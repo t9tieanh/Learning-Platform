@@ -35,6 +35,12 @@ module.exports = {
     node: true
   },
   rules: {
+    'semi': ['error', 'never'],
+    'quotes': ['error', 'single'],
+    'indent': ['error', 2],
+    'comma-dangle': ['error', 'never'],
+    'no-trailing-spaces': 'error',
+    'eol-last': 'error',
     // Tắt rule yêu cầu import React trong file jsx
     'react/react-in-jsx-scope': 'off',
     // Cảnh báo khi thẻ <a target='_blank'> mà không có rel="noreferrer"

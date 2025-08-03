@@ -51,6 +51,9 @@ module.exports = (env, argv) => {
               options: { sourceMap: !isProduction } // Hiển thị sourcemap ở môi trường dev cho dễ debug
             },
             {
+              loader: 'postcss-loader' // Thêm postcss-loader để xử lý Tailwind
+            },
+            {
               loader: 'sass-loader', // biên dịch sass sang css
               options: { sourceMap: !isProduction }
             }
