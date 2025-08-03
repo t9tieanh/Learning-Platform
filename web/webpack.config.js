@@ -25,11 +25,7 @@ module.exports = (env, argv) => {
       // các file cùng một tên nhưng các đuôi mở rộng
       extensions: ['.tsx', '.ts', '.jsx', '.js'],
       alias: {
-        // Cấu hình alias cho webpack
-        // để khi import cho ngắn gọn
-        // Ví dụ: import Login from '@pages/Login'
-        // Thay vì: import Login from '../pages/Login' chẳng hạn
-        '@pages': path.resolve(__dirname, './src/pages')
+        '@': path.resolve(__dirname, 'src')
       }
     },
     // File đầu vào cho webpack, file này thường là file import mọi file khác
@@ -130,8 +126,8 @@ module.exports = (env, argv) => {
       new ESLintPlugin({
         extensions: ['.tsx', '.ts', '.js', '.jsx'],
         emitWarning: false, // Thêm dòng này để tắt warnings hiển thị trên browser
-        failOnWarning: false,
-        failOnError: false
+        // failOnWarning: false,
+        failOnError: true
       })
     ]
   }

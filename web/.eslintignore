@@ -1,4 +1,3 @@
-# filepath: c:\Learn\Learning-Platform\web\.eslintignore
 node_modules/
 dist/
 build/
@@ -8,4 +7,4 @@ tailwind.config.ts
 postcss.config.js
 *.config.js
 *.config.ts
-!src/**/*
+src/components/ui/**/*

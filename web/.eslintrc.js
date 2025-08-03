@@ -14,6 +14,11 @@ module.exports = {
     'eslint-config-prettier',
     'prettier'
   ],
+  ignorePatterns: [
+    'dist',
+    'node_modules',
+    'src/components/ui/**/*'
+  ],
   plugins: ['prettier'],
   settings: {
     react: {
@@ -35,9 +40,13 @@ module.exports = {
     node: true
   },
   rules: {
-    'semi': ['error', 'never'],
-    'quotes': ['error', 'single'],
-    'indent': ['error', 2],
+    'comma-dangle': 'off', // Tắt hoàn toàn rule này
+    'jsx-a11y/anchor-is-valid': 'off',
+    'jsx-a11y/no-noninteractive-tabindex': 'off',
+    '@typescript-eslint/no-unused-vars': 'warn', // Đổi thành warning
+    'comma-dangle': ['warn', 'always-multiline'], // Cho phép trailing comma
+    'jsx-a11y/anchor-is-valid': 'off',
+    'import/namespace': 'off',
     'comma-dangle': ['error', 'never'],
     'no-trailing-spaces': 'error',
     'eol-last': 'error',
