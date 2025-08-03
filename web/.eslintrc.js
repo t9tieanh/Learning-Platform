@@ -47,7 +47,7 @@ module.exports = {
     'comma-dangle': ['warn', 'always-multiline'], // Cho phép trailing comma
     'jsx-a11y/anchor-is-valid': 'off',
     'import/namespace': 'off',
-    'comma-dangle': ['error', 'never'],
+    'jsx-a11y/alt-text': 'off',
     'no-trailing-spaces': 'error',
     'eol-last': 'error',
     // Tắt rule yêu cầu import React trong file jsx

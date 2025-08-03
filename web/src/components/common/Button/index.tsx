@@ -1,7 +1,11 @@
-const CustomButton = ({ label, className }: { label: string; className?: string }) => {
+import { Button } from '@/components/ui/button'
+
+const CustomButton = ({ label, className, onClick }: { label: string; className?: string; onClick: () => void }) => {
   return (
     <>
-      <button className={`btn ${className}`}>{label}</button>
+      <Button className={className} onClick={onClick}>
+        {label}
+      </Button>
     </>
   )
 }

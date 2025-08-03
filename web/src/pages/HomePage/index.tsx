@@ -1,9 +1,11 @@
-import { Button } from "@/components/ui/button"
+import { Banner } from '@/components/HomePage/Banner'
+import CourseList from '@/components/HomePage/CourseList'
 
 const HomePage = () => {
   return (
-    <div>
-      <Button title="hello" className="btn-primary m-3" >Hello, config xong rồi nhá</Button>
+    <div className='home-page-container'>
+      <Banner />
+      <CourseList />
     </div>
   )
 }
