@@ -1,0 +1,14 @@
+package com.freeclassroom.userservice.dto.request;
+
+import lombok.*;
+import lombok.experimental.FieldDefaults;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public class VerifyOtpRequest {
+    String username;
+    String otp;
+}

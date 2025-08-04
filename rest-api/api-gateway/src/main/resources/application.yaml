@@ -1,0 +1,14 @@
+server:
+  port: 8888
+
+spring:
+  application:
+    name: api-gateway
+
+  cloud:
+    gateway:
+      routes:
+        - id: user
+          uri: http://localhost:8080/user
+          predicates:
+            - Path=/user/**
