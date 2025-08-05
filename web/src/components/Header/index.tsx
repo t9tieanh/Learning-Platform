@@ -12,7 +12,10 @@ const Header: FC = () => {
         <div className='flex items-center justify-between w-full p-1'>
           <NavigationMenuList className='text-left'>
             <Avatar className='rounded-lg'>
-              <AvatarImage src='https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQHR98lk3F3Pc1Fg4QjflSxwbbCeOd6D-JEnQ&s' alt='@shadcn' />
+              <AvatarImage
+                src='https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQHR98lk3F3Pc1Fg4QjflSxwbbCeOd6D-JEnQ&s'
+                alt='@shadcn'
+              />
               <AvatarFallback>LEARNING_PLATFORM</AvatarFallback>
             </Avatar>
             {/* <NavigationMenuTrigger className='text-blue-700 font-bold'>Trái</NavigationMenuTrigger> */}
