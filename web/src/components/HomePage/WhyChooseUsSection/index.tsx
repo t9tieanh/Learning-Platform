@@ -30,12 +30,14 @@ const WhyChooseUsSection = () => {
       image: 'https://cdn-icons-png.freepik.com/512/7036/7036037.png',
       description:
         'Tích hợp trí tuệ nhân tạo để cá nhân hóa lộ trình học tập, gợi ý nội dung phù hợp và nâng cao hiệu quả học tập trực tuyến.'
-    },
+    }
   ]
 
   return (
     <div className='why-choose-us-section mt-8 my-5 py-3'>
-      <h4 className='font-bold bg-blue-500 text-white p-2 max-w-96 text-center rounded-r-3xl'>Chúng tôi khác biệt như thế nào ?</h4>
+      <h4 className='font-bold bg-blue-500 text-white p-2 max-w-96 text-center rounded-r-3xl'>
+        Chúng tôi khác biệt như thế nào ?
+      </h4>
       <div className='grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 my-6'>
         <div className='flex flex-col justify-center items-center gap-4'>
           {features.map((feature, index) => (
