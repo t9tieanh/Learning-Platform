@@ -1,9 +1,8 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { FaLocationArrow } from "react-icons/fa";
+import { FaLocationArrow, FaCommentDots } from 'react-icons/fa'
 import { Button } from '@/components/ui/button'
 import { IoPaperPlane } from 'react-icons/io5'
 import { FcLike } from 'react-icons/fc'
-import { FaCommentDots } from 'react-icons/fa'
 
 interface Article {
   id: number
@@ -25,10 +24,16 @@ const ArticlesCard = ({ article }: { article: Article }) => {
           <div className='flex items-center gap-2 text-sm'>
             <div className='flex items-center gap-2 text-sm'>
               <span className='font-bold flex items-center'>
-                <div><FcLike /> </div><div className='mx-1'>100</div>
+                <div>
+                  <FcLike />{' '}
+                </div>
+                <div className='mx-1'>100</div>
               </span>
               <span className='font-bold flex items-center'>
-                <div><FaCommentDots /> </div><div className='mx-1'>100</div>
+                <div>
+                  <FaCommentDots />{' '}
+                </div>
+                <div className='mx-1'>100</div>
               </span>
             </div>
           </div>

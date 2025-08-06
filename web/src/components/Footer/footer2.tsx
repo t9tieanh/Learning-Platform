@@ -71,7 +71,7 @@ const Footer = ({
         { text: 'LinkedIn', url: '#' }
       ]
     }
-  ]
+  ],
 }: Footer2Props) => {
   return (
     <section className='py-32'>

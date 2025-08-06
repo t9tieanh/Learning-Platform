@@ -40,6 +40,8 @@ module.exports = {
     node: true
   },
   rules: {
+    'no-trailing-spaces': 'off',
+    'eol-last': 'off',
     'comma-dangle': 'off', // Tắt hoàn toàn rule này
     'jsx-a11y/anchor-is-valid': 'off',
     'jsx-a11y/no-noninteractive-tabindex': 'off',
@@ -48,8 +50,6 @@ module.exports = {
     'jsx-a11y/anchor-is-valid': 'off',
     'import/namespace': 'off',
     'jsx-a11y/alt-text': 'off',
-    'no-trailing-spaces': 'error',
-    'eol-last': 'error',
     // Tắt rule yêu cầu import React trong file jsx
     'react/react-in-jsx-scope': 'off',
     // Cảnh báo khi thẻ <a target='_blank'> mà không có rel="noreferrer"
