@@ -7,8 +7,8 @@ interface RequirementProps {
 
 const Requirement: React.FC<RequirementProps> = ({ requirements }: RequirementProps) => {
   return (
-    <div className='requirement-container max-w-7xl text-left ml-4 mt-6'>
-      <ul className='my-6 ml-6 list-disc [&>li]:mt-3 text-sm font-medium text-gray-700'>
+    <div className='requirement-container max-w-7xl text-left ml-12 mt-6'>
+      <ul className='my-6 ml-6 list-disc [&>li]:mt-3 text-sm font-normal text-gray-700'>
         {requirements.map((item, idx) => (
           <div key={idx} className='flex items-start gap-3 mb-3'>
             <Checkbox id={`requirement-${idx}`} defaultChecked checked={true} />

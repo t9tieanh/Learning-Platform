@@ -28,7 +28,7 @@ const Post = ({ title, isPublic, className }: { title: string; isPublic: boolean
 const Section = ({ title, posts }: SectionProps) => {
   return (
     <AccordionItem value={title} className='m-0 shadow-md'>
-      <AccordionTrigger className='bg-gray-300/55 text-slate-600 font-bold p-3 text-sm flex items-center !justify-start !gap-0 hover:no-underline'>
+      <AccordionTrigger className='bg-slate-800 text-white font-nomal p-3 text-sm flex items-center !justify-start !gap-0 hover:no-underline'>
         {title}
         <span className='text-xs ml-1'>2 bài học</span>
       </AccordionTrigger>
@@ -45,7 +45,7 @@ const Sections = () => {
         { title: 'Chào mừng đến với khóa học', isPublic: true },
         { title: 'Cách học hiệu quả', isPublic: false },
         { title: 'Giới thiệu giảng viên', isPublic: true },
-      ]
+      ],
     },
     {
       title: 'Cơ bản về React',
@@ -54,7 +54,7 @@ const Sections = () => {
         { title: 'Component và Props', isPublic: true },
         { title: 'State và Lifecycle', isPublic: false },
         { title: 'Xử lý sự kiện', isPublic: true },
-      ]
+      ],
     },
     {
       title: 'Nâng cao về React',
@@ -63,7 +63,7 @@ const Sections = () => {
         { title: 'Custom Hooks', isPublic: false },
         { title: 'Context API', isPublic: true },
         { title: 'Performance Optimization', isPublic: false },
-      ]
+      ],
     },
     {
       title: 'Quản lý dữ liệu',
@@ -71,7 +71,7 @@ const Sections = () => {
         { title: 'Redux cơ bản', isPublic: true },
         { title: 'Redux Toolkit', isPublic: false },
         { title: 'React Query', isPublic: true },
-      ]
+      ],
     },
     {
       title: 'Triển khai và nâng cấp',
@@ -79,7 +79,7 @@ const Sections = () => {
         { title: 'Build & Deploy', isPublic: true },
         { title: 'CI/CD với Github Actions', isPublic: false },
         { title: 'Nâng cấp dự án', isPublic: true },
-      ]
+      ],
     },
     {
       title: 'Câu hỏi thường gặp',
@@ -87,12 +87,12 @@ const Sections = () => {
         { title: 'Làm sao để nhận chứng chỉ?', isPublic: true },
         { title: 'Hỗ trợ kỹ thuật', isPublic: true },
         { title: 'Liên hệ giảng viên', isPublic: false },
-      ]
-    }
+      ],
+    },
   ]
 
   return (
-    <Accordion className='mx-auto sections-list' type='single' collapsible defaultValue={sections[0]?.title}>
+    <Accordion className='sections-list' type='single' collapsible defaultValue={sections[0]?.title}>
       {sections &&
         sections.map((section, index) => <Section key={index} title={section.title} posts={section.posts} />)}
     </Accordion>

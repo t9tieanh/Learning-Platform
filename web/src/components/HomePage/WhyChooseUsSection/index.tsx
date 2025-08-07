@@ -30,7 +30,7 @@ const WhyChooseUsSection = () => {
       image: 'https://cdn-icons-png.freepik.com/512/7036/7036037.png',
       description:
         'Tích hợp trí tuệ nhân tạo để cá nhân hóa lộ trình học tập, gợi ý nội dung phù hợp và nâng cao hiệu quả học tập trực tuyến.'
-    }
+    },
   ]
 
   return (
