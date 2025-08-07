@@ -1,5 +1,7 @@
 import Cover from '@/components/Course/Cover'
 import WhatYouWillLearn from '@/components/Course/WhatYouWillLearn'
+import CoursePurchaseBox from '@/components/Course/CoursePurchaseBox'
+import CourseContent from '@/components/Course/CourseContent'
 
 const Course = () => {
   return (
@@ -14,6 +16,14 @@ const Course = () => {
         }}
       />
       <WhatYouWillLearn />
+      <div className='grid grid-cols-3 gap-4 bg-white'>
+        <div className='col-span-2'>
+          <CourseContent />
+        </div>
+        <div className='col-span-1'>
+          <CoursePurchaseBox />
+        </div>
+      </div>
     </div>
   )
 }

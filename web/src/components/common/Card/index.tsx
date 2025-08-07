@@ -4,24 +4,23 @@ const CustomCard = ({
   title,
   icon,
   description,
-  content
+  content,
+  className
 }: {
   title: string
   icon?: React.ReactNode
   description?: string
   content: React.ReactNode
+  className?: string
 }) => {
   return (
     <>
-      <Card>
+      <Card className={className}>
         <CardHeader>
-          <CardTitle>{title}</CardTitle>
+          <CardTitle className='text-lg'>{title}</CardTitle>
           <CardDescription>{description}</CardDescription>
         </CardHeader>
-        <CardContent>
-          <CardDescription>{description}</CardDescription>
-          {content}
-        </CardContent>
+        <CardContent>{content}</CardContent>
       </Card>
     </>
   )

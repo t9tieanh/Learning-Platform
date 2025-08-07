@@ -17,11 +17,7 @@ const CustomInput = ({
 }) => {
   return (
     <div className='input-container'>
-      {label && (
-        <Label htmlFor={label}>
-          {label}
-        </Label>
-      )}
+      {label && <Label htmlFor={label}>{label}</Label>}
       <Input
         type={type}
         id={label}

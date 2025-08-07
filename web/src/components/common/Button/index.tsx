@@ -9,7 +9,7 @@ const CustomButton = ({
   onClick,
   isLoader,
 }: {
-  label: string
+  label?: string
   icon?: React.ReactNode
   className?: string
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
