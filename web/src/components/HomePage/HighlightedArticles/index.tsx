@@ -6,13 +6,13 @@ const HighlightedArticles = () => {
       id: 1,
       title: 'Understanding React Hooks',
       shortDescription: 'A deep dive into the world of React Hooks.',
-      thumbnail: 'https://files.fullstack.edu.vn/f8-prod/blog_posts/4685/63117986d6356.png',
+      thumbnail: 'https://files.fullstack.edu.vn/f8-prod/blog_posts/4685/63117986d6356.png'
     },
     {
       id: 2,
       title: 'Exploring TypeScript',
       shortDescription: 'An introduction to TypeScript and its benefits.',
-      thumbnail: 'https://www.jamviet.com/upload/2021/09/typescript-1024x538.png',
+      thumbnail: 'https://www.jamviet.com/upload/2021/09/typescript-1024x538.png'
     },
     {
       id: 3,

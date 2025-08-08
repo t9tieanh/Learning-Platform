@@ -2,6 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { IoPaperPlane } from 'react-icons/io5'
+import './style.scss'
 
 interface Course {
   id: number
@@ -31,7 +32,7 @@ const CourseCard = ({ course }: { course: Course }) => {
               </Avatar>
               Phạm Tiến Anh
             </div>
-            <Button className='rounded-3xl'>
+            <Button className='rounded-3xl btn-detail'>
               <IoPaperPlane />
               Xem chi tiết
             </Button>
