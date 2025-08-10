@@ -61,7 +61,7 @@ const Feedbacks = () => {
         'Mình đánh giá cao sự hỗ trợ của giảng viên trong suốt quá trình học. Các ví dụ thực hành rất sát với thực tế, giúp mình tự tin hơn khi làm việc với React.',
       rating: 5,
       createdAt: '2023-03-17'
-    }
+    },
   ]
 
   return (

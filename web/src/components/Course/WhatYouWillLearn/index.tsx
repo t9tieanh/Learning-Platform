@@ -30,7 +30,7 @@ const WhatYouWillLearn = () => {
     {
       content:
         'Tự tin xây dựng quy trình chỉnh sửa video hoàn chỉnh, áp dụng các mẹo và kỹ thuật giúp sản phẩm cuối cùng hấp dẫn hơn.',
-    },
+    }
   ]
 
   return (

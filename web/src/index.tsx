@@ -6,6 +6,7 @@ import { RouterProvider, createBrowserRouter } from 'react-router-dom'
 import HomePage from './pages/HomePage'
 import DefaultLayout from './layouts/DefaultLayout'
 import Course from './pages/Course'
+import CartPage from './pages/Cart'
 
 const router = createBrowserRouter([
   {
@@ -16,9 +17,10 @@ const router = createBrowserRouter([
         path: '',
         element: <DefaultLayout />,
         children: [
-          { index: true, element: <HomePage /> },
-          { path: 'course/:id', element: <Course /> }
-        ]
+          { path: '', element: <HomePage /> },
+          { path: 'course/:id', element: <Course /> },
+          { path: 'my-cart', element: <CartPage /> }
+        ],
       }
     ],
   }

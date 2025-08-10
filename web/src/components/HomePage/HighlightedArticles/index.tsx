@@ -39,7 +39,7 @@ const HighlightedArticles = () => {
       title: 'Exploring TypeScript',
       shortDescription: 'An introduction to TypeScript and its benefits.',
       thumbnail: 'https://nohiedu.com/wp-content/uploads/2024/06/khoa-hoc-docker.webp',
-    },
+    }
   ]
 
   return (
