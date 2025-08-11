@@ -1,0 +1,11 @@
+.course-card {
+    .teacher-info-name {
+        display: inline;
+    }
+
+    @media (min-width: 400px) {
+        .teacher-info-name {
+            display: none;
+        }
+    }
+}
