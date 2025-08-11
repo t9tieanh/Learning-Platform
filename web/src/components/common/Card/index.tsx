@@ -17,7 +17,9 @@ const CustomCard = ({
     <>
       <Card className={className}>
         <CardHeader>
-          <CardTitle className='text-lg flex items-center'>{icon}&nbsp;{title}</CardTitle>
+          <CardTitle className='text-lg flex items-center'>
+            {icon}&nbsp;{title}
+          </CardTitle>
           <CardDescription>{description}</CardDescription>
         </CardHeader>
         <CardContent>{content}</CardContent>
