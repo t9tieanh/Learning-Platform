@@ -1,3 +1,18 @@
 .cart-page {
     background-color: white !important;
+
+    .end-cart {
+        background-image: url('https://cdn.prod.website-files.com/605826c62e8de87de744596e/6262973b8506afd8751ba150_April%2013%2B%20Cart%20Page%20Designs%20to%20Increase%20Your%20Store%20Conversions%20%20%20High%20Abandonment%20Rate%20.jpg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-position: center bottom;
+        background-attachment: fixed;
+        
+        max-height: 50px; /* Hoặc 100vh cho full screen */
+        width: 100%;
+        padding: 30px;
+        position: relative;
+        color: white;
+    }
 }

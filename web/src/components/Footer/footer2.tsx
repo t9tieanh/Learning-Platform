@@ -42,7 +42,7 @@ const Footer = ({
         { text: 'Tuyển dụng', url: '#' },
         { text: 'Liên hệ', url: '#' },
         { text: 'Chính sách bảo mật', url: '#' }
-      ]
+      ],
     },
     {
       title: 'Liên hệ',
@@ -53,7 +53,7 @@ const Footer = ({
         { text: 'Careers', url: '#' },
         { text: 'Contact', url: '#' },
         { text: 'Privacy', url: '#' }
-      ]
+      ],
     },
     {
       title: 'Thông tin',
@@ -61,7 +61,7 @@ const Footer = ({
         { text: 'Help', url: '#' },
         { text: 'Sales', url: '#' },
         { text: 'Advertise', url: '#' }
-      ]
+      ],
     },
     {
       title: 'Liên kết',
@@ -69,8 +69,8 @@ const Footer = ({
         { text: 'Twitter', url: '#' },
         { text: 'Instagram', url: '#' },
         { text: 'LinkedIn', url: '#' }
-      ]
-    }
+      ],
+    },
   ]
 }: Footer2Props) => {
   return (

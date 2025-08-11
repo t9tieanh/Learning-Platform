@@ -45,7 +45,7 @@ const Sections = () => {
         { title: 'Chào mừng đến với khóa học', isPublic: true },
         { title: 'Cách học hiệu quả', isPublic: false },
         { title: 'Giới thiệu giảng viên', isPublic: true },
-      ]
+      ],
     },
     {
       title: 'Cơ bản về React',
@@ -54,7 +54,7 @@ const Sections = () => {
         { title: 'Component và Props', isPublic: true },
         { title: 'State và Lifecycle', isPublic: false },
         { title: 'Xử lý sự kiện', isPublic: true },
-      ]
+      ],
     },
     {
       title: 'Nâng cao về React',
@@ -63,7 +63,7 @@ const Sections = () => {
         { title: 'Custom Hooks', isPublic: false },
         { title: 'Context API', isPublic: true },
         { title: 'Performance Optimization', isPublic: false },
-      ]
+      ],
     },
     {
       title: 'Quản lý dữ liệu',
@@ -71,7 +71,7 @@ const Sections = () => {
         { title: 'Redux cơ bản', isPublic: true },
         { title: 'Redux Toolkit', isPublic: false },
         { title: 'React Query', isPublic: true },
-      ]
+      ],
     },
     {
       title: 'Triển khai và nâng cấp',
@@ -79,7 +79,7 @@ const Sections = () => {
         { title: 'Build & Deploy', isPublic: true },
         { title: 'CI/CD với Github Actions', isPublic: false },
         { title: 'Nâng cấp dự án', isPublic: true },
-      ]
+      ],
     },
     {
       title: 'Câu hỏi thường gặp',
@@ -87,8 +87,8 @@ const Sections = () => {
         { title: 'Làm sao để nhận chứng chỉ?', isPublic: true },
         { title: 'Hỗ trợ kỹ thuật', isPublic: true },
         { title: 'Liên hệ giảng viên', isPublic: false },
-      ]
-    }
+      ],
+    },
   ]
 
   return (

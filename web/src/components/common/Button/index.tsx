@@ -21,8 +21,7 @@ const CustomButton = ({
     <>
       <Button className={className} onClick={onClick} variant={variant}>
         {isLoader && <Loader2Icon className='animate-spin' />}
-        {icon && <span className='mr-2'>{icon}</span>}
-        &nbsp;
+        {icon && <span>{icon}</span>}
         {label}
       </Button>
     </>
