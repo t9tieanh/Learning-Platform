@@ -3,7 +3,7 @@ import CustomButton from '@/components/common/Button'
 import { GrLinkNext } from 'react-icons/gr'
 import './style.scss'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Trash } from 'lucide-react'
+import { Trash, MousePointer2 } from 'lucide-react'
 
 interface OrderDetailProps {
   title: string
@@ -60,7 +60,7 @@ const CheckoutSummary = () => {
         </p>
         <hr />
       </div>
-      <div className='mt-3'>
+      <div className='mt-3 p-1'>
         <div className='flex items-center justify-between p-2 font-bold text-2xl'>
           ₫279,000 VND
           <div>
@@ -78,6 +78,11 @@ const CheckoutSummary = () => {
             icon={<GrLinkNext />}
             label='Đặt hàng'
             className='bg-blue-500 hover:bg-blue-600 text-white w-full'
+          />
+          <CustomButton
+            icon={<MousePointer2  />}
+            label='Nhập mã giảm giá'
+            className='bg-red-500 hover:bg-red-600 text-white w-full mt-1'
           />
         </div>
       </div>

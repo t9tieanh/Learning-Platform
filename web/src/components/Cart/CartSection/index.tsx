@@ -20,6 +20,14 @@ const CardSection = () => {
       price: 250000,
       rating: 4
     },
+    {
+      title: 'Học chỉnh sửa video với Adobe Premiere Pro cho người mới bắt đầu (2025)',
+      teacherName: 'Teacher 2',
+      image: 'https://i.ytimg.com/vi/5yHpfICfx_k/maxresdefault.jpg',
+      basePrice: 300000,
+      price: 250000,
+      rating: 5
+    }
   ]
 
   return (
@@ -28,7 +36,7 @@ const CardSection = () => {
         <p className='text-lg font-semibold mb-1 flex items-center'>
           <Sigma />
           Có
-          <span className='text-red-400'>&nbsp;2&nbsp;</span>khóa học trong giỏ hàng !
+          <span className='text-red-400'>&nbsp;3&nbsp;</span>khóa học trong giỏ hàng !
         </p>
         <hr />
       </div>
