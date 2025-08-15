@@ -6,33 +6,32 @@ import org.springframework.http.HttpStatusCode;
 
 @Getter
 public enum ErrorCode {
-    INVALID_KEY(123,"Invalid request body",HttpStatus.BAD_REQUEST),
-    USER_EXISTED(1001,"User exitsted",HttpStatus.BAD_REQUEST),
-    USER_NOT_FOUND(1002,"User not found",HttpStatus.NOT_FOUND),
-    WRONG_PASSWORD(1003,"Wrong password",HttpStatus.UNAUTHORIZED),
-    UNCATEGORIZED_EXEPTION(999,"Uncategorized error", HttpStatus.INTERNAL_SERVER_ERROR),
-    UNAUTHORIZED(1006,"You do not have permission", HttpStatus.UNAUTHORIZED),
-    USERNAME_INVALID(1004,"username must be at least 3 characters",HttpStatus.BAD_REQUEST),
-    PASSWORD_INVALID(1005,"password must be at least 8 characters",HttpStatus.BAD_REQUEST),
-    INVALID_DOB(1008,"dob must least {min}",HttpStatus.BAD_REQUEST),
-    UN_AUTHENTICATED(1009,"Unauthenticated",HttpStatus.UNAUTHORIZED),
-    OTP_SEND(1010,"Cannot send otp",HttpStatus.INTERNAL_SERVER_ERROR),
-
+    INVALID_KEY(123, "Dữ liệu yêu cầu không hợp lệ", HttpStatus.OK),
+    USER_EXISTED(1001, "Người dùng đã tồn tại", HttpStatus.OK),
+    USER_NOT_FOUND(1002, "Không tìm thấy người dùng", HttpStatus.OK),
+    USER_BLOCKED(1007, "Tài khoản đã bị khóa", HttpStatus.OK), // đổi code tránh trùng 1002
+    WRONG_PASSWORD(1003, "Sai mật khẩu", HttpStatus.UNAUTHORIZED), // 401
+    UNCATEGORIZED_EXEPTION(999, "Lỗi không xác định", HttpStatus.OK),
+    UNAUTHORIZED(1006, "Bạn không có quyền truy cập", HttpStatus.UNAUTHORIZED), // 401
+    USERNAME_INVALID(1004, "Tên đăng nhập phải có ít nhất 3 ký tự", HttpStatus.OK),
+    PASSWORD_INVALID(1005, "Mật khẩu phải có ít nhất 8 ký tự", HttpStatus.OK),
+    INVALID_DOB(1008, "Ngày sinh phải từ {min} trở lên", HttpStatus.OK),
+    UN_AUTHENTICATED(1009, "Chưa xác thực", HttpStatus.UNAUTHORIZED), // 401
+    OTP_SEND(1010, "Không thể gửi mã OTP", HttpStatus.OK),
 
     // dùng cho xác thực otp
-    NOT_VERIFY_OTP (1011,"Otp code invalid, try again",HttpStatus.BAD_REQUEST),
-    ;
+    NOT_VERIFY_OTP(1011, "Mã OTP không hợp lệ, vui lòng thử lại", HttpStatus.OK);
 
-    private int code;
-    private HttpStatusCode statusCode;
-    private String message;
+    private final int code;
+    private final HttpStatusCode statusCode;
+    private final String message;
 
-
-    ErrorCode (int code, String message, HttpStatusCode statusCode) {
+    ErrorCode(int code, String message, HttpStatusCode statusCode) {
         this.code = code;
         this.message = message;
         this.statusCode = statusCode;
     }
-
 }
+
+
 
