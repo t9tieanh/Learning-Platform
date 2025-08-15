@@ -37,7 +37,7 @@ public class SecurityConfig {
 
     private final CustomJwtDecoder jwtDecoder;
 
-    private final String[] PUBLIC_ENDPOINTS = {"/auth/outbound/active-account","/auth/outbound/authentication","/auth/refresh-token","/auth/sign-up", "/auth/login", "/api/files","/auth/verify-otp","/classroom","/files/**"};
+    private final String[] PUBLIC_ENDPOINTS = {"/auth/**", "/user/**"};
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
@@ -61,19 +61,18 @@ public class SecurityConfig {
         httpSecurity.oauth2ResourceServer(oauth2 ->
                 oauth2.jwt(jwt -> jwt.decoder(jwtDecoder))
         );
-//                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)); // Không sử dụng session
 
         return httpSecurity.build();
     }
 
-    // ✅ Đảm bảo CORS chạy TRƯỚC Security để không bị chặn
+    //Đảm bảo CORS chạy TRƯỚC Security để không bị chặn
     @Bean
     @Order(Ordered.HIGHEST_PRECEDENCE)
     public CorsFilter corsFilter() {
         return new CorsFilter(corsConfigurationSource());
     }
 
-    // ✅ Cấu hình nguồn CORS để áp dụng cho Spring Security
+    //Cấu hình nguồn CORS để áp dụng cho Spring Security
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
