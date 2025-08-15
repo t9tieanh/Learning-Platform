@@ -46,8 +46,6 @@ module.exports = {
     'jsx-a11y/anchor-is-valid': 'off',
     'jsx-a11y/no-noninteractive-tabindex': 'off',
     '@typescript-eslint/no-unused-vars': 'warn', // Đổi thành warning
-    'comma-dangle': ['warn', 'always-multiline'], // Cho phép trailing comma
-    'jsx-a11y/anchor-is-valid': 'off',
     'import/namespace': 'off',
     'jsx-a11y/alt-text': 'off',
     // Tắt rule yêu cầu import React trong file jsx

@@ -1,12 +1,9 @@
 import { FC, useState } from 'react'
-import reactlogo from './assets/images/react.svg'
 import './assets/styles/app.css'
 import './assets/styles/app.scss'
 import { Outlet } from 'react-router-dom'
-import { Button } from './components/ui/button'
 
 const App: FC = () => {
-  const [fullname] = useState('Phạm Tiến Anh')
   return (
     <div>
       <Outlet />

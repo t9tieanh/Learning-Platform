@@ -10,7 +10,7 @@ interface SectionProps {
 
 const Post = ({ title, isPublic, className }: { title: string; isPublic: boolean; className?: string }) => {
   return (
-    <AccordionContent className={`bg-white post p-2 mb-0 flex items-center justify-between ${className}`}>
+    <AccordionContent className={`bg-gray-100 post p-2 mb-0 flex items-center justify-between ${className}`}>
       <div className='flex items-center text-gray-700 font-medium'>
         <Clapperboard size={15} />
         &nbsp;&nbsp;
@@ -28,7 +28,7 @@ const Post = ({ title, isPublic, className }: { title: string; isPublic: boolean
 const Section = ({ title, posts }: SectionProps) => {
   return (
     <AccordionItem value={title} className='m-0 shadow-md'>
-      <AccordionTrigger className='bg-slate-800 text-white font-nomal p-3 text-sm flex items-center !justify-start !gap-0 hover:no-underline'>
+      <AccordionTrigger className='bg-white text-black font-nomal p-3 text-sm flex items-center !justify-start !gap-0 hover:no-underline'>
         {title}
         <span className='text-xs ml-1'>2 bài học</span>
       </AccordionTrigger>
