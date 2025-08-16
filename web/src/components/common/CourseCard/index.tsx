@@ -11,10 +11,10 @@ interface Course {
   image: string
 }
 
-const CourseCard = ({ course }: { course: Course }) => {
+const CourseCard = ({ course, className }: { course: Course; className?: string }) => {
   return (
     <>
-      <Card className='p-0 gap-0'>
+      <Card className={`p-0 gap-0 course-card ${className}`}>
         <CardHeader className='p-0'>
           <img alt='Course' className='h-48 w-full object-cover rounded-2xl' src={course.image} />
         </CardHeader>
@@ -30,7 +30,7 @@ const CourseCard = ({ course }: { course: Course }) => {
                 <AvatarImage src='https://github.com/shadcn.png' />
                 <AvatarFallback>CN</AvatarFallback>
               </Avatar>
-              Phạm Tiến Anh
+              <span className='teacher-info-name'>Phạm Tiến Anh</span>
             </div>
             <Button className='rounded-3xl btn-detail'>
               <IoPaperPlane />

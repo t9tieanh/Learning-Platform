@@ -2,7 +2,6 @@ package com.freeclassroom.userservice.configuration;
 
 import com.freeclassroom.userservice.exception.CustomExeption;
 import com.freeclassroom.userservice.exception.ErrorCode;
-import com.freeclassroom.userservice.service.auth.AuthenticationService;
 import jakarta.annotation.PostConstruct;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +22,7 @@ import javax.crypto.spec.SecretKeySpec;
 public class CustomJwtDecoder implements JwtDecoder {
 
 
-    final AuthenticationService authenticationService;
+    //final AuthenticationService authenticationService;
 
     NimbusJwtDecoder nimbusJwtDecoder;
 
@@ -43,8 +42,8 @@ public class CustomJwtDecoder implements JwtDecoder {
     public Jwt decode(String token) throws JwtException {
         try {
 
-            if (!authenticationService.introspectAccessToken(token))
-                throw new CustomExeption(ErrorCode.UN_AUTHENTICATED);
+//            if (!authenticationService.introspectAccessToken(token))
+//                throw new CustomExeption(ErrorCode.UN_AUTHENTICATED);
 
             return nimbusJwtDecoder.decode(token);
 

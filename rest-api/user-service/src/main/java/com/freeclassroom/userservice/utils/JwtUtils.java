@@ -1,11 +1,8 @@
 package com.freeclassroom.userservice.utils;
 
-import com.freeclassroom.userservice.constant.TokenEnum;
-import com.freeclassroom.userservice.entity.account.AccountEntity;
+import com.freeclassroom.userservice.enums.role.TokenEnum;
 import com.nimbusds.jose.*;
-import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
-import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,7 +10,6 @@ import org.springframework.stereotype.Component;
 
 import java.text.ParseException;
 import java.util.Date;
-import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
@@ -29,31 +25,31 @@ public class JwtUtils {
     private Long refreshTokenExpiration;
 
 
-
-    public String generateToken (AccountEntity account, TokenEnum tokenType) throws JOSEException {
-        JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
-
-        Long date = (tokenType.equals(TokenEnum.ACCESS_TOKEN)) ? accessTokenExpiration : refreshTokenExpiration;
-
-        //payload
-        JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
-                .jwtID(UUID.randomUUID().toString())
-                .subject(account.getUsername()) // sub
-                .issuer("freeclassroom.com") // iss
-                .issueTime(new Date()) // iat
-                .expirationTime(new Date(System.currentTimeMillis() + date))
-                .claim("scope", account.getRole()) // Custom claim
-                .claim("type",tokenType.name())
-                .build();
-
-        Payload payload = new Payload(claimsSet.toJSONObject());
-
-        JWSObject jwsObject = new JWSObject(header, payload);
-
-        jwsObject.sign(new MACSigner(SIGNER_KEY.getBytes()));
-
-        return jwsObject.serialize();
-    }
+//
+//    public String generateToken (AccountEntity account, TokenEnum tokenType) throws JOSEException {
+//        JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
+//
+//        Long date = (tokenType.equals(TokenEnum.ACCESS_TOKEN)) ? accessTokenExpiration : refreshTokenExpiration;
+//
+//        //payload
+//        JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
+//                .jwtID(UUID.randomUUID().toString())
+//                .subject(account.getUsername()) // sub
+//                .issuer("freeclassroom.com") // iss
+//                .issueTime(new Date()) // iat
+//                .expirationTime(new Date(System.currentTimeMillis() + date))
+//                .claim("scope", account.getRole()) // Custom claim
+//                .claim("type",tokenType.name())
+//                .build();
+//
+//        Payload payload = new Payload(claimsSet.toJSONObject());
+//
+//        JWSObject jwsObject = new JWSObject(header, payload);
+//
+//        jwsObject.sign(new MACSigner(SIGNER_KEY.getBytes()));
+//
+//        return jwsObject.serialize();
+//    }
 
 
     public Boolean validToken (String token, TokenEnum tokenType) throws JOSEException, ParseException {

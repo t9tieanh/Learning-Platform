@@ -1,8 +1,11 @@
-.btn-detail {
-    background-color: #FF811B;
+.course-card {
+    .teacher-info-name {
+        display: inline;
+    }
 
-    &:hover {
-        background-color: #d86100;
-        scale: 1.05;
+    @media (min-width: 400px) {
+        .teacher-info-name {
+            display: none;
+        }
     }
 }

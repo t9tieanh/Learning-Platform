@@ -6,7 +6,7 @@ import { GiClick } from 'react-icons/gi'
 // eslint-disable-next-line import/no-unresolved
 import CustomInput from '@/components/common/Input'
 import CustomCard from '@/components/common/Card'
-import { MdDiscount } from "react-icons/md";
+import { MdDiscount } from 'react-icons/md'
 
 const CoursePurchaseBox = () => {
   return (
