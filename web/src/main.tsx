@@ -20,11 +20,11 @@ const router = createBrowserRouter([
         children: [
           { path: '', element: <HomePage /> },
           { path: 'course/:id', element: <Course /> },
-          { path: 'my-cart', element: <CartPage /> },
+          { path: 'my-cart', element: <CartPage /> }
         ]
       },
       { path: 'login', element: <Login /> }
-    ],
+    ]
   }
 ])
 

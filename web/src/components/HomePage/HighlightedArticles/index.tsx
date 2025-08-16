@@ -18,28 +18,28 @@ const HighlightedArticles = () => {
       id: 3,
       title: 'Exploring TypeScript',
       shortDescription: 'An introduction to TypeScript and its benefits.',
-      thumbnail: 'https://i.ytimg.com/vi/MGhw6XliFgo/maxresdefault.jpg',
+      thumbnail: 'https://i.ytimg.com/vi/MGhw6XliFgo/maxresdefault.jpg'
     },
     {
       id: 4,
       title: 'Exploring TypeScript',
       shortDescription: 'An introduction to TypeScript and its benefits.',
       thumbnail:
-        'https://khoahochatde.com/wp-content/uploads/2025/01/Lap-trinh-Backend-Microservices-voi-Typescript-va-Express.webp',
+        'https://khoahochatde.com/wp-content/uploads/2025/01/Lap-trinh-Backend-Microservices-voi-Typescript-va-Express.webp'
     },
     {
       id: 5,
       title: 'Exploring TypeScript',
       shortDescription: 'An introduction to TypeScript and its benefits.',
       thumbnail:
-        'https://i.ytimg.com/vi/yuR9dz0Qr_w/hq720.jpg?sqp=-oaymwE7CK4FEIIDSFryq4qpAy0IARUAAAAAGAElAADIQj0AgKJD8AEB-AH-CYAC0AWKAgwIABABGCwgNCh_MA8=&rs=AOn4CLBsVDmn8lhJHEF32f_HENmhZmKfqw',
+        'https://i.ytimg.com/vi/yuR9dz0Qr_w/hq720.jpg?sqp=-oaymwE7CK4FEIIDSFryq4qpAy0IARUAAAAAGAElAADIQj0AgKJD8AEB-AH-CYAC0AWKAgwIABABGCwgNCh_MA8=&rs=AOn4CLBsVDmn8lhJHEF32f_HENmhZmKfqw'
     },
     {
       id: 5,
       title: 'Exploring TypeScript',
       shortDescription: 'An introduction to TypeScript and its benefits.',
-      thumbnail: 'https://nohiedu.com/wp-content/uploads/2024/06/khoa-hoc-docker.webp',
-    },
+      thumbnail: 'https://nohiedu.com/wp-content/uploads/2024/06/khoa-hoc-docker.webp'
+    }
   ]
 
   return (

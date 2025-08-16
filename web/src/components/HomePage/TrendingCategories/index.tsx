@@ -17,10 +17,10 @@ const TrendingCategories = () => {
     {
       title: 'NodeJS',
       image:
-        'https://play-lh.googleusercontent.com/fSQ2dmyQPfqZAacdmLnA3UoUdaHgF0ADmbLVMXFiD_iTwVVJNi8PjBbe_RlZSAZEJMo=w240-h480-rw',
+        'https://play-lh.googleusercontent.com/fSQ2dmyQPfqZAacdmLnA3UoUdaHgF0ADmbLVMXFiD_iTwVVJNi8PjBbe_RlZSAZEJMo=w240-h480-rw'
     },
     { title: 'Spring Boot', image: 'https://img.icons8.com/color/512/spring-logo.png' },
-    { title: 'ReactJS', image: 'https://images.viblo.asia/da226ac1-bf54-496d-9547-d1506ebe9695.png' },
+    { title: 'ReactJS', image: 'https://images.viblo.asia/da226ac1-bf54-496d-9547-d1506ebe9695.png' }
   ]
 
   return (

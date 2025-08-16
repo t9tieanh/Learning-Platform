@@ -41,13 +41,19 @@ const SlidingLoginSignup: React.FC<SlidingLoginSignupProps> = () => {
     >
       <div className='absolute w-full h-full top-0 left-0'>
         <div
-          className={` absolute top-[95%] lg:top-1/2 left-1/2 grid grid-cols-1 z-[5] -translate-x-1/2 
-             -translate-y-full lg:-translate-y-1/2 lg:w-1/2 w-full  transition-[1s]  duration-[1.6s] 
-             lg:duration-[1.4s] ease-[ease-in-out] ${
-               isSignUpMode
-                 ? 'lg:left-1/4   max-lg:top-[-10%]   max-lg:-translate-x-2/4   max-lg:translate-y-0'
-                 : 'lg:left-3/4 '
-             } `}
+          className={`
+            absolute
+            top-[95%] lg:top-1/2 left-1/2
+            grid grid-cols-1 z-[5] -translate-x-1/2 
+            -translate-y-full lg:-translate-y-1/2 lg:w-1/2 w-full  transition-[1s]  duration-[1.6s] 
+            lg:duration-[1.4s] ease-[ease-in-out]
+            ${
+              isSignUpMode
+                ? 'lg:left-1/4   max-lg:top-[-10%]   max-lg:-translate-x-2/4   max-lg:translate-y-0'
+                : 'lg:left-3/4 '
+            }
+            max-lg:static max-lg:flex max-lg:items-center max-lg:justify-center max-lg:h-full max-lg:translate-x-0 max-lg:translate-y-0
+          `}
         >
           <div
             style={{ transition: 'all 1500ms ease-in-out' }}
@@ -74,7 +80,7 @@ const SlidingLoginSignup: React.FC<SlidingLoginSignupProps> = () => {
           className={`flex flex-row justify-center lg:flex-col items-center  
     max-lg:col-start-1 max-lg:col-end-2 max-lg:px-[8%] max-lg:py-10 
     lg:items-center text-center z-[6] max-lg:row-start-1 max-lg:row-end-2
-    pt-12 pb-8 ${isSignUpMode ? 'pointer-events-none' : 'pointer-events-auto'}`}
+    pt-12 pb-8 ${isSignUpMode ? 'lg:pointer-events-none' : 'lg:pointer-events-auto'}`}
         >
           <div
             style={{ transition: 'all 1500ms ease-in-out' }}
@@ -110,7 +116,7 @@ const SlidingLoginSignup: React.FC<SlidingLoginSignupProps> = () => {
         <div
           className={`flex flex-row   max-lg:row-start-3 max-lg:row-end-4 lg:flex-col items-center lg:items-end 
             justify-around text-center z-[6]   max-lg:col-start-1 max-lg:col-end-2  max-lg:px-[8%]   max-lg:py-10 
-             pl-[17%] pr-[12%] pt-12 pb-8 ${isSignUpMode ? ' pointer-events-auto' : 'pointer-events-none'}`}
+             pl-[17%] pr-[12%] pt-12 pb-8 ${isSignUpMode ? 'lg:pointer-events-auto' : 'lg:pointer-events-none'}`}
         >
           <div
             style={{ transition: 'all 1500ms ease-in-out' }}

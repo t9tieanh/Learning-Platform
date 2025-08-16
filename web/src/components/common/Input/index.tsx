@@ -7,7 +7,7 @@ const CustomInput = ({
   type,
   value,
   onChange,
-  placeholder,
+  placeholder
 }: {
   label?: string
   type?: string

@@ -44,8 +44,8 @@ const Sections = () => {
       posts: [
         { title: 'Chào mừng đến với khóa học', isPublic: true },
         { title: 'Cách học hiệu quả', isPublic: false },
-        { title: 'Giới thiệu giảng viên', isPublic: true },
-      ],
+        { title: 'Giới thiệu giảng viên', isPublic: true }
+      ]
     },
     {
       title: 'Cơ bản về React',
@@ -53,8 +53,8 @@ const Sections = () => {
         { title: 'JSX là gì?', isPublic: true },
         { title: 'Component và Props', isPublic: true },
         { title: 'State và Lifecycle', isPublic: false },
-        { title: 'Xử lý sự kiện', isPublic: true },
-      ],
+        { title: 'Xử lý sự kiện', isPublic: true }
+      ]
     },
     {
       title: 'Nâng cao về React',
@@ -62,33 +62,33 @@ const Sections = () => {
         { title: 'Hooks cơ bản', isPublic: true },
         { title: 'Custom Hooks', isPublic: false },
         { title: 'Context API', isPublic: true },
-        { title: 'Performance Optimization', isPublic: false },
-      ],
+        { title: 'Performance Optimization', isPublic: false }
+      ]
     },
     {
       title: 'Quản lý dữ liệu',
       posts: [
         { title: 'Redux cơ bản', isPublic: true },
         { title: 'Redux Toolkit', isPublic: false },
-        { title: 'React Query', isPublic: true },
-      ],
+        { title: 'React Query', isPublic: true }
+      ]
     },
     {
       title: 'Triển khai và nâng cấp',
       posts: [
         { title: 'Build & Deploy', isPublic: true },
         { title: 'CI/CD với Github Actions', isPublic: false },
-        { title: 'Nâng cấp dự án', isPublic: true },
-      ],
+        { title: 'Nâng cấp dự án', isPublic: true }
+      ]
     },
     {
       title: 'Câu hỏi thường gặp',
       posts: [
         { title: 'Làm sao để nhận chứng chỉ?', isPublic: true },
         { title: 'Hỗ trợ kỹ thuật', isPublic: true },
-        { title: 'Liên hệ giảng viên', isPublic: false },
-      ],
-    },
+        { title: 'Liên hệ giảng viên', isPublic: false }
+      ]
+    }
   ]
 
   return (
