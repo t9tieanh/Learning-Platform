@@ -32,7 +32,7 @@ const CourseCard = ({ course, className }: { course: Course; className?: string 
               </Avatar>
               <span className='teacher-info-name'>Phạm Tiến Anh</span>
             </div>
-            <Button className='rounded-3xl'>
+            <Button className='rounded-3xl btn-detail'>
               <IoPaperPlane />
               Xem chi tiết
             </Button>

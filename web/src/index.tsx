@@ -7,6 +7,7 @@ import HomePage from './pages/HomePage'
 import DefaultLayout from './layouts/DefaultLayout'
 import Course from './pages/Course'
 import CartPage from './pages/Cart'
+import Login from './pages/Login'
 
 const router = createBrowserRouter([
   {
@@ -19,9 +20,10 @@ const router = createBrowserRouter([
         children: [
           { path: '', element: <HomePage /> },
           { path: 'course/:id', element: <Course /> },
-          { path: 'my-cart', element: <CartPage /> }
+          { path: 'my-cart', element: <CartPage /> },
         ]
-      }
+      },
+      { path: 'login', element: <Login /> }
     ],
   }
 ])
