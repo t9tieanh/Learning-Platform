@@ -7,7 +7,8 @@ import HomePage from './pages/HomePage'
 import DefaultLayout from './layouts/DefaultLayout'
 import Course from './pages/Course'
 import CartPage from './pages/Cart'
-import Login from './pages/Login'
+import AuthLayout from './layouts/AuthLayout'
+import NotFound from './pages/NotFound'
 
 const router = createBrowserRouter([
   {
@@ -23,7 +24,8 @@ const router = createBrowserRouter([
           { path: 'my-cart', element: <CartPage /> }
         ]
       },
-      { path: 'login', element: <Login /> }
+      { path: 'auth', element: <AuthLayout /> },
+      { path: '*', element: <NotFound /> }
     ]
   }
 ])

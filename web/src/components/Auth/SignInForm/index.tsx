@@ -1,41 +1,35 @@
 import React, { FC } from 'react'
-import CustomButton from '../common/Button'
-import CustomInput from '../common/Input'
+import CustomButton from '../../common/Button'
+import CustomInput from '../../common/Input'
 import { RiLoginCircleFill } from 'react-icons/ri'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { FcGoogle } from 'react-icons/fc'
-import CustomCheckbox from '../common/CustomCheckbox'
+import CustomCheckbox from '../../common/CustomCheckbox'
 import { FaSquareFacebook } from 'react-icons/fa6'
-import { BookOpen } from 'lucide-react';
+import { BookOpen } from 'lucide-react'
 
-
-interface SignUpFormProps {
-  buttonClasses: string
-  buttonForGFT: string
-}
-
-const SignUpForm: FC<SignUpFormProps> = ({ buttonClasses, buttonForGFT }) => {
+const SignInForm: FC = () => {
   return (
     <div className='w-full bg-white rounded-lg md:mt-0 sm:max-w-md xl:py-0'>
       <Card className='shadow-xl py-12 border-none'>
         <CardHeader className='text-center'>
           <CardTitle className='font-bold flex items-center justify-center gap-2'>
-            <BookOpen />Đăng ký tài khoản mới
+            <BookOpen />
+            Chào mừng bạn đã quay trở lại !
           </CardTitle>
           <CardDescription>Nhâp thông tin đăng nhập của bạn để tiếp tục.</CardDescription>
           <CardContent className='mt-5'>
             <div className='login-form flex flex-col gap-3'>
               <CustomInput placeholder='Email' />
-              <CustomInput placeholder='Nhập tên của bạn !' />
               <CustomInput placeholder='Password' type='password' />
-              <CustomInput placeholder='Xác nhận lại password' type='password' />
             </div>
-            <div className='remember-me mt-5'>
-              <CustomCheckbox id='remember-me' label='Đồng ý với điều khoản dịch ' className='text-gray-700' />
+            <div className='remember-me flex justify-between items-center mt-5'>
+              <CustomCheckbox id='remember-me' label='Ghi nhớ tôi' className='text-gray-700' />
+              <p className='text-gray-700 text-sm font-bold'>Quên mật khẩu ?</p>
             </div>
             <div className='signin-button w-full mt-5'>
               <CustomButton
-                label='Tạo tài khoản'
+                label='Đăng nhập'
                 icon={<RiLoginCircleFill />}
                 className='w-full rounded-md border border-gray-300 bg-blue-500 py-3 text-white hover:bg-blue-600'
               />
@@ -55,7 +49,10 @@ const SignUpForm: FC<SignUpFormProps> = ({ buttonClasses, buttonForGFT }) => {
               <CustomButton icon={<FaSquareFacebook className='text-white' />} className='bg-blue-600 w-1/2' />
             </div>
             <p className='text-center text-sm text-gray-500 mt-5'>
-              Bạn đã có tài khoản? <a href='/login' className='text-blue-500 hover:underline'>Đăng nhập</a>
+              Bạn chưa có tài khoản?{' '}
+              <a href='/login' className='text-blue-500 hover:underline'>
+                Đăng ký
+              </a>
             </p>
           </CardContent>
         </CardHeader>
@@ -64,4 +61,4 @@ const SignUpForm: FC<SignUpFormProps> = ({ buttonClasses, buttonForGFT }) => {
   )
 }
 
-export default SignUpForm
+export default SignInForm
