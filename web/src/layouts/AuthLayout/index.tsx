@@ -48,9 +48,9 @@ const AuthLayout: React.FC = () => {
                  isSignUpMode ? 'lg:translate-x-[-800px]   max-lg:translate-y-[-300px]' : ''
                }`}
           >
-            <h3 className='font-semibold leading-none text-[1.2rem] lg:text-[1.5rem]'>New here ?</h3>
+            <h3 className='font-semibold leading-none text-[1.2rem] lg:text-[1.5rem]'>Mới tham gia?</h3>
             <p className='text-[0.7rem] lg:text-[0.95rem] px-0 py-2 lg:py-[0.7rem]'>
-              Sign up and discover our platform
+              Đăng ký để khám phá nền tảng học tập của chúng tôi
             </p>
             <button
               className='bg-transparent w-[110px] h-[35px] text-[0.7rem] lg:w-[130px] lg:h-[41px] 
@@ -59,7 +59,7 @@ const AuthLayout: React.FC = () => {
               id='sign-up-btn'
               onClick={toggleSignUpMode}
             >
-              Sign up
+              Đăng ký
             </button>
           </div>
           <img
@@ -69,7 +69,7 @@ const AuthLayout: React.FC = () => {
     duration-[1.8s] lg:duration-[2.2s] ease-[ease-in-out] delay-[1.2s] lg:delay-[0.8s] ${
       isSignUpMode ? 'lg:translate-x-[-800px] max-lg:translate-y-[-300px]' : ''
     }`}
-            alt='login'
+            alt='Đăng nhập'
           />
         </div>
         <div
@@ -84,9 +84,9 @@ const AuthLayout: React.FC = () => {
                  isSignUpMode ? '' : 'lg:translate-x-[800px]   max-lg:translate-y-[300px]'
                }`}
           >
-            <h3 className='font-semibold leading-none text-[1.2rem] lg:text-[1.5rem]'>One of us ?</h3>
+            <h3 className='font-semibold leading-none text-[1.2rem] lg:text-[1.5rem]'>Đã có tài khoản?</h3>
             <p className=' py-2 text-[0.7rem] lg:text-[0.95rem] px-0  lg:py-[0.7rem]'>
-              Sign in to your account to have hastle free experience
+              Đăng nhập để trải nghiệm học tập dễ dàng hơn
             </p>
             <button
               className='bg-transparent w-[110px] h-[35px]  text-[0.7rem] lg:w-[130px] 
@@ -95,14 +95,14 @@ const AuthLayout: React.FC = () => {
               id='sign-in-btn'
               onClick={toggleSignUpMode}
             >
-              Sign in
+              Đăng nhập
             </button>
           </div>
 
           <img
             style={{ transition: 'all 1500ms ease-in-out' }}
             src={register}
-            alt='register'
+            alt='Đăng ký'
             className={`max-md:hidden w-[200px] lg:w-full transition-transform duration-[1800ms] 
     lg:duration-[2200ms] ease-in-out delay-[1200ms] lg:delay-[800ms] ${
       isSignUpMode ? '' : 'lg:translate-x-[800px] max-lg:translate-y-[300px]'
