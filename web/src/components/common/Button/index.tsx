@@ -7,7 +7,7 @@ const CustomButton = ({
   className,
   variant,
   onClick,
-  isLoader,
+  isLoader
 }: {
   label?: string
   icon?: React.ReactNode

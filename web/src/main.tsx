@@ -7,6 +7,8 @@ import HomePage from './pages/HomePage'
 import DefaultLayout from './layouts/DefaultLayout'
 import Course from './pages/Course'
 import CartPage from './pages/Cart'
+import AuthLayout from './layouts/AuthLayout'
+import NotFound from './pages/NotFound'
 
 const router = createBrowserRouter([
   {
@@ -21,8 +23,10 @@ const router = createBrowserRouter([
           { path: 'course/:id', element: <Course /> },
           { path: 'my-cart', element: <CartPage /> }
         ]
-      }
-    ],
+      },
+      { path: 'auth', element: <AuthLayout /> },
+      { path: '*', element: <NotFound /> }
+    ]
   }
 ])
 

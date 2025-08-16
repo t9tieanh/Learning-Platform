@@ -48,7 +48,7 @@ const CheckoutSummary = () => {
       basePrice: 300000,
       price: 250000,
       image: 'https://files.fullstack.edu.vn/f8-prod/courses/7.png'
-    },
+    }
   ]
 
   return (
@@ -80,7 +80,7 @@ const CheckoutSummary = () => {
             className='bg-blue-500 hover:bg-blue-600 text-white w-full'
           />
           <CustomButton
-            icon={<MousePointer2  />}
+            icon={<MousePointer2 />}
             label='Nhập mã giảm giá'
             className='bg-red-500 hover:bg-red-600 text-white w-full mt-1'
           />

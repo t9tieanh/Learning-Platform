@@ -28,7 +28,7 @@ const CourseContent = () => {
           'Trước khi bắt đầu, hãy đảm bảo bạn đã cài đặt Node.js và npm để có thể chạy các ví dụ thực hành và cài đặt các thư viện cần thiết.',
           'Tinh thần học hỏi, chủ động tìm hiểu và không ngại thử nghiệm là yếu tố quan trọng giúp bạn tiến bộ nhanh hơn.',
           'Khả năng đọc hiểu tài liệu tiếng Anh sẽ giúp bạn tiếp cận nhiều nguồn kiến thức và giải quyết các vấn đề kỹ thuật hiệu quả hơn.',
-          'Bạn nên có tài khoản Github để lưu trữ, quản lý mã nguồn và chia sẻ các dự án thực hành với cộng đồng.',
+          'Bạn nên có tài khoản Github để lưu trữ, quản lý mã nguồn và chia sẻ các dự án thực hành với cộng đồng.'
         ]}
       />
       {/* description */}

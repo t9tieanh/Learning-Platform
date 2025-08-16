@@ -19,7 +19,7 @@ const CartPage = () => {
       <div className='mx-12 min-h-[60vh]'>
         <RecommendedCourses />
       </div>
-      <div className='end-cart'/>
+      <div className='end-cart' />
     </div>
   )
 }

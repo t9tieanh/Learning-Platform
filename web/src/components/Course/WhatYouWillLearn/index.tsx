@@ -17,20 +17,20 @@ const WhatYouWillLearn = () => {
   const learnings = [
     {
       content:
-        'Nắm vững các thao tác cơ bản trong Adobe Premiere Pro, từ việc tạo dự án mới đến quản lý timeline và các công cụ chỉnh sửa.',
+        'Nắm vững các thao tác cơ bản trong Adobe Premiere Pro, từ việc tạo dự án mới đến quản lý timeline và các công cụ chỉnh sửa.'
     },
     {
       content:
-        'Biết cách cắt ghép, chỉnh sửa, thêm hiệu ứng chuyển cảnh, chèn chữ và âm thanh để tạo ra những video chất lượng chuyên nghiệp.',
+        'Biết cách cắt ghép, chỉnh sửa, thêm hiệu ứng chuyển cảnh, chèn chữ và âm thanh để tạo ra những video chất lượng chuyên nghiệp.'
     },
     {
       content:
-        'Thành thạo các kỹ thuật xử lý màu sắc, xuất video với định dạng phù hợp và tối ưu hóa chất lượng cho từng nền tảng.',
+        'Thành thạo các kỹ thuật xử lý màu sắc, xuất video với định dạng phù hợp và tối ưu hóa chất lượng cho từng nền tảng.'
     },
     {
       content:
-        'Tự tin xây dựng quy trình chỉnh sửa video hoàn chỉnh, áp dụng các mẹo và kỹ thuật giúp sản phẩm cuối cùng hấp dẫn hơn.',
-    },
+        'Tự tin xây dựng quy trình chỉnh sửa video hoàn chỉnh, áp dụng các mẹo và kỹ thuật giúp sản phẩm cuối cùng hấp dẫn hơn.'
+    }
   ]
 
   return (

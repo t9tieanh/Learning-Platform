@@ -1,17 +1,43 @@
 .banner-container {
-    background-image: url('https://images.unsplash.com/photo-1495465798138-718f86d1a4bc?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
+    // background-image: url('https://images.unsplash.com/photo-1495465798138-718f86d1a4bc?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
+    background-image: url('https://res.cloudinary.com/df8780mba/image/upload/v1754644127/banner_ou5ree.jpg');
     background-size: cover;
-    background-position: center;
     background-repeat: no-repeat;
-    background-position: center bottom;
     background-attachment: fixed;
-    
-    min-height: 550px; /* Hoặc 100vh cho full screen */
+
+    min-height: 550px;
+    /* Hoặc 100vh cho full screen */
     width: 100%;
     padding: 50px;
     position: relative;
 
-    h1, blockquote {
-        max-width: 600px !important ;
+    h1,
+    blockquote {
+        max-width: 600px !important;
+    }
+
+    color: white;
+
+    &::before {
+        content: '';
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1;
+        pointer-events: none;
+        position: absolute;
+    }
+
+    > * {
+        position: relative;
+        z-index: 2;
+    }
+
+    .btn-primary {
+        background-color: #FF811B;
+
+        &:hover {
+            background-color: #d86100;
+            scale: 1.1;
+        }
     }
 }

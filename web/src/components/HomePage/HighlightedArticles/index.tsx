@@ -6,40 +6,40 @@ const HighlightedArticles = () => {
       id: 1,
       title: 'Understanding React Hooks',
       shortDescription: 'A deep dive into the world of React Hooks.',
-      thumbnail: 'https://files.fullstack.edu.vn/f8-prod/blog_posts/4685/63117986d6356.png',
+      thumbnail: 'https://files.fullstack.edu.vn/f8-prod/blog_posts/4685/63117986d6356.png'
     },
     {
       id: 2,
       title: 'Exploring TypeScript',
       shortDescription: 'An introduction to TypeScript and its benefits.',
-      thumbnail: 'https://www.jamviet.com/upload/2021/09/typescript-1024x538.png',
+      thumbnail: 'https://www.jamviet.com/upload/2021/09/typescript-1024x538.png'
     },
     {
       id: 3,
       title: 'Exploring TypeScript',
       shortDescription: 'An introduction to TypeScript and its benefits.',
-      thumbnail: 'https://i.ytimg.com/vi/MGhw6XliFgo/maxresdefault.jpg',
+      thumbnail: 'https://i.ytimg.com/vi/MGhw6XliFgo/maxresdefault.jpg'
     },
     {
       id: 4,
       title: 'Exploring TypeScript',
       shortDescription: 'An introduction to TypeScript and its benefits.',
       thumbnail:
-        'https://khoahochatde.com/wp-content/uploads/2025/01/Lap-trinh-Backend-Microservices-voi-Typescript-va-Express.webp',
+        'https://khoahochatde.com/wp-content/uploads/2025/01/Lap-trinh-Backend-Microservices-voi-Typescript-va-Express.webp'
     },
     {
       id: 5,
       title: 'Exploring TypeScript',
       shortDescription: 'An introduction to TypeScript and its benefits.',
       thumbnail:
-        'https://i.ytimg.com/vi/yuR9dz0Qr_w/hq720.jpg?sqp=-oaymwE7CK4FEIIDSFryq4qpAy0IARUAAAAAGAElAADIQj0AgKJD8AEB-AH-CYAC0AWKAgwIABABGCwgNCh_MA8=&rs=AOn4CLBsVDmn8lhJHEF32f_HENmhZmKfqw',
+        'https://i.ytimg.com/vi/yuR9dz0Qr_w/hq720.jpg?sqp=-oaymwE7CK4FEIIDSFryq4qpAy0IARUAAAAAGAElAADIQj0AgKJD8AEB-AH-CYAC0AWKAgwIABABGCwgNCh_MA8=&rs=AOn4CLBsVDmn8lhJHEF32f_HENmhZmKfqw'
     },
     {
       id: 5,
       title: 'Exploring TypeScript',
       shortDescription: 'An introduction to TypeScript and its benefits.',
-      thumbnail: 'https://nohiedu.com/wp-content/uploads/2024/06/khoa-hoc-docker.webp',
-    },
+      thumbnail: 'https://nohiedu.com/wp-content/uploads/2024/06/khoa-hoc-docker.webp'
+    }
   ]
 
   return (
