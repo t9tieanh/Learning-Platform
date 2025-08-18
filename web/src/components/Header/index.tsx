@@ -20,20 +20,32 @@ const Header: FC = () => {
             </Avatar>
             {/* <NavigationMenuTrigger className='text-blue-700 font-bold'>Trái</NavigationMenuTrigger> */}
           </NavigationMenuList>
-          <NavigationMenuList className='mx-auto'>
+          <NavigationMenuList className='mx-auto bg-transparent'>
             <NavigationMenuItem>
               <Tabs defaultValue='home' className='w-full'>
-                <TabsList>
-                  <TabsTrigger value='home' className='tab-page'>
+                <TabsList className='flex gap-6 bg-transparent px-4 py-2'>
+                  <TabsTrigger
+                    value='home'
+                    className='tab-page font-semibold px-4 py-4 rounded-lg transition-colors duration-200 hover:bg-blue-100 hover:text-blue-700 data-[state=active]:bg-blue-500 data-[state=active]:text-white'
+                  >
                     Trang chủ
                   </TabsTrigger>
-                  <TabsTrigger value='course' className='tab-page'>
+                  <TabsTrigger
+                    value='course'
+                    className='tab-page font-semibold px-4 py-4 rounded-lg transition-colors duration-200 hover:bg-blue-100 hover:text-blue-700 data-[state=active]:bg-blue-500 data-[state=active]:text-white'
+                  >
                     Khóa học
                   </TabsTrigger>
-                  <TabsTrigger value='about' className='tab-page'>
+                  <TabsTrigger
+                    value='about'
+                    className='tab-page font-semibold px-4 py-4 rounded-lg transition-colors duration-200 hover:bg-blue-100 hover:text-blue-700 data-[state=active]:bg-blue-500 data-[state=active]:text-white'
+                  >
                     Về chúng tôi
                   </TabsTrigger>
-                  <TabsTrigger value='blog' className='tab-page'>
+                  <TabsTrigger
+                    value='blog'
+                    className='tab-page font-semibold px-4 py-4 rounded-lg transition-colors duration-200 hover:bg-blue-100 hover:text-blue-700 data-[state=active]:bg-blue-500 data-[state=active]:text-white'
+                  >
                     Blog
                   </TabsTrigger>
                 </TabsList>

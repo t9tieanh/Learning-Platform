@@ -1,102 +1,102 @@
+import React from 'react'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
-import { Clapperboard, Play } from 'lucide-react'
-import CustomButton from '@/components/common/Button'
-import './style.scss'
+import { Badge } from '@/components/ui/badge'
+import { PlayCircle, Clock, FileText } from 'lucide-react'
 
-interface SectionProps {
-  title: string
-  posts?: { title: string; isPublic: boolean }[]
-}
-
-const Post = ({ title, isPublic, className }: { title: string; isPublic: boolean; className?: string }) => {
-  return (
-    <AccordionContent className={`bg-gray-100 post p-2 mb-0 flex items-center justify-between ${className}`}>
-      <div className='flex items-center text-gray-700 font-medium'>
-        <Clapperboard size={15} />
-        &nbsp;&nbsp;
-        {title}
-      </div>
-      {isPublic && (
-        <div className='flex items-center'>
-          <CustomButton icon={<Play size={15} />} variant={'icon'} label='Xem trước bài học này' />
-        </div>
-      )}
-    </AccordionContent>
-  )
-}
-
-const Section = ({ title, posts }: SectionProps) => {
-  return (
-    <AccordionItem value={title} className='m-0 shadow-md'>
-      <AccordionTrigger className='bg-white text-black font-nomal p-3 text-sm flex items-center !justify-start !gap-0 hover:no-underline'>
-        {title}
-        <span className='text-xs ml-1'>2 bài học</span>
-      </AccordionTrigger>
-      {posts && posts.map((post, index) => <Post key={index} title={post.title} isPublic={post.isPublic} />)}
-    </AccordionItem>
-  )
-}
-
-const Sections = () => {
+const CourseSections = () => {
   const sections = [
     {
       title: 'Giới thiệu về khóa học',
-      posts: [
-        { title: 'Chào mừng đến với khóa học', isPublic: true },
-        { title: 'Cách học hiệu quả', isPublic: false },
-        { title: 'Giới thiệu giảng viên', isPublic: true }
-      ]
+      lessons: 2,
+      duration: '30 phút',
+      topics: ['Tổng quan về khóa học và mục tiêu', 'Cài đặt môi trường phát triển']
     },
     {
       title: 'Cơ bản về React',
-      posts: [
-        { title: 'JSX là gì?', isPublic: true },
-        { title: 'Component và Props', isPublic: true },
-        { title: 'State và Lifecycle', isPublic: false },
-        { title: 'Xử lý sự kiện', isPublic: true }
-      ]
+      lessons: 2,
+      duration: '45 phút',
+      topics: ['Components và JSX', 'Props và State cơ bản']
     },
     {
       title: 'Nâng cao về React',
-      posts: [
-        { title: 'Hooks cơ bản', isPublic: true },
-        { title: 'Custom Hooks', isPublic: false },
-        { title: 'Context API', isPublic: true },
-        { title: 'Performance Optimization', isPublic: false }
-      ]
+      lessons: 2,
+      duration: '60 phút',
+      topics: ['Hooks và Context API', 'State Management với Redux']
     },
     {
       title: 'Quản lý dữ liệu',
-      posts: [
-        { title: 'Redux cơ bản', isPublic: true },
-        { title: 'Redux Toolkit', isPublic: false },
-        { title: 'React Query', isPublic: true }
-      ]
+      lessons: 2,
+      duration: '50 phút',
+      topics: ['API Integration', 'Form Handling và Validation']
     },
     {
       title: 'Triển khai và nâng cấp',
-      posts: [
-        { title: 'Build & Deploy', isPublic: true },
-        { title: 'CI/CD với Github Actions', isPublic: false },
-        { title: 'Nâng cấp dự án', isPublic: true }
-      ]
+      lessons: 2,
+      duration: '40 phút',
+      topics: ['Build và Deploy ứng dụng', 'Performance Optimization']
     },
     {
       title: 'Câu hỏi thường gặp',
-      posts: [
-        { title: 'Làm sao để nhận chứng chỉ?', isPublic: true },
-        { title: 'Hỗ trợ kỹ thuật', isPublic: true },
-        { title: 'Liên hệ giảng viên', isPublic: false }
-      ]
+      lessons: 2,
+      duration: '25 phút',
+      topics: ['Debugging và Troubleshooting', 'Best Practices và Tips']
     }
   ]
 
   return (
-    <Accordion className='sections-list' type='single' collapsible defaultValue={sections[0]?.title}>
-      {sections &&
-        sections.map((section, index) => <Section key={index} title={section.title} posts={section.posts} />)}
+    <Accordion type='single' collapsible className='w-full space-y-4'>
+      {sections.map((section, index) => (
+        <AccordionItem
+          key={index}
+          value={`item-${index}`}
+          className='border border-border rounded-lg bg-card hover:shadow-soft transition-all duration-300'
+        >
+          <AccordionTrigger className='px-6 py-4 hover:no-underline group'>
+            <div className='flex items-center justify-between w-full text-left'>
+              <div className='flex items-center gap-4'>
+                <div className='w-10 h-10 bg-gradient-primary rounded-lg flex items-center justify-center text-primary-foreground font-semibold'>
+                  {index + 1}
+                </div>
+                <div>
+                  <h3 className='font-semibold text-foreground group-hover:text-primary transition-colors'>
+                    {section.title}
+                  </h3>
+                  <div className='flex items-center gap-4 mt-1 text-sm text-muted-foreground'>
+                    <div className='flex items-center gap-1'>
+                      {React.createElement(FileText, { className: 'w-4 h-4' })}
+                      <span>{section.lessons} bài học</span>
+                    </div>
+                    <div className='flex items-center gap-1'>
+                      {React.createElement(Clock, { className: 'w-4 h-4' })}
+                      <span>{section.duration}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <Badge variant='secondary' className='hidden sm:inline-flex'>
+                {section.lessons} bài
+              </Badge>
+            </div>
+          </AccordionTrigger>
+          <AccordionContent className='px-6 pb-6'>
+            <div className='ml-14 space-y-3'>
+              {section.topics.map((topic, topicIndex) => (
+                <div
+                  key={topicIndex}
+                  className='flex items-center gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors'
+                >
+                  <div className='w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center'>
+                    {React.createElement(PlayCircle, { className: 'w-4 h-4 text-primary' })}
+                  </div>
+                  <span className='text-muted-foreground'>{topic}</span>
+                </div>
+              ))}
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+      ))}
     </Accordion>
   )
 }
 
-export default Sections
+export default CourseSections

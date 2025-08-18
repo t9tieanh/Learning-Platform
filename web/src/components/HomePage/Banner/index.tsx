@@ -13,7 +13,7 @@ const Banner = () => {
         <blockquote className='mt-6 border-l-2 pl-6 italic'>
           &quot;Cùng công nghệ, học tập trở nên dễ dàng hơn.&quot;
         </blockquote>
-        <Button className='btn-primary mt-6 w-48'>
+        <Button className='btn-primary mt-6 w-48 bg-accent hover:bg-accent-hover'>
           <FaPaperPlane />
           Bắt đầu ngay
         </Button>

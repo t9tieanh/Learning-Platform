@@ -1,7 +1,6 @@
 import React, { FC } from 'react'
 import CustomButton from '../../common/Button'
 import CustomInput from '../../common/Input'
-import { RiLoginCircleFill } from 'react-icons/ri'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { FcGoogle } from 'react-icons/fc'
 import CustomCheckbox from '../../common/CustomCheckbox'
@@ -30,7 +29,6 @@ const SignInForm: FC = () => {
             <div className='signin-button w-full mt-5'>
               <CustomButton
                 label='Đăng nhập'
-                icon={<RiLoginCircleFill />}
                 className='w-full rounded-md border border-gray-300 bg-blue-500 py-3 text-white hover:bg-blue-600'
               />
             </div>
@@ -45,8 +43,11 @@ const SignInForm: FC = () => {
             </div>
             {/* login with other providers */}
             <div className='mt-5 flex items-center justify-center gap-3 w-full'>
-              <CustomButton icon={<FcGoogle />} className='bg-inherit w-1/2' />
-              <CustomButton icon={<FaSquareFacebook className='text-white' />} className='bg-blue-600 w-1/2' />
+              <CustomButton icon={<FcGoogle />} className='bg-inherit w-1/2 border-2 border-solid hover:bg-red-600' />
+              <CustomButton
+                icon={<FaSquareFacebook className='text-white' />}
+                className='bg-blue-600 w-1/2 border-2 border-solid hover:bg-blue-700'
+              />
             </div>
             <p className='text-center text-sm text-gray-500 mt-5'>
               Bạn chưa có tài khoản?{' '}
