@@ -6,4 +6,5 @@ import com.freeclassroom.userservice.dto.response.user.UserResponse;
 
 public interface IUserService {
     ApiResponse<UserResponse> registerUser(CreationUserRequest request);
+    ApiResponse<UserResponse> verifySignUp (String token);
 }

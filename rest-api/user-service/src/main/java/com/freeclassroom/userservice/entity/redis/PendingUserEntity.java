@@ -21,7 +21,6 @@ public class PendingUserEntity implements Serializable {
     @Id
     String token; // UUID random
     String email;
-    String image;
     String name;
     String phone;
     String username;

@@ -1,4 +1,4 @@
-package com.freeclassroom.userservice.service.impl.auth;
+package com.freeclassroom.userservice.service.auth;
 
 import com.freeclassroom.userservice.enums.role.TokenEnum;
 import com.freeclassroom.userservice.entity.user.UserEntity;

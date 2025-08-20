@@ -1,11 +1,12 @@
-import { NotificationType } from '~/enums/notification.enum'
+import { QueueNameEnum } from "~/enums/rabbitQueue.enum"
 
 export interface NotificationDto {
-  type: NotificationType
+  type: QueueNameEnum
   email: string[]
   title: string
 }
 
 export interface VerifyEmail extends NotificationDto {
   token: string
+  name: string
 }
