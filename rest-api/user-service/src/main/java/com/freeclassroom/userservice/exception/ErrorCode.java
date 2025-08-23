@@ -19,6 +19,9 @@ public enum ErrorCode {
     UN_AUTHENTICATED(1009, "Chưa xác thực", HttpStatus.UNAUTHORIZED), // 401
     OTP_SEND(1010, "Không thể gửi mã OTP", HttpStatus.OK),
 
+    // wrong token user signup
+    WRONG_VERFY_TOKEN(1002, "Token verify không đúng hoặc đã hết hạn", HttpStatus.OK),
+
     // dùng cho xác thực otp
     NOT_VERIFY_OTP(1011, "Mã OTP không hợp lệ, vui lòng thử lại", HttpStatus.OK);
 

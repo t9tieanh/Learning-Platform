@@ -37,7 +37,9 @@ class RabbitClient {
     RabbitClient.channel?.consume(queue, async (data) => {
       if (!data) return
       try {
-        const parsed: T = JSON.parse(data.content.toString())
+        const parsed: T & { type?: string } = JSON.parse(data.content.toString())
+        parsed.type = queue // Gán type cho parsed để biết queue nào đã gửi message
+
         await handler(parsed)
         RabbitClient.channel?.ack(data)
       } catch (err) {

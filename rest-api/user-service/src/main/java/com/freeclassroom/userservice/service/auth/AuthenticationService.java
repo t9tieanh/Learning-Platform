@@ -1,4 +1,4 @@
-package com.freeclassroom.userservice.service.impl.auth;
+package com.freeclassroom.userservice.service.auth;
 
 import com.freeclassroom.userservice.dto.response.ApiResponse;
 import com.freeclassroom.userservice.enums.role.TokenEnum;
@@ -11,7 +11,6 @@ import com.freeclassroom.userservice.exception.ErrorCode;
 import com.freeclassroom.userservice.repository.entity.UserRepository;
 import com.freeclassroom.userservice.repository.httpclient.OutboundAuthenticateClient;
 import com.freeclassroom.userservice.repository.httpclient.OutboundUserInfoClient;
-import com.freeclassroom.userservice.service.auth.IAuthenticationService;
 import com.nimbusds.jose.JOSEException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -20,8 +19,6 @@ import lombok.experimental.NonFinal;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.text.ParseException;
 
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -46,9 +43,6 @@ public class AuthenticationService implements IAuthenticationService {
     @NonFinal
     @Value("${outbound.identity.redirect-uri}")
     protected String REDIRECT_URL ;
-
-    @NonFinal
-    protected String GRANT_TYPE = "authorization_code";
 
 
     public ApiResponse<AuthResponse> authentication (AuthRequest request) throws JOSEException {

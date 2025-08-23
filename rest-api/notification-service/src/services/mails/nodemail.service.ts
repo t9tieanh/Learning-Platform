@@ -1,7 +1,7 @@
 import nodemailer from 'nodemailer'
 import { env } from '~/config/env'
 import { NotificationDto, VerifyEmail } from '~/dto/request/notification.dto'
-import { NotificationType } from '~/enums/notification.enum'
+import { QueueNameEnum } from '~/enums/rabbitQueue.enum'
 import { renderTemplate } from '~/utils/templateUtil'
 
 // Interface cho options gửi mail
@@ -48,18 +48,18 @@ class NodeMailService {
   // public send mail
   async sendMail(notification: NotificationDto): Promise<void> {
     let subject = ''
-    const to = []
+    let to
     let templateName = ''
     let templateData = {}
 
     switch (notification.type) {
-      case NotificationType.VERIFY_EMAIL: {
+      case QueueNameEnum.VERIFY_EMAIL: {
         const emailNotification = notification as VerifyEmail
 
         subject = 'Hãy xác thực tài khoản của bạn'
-        to.push(...emailNotification.email)
+        to = emailNotification.email
         templateName = 'email-verification.html'
-        templateData = { name: emailNotification.title, token: emailNotification.token }
+        templateData = { name: emailNotification.name, token: emailNotification.token }
         break
       }
 
@@ -69,6 +69,7 @@ class NodeMailService {
         return
     }
 
+    // render html
     const html = await renderTemplate(templateName, templateData)
 
     const mailPayload: SendEmailOptions = {
