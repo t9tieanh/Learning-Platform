@@ -15,7 +15,7 @@ interface CartItemCardProps {
 
 const CartItemCard = ({ cardItem }: { cardItem: CartItemCardProps }) => {
   return (
-    <Card className='cart-item-card flex flex-row gap-4 items-center p-4 mt-3 border-none shadow-base hover:-translate-y-1 transition-all duration-300 ease-in-out'>
+    <Card className='cart-item-card flex flex-row gap-4 items-center p-4 mt-3 border-none shadow-md hover:-translate-y-1 transition-all duration-300 ease-in-out'>
       <img src={cardItem.image} alt={cardItem.title} className='max-w-80 max-h-80 object-cover rounded' />
       <div className='flex justify-between flex-1'>
         <div>

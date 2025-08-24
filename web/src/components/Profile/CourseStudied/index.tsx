@@ -38,7 +38,7 @@ const CourseStudied = () => {
   return (
     <div className='space-y-6'>
       <div className='flex items-center justify-between'>
-        <h2 className='text-xl font-semibold text-white bg-gradient-to-r from-primary to-purple-600 px-6 py-3 rounded-2xl shadow-lg tracking-tight'>
+        <h2 className='text-base font-semibold text-white bg-gradient-to-r from-primary to-purple-600 px-6 py-3 rounded-2xl shadow-lg tracking-tight'>
           Khóa học đã học
         </h2>
       </div>

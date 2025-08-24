@@ -45,7 +45,7 @@ const Profile = () => {
   }
 
   return (
-    <div className='min-h-screen bg-background'>
+    <div className='min-h-screen bg-gray-50'>
       <div className='container mx-auto p-6'>
         <div className='grid grid-cols-1 lg:grid-cols-4 gap-6'>
           {/* Navigation Sidebar */}
@@ -74,7 +74,7 @@ const Profile = () => {
                       >
                         <Icon className='h-5 w-5' />
                         <div>
-                          <div className='font-medium'>{item.title}</div>
+                          <div className='font-base'>{item.title}</div>
                           <div
                             className={`text-xs ${isActive ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}
                           >
