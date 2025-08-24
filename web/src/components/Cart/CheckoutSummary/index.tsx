@@ -52,7 +52,7 @@ const CheckoutSummary = () => {
   ]
 
   return (
-    <div className='p-3 checkout-section'>
+    <div className='p-3 checkout-section shadow-md'>
       <div className='checkout-title'>
         <p className='text-lg font-semibold mb-1 flex items-center'>
           <CiDiscount1 />

@@ -6,7 +6,7 @@ import './style.scss'
 
 const CartPage = () => {
   return (
-    <div className='cart-page'>
+    <div className='cart-page bg-gray-50'>
       <Banner />
       <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 mx-4 lg:mx-12 min-h-[60vh] mt-5 gap-6'>
         <div className='lg:col-span-3 md:col-span-1'>
@@ -16,7 +16,7 @@ const CartPage = () => {
           <CheckoutSummary />
         </div>
       </div>
-      <div className='mx-12 min-h-[60vh]'>
+      <div className='mx-12 mt-10 min-h-[60vh]'>
         <RecommendedCourses />
       </div>
       <div className='end-cart' />

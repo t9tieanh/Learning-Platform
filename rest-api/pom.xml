@@ -8,12 +8,13 @@
     <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>REST API Multi-Module Project</name>
-    <description>Parent POM for API Gateway, User Service, and Course Service</description>
+    <description>Parent POM for API Gateway, User Service, Sale Service, and Course Service</description>
 
     <modules>
         <module>api-gateway</module>
         <module>user-service</module>
-        <module>course-service</module> <!-- Thêm dòng này -->
+        <module>sale-service</module>
+        <module>course-service</module>
     </modules>
 
     <properties>

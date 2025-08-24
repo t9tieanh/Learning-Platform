@@ -1,4 +1,4 @@
-import { QueueNameEnum } from "~/enums/rabbitQueue.enum"
+import { QueueNameEnum } from '~/enums/rabbitQueue.enum'
 
 export interface NotificationDto {
   type: QueueNameEnum

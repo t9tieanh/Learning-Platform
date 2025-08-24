@@ -1,6 +1,5 @@
 package com.freeclassroom.userservice.configuration;
 
-import com.freeclassroom.userservice.entity.role.RoleAssignmentEntity;
 import com.freeclassroom.userservice.entity.role.RoleEntity;
 import com.freeclassroom.userservice.entity.user.UserEntity;
 import com.freeclassroom.userservice.enums.entity.EnumAccountStatus;
@@ -19,6 +18,7 @@ import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashSet;
+import java.util.Set;
 
 @Configuration
 @RequiredArgsConstructor
@@ -56,18 +56,19 @@ public class ApplicationInitConfig {
                                 RoleEntity.builder().name(ADMIN_ROLE).description("This Is Admin Role").build()
                         );
 
-
-                var roles = new HashSet<RoleAssignmentEntity>();
-                roles.add(RoleAssignmentEntity.builder().role(adminRole).build());
+                // save role admin
+                adminRole = roleRepository.save(adminRole);
 
                 // thêm user admin
                 UserEntity user = UserEntity.builder()
                         .username(ADMIN_USER_NAME)
                         .email("admin@tienanh194.com")
                         .password(passwordEncoder.encode(ADMIN_PASSWORD))
-                        .roles(roles)
                         .status(EnumAccountStatus.ACTIVE)
                         .build();
+
+                user.setRoles(new HashSet<>());
+                user.getRoles().add(adminRole);
 
                 userRepository.save(user);
                 log.warn("admin user has been created with default password: admin, please change it");
