@@ -30,9 +30,9 @@ const CourseCard = ({ course, className }: { course: Course; className?: string 
                 <AvatarImage src='https://github.com/shadcn.png' />
                 <AvatarFallback>CN</AvatarFallback>
               </Avatar>
-              <span className='teacher-info-name'>Phạm Tiến Anh</span>
+              <span className='teacher-info-name '>Phạm Tiến Anh</span>
             </div>
-            <Button className='rounded-3xl btn-detail'>
+            <Button className='rounded-3xl btn-detail bg-primary hover:bg-primary-hover'>
               <IoPaperPlane />
               Xem chi tiết
             </Button>

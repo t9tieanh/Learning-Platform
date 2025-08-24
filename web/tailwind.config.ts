@@ -19,33 +19,40 @@ module.exports = {
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
-        primary: {
-          DEFAULT: "hsl(var(--primary))",
-          foreground: "hsl(var(--primary-foreground))",
+        primary: {  // MÀU CHỦ ĐẠO 
+          DEFAULT: "#3B82F6", // blue-500
+          hover: "#2563eb",
+          foreground: "#FFFFFF",
         },
-        secondary: {
-          DEFAULT: "hsl(var(--secondary))",
-          foreground: "hsl(var(--secondary-foreground))",
+        secondary: {  // MÀU PHỤ 
+          DEFAULT: "#6366F1", // indigo-500
+          foreground: "#FFFFFF",
         },
-        destructive: {
-          DEFAULT: "hsl(var(--destructive))",
-          foreground: "hsl(var(--destructive-foreground))",
+        destructive: {  // MÀU CẢNH BÁO
+          DEFAULT: "#EF4444", // red-500
+          foreground: "#FFFFFF",
         },
-        muted: {
-          DEFAULT: "hsl(var(--muted))",
-          foreground: "hsl(var(--muted-foreground))",
+        muted: {  // MÀU CHO BORDER, TEXT, PLACEHOLDER
+          DEFAULT: "#E5E7EB", // gray-200
+          foreground: "#374151", // gray-700
         },
-        accent: {
-          DEFAULT: "hsl(var(--accent))",
-          foreground: "hsl(var(--accent-foreground))",
+        accent: { // MÀU NHẤN 
+          DEFAULT: "#F97316", // emerald-500
+          hover: "#EA580C",
+          foreground: "#FFFFFF",
         },
-        popover: {
-          DEFAULT: "hsl(var(--popover))",
-          foreground: "hsl(var(--popover-foreground))",
+        popover: { // MÀU CHO POPOVER, DROPDOWN, TOOLTIP
+          DEFAULT: "#F9FAFB", // gray-50
+          foreground: "#111827", // gray-900
         },
-        card: {
-          DEFAULT: "hsl(var(--card))",
-          foreground: "hsl(var(--card-foreground))",
+        card: {  // MÀU CHO THẺ CARD COMPONENTS
+          DEFAULT: "#FFFFFF",
+          foreground: "#111827",
+        },
+        brand: {  // MÀU LOGO, NAVBAR, HEADER
+          light: "#60A5FA",   // blue-400
+          DEFAULT: "#3B82F6", // blue-500
+          dark: "#2563EB",    // blue-600
         },
       },
       borderRadius: {
@@ -74,8 +81,8 @@ module.exports = {
         '1400': '1400ms',
         '1800': '1800ms',
         '2200': '2200ms',
-        '6000': '6000ms', // Thêm cho transition chậm hơn
-        '10000': '10000ms', // Thêm để thử nghiệm
+        '6000': '6000ms',
+        '10000': '10000ms',
       },
       transitionDelay: {
         '1600': '1600ms',

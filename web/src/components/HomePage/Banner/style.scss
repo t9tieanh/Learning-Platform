@@ -31,13 +31,4 @@
         position: relative;
         z-index: 2;
     }
-
-    .btn-primary {
-        background-color: #FF811B;
-
-        &:hover {
-            background-color: #d86100;
-            scale: 1.1;
-        }
-    }
 }

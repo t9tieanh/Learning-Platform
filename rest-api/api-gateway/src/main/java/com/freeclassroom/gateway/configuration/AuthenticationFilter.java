@@ -1,4 +1,4 @@
-package com.devteria.gateway.configuration;
+package com.freeclassroom.gateway.configuration;
 
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.http.HttpStatus;
