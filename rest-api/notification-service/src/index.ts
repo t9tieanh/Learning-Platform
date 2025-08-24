@@ -6,6 +6,7 @@ import { CONNECT_DATABASES } from './config/connect'
 import { env } from '~/config/env'
 import { errorHandlingMiddleware } from '~/middleware/error-handler.midleware'
 import http from 'http'
+import { seedAll } from './seed/seedAll'
 
 const START_SERVER = async () => {
   const app = express()
@@ -16,6 +17,11 @@ const START_SERVER = async () => {
 
   // Middleware xử lý lỗi
   app.use(errorHandlingMiddleware)
+
+  app.get('/seeds-data', async (_req, res) => {
+    await seedAll()
+    res.status(200).json({ message: 'Seed data successfully!' })
+  })
 
   // tạo server duy nhất
   const server = http.createServer(app)
