@@ -8,8 +8,8 @@ import org.springframework.data.redis.repository.configuration.EnableRedisReposi
 @SpringBootApplication
 @EnableFeignClients
 @EnableRedisRepositories
-public class FreeclassroomApplication {
+public class CourseServiceApplication {
 	public static void main(String[] args) {
-		SpringApplication.run(FreeclassroomApplication.class, args);
+		SpringApplication.run(CourseServiceApplication.class, args);
 	}
 }

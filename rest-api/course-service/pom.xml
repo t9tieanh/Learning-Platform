@@ -11,9 +11,9 @@
 	</parent>
 
 	<groupId>com.freeclassroom</groupId>
-	<artifactId>user-service</artifactId>
+	<artifactId>course-service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>freeclassroom</name>
+	<name>course-service</name>
 	<description>Demo project for Spring Boot</description>
 
 	<properties>
