@@ -9,6 +9,7 @@ import Course from './pages/Course'
 import CartPage from './pages/Cart'
 import AuthLayout from './layouts/AuthLayout'
 import NotFound from './pages/NotFound'
+import Profile from './pages/Profile'
 
 const router = createBrowserRouter([
   {
@@ -21,7 +22,8 @@ const router = createBrowserRouter([
         children: [
           { path: '', element: <HomePage /> },
           { path: 'course/:id', element: <Course /> },
-          { path: 'my-cart', element: <CartPage /> }
+          { path: 'my-cart', element: <CartPage /> },
+          { path: 'profile', element: <Profile /> }
         ]
       },
       { path: 'auth', element: <AuthLayout /> },
