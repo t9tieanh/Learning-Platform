@@ -1,5 +1,6 @@
-package com.freeclassroom.courseservice.entity;
+package com.freeclassroom.courseservice.entity.course;
 
+import com.freeclassroom.courseservice.entity.AbstractEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -11,16 +12,16 @@ import lombok.experimental.SuperBuilder;
 @Getter
 @Setter
 @Entity
-@Table(name = "category")
+@Table(name = "resources")
 @AllArgsConstructor
 @NoArgsConstructor(force = true)
 @SuperBuilder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class CategoryEntity extends AbstractEntity {
-    String name;
-    String description;
+public class ResourceEntity extends AbstractEntity {
+    String type;
+    String url;
 
     @ManyToOne
-    @JoinColumn(name = "course_id")
-    CourseEntity course;
+    @JoinColumn(name = "lesson_id")
+    LessonEntity lesson;
 }

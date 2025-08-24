@@ -1,17 +1,17 @@
-package com.freeclassroom.courseservice.entity;
+package com.freeclassroom.courseservice.entity.course;
 
+import com.freeclassroom.courseservice.entity.AbstractEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.SuperBuilder;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
 @Setter
 @Entity
-@Table(name = "chapter")
+@Table(name = "chapters")
 @AllArgsConstructor
 @NoArgsConstructor(force = true)
 @SuperBuilder

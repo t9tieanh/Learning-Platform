@@ -1,22 +1,23 @@
-package com.freeclassroom.courseservice.entity;
+package com.freeclassroom.courseservice.entity.course;
 
+import com.freeclassroom.courseservice.entity.AbstractEntity;
+import com.freeclassroom.courseservice.entity.member.LessonProgress;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.SuperBuilder;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
 @Setter
 @Entity
-@Table(name = "lesson")
+@Table(name = "lessons")
 @AllArgsConstructor
 @NoArgsConstructor(force = true)
 @SuperBuilder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class LessonEntity extends AbstractEntity{
+public class LessonEntity extends AbstractEntity {
     String title;
     String content;
     Long duration;
