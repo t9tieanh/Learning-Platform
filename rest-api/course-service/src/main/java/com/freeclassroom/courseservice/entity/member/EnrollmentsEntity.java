@@ -22,6 +22,8 @@ import java.util.List;
 public class EnrollmentsEntity extends AbstractEntity {
     String userId;
     LocalDateTime enrollmentDate;
+
+    @Enumerated(EnumType.STRING)
     EnumCompletionStatus status;
     Double progress;
 

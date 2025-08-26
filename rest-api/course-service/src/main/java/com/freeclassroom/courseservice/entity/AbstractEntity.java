@@ -27,4 +27,3 @@ public abstract class AbstractEntity {
     @LastModifiedDate
     LocalDateTime updatedAt;
 }
-
