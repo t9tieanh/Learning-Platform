@@ -16,6 +16,7 @@ import com.freeclassroom.userservice.repository.entity.InvalidatedTokenRepositor
 import com.freeclassroom.userservice.repository.entity.UserRepository;
 import com.freeclassroom.userservice.repository.httpclient.OutboundAuthenticateClient;
 import com.freeclassroom.userservice.repository.httpclient.OutboundUserInfoClient;
+import com.freeclassroom.userservice.service.token.TokenBlacklistService;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.crypto.MACVerifier;
@@ -44,6 +45,8 @@ public class AuthenticationService implements IAuthenticationService {
 
     OutboundAuthenticateClient outboundAuthenticateClient;
     OutboundUserInfoClient outboundUserInfoClient;
+
+    TokenBlacklistService tokenBlacklistService;
 
     PasswordEncoder passwordEncoder;
     JwtService jwtService;
@@ -105,18 +108,12 @@ public class AuthenticationService implements IAuthenticationService {
 
     public void logout(LogoutRequest request) {
         try {
-            var signToken = verifyToken(request.getToken(), true);
+            var signToken = jwtService.verifyToken(request.getToken(), true);
 
             String jit = signToken.getJWTClaimsSet().getJWTID();
             Date expirationTime = signToken.getJWTClaimsSet().getExpirationTime();
 
-            InvalidatedToken invalidatedToken =
-                    InvalidatedToken.builder()
-                            .id(jit)
-                            .expiryTime(expirationTime)
-                            .build();
-
-            invalidatedTokenRepository.save(invalidatedToken);
+            tokenBlacklistService.blacklistToken(jit, expirationTime);
         } catch (CustomExeption | ParseException exeption) {
             log.info("Token đã hết hạn");
         } catch (JOSEException e) {
@@ -124,33 +121,18 @@ public class AuthenticationService implements IAuthenticationService {
         }
     }
 
-    private SignedJWT verifyToken(String token, boolean isRefresh) throws JOSEException, ParseException {
-        JWSVerifier jwsVerifier = new MACVerifier(SIGNER_KEY.getBytes());
-
-        SignedJWT signedJWT = SignedJWT.parse(token);
-
-        Date expirationTime = (isRefresh)
-                ? new Date(signedJWT.getJWTClaimsSet().getIssueTime()
-                    .toInstant().plus(REFRESHABLE_DURATION, ChronoUnit.SECONDS).toEpochMilli())
-                : signedJWT.getJWTClaimsSet().getExpirationTime();
-
-        var verified = signedJWT.verify(jwsVerifier);
-
-        if (!(verified && expirationTime.after(new Date())))
-            throw new CustomExeption(ErrorCode.UNAUTHENTICATED);
-
-        if (invalidatedTokenRepository.existsById(signedJWT.getJWTClaimsSet().getJWTID()))
-            throw new CustomExeption(ErrorCode.UNAUTHENTICATED);
-
-        return signedJWT;
-    }
 
     public ApiResponse<IntrospectResponse> introspect(IntrospectRequest request) {
         var token = request.getToken();
         boolean isValid = true;
 
         try {
-            verifyToken(token, false);
+            var signToken = jwtService.verifyToken(token, false);
+            String jti = signToken.getJWTClaimsSet().getJWTID();
+
+            if (tokenBlacklistService.isTokenBlacklisted(jti)) {
+                throw new CustomExeption();
+            }
         } catch (CustomExeption | JOSEException | ParseException e) {
             isValid = false;
         }
