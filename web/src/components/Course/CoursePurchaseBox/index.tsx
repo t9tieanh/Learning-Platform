@@ -3,6 +3,8 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { FaPaperPlane, FaShoppingCart, FaTag, FaClock } from 'react-icons/fa'
 import { useState } from 'react'
+import CustomButton from '@/components/common/Button'
+import { GiClick } from 'react-icons/gi'
 
 const CoursePurchaseBox = () => {
   const [discountCode, setDiscountCode] = useState('')
@@ -25,12 +27,11 @@ const CoursePurchaseBox = () => {
             </div>
 
             {/* Countdown Timer */}
-            <div className='bg-course-urgent/5 border border-course-urgent/20 rounded-xl p-3 text-center bg-red-100 border-red-300 text-red-600'>
+            <div className='bg-course-urgent/5 border border-course-urgent/20 rounded-xl p-3 text-center bg-red-100  text-red-600'>
               <div className='flex items-center justify-center gap-2 text-course-urgent mb-1'>
                 <FaClock className='w-4 h-4' />
-                <span className='text-sm font-medium'>Thời gian ưu đãi còn lại</span>
+                <span className='text-sm font-medium'>Thời gian ưu đãi còn lại: 2 ngày 3 giờ</span>
               </div>
-              <div className='text-lg font-bold text-course-urgent'>2 ngày 3 giờ</div>
             </div>
 
             {/* Action Buttons */}
@@ -49,7 +50,7 @@ const CoursePurchaseBox = () => {
 
           <CardContent className='pt-0'>
             {/* Discount Code Section */}
-            <div className='bg-muted/30 rounded-xl p-4 space-y-4'>
+            <div className='bg-white shadow-md rounded-xl p-4 space-y-4'>
               <div className='flex items-center gap-2 text-muted-foreground'>
                 <FaTag className='w-4 h-4 text-primary' />
                 <span className='font-medium'>Nhập mã giảm giá (nếu có)</span>
@@ -64,9 +65,7 @@ const CoursePurchaseBox = () => {
                   onChange={(e) => setDiscountCode(e.target.value)}
                   className='flex-1 border-primary/20 focus:border-primary'
                 />
-                <Button className='px-4 bg-green-600' disabled={!discountCode}>
-                  Áp dụng
-                </Button>
+                <CustomButton label='Áp dụng' icon={<GiClick className='w-4 h-4' />} disabled={!discountCode} />
               </div>
             </div>
           </CardContent>

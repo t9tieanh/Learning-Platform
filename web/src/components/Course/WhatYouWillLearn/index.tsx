@@ -1,4 +1,4 @@
-import React from 'react'
+import { FaLightbulb } from 'react-icons/fa'
 import { Card, CardContent } from '@/components/ui/card'
 
 const WhatYouWillLearn = () => {
@@ -24,22 +24,24 @@ const WhatYouWillLearn = () => {
   return (
     <section className='py-12 pr-4 bg-gradient-subtle'>
       <h4 className='mb-6 font-bold bg-primary text-white p-2 rounded-r-3xl max-w-md text-center flex'>
-        &nbsp;Bạn sẽ học được gì từ khóa học này ?
+        <FaLightbulb className='mt-1 mr-1' />
+        Bạn sẽ học được gì từ khóa học này ?
       </h4>
       <div className='max-w-6xl mx-auto'>
         <div className='grid md:grid-cols-2 gap-8'>
           {learningPoints.map((point, index) => (
             <Card
               key={index}
-              className='group relative overflow-hidden border-0 shadow-soft hover:shadow-elegant transition-all duration-500 hover:-translate-y-1'
+              className='group relative shadow-md overflow-hidden border-0 shadow-soft hover:shadow-elegant transition-all duration-500 hover:-translate-y-1'
             >
-              <CardContent className='p-8'>
+              <CardContent className='px-5'>
                 <div className='flex items-start space-x-4'>
                   <div className='flex-1'>
-                    <h3 className='text-xl font-semibold text-foreground mb-3 group-hover:text-primary transition-colors duration-300'>
+                    <h3 className='text-lg flex font-semibold text-foreground mb-3 group-hover:text-primary transition-colors duration-300'>
+                      <FaLightbulb className='mt-1 mr-1' />
                       {point.title}
                     </h3>
-                    <p className='text-muted-foreground leading-relaxed'>{point.description}</p>
+                    <p className='text-muted-foreground text-base leading-relaxed'>{point.description}</p>
                   </div>
                 </div>
 
