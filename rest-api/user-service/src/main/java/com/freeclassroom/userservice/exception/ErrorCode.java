@@ -16,7 +16,7 @@ public enum ErrorCode {
     USERNAME_INVALID(1004, "Tên đăng nhập phải có ít nhất 3 ký tự", HttpStatus.OK),
     PASSWORD_INVALID(1005, "Mật khẩu phải có ít nhất 8 ký tự", HttpStatus.OK),
     INVALID_DOB(1008, "Ngày sinh phải từ {min} trở lên", HttpStatus.OK),
-    UN_AUTHENTICATED(1009, "Chưa xác thực", HttpStatus.UNAUTHORIZED), // 401
+    UNAUTHENTICATED(1009, "Chưa xác thực", HttpStatus.UNAUTHORIZED), // 401
     OTP_SEND(1010, "Không thể gửi mã OTP", HttpStatus.OK),
 
     // wrong token user signup

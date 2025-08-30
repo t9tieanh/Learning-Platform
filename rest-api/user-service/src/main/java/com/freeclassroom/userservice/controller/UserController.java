@@ -25,4 +25,5 @@ public class UserController {
     ApiResponse<UserResponse> verifySignUp(@RequestParam("token") String token) {
         return userService.verifySignUp(token);
     }
+
 }

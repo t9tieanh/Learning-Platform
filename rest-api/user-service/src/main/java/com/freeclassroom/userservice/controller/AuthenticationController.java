@@ -1,7 +1,10 @@
 package com.freeclassroom.userservice.controller;
 
-import com.freeclassroom.userservice.dto.request.user.AuthRequest;
+import com.freeclassroom.userservice.dto.request.auth.AuthRequest;
+import com.freeclassroom.userservice.dto.request.auth.IntrospectRequest;
+import com.freeclassroom.userservice.dto.request.auth.LogoutRequest;
 import com.freeclassroom.userservice.dto.response.*;
+import com.freeclassroom.userservice.dto.response.auth.IntrospectResponse;
 import com.freeclassroom.userservice.dto.response.user.AuthResponse;
 import com.freeclassroom.userservice.service.auth.IAuthenticationService;
 import com.nimbusds.jose.JOSEException;
@@ -19,7 +22,18 @@ public class AuthenticationController {
     IAuthenticationService authenticationService;
 
     @PostMapping
-    public ApiResponse<AuthResponse> login (@RequestBody AuthRequest request) throws JOSEException {
+    ApiResponse<AuthResponse> login (@RequestBody AuthRequest request) throws JOSEException {
         return authenticationService.authentication(request);
+    }
+
+    @PostMapping("/logout")
+    ApiResponse<Void> logout (@RequestBody LogoutRequest request) {
+        authenticationService.logout(request);
+        return ApiResponse.<Void>builder().build();
+    }
+
+    @PostMapping("/introspect")
+    ApiResponse<IntrospectResponse> introspect(@RequestBody IntrospectRequest request) {
+        return authenticationService.introspect(request);
     }
 }

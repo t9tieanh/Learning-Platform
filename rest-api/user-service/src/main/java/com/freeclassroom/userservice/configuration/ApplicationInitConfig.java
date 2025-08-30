@@ -35,6 +35,9 @@ public class ApplicationInitConfig {
     static final String TEACHER_ROLE = "teacher";
 
     @NonFinal
+    static final String STUDENT_ROLE = "student";
+
+    @NonFinal
     static final String ADMIN_USER_NAME = "admin";
 
     @NonFinal
@@ -53,7 +56,7 @@ public class ApplicationInitConfig {
                 // add role admin
                 RoleEntity adminRole =
                         roleRepository.save(
-                                RoleEntity.builder().name(ADMIN_ROLE).description("This Is Admin Role").build()
+                                RoleEntity.builder().name(ADMIN_ROLE).description("Admin Role").build()
                         );
 
                 // save role admin
@@ -77,7 +80,13 @@ public class ApplicationInitConfig {
             if (roleRepository.findByName(TEACHER_ROLE) == null) {
                 //add role teacher
                 roleRepository.save(
-                        RoleEntity.builder().name(TEACHER_ROLE).description("This Is Teacher Role").build()
+                        RoleEntity.builder().name(TEACHER_ROLE).description("Teacher Role").build()
+                );
+            }
+
+            if (roleRepository.findByName(STUDENT_ROLE) == null) {
+                roleRepository.save(
+                        RoleEntity.builder().name(STUDENT_ROLE).description("Student Role").build()
                 );
             }
             log.info("Application initialization completed .....");
