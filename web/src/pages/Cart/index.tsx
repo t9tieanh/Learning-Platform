@@ -2,7 +2,6 @@ import Banner from '@/components/Cart/Banner'
 import CardSection from '@/components/Cart/CartSection'
 import CheckoutSummary from '@/components/Cart/CheckoutSummary'
 import RecommendedCourses from '@/components/Cart/RecommendedCourses'
-import './style.scss'
 
 const CartPage = () => {
   return (
@@ -19,7 +18,6 @@ const CartPage = () => {
       <div className='mx-12 mt-10 min-h-[60vh]'>
         <RecommendedCourses />
       </div>
-      <div className='end-cart' />
     </div>
   )
 }
