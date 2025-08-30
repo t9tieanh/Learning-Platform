@@ -1,4 +1,4 @@
-package com.freeclassroom.userservice.dto.request.user;
+package com.freeclassroom.userservice.dto.request.auth;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -8,7 +8,6 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class AuthRequest {
-    private String username;
-    private String password;
+public class IntrospectRequest {
+    String token;
 }

@@ -1,58 +1,61 @@
-import { FaLightbulb } from 'react-icons/fa'
-import { Card, CardContent } from '@/components/ui/card'
+import './style.scss'
+import { FaLightbulb, FaLocationArrow, FaQuestionCircle } from 'react-icons/fa'
+import Button from '@/components/common/Button'
+
+const LearningText = ({ content }: { content: string }) => {
+  return (
+    <>
+      <div className='text-center text-black flex gap-3'>
+        <FaLightbulb size={30} />
+        <h1 className='text-left font-medium mt-2 text-sm mb-1'>{content}</h1>
+      </div>
+    </>
+  )
+}
 
 const WhatYouWillLearn = () => {
-  const learningPoints = [
+  const learnings = [
     {
-      title: 'Nắm vững các thao tác cơ bản',
-      description: 'Từ việc tạo dự án mới đến quản lý timeline và các công cụ chỉnh sửa trong Adobe Premiere Pro.'
+      content:
+        'Nắm vững các thao tác cơ bản trong Adobe Premiere Pro, từ việc tạo dự án mới đến quản lý timeline và các công cụ chỉnh sửa.'
     },
     {
-      title: 'Biết cách cắt ghép, chỉnh sửa, thêm hiệu ứng',
-      description: 'Chuyên cảnh, chèn chữ và âm thanh để tạo ra những video chất lượng chuyên nghiệp.'
+      content:
+        'Biết cách cắt ghép, chỉnh sửa, thêm hiệu ứng chuyển cảnh, chèn chữ và âm thanh để tạo ra những video chất lượng chuyên nghiệp.'
     },
     {
-      title: 'Thành thạo các kỹ thuật xử lý màu sắc',
-      description: 'Xuất video với định dạng phù hợp và tối ưu hóa chất lượng cho từng nền tảng.'
+      content:
+        'Thành thạo các kỹ thuật xử lý màu sắc, xuất video với định dạng phù hợp và tối ưu hóa chất lượng cho từng nền tảng.'
     },
     {
-      title: 'Tự tin xây dựng quy trình chỉnh sửa video hoàn chỉnh',
-      description: 'Áp dụng các mẹo và kỹ thuật giúp sản phẩm cuối cùng hấp dẫn hơn.'
+      content:
+        'Tự tin xây dựng quy trình chỉnh sửa video hoàn chỉnh, áp dụng các mẹo và kỹ thuật giúp sản phẩm cuối cùng hấp dẫn hơn.'
     }
   ]
 
   return (
-    <section className='py-12 pr-4 bg-gradient-subtle'>
-      <h4 className='mb-6 font-bold bg-primary text-white p-2 rounded-r-3xl max-w-md text-center flex'>
-        <FaLightbulb className='mt-1 mr-1' />
-        Bạn sẽ học được gì từ khóa học này ?
+    <div className='what-you-will-learn-container min-h-24 bg-white pt-10 pb-12'>
+      <h4 className='font-bold bg-primary text-white p-2 rounded-r-3xl max-w-md text-center flex'>
+        <FaQuestionCircle size={20} className='mt-1 pl-6' />
+        &nbsp;Bạn sẽ học được gì từ khóa học này ?
       </h4>
-      <div className='max-w-6xl mx-auto'>
-        <div className='grid md:grid-cols-2 gap-8'>
-          {learningPoints.map((point, index) => (
-            <Card
-              key={index}
-              className='group relative shadow-md overflow-hidden border-0 shadow-soft hover:shadow-elegant transition-all duration-500 hover:-translate-y-1'
-            >
-              <CardContent className='px-5'>
-                <div className='flex items-start space-x-4'>
-                  <div className='flex-1'>
-                    <h3 className='text-lg flex font-semibold text-foreground mb-3 group-hover:text-primary transition-colors duration-300'>
-                      <FaLightbulb className='mt-1 mr-1' />
-                      {point.title}
-                    </h3>
-                    <p className='text-muted-foreground text-base leading-relaxed'>{point.description}</p>
-                  </div>
-                </div>
-
-                {/* Decorative gradient border */}
-                <div className='absolute inset-0 bg-gradient-primary opacity-0 group-hover:opacity-5 transition-opacity duration-300 rounded-lg' />
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+      <div className='grid grid-cols-1 md:grid-cols-4 gap-6 mt-6 mx-auto max-w-7xl px-4'>
+        {learnings.map((learning, index) => (
+          <LearningText key={index} content={learning.content} />
+        ))}
       </div>
-    </section>
+      <div className='text-right text-sm text-black mt-4 px-3'>
+        <Button
+          label='Xem thêm'
+          icon={<FaLocationArrow />}
+          onClick={() => console.log('Xem thêm')}
+          className='group bg-white text-blue-600 hover:bg-gray-200 relative'
+          variant='outline'
+        />
+        {/* <FaLocationArrow /> Xem thêm
+        </Button> */}
+      </div>
+    </div>
   )
 }
 
