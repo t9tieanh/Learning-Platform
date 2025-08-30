@@ -9,6 +9,6 @@ spring:
     gateway:
       routes:
         - id: user
-          uri: http://localhost:8080/user
+          uri: http://localhost:8080
           predicates:
-            - Path=/user/**
+            - Path=/**

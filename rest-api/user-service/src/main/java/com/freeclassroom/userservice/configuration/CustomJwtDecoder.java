@@ -21,9 +21,6 @@ import javax.crypto.spec.SecretKeySpec;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CustomJwtDecoder implements JwtDecoder {
 
-
-    //final AuthenticationService authenticationService;
-
     NimbusJwtDecoder nimbusJwtDecoder;
 
     @Value("${spring.jwt.signerKey}")
