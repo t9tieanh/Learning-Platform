@@ -10,6 +10,8 @@ import CartPage from './pages/Cart'
 import AuthLayout from './layouts/AuthLayout'
 import NotFound from './pages/NotFound'
 import Profile from './pages/Profile'
+import TCHomePage from './pages/TC_HomePage'
+import ForgotPass from './pages/ForgotPass'
 
 const router = createBrowserRouter([
   {
@@ -27,7 +29,12 @@ const router = createBrowserRouter([
         ]
       },
       { path: 'auth', element: <AuthLayout /> },
-      { path: '*', element: <NotFound /> }
+      { path: '*', element: <NotFound /> },
+      { path: 'forgot', element: <ForgotPass /> },
+      {
+        path: 'teacher',
+        children: [{ path: '', element: <TCHomePage /> }]
+      }
     ]
   }
 ])
