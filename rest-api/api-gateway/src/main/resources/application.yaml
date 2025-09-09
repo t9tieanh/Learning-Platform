@@ -1,14 +1,33 @@
 server:
   port: 8888
 
+app:
+  api-prefix: /api/v1
+
 spring:
   application:
     name: api-gateway
 
   cloud:
     gateway:
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins:
+              - "http://localhost:3000"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders: "*"
+            allowCredentials: true
+
       routes:
         - id: user
           uri: http://localhost:8080
           predicates:
-            - Path=/**
+            - Path=${app.api-prefix}/user**
+          filters:
+            - StripPrefix=2

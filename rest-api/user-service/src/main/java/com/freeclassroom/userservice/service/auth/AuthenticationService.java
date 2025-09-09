@@ -4,7 +4,6 @@ import com.freeclassroom.userservice.dto.request.auth.IntrospectRequest;
 import com.freeclassroom.userservice.dto.request.auth.LogoutRequest;
 import com.freeclassroom.userservice.dto.response.ApiResponse;
 import com.freeclassroom.userservice.dto.response.auth.IntrospectResponse;
-import com.freeclassroom.userservice.entity.token.InvalidatedToken;
 import com.freeclassroom.userservice.enums.role.TokenEnum;
 import com.freeclassroom.userservice.dto.request.auth.AuthRequest;
 import com.freeclassroom.userservice.dto.response.user.AuthResponse;
@@ -12,15 +11,11 @@ import com.freeclassroom.userservice.entity.user.UserEntity;
 import com.freeclassroom.userservice.enums.entity.EnumAccountStatus;
 import com.freeclassroom.userservice.exception.CustomExeption;
 import com.freeclassroom.userservice.exception.ErrorCode;
-import com.freeclassroom.userservice.repository.entity.InvalidatedTokenRepository;
 import com.freeclassroom.userservice.repository.entity.UserRepository;
 import com.freeclassroom.userservice.repository.httpclient.OutboundAuthenticateClient;
 import com.freeclassroom.userservice.repository.httpclient.OutboundUserInfoClient;
 import com.freeclassroom.userservice.service.token.TokenBlacklistService;
 import com.nimbusds.jose.JOSEException;
-import com.nimbusds.jose.JWSVerifier;
-import com.nimbusds.jose.crypto.MACVerifier;
-import com.nimbusds.jwt.SignedJWT;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -31,7 +26,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.text.ParseException;
-import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
 @RequiredArgsConstructor
@@ -41,7 +35,6 @@ import java.util.Date;
 public class AuthenticationService implements IAuthenticationService {
 
     UserRepository userRepository;
-    InvalidatedTokenRepository invalidatedTokenRepository;
 
     OutboundAuthenticateClient outboundAuthenticateClient;
     OutboundUserInfoClient outboundUserInfoClient;
@@ -120,7 +113,6 @@ public class AuthenticationService implements IAuthenticationService {
             throw new RuntimeException(e);
         }
     }
-
 
     public ApiResponse<IntrospectResponse> introspect(IntrospectRequest request) {
         var token = request.getToken();
