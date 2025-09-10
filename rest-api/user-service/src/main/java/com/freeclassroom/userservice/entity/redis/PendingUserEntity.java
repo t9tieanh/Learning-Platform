@@ -1,5 +1,6 @@
 package com.freeclassroom.userservice.entity.redis;
 
+import com.freeclassroom.userservice.enums.entity.EnumAccountStatus;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -25,4 +26,5 @@ public class PendingUserEntity implements Serializable {
     String phone;
     String username;
     String password;
+    EnumAccountStatus status;
 }

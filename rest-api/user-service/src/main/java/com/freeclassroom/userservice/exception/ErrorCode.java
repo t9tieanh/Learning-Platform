@@ -8,6 +8,8 @@ import org.springframework.http.HttpStatusCode;
 public enum ErrorCode {
     INVALID_KEY(123, "Dữ liệu yêu cầu không hợp lệ", HttpStatus.OK),
     USER_EXISTED(1001, "Người dùng đã tồn tại", HttpStatus.OK),
+    EMAIL_EXISTED(1001, "Email đã tồn tại !", HttpStatus.OK),
+    USERNAME_EXISTED(1001, "username đã tồn tại !", HttpStatus.OK),
     USER_NOT_FOUND(1002, "Không tìm thấy người dùng", HttpStatus.OK),
     USER_BLOCKED(1007, "Tài khoản đã bị khóa", HttpStatus.OK), // đổi code tránh trùng 1002
     WRONG_PASSWORD(1003, "Sai mật khẩu", HttpStatus.UNAUTHORIZED), // 401

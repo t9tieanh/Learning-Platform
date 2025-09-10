@@ -37,7 +37,7 @@ public class ExceptionsHandler {
         apiResponse.setCode(errorCode.getCode());
         apiResponse.setMessage(errorCode.getMessage());
 
-        return ResponseEntity.status(errorCode.getStatusCode()).body(apiResponse);
+        return ResponseEntity.ok().body(apiResponse);
     }
 
     @ExceptionHandler (value = MethodArgumentNotValidException.class)

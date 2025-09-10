@@ -1,32 +1,22 @@
 import { Button } from '@/components/ui/button'
 import { Loader2Icon } from 'lucide-react'
+import React from 'react'
 
-const CustomButton = ({
-  label,
-  icon,
-  className,
-  variant,
-  onClick,
-  isLoader,
-  disabled
-}: {
+type CustomButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   label?: string
   icon?: React.ReactNode
-  className?: string
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  variant?: any
-  onClick?: () => void
   isLoader?: boolean
-  disabled?: boolean
-}) => {
+}
+
+// eslint-disable-next-line react/prop-types
+const CustomButton: React.FC<CustomButtonProps> = ({ label, icon, className, isLoader, children, ...rest }) => {
   return (
-    <>
-      <Button className={className} onClick={onClick} variant={variant} disabled={disabled}>
-        {isLoader && <Loader2Icon className='animate-spin' />}
-        {icon && <span>{icon}</span>}
-        {label}
-      </Button>
-    </>
+    <Button className={className} disabled={rest.disabled || isLoader} {...rest}>
+      {isLoader && <Loader2Icon className='animate-spin' />}
+      {icon && <span>{icon}</span>}
+      {label}
+      {children}
+    </Button>
   )
 }
 

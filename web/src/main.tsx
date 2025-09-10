@@ -10,6 +10,7 @@ import CartPage from './pages/Cart'
 import AuthLayout from './layouts/AuthLayout'
 import NotFound from './pages/NotFound'
 import Profile from './pages/Profile'
+import User from '@/pages/User'
 
 const router = createBrowserRouter([
   {
@@ -27,14 +28,15 @@ const router = createBrowserRouter([
         ]
       },
       { path: 'auth', element: <AuthLayout /> },
+      { path: 'user/verify', element: <User /> },
       { path: '*', element: <NotFound /> }
     ]
   }
 ])
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
-  <React.StrictMode>
+  <>
     <RouterProvider router={router} />
     <ToastContainer />
-  </React.StrictMode>
+  </>
 )
