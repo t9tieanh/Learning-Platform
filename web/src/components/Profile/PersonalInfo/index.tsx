@@ -4,7 +4,7 @@ import CustomButton from '@/components/common/Button'
 import { Mail, Phone, MapPin, Calendar, Edit3, Save, X, User, BookAudio } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
-import { FaUserEdit } from "react-icons/fa";
+import { FaUserEdit } from 'react-icons/fa'
 
 interface UserInfo {
   name: string
@@ -82,7 +82,8 @@ const PersonalInfo = () => {
           </div>
 
           <div className='flex justify-end mt-8'>
-            <CustomButton className='rounded-lg hover:bg-primary-hover hover:scale-105'
+            <CustomButton
+              className='rounded-lg hover:bg-primary-hover hover:scale-105'
               label='Chỉnh sửa'
               icon={<FaUserEdit className='h-5 w-5' />}
             />

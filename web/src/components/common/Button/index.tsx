@@ -7,7 +7,8 @@ const CustomButton = ({
   className,
   variant,
   onClick,
-  isLoader
+  isLoader,
+  disabled
 }: {
   label?: string
   icon?: React.ReactNode
@@ -16,10 +17,11 @@ const CustomButton = ({
   variant?: any
   onClick?: () => void
   isLoader?: boolean
+  disabled?: boolean
 }) => {
   return (
     <>
-      <Button className={className} onClick={onClick} variant={variant}>
+      <Button className={className} onClick={onClick} variant={variant} disabled={disabled}>
         {isLoader && <Loader2Icon className='animate-spin' />}
         {icon && <span>{icon}</span>}
         {label}
