@@ -1,6 +1,4 @@
 package com.freeclassroom.gateway.configuration;
-
-//import com.freeclassroom.gateway.service.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.freeclassroom.gateway.dto.ApiResponse;
@@ -33,7 +31,7 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
 
     @NonFinal
     private String[] publicEndpoints = {
-            "/user.*",
+            "/user.*", "/auth.*",
     };
 
     ObjectMapper objectMapper;

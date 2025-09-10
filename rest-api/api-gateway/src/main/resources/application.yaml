@@ -4,6 +4,13 @@ server:
 app:
   api-prefix: /api/v1
 
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    org.springframework.http.server.reactive: DEBUG
+    org.springframework.web.reactive: DEBUG
+    reactor.netty.http.client: DEBUG
+
 spring:
   application:
     name: api-gateway
@@ -28,6 +35,6 @@ spring:
         - id: user
           uri: http://localhost:8080
           predicates:
-            - Path=${app.api-prefix}/user**
+            - Path=${app.api-prefix}/user/**, ${app.api-prefix}/user**, ${app.api-prefix}/auth**
           filters:
             - StripPrefix=2

@@ -37,7 +37,7 @@ public class SecurityConfig {
 
     private final CustomJwtDecoder jwtDecoder;
 
-    private final String[] PUBLIC_ENDPOINTS = {"/auth/**", "/",};
+    private final String[] PUBLIC_ENDPOINTS = {"/auth/**", "/user/**",};
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {

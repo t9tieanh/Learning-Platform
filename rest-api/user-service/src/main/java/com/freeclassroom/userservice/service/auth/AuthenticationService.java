@@ -70,7 +70,7 @@ public class AuthenticationService implements IAuthenticationService {
 
 
     public ApiResponse<AuthResponse> authentication (AuthRequest request) throws JOSEException {
-        UserEntity account = userRepository.findByUsername(request.getUsername()).orElseThrow(
+        UserEntity account = userRepository.findByEmailOrUsername(request.getUsername()).orElseThrow(
                 () -> new CustomExeption(ErrorCode.USER_NOT_FOUND)
         );
 

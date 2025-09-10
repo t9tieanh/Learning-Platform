@@ -4,8 +4,10 @@ import React from 'react'
 
 type CustomInputProps = React.InputHTMLAttributes<HTMLInputElement> & {
   label?: string
+  className?: string
 }
 
+// eslint-disable-next-line
 const CustomInput = React.forwardRef<HTMLInputElement, CustomInputProps>(({ label, className, ...rest }, ref) => {
   return (
     <div className='input-container'>

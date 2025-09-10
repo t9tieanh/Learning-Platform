@@ -25,3 +25,13 @@ export const signUpSchema = yup.object({
   confirmRules: yup.boolean().oneOf([true], 'Bạn phải đồng ý với điều khoản').default(false),
   email: yup.string().required('Email không được để trống').email('Email không hợp lệ')
 })
+
+export type SignInFormInputs = {
+  username: string
+  password: string
+}
+
+export const signInSchema = yup.object({
+  username: yup.string().required('Username không được để trống'),
+  password: yup.string().required('Mật khẩu không được để trống').min(6, 'Mật khẩu tối thiểu 6 ký tự')
+})

@@ -8,6 +8,7 @@ type CustomButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   isLoader?: boolean
 }
 
+// eslint-disable-next-line react/prop-types
 const CustomButton: React.FC<CustomButtonProps> = ({ label, icon, className, isLoader, children, ...rest }) => {
   return (
     <Button className={className} disabled={rest.disabled || isLoader} {...rest}>
