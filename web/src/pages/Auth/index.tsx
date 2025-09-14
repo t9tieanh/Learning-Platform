@@ -1,17 +1,18 @@
 import React, { useEffect } from 'react'
 import SignInForm from '@/components/Auth/SignInForm'
 import SignUpForm from '@/components/Auth/SignUpForm'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams, useNavigate } from 'react-router-dom'
 import useLoading from '@/hooks/useLoading.hook'
 import userService from '@/services/user.service'
 import { useAuthStore } from '@/stores/useAuth.stores'
 import { toast } from 'react-toastify'
-import { useNavigate } from 'react-router-dom'
 
 interface SlidingLoginSignupProps {
   isSignUpMode: boolean
   setIsSignUpMode: (value: boolean) => void
 }
+
+let i: number = 0
 
 const AuthPage: React.FC<SlidingLoginSignupProps> = ({ isSignUpMode, setIsSignUpMode }) => {
   // handle redirect oauth2 google
@@ -19,15 +20,18 @@ const AuthPage: React.FC<SlidingLoginSignupProps> = ({ isSignUpMode, setIsSignUp
   const navigator = useNavigate()
 
   const [searchParams] = useSearchParams()
-  const code = searchParams.get("code")
+  const code = searchParams.get('code')
 
   // Get state and actions
   const { data, setData } = useAuthStore()
 
-  if (data) {
-    toast.info('Bạn đã đăng nhập rồi!')
-    navigator('/')
-  }
+  useEffect(() => {
+    if (data) {
+      console.log('render num: ', i++)
+      toast.info('Bạn đã đăng nhập rồi!')
+      navigator('/')
+    }
+  }, [data, navigator])
 
   const exchangeTokenForOauth2 = async (authorizationCode: string) => {
     try {
@@ -48,7 +52,7 @@ const AuthPage: React.FC<SlidingLoginSignupProps> = ({ isSignUpMode, setIsSignUp
       stopLoading()
     }
   }
-  
+
   // check if already logged in
   useEffect(() => {
     if (code) {

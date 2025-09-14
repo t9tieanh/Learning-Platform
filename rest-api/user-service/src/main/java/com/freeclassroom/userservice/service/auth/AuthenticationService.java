@@ -177,6 +177,8 @@ public class AuthenticationService implements IAuthenticationService {
                         .refreshToken(jwtService.generateToken(account,TokenEnum.RESFESH_TOKEN))
                         .email(account.getEmail())
                         .username(account.getUsername())
+                        .name(account.getName())
+                        .avatarUrl(account.getImage())
                         .build())
                 .build();
     }

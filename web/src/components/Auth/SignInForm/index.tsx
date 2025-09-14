@@ -28,12 +28,6 @@ const SignInForm: FC = () => {
   // Get state and actions
   const { data, setData } = useAuthStore()
 
-  // check if already logged in
-  if (data) {
-    toast.info('Bạn đã đăng nhập rồi!')
-    navigator('/')
-  }
-
   const { loading, startLoading, stopLoading } = useLoading()
 
   // handle signin
