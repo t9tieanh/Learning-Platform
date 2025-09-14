@@ -54,6 +54,24 @@ const SignInForm: FC = () => {
     }
   }
 
+  //handle login with google
+  const handleLoginWithGoogle = () => {
+    try {
+      const authUri = import.meta.env.VITE_GOOGLE_AUTH_URI as string
+      const callbackUri = import.meta.env.VITE_GOOGLE_REDIRECT_URI as string
+      const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID as string
+
+      const targetUrl = `${authUri}?redirect_uri=${encodeURIComponent(
+        callbackUri
+      )}&response_type=code&client_id=${googleClientId}&scope=openid%20email%20profile`
+
+      window.location.href = targetUrl
+    } catch (error: any) {
+      console.log(error)
+      toast.error('Đã có lỗi trong quá trình xử lý !')
+    }
+  }
+
   return (
     <div className='w-full bg-white rounded-lg md:mt-0 sm:max-w-md xl:py-0'>
       <Card className='shadow-xl py-12 border-none'>
@@ -96,7 +114,11 @@ const SignInForm: FC = () => {
             </div>
             {/* login with other providers */}
             <div className='mt-5 flex items-center justify-center gap-3 w-full'>
-              <CustomButton icon={<FcGoogle />} className='bg-inherit w-1/2 border-2 border-solid hover:bg-red-600' />
+              <CustomButton
+                onClick={handleLoginWithGoogle}
+                icon={<FcGoogle />}
+                className='bg-inherit w-1/2 hover:bg-blue-200'
+              />
               <CustomButton
                 icon={<FaSquareFacebook className='text-white' />}
                 className='bg-blue-600 w-1/2 border-2 border-solid hover:bg-blue-700'

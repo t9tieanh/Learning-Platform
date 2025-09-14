@@ -36,6 +36,23 @@ class UserService {
     const response = await axiosClient.axiosInstance.post('auth', { username, password })
     return response.data
   }
+
+  async loginWithGoogle(authorizationCode: string): Promise<
+    ApiResponse<{
+      accessToken: string
+      refreshToken: string
+      name: string
+      username: string
+      email: string
+      userName: string
+      avatarUrl?: string
+    }>
+  > {
+    const response = await axiosClient.axiosInstance.post(`auth/oauth2/google`, null, {
+      params: { code: authorizationCode }
+    })
+    return response.data
+  }
 }
 
 export default new UserService()
