@@ -36,4 +36,9 @@ public class AuthenticationController {
     ApiResponse<IntrospectResponse> introspect(@RequestBody IntrospectRequest request) {
         return authenticationService.introspect(request);
     }
+
+    @PostMapping("oauth2/google")
+    ApiResponse<AuthResponse> outBoundAuthentication(@RequestParam("code") String code) throws JOSEException {
+        return authenticationService.oauth2GoogleAuth(code);
+    }
 }

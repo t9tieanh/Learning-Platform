@@ -1,4 +1,4 @@
-package com.freeclassroom.userservice.dto.request.oauth2;
+package com.freeclassroom.userservice.dto.request.outbound.oauth2;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;

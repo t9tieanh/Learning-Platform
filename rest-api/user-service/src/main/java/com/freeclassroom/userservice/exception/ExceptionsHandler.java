@@ -15,7 +15,8 @@ public class ExceptionsHandler {
     ResponseEntity<ApiResponse> exceptionHandler(Exception e) {
         ApiResponse apiResponse = new ApiResponse();
         apiResponse.setCode(ErrorCode.UNCATEGORIZED_EXEPTION.getCode());
-        apiResponse.setMessage(ErrorCode.UNCATEGORIZED_EXEPTION.getMessage());
+        //apiResponse.setMessage(ErrorCode.UNCATEGORIZED_EXEPTION.getMessage());
+        apiResponse.setMessage(e.getMessage());
 
         return ResponseEntity.badRequest().body(apiResponse);
     }
