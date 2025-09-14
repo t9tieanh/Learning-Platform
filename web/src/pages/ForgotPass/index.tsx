@@ -1,11 +1,15 @@
 import { useState } from 'react'
-import { Button } from '@/components/ui/button'
 import { Card, CardDescription, CardHeader } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
 import forgot from '@/assets/images/forgot1.png'
+import ForgotPassForm from '@/components/ForgotPass/forgotPassForm'
+import ResetPassForm from '@/components/ForgotPass/resetPassForm'
+import { KeyRound } from 'lucide-react'
+import { useLocation } from 'react-router-dom'
 
 const ForgotPass = () => {
-  const [email, setEmail] = useState('')
+  const location = useLocation()
+  const params = new URLSearchParams(location.search)
+  const code = params.get('code')
 
   return (
     <div className='relative min-h-screen flex items-center justify-center overflow-hidden bg-white'>
@@ -19,27 +23,17 @@ const ForgotPass = () => {
         <div className='flex-1 w-full max-w-3xl flex flex-col justify-center py-16 px-4 sm:py-20 sm:px-8'>
           <Card className='shadow-none border-none p-0'>
             <CardHeader>
-              <h2 className='text-2xl sm:text-3xl font-semibold text-center text-primary'>Quên mật khẩu</h2>
+              <h2 className='text-2xl sm:text-3xl font-semibold text-center text-primary'>
+                <KeyRound className='inline-block w-10 h-10 mb-1 mr-2 text-primary' />
+                Quên mật khẩu
+              </h2>
             </CardHeader>
             <CardDescription>
-              <p className='mb-2 text-center text-sm sm:text-base'>Vui lòng nhập địa chỉ email của bạn để nhận liên kết đặt lại mật khẩu.</p>
+              <p className='mb-2 text-center text-sm sm:text-base'>
+                Vui lòng nhập địa chỉ email của bạn để nhận liên kết đặt lại mật khẩu.
+              </p>
             </CardDescription>
-            <form className='flex flex-col gap-3 mt-2'>
-              <Input
-                id='email'
-                type='email'
-                placeholder='example@gmail.com'
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className='mb-2 border-primary focus:border-primary'
-              />
-              <Button className='hover:bg-blue-600 transition-transform duration-300 ease-in-out hover:scale-105 text-white font-semibold py-2 rounded-lg'>
-                Nhận liên kết đặt lại
-              </Button>
-              <a href='/auth' className='text-primary text-sm text-center mt-2 hover:underline hover:text-blue-600'>
-                Đăng nhập
-              </a>
-            </form>
+            {!code ? <ForgotPassForm /> : <ResetPassForm />}
           </Card>
         </div>
         {/* Right: Image */}

@@ -1,9 +1,8 @@
 package com.freeclassroom.userservice.configuration;
 
-import org.springframework.amqp.core.Binding;
-import org.springframework.amqp.core.BindingBuilder;
-import org.springframework.amqp.core.Queue;
-import org.springframework.amqp.core.TopicExchange;
+import org.springframework.amqp.core.*;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.context.annotation.Bean;
@@ -12,28 +11,53 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitMQConfig {
     public static final String EXCHANGE = "user-notification-exchange";
-    public static final String QUEUE = "verify-email";
-    public static final String ROUTING_KEY = "user.verify-email";
+
+    //queue
+    public static final String VERIFY_REGISTER_QUEUE = "verify-email";
+    public static final String FORGOT_PASSWORD_QUEUE = "forgot-password-queue";
+
+    //routing key
+    public static final String VERIFY_REGISTER_ROUTING_KEY = "user.verify.register";
+    public static final String FORGOT_PASSWORD_ROUTING_KEY = "user.forgot.password";
 
     @Bean
-    public TopicExchange exchange() {
-        return new TopicExchange(EXCHANGE, true, false);
+    public DirectExchange exchange() {
+        return new DirectExchange(EXCHANGE, true, false);
     }
 
     @Bean
-    public Queue queue() {
-        return new Queue(QUEUE, true);
+    public Queue verifyRegisterQueue() {
+        return new Queue(VERIFY_REGISTER_QUEUE, true);
     }
 
     @Bean
-    public Binding binding(Queue queue, TopicExchange exchange) {
-        return BindingBuilder.bind(queue)
-                .to(exchange)
-                .with(ROUTING_KEY);
+    public Queue forgotPasswordQueue() {
+        return new Queue(FORGOT_PASSWORD_QUEUE, true);
+    }
+
+    @Bean
+    public Binding bindingVerifyRegister(Queue verifyRegisterQueue, DirectExchange userNotificationExchange) {
+        return BindingBuilder.bind(verifyRegisterQueue)
+                .to(userNotificationExchange)
+                .with(VERIFY_REGISTER_ROUTING_KEY);
+    }
+
+    @Bean
+    public Binding bindingForgotPassword(Queue forgotPasswordQueue, DirectExchange userNotificationExchange) {
+        return BindingBuilder.bind(forgotPasswordQueue)
+                .to(userNotificationExchange)
+                .with(FORGOT_PASSWORD_ROUTING_KEY);
     }
 
     @Bean
     public MessageConverter messageConverter() {
         return new Jackson2JsonMessageConverter();
+    }
+
+    @Bean
+    public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory, MessageConverter messageConverter) {
+        RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
+        rabbitTemplate.setMessageConverter(messageConverter);
+        return rabbitTemplate;
     }
 }
