@@ -6,8 +6,33 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
-import { Upload, Image as ImageIcon, Eye, Star, Users, Clock, X } from 'lucide-react'
+import { Upload, Image as ImageIcon, Eye, Star, Users, Clock, X, Target, Award } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import DynamicListInput from './CourseGoalsForm'
+
+const configs: FieldConfig[] = [
+  {
+    key: 'learningObjectives',
+    label: 'Học viên sẽ học được gì?',
+    description: 'Ít nhất 4 mục tiêu.',
+    icon: <Target className='h-5 w-5 text-primary' />,
+    placeholder: 'Ví dụ: Hiểu cách quản lý dự án'
+  },
+  {
+    key: 'prerequisites',
+    label: 'Yêu cầu trước khi học',
+    description: 'Kỹ năng/kiến thức cần có.',
+    icon: <Award className='h-5 w-5 text-primary' />,
+    placeholder: 'Ví dụ: Không cần kinh nghiệm lập trình'
+  },
+  {
+    key: 'audience',
+    label: 'Đối tượng học viên',
+    description: 'Khoá học này phù hợp cho ai?',
+    icon: <Users className='h-5 w-5 text-primary' />,
+    placeholder: 'Ví dụ: Sinh viên CNTT năm cuối'
+  }
+]
 
 const LandingPageForm = () => {
   const [courseTitle, setCourseTitle] = useState('Khóa học Web Development Bootcamp hoàn chỉnh')
@@ -19,6 +44,9 @@ const LandingPageForm = () => {
   const [category, setCategory] = useState('development')
   const [tags, setTags] = useState(['JavaScript', 'React', 'Web Development', 'Frontend'])
   const [newTag, setNewTag] = useState('')
+
+  const [learnItems, setLearnItems] = useState<string[]>([])
+  const [requirements, setRequirements] = useState<string[]>([])
 
   const addTag = () => {
     if (newTag && !tags.includes(newTag) && tags.length < 10) {
@@ -164,6 +192,20 @@ const LandingPageForm = () => {
                   </div>
                 </CardContent>
               </Card>
+
+              <DynamicListInput
+                title='Bạn sẽ học được gì từ khóa học này?'
+                placeholder='Nhập nội dung bạn sẽ học'
+                items={learnItems}
+                onChange={setLearnItems}
+              />
+
+              <DynamicListInput
+                title='Yêu cầu trước của khóa học này?'
+                placeholder='Nhập yêu cầu trước'
+                items={requirements}
+                onChange={setRequirements}
+              />
             </TabsContent>
 
             <TabsContent value='media' className='space-y-6'>

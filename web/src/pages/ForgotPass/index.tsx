@@ -22,7 +22,9 @@ const ForgotPass = () => {
               <h2 className='text-2xl sm:text-3xl font-semibold text-center text-primary'>Quên mật khẩu</h2>
             </CardHeader>
             <CardDescription>
-              <p className='mb-2 text-center text-sm sm:text-base'>Vui lòng nhập địa chỉ email của bạn để nhận liên kết đặt lại mật khẩu.</p>
+              <p className='mb-2 text-center text-sm sm:text-base'>
+                Vui lòng nhập địa chỉ email của bạn để nhận liên kết đặt lại mật khẩu.
+              </p>
             </CardDescription>
             <form className='flex flex-col gap-3 mt-2'>
               <Input
