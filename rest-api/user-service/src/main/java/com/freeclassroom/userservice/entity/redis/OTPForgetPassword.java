@@ -19,4 +19,5 @@ public class OTPForgetPassword {
     @Id
     String token;
     String email;
+    String name;
 }

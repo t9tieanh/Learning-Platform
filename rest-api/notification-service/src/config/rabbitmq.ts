@@ -67,6 +67,12 @@ class RabbitClient {
         await nodemailService.sendMail(parsed)
       })
 
+      await RabbitClient.channel.assertQueue(QueueNameEnum.RESET_PASSWORD, { durable: true })
+      // Đăng ký consumer cho queue RESET_PASSWORD
+      this.consumeQueue<VerifyEmail>(QueueNameEnum.RESET_PASSWORD, async (parsed) => {
+        await nodemailService.sendMail(parsed)
+      })
+
       console.log('Connection to RabbitMQ established')
     } catch (error) {
       console.error('RabbitMQ connection failed:', error)

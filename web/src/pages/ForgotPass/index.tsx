@@ -33,7 +33,7 @@ const ForgotPass = () => {
                 Vui lòng nhập địa chỉ email của bạn để nhận liên kết đặt lại mật khẩu.
               </p>
             </CardDescription>
-            {!code ? <ForgotPassForm /> : <ResetPassForm />}
+            {!code ? <ForgotPassForm /> : <ResetPassForm code={code} />}
           </Card>
         </div>
         {/* Right: Image */}

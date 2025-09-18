@@ -9,4 +9,5 @@ public interface IUserService {
     ApiResponse<UserResponse> verifySignUp (String token);
     ApiResponse<Void> forgotPassword(String email);
     ApiResponse<UserResponse> verifyForgotPassword(String code, String newPassword);
+    ApiResponse<Void> checkForgotPassword(String code);
 }

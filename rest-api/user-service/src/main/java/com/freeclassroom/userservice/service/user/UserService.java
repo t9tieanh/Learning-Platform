@@ -119,11 +119,12 @@ public class UserService implements IUserService {
 
     public ApiResponse<Void> forgotPassword(String email) {
         // check user exits
-        if (!userRepository.existsByEmail(email))
-            throw new CustomExeption(ErrorCode.USER_NOT_FOUND);
+        UserEntity user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new CustomExeption(ErrorCode.USER_NOT_FOUND));
 
         OTPForgetPassword newOtpForgetPassword = OTPForgetPassword.builder()
                 .email(email)
+                .name(user.getName())
                 .build();
 
         newOtpForgetPassword = otpForgetPasswordRepo.save(newOtpForgetPassword);
@@ -137,6 +138,19 @@ public class UserService implements IUserService {
         return ApiResponse.<Void>builder()
                 .code(200)
                 .message("Vui lòng kiểm tra email để tiếp tục !")
+                .build();
+    }
+
+    @Override
+    public ApiResponse<Void> checkForgotPassword(String code) {
+        // get token in redis
+        OTPForgetPassword forgetPassword = otpForgetPasswordRepo.findById(code)
+                .orElseThrow(() -> new CustomExeption(ErrorCode.WRONG_VERFY_TOKEN));
+
+        return ApiResponse.<Void>builder()
+                .code(forgetPassword != null ? 200 : 0)
+                .message(forgetPassword != null ? "Yêu cầu hợp lệ, bạn có thể đặt lại mật khẩu."
+                        : "Yêu cầu đã hết hạn, vui lòng thử lại sau.")
                 .build();
     }
 

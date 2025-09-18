@@ -90,6 +90,8 @@ public class AuthenticationService implements IAuthenticationService {
                     .refreshToken(jwtService.generateToken(account,TokenEnum.RESFESH_TOKEN))
                     .email(account.getEmail())
                     .username(account.getUsername())
+                    .name(account.getName())
+                    .avatarUrl(account.getImage())
                     .build();
 
             return ApiResponse.<AuthResponse>builder()
@@ -165,6 +167,7 @@ public class AuthenticationService implements IAuthenticationService {
                             .name(userInfo.getName())
                             .username(userInfo.getEmail())
                             .image(userInfo.getPicture())
+                            .status(EnumAccountStatus.ACTIVE)
                             .build());
                 }
         );

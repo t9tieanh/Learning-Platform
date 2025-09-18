@@ -1,3 +1,5 @@
+/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
+/* eslint-disable jsx-a11y/click-events-have-key-events */
 import React, { FC } from 'react'
 import CustomButton from '../../common/Button'
 import CustomInput from '../../common/Input'
@@ -86,7 +88,14 @@ const SignInForm: FC = () => {
               </div>
               <div className='remember-me flex justify-between items-center mt-5'>
                 <CustomCheckbox id='remember-me' label='Ghi nhớ tôi' className='text-gray-700' />
-                <p className='text-gray-700 text-sm font-bold'>Quên mật khẩu ?</p>
+                <p
+                  className='text-gray-700 text-sm font-bold'
+                  onClick={() => {
+                    navigator('/forgot')
+                  }}
+                >
+                  Quên mật khẩu ?
+                </p>
               </div>
               <div className='signin-button w-full mt-5'>
                 <CustomButton

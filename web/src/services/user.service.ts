@@ -53,6 +53,35 @@ class UserService {
     })
     return response.data
   }
+
+  // request forgot password
+  async requestForgotPassword(email: string): Promise<ApiResponse<any>> {
+    const response = await axiosClient.axiosInstance.post('auth/forgot-password', { email })
+    return response.data
+  }
+
+  //check async token exists
+  async checkForgotPasswordToken(code: string): Promise<ApiResponse<any>> {
+    const response = await axiosClient.axiosInstance.get(`auth/forgot-password/${code}`)
+    return response.data
+  }
+
+  //verify token for reset password
+  async resetPassword(
+    code: string,
+    newPassword: string
+  ): Promise<
+    ApiResponse<{
+      name: string
+      email: string
+    }>
+  > {
+    const response = await axiosClient.axiosInstance.post(`auth/reset-password`, {
+      code,
+      newPassword
+    })
+    return response.data
+  }
 }
 
 export default new UserService()

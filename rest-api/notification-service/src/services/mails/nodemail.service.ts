@@ -64,11 +64,11 @@ class NodeMailService {
       }
 
       case QueueNameEnum.RESET_PASSWORD: {
-        const passwordNotification = notification as ResetPassword
+        const passwordNotification = notification as VerifyEmail
 
         subject = 'Đặt lại mật khẩu của bạn'
         to = passwordNotification.email
-        templateName = 'password-reset.html'
+        templateName = 'email-verification.html'
         templateData = { name: passwordNotification.name, token: passwordNotification.token }
         break
       }
