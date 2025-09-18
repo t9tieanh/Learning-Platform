@@ -63,6 +63,16 @@ class NodeMailService {
         break
       }
 
+      case QueueNameEnum.RESET_PASSWORD: {
+        const passwordNotification = notification as ResetPassword
+
+        subject = 'Đặt lại mật khẩu của bạn'
+        to = passwordNotification.email
+        templateName = 'password-reset.html'
+        templateData = { name: passwordNotification.name, token: passwordNotification.token }
+        break
+      }
+
       // Thêm các loại khác nếu cần
       default:
         console.log(`Chưa thể gửi mail to ${notification.email}: ${notification.type}`)
