@@ -16,6 +16,15 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
     IUserService userService;
 
+    @GetMapping
+    ApiResponse<UserResponse> checkStatus() {
+        return ApiResponse.<UserResponse>builder()
+                .code(200)
+                .message("Chào mừng bạn đến với Learning Platform")
+                .build();
+    }
+
+
     @PostMapping
     ApiResponse<UserResponse> signUp(@RequestBody CreationUserRequest request) {
         return userService.registerUser(request);
@@ -25,5 +34,4 @@ public class UserController {
     ApiResponse<UserResponse> verifySignUp(@RequestParam("token") String token) {
         return userService.verifySignUp(token);
     }
-
 }

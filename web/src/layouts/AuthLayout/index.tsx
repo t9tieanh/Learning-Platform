@@ -28,7 +28,7 @@ const AuthLayout: React.FC = () => {
             }`}
     >
       <div className='absolute w-full h-full top-0 left-0'>
-        <AuthPage isSignUpMode={isSignUpMode} />
+        <AuthPage isSignUpMode={isSignUpMode} setIsSignUpMode={setIsSignUpMode} />
       </div>
 
       <div

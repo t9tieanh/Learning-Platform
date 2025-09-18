@@ -1,33 +1,20 @@
-/* eslint-disable import/no-unresolved */
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import React from 'react'
 
-const CustomInput = ({
-  label,
-  type,
-  value,
-  onChange,
-  placeholder
-}: {
+type CustomInputProps = React.InputHTMLAttributes<HTMLInputElement> & {
   label?: string
-  type?: string
-  value?: string
-  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void
-  placeholder?: string
-}) => {
+  className?: string
+}
+
+// eslint-disable-next-line
+const CustomInput = React.forwardRef<HTMLInputElement, CustomInputProps>(({ label, className, ...rest }, ref) => {
   return (
     <div className='input-container'>
-      {label && <Label htmlFor={label}>{label}</Label>}
-      <Input
-        type={type}
-        id={label}
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-        className='input-field'
-      />
+      {label && <Label htmlFor={rest.id || rest.name}>{label}</Label>}
+      <Input ref={ref} className={`input-field ${className ?? ''}`} {...rest} />
     </div>
   )
-}
+})
 
 export default CustomInput

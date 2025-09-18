@@ -9,7 +9,8 @@ const TeacherInfo = () => {
     name: 'Nguyễn Văn An',
     title: 'Senior Full-Stack Developer',
     company: 'Tech Innovation Corp',
-    avatar: 'https://img.freepik.com/free-photo/portrait-smiling-charming-young-man-grey-t-shirt-standing-against-plain-background_23-2148213406.jpg',
+    avatar:
+      'https://img.freepik.com/free-photo/portrait-smiling-charming-young-man-grey-t-shirt-standing-against-plain-background_23-2148213406.jpg',
     rating: 4.9,
     courses: 8,
     bio: 'Với hơn 5 năm kinh nghiệm trong lĩnh vực phát triển web, tôi đã tham gia xây dựng nhiều ứng dụng quy mô lớn cho các doanh nghiệp hàng đầu. Tôi đam mê chia sẻ kiến thức và giúp đỡ các developer trẻ phát triển sự nghiệp.',

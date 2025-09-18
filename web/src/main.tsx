@@ -14,6 +14,7 @@ import TCHomePage from './pages/TC_HomePage'
 import ForgotPass from './pages/ForgotPass'
 import TC_Course from './pages/TC_Course'
 import TC_CreateCourse from './pages/TC_CreateCourse'
+import User from '@/pages/User'
 
 const router = createBrowserRouter([
   {
@@ -40,14 +41,16 @@ const router = createBrowserRouter([
           { path: 'course', element: <TC_Course /> },
           { path: 'create-course', element: <TC_CreateCourse /> }
         ]
-      }
+      },
+      { path: 'user/verify', element: <User /> },
+      { path: '*', element: <NotFound /> }
     ]
   }
 ])
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
-  <React.StrictMode>
+  <>
     <RouterProvider router={router} />
     <ToastContainer />
-  </React.StrictMode>
+  </>
 )

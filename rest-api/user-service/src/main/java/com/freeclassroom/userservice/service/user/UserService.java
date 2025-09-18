@@ -6,6 +6,7 @@ import com.freeclassroom.userservice.dto.response.ApiResponse;
 import com.freeclassroom.userservice.dto.response.user.UserResponse;
 import com.freeclassroom.userservice.entity.redis.PendingUserEntity;
 import com.freeclassroom.userservice.entity.user.UserEntity;
+import com.freeclassroom.userservice.enums.entity.EnumAccountStatus;
 import com.freeclassroom.userservice.exception.CustomExeption;
 import com.freeclassroom.userservice.exception.ErrorCode;
 import com.freeclassroom.userservice.mapper.user.UserMapper;
@@ -17,6 +18,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -32,20 +34,34 @@ public class UserService implements IUserService {
     RabbitTemplate rabbitTemplate;
     RabbitMQConfig rabbitMQConfig;
 
+    //password encoder
+    PasswordEncoder passwordEncoder;
+
     @NonFinal
     @Value("${app.frontend.verify-url}")
     private String verifyUrl;
+
     private final UserRepository userRepository;
 
     public ApiResponse<UserResponse> registerUser(CreationUserRequest request) {
+        // check user exits
+        if (userRepository.existsByEmail(request.getEmail()))
+            throw new CustomExeption(ErrorCode.EMAIL_EXISTED);
+
+        if (userRepository.existsByUsername(request.getUsername()))
+            throw new CustomExeption(ErrorCode.USERNAME_EXISTED);
+
         PendingUserEntity redisEntity = userMapper.toEntity(request);
 
         // generate token for verify
         redisEntity.setToken(UUID.randomUUID().toString());
-        // Lưu vào Redis với TTL
+        redisEntity.setStatus(EnumAccountStatus.ACTIVE);
+
+        // save in Redis with TTL
         redisEntity = pendingUserRepo.save(redisEntity);
+
         // -> send to notification service
-        redisEntity.setToken(verifyUrl + redisEntity.getToken());
+        redisEntity.setToken("http://" + verifyUrl + redisEntity.getToken());
         rabbitTemplate.convertAndSend(rabbitMQConfig.EXCHANGE, rabbitMQConfig.ROUTING_KEY, redisEntity);
 
         UserResponse response = UserResponse.builder()
@@ -67,9 +83,13 @@ public class UserService implements IUserService {
                 .orElseThrow(() -> new CustomExeption(ErrorCode.WRONG_VERFY_TOKEN));
 
         // check user exitst
-        if (userRepository.findByEmailOrUsername(newUser.getEmail(), newUser.getUsername()) != null) {
+        if (userRepository.existsByUsernameOrEmail(newUser.getUsername(), newUser.getEmail()))
             throw new CustomExeption(ErrorCode.USER_EXISTED);
-        }
+
+        // endcode password
+        newUser.setPassword(
+                passwordEncoder.encode(newUser.getPassword())
+        );
 
         // Convert PendingUserEntity -> UserEntity
         UserEntity newUserEntity = userRepository.save(userMapper.toEntity(newUser));

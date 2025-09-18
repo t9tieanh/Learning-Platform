@@ -4,9 +4,10 @@ import SignUpForm from '@/components/Auth/SignUpForm'
 
 interface SlidingLoginSignupProps {
   isSignUpMode: boolean
+  setIsSignUpMode: (value: boolean) => void
 }
 
-const AuthPage: React.FC<SlidingLoginSignupProps> = ({ isSignUpMode }) => {
+const AuthPage: React.FC<SlidingLoginSignupProps> = ({ isSignUpMode, setIsSignUpMode }) => {
   const containerBase =
     'absolute grid grid-cols-1 z-[5] left-1/2 w-full lg:w-1/2 top-[95%] lg:top-1/2 -translate-x-1/2 -translate-y-full lg:-translate-y-1/2 transition-[1s] duration-[1.6s] lg:duration-[1.4s] ease-[ease-in-out] max-lg:static max-lg:flex max-lg:items-center max-lg:justify-center max-lg:h-full max-lg:translate-x-0 max-lg:translate-y-0'
   const containerMode = isSignUpMode
@@ -23,7 +24,7 @@ const AuthPage: React.FC<SlidingLoginSignupProps> = ({ isSignUpMode }) => {
         <SignInForm />
       </div>
       <div style={{ transition: 'all 1500ms ease-in-out' }} className={`${formBase} ${signUpMode}`}>
-        <SignUpForm />
+        <SignUpForm setIsSignUpMode={setIsSignUpMode} />
       </div>
     </div>
   )
