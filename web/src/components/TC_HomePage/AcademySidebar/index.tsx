@@ -24,8 +24,15 @@ const sidebarItems = [
 
 const AcademySidebar = () => {
   return (
-    <div className='w-64 h-screen bg-[#1D1D2A] text-sidebar-foreground flex flex-col'>
-      <div className='flex p-6 items-center gap-3'>
+    <div
+      className='w-64 h-screen bg-[#1D1D2A] text-sidebar-foreground flex flex-col
+  min-w-[220px] max-w-full
+  fixed lg:static top-0 left-0 z-40
+  transition-transform duration-300
+  lg:translate-x-0 translate-x-0
+  '
+    >
+      <div className='flex p-4 md:p-6 items-center gap-3'>
         <Avatar>
           <AvatarImage
             className='w-8 h-8 rounded-full'
@@ -33,10 +40,10 @@ const AcademySidebar = () => {
           />
           <AvatarFallback>CN</AvatarFallback>
         </Avatar>
-        <span className='text-xl font-semibold text-white'>Academy</span>
+        <span className='text-lg md:text-xl font-semibold text-white'>Academy</span>
       </div>
 
-      <nav className='flex-1 px-4 text-white'>
+      <nav className='flex-1 px-2 md:px-4 text-white'>
         {sidebarItems.map((section, sectionIndex) => (
           <div key={sectionIndex} className='mb-6'>
             <h3 className='text-xs font-semibold text-sidebar-foreground/60 mb-3 px-2'>{section.category}</h3>
@@ -63,19 +70,19 @@ const AcademySidebar = () => {
         ))}
       </nav>
 
-      <div className='p-4 border-t border-sidebar-border text-white'>
-        <div className='flex items-center gap-3'>
+      <div className='p-2 md:p-4 border-t border-sidebar-border text-white'>
+        <div className='flex items-center gap-2 md:gap-3'>
           <Avatar>
             <AvatarImage
-              className='rounded-full h-12 w-12'
+              className='rounded-full h-10 w-10 md:h-12 md:w-12'
               src='https://images.vexels.com/media/users/3/145908/raw/52eabf633ca6414e60a7677b0b917d92-male-avatar-maker.jpg'
             />
             <AvatarFallback className='bg-primary text-white'>AS</AvatarFallback>
           </Avatar>
 
           <div className='flex-1'>
-            <p className='text-base font-semibold'>Anh Sang</p>
-            <p className='text-sm text-sidebar-foreground/60'>Giáo viên</p>
+            <p className='text-base font-semibold truncate'>Anh Sang</p>
+            <p className='text-xs md:text-sm text-sidebar-foreground/60'>Giáo viên</p>
           </div>
         </div>
       </div>

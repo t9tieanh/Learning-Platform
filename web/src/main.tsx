@@ -12,6 +12,8 @@ import NotFound from './pages/NotFound'
 import Profile from './pages/Profile'
 import TCHomePage from './pages/TC_HomePage'
 import ForgotPass from './pages/ForgotPass'
+import TC_Course from './pages/TC_Course'
+import TC_CreateCourse from './pages/TC_CreateCourse'
 
 const router = createBrowserRouter([
   {
@@ -33,7 +35,11 @@ const router = createBrowserRouter([
       { path: 'forgot', element: <ForgotPass /> },
       {
         path: 'teacher',
-        children: [{ path: '', element: <TCHomePage /> }]
+        children: [
+          { path: '', element: <TCHomePage /> },
+          { path: 'course', element: <TC_Course /> },
+          { path: 'create-course', element: <TC_CreateCourse /> }
+        ]
       }
     ]
   }
