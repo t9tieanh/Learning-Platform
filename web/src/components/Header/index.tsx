@@ -1,11 +1,19 @@
 import { FC } from 'react'
 import { NavigationMenu, NavigationMenuItem, NavigationMenuList } from '@/components/ui/navigation-menu'
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
-import { Button } from '../ui/button'
+import CustomButton from '../common/Button'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import './style.scss'
+import { useNavigate } from 'react-router-dom'
+import { useAuthStore } from '@/stores/useAuth.stores'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { LogIn, UserPlus } from 'lucide-react'
+import Menu from './menu'
 
 const Header: FC = () => {
+  const navigate = useNavigate()
+  const { data, setData } = useAuthStore()
+
   return (
     <div className=' p-3 w-full header-container'>
       <NavigationMenu className='min-w-full mx-0'>
@@ -53,12 +61,45 @@ const Header: FC = () => {
             </NavigationMenuItem>
           </NavigationMenuList>
           <NavigationMenuList className='text-right'>
-            <NavigationMenuItem className='flex gap-2'>
-              <Button variant={'secondary'} className='signup-btn bg-blue-200 text-blue-700 rounded-xl font-normal'>
-                Đăng ký
-              </Button>
-              <Button className='btn-primary login-btn bg-blue-500 rounded-xl font-normal'>Đăng nhập</Button>
-            </NavigationMenuItem>
+            {data ? (
+              <div className='profile flex gap-2 text-sm font-bold items-center'>
+                <Popover>
+                  <PopoverTrigger className='flex gap-2 items-center'>
+                    <p className='ml-2'>
+                      <span className='text-red-500 italic font-base'>Xin chào</span> {data.name}
+                    </p>
+                    <Avatar className='rounded-lg'>
+                      <AvatarImage src={data.avatarUrl} alt='avatar' />
+                      <AvatarFallback>{data.name?.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                  </PopoverTrigger>
+                  <PopoverContent className='w-80'>
+                    <Menu
+                      username={data.username as string}
+                      name={data.name as string}
+                      avatarUrl={data.avatarUrl as string}
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            ) : (
+              <>
+                <NavigationMenuItem className='flex gap-2'>
+                  <CustomButton
+                    label='Đăng ký'
+                    icon={<UserPlus className='w-4 h-4 mr-2' />}
+                    className='signup-btn shadow-lg bg-white-100 text-blue-700 hover:text-white hover:bg-blue-600 rounded-xl font-base'
+                    onClick={() => navigate('/auth?mode=signup')}
+                  />
+                  <CustomButton
+                    label='Đăng nhập'
+                    className='btn-primary shadow-lg login-btn bg-blue-600 hover:bg-blue-700 font-base rounded-xl'
+                    onClick={() => navigate('/auth')}
+                    icon={<LogIn className='w-4 h-4 mr-2' />}
+                  />
+                </NavigationMenuItem>
+              </>
+            )}
           </NavigationMenuList>
         </div>
       </NavigationMenu>

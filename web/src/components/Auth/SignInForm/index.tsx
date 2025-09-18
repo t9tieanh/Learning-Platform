@@ -1,3 +1,5 @@
+/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
+/* eslint-disable jsx-a11y/click-events-have-key-events */
 import React, { FC } from 'react'
 import CustomButton from '../../common/Button'
 import CustomInput from '../../common/Input'
@@ -28,12 +30,6 @@ const SignInForm: FC = () => {
   // Get state and actions
   const { data, setData } = useAuthStore()
 
-  // check if already logged in
-  if (data) {
-    toast.info('Bạn đã đăng nhập rồi!')
-    navigator('/')
-  }
-
   const { loading, startLoading, stopLoading } = useLoading()
 
   // handle signin
@@ -51,6 +47,24 @@ const SignInForm: FC = () => {
       toast.error('Đã có lỗi trong quá trình xử lý !')
     } finally {
       stopLoading()
+    }
+  }
+
+  //handle login with google
+  const handleLoginWithGoogle = () => {
+    try {
+      const authUri = import.meta.env.VITE_GOOGLE_AUTH_URI as string
+      const callbackUri = import.meta.env.VITE_GOOGLE_REDIRECT_URI as string
+      const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID as string
+
+      const targetUrl = `${authUri}?redirect_uri=${encodeURIComponent(
+        callbackUri
+      )}&response_type=code&client_id=${googleClientId}&scope=openid%20email%20profile`
+
+      window.location.href = targetUrl
+    } catch (error: any) {
+      console.log(error)
+      toast.error('Đã có lỗi trong quá trình xử lý !')
     }
   }
 
@@ -74,7 +88,14 @@ const SignInForm: FC = () => {
               </div>
               <div className='remember-me flex justify-between items-center mt-5'>
                 <CustomCheckbox id='remember-me' label='Ghi nhớ tôi' className='text-gray-700' />
-                <p className='text-gray-700 text-sm font-bold'>Quên mật khẩu ?</p>
+                <p
+                  className='text-gray-700 text-sm font-bold'
+                  onClick={() => {
+                    navigator('/forgot')
+                  }}
+                >
+                  Quên mật khẩu ?
+                </p>
               </div>
               <div className='signin-button w-full mt-5'>
                 <CustomButton
@@ -96,7 +117,11 @@ const SignInForm: FC = () => {
             </div>
             {/* login with other providers */}
             <div className='mt-5 flex items-center justify-center gap-3 w-full'>
-              <CustomButton icon={<FcGoogle />} className='bg-inherit w-1/2 border-2 border-solid hover:bg-red-600' />
+              <CustomButton
+                onClick={handleLoginWithGoogle}
+                icon={<FcGoogle />}
+                className='bg-inherit w-1/2 hover:bg-blue-200'
+              />
               <CustomButton
                 icon={<FaSquareFacebook className='text-white' />}
                 className='bg-blue-600 w-1/2 border-2 border-solid hover:bg-blue-700'

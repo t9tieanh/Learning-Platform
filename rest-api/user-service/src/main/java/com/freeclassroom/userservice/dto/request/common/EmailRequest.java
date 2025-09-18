@@ -1,4 +1,4 @@
-package com.freeclassroom.userservice.dto.response;
+package com.freeclassroom.userservice.dto.request.common;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
@@ -11,10 +11,6 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
-public class ExchanceTokenResponse {
-    String accessToken;
-    String expiresIn;
-    String refreshToken;
-    String refreshTokenExpiresIn;
-//    List<String> scope;
+public class EmailRequest {
+    String email;
 }

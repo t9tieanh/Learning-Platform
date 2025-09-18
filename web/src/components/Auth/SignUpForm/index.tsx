@@ -12,6 +12,7 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import userService from '@/services/user.service'
 import { toast } from 'react-toastify'
 import { SignUpFormInputs, signUpSchema } from '@/utils/auth'
+import useLoading from '@/hooks/useLoading.hook'
 
 const SignUpForm: FC<{ setIsSignUpMode: (value: boolean) => void }> = ({ setIsSignUpMode }) => {
   const {
@@ -24,9 +25,12 @@ const SignUpForm: FC<{ setIsSignUpMode: (value: boolean) => void }> = ({ setIsSi
     resolver: yupResolver(signUpSchema)
   })
 
+  const { loading, startLoading, stopLoading } = useLoading()
+
   // handle signup
   const onSubmit = async (data: SignUpFormInputs) => {
     try {
+      startLoading()
       const response = await userService.signUp(data)
       if (response && response.code === 200) {
         toast.success(response.message)
@@ -34,6 +38,8 @@ const SignUpForm: FC<{ setIsSignUpMode: (value: boolean) => void }> = ({ setIsSi
       } else toast.error(response.message)
     } catch (e: any) {
       toast.error('Đã có lỗi trong quá trình xử lý !')
+    } finally {
+      stopLoading()
     }
   }
 
@@ -83,6 +89,7 @@ const SignUpForm: FC<{ setIsSignUpMode: (value: boolean) => void }> = ({ setIsSi
               </div>
               <div className='signin-button w-full mt-5'>
                 <CustomButton
+                  isLoader={loading}
                   label='Tạo tài khoản'
                   type='submit'
                   className='w-full rounded-md border border-gray-300 bg-blue-500 py-3 text-white hover:bg-blue-600'
