@@ -1,40 +1,9 @@
-import { Card, CardContent } from '@/components/ui/card'
-import { TrendingUp, TrendingDown, Users, BookOpen, Eye } from 'lucide-react'
+import { TrendingUp, Users, BookOpen, Eye } from 'lucide-react'
 import { StatsCard } from '../StatsCard'
 
-const statsData = [
-  {
-    title: 'Tổng lớp',
-    value: '25',
-    change: '+15%',
-    color: 'dashboard-success',
-    status: true
-  },
-  {
-    title: 'Học sinh',
-    value: '163',
-    change: '-25%',
-    color: 'dashboard-error',
-    status: false
-  },
-  {
-    title: 'Lợi nhuận (VND)',
-    value: '16.345.000',
-    change: '+15%',
-    color: 'dashboard-success',
-    status: true
-  },
-  {
-    title: 'Khách truy cập',
-    value: '2K',
-    change: '-35%',
-    color: 'dashboard-error',
-    status: false
-  }
-]
 const DashboardStats = () => {
   return (
-    <div className='grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-6'>
+    <div className='grid gap-4 mb-6 min-w-0 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4'>
       <StatsCard
         title='Tổng số lớp'
         value='12'
@@ -57,7 +26,7 @@ const DashboardStats = () => {
         subtitle='Doanh thu'
         icon={TrendingUp}
         variant='success'
-        trend={{ value: '-8.2%', isPositive: false }}
+        trend={{ value: '-8.3%', isPositive: false }}
       />
       <StatsCard
         title='Khách truy cập'

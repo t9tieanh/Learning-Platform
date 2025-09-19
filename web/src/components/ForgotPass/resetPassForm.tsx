@@ -91,7 +91,9 @@ const ResetPassForm: React.FC<{ code: string }> = ({ code }: { code: string }) =
           className='mb-2 border-primary focus:border-primary shadow-lg'
           {...register('confirmPassword')}
         />
-        {errors.confirmPassword && <span className='text-red-500 text-xs text-left'>{errors.confirmPassword.message}</span>}
+        {errors.confirmPassword && (
+          <span className='text-red-500 text-xs text-left'>{errors.confirmPassword.message}</span>
+        )}
         <CustomButton
           className='hover:bg-blue-600 shadow-lg mt-3 transition-transform duration-300 ease-in-out hover:scale-105 text-white font-semibold py-2 rounded-lg'
           label='Đặt lại mật khẩu'
