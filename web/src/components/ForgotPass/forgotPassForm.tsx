@@ -63,7 +63,9 @@ const ForgotPassForm = () => {
         <CustomButton
           className='hover:bg-blue-100 text-black bg-white shadow-lg transition-transform duration-300 ease-in-out hover:scale-105 font-semibold py-2 rounded-lg'
           label='Đăng nhập'
-          onClick={() => { navigator('/auth') }}
+          onClick={() => {
+            navigator('/auth')
+          }}
           icon={<LogIn />}
         />
       </form>

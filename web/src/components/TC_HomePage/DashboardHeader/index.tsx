@@ -8,10 +8,10 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
 const DashboardHeader = () => {
   return (
-    <div className='flex items-center justify-between mb-6'>
+    <div className='flex flex-col md:flex-row items-start md:items-center justify-between mb-6 gap-4 md:gap-0'>
       <div>
         <motion.h1
-          className='text-2xl font-bold flex items-center gap-2'
+          className='text-lg md:text-2xl font-bold flex items-center gap-2'
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
@@ -22,11 +22,11 @@ const DashboardHeader = () => {
           >
             👋
           </motion.span>
-          Xin chào, Anh Sang
+          <span className='truncate max-w-[120px] md:max-w-[180px] lg:max-w-none'>Xin chào, Anh Sang</span>
         </motion.h1>
 
         <motion.h3
-          className='text-base mt-2 text-muted-foreground'
+          className='text-xs md:text-sm lg:text-base mt-2 text-muted-foreground'
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.8, duration: 0.8 }}
@@ -35,7 +35,7 @@ const DashboardHeader = () => {
         </motion.h3>
       </div>
 
-      <div className='flex items-center gap-4'>
+      <div className='flex items-center gap-2 md:gap-4 self-end md:self-auto'>
         {/* Nút thông báo nổi bật */}
         <Button
           variant='ghost'
@@ -54,7 +54,7 @@ const DashboardHeader = () => {
               size='icon'
               className='rounded-full p-0 border-2 border-dashboard-primary/40 shadow-md hover:shadow-lg transition-all duration-200'
             >
-              <Avatar className='w-10 h-10 ring-2 ring-dashboard-primary/50'>
+              <Avatar className='w-8 h-8 md:w-10 md:h-10 ring-2 ring-dashboard-primary/50'>
                 <AvatarImage src='/avatar.jpg' alt='Avatar' />
                 <AvatarFallback className='bg-dashboard-primary text-white font-bold'>AS</AvatarFallback>
               </Avatar>

@@ -40,8 +40,8 @@ module.exports = {
         },
         accent: {
           // MÀU NHẤN
-          DEFAULT: '#F97316', // emerald-500
-          hover: '#EA580C',
+          DEFAULT: '#2563eb', // emerald-500
+          hover: '#2563eb',
           foreground: '#FFFFFF'
         },
         popover: {
