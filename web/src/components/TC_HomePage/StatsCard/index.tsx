@@ -42,28 +42,16 @@ export function StatsCard({ title, value, subtitle, icon: Icon, trend, variant =
   const styles = getVariantStyles()
 
   return (
-    <Card className='hover:shadow-md transform transition-transform duration-300 hover:scale-105'>
-      <CardContent className='p-6'>
-        <div className='flex items-center justify-between'>
-          <div className='flex-1'>
-            <p className='text-base font-medium text-muted-foreground mb-1'>{title}</p>
-            <p className='text-2xl font-bold text-foreground'>{value}</p>
-            {subtitle && <p className='text-sm text-muted-foreground mt-1'>{subtitle}</p>}
-            {trend && (
-              <div className='flex items-center mt-2'>
-                <span
-                  className={`text-sm font-medium ${trend.isPositive ? 'text-gradient-success' : 'text-destructive'}`}
-                >
-                  {trend.isPositive ? '+' : ''}
-                  {trend.value}
-                </span>
-                <span className='text-sm text-muted-foreground ml-1'>so với tháng trước</span>
-              </div>
-            )}
+    <Card className='w-52 hover:shadow-md transform transition-transform duration-300 hover:scale-105'>
+      <CardContent>
+        <div className='flex items-center gap-4'>
+          <div className={`p-3 rounded-lg flex items-center justify-center ${styles.iconBg}`}>
+            <Icon className={`h-5 w-5 ${styles.iconColor}`} />
           </div>
 
-          <div className={`p-3 rounded-lg ${styles.iconBg}`}>
-            <Icon className={`h-8 w-8 ${styles.iconColor}`} />
+          <div className='flex flex-col gap-2'>
+            <span className='text-sm font-medium text-muted-foreground break-all'>{title}</span>
+            <span className='block text-lg font-bold text-foreground break-all'>{value}</span>
           </div>
         </div>
       </CardContent>

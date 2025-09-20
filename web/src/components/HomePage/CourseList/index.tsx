@@ -4,7 +4,7 @@ const CourseList = () => {
   return (
     <div className='course-list-container'>
       <h4 className='font-bold bg-blue-500 text-white p-2 rounded-r-3xl max-w-80 text-center mt-6'>
-        Danh sách khóa học của tôi
+        Danh sách khóa học
       </h4>
       <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-6 mx-auto max-w-7xl px-4'>
         <CourseCard

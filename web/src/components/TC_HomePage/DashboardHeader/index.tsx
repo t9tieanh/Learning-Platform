@@ -22,7 +22,9 @@ const DashboardHeader = () => {
           >
             👋
           </motion.span>
-          <span className='truncate max-w-[120px] md:max-w-[180px] lg:max-w-none'>Xin chào, Anh Sang</span>
+          <span className='truncate max-w-[120px] md:max-w-[180px] lg:max-w-none bg-gradient-to-r from-indigo-500 via-blue-500 to-purple-500 bg-clip-text text-transparent'>
+            Xin chào, Anh Sang
+          </span>
         </motion.h1>
 
         <motion.h3
@@ -40,9 +42,9 @@ const DashboardHeader = () => {
         <Button
           variant='ghost'
           size='icon'
-          className='relative transition-all duration-200 hover:bg-dashboard-primary/10 hover:shadow-lg border border-dashboard-primary/30'
+          className='relative transition-all duration-200 hover:bg-primary/10 hover:shadow-lg border border-primary/30'
         >
-          <Bell className='w-5 h-5 text-dashboard-primary' />
+          <Bell className='w-5 h-5 text-primary' />
           <span className='absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full ring-2 ring-white animate-pulse'></span>
         </Button>
 
@@ -52,11 +54,11 @@ const DashboardHeader = () => {
             <Button
               variant='ghost'
               size='icon'
-              className='rounded-full p-0 border-2 border-dashboard-primary/40 shadow-md hover:shadow-lg transition-all duration-200'
+              className='rounded-full p-0 border-2 border-primary/40 shadow-md hover:shadow-lg transition-all duration-200'
             >
-              <Avatar className='w-8 h-8 md:w-10 md:h-10 ring-2 ring-dashboard-primary/50'>
+              <Avatar className='w-8 h-8 md:w-10 md:h-10 ring-2 ring-primary/50'>
                 <AvatarImage src='/avatar.jpg' alt='Avatar' />
-                <AvatarFallback className='bg-dashboard-primary text-white font-bold'>AS</AvatarFallback>
+                <AvatarFallback className='bg-primary text-white font-bold'>AS</AvatarFallback>
               </Avatar>
             </Button>
           </DropdownMenuTrigger>
