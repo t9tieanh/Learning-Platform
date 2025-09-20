@@ -11,6 +11,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.experimental.SuperBuilder;
 
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -54,4 +55,10 @@ public class CourseEntity extends AbstractEntity {
     // Category
     @OneToMany(mappedBy = "course")
     List<CategoryEntity> categories;
+
+    //outcomes
+    Set<String> outcomes;
+
+    //requiment
+    Set<String> requirements;
 }

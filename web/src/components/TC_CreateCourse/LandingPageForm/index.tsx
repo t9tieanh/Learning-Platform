@@ -1,14 +1,14 @@
-import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import TitleComponent from '@/components/TC_CreateCourse/common/Title'
 import PreviewComponent from './Preview'
 import BaseInfomation from './BaseInfomation'
 import MediaInfomation from './MediaInfomation'
 import SeoTagInfomation from './SeoTagInfomation'
-import { Info, Video, Tag } from 'lucide-react'
+import { Info, Video, Tag, UndoDot, Send } from 'lucide-react'
 import { landingPageSchema, LandingPageFormValues } from '@/utils/create-course/landingPage'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
+import CustomButton from '@/components/common/Button'
 
 const LandingPageForm = () => {
   const {
@@ -112,10 +112,18 @@ const LandingPageForm = () => {
 
       {/* Action Buttons */}
       <div className='flex justify-between pt-6 border-t border-border/60'>
-        <Button variant='ghost'>Quay lại</Button>
+        <CustomButton
+          className='bg-gray-100 text-black/90 hover:bg-gray-200 hover:text-black'
+          label='Quay lại'
+          icon={<UndoDot className='mr-2' />}
+        />
         <div className='space-x-3'>
-          <Button variant='secondary'>Lưu bản nháp</Button>
-          <Button className='bg-primary/90 hover:bg-primary'>Tiếp tục</Button>
+          <CustomButton className='bg-gray-100 text-black/90 hover:bg-gray-200 hover:text-black' label='Lưu bản nháp' />
+          <CustomButton
+            className='bg-primary/90 hover:bg-primary'
+            label='Tiếp tục'
+            icon={<Send className='mr-2' />}
+          />
         </div>
       </div>
     </div>
