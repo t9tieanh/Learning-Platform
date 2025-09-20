@@ -74,7 +74,7 @@ const Footer = ({
   ]
 }: Footer2Props) => {
   return (
-    <section className='py-12 bg-[#000000] text-white'>
+    <section className='py-12 bg-[#1f2937] text-white'>
       <div className='container'>
         <footer>
           <div className='grid grid-cols-2 gap-8 lg:grid-cols-6'>
@@ -92,7 +92,7 @@ const Footer = ({
                 <h3 className='mb-4 font-bold'>{section.title}</h3>
                 <ul className='space-y-4'>
                   {section.links.map((link, linkIdx) => (
-                    <li key={linkIdx} className='hover:text-primary font-medium'>
+                    <li key={linkIdx} className='hover:text-gray-600 font-medium'>
                       <a href={link.url}>{link.text}</a>
                     </li>
                   ))}

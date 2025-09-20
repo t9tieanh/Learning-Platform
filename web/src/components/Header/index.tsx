@@ -7,9 +7,8 @@ import './style.scss'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/stores/useAuth.stores'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { LogIn, UserPlus } from 'lucide-react'
+import { LogIn, UserPlus, House, BookOpen, Building2, StickyNote } from 'lucide-react'
 import Menu from './menu'
-import { House, BookOpen, Building2, StickyNote } from 'lucide-react';
 
 const Header: FC = () => {
   const navigate = useNavigate()
@@ -97,12 +96,12 @@ const Header: FC = () => {
                   <CustomButton
                     label='Đăng ký'
                     icon={<UserPlus className='w-4 h-4 mr-2' />}
-                    className='signup-btn shadow-lg bg-white-100 text-blue-700 hover:text-white hover:bg-blue-600 rounded-xl font-base'
+                    className='signup-btn shadow-lg bg-white-100 text-blue-700 hover:text-white hover:bg-blue-800 rounded-xl font-base hover:scale-105 transition-transform duration-300 ease-in-out'
                     onClick={() => navigate('/auth?mode=signup')}
                   />
                   <CustomButton
                     label='Đăng nhập'
-                    className='btn-primary shadow-lg login-btn bg-blue-600 hover:bg-blue-700 font-base rounded-xl'
+                    className='btn-primary shadow-lg login-btn bg-blue-600 hover:bg-blue-800 font-base rounded-xl hover:scale-105 transition-transform duration-300 ease-in-out'
                     onClick={() => navigate('/auth')}
                     icon={<LogIn className='w-4 h-4 mr-2' />}
                   />
