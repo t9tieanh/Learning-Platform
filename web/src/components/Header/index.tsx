@@ -9,6 +9,7 @@ import { useAuthStore } from '@/stores/useAuth.stores'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { LogIn, UserPlus } from 'lucide-react'
 import Menu from './menu'
+import { House, BookOpen, Building2, StickyNote } from 'lucide-react';
 
 const Header: FC = () => {
   const navigate = useNavigate()
@@ -26,6 +27,10 @@ const Header: FC = () => {
               />
               <AvatarFallback>LEARNING_PLATFORM</AvatarFallback>
             </Avatar>
+            <span className='text-sm font-bold'>
+              <span className='text-blue-700'>Learning</span>
+              <span className='text-red-500'> Platform</span>
+            </span>
             {/* <NavigationMenuTrigger className='text-blue-700 font-bold'>Trái</NavigationMenuTrigger> */}
           </NavigationMenuList>
           <NavigationMenuList className='mx-auto bg-transparent'>
@@ -36,24 +41,28 @@ const Header: FC = () => {
                     value='home'
                     className='tab-page font-semibold px-4 py-4 rounded-lg transition-colors duration-200 hover:bg-blue-100 hover:text-blue-700 data-[state=active]:bg-blue-500 data-[state=active]:text-white'
                   >
+                    <House className='w-5 h-5 mb-1' />
                     Trang chủ
                   </TabsTrigger>
                   <TabsTrigger
                     value='course'
                     className='tab-page font-semibold px-4 py-4 rounded-lg transition-colors duration-200 hover:bg-blue-100 hover:text-blue-700 data-[state=active]:bg-blue-500 data-[state=active]:text-white'
                   >
+                    <BookOpen className='w-5 h-5 mb-1' />
                     Khóa học
                   </TabsTrigger>
                   <TabsTrigger
                     value='about'
                     className='tab-page font-semibold px-4 py-4 rounded-lg transition-colors duration-200 hover:bg-blue-100 hover:text-blue-700 data-[state=active]:bg-blue-500 data-[state=active]:text-white'
                   >
+                    <Building2 className='w-5 h-5 mb-1' />
                     Về chúng tôi
                   </TabsTrigger>
                   <TabsTrigger
                     value='blog'
                     className='tab-page font-semibold px-4 py-4 rounded-lg transition-colors duration-200 hover:bg-blue-100 hover:text-blue-700 data-[state=active]:bg-blue-500 data-[state=active]:text-white'
                   >
+                    <StickyNote className='w-5 h-5 mb-1' />
                     Blog
                   </TabsTrigger>
                 </TabsList>
