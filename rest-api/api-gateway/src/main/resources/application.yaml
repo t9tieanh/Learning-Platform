@@ -38,3 +38,10 @@ spring:
             - Path=${app.api-prefix}/user/**, ${app.api-prefix}/user**, ${app.api-prefix}/auth**, ${app.api-prefix}/auth/**
           filters:
             - StripPrefix=2
+
+        - id: course
+          uri: http://localhost:8081
+          predicates:
+            - Path=${app.api-prefix}/course/**, ${app.api-prefix}/course**
+          filters:
+            - StripPrefix=3

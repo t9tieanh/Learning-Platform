@@ -1,4 +1,4 @@
-package com.freeclassroom.courseservice.dto.request;
+package com.freeclassroom.courseservice.dto.response.common;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -8,7 +8,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class AuthRequest {
-    private String username;
-    private String password;
+public class CreationResponse {
+    String id;
+    String name;
 }

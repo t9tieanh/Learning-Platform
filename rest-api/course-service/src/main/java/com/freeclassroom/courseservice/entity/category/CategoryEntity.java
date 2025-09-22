@@ -2,13 +2,12 @@ package com.freeclassroom.courseservice.entity.category;
 
 import com.freeclassroom.courseservice.entity.AbstractEntity;
 import com.freeclassroom.courseservice.entity.course.CourseEntity;
-import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.SuperBuilder;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -22,7 +21,6 @@ public class CategoryEntity extends AbstractEntity {
     String name;
     String description;
 
-    @ManyToOne
-    @JoinColumn(name = "course_id")
-    CourseEntity course;
+    @OneToMany(mappedBy = "category")
+    List<CourseEntity> courses;
 }
