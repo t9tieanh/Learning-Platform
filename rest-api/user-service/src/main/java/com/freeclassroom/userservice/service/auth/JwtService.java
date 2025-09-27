@@ -25,7 +25,7 @@ public class JwtService {
     private String SIGNER_KEY;
 
     @NonFinal
-    @Value("${spring.jwt.refreshable-duration}")
+    @Value("${spring.jwt.refresh-token-expiration}")
     protected long REFRESHABLE_DURATION;
 
     @Value("${spring.jwt.access-token-expiration}")
