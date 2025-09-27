@@ -56,11 +56,11 @@ public class AuthenticationService implements IAuthenticationService {
     protected String CLIENT_ID;
 
     @NonFinal
-    @Value("${spring.jwt.valid-duration}")
+    @Value("${spring.jwt.access-token-expiration}")
     protected long VALID_DURATION;
 
     @NonFinal
-    @Value("${spring.jwt.refreshable-duration}")
+    @Value("${spring.jwt.refresh-token-expiration}")
     protected long REFRESHABLE_DURATION;
 
     @NonFinal
