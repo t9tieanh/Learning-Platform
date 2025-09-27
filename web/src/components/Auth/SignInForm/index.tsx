@@ -16,6 +16,7 @@ import { toast } from 'react-toastify'
 import useLoading from '@/hooks/useLoading.hook'
 import { useAuthStore } from '@/stores/useAuth.stores'
 import { useNavigate } from 'react-router-dom'
+import logo from '@/assets/images/logo1.png'
 
 const SignInForm: FC = () => {
   const {
@@ -72,11 +73,12 @@ const SignInForm: FC = () => {
     <div className='w-full bg-white rounded-lg md:mt-0 sm:max-w-md xl:py-0'>
       <Card className='shadow-xl py-12 border-none'>
         <CardHeader className='text-center'>
-          <CardTitle className='font-bold flex items-center justify-center gap-2'>
-            <BookOpen />
-            Chào mừng bạn đã quay trở lại !
+          <CardTitle className='flex items-center justify-center'>
+            <img src={logo} alt='LEARNOVA logo' className='h-12 md:h-14 w-auto object-contain mx-auto select-none' />
           </CardTitle>
-          <CardDescription>Nhâp thông tin đăng nhập của bạn để tiếp tục.</CardDescription>
+          <CardDescription className='text-[#2DD4BF] text-base font-semibold mt-2'>
+            Đăng nhập để khám phá tri thức cùng Learnova.
+          </CardDescription>
           <CardContent className='mt-5'>
             <form onSubmit={handleSubmit(onSubmit)}>
               <div className='login-form flex flex-col gap-3'>
@@ -136,6 +138,7 @@ const SignInForm: FC = () => {
           </CardContent>
         </CardHeader>
       </Card>
+      <p className='text-xs text-center mt-2 text-muted-foreground'>Copyright © 2025 Learnova. All rights reserved.</p>
     </div>
   )
 }
