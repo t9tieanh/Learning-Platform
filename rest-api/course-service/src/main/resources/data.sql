@@ -1,9 +1,9 @@
 -- Xóa dữ liệu cũ để tránh trùng lặp (nếu chạy lại)
-DELETE FROM categorys;
+DELETE FROM categories;
 DELETE FROM tags;
 
 -- Seed Categorys (20 rows)
-INSERT INTO categorys (id, name, description, created_at, updated_at) VALUES
+INSERT INTO categories (id, name, description, created_at, updated_at) VALUES
 (1, 'Web Development', 'Learn how to build modern websites', NOW(), NOW()),
 (2, 'Mobile Apps', 'Build Android and iOS applications', NOW(), NOW()),
 (3, 'Data Science', 'Data analysis and machine learning', NOW(), NOW()),

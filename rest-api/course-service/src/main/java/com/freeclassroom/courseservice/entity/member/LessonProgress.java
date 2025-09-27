@@ -11,7 +11,7 @@ import lombok.experimental.SuperBuilder;
 @Getter
 @Setter
 @Entity
-@Table(name = "lesson_progresss")
+@Table(name = "lesson_progress")
 @AllArgsConstructor
 @NoArgsConstructor(force = true)
 @SuperBuilder

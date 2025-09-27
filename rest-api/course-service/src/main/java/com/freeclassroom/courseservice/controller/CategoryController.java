@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/categorys")
+@RequestMapping("/categories")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class CategoryController {
@@ -25,4 +25,5 @@ public class CategoryController {
     ApiResponse<List<CategoryResponse>> getAllCategory() {
         return categoryService.getAllCategory();
     }
+
 }

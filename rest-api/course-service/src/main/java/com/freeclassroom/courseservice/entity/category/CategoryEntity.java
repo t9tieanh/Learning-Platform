@@ -12,7 +12,7 @@ import java.util.List;
 @Getter
 @Setter
 @Entity
-@Table(name = "categorys")
+@Table(name = "categories")
 @AllArgsConstructor
 @NoArgsConstructor(force = true)
 @SuperBuilder

@@ -9,6 +9,7 @@ import { useAuthStore } from '@/stores/useAuth.stores'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { LogIn, UserPlus, House, BookOpen, Building2, StickyNote } from 'lucide-react'
 import Menu from './menu'
+import logo from '../../assets/images/logo1.png'
 
 const Header: FC = () => {
   const navigate = useNavigate()
@@ -18,19 +19,10 @@ const Header: FC = () => {
     <div className=' p-3 w-full header-container'>
       <NavigationMenu className='min-w-full mx-0'>
         <div className='flex items-center justify-between w-full p-1'>
-          <NavigationMenuList className='text-left'>
-            <Avatar className='rounded-lg'>
-              <AvatarImage
-                src='https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQHR98lk3F3Pc1Fg4QjflSxwbbCeOd6D-JEnQ&s'
-                alt='@shadcn'
-              />
-              <AvatarFallback>LEARNING_PLATFORM</AvatarFallback>
-            </Avatar>
-            <span className='text-sm font-bold'>
-              <span className='text-blue-700'>Learning</span>
-              <span className='text-red-500'> Platform</span>
-            </span>
-            {/* <NavigationMenuTrigger className='text-blue-700 font-bold'>Trái</NavigationMenuTrigger> */}
+          <NavigationMenuList className='text-left ml-2'>
+            <button onClick={() => navigate('/')} className='p-0 border-none bg-transparent cursor-pointer'>
+              <img src={logo} alt='LEARNOVA logo' className='h-10 md:h-6 w-auto select-none object-contain' />
+            </button>
           </NavigationMenuList>
           <NavigationMenuList className='mx-auto bg-transparent'>
             <NavigationMenuItem>

@@ -13,7 +13,8 @@ import java.util.List;
 public class CreationCourseRequest {
     String id;
     String title;
-    String description;
+    String shortDescription;
+    String longDescription;
     String thumbnailUrl;
     String language;
     List<String> outcomes;

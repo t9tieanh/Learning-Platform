@@ -5,8 +5,18 @@ import { Bell, User } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { useAuthStore } from '@/stores/useAuth.stores'
+import { useNavigate } from 'react-router-dom'
 
 const DashboardHeader = () => {
+  const { data } = useAuthStore()
+  const navigate = useNavigate()
+  const displayName = data?.name || 'Giảng viên'
+  const initials = (data?.name || 'GV')
+    .split(' ')
+    .map((n) => n[0])
+    .join('')
+    .toUpperCase()
   return (
     <div className='flex flex-col md:flex-row items-start md:items-center justify-between mb-6 gap-4 md:gap-0'>
       <div>
@@ -22,8 +32,8 @@ const DashboardHeader = () => {
           >
             👋
           </motion.span>
-          <span className='truncate max-w-[120px] md:max-w-[180px] lg:max-w-none bg-gradient-to-r from-indigo-500 via-blue-500 to-purple-500 bg-clip-text text-transparent'>
-            Xin chào, Anh Sang
+          <span className='truncate max-w-[160px] md:max-w-[220px] lg:max-w-none bg-gradient-to-r from-indigo-500 via-blue-500 to-purple-500 bg-clip-text text-transparent'>
+            Xin chào, {displayName}
           </span>
         </motion.h1>
 
@@ -57,13 +67,13 @@ const DashboardHeader = () => {
               className='rounded-full p-0 border-2 border-primary/40 shadow-md hover:shadow-lg transition-all duration-200'
             >
               <Avatar className='w-8 h-8 md:w-10 md:h-10 ring-2 ring-primary/50'>
-                <AvatarImage src='/avatar.jpg' alt='Avatar' />
-                <AvatarFallback className='bg-primary text-white font-bold'>AS</AvatarFallback>
+                <AvatarImage src={data?.avatarUrl} alt='Avatar' />
+                <AvatarFallback className='bg-primary text-white font-bold'>{initials}</AvatarFallback>
               </Avatar>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align='end'>
-            <DropdownMenuItem className='flex items-center gap-2'>
+            <DropdownMenuItem className='flex items-center gap-2' onClick={() => navigate('/teacher/profile')}>
               <User size={16} /> Tài khoản
             </DropdownMenuItem>
             <DropdownMenuItem>Đăng xuất</DropdownMenuItem>
