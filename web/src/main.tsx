@@ -13,7 +13,7 @@ import Profile from './pages/Profile'
 import User from '@/pages/User'
 import TCHomePage from './pages/TC_HomePage'
 import ForgotPass from './pages/ForgotPass'
-import TC_Course from './pages/TC_Course'
+import TC_Course from './pages/TC_Courses'
 import TC_CreateCourse from './pages/TC_CreateCourse'
 import TC_Profile from './pages/TC_Profile'
 

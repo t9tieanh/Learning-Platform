@@ -1,6 +1,8 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@radix-ui/react-avatar'
 import { BookOpen, Calendar, Home, MessageSquare, BarChart3, HelpCircle, Settings } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { useAuthStore } from '@/stores/useAuth.stores'
+import { useNavigate } from 'react-router-dom'
 
 const sidebarItems = [
   {
@@ -23,6 +25,14 @@ const sidebarItems = [
 ]
 
 const AcademySidebar = () => {
+  const { data } = useAuthStore()
+  const navigate = useNavigate()
+  const displayName = data?.name || 'Giảng viên'
+  const initials = (data?.name || 'GV')
+    .split(' ')
+    .map((n) => n[0])
+    .join('')
+    .toUpperCase()
   return (
     <div
       className='w-64 h-screen bg-[#1D1D2A] text-sidebar-foreground flex flex-col
@@ -50,6 +60,9 @@ const AcademySidebar = () => {
             <div className='space-y-1'>
               {section.items.map((item, itemIndex) => {
                 const Icon = item.icon
+                let onClick = undefined
+                if (item.name === 'Trang chủ') onClick = () => navigate('/teacher')
+                if (item.name === 'Khóa học') onClick = () => navigate('/teacher/course')
                 return (
                   <Button
                     key={itemIndex}
@@ -59,6 +72,7 @@ const AcademySidebar = () => {
                         ? 'bg-sidebar-accent text-sidebar-accent-foreground hover:bg-[#ababaf]'
                         : 'text-sidebar-foreground/80 hover:bg-[#afafb3] hover:text-sidebar-accent-foreground'
                     }`}
+                    onClick={onClick}
                   >
                     <Icon className='w-5 h-5 mr-3' />
                     {item.name}
@@ -73,16 +87,13 @@ const AcademySidebar = () => {
       <div className='p-2 md:p-4 border-t border-sidebar-border text-white'>
         <div className='flex items-center gap-2 md:gap-3'>
           <Avatar>
-            <AvatarImage
-              className='rounded-full h-10 w-10 md:h-12 md:w-12'
-              src='https://images.vexels.com/media/users/3/145908/raw/52eabf633ca6414e60a7677b0b917d92-male-avatar-maker.jpg'
-            />
-            <AvatarFallback className='bg-primary text-white'>AS</AvatarFallback>
+            <AvatarImage className='rounded-full h-10 w-10 md:h-12 md:w-12' src={data?.avatarUrl} />
+            <AvatarFallback className='bg-primary text-white'>{initials}</AvatarFallback>
           </Avatar>
 
           <div className='flex-1'>
-            <p className='text-base font-semibold truncate'>Anh Sang</p>
-            <p className='text-xs md:text-sm text-sidebar-foreground/60'>Giáo viên</p>
+            <p className='text-base font-semibold truncate'>{displayName}</p>
+            <p className='text-xs md:text-sm text-sidebar-foreground/60'>Giảng viên</p>
           </div>
         </div>
       </div>

@@ -4,6 +4,7 @@ import com.freeclassroom.courseservice.dto.request.course.CreationCourseRequest;
 import com.freeclassroom.courseservice.dto.request.course.UpdateTagsRequest;
 import com.freeclassroom.courseservice.dto.response.ApiResponse;
 import com.freeclassroom.courseservice.dto.response.common.CreationResponse;
+import com.freeclassroom.courseservice.dto.response.course.CourseResponse;
 import com.freeclassroom.courseservice.entity.category.CategoryEntity;
 import com.freeclassroom.courseservice.entity.category.TagEntity;
 import com.freeclassroom.courseservice.entity.course.CourseEntity;
@@ -102,6 +103,11 @@ public class CourseService implements ICourseService {
                         .id(course.getId())
                         .build())
                 .build();
+    }
+
+    @Override
+    public ApiResponse<List<CourseResponse>> getCoursesByTeacherId(String teacherId) {
+        return null;
     }
 
 }

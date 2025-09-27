@@ -1,21 +1,45 @@
 import TeacherProfile from '@/components/TC_Profile'
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import CustomButton from '@/components/common/Button'
+import { useAuthStore } from '@/stores/useAuth.stores'
+import { useNavigate } from 'react-router-dom'
 
 const TC_Profile = () => {
-  // Sample teacher data with state management
-  const [teacher, setTeacher] = useState({
-    id: '1',
-    name: 'Dr. Sarah Chen',
-    username: 'sarahchen',
-    email: 'sarah.chen@academy.edu',
-    phone: '+1 (555) 123-4567',
-    avatar: '', // Will use initials
-    specialization: 'Computer Science & AI',
-    date: '20/09/2025'
-  })
+  const { data } = useAuthStore()
+  const navigate = useNavigate()
+  // Local teacher type aligned with component (avatar optional)
+  type PageTeacher = {
+    id: string
+    name: string
+    username: string
+    email: string
+    phone: string
+    avatar?: string
+    specialization?: string
+    date?: string
+  }
 
-  const handleUpdateTeacher = (updatedTeacher: typeof teacher) => {
+  // Map store user to teacher shape
+  const initialTeacher: PageTeacher = useMemo(
+    () => ({
+      id: 'current',
+      name: data?.name || 'Giảng viên',
+      username: data?.username || 'teacher',
+      email: data?.email || '',
+      phone: '',
+      avatar: data?.avatarUrl || undefined,
+      specialization: 'Giảng dạy',
+      date: new Date().toLocaleDateString('vi-VN')
+    }),
+    [data]
+  ) as PageTeacher
+  const [teacher, setTeacher] = useState<PageTeacher>(initialTeacher)
+
+  useEffect(() => {
+    setTeacher(initialTeacher)
+  }, [initialTeacher])
+
+  const handleUpdateTeacher = (updatedTeacher: PageTeacher) => {
     setTeacher(updatedTeacher)
   }
 
@@ -25,7 +49,7 @@ const TC_Profile = () => {
       <header className='border-b border-border bg-card'>
         <div className='container mx-auto px-6 py-4'>
           <div className='flex items-center gap-3'>
-            <CustomButton>Back</CustomButton>
+            <CustomButton onClick={() => navigate('/teacher')}>Quay lại</CustomButton>
           </div>
         </div>
       </header>

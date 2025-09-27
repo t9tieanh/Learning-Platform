@@ -24,7 +24,8 @@ import java.util.Set;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CourseEntity extends AbstractEntity {
     String title;
-    String description;
+    String shortDescription;
+    String longDescription;
     String thumbnailUrl;
     String language;
     Double originalPrice;
