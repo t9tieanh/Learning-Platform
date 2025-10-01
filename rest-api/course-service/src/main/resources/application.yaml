@@ -9,12 +9,12 @@ spring:
     password: 1234
   jpa:
     hibernate:
-      ddl-auto: update
-    show-sql: true
+      ddl-auto: none
+    show-sql: false
     defer-datasource-initialization: true
   sql:
     init:
-      mode: always
+      mode: never
 
   jwt:
     signerKey: "1TjXchw5FloESb63Kc+DFhTARvpWL4jUGCwfGWxuG5SIf/1y/LgJxHnMqaF6A/ij"
@@ -23,3 +23,12 @@ spring:
     refresh-token-expiration: 604800000 # 7 ngày (7 * 24 * 60 * 60 * 1000 ms)
     refreshable-duration: 604800000
     short-lived-token: 3600000
+
+grpc:
+  server:
+    port: 9091
+
+  client:
+    user-service:
+      address: static://localhost:9090
+      negotiation-type: plaintext

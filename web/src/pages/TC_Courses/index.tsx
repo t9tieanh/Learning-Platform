@@ -4,52 +4,87 @@ import CoursesTable from '@/components/TC_Courses/CoursesTable'
 import CoursePagination from '@/components/TC_Courses/CoursePagination'
 import { Course } from '@/components/TC_Courses/CourseTypes'
 import AcademySidebar from '@/components/TC_HomePage/AcademySidebar'
+import courseService from '@/services/course.service'
 
 interface State {
   courses: Course[]
+  page: number
+  size: number
+  totalPages: number
+  totalElements: number
+  loading: boolean
+  search: string
+  statusFilter: '' | 'PUBLISHED' | 'DRAFT' | 'PENDING_REVIEW'
 }
 
 class TC_Course extends Component<Record<string, never>, State> {
   state: State = {
-    courses: [
-      {
-        id: 1,
-        title: 'Spring Boot v1',
-        tags: ['Java', 'Spring', 'MySQL'],
-        duration: '48 giờ 26 phút',
-        students: 16,
-        createdAt: '04/08/2024',
-        image:
-          'https://images.shiksha.com/mediadata/ugcDocuments/images/wordpressImages/2022_08_MicrosoftTeams-image-13-2-1.jpg',
-        status: 'closed'
-      },
-      {
-        id: 2,
-        title: 'React v1',
-        tags: ['React', 'Frontend'],
-        duration: '30 giờ 26 phút',
-        students: 42,
-        createdAt: '04/09/2024',
-        image:
-          'https://images.shiksha.com/mediadata/ugcDocuments/images/wordpressImages/2022_08_MicrosoftTeams-image-13-2-1.jpg',
-        status: 'pending'
-      },
-      {
-        id: 3,
-        title: 'MongoDB (Mongoose)',
-        tags: ['Database', 'NoSQL'],
-        duration: '25 giờ 26 phút',
-        students: 27,
-        createdAt: '12/09/2024',
-        image:
-          'https://images.shiksha.com/mediadata/ugcDocuments/images/wordpressImages/2022_08_MicrosoftTeams-image-13-2-1.jpg',
-        status: 'active'
-      }
-    ]
+    courses: [],
+    page: 1,
+    size: 5,
+    totalPages: 1,
+    totalElements: 0,
+    loading: false,
+    search: '',
+    statusFilter: ''
+  }
+
+  async componentDidMount() {
+    await this.fetchCourses()
+  }
+
+  fetchCourses = async (nextPage?: number) => {
+    this.setState({ loading: true })
+    try {
+      const page = nextPage ?? this.state.page
+      const res = await courseService.getTeacherCourses(undefined, { page, limit: this.state.size })
+      const payload = res.result
+      const list = payload?.items as any[] | undefined
+      const mapped: Course[] = (list || []).map((c, idx) => ({
+        id: String(c.id ?? `temp-${idx}`),
+        title: c.title ?? 'Chưa có tiêu đề',
+        shortDescription: c.shortDescription ?? null,
+        longDescription: c.longDescription ?? null,
+        thumbnailUrl: c.thumbnailUrl ?? null,
+        language: c.language ?? null,
+        originalPrice: c.originalPrice ?? null,
+        finalPrice: c.finalPrice ?? null,
+        status: (c.status as Course['status']) ?? 'DRAFT',
+        instructorId: c.instructorId ?? null,
+        chapterIds: c.chapterIds ?? null,
+        enrollmentIds: c.enrollmentIds ?? null,
+        tagNames: c.tagNames ?? null,
+        categoryName: c.categoryName ?? null,
+        progressStep: c.progressStep ?? null,
+        outcomes: c.outcomes ?? null,
+        requirements: c.requirements ?? null,
+        image: c.thumbnailUrl ?? undefined,
+        tags: c.tagNames ?? undefined,
+        duration: undefined,
+        students: undefined,
+        createdAt: undefined
+      }))
+      this.setState({
+        courses: mapped,
+        page: payload?.page ?? page,
+        size: payload?.size ?? this.state.size,
+        totalPages: payload?.totalPages ?? 1,
+        totalElements: payload?.totalElements ?? mapped.length,
+        loading: false
+      })
+    } catch (e) {
+      console.error('Failed to load teacher courses', e)
+      this.setState({ courses: [], loading: false })
+    }
   }
 
   render() {
     const { courses } = this.state
+    const filtered = courses.filter((c) => {
+      const matchSearch = this.state.search ? c.title.toLowerCase().includes(this.state.search.toLowerCase()) : true
+      const matchStatus = this.state.statusFilter ? c.status === this.state.statusFilter : true
+      return matchSearch && matchStatus
+    })
 
     return (
       <div className='flex min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-slate-900 dark:to-slate-950 transition-colors'>
@@ -59,9 +94,21 @@ class TC_Course extends Component<Record<string, never>, State> {
         </div>
         {/* Main content */}
         <div className='flex-1 ml-64 p-6 space-y-6'>
-          <CourseSearchBar />
-          <CoursesTable courses={courses} />
-          <CoursePagination />
+          <CourseSearchBar onSearch={(v) => this.setState({ search: v })} />
+          {this.state.loading ? (
+            <div className='text-center text-sm text-gray-500'>Đang tải dữ liệu...</div>
+          ) : (
+            <CoursesTable
+              courses={filtered}
+              statusFilter={this.state.statusFilter}
+              onChangeStatusFilter={(s) => this.setState({ statusFilter: s as State['statusFilter'] })}
+            />
+          )}
+          <CoursePagination
+            pages={this.state.totalPages}
+            current={this.state.page}
+            onChange={(p) => this.fetchCourses(p)}
+          />
         </div>
       </div>
     )

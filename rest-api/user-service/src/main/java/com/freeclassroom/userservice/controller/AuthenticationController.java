@@ -25,6 +25,7 @@ public class AuthenticationController {
 
     @PostMapping
     ApiResponse<AuthResponse> login (@RequestBody AuthRequest request) throws JOSEException {
+        System.out.println("vo roi");
         return authenticationService.authentication(request);
     }
 

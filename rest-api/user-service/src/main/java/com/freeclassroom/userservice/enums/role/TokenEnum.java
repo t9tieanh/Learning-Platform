@@ -3,7 +3,7 @@ package com.freeclassroom.userservice.enums.role;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum TokenEnum {
-    RESFESH_TOKEN("reshfesh"),
+    REFRESH_TOKEN("refresh"),
     ACCESS_TOKEN("access"),
     ;
 

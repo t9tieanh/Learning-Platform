@@ -1,61 +1,33 @@
-import './style.scss'
-import { FaLightbulb, FaLocationArrow, FaQuestionCircle } from 'react-icons/fa'
-import Button from '@/components/common/Button'
-
-const LearningText = ({ content }: { content: string }) => {
-  return (
-    <>
-      <div className='text-center text-black flex gap-3'>
-        <FaLightbulb size={30} />
-        <h1 className='text-left font-medium mt-2 text-sm mb-1'>{content}</h1>
-      </div>
-    </>
-  )
-}
+import React from 'react'
+import { CheckCircle2 } from 'lucide-react'
 
 const WhatYouWillLearn = () => {
-  const learnings = [
-    {
-      content:
-        'Nắm vững các thao tác cơ bản trong Adobe Premiere Pro, từ việc tạo dự án mới đến quản lý timeline và các công cụ chỉnh sửa.'
-    },
-    {
-      content:
-        'Biết cách cắt ghép, chỉnh sửa, thêm hiệu ứng chuyển cảnh, chèn chữ và âm thanh để tạo ra những video chất lượng chuyên nghiệp.'
-    },
-    {
-      content:
-        'Thành thạo các kỹ thuật xử lý màu sắc, xuất video với định dạng phù hợp và tối ưu hóa chất lượng cho từng nền tảng.'
-    },
-    {
-      content:
-        'Tự tin xây dựng quy trình chỉnh sửa video hoàn chỉnh, áp dụng các mẹo và kỹ thuật giúp sản phẩm cuối cùng hấp dẫn hơn.'
-    }
+  const learningPoints = [
+    'Nắm vững các thao tác cơ bản',
+    'Biết cách cắt ghép, chỉnh sửa, thêm hiệu ứng',
+    'Thành thạo các kỹ thuật xử lý màu sắc',
+    'Tự tin xây dựng quy trình chỉnh sửa video hoàn chỉnh'
   ]
 
   return (
-    <div className='what-you-will-learn-container min-h-24 bg-white pt-10 pb-12'>
-      <h4 className='font-bold bg-primary text-white p-2 rounded-r-3xl max-w-md text-center flex'>
-        <FaQuestionCircle size={20} className='mt-1 pl-6' />
-        &nbsp;Bạn sẽ học được gì từ khóa học này ?
-      </h4>
-      <div className='grid grid-cols-1 md:grid-cols-4 gap-6 mt-6 mx-auto max-w-7xl px-4'>
-        {learnings.map((learning, index) => (
-          <LearningText key={index} content={learning.content} />
+    <section className='my-8 bg-white'>
+      <div className='shrink-0'>
+        <h4 className='font-bold max-w-80 bg-blue-500 text-white p-2 rounded-r-3xl pl-12'>Kiến thức đạt được</h4>
+      </div>
+
+      <ul className='space-y-4 max-w-3xl ml-14 my-8'>
+        {learningPoints.map((title, index) => (
+          <li key={index} className='flex items-center space-x-4 group'>
+            <div className='flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white transition-colors duration-300'>
+              <CheckCircle2 size={22} strokeWidth={2.2} />
+            </div>
+            <span className='text-base font-medium text-foreground group-hover:text-primary transition-colors duration-300'>
+              {title}
+            </span>
+          </li>
         ))}
-      </div>
-      <div className='text-right text-sm text-black mt-4 px-3'>
-        <Button
-          label='Xem thêm'
-          icon={<FaLocationArrow />}
-          onClick={() => console.log('Xem thêm')}
-          className='group bg-white text-blue-600 hover:bg-gray-200 relative'
-          variant='outline'
-        />
-        {/* <FaLocationArrow /> Xem thêm
-        </Button> */}
-      </div>
-    </div>
+      </ul>
+    </section>
   )
 }
 

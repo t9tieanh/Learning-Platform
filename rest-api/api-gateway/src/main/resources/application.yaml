@@ -42,6 +42,6 @@ spring:
         - id: course
           uri: http://localhost:8081
           predicates:
-            - Path=${app.api-prefix}/course/**, ${app.api-prefix}/course**
+            - Path=${app.api-prefix}/courses/**, ${app.api-prefix}/courses**
           filters:
-            - StripPrefix=3
+            - StripPrefix=2
