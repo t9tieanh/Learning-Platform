@@ -12,6 +12,7 @@
 
     <modules>
         <module>api-gateway</module>
+        <module>proto-shared</module>
         <module>user-service</module>
         <module>sale-service</module>
         <module>course-service</module>

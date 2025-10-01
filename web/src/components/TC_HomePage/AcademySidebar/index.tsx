@@ -3,6 +3,7 @@ import { BookOpen, Calendar, Home, MessageSquare, BarChart3, HelpCircle, Setting
 import { Button } from '@/components/ui/button'
 import { useAuthStore } from '@/stores/useAuth.stores'
 import { useNavigate } from 'react-router-dom'
+import logo from '@/assets/images/logo1.png'
 
 const sidebarItems = [
   {
@@ -43,14 +44,9 @@ const AcademySidebar = () => {
   '
     >
       <div className='flex p-4 md:p-6 items-center gap-3'>
-        <Avatar>
-          <AvatarImage
-            className='w-8 h-8 rounded-full'
-            src='https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/React-icon.svg/2300px-React-icon.svg.png'
-          />
-          <AvatarFallback>CN</AvatarFallback>
-        </Avatar>
-        <span className='text-lg md:text-xl font-semibold text-white'>Academy</span>
+        <button onClick={() => navigate('/teacher')} className='p-0 border-none bg-transparent cursor-pointer'>
+          <img src={logo} alt='LEARNOVA logo' className='h-12 md:h-8 w-auto select-none object-contain' />
+        </button>
       </div>
 
       <nav className='flex-1 px-2 md:px-4 text-white'>

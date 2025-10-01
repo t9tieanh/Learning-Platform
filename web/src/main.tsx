@@ -16,6 +16,7 @@ import ForgotPass from './pages/ForgotPass'
 import TC_Course from './pages/TC_Courses'
 import TC_CreateCourse from './pages/TC_CreateCourse'
 import TC_Profile from './pages/TC_Profile'
+import TC_CourseDetail from './pages/TC_CourseDetail'
 
 const router = createBrowserRouter([
   {
@@ -42,7 +43,8 @@ const router = createBrowserRouter([
           { path: '', element: <TCHomePage /> },
           { path: 'course', element: <TC_Course /> },
           { path: 'create-course', element: <TC_CreateCourse /> },
-          { path: 'profile', element: <TC_Profile /> }
+          { path: 'profile', element: <TC_Profile /> },
+          { path: 'course-details', element: <TC_CourseDetail /> }
         ]
       },
       { path: 'user/verify', element: <User /> },

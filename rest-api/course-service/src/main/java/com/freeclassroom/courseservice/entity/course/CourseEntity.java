@@ -61,9 +61,15 @@ public class CourseEntity extends AbstractEntity {
     @Enumerated(EnumType.STRING)
     EnumCourseProgressStep progressStep;
 
+    @ElementCollection
+    @CollectionTable(name = "course_outcomes", joinColumns = @JoinColumn(name = "course_id"))
+    @Column(name = "outcome")
     //outcomes
     Set<String> outcomes;
 
+    @ElementCollection
+    @CollectionTable(name = "course_requirements", joinColumns = @JoinColumn(name = "course_id"))
+    @Column(name = "requirement")
     //requiment
     Set<String> requirements;
 }

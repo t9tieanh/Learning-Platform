@@ -15,6 +15,8 @@ interface CoursePaginationProps {
 }
 
 const CoursePagination: FC<CoursePaginationProps> = ({ pages = 4, current = 1, onChange }) => {
+  const canPrev = current > 1
+  const canNext = current < pages
   return (
     <Pagination className='pt-6 flex justify-center'>
       <PaginationContent className='gap-1 sm:gap-2'>
@@ -22,6 +24,11 @@ const CoursePagination: FC<CoursePaginationProps> = ({ pages = 4, current = 1, o
           <PaginationPrevious
             href='#'
             className='sm:px-3 py-1 text-xs sm:text-sm text-blue-600 transition hover:bg-transparent hover:text-blue-600 hover:scale-105 hover:underline'
+            aria-disabled={!canPrev}
+            onClick={(e) => {
+              e.preventDefault()
+              if (canPrev) onChange?.(current - 1)
+            }}
           />
         </PaginationItem>
         {Array.from({ length: pages }, (_, i) => i + 1).map((page) => (
@@ -29,11 +36,10 @@ const CoursePagination: FC<CoursePaginationProps> = ({ pages = 4, current = 1, o
             <PaginationLink
               href='#'
               isActive={page === current}
-              className={`rounded-full w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center font-medium shadow-sm text-xs sm:text-sm transition-transform duration-300 ease-in-out hover:scale-110 ${
-                page === current
+              className={`rounded-full w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center font-medium shadow-sm text-xs sm:text-sm transition-transform duration-300 ease-in-out hover:scale-110 ${page === current
                   ? 'bg-blue-400 text-white hover:bg-blue-600'
                   : 'bg-blue-100 text-blue-600 hover:bg-blue-600 hover:text-white'
-              }`}
+                }`}
               onClick={(e) => {
                 e.preventDefault()
                 onChange?.(page)
@@ -47,6 +53,11 @@ const CoursePagination: FC<CoursePaginationProps> = ({ pages = 4, current = 1, o
           <PaginationNext
             href='#'
             className='sm:px-3 py-1 text-xs sm:text-sm text-blue-600 transition hover:bg-transparent hover:text-blue-600 hover:scale-105 hover:underline'
+            aria-disabled={!canNext}
+            onClick={(e) => {
+              e.preventDefault()
+              if (canNext) onChange?.(current + 1)
+            }}
           />
         </PaginationItem>
       </PaginationContent>

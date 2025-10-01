@@ -5,6 +5,7 @@ import com.freeclassroom.courseservice.dto.request.course.UpdateTagsRequest;
 import com.freeclassroom.courseservice.dto.response.ApiResponse;
 import com.freeclassroom.courseservice.dto.response.common.CreationResponse;
 import com.freeclassroom.courseservice.dto.response.course.CourseResponse;
+import com.freeclassroom.courseservice.dto.response.course.PageResponse;
 import com.freeclassroom.courseservice.entity.category.CategoryEntity;
 import com.freeclassroom.courseservice.entity.category.TagEntity;
 import com.freeclassroom.courseservice.entity.course.CourseEntity;
@@ -12,6 +13,7 @@ import com.freeclassroom.courseservice.enums.entity.EnumCourseProgressStep;
 import com.freeclassroom.courseservice.enums.entity.EnumCourseStatus;
 import com.freeclassroom.courseservice.exception.CustomExeption;
 import com.freeclassroom.courseservice.exception.ErrorCode;
+import com.freeclassroom.courseservice.grpc.client.UserGrpcClient;
 import com.freeclassroom.courseservice.mapper.CourseMapper;
 import com.freeclassroom.courseservice.repository.entity.CategoryRepository;
 import com.freeclassroom.courseservice.repository.entity.CourseRepository;
@@ -20,6 +22,11 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -35,6 +42,7 @@ public class CourseService implements ICourseService {
 
     CourseMapper courseMapper;
 
+    UserGrpcClient userGrpcClient;
     @Override
     public ApiResponse<CreationResponse> createCourse(CreationCourseRequest request, String userId) {
         CourseEntity newCourse = null;
@@ -106,8 +114,34 @@ public class CourseService implements ICourseService {
     }
 
     @Override
-    public ApiResponse<List<CourseResponse>> getCoursesByTeacherId(String teacherId) {
-        return null;
-    }
+    public ApiResponse<PageResponse<CourseResponse>> getCoursesByTeacherId(String instructorId, int page, int size) {
+        try {
+            Pageable pageable = PageRequest.of(Math.max(0, page - 1), size, Sort.by("createdAt").descending());
+            Page<CourseEntity> coursePage = courseRepo.findByInstructorId(instructorId, pageable);
+            List<CourseResponse> items = courseMapper.toDtoList(coursePage.getContent());
+            PageResponse<CourseResponse> pageResponse = PageResponse.<CourseResponse>builder()
+                    .items(items)
+                    .page(coursePage.getNumber() + 1)
+                    .size(coursePage.getSize())
+                    .totalElements(coursePage.getTotalElements())
+                    .totalPages(coursePage.getTotalPages())
+                    .build();
 
+            return ApiResponse.<PageResponse<CourseResponse>>builder()
+                    .code(HttpStatus.OK.value())
+                    .message("Lấy danh sách khóa học thành công")
+                    .result(pageResponse)
+                    .build();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println("Lỗi khi lấy danh sách course theo instructorId = " + instructorId);
+
+            return ApiResponse.<PageResponse<CourseResponse>>builder()
+                    .code(999)
+                    .message("Lỗi server: " + e.getMessage())
+                    .result(null)
+                    .build();
+        }
+    }
 }

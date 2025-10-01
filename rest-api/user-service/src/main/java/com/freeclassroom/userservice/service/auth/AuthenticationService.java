@@ -87,7 +87,7 @@ public class AuthenticationService implements IAuthenticationService {
         if (result) {
             AuthResponse response = AuthResponse.builder()
                     .accessToken(jwtService.generateToken(account, TokenEnum.ACCESS_TOKEN))
-                    .refreshToken(jwtService.generateToken(account,TokenEnum.RESFESH_TOKEN))
+                    .refreshToken(jwtService.generateToken(account,TokenEnum.REFRESH_TOKEN))
                     .email(account.getEmail())
                     .username(account.getUsername())
                     .name(account.getName())
@@ -177,7 +177,7 @@ public class AuthenticationService implements IAuthenticationService {
                 .message("Xác thực tài khoản google thành công !")
                 .result(AuthResponse.builder()
                         .accessToken(jwtService.generateToken(account, TokenEnum.ACCESS_TOKEN))
-                        .refreshToken(jwtService.generateToken(account,TokenEnum.RESFESH_TOKEN))
+                        .refreshToken(jwtService.generateToken(account,TokenEnum.REFRESH_TOKEN))
                         .email(account.getEmail())
                         .username(account.getUsername())
                         .name(account.getName())

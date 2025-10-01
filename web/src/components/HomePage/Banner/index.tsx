@@ -48,12 +48,12 @@ const Banner = () => {
           >
             👋
           </motion.span>
-          Chào mừng bạn đến với ALL Study
+          Chào mừng bạn đến với Learnova
         </motion.h2>
         <motion.h1 className='scroll-m-20 text-4xl mt-4 font-extrabold tracking-tight text-start' variants={item}>
           Nền tảng học tập trực tuyến dành cho thế hệ mới
         </motion.h1>
-        <motion.blockquote className='mt-6 border-l-2 pl-6 italic' variants={item}>
+        <motion.blockquote className='mt-6 border-l-2 pl-6 italic text-lg' variants={item}>
           &quot;Cùng công nghệ, học tập trở nên dễ dàng hơn.&quot;
         </motion.blockquote>
         <motion.div variants={item}>

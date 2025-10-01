@@ -5,6 +5,7 @@ import { Search } from 'lucide-react'
 interface CourseSearchBarProps {
   onCreate?: () => void
   onSearch?: (value: string) => void
+  onFilterChange?: (status: string) => void
 }
 
 const CourseSearchBar: FC<CourseSearchBarProps> = ({ onCreate, onSearch }) => {

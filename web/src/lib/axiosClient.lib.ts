@@ -1,4 +1,26 @@
 import axios, { AxiosError, type AxiosInstance, type AxiosResponse, type InternalAxiosRequestConfig } from 'axios'
+import { useAuthStore } from '@/stores/useAuth.stores'
+
+function getAccessToken(): string | null {
+  try {
+    const tokenFromStore = useAuthStore.getState().data?.accessToken
+    if (tokenFromStore) return tokenFromStore
+  } catch {
+    // ignore
+  }
+  try {
+    const persisted = localStorage.getItem('user-storage')
+    if (persisted) {
+      const parsed = JSON.parse(persisted)
+      const token = parsed?.state?.data?.accessToken as string | undefined
+      if (token) return token
+    }
+  } catch {
+    // ignore
+  }
+  const legacy = localStorage.getItem('access_token')
+  return legacy
+}
 
 class AxiosClient {
   public axiosInstance: AxiosInstance
@@ -16,8 +38,8 @@ class AxiosClient {
   private _initializeInterceptors() {
     this.axiosInstance.interceptors.request.use(
       (config: InternalAxiosRequestConfig): InternalAxiosRequestConfig => {
-        // Lấy access_token từ localStorage thay vì AsyncStorage
-        const token = localStorage.getItem('access_token')
+        // Lấy access_token từ Zustand store (persist) hoặc localStorage
+        const token = getAccessToken()
         if (token && config.headers) {
           config.headers.Authorization = `Bearer ${token}`
         }

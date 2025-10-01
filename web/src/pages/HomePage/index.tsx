@@ -9,6 +9,7 @@ const HomePage = () => {
     <div className='home-page-container'>
       <Banner />
       <CourseList />
+      <CourseList />
       <TrendingCategories />
       <WhyChooseUsSection />
       <HighlightedArticles />
