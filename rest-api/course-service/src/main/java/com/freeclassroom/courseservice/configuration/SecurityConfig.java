@@ -39,7 +39,7 @@ public class SecurityConfig {
 
     private final CustomJwtDecoder jwtDecoder;
 
-    private final String[] PUBLIC_ENDPOINTS = {"/categories/**", "/tags/**", "/test/**"};
+    private final String[] PUBLIC_ENDPOINTS = {"/categories/**", "/tags/**", "/test/**", "/storage/**"};
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
