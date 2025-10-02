@@ -12,8 +12,6 @@ interface SlidingLoginSignupProps {
   setIsSignUpMode: (value: boolean) => void
 }
 
-let i: number = 0
-
 const AuthPage: React.FC<SlidingLoginSignupProps> = ({ isSignUpMode, setIsSignUpMode }) => {
   // handle redirect oauth2 google
   const { loading, startLoading, stopLoading } = useLoading()
@@ -27,7 +25,7 @@ const AuthPage: React.FC<SlidingLoginSignupProps> = ({ isSignUpMode, setIsSignUp
 
   useEffect(() => {
     if (data) {
-      console.log('render num: ', i++)
+      toast.info('Bạn đã đăng nhập rồi!')
       navigator('/')
     }
   }, [data, navigator])
