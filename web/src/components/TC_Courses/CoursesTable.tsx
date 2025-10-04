@@ -5,6 +5,7 @@ import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuIte
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { MoreHorizontal, Filter, Check } from 'lucide-react'
 import { Course, CourseStatus } from './CourseTypes'
+import { useNavigate } from 'react-router-dom'
 
 const getStatusBadge = (status: CourseStatus) => {
   switch (status) {
@@ -41,6 +42,8 @@ interface CoursesTableProps {
 const statusOptions: Array<'' | 'PUBLISHED' | 'DRAFT' | 'PENDING_REVIEW'> = ['', 'PUBLISHED', 'DRAFT', 'PENDING_REVIEW']
 
 const CoursesTable: FC<CoursesTableProps> = ({ courses, statusFilter = '', onChangeStatusFilter }) => {
+  const navigate = useNavigate()
+
   return (
     <div className='overflow-x-auto rounded-xl border border-gray-200 dark:border-slate-700 shadow-sm'>
       <Table className='min-w-[700px]'>
@@ -53,9 +56,8 @@ const CoursesTable: FC<CoursesTableProps> = ({ courses, statusFilter = '', onCha
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <button
-                      className={`p-1 rounded-md border transition-colors ${
-                        statusFilter ? 'border-blue-300 text-blue-600 bg-white' : 'border-transparent text-blue-600'
-                      } hover:bg-blue-50`}
+                      className={`p-1 rounded-md border transition-colors ${statusFilter ? 'border-blue-300 text-blue-600 bg-white' : 'border-transparent text-blue-600'
+                        } hover:bg-blue-50`}
                       aria-label='Lọc theo trạng thái'
                     >
                       <Filter className='w-4 h-4' />
@@ -84,7 +86,11 @@ const CoursesTable: FC<CoursesTableProps> = ({ courses, statusFilter = '', onCha
         </TableHeader>
         <TableBody>
           {courses.map((course) => (
-            <TableRow key={course.id} className='hover:bg-white dark:hover:bg-slate-800 hover:shadow-md transition-all'>
+            <TableRow
+              key={course.id}
+              className='hover:bg-white dark:hover:bg-slate-800 hover:shadow-md transition-all cursor-pointer'
+              onClick={() => navigate(`/teacher/course-details/${course.id}`)}
+            >
               <TableCell className='p-3 sm:p-4 flex items-center gap-3 sm:gap-4'>
                 <img
                   src={course.thumbnailUrl || course.image || 'https://picsum.photos/200/120?grayscale'}
