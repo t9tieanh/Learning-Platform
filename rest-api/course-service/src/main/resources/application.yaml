@@ -3,14 +3,14 @@ server:
 
 aws:
   accessKeyId:
-  secretAccessKey:
-  bucketName: sample-s3-ntd
-  key-store: https://sample-s3-ntd.s3.ap-southeast-1.amazonaws.com
-  region: ap-southeast-1
+  secretAccessKey: +S41d/55eDu//GR5/FMjAWerS
+  bucketName: -s3-ntd
+  key-store: https://samp-ntd.s3.ap--1.amazonaws.com
+  region: ap--1
 
 
 cloudinary:
-  cloud_name:
+  cloud_name: nzgv2
   api_key:
   api_secret: -9HimZk
 

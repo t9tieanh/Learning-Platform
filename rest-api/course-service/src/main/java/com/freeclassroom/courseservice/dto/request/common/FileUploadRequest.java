@@ -1,5 +1,6 @@
-package com.freeclassroom.courseservice.dto.response.category;
+package com.freeclassroom.courseservice.dto.request.common;
 
+import org.springframework.web.multipart.MultipartFile;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -8,8 +9,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class CategoryResponse {
+public class FileUploadRequest {
+    MultipartFile file;
     String id;
-    String name;
-    String description;
 }

@@ -42,7 +42,7 @@ const router = createBrowserRouter([
         children: [
           { path: '', element: <TCHomePage /> },
           { path: 'course', element: <TC_Course /> },
-          { path: 'create-course', element: <TC_CreateCourse /> },
+          { path: 'course/:id', element: <TC_CreateCourse /> },
           { path: 'profile', element: <TC_Profile /> },
           { path: 'course-details', element: <TC_CourseDetail /> }
         ]

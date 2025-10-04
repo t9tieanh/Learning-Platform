@@ -5,11 +5,13 @@ import { Badge } from '@/components/ui/badge'
 const PreviewComponent = ({
   courseTitle,
   subtitle,
-  tags
+  tags,
+  thumbnailUrl
 }: {
   courseTitle: string
   subtitle: string
   tags: string[] | undefined
+  thumbnailUrl: string | undefined
 }) => {
   return (
     <>
@@ -23,7 +25,11 @@ const PreviewComponent = ({
 
         <CardContent className='space-y-4'>
           <div className='aspect-video bg-blue-100 rounded-lg flex items-center justify-center'>
-            <ImageIcon className='h-10 w-10 text-blue-400' />
+            {thumbnailUrl ? (
+              <img src={thumbnailUrl} alt='Thumbnail' className='object-cover w-full h-full rounded-lg' />
+            ) : (
+              <ImageIcon className='h-10 w-10 text-blue-400' />
+            )}
           </div>
 
           <div className='space-y-3'>

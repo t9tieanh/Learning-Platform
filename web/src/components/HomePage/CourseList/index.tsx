@@ -46,7 +46,6 @@ const CourseList = () => {
             image: 'https://files.fullstack.edu.vn/f8-prod/courses/12.png'
           }}
         />
-
       </div>
     </div>
   )

@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -5,10 +6,13 @@ import { Badge } from '@/components/ui/badge'
 import { X } from 'lucide-react'
 import { useState } from 'react'
 import { Props as CommonProps } from '@/utils/common/reactHookFormProps'
+import CustomTag from '@/components/common/CustomTag'
+import useTags from '@/hooks/useTags.hook'
 
 const SeoTagInfomation = ({ register, control, errors, setValue, getValues }: CommonProps) => {
   const tags = getValues('tags') || []
   const [newTag, setNewTag] = useState('')
+  const availableTags = useTags()
 
   const addTag = () => {
     if (newTag && !tags.includes(newTag) && tags.length < 10) {
@@ -35,19 +39,27 @@ const SeoTagInfomation = ({ register, control, errors, setValue, getValues }: Co
         <CardContent className='space-y-4'>
           {/* Tags list */}
           <div className='flex flex-wrap gap-2 mb-4'>
-            {tags.map((tag: string) => (
-              <Badge
-                key={tag}
-                variant='secondary'
-                className='flex items-center text-sm px-2 py-1 rounded-md bg-blue-100 text-blue-800 border border-blue-300'
-              >
-                {tag}
-                <X
-                  className='h-3 w-3 ml-1 cursor-pointer text-blue-500 hover:text-red-500 transition-colors'
-                  onClick={() => removeTag(tag)}
+            {
+              availableTags?.map((tag) => (
+                <CustomTag
+                  key={tag.id}
+                  label={tag.name}
+                  imageUri={tag.imageUrl}
+                  checked={tags.includes(tag.id)}
+                  onChange={(checked: boolean) => {
+                    if (checked) {
+                      // Add tag
+                      if (!tags.includes(tag.id) && tags.length < 10) {
+                        setValue('tags', [...tags, tag.id])
+                      }
+                    } else {
+                      // Remove tag
+                      removeTag(tag.id)
+                    }
+                  }}
                 />
-              </Badge>
-            ))}
+              ))
+            }
           </div>
 
           {/* Input + Button */}

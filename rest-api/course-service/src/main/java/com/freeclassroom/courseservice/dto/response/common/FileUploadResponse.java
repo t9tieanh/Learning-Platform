@@ -1,4 +1,4 @@
-package com.freeclassroom.courseservice.dto.response.category;
+package com.freeclassroom.courseservice.dto.response.common;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -8,8 +8,6 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class CategoryResponse {
-    String id;
-    String name;
-    String description;
+public class FileUploadResponse {
+    String imageUrl;
 }

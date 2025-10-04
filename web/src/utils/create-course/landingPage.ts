@@ -17,6 +17,7 @@ export type LandingPageFormValues = {
   description: string
   language: string
   category: string
+  thumbnailUrl: string | undefined
   tags: string[] | undefined
   learnItems: string[] | undefined
   requirements: string[] | undefined

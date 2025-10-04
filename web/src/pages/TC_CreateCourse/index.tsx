@@ -4,22 +4,23 @@ import CurriculumForm from '@/components/TC_CreateCourse/CurriculumForm/Curricul
 import LandingPageForm from '@/components/TC_CreateCourse/LandingPageForm'
 import PricingForm from '@/components/TC_CreateCourse/PricingForm/PricingForm'
 import SetupForm from '@/components/TC_CreateCourse/SetupForm/SetupForm'
+import { useParams } from 'react-router-dom'
 
 const TC_CreateCourse = () => {
   const [activeSection, setActiveSection] = useState('landing')
+
+  const { id } = useParams<{ id: string }>()
 
   const renderContent = () => {
     switch (activeSection) {
       case 'curriculum':
         return <CurriculumForm />
-      case 'landing':
-        return <LandingPageForm />
       case 'pricing':
         return <PricingForm />
       case 'setup':
         return <SetupForm />
       default:
-        return <LandingPageForm />
+        return <LandingPageForm id={id as string} />
     }
   }
 

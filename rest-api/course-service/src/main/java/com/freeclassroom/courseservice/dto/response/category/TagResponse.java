@@ -12,6 +12,7 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class TagResponse {
+    String id;
     String name;
     String imageUrl;
 }

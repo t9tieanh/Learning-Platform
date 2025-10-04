@@ -7,8 +7,11 @@ import { Label } from '@/components/ui/label'
 import DynamicListInput from '../common/DynamicListInput'
 import { Props as CommonProps } from '@/utils/common/reactHookFormProps'
 import { BookOpen, FileText, Info } from 'lucide-react'
+import useCategory from '@/hooks/useCategory.hook'
 
 const BaseInfomation = ({ register, control, errors, setValue, getValues }: CommonProps) => {
+  const categories = useCategory()
+
   return (
     <>
       <Card className='border border-blue-200 shadow-sm bg-blue-50'>
@@ -107,13 +110,22 @@ const BaseInfomation = ({ register, control, errors, setValue, getValues }: Comm
               render={({ field }) => (
                 <Select value={field.value} onValueChange={field.onChange}>
                   <SelectTrigger className='mt-2 border-blue-300 focus:ring-blue-300'>
-                    <SelectValue />
+                    <SelectValue
+                      placeholder={categories && categories.length > 0 ? 'Chọn danh mục' : 'Chưa có danh mục'}
+                    />
                   </SelectTrigger>
                   <SelectContent className='bg-blue-50'>
-                    <SelectItem value='development'>Phát triển</SelectItem>
-                    <SelectItem value='business'>Kinh doanh</SelectItem>
-                    <SelectItem value='design'>Thiết kế</SelectItem>
-                    <SelectItem value='marketing'>Marketing</SelectItem>
+                    {categories && categories.length > 0 ? (
+                      categories.map((cat) => (
+                        <SelectItem key={cat.name} value={cat.name}>
+                          {cat.name}
+                        </SelectItem>
+                      ))
+                    ) : (
+                      <p className='text-red-500 text-xs'>
+                        Chưa có danh mục nào. Vui lòng thêm danh mục trong trang quản trị.
+                      </p>
+                    )}
                   </SelectContent>
                 </Select>
               )}

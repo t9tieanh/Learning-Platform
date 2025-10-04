@@ -9,8 +9,10 @@ import { landingPageSchema, LandingPageFormValues } from '@/utils/create-course/
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import CustomButton from '@/components/common/Button'
+import { useEffect } from 'react'
+import courseService from '@/services/course/course.service'
 
-const LandingPageForm = () => {
+const LandingPageForm: React.FC<{ id: string }> = ({ id }: { id: string }) => {
   const {
     control,
     register,
@@ -23,6 +25,31 @@ const LandingPageForm = () => {
     resolver: yupResolver(landingPageSchema) as any
   })
 
+  useEffect(() => {
+    // Fetch course info by ID and populate form fields
+    const fetchCourseInfo = async () => {
+      try {
+        const response = await courseService.getCourseInfo(id)
+
+        if (response.code === 200 && response.result) {
+          setValue('courseTitle', response.result.title || '')
+          setValue('subtitle', response.result.shortDescription || '')
+          setValue('description', response.result.longDescription || '')
+          setValue('language', response.result.language || '')
+          setValue('learnItems', response.result.outcomes || [])
+          setValue('category', response.result.category || '')
+          setValue('requirements', response.result.requirements || '')
+          setValue('thumbnailUrl', response.result.thumbnailUrl || '')
+        }
+      } catch (error) {
+        console.log('Error fetching course info:', error)
+      }
+    }
+
+    if (id) {
+      fetchCourseInfo()
+    }
+  }, [id])
   // Watch form values
   const formValues = watch()
 
@@ -84,11 +111,14 @@ const LandingPageForm = () => {
 
             <TabsContent value='media' className='space-y-6'>
               <MediaInfomation
-                register={register}
-                control={control}
-                errors={errors}
-                setValue={setValue}
-                getValues={getValues}
+                formProps={{
+                  register,
+                  control,
+                  errors,
+                  setValue,
+                  getValues
+                }}
+                id={id}
               />
             </TabsContent>
 
@@ -119,11 +149,7 @@ const LandingPageForm = () => {
         />
         <div className='space-x-3'>
           <CustomButton className='bg-gray-100 text-black/90 hover:bg-gray-200 hover:text-black' label='Lưu bản nháp' />
-          <CustomButton
-            className='bg-primary/90 hover:bg-primary'
-            label='Tiếp tục'
-            icon={<Send className='mr-2' />}
-          />
+          <CustomButton className='bg-primary/90 hover:bg-primary' label='Tiếp tục' icon={<Send className='mr-2' />} />
         </div>
       </div>
     </div>

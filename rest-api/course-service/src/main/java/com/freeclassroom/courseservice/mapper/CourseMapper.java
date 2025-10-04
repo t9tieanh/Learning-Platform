@@ -1,6 +1,7 @@
 package com.freeclassroom.courseservice.mapper;
 
 import com.freeclassroom.courseservice.dto.request.course.CreationCourseRequest;
+import com.freeclassroom.courseservice.dto.response.course.CourseInfoResponse;
 import com.freeclassroom.courseservice.dto.response.course.CourseResponse;
 import com.freeclassroom.courseservice.entity.course.CourseEntity;
 import org.mapstruct.Mapper;
@@ -19,4 +20,7 @@ public interface CourseMapper {
     CourseResponse toDto(CourseEntity entity);
 
     List<CourseResponse> toDtoList(List<CourseEntity> entities);
+
+    @Mapping(target = "category", ignore = true)
+    CourseInfoResponse toInfoResponseDto(CourseEntity entity);
 }

@@ -35,7 +35,6 @@ interface CertificationProps {
 }
 
 export function CertificateSection({ teacher, onUpdateTeacher, setEditedTeacher, className = '' }: CertificationProps) {
-
   const [newCertificate, setNewCertificate] = useState<Omit<Certificate, 'id'>>({
     name: '',
     image: '',
