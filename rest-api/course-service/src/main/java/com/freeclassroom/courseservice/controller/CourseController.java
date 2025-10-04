@@ -39,4 +39,6 @@ public class CourseController {
     ) {
         return courseService.updateTags(id, request, SecurityContextHolder.getContext().getAuthentication().getName());
     }
+
+    
 }
