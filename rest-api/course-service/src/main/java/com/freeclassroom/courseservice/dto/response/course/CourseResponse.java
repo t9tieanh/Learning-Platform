@@ -27,9 +27,9 @@ public class CourseResponse {
     EnumCourseStatus status;
     String instructorId;
 
-    List<String> chapterIds;
-    List<String> enrollmentIds;
-    List<String> tagNames;
+    List<String> chapterLst;
+    List<String> enrollments;
+    List<String> tags;
 
     String categoryName;
 

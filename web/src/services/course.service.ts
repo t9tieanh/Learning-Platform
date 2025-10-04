@@ -60,6 +60,13 @@ class CourseService {
     const response = await axiosClient.axiosInstance.post('/courses/teacher', body)
     return response.data
   }
+
+  // Lấy chi tiết khóa học theo id
+  async getCourseDetail(courseId: string): Promise<ApiResponse<any>> {
+    if (!courseId) throw new Error('Thiếu courseId')
+    const response = await axiosClient.axiosInstance.get(`/courses/details/${courseId}`)
+    return response.data
+  }
 }
 
 export default new CourseService()

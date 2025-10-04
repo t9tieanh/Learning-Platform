@@ -1,6 +1,7 @@
 package com.freeclassroom.courseservice.controller;
 
 import com.freeclassroom.courseservice.dto.request.course.CreationCourseRequest;
+import com.freeclassroom.courseservice.dto.request.course.GetCourseRequest;
 import com.freeclassroom.courseservice.dto.request.course.InstructorRequest;
 import com.freeclassroom.courseservice.dto.request.course.UpdateTagsRequest;
 import com.freeclassroom.courseservice.dto.response.ApiResponse;
@@ -14,12 +15,20 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/courses")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class CourseController {
     ICourseService courseService;
+
+    // GET
+    @GetMapping("/details/{id}")
+    ApiResponse<CourseResponse> getCourse(@PathVariable String id) {
+        return courseService.getCourse(id);
+    }
 
     @PostMapping("/teacher")
     ApiResponse<PageResponse<CourseResponse>> getCoursesByTeacherId(@RequestBody InstructorRequest request) {
@@ -40,5 +49,7 @@ public class CourseController {
         return courseService.updateTags(id, request, SecurityContextHolder.getContext().getAuthentication().getName());
     }
 
-    
+
+
+
 }

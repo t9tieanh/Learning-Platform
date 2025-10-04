@@ -14,7 +14,7 @@ export function LearningOutcomes({ outcomes }: LearningOutcomesProps) {
       className='rounded-xl bg-card p-6 shadow-md'
     >
       <h2 className='text-xl font-bold mb-6'>Bạn sẽ học được gì</h2>
-      <ul className='grid gap-4 sm:grid-cols-2'>
+      <ul className='flex flex-col gap-4'>
         {outcomes.map((outcome, index) => (
           <motion.li
             key={index}

@@ -44,10 +44,13 @@ const router = createBrowserRouter([
           { path: 'course', element: <TC_Course /> },
           { path: 'create-course', element: <TC_CreateCourse /> },
           { path: 'profile', element: <TC_Profile /> },
-          { path: 'course-details', element: <TC_CourseDetail /> }
+          { path: 'course-details/:id', element: <TC_CourseDetail /> },
+          // Alias cũ (nếu ai truy cập không có id sẽ 404 hoặc có thể điều hướng)
+          { path: 'course-details', element: <NotFound /> }
         ]
       },
       { path: 'user/verify', element: <User /> },
+      { path: 'TC_CourseDetail/:id', element: <TC_CourseDetail /> },
       { path: '*', element: <NotFound /> }
     ]
   }

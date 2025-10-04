@@ -1,6 +1,7 @@
 package com.freeclassroom.courseservice.service.course;
 
 import com.freeclassroom.courseservice.dto.request.course.CreationCourseRequest;
+import com.freeclassroom.courseservice.dto.request.course.GetCourseRequest;
 import com.freeclassroom.courseservice.dto.request.course.UpdateTagsRequest;
 import com.freeclassroom.courseservice.dto.response.ApiResponse;
 import com.freeclassroom.courseservice.dto.response.common.CreationResponse;
@@ -30,6 +31,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -144,4 +146,37 @@ public class CourseService implements ICourseService {
                     .build();
         }
     }
+
+    @Override
+    public ApiResponse<CourseResponse> getCourse(String id) {
+        try {
+            CourseEntity entity = courseRepo.findByIdWithTags(id)
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy khóa học"));
+
+            courseRepo.findByIdWithChapters(id)
+                    .ifPresent(e -> entity.setChapterLst(e.getChapterLst()));
+
+            courseRepo.findByIdWithEnrollments(id)
+                    .ifPresent(e -> entity.setEnrollments(e.getEnrollments()));
+
+            System.out.println("Tags: " + entity.getTags().size());
+            System.out.println("Chapters: " + entity.getChapterLst().size());
+            System.out.println("Enrollments: " + entity.getEnrollments().size());
+
+            CourseResponse response = courseMapper.toDto(entity);
+
+            return ApiResponse.<CourseResponse>builder()
+                    .code(HttpStatus.OK.value())
+                    .message("Lấy khóa học thành công")
+                    .result(response)
+                    .build();
+        } catch (Exception e) {
+            return ApiResponse.<CourseResponse>builder()
+                    .code(HttpStatus.NOT_FOUND.value())
+                    .message("Lỗi: " + e.getMessage())
+                    .result(null)
+                    .build();
+        }
+    }
+
 }
