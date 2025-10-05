@@ -1,7 +1,6 @@
 /* eslint-disable prettier/prettier */
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { CirclePlus } from 'lucide-react';
-import { useState } from 'react'
 import { Props as CommonProps } from '@/utils/common/reactHookFormProps'
 import CustomTag from '@/components/common/CustomTag'
 import useTags from '@/hooks/useTags.hook'

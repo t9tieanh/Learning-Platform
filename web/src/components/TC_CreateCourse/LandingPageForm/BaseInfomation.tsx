@@ -12,7 +12,7 @@ import CustomButton from '@/components/common/Button'
 import { toast } from 'react-toastify'
 import courseService from '@/services/course/course.service'
 import useLoading from '@/hooks/useLoading.hook'
-import { useCallback, useEffect, useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 
 interface BaseInfomationProps extends CommonProps {
   id: string
