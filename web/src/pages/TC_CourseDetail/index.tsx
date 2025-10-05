@@ -266,6 +266,7 @@ export default function CourseDetailPage() {
                   date: r.createdAt
                 }))}
                 reviewsPerPage={5}
+                courseId={course.id}
               />
             </div>
 

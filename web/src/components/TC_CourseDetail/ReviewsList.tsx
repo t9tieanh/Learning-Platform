@@ -1,20 +1,87 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { Star, ChevronDown } from 'lucide-react'
+import { Star, ChevronDown, Loader2 } from 'lucide-react'
 import { Review } from '@/types/course.type'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import feedbackService, { FeedbackItem } from '@/services/feedback.service'
 
 interface ReviewsListProps {
   reviews: Review[]
   reviewsPerPage?: number
+  courseId?: string
 }
 
-export function ReviewsList({ reviews, reviewsPerPage = 5 }: ReviewsListProps) {
-  const [visibleCount, setVisibleCount] = useState(reviewsPerPage)
+export function ReviewsList({ reviews, reviewsPerPage = 5, courseId }: ReviewsListProps) {
+  // Local state cho chế độ API load-more
+  const [items, setItems] = useState<Review[]>(reviews)
+  const [cursor, setCursor] = useState<string | null>(null)
+  const [hasMore, setHasMore] = useState(false)
+  const [initialLoaded, setInitialLoaded] = useState(false)
+  const [loadingMore, setLoadingMore] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  const visibleReviews = reviews.slice(0, visibleCount)
-  const hasMore = visibleCount < reviews.length
+  const useApiMode = !!courseId // nếu có courseId thì dùng API; nếu không dùng mảng reviews truyền vào
+
+  const mapFeedbackToReview = (f: FeedbackItem): Review => ({
+    id: String(f._id),
+    reviewerName: f.userName || 'User',
+    reviewerAvatar: f.userAvatar || '',
+    rating: f.rating,
+    comment: f.message,
+    date: f.createdAt
+  })
+
+  useEffect(() => {
+    if (!useApiMode) return
+    let cancelled = false
+    async function loadFirst() {
+      try {
+        setError(null)
+        const res = await feedbackService.getCourseFeedbacks({ courseId: courseId!, limit: reviewsPerPage })
+        if (cancelled) return
+        const mapped = res.items.map(mapFeedbackToReview)
+        setItems(mapped)
+        setHasMore(res.hasMore)
+        setCursor(res.nextCursor)
+      } catch (e: any) {
+        if (!cancelled) setError(e.message || 'Không tải được đánh giá')
+      } finally {
+        if (!cancelled) setInitialLoaded(true)
+      }
+    }
+    loadFirst()
+    return () => {
+      cancelled = true
+    }
+  }, [courseId, reviewsPerPage, useApiMode])
+
+  const handleLoadMore = async () => {
+    if (!useApiMode) {
+      // Fallback chế độ local (không dùng API) -> giữ logic cũ tăng visibleCount
+      setItems((prev) => [...prev, ...reviews.slice(prev.length, prev.length + reviewsPerPage)])
+      return
+    }
+    if (!hasMore || loadingMore) return
+    try {
+      setLoadingMore(true)
+      const res = await feedbackService.getCourseFeedbacks({
+        courseId: courseId!,
+        limit: reviewsPerPage,
+        cursor: cursor || undefined
+      })
+      const mapped = res.items.map(mapFeedbackToReview)
+      setItems((prev) => [...prev, ...mapped])
+      setHasMore(res.hasMore)
+      setCursor(res.nextCursor)
+    } catch (e: any) {
+      setError(e.message || 'Không tải thêm được đánh giá')
+    } finally {
+      setLoadingMore(false)
+    }
+  }
+
+  const visibleReviews = items
 
   const renderStars = (rating: number) => {
     return (
@@ -36,6 +103,15 @@ export function ReviewsList({ reviews, reviewsPerPage = 5 }: ReviewsListProps) {
       <h2 className='text-2xl font-bold'>Đánh giá từ học viên</h2>
 
       <div className='space-y-4'>
+        {error && <div className='text-sm text-destructive bg-destructive/10 px-3 py-2 rounded-md'>{error}</div>}
+        {!useApiMode && visibleReviews.length === 0 && (
+          <p className='text-sm text-muted-foreground'>Chưa có đánh giá</p>
+        )}
+        {useApiMode && !initialLoaded && (
+          <div className='flex items-center gap-2 text-sm text-muted-foreground'>
+            <Loader2 className='h-4 w-4 animate-spin' /> Đang tải đánh giá...
+          </div>
+        )}
         {visibleReviews.map((review, index) => (
           <motion.div
             key={review.id}
@@ -75,9 +151,10 @@ export function ReviewsList({ reviews, reviewsPerPage = 5 }: ReviewsListProps) {
 
       {hasMore && (
         <div className='flex justify-center'>
-          <Button variant='outline' onClick={() => setVisibleCount((prev) => prev + reviewsPerPage)} className='gap-2'>
-            <span>Xem thêm đánh giá</span>
-            <ChevronDown className='h-4 w-4' />
+          <Button variant='outline' onClick={handleLoadMore} className='gap-2' disabled={loadingMore}>
+            {loadingMore && <Loader2 className='h-4 w-4 animate-spin' />}
+            <span>{loadingMore ? 'Đang tải...' : 'Xem thêm đánh giá'}</span>
+            {!loadingMore && <ChevronDown className='h-4 w-4' />}
           </Button>
         </div>
       )}
