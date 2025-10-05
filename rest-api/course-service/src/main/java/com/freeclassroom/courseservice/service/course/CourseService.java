@@ -16,7 +16,9 @@ import com.freeclassroom.courseservice.exception.CustomExeption;
 import com.freeclassroom.courseservice.exception.ErrorCode;
 import com.freeclassroom.courseservice.grpc.client.UserGrpcClient;
 import com.freeclassroom.courseservice.mapper.CourseMapper;
+import com.freeclassroom.courseservice.mapper.LessonMapper;
 import com.freeclassroom.courseservice.repository.entity.CategoryRepository;
+import com.freeclassroom.courseservice.repository.entity.ChapterRepository;
 import com.freeclassroom.courseservice.repository.entity.CourseRepository;
 import com.freeclassroom.courseservice.repository.entity.TagRepository;
 import lombok.AccessLevel;
@@ -32,6 +34,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -41,8 +44,10 @@ public class CourseService implements ICourseService {
     CourseRepository courseRepo;
     CategoryRepository categoryRepo;
     TagRepository tagRepo;
+    ChapterRepository chapterRepo;
 
     CourseMapper courseMapper;
+    LessonMapper lessonMapper;
 
     UserGrpcClient userGrpcClient;
     @Override
@@ -153,17 +158,26 @@ public class CourseService implements ICourseService {
             CourseEntity entity = courseRepo.findByIdWithTags(id)
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy khóa học"));
 
+            System.out.println("cate" + entity.getCategory().getName());
+
             courseRepo.findByIdWithChapters(id)
-                    .ifPresent(e -> entity.setChapterLst(e.getChapterLst()));
+                    .ifPresent(e -> entity.setChapters(e.getChapters()));
 
             courseRepo.findByIdWithEnrollments(id)
                     .ifPresent(e -> entity.setEnrollments(e.getEnrollments()));
 
-            System.out.println("Tags: " + entity.getTags().size());
-            System.out.println("Chapters: " + entity.getChapterLst().size());
-            System.out.println("Enrollments: " + entity.getEnrollments().size());
-
             CourseResponse response = courseMapper.toDto(entity);
+
+            response.getChapters().forEach(chapterDTO -> {
+                var chapter = chapterRepo.findByIdWithLessons(chapterDTO.getId())
+                        .orElseThrow(() -> new RuntimeException("Chapter not found"));
+                chapterDTO.setLessons(
+                        chapter.getLessons()
+                                .stream()
+                                .map(lessonMapper::toDto)
+                                .collect(Collectors.toList())
+                );
+            });
 
             return ApiResponse.<CourseResponse>builder()
                     .code(HttpStatus.OK.value())

@@ -78,7 +78,17 @@ export function CurriculumAccordion({ sections, courseId, onPlayLesson }: Curric
                       <div className='flex items-center gap-1'>
                         <Clock className='w-4 h-4' />
                         <span>
-                          {section.lessons.reduce((acc, l) => acc + (l.duration ? parseInt(l.duration) : 0), 0)} phút
+                          {(() => {
+                            const totalSeconds = section.lessons.reduce(
+                              (acc, l) => acc + (l.duration ? parseInt(l.duration) : 0),
+                              0
+                            )
+
+                            const hours = Math.floor(totalSeconds / 3600)
+                            const minutes = Math.floor((totalSeconds % 3600) / 60)
+
+                            return `${hours > 0 ? `${hours} giờ ` : ''}${minutes} phút`
+                          })()}
                         </span>
                       </div>
                     </div>
@@ -104,7 +114,14 @@ export function CurriculumAccordion({ sections, courseId, onPlayLesson }: Curric
                       <Badge variant='secondary' className='text-xs'>
                         {lesson.type === 'video' ? 'Video' : lesson.type === 'article' ? 'Bài viết' : 'Nội dung'}
                       </Badge>
-                      <span className='text-xs text-muted-foreground'>{lesson.duration}</span>
+                      <span className='text-xs text-muted-foreground'>
+                        {(() => {
+                          const seconds = Math.floor(Number(lesson.duration) || 0)
+                          const hours = Math.floor(seconds / 3600)
+                          const minutes = Math.floor((seconds % 3600) / 60)
+                          return hours > 0 ? `${hours}h${minutes.toString().padStart(2, '0')}m` : `${minutes}m`
+                        })()}
+                      </span>
                       {canPlay && (
                         <Button
                           size='icon'

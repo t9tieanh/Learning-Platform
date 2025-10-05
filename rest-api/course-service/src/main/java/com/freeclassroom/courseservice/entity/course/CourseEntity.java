@@ -39,7 +39,7 @@ public class CourseEntity extends AbstractEntity {
 
     // Chapter
     @OneToMany(mappedBy = "course")
-    List<ChapterEntity> chapterLst;
+    List<ChapterEntity> chapters;
 
     // Enrollment
     @OneToMany(mappedBy = "course")
