@@ -11,7 +11,7 @@ import org.mapstruct.MappingTarget;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {ChapterMapper.class, EnrollmentMapper.class})
 public interface CourseMapper {
     CourseEntity toEntity(CreationCourseRequest request);
 
@@ -22,14 +22,10 @@ public interface CourseMapper {
             target = "tags",
             expression = "java(entity.getTags().stream().map(tag -> tag.getName()).toList())"
     )
-    @Mapping(
-            target = "chapterLst",
-            expression = "java(entity.getChapterLst().stream().map(ch -> ch.getId()).toList())"
-    )
-    @Mapping(
-            target = "enrollments",
-            expression = "java(entity.getEnrollments().stream().map(en -> en.getId()).toList())"
-    )
+    @Mapping(target = "category",
+            expression = "java(entity.getCategory() != null ? entity.getCategory().getName() : null)")
+    @Mapping(source = "chapters", target = "chapters")
+    @Mapping(source = "enrollments", target = "enrollments")
     CourseResponse toDto(CourseEntity entity);
 
     List<CourseResponse> toDtoList(List<CourseEntity> entities);

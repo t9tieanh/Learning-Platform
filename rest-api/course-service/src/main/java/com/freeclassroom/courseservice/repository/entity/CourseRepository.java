@@ -19,14 +19,11 @@ public interface CourseRepository extends JpaRepository<CourseEntity, String> {
     @Query("select c from CourseEntity c where c.id = :id")
     Optional<CourseEntity> findByIdWithTags(@Param("id") String id);
 
-    @EntityGraph(attributePaths = {"chapterLst"})
+    @EntityGraph(attributePaths = {"chapters"})
     @Query("select c from CourseEntity c where c.id = :id")
     Optional<CourseEntity> findByIdWithChapters(@Param("id") String id);
 
     @EntityGraph(attributePaths = {"enrollments"})
     @Query("select c from CourseEntity c where c.id = :id")
     Optional<CourseEntity> findByIdWithEnrollments(@Param("id") String id);
-
-//    @EntityGraph(attributePaths = {"tags"})
-//    Optional<CourseEntity> findById(String id);
 }

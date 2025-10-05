@@ -32,7 +32,7 @@ interface CourseResponseDTO {
   // tuỳ backend: tags, sections, lessons...
   tagNames?: string[]
   categories?: string[]
-  sections?: Array<{
+  chapters?: Array<{
     id: string
     title: string
     order?: number
@@ -140,7 +140,7 @@ export default function CourseDetailPage() {
           categories: data.categories || (data.category ? [data.category] : []),
           learningOutcomes: data.outcomes || [],
           requirements: data.requirements || [],
-          sections: (data.sections || []).map((s: any, idx: number) => ({
+          chapters: (data.chapters || []).map((s: any, idx: number) => ({
             id: s.id || `sec-${idx}`,
             title: s.title || s.name || `Phần ${idx + 1}`,
             order: s.order ?? idx + 1,
@@ -160,7 +160,7 @@ export default function CourseDetailPage() {
             createdAt: r.createdAt || r.date || new Date().toISOString(),
             avatar: r.avatar || r.reviewerAvatar
           })),
-          students: data.studentsCount || data.students || 0,
+          students: data.enrollments.length || data.students || 0,
           rating: data.rating || 5,
           revenue: data.revenue || data.stats?.revenue || 0,
           publishedAt: data.publishedAt || data.stats?.publishedAt || data.createdAt
@@ -217,7 +217,7 @@ export default function CourseDetailPage() {
               <CourseHero
                 title={course.title}
                 coverImage={course.thumbnailUrl || '/placeholder.png'}
-                status={course.status === 'published' ? 'published' : 'draft'}
+                status={course.status.toLowerCase()}
                 publishedAt={course.publishedAt || course.createdAt || new Date().toISOString()}
                 price={course.price}
                 onPlayIntro={handlePlayIntro}
@@ -238,7 +238,7 @@ export default function CourseDetailPage() {
               <Prerequisites prerequisites={course.requirements || []} />
 
               <CurriculumAccordion
-                sections={(course.sections || []).map((s) => ({
+                sections={(course.chapters || []).map((s) => ({
                   id: s.id,
                   title: s.title,
                   order: s.order || 0,
@@ -272,7 +272,7 @@ export default function CourseDetailPage() {
             {/* Right Column - Sidebar */}
             <aside className='hidden lg:block'>
               <StatsSidebar
-                revenue={course.revenue || 0}
+                revenue={(course.price || 0) * (course.students || 0)}
                 studentsCount={course.students || 0}
                 rating={course.rating || 5}
                 status={course.status === 'published' ? 'published' : 'draft'}

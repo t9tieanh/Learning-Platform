@@ -41,7 +41,7 @@ export function StatsSidebar({
               </div>
               <div>
                 <p className='text-sm text-muted-foreground'>Doanh thu</p>
-                <p className='text-lg font-semibold'>{revenue.toLocaleString('vi-VN')}đ</p>
+                <p className='text-lg font-semibold'>{revenue.toLocaleString('vi-VN')} VND</p>
               </div>
             </div>
           </div>
