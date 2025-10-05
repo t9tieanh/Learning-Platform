@@ -18,10 +18,7 @@ public class UserGrpcService extends UserServiceGrpc.UserServiceImplBase {
     @Override
     public void getUser(GetUserRequest request, StreamObserver<GetUserResponse> responseObserver) {
         String id = request.getId();
-        System.out.println("check id: " + id);
         UserEntity user = userRepository.findById(id).orElse(null);
-        System.out.println("check user: " + user);
-
         if(user == null) {
             responseObserver.onError(
                     new RuntimeException("User not found with id" + id)

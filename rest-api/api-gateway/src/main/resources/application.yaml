@@ -45,3 +45,10 @@ spring:
             - Path=${app.api-prefix}/courses/**, ${app.api-prefix}/courses**
           filters:
             - StripPrefix=2
+
+        - id: notify
+          uri: http://localhost:8082
+          predicates:
+            - Path=${app.api-prefix}/notify/**, ${app.api-prefix}/notify**
+          filters:
+            - StripPrefix=2

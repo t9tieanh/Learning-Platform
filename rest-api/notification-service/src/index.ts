@@ -1,21 +1,18 @@
 import express from 'express'
 import 'reflect-metadata'
-import cors from 'cors'
-import { corsOptions } from '~/config/cors'
 import { CONNECT_DATABASES } from './config/connect'
 import { env } from '~/config/env'
 import { errorHandlingMiddleware } from '~/middleware/error-handler.midleware'
 import http from 'http'
 import { seedAll } from './seed/seedAll'
+import router from '~/routes/index'
 
 const START_SERVER = async () => {
   const app = express()
 
-  // config cors
-  app.use(cors(corsOptions))
   app.use(express.json())
 
-  // Middleware xử lý lỗi
+  app.use('/notify', router)
   app.use(errorHandlingMiddleware)
 
   app.get('/seeds-data', async (_req, res) => {

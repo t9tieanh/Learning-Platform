@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document, Model, Types } from 'mongoose'
+import mongoose, { Schema, Document, Model } from 'mongoose'
 
 interface IFeedback extends Document {
   userId: string
@@ -19,11 +19,13 @@ const FeedbackSchema: Schema = new Schema({
 }).set('toJSON', {
   transform: function (doc, ret) {
     //delete ret.__v
-
     return ret
   }
 })
 
-const FeedbackModel: Model<IFeedback> = mongoose.model<IFeedback>('Feedback', FeedbackSchema)
+// Index phục vụ truy vấn phân trang theo course + _id (cursor)
+FeedbackSchema.index({ courseId: 1, _id: -1 })
 
-export { FeedbackModel }
+const Feedback: Model<IFeedback> = mongoose.model<IFeedback>('Feedback', FeedbackSchema)
+
+export { Feedback }

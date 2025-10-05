@@ -3,6 +3,7 @@ package com.freeclassroom.userservice.service.user;
 import com.freeclassroom.userservice.configuration.RabbitMQConfig;
 import com.freeclassroom.userservice.dto.request.user.CreationUserRequest;
 import com.freeclassroom.userservice.dto.response.ApiResponse;
+import com.freeclassroom.userservice.dto.response.user.GetUserResponse;
 import com.freeclassroom.userservice.dto.response.user.UserResponse;
 import com.freeclassroom.userservice.entity.redis.OTPForgetPassword;
 import com.freeclassroom.userservice.entity.redis.PendingUserEntity;
@@ -20,6 +21,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -154,6 +156,27 @@ public class UserService implements IUserService {
                 .build();
     }
 
+    @Override
+    public ApiResponse<GetUserResponse> getUser(String id) {
+        try {
+            UserEntity user = userRepository.findById(id)
+                    .orElseThrow(() -> new CustomExeption(ErrorCode.USER_NOT_FOUND));
+
+            GetUserResponse response = userMapper.toDto(user);
+
+            return ApiResponse.<GetUserResponse>builder()
+                    .code(HttpStatus.OK.value())
+                    .message("Get user successfully")
+                    .result(response)
+                    .build();
+        } catch (Exception e) {
+            return ApiResponse.<GetUserResponse>builder()
+                    .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                    .message("Unexpected error: " + e.getMessage())
+                    .build();
+        }
+    }
+
     public ApiResponse<UserResponse> verifyForgotPassword(String code, String newPassword) {
         // get token in redis
         OTPForgetPassword forgetPassword = otpForgetPasswordRepo.findById(code)
@@ -181,4 +204,6 @@ public class UserService implements IUserService {
                 )
                 .build();
     }
+
+
 }
