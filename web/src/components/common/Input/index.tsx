@@ -11,7 +11,11 @@ type CustomInputProps = React.InputHTMLAttributes<HTMLInputElement> & {
 const CustomInput = React.forwardRef<HTMLInputElement, CustomInputProps>(({ label, className, ...rest }, ref) => {
   return (
     <div className='input-container'>
-      {label && <Label htmlFor={rest.id || rest.name}>{label}</Label>}
+      {label && (
+        <Label className='mb-2' htmlFor={rest.id || rest.name}>
+          {label}
+        </Label>
+      )}
       <Input ref={ref} className={`input-field ${className ?? ''}`} {...rest} />
     </div>
   )

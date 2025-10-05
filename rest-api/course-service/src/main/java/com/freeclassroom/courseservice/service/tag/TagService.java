@@ -33,4 +33,16 @@ public class TagService implements ITagService {
                         .collect(Collectors.toList()))
                 .build();
     }
+
+    @Override
+    public ApiResponse<List<TagResponse>> getTagsByCourseId(String courseId) {
+        List<TagEntity> result = tagRepo.findAllByCourses_Id(courseId);
+        return ApiResponse.<List<TagResponse>>builder()
+                .message("Lấy category thành công")
+                .code(200)
+                .result(result.stream()
+                        .map(tagMapper::toDto)
+                        .collect(Collectors.toList()))
+                .build();
+    }
 }

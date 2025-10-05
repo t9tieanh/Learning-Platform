@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { X } from 'lucide-react'
+import { BadgeCheck, X } from 'lucide-react'
 
 type DynamicListInputProps = {
   title: string
@@ -39,8 +39,9 @@ function DynamicListInput({ title, placeholder, items = [], icon, onChange }: Dy
           {items.map((item, index) => (
             <li
               key={index}
-              className='flex items-center justify-between bg-blue-200 p-2 rounded-lg text-blue-950 text-base'
+              className='flex items-center gap-2 justify-between bg-blue-200 p-2 rounded-lg text-blue-950 text-base'
             >
+              <BadgeCheck className='h-5 w-5 text-blue-700' />
               <span className='flex-1 pr-2 break-words'>{item}</span>
               <X
                 className='h-6 w-6 flex-shrink-0 text-blue-500 hover:text-red-500 cursor-pointer'

@@ -2,17 +2,17 @@ server:
   port: 8081
 
 aws:
-  accessKeyId:
-  secretAccessKey: +S41d/55eDu//GR5/FMjAWerS
-  bucketName: -s3-ntd
-  key-store: https://samp-ntd.s3.ap--1.amazonaws.com
-  region: ap--1
+  accessKeyId: AKIAWDVGBIV2PUTG6MHM
+  secretAccessKey: +S41d/55eDu/UIHQuMYoLitHcCn/GR5/FMjAWerS
+  bucketName: sample-s3-ntd
+  key-store: https://sample-s3-ntd.s3.ap-southeast-1.amazonaws.com
+  region: ap-southeast-1
 
 
 cloudinary:
-  cloud_name: nzgv2
-  api_key:
-  api_secret: -9HimZk
+  cloud_name: df3snzgv2
+  api_key: 242516133233971
+  api_secret: 8kYfliJa45faDUqNJdH6-9HimZk
 
 spring:
   datasource:

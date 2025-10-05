@@ -44,6 +44,21 @@ type Paginated<T> = {
 }
 
 class CourseService {
+  async createCourse(request: {
+    id?: string
+    title: string
+    shortDescription: string
+    longDescription?: string
+    thumbnailUrl?: string
+    language?: string
+    outcomes?: string[]
+    requirements?: string[]
+    categoryIds: string
+  }): Promise<ApiResponse<{ id: string; name: string }> | null> {
+    const response = await axiosClient.axiosInstance.post('learning/courses', request)
+    return response.data
+  }
+
   async getTeacherCourses(
     instructorId?: string,
     options?: { page?: number; limit?: number }

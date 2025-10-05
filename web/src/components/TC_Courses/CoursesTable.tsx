@@ -5,6 +5,7 @@ import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuIte
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { MoreHorizontal, Filter, Check } from 'lucide-react'
 import { Course, CourseStatus } from './CourseTypes'
+import { useNavigate } from 'react-router'
 
 const getStatusBadge = (status: CourseStatus) => {
   switch (status) {
@@ -41,6 +42,8 @@ interface CoursesTableProps {
 const statusOptions: Array<'' | 'PUBLISHED' | 'DRAFT' | 'PENDING_REVIEW'> = ['', 'PUBLISHED', 'DRAFT', 'PENDING_REVIEW']
 
 const CoursesTable: FC<CoursesTableProps> = ({ courses, statusFilter = '', onChangeStatusFilter }) => {
+  const navigator = useNavigate()
+
   return (
     <div className='overflow-x-auto rounded-xl border border-gray-200 dark:border-slate-700 shadow-sm'>
       <Table className='min-w-[700px]'>
@@ -87,13 +90,18 @@ const CoursesTable: FC<CoursesTableProps> = ({ courses, statusFilter = '', onCha
             <TableRow key={course.id} className='hover:bg-white dark:hover:bg-slate-800 hover:shadow-md transition-all'>
               <TableCell className='p-3 sm:p-4 flex items-center gap-3 sm:gap-4'>
                 <img
-                  src={course.thumbnailUrl || course.image || 'https://picsum.photos/200/120?grayscale'}
+                  src={
+                    course.thumbnailUrl ||
+                    course.image ||
+                    'https://media.istockphoto.com/id/2173059563/vector/coming-soon-image-on-white-background-no-photo-available.jpg?s=612x612&w=0&k=20&c=v0a_B58wPFNDPULSiw_BmPyhSNCyrP_d17i2BPPyDTk='
+                  }
                   alt={course.title}
                   className='w-20 h-14 sm:w-28 sm:h-20 rounded-lg object-cover shadow-sm'
                 />
                 <div>
                   <div className='font-semibold text-gray-700 dark:text-gray-100 text-base sm:text-lg'>
                     {course.title}
+                    <p className='text-sm text-gray-500 dark:text-gray-400'>{course.shortDescription}</p>
                   </div>
                   <div className='flex flex-wrap gap-2 mt-2'>
                     {(course.tagNames || course.tags || []).map((tag, idx) => (
@@ -111,7 +119,7 @@ const CoursesTable: FC<CoursesTableProps> = ({ courses, statusFilter = '', onCha
               <TableCell className='text-gray-700 dark:text-gray-300 px-10'>{course.students ?? 0}</TableCell>
               <TableCell className='text-gray-700 dark:text-gray-300'>{course.duration ?? '-'}</TableCell>
               <TableCell className='text-gray-500 dark:text-gray-400 text-xs sm:text-sm px-5'>
-                {course.createdAt ?? ''}
+                {course.createdAt ?? 'Chưa có dữ liệu'}
               </TableCell>
               <TableCell className='text-right'>
                 <DropdownMenu>
@@ -125,14 +133,11 @@ const CoursesTable: FC<CoursesTableProps> = ({ courses, statusFilter = '', onCha
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align='end' className='rounded-xl shadow-lg border border-gray-100'>
-                    <DropdownMenuItem className='rounded-md px-3 py-2 text-sm transition-colors data-[highlighted]:bg-blue-500 data-[highlighted]:text-white'>
+                    <DropdownMenuItem
+                      className='rounded-md px-3 py-2 text-sm transition-colors data-[highlighted]:bg-blue-500 data-[highlighted]:text-white'
+                      onClick={() => navigator(`/teacher/course/${course.id}`)}
+                    >
                       Xem chi tiết
-                    </DropdownMenuItem>
-                    <DropdownMenuItem className='rounded-md px-3 py-2 text-sm transition-colors data-[highlighted]:bg-blue-500 data-[highlighted]:text-white'>
-                      Chỉnh sửa
-                    </DropdownMenuItem>
-                    <DropdownMenuItem className='rounded-md px-3 py-2 text-sm text-red-600 transition-colors data-[highlighted]:bg-red-500 data-[highlighted]:text-white'>
-                      Xóa
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>

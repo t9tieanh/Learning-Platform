@@ -31,7 +31,7 @@ const CustomTag = ({
       <div className='grid gap-1.5 font-normal flex'>
         <Avatar>
           <AvatarImage src={imageUri} />
-          <AvatarFallback>Tag</AvatarFallback>
+          <AvatarFallback>{label.charAt(0)}</AvatarFallback>
         </Avatar>
         <div className='text-sm leading-none font-medium'>{label}</div>
       </div>

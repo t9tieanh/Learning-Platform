@@ -8,4 +8,5 @@ import java.util.List;
 
 public interface ITagService {
     ApiResponse<List<TagResponse>> getAllTag();
+    ApiResponse<List<TagResponse>> getTagsByCourseId(String courseId);
 }
