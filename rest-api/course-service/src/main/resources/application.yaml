@@ -1,12 +1,21 @@
 server:
   port: 8081
 
+redis:
+  host: localhost
+  port: 6379
+
 aws:
-  accessKeyId: AKIAWDVGBIV2PUTG6MHM
-  secretAccessKey: +S41d/55eDu/UIHQuMYoLitHcCn/GR5/FMjAWerS
-  bucketName: sample-s3-ntd
-  key-store: https://sample-s3-ntd.s3.ap-southeast-1.amazonaws.com
-  region: ap-southeast-1
+  accessKeyId: AKIAW2XWSOSQMACRHOAQ
+  secretAccessKey: wV4AYxacNSRHxRN/ldmPB16bWosw4CIYzM4YbSgb
+  bucketName: learning-platform-ntd-pta
+  key-store: file
+  region: ap-southeast-2
+  cloudfront:
+    distributionDomainName: d5nun0zyhrn06.cloudfront.net
+    privateKeyPath: classpath:cloudfront-private-key.pem
+    keyPairId: APKAW2XWSOSQGINIPEFQ
+    defaultExpireDays: 7
 
 
 cloudinary:

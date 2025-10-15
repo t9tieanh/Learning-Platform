@@ -31,6 +31,7 @@ public enum ErrorCode {
     COURSE_NOT_FOUND(1013, "Khóa học không tồn tại !", HttpStatus.OK),
 
     UPLOAD_NOT_COMPLETED(12345, "Upload file thất bại !", HttpStatus.OK),
+    FILE_NOT_FOUND(400, "Không tìm thấy file trong hệ thống !", HttpStatus.OK),
     FILE_TYPE_INVALID(12346, "Loại file không hợp lệ !", HttpStatus.OK);
     ;
 
