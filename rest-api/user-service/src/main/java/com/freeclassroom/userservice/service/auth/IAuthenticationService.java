@@ -10,6 +10,7 @@ import com.nimbusds.jose.JOSEException;
 
 public interface IAuthenticationService {
     ApiResponse<AuthResponse> authentication (AuthRequest request) throws JOSEException;
+    ApiResponse<AuthResponse> oauth2GoogleAuth(String authorizationCode) throws JOSEException;
     void logout (LogoutRequest request);
     ApiResponse<IntrospectResponse> introspect (IntrospectRequest request);
 }

@@ -25,7 +25,7 @@ public class JwtService {
     private String SIGNER_KEY;
 
     @NonFinal
-    @Value("${spring.jwt.refreshable-duration}")
+    @Value("${spring.jwt.refresh-token-expiration}")
     protected long REFRESHABLE_DURATION;
 
     @Value("${spring.jwt.access-token-expiration}")
@@ -43,8 +43,8 @@ public class JwtService {
         //payload
         JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
                 .jwtID(UUID.randomUUID().toString())
-                .subject(user.getUsername()) // sub
-                .issuer("learningplatform.com") // iss
+                .subject(user.getId()) // sub
+                .issuer("learnova.com") // iss
                 .issueTime(new Date()) // iat
                 .expirationTime(new Date(System.currentTimeMillis() + date))
                 .claim("scope", user.getRoles()) // Custom claim

@@ -2,6 +2,7 @@ package com.freeclassroom.courseservice.entity.course;
 
 import com.freeclassroom.courseservice.entity.AbstractEntity;
 import com.freeclassroom.courseservice.entity.member.LessonProgress;
+import com.freeclassroom.courseservice.enums.entity.EnumLessonType;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -24,6 +25,9 @@ public class LessonEntity extends AbstractEntity {
     Long position;
     Boolean isPublic;
 
+    @Enumerated(EnumType.STRING)
+    EnumLessonType type;
+    String url;
     // Chapter
     @ManyToOne
     @JoinColumn(name = "chapter_id")
@@ -32,8 +36,4 @@ public class LessonEntity extends AbstractEntity {
     // Lesson Progress
     @OneToMany(mappedBy = "lesson")
     List<LessonProgress> progresses;
-
-    // Resource
-    @OneToMany(mappedBy = "lesson")
-    List<ResourceEntity> resourceLst;
 }

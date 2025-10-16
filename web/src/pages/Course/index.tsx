@@ -7,7 +7,7 @@ import Feedback from '@/components/Course/Feedback'
 
 const Course = () => {
   return (
-    <div className='course-page'>
+    <div className='course-page bg-white'>
       <Cover
         video='https://i.ytimg.com/vi/5yHpfICfx_k/maxresdefault.jpg'
         title='Học chỉnh sửa video với Adobe Premiere Pro cho người mới bắt đầu (2025)'

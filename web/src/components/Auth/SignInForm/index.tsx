@@ -1,3 +1,5 @@
+/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
+/* eslint-disable jsx-a11y/click-events-have-key-events */
 import React, { FC } from 'react'
 import CustomButton from '../../common/Button'
 import CustomInput from '../../common/Input'
@@ -9,11 +11,12 @@ import { BookOpen } from 'lucide-react'
 import { SignInFormInputs, signInSchema } from '@/utils/auth'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
-import userService from '@/services/user.service'
+import userService from '@/services/user/user.service'
 import { toast } from 'react-toastify'
 import useLoading from '@/hooks/useLoading.hook'
 import { useAuthStore } from '@/stores/useAuth.stores'
 import { useNavigate } from 'react-router-dom'
+import logo from '@/assets/images/logo1.png'
 
 const SignInForm: FC = () => {
   const {
@@ -27,12 +30,6 @@ const SignInForm: FC = () => {
 
   // Get state and actions
   const { data, setData } = useAuthStore()
-
-  // check if already logged in
-  if (data) {
-    toast.info('Bạn đã đăng nhập rồi!')
-    navigator('/')
-  }
 
   const { loading, startLoading, stopLoading } = useLoading()
 
@@ -54,15 +51,34 @@ const SignInForm: FC = () => {
     }
   }
 
+  //handle login with google
+  const handleLoginWithGoogle = () => {
+    try {
+      const authUri = import.meta.env.VITE_GOOGLE_AUTH_URI as string
+      const callbackUri = import.meta.env.VITE_GOOGLE_REDIRECT_URI as string
+      const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID as string
+
+      const targetUrl = `${authUri}?redirect_uri=${encodeURIComponent(
+        callbackUri
+      )}&response_type=code&client_id=${googleClientId}&scope=openid%20email%20profile`
+
+      window.location.href = targetUrl
+    } catch (error: any) {
+      console.log(error)
+      toast.error('Đã có lỗi trong quá trình xử lý !')
+    }
+  }
+
   return (
     <div className='w-full bg-white rounded-lg md:mt-0 sm:max-w-md xl:py-0'>
       <Card className='shadow-xl py-12 border-none'>
         <CardHeader className='text-center'>
-          <CardTitle className='font-bold flex items-center justify-center gap-2'>
-            <BookOpen />
-            Chào mừng bạn đã quay trở lại !
+          <CardTitle className='flex items-center justify-center'>
+            <img src={logo} alt='LEARNOVA logo' className='h-12 md:h-14 w-auto object-contain mx-auto select-none' />
           </CardTitle>
-          <CardDescription>Nhâp thông tin đăng nhập của bạn để tiếp tục.</CardDescription>
+          <CardDescription className='text-[#2DD4BF] text-base font-semibold mt-2'>
+            Đăng nhập để khám phá tri thức cùng Learnova.
+          </CardDescription>
           <CardContent className='mt-5'>
             <form onSubmit={handleSubmit(onSubmit)}>
               <div className='login-form flex flex-col gap-3'>
@@ -74,7 +90,14 @@ const SignInForm: FC = () => {
               </div>
               <div className='remember-me flex justify-between items-center mt-5'>
                 <CustomCheckbox id='remember-me' label='Ghi nhớ tôi' className='text-gray-700' />
-                <p className='text-gray-700 text-sm font-bold'>Quên mật khẩu ?</p>
+                <p
+                  className='text-gray-700 text-sm font-bold'
+                  onClick={() => {
+                    navigator('/forgot')
+                  }}
+                >
+                  Quên mật khẩu ?
+                </p>
               </div>
               <div className='signin-button w-full mt-5'>
                 <CustomButton
@@ -96,7 +119,11 @@ const SignInForm: FC = () => {
             </div>
             {/* login with other providers */}
             <div className='mt-5 flex items-center justify-center gap-3 w-full'>
-              <CustomButton icon={<FcGoogle />} className='bg-inherit w-1/2 border-2 border-solid hover:bg-red-600' />
+              <CustomButton
+                onClick={handleLoginWithGoogle}
+                icon={<FcGoogle />}
+                className='bg-inherit w-1/2 hover:bg-blue-200'
+              />
               <CustomButton
                 icon={<FaSquareFacebook className='text-white' />}
                 className='bg-blue-600 w-1/2 border-2 border-solid hover:bg-blue-700'
@@ -111,6 +138,7 @@ const SignInForm: FC = () => {
           </CardContent>
         </CardHeader>
       </Card>
+      <p className='text-xs text-center mt-2 text-muted-foreground'>Copyright © 2025 Learnova. All rights reserved.</p>
     </div>
   )
 }

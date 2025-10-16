@@ -1,15 +1,60 @@
 server:
-  port: 8080
-  servlet:
-    context-path: /course
+  port: 8081
+
+redis:
+  host: localhost
+  port: 6379
+
+aws:
+  accessKeyId: AKIAW2XWSOSQMACRHOAQ
+  secretAccessKey: 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
+  bucketName: learning-platform-ntd-pta
+  key-store: file
+  region: ap-southeast-2
+  cloudfront:
+    distributionDomainName: d5nun0zyhrn06.cloudfront.net
+    privateKeyPath: classpath:cloudfront-private-key.pem
+    keyPairId: APKAW2XWSOSQGINIPEFQ
+    defaultExpireDays: 7
+
+
+cloudinary:
+  cloud_name: df3snzgv2
+  api_key: 242516133233971
+  api_secret: 8kYfliJa45faDUqNJdH6-9HimZk
 
 spring:
   datasource:
-    url: "jdbc:mysql://localhost:3306/course_service"
-    driverClassName: "com.mysql.cj.jdbc.Driver"
+    url: jdbc:mysql://localhost:3306/course_service
+    driverClassName: com.mysql.cj.jdbc.Driver
     username: root
-    password: 1234
+    password: 1942004anh
   jpa:
     hibernate:
-      ddl-auto: update
-    show-sql: true
+      ddl-auto: create-drop
+    show-sql: false
+    defer-datasource-initialization: true
+  sql:
+    init:
+      mode: never
+  servlet:
+    multipart:
+      max-file-size: 500MB
+      max-request-size: 500MB
+
+  jwt:
+    signerKey: "1TjXchw5FloESb63Kc+DFhTARvpWL4jUGCwfGWxuG5SIf/1y/LgJxHnMqaF6A/ij"
+    access-token-expiration: 21600000    # 2 tiếng (2 * 60 * 60 * 1000 ms)
+    valid-duration: 21600000
+    refresh-token-expiration: 604800000 # 7 ngày (7 * 24 * 60 * 60 * 1000 ms)
+    refreshable-duration: 604800000
+    short-lived-token: 3600000
+
+grpc:
+  server:
+    port: 9091
+
+  client:
+    user-service:
+      address: static://localhost:9090
+      negotiation-type: plaintext

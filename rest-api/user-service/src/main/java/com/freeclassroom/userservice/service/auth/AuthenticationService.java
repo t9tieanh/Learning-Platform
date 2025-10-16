@@ -2,8 +2,10 @@ package com.freeclassroom.userservice.service.auth;
 
 import com.freeclassroom.userservice.dto.request.auth.IntrospectRequest;
 import com.freeclassroom.userservice.dto.request.auth.LogoutRequest;
+import com.freeclassroom.userservice.dto.request.outbound.oauth2.GoogleExchanceTokenRequest;
 import com.freeclassroom.userservice.dto.response.ApiResponse;
 import com.freeclassroom.userservice.dto.response.auth.IntrospectResponse;
+import com.freeclassroom.userservice.dto.response.outbound.oauth2.GoogleGetUserInfo;
 import com.freeclassroom.userservice.enums.role.TokenEnum;
 import com.freeclassroom.userservice.dto.request.auth.AuthRequest;
 import com.freeclassroom.userservice.dto.response.user.AuthResponse;
@@ -12,8 +14,8 @@ import com.freeclassroom.userservice.enums.entity.EnumAccountStatus;
 import com.freeclassroom.userservice.exception.CustomExeption;
 import com.freeclassroom.userservice.exception.ErrorCode;
 import com.freeclassroom.userservice.repository.entity.UserRepository;
-import com.freeclassroom.userservice.repository.httpclient.OutboundAuthenticateClient;
-import com.freeclassroom.userservice.repository.httpclient.OutboundUserInfoClient;
+import com.freeclassroom.userservice.repository.httpclient.oauth2.GoogleOutboundAuthenticateClient;
+import com.freeclassroom.userservice.repository.httpclient.oauth2.GoogleOutboundUserInfoClient;
 import com.freeclassroom.userservice.service.token.TokenBlacklistService;
 import com.nimbusds.jose.JOSEException;
 import lombok.AccessLevel;
@@ -36,13 +38,14 @@ public class AuthenticationService implements IAuthenticationService {
 
     UserRepository userRepository;
 
-    OutboundAuthenticateClient outboundAuthenticateClient;
-    OutboundUserInfoClient outboundUserInfoClient;
-
     TokenBlacklistService tokenBlacklistService;
 
     PasswordEncoder passwordEncoder;
     JwtService jwtService;
+
+    // oauth2
+    GoogleOutboundUserInfoClient googleGetUserInfoClient;
+    GoogleOutboundAuthenticateClient googleAuthClient;
 
     @NonFinal
     @Value("${spring.jwt.signerKey}")
@@ -53,11 +56,11 @@ public class AuthenticationService implements IAuthenticationService {
     protected String CLIENT_ID;
 
     @NonFinal
-    @Value("${spring.jwt.valid-duration}")
+    @Value("${spring.jwt.access-token-expiration}")
     protected long VALID_DURATION;
 
     @NonFinal
-    @Value("${spring.jwt.refreshable-duration}")
+    @Value("${spring.jwt.refresh-token-expiration}")
     protected long REFRESHABLE_DURATION;
 
     @NonFinal
@@ -68,7 +71,7 @@ public class AuthenticationService implements IAuthenticationService {
     @Value("${outbound.identity.redirect-uri}")
     protected String REDIRECT_URL;
 
-
+    // login with username password
     public ApiResponse<AuthResponse> authentication (AuthRequest request) throws JOSEException {
         UserEntity account = userRepository.findByEmailOrUsername(request.getUsername()).orElseThrow(
                 () -> new CustomExeption(ErrorCode.USER_NOT_FOUND)
@@ -84,9 +87,11 @@ public class AuthenticationService implements IAuthenticationService {
         if (result) {
             AuthResponse response = AuthResponse.builder()
                     .accessToken(jwtService.generateToken(account, TokenEnum.ACCESS_TOKEN))
-                    .refreshToken(jwtService.generateToken(account,TokenEnum.RESFESH_TOKEN))
+                    .refreshToken(jwtService.generateToken(account,TokenEnum.REFRESH_TOKEN))
                     .email(account.getEmail())
                     .username(account.getUsername())
+                    .name(account.getName())
+                    .avatarUrl(account.getImage())
                     .build();
 
             return ApiResponse.<AuthResponse>builder()
@@ -135,6 +140,49 @@ public class AuthenticationService implements IAuthenticationService {
                 .code(200)
                 .message("Thành công!")
                 .result(response)
+                .build();
+    }
+
+    @Override
+    public ApiResponse<AuthResponse> oauth2GoogleAuth(String authorizationCode) throws JOSEException {
+        // verify authorization code
+        var response = googleAuthClient.exchanceToken(
+                GoogleExchanceTokenRequest.builder()
+                        .code(authorizationCode)
+                        .clientId(CLIENT_ID)
+                        .clientSecret(CLIENT_SECRET)
+                        .redirectUri(REDIRECT_URL)
+                        .grantType("authorization_code")
+                        .build()
+        );
+
+        // get userinfo after verify authorization code
+        GoogleGetUserInfo userInfo = googleGetUserInfoClient.getUserInfo("json", response.getAccessToken());
+
+        // find user in db
+        var account =  userRepository.findByEmail(userInfo.getEmail()).orElseGet(
+                () -> {
+                    return userRepository.save(UserEntity.builder()
+                            .email(userInfo.getEmail())
+                            .name(userInfo.getName())
+                            .username(userInfo.getEmail())
+                            .image(userInfo.getPicture())
+                            .status(EnumAccountStatus.ACTIVE)
+                            .build());
+                }
+        );
+
+        return ApiResponse.<AuthResponse>builder()
+                .code(200)
+                .message("Xác thực tài khoản google thành công !")
+                .result(AuthResponse.builder()
+                        .accessToken(jwtService.generateToken(account, TokenEnum.ACCESS_TOKEN))
+                        .refreshToken(jwtService.generateToken(account,TokenEnum.REFRESH_TOKEN))
+                        .email(account.getEmail())
+                        .username(account.getUsername())
+                        .name(account.getName())
+                        .avatarUrl(account.getImage())
+                        .build())
                 .build();
     }
 }

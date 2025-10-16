@@ -35,8 +35,8 @@ const WhyChooseUsSection = () => {
 
   return (
     <div className='why-choose-us-section mt-8 my-5 py-3'>
-      <h4 className='font-bold bg-blue-500 text-white p-2 max-w-96 text-center rounded-r-3xl'>
-        Chúng tôi khác biệt như thế nào ?
+      <h4 className='font-bold bg-blue-500 text-white p-2 max-w-96 pl-12 rounded-r-3xl'>
+        Chúng tôi khác biệt như thế nào
       </h4>
       <div className='grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 my-6'>
         <div className='flex flex-col justify-center items-center gap-4'>

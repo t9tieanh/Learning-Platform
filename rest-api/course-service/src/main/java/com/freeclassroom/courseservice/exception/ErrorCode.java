@@ -23,7 +23,17 @@ public enum ErrorCode {
     WRONG_VERFY_TOKEN(1002, "Token verify không đúng hoặc đã hết hạn", HttpStatus.OK),
 
     // dùng cho xác thực otp
-    NOT_VERIFY_OTP(1011, "Mã OTP không hợp lệ, vui lòng thử lại", HttpStatus.OK);
+    NOT_VERIFY_OTP(1011, "Mã OTP không hợp lệ, vui lòng thử lại", HttpStatus.OK),
+
+    //category không tồn tại
+    CATEGORY_NOT_FOUND(1012, "Danh mục (category) không tồn tại !", HttpStatus.OK),
+    TAG_NOT_FOUND(1013, "Tag không tồn tại !", HttpStatus.OK),
+    COURSE_NOT_FOUND(1013, "Khóa học không tồn tại !", HttpStatus.OK),
+
+    UPLOAD_NOT_COMPLETED(12345, "Upload file thất bại !", HttpStatus.OK),
+    FILE_NOT_FOUND(400, "Không tìm thấy file trong hệ thống !", HttpStatus.OK),
+    FILE_TYPE_INVALID(12346, "Loại file không hợp lệ !", HttpStatus.OK);
+    ;
 
     private final int code;
     private final HttpStatusCode statusCode;

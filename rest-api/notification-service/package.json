@@ -10,7 +10,8 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "prettier": "prettier --check .",
-    "prettier:fix": "prettier --write ."
+    "prettier:fix": "prettier --write .",
+    "gen-sign": "node src/tests/generatesignUrl.js"
   },
   "keywords": [],
   "author": "",
@@ -27,6 +28,7 @@
     "@types/node": "^24.0.1",
     "@types/nodemailer": "^6.4.17",
     "eslint": "^9.29.0",
+    "@aws-sdk/cloudfront-signer": "^3.0.0",
     "eslint-config-prettier": "^10.1.5",
     "eslint-plugin-prettier": "^5.4.1",
     "globals": "^16.2.0",
@@ -39,6 +41,8 @@
     "typescript-eslint": "^8.34.0"
   },
   "dependencies": {
+    "@grpc/grpc-js": "^1.14.0",
+    "@grpc/proto-loader": "^0.8.0",
     "@types/qs": "^6.14.0",
     "amqplib": "^0.10.8",
     "axios": "^1.10.0",

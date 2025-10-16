@@ -32,7 +32,7 @@ const CourseCard = ({ course, className }: { course: Course; className?: string 
               </Avatar>
               <span className='teacher-info-name '>Phạm Tiến Anh</span>
             </div>
-            <Button className='rounded-3xl btn-detail bg-primary hover:bg-primary-hover'>
+            <Button className='rounded-3xl btn-detail bg-primary hover:bg-primary-hover hover:scale-105 transition-transform duration-300 ease-in-out'>
               <IoPaperPlane />
               Xem chi tiết
             </Button>

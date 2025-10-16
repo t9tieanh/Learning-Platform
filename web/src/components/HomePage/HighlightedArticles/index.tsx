@@ -44,7 +44,7 @@ const HighlightedArticles = () => {
 
   return (
     <div className='highlighted-articles-container mb-10'>
-      <h4 className='font-bold bg-blue-500 text-white p-2 rounded-r-3xl max-w-80 text-center mt-6'>Bài viết nổi bật</h4>
+      <h4 className='font-bold bg-blue-500 text-white p-2 rounded-r-3xl max-w-80 pl-12 mt-6'>Bài viết nổi bật</h4>
       <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-6 mx-auto max-w-7xl px-4'>
         {articles.map((article) => (
           <ArticlesCard key={article.id} article={article} />

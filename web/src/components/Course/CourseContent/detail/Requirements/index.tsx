@@ -1,25 +1,28 @@
-import { Checkbox } from '@/components/ui/checkbox'
-import { Label } from '@/components/ui/label'
+import React from 'react'
+import { CheckCircle2 } from 'lucide-react'
 
-interface RequirementProps {
+interface RequirementsProps {
   requirements: string[]
 }
 
-const Requirement: React.FC<RequirementProps> = ({ requirements }: RequirementProps) => {
+const Requirements: React.FC<RequirementsProps> = ({ requirements }) => {
   return (
-    <div className='requirement-container max-w-7xl text-left ml-12 mt-6'>
-      <ul className='my-6 ml-6 list-disc [&>li]:mt-3 text-sm font-normal text-gray-700'>
-        {requirements.map((item, idx) => (
-          <div key={idx} className='flex items-start gap-3 mb-3'>
-            <Checkbox id={`requirement-${idx}`} defaultChecked checked={true} />
-            <div className='grid gap-2'>
-              <Label htmlFor={`requirement-${idx}`}>{item}</Label>
+    <div className='space-y-4'>
+      {requirements.map((requirement, index) => (
+        <div
+          key={index}
+          className='flex ml-10 gap-4 p-4 bg-primary/5 border border-primary/20 rounded-lg transition-colors duration-200'
+        >
+          <div className='flex-shrink-0 mt-1 '>
+            <div className='w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center'>
+              {React.createElement(CheckCircle2, { className: 'w-4 h-4 text-primary' })}
             </div>
           </div>
-        ))}
-      </ul>
+          <p className='text-slate-600 leading-relaxed text-base'>{requirement}</p>
+        </div>
+      ))}
     </div>
   )
 }
 
-export default Requirement
+export default Requirements

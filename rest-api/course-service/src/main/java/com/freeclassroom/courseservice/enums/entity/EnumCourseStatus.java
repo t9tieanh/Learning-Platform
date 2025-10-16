@@ -1,6 +1,9 @@
 package com.freeclassroom.courseservice.enums.entity;
 
 public enum EnumCourseStatus {
-    PRIVATE,
-    PUBLIC
+    DRAFT,
+    PENDING_REVIEW,
+    PUBLISHED,
+    REJECTED,
+    ARCHIVED
 }
