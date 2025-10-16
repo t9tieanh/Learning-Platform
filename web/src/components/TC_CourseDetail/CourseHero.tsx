@@ -6,11 +6,53 @@ import { Badge } from '@/components/ui/badge'
 interface CourseHeroProps {
   title: string
   coverImage: string
-  status: 'published' | 'draft'
+  status: string
   publishedAt: string
   price?: number
   onPlayIntro: () => void
   onEdit: () => void
+}
+
+enum EnumCourseStatus {
+  DRAFT = 'DRAFT',
+  PENDING_REVIEW = 'PENDING_REVIEW',
+  PUBLISHED = 'PUBLISHED',
+  REJECTED = 'REJECTED',
+  ARCHIVED = 'ARCHIVED'
+}
+
+function getStatusColor(status: EnumCourseStatus | string) {
+  switch (status.toString().toLowerCase()) {
+    case 'draft':
+      return 'bg-gray-500 text-white' // Bản nháp
+    case 'pending_review':
+      return 'bg-yellow-400 text-black' // Chờ duyệt
+    case 'published':
+      return 'bg-green-500 text-white' // Đang mở
+    case 'rejected':
+      return 'bg-red-500 text-white' // Bị từ chối
+    case 'archived':
+      return 'bg-gray-700 text-white' // Đã lưu trữ
+    default:
+      return 'bg-gray-300 text-black' // Mặc định
+  }
+}
+
+function getStatusLabel(status: string | EnumCourseStatus) {
+  switch (status.toString().toLowerCase()) {
+    case 'draft':
+      return 'Bản nháp'
+    case 'pending_review':
+      return 'Chờ duyệt'
+    case 'published':
+      return 'Đang mở'
+    case 'rejected':
+      return 'Bị từ chối'
+    case 'archived':
+      return 'Đã lưu trữ'
+    default:
+      return status.replace('_', ' ') // fallback
+  }
 }
 
 export function CourseHero({ title, coverImage, status, publishedAt, price, onPlayIntro, onEdit }: CourseHeroProps) {
@@ -23,11 +65,9 @@ export function CourseHero({ title, coverImage, status, publishedAt, price, onPl
       <div className='absolute inset-0 bg-slate-50' />
 
       <div className='relative grid gap-6 p-8 lg:grid-cols-2 lg:gap-8'>
-        {/* Left: Course Info */}
         <div className='flex flex-col justify-center space-y-6'>
           <div className='flex items-center gap-3 flex-wrap'>
-            {/* Trạng thái chính: nổi bật (xanh lục) */}
-            <Badge className='bg-green-500 text-white text-sm p-1'>Đang mở</Badge>
+            <Badge className={`${getStatusColor(status)} text-sm p-1`}>{getStatusLabel(status)}</Badge>
 
             {/* Ngày: trung tính, không cần màu đậm */}
             <div className='flex items-center gap-2 text-sm text-muted-foreground bg-gray-100 p-1 rounded-md'>

@@ -2,6 +2,7 @@ package com.freeclassroom.courseservice.service.course;
 
 import com.freeclassroom.courseservice.dto.request.common.FileUploadRequest;
 import com.freeclassroom.courseservice.dto.request.course.CreationCourseRequest;
+import com.freeclassroom.courseservice.dto.request.course.GetCourseRequest;
 import com.freeclassroom.courseservice.dto.request.course.UpdateTagsRequest;
 import com.freeclassroom.courseservice.dto.response.ApiResponse;
 import com.freeclassroom.courseservice.dto.response.common.CreationResponse;
@@ -18,7 +19,9 @@ import com.freeclassroom.courseservice.exception.CustomExeption;
 import com.freeclassroom.courseservice.exception.ErrorCode;
 import com.freeclassroom.courseservice.grpc.client.UserGrpcClient;
 import com.freeclassroom.courseservice.mapper.CourseMapper;
+import com.freeclassroom.courseservice.mapper.LessonMapper;
 import com.freeclassroom.courseservice.repository.entity.CategoryRepository;
+import com.freeclassroom.courseservice.repository.entity.ChapterRepository;
 import com.freeclassroom.courseservice.repository.entity.CourseRepository;
 import com.freeclassroom.courseservice.repository.entity.TagRepository;
 import com.freeclassroom.courseservice.service.utils.file.IUploadFileService;
@@ -34,6 +37,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -43,8 +48,10 @@ public class CourseService implements ICourseService {
     CourseRepository courseRepo;
     CategoryRepository categoryRepo;
     TagRepository tagRepo;
+    ChapterRepository chapterRepo;
 
     CourseMapper courseMapper;
+    LessonMapper lessonMapper;
 
     IUploadFileService fileService;
 
@@ -193,4 +200,44 @@ public class CourseService implements ICourseService {
     public boolean isTeacherOfCourse(String courseId, String userId) {
         return courseRepo.existsByIdAndInstructorId(courseId, userId);
     }
+    public ApiResponse<CourseResponse> getCourse(String id) {
+        try {
+            CourseEntity entity = courseRepo.findByIdWithTags(id)
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy khóa học"));
+
+            System.out.println("cate" + entity.getCategory().getName());
+
+            courseRepo.findByIdWithChapters(id)
+                    .ifPresent(e -> entity.setChapters(e.getChapters()));
+
+            courseRepo.findByIdWithEnrollments(id)
+                    .ifPresent(e -> entity.setEnrollments(e.getEnrollments()));
+
+            CourseResponse response = courseMapper.toDto(entity);
+
+            response.getChapters().forEach(chapterDTO -> {
+                var chapter = chapterRepo.findByIdWithLessons(chapterDTO.getId())
+                        .orElseThrow(() -> new RuntimeException("Chapter not found"));
+                chapterDTO.setLessons(
+                        chapter.getLessons()
+                                .stream()
+                                .map(lessonMapper::toDto)
+                                .collect(Collectors.toList())
+                );
+            });
+
+            return ApiResponse.<CourseResponse>builder()
+                    .code(HttpStatus.OK.value())
+                    .message("Lấy khóa học thành công")
+                    .result(response)
+                    .build();
+        } catch (Exception e) {
+            return ApiResponse.<CourseResponse>builder()
+                    .code(HttpStatus.NOT_FOUND.value())
+                    .message("Lỗi: " + e.getMessage())
+                    .result(null)
+                    .build();
+        }
+    }
+
 }

@@ -1,5 +1,6 @@
 package com.freeclassroom.courseservice.dto.response.course;
 
+import com.freeclassroom.courseservice.dto.response.member.EnrollmentResponse;
 import com.freeclassroom.courseservice.enums.entity.EnumCourseProgressStep;
 import com.freeclassroom.courseservice.enums.entity.EnumCourseStatus;
 import lombok.*;
@@ -27,11 +28,11 @@ public class CourseResponse {
     EnumCourseStatus status;
     String instructorId;
 
-    List<String> chapterIds;
-    List<String> enrollmentIds;
-    List<String> tagNames;
+    List<ChapterResponse> chapters;
+    List<EnrollmentResponse> enrollments;
+    List<String> tags;
 
-    String categoryName;
+    String category;
 
     EnumCourseProgressStep progressStep;
 
