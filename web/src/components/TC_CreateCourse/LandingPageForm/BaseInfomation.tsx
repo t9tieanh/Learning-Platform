@@ -87,7 +87,7 @@ const BaseInfomation = ({
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className ='space-y-6'>
+    <form onSubmit={handleSubmit(onSubmit)} className='space-y-6'>
       <Card className='border border-blue-200 shadow-sm bg-blue-50'>
         <CardHeader className='bg-blue-200/40 rounded-t-lg'>
           <CardTitle className='text-lg font-medium text-blue-900 flex items-center gap-2'>
