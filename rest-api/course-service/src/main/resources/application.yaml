@@ -31,12 +31,13 @@ spring:
     password: 1942004anh
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
     show-sql: false
     defer-datasource-initialization: true
   sql:
     init:
       mode: never
+#      mode: always
   servlet:
     multipart:
       max-file-size: 500MB

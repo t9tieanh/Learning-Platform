@@ -26,4 +26,13 @@ public abstract class AbstractEntity {
 
     @LastModifiedDate
     LocalDateTime updatedAt;
+
+    Boolean deleted;
+
+    @PrePersist
+    public void prePersist() {
+        if (deleted == null) {
+            deleted = false;
+        }
+    }
 }
