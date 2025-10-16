@@ -31,7 +31,7 @@ spring:
     password: 1942004anh
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create-drop
     show-sql: false
     defer-datasource-initialization: true
   sql:
