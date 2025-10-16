@@ -6,7 +6,7 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import { toast } from 'react-toastify'
 import * as yup from 'yup'
 import useLoading from '@/hooks/useLoading.hook'
-import userService from '@/services/user.service'
+import userService from '@/services/user/user.service'
 import { useNavigate } from 'react-router'
 
 export const ForgotPassSchema = yup.object({

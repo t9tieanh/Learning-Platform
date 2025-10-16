@@ -27,6 +27,7 @@ spring:
               - POST
               - PUT
               - DELETE
+              - PATCH
               - OPTIONS
             allowedHeaders: "*"
             allowCredentials: true
@@ -42,9 +43,9 @@ spring:
         - id: course
           uri: http://localhost:8081
           predicates:
-            - Path=${app.api-prefix}/courses/**, ${app.api-prefix}/courses**
+            - Path=${app.api-prefix}/learning/**, ${app.api-prefix}/learning**
           filters:
-            - StripPrefix=2
+            - StripPrefix=3
 
         - id: notify
           uri: http://localhost:8082

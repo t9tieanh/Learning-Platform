@@ -1,4 +1,4 @@
-import axiosClient from '../lib/axiosClient.lib'
+import axiosClient from '../../lib/axiosClient.lib'
 import { ApiResponse } from '@/types/response.type'
 
 class UserService {

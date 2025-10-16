@@ -36,10 +36,11 @@ const CoursePagination: FC<CoursePaginationProps> = ({ pages = 4, current = 1, o
             <PaginationLink
               href='#'
               isActive={page === current}
-              className={`rounded-full w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center font-medium shadow-sm text-xs sm:text-sm transition-transform duration-300 ease-in-out hover:scale-110 ${page === current
+              className={`rounded-full w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center font-medium shadow-sm text-xs sm:text-sm transition-transform duration-300 ease-in-out hover:scale-110 ${
+                page === current
                   ? 'bg-blue-400 text-white hover:bg-blue-600'
                   : 'bg-blue-100 text-blue-600 hover:bg-blue-600 hover:text-white'
-                }`}
+              }`}
               onClick={(e) => {
                 e.preventDefault()
                 onChange?.(page)

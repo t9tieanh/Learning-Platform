@@ -1,27 +1,49 @@
+/* eslint-disable prettier/prettier */
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { X } from 'lucide-react'
-import { useState } from 'react'
+import { CirclePlus } from 'lucide-react';
 import { Props as CommonProps } from '@/utils/common/reactHookFormProps'
+import CustomTag from '@/components/common/CustomTag'
+import useTags from '@/hooks/useTags.hook'
+import CustomButton from '@/components/common/Button'
+import tagsService from '@/services/course/tags.service'
+import useLoading from '@/hooks/useLoading.hook'
+import { toast } from 'react-toastify';
 
-const SeoTagInfomation = ({ register, control, errors, setValue, getValues }: CommonProps) => {
+interface SeoTagInfomationProps {
+  formProps: CommonProps
+  id: string
+}
+
+const SeoTagInfomation = ({ formProps, id }: SeoTagInfomationProps) => {
+  const { register, control, errors, setValue, getValues } = formProps
   const tags = getValues('tags') || []
-  const [newTag, setNewTag] = useState('')
+  const availableTags = useTags()
+  const { loading, startLoading, stopLoading } = useLoading()
 
-  const addTag = () => {
-    if (newTag && !tags.includes(newTag) && tags.length < 10) {
-      setValue('tags', [...tags, newTag])
-      setNewTag('')
-    }
-  }
-
-  const removeTag = (tagToRemove: string) => {
+  const removeTag = (tagToRemove: { id: string; name: string }) => {
     setValue(
       'tags',
-      tags.filter((tag: string) => tag !== tagToRemove)
+      tags.filter((tag: { id: string; name: string }) => tag.id !== tagToRemove.id)
     )
+  }
+
+  const handleAddNewTags = async() => {
+    const tagIds = tags.map((tag: any) => (typeof tag === 'object' ? tag.id : tag))
+    const courseId = id
+
+    try {
+      startLoading()
+      const response = await tagsService.addTagsToCourse(courseId, tagIds)
+      if (response?.code === 200) {
+        toast.success(response?.message || 'Thêm tag thành công !')
+      } else {
+        toast.error(response?.message || 'Thêm tag thất bại !')
+      }
+    } catch (error) {
+      console.log('Error adding tags')
+    } finally {
+      stopLoading()
+    }
   }
 
   return (
@@ -34,38 +56,39 @@ const SeoTagInfomation = ({ register, control, errors, setValue, getValues }: Co
 
         <CardContent className='space-y-4'>
           {/* Tags list */}
-          <div className='flex flex-wrap gap-2 mb-4'>
-            {tags.map((tag: string) => (
-              <Badge
-                key={tag}
-                variant='secondary'
-                className='flex items-center text-sm px-2 py-1 rounded-md bg-blue-100 text-blue-800 border border-blue-300'
-              >
-                {tag}
-                <X
-                  className='h-3 w-3 ml-1 cursor-pointer text-blue-500 hover:text-red-500 transition-colors'
-                  onClick={() => removeTag(tag)}
-                />
-              </Badge>
-            ))}
-          </div>
+          <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 mb-4'>
+    {
+      availableTags?.map((tag) => (
+        <CustomTag
+          key={tag.id}
+          label={tag.name}
+          imageUri={tag.imageUrl}
+          checked={tags.some((t: any) => (typeof t === 'object' ? t.id === tag.id : t === tag.id))}
+          onChange={(checked: boolean) => {
+            if (checked) {
+              // Add tag object (not just id)
+              if (!tags.some((t: any) => (typeof t === 'object' ? t.id === tag.id : t === tag.id)) && tags.length < 10) {
+                setValue('tags', [...tags, tag]) // Lưu cả object tag
+              }
+            } else {
+              // Remove tag by id
+              removeTag(tag)
+            }
+          }}
+        />
+      ))
+    }
+  </div>
 
-          {/* Input + Button */}
-          <div className='flex space-x-2'>
-            <Input
-              value={newTag}
-              onChange={(e) => setNewTag(e.target.value)}
-              placeholder='Thêm thẻ'
-              onKeyDown={(e) => e.key === 'Enter' && addTag()}
-              className='border-blue-300 focus:ring-2 focus:ring-blue-400 rounded-lg'
-            />
-            <Button
-              onClick={addTag}
-              disabled={!newTag || tags.length >= 10}
+          <div className='flex justify-end'>
+            <CustomButton
+              onClick={handleAddNewTags}
+              disabled={tags.length >= 10}
               className='bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow'
-            >
-              Thêm
-            </Button>
+              icon={<CirclePlus className='h-5 w-5' />}
+              label='Thêm thẻ mới'
+              isLoader={loading}
+            />
           </div>
 
           {/* Counter */}

@@ -4,7 +4,7 @@ import CoursesTable from '@/components/TC_Courses/CoursesTable'
 import CoursePagination from '@/components/TC_Courses/CoursePagination'
 import { Course } from '@/components/TC_Courses/CourseTypes'
 import AcademySidebar from '@/components/TC_HomePage/AcademySidebar'
-import courseService from '@/services/course.service'
+import courseService from '@/services/course/course.service'
 
 interface State {
   courses: Course[]

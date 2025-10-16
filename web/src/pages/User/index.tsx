@@ -1,6 +1,6 @@
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useMemo, useEffect } from 'react'
-import userService from '@/services/user.service'
+import userService from '@/services/user/user.service'
 import { toast } from 'react-toastify'
 import useLoading from '@/hooks/useLoading.hook'
 import CustomSpinner from '@/components/common/CustomSpinner'

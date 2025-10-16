@@ -13,6 +13,7 @@ import java.util.Optional;
 
 public interface CourseRepository extends JpaRepository<CourseEntity, String> {
     Optional<CourseEntity> findByIdAndInstructorId(String id, String instructorId);
+    boolean existsByIdAndInstructorId(String id, String instructorId);
 
     Page<CourseEntity> findByInstructorId(String instructorId, Pageable pageable);
     @EntityGraph(attributePaths = {"tags"})

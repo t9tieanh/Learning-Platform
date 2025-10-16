@@ -57,14 +57,14 @@ class CourseService {
       page: options?.page ?? 1,
       limit: options?.limit ?? 10
     }
-    const response = await axiosClient.axiosInstance.post('/courses/teacher', body)
+    const response = await axiosClient.axiosInstance.post('learning/courses/teacher', body)
     return response.data
   }
 
   // Lấy chi tiết khóa học theo id
   async getCourseDetail(courseId: string): Promise<ApiResponse<any>> {
     if (!courseId) throw new Error('Thiếu courseId')
-    const response = await axiosClient.axiosInstance.get(`/courses/details/${courseId}`)
+    const response = await axiosClient.axiosInstance.get(`learning/courses/details/${courseId}`)
     return response.data
   }
 }

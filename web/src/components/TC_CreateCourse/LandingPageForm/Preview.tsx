@@ -1,15 +1,18 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Eye, ImageIcon, Clock } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
 const PreviewComponent = ({
   courseTitle,
   subtitle,
-  tags
+  tags,
+  thumbnailUrl
 }: {
   courseTitle: string
   subtitle: string
-  tags: string[] | undefined
+  tags: { id: string; name: string; imageUrl: string }[] | undefined
+  thumbnailUrl: string | undefined
 }) => {
   return (
     <>
@@ -23,7 +26,11 @@ const PreviewComponent = ({
 
         <CardContent className='space-y-4'>
           <div className='aspect-video bg-blue-100 rounded-lg flex items-center justify-center'>
-            <ImageIcon className='h-10 w-10 text-blue-400' />
+            {thumbnailUrl ? (
+              <img src={thumbnailUrl} alt='Thumbnail' className='object-cover w-full h-full rounded-lg' />
+            ) : (
+              <ImageIcon className='h-10 w-10 text-blue-400' />
+            )}
           </div>
 
           <div className='space-y-3'>
@@ -40,11 +47,15 @@ const PreviewComponent = ({
             <div className='flex flex-wrap gap-2'>
               {tags?.map((tag) => (
                 <Badge
-                  key={tag}
+                  key={tag.id}
                   variant='outline'
-                  className='text-xs rounded-md border-blue-300 text-blue-800 bg-blue-100'
+                  className='text-xs rounded-md border-blue-300 text-blue-800 bg-blue-100 flex items-center'
                 >
-                  {tag}
+                  <Avatar>
+                    <AvatarImage src={tag.imageUrl} />
+                    <AvatarFallback>{tag.name.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                  {tag.name}
                 </Badge>
               ))}
             </div>

@@ -21,6 +21,7 @@
 		<mapstruct.version>1.5.5.Final</mapstruct.version>
 		<lombok.version>1.18.30</lombok.version>
 		<protobuf.version>3.25.3</protobuf.version>
+        <aws.sdk.version>2.34.8</aws.sdk.version>
 		<grpc.version>1.64.0</grpc.version>
 	</properties>
 
@@ -172,16 +173,22 @@
 			<scope>provided</scope>
 		</dependency>
 
-        <!--      aws-s3     -->
         <dependency>
             <groupId>software.amazon.awssdk</groupId>
-            <artifactId>s3</artifactId>
-            <version>2.34.8</version>
+            <artifactId>cloudfront</artifactId>
+            <version>${aws.sdk.version}</version>
         </dependency>
+
         <dependency>
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>s3-transfer-manager</artifactId>
-            <version>2.34.8</version>
+            <version>${aws.sdk.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>sdk-core</artifactId>
+            <version>${aws.sdk.version}</version>
         </dependency>
 
         <!--        cloudinary      -->

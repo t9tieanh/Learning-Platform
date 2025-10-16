@@ -3,7 +3,7 @@ import SignInForm from '@/components/Auth/SignInForm'
 import SignUpForm from '@/components/Auth/SignUpForm'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import useLoading from '@/hooks/useLoading.hook'
-import userService from '@/services/user.service'
+import userService from '@/services/user/user.service'
 import { useAuthStore } from '@/stores/useAuth.stores'
 import { toast } from 'react-toastify'
 

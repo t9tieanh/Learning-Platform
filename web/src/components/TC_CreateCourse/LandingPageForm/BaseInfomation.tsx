@@ -6,11 +6,88 @@ import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import DynamicListInput from '../common/DynamicListInput'
 import { Props as CommonProps } from '@/utils/common/reactHookFormProps'
-import { BookOpen, FileText, Info } from 'lucide-react'
+import { BookOpen, FileText, Info, Save } from 'lucide-react'
+import useCategory from '@/hooks/useCategory.hook'
+import CustomButton from '@/components/common/Button'
+import { toast } from 'react-toastify'
+import courseService from '@/services/course/course.service'
+import useLoading from '@/hooks/useLoading.hook'
+import { useCallback, useMemo } from 'react'
 
-const BaseInfomation = ({ register, control, errors, setValue, getValues }: CommonProps) => {
+interface BaseInfomationProps extends CommonProps {
+  id: string
+}
+
+const BaseInfomation = ({
+  register,
+  control,
+  errors,
+  setValue,
+  getValues,
+  handleSubmit,
+  watch,
+  id
+}: BaseInfomationProps) => {
+  const categories = useCategory()
+  const { loading, startLoading, stopLoading } = useLoading()
+
+  const handleCategoryChange = useCallback(
+    (value: string) => {
+      if (!value) return
+      setValue('category', value, { shouldValidate: true, shouldDirty: true })
+      setValue('categoryId', categories.find((cat) => cat.name === value)?.id, {
+        shouldValidate: true,
+        shouldDirty: true
+      })
+    },
+    [setValue, categories]
+  )
+
+  // Watch tất cả values một lần
+  const watchedValues = watch(['courseTitle', 'subtitle'])
+
+  // Safely get character counts
+  const courseTitleLength = useMemo(() => {
+    return watchedValues[0]?.length || 0
+  }, [watchedValues[0]])
+
+  const subtitleLength = useMemo(() => {
+    return watchedValues[1]?.length || 0
+  }, [watchedValues[1]])
+
+  const onSubmit = async (data: any) => {
+    const courseId = id
+    if (!courseId) return
+
+    const request = {
+      id: courseId,
+      title: data.courseTitle,
+      shortDescription: data.subtitle,
+      longDescription: data.description,
+      outcomes: data.learnItems,
+      requirements: data.requirements,
+      categoryIds: data.categoryId,
+      thumbnailUrl: data.thumbnailUrl
+    }
+
+    try {
+      startLoading()
+      const response = await courseService.createCourse(request)
+      if (response && response.code === 200) {
+        toast.success('Cập nhật thông tin khóa học thành công')
+      } else {
+        toast.error('Cập nhật thông tin khóa học thất bại')
+      }
+    } catch (error) {
+      console.log('Error updating course info:', error)
+      toast.error('Có lỗi xảy ra khi cập nhật khóa học')
+    } finally {
+      stopLoading()
+    }
+  }
+
   return (
-    <>
+    <form onSubmit={handleSubmit(onSubmit)} className ='space-y-6'>
       <Card className='border border-blue-200 shadow-sm bg-blue-50'>
         <CardHeader className='bg-blue-200/40 rounded-t-lg'>
           <CardTitle className='text-lg font-medium text-blue-900 flex items-center gap-2'>
@@ -20,16 +97,16 @@ const BaseInfomation = ({ register, control, errors, setValue, getValues }: Comm
         </CardHeader>
         <CardContent className='space-y-5'>
           <div>
-            <Label htmlFor='title' className='text-blue-900'>
+            <Label htmlFor='courseTitle' className='text-blue-900'>
               Tiêu đề khóa học *
             </Label>
             <Input
-              id='title'
+              id='courseTitle'
               {...register('courseTitle')}
               placeholder='Nhập tiêu đề khóa học'
               className='mt-2 border-blue-300 focus:ring-blue-300'
             />
-            <div className='text-xs text-blue-700 mt-1'>{getValues('courseTitle')?.length || 0}/60 ký tự</div>
+            <div className='text-xs text-blue-700 mt-1'>{courseTitleLength}/60 ký tự</div>
             {errors.courseTitle && <p className='text-red-500 text-xs'>{errors.courseTitle.message}</p>}
           </div>
 
@@ -44,7 +121,7 @@ const BaseInfomation = ({ register, control, errors, setValue, getValues }: Comm
               className='mt-2 border-blue-300 focus:ring-blue-300'
               rows={3}
             />
-            <div className='text-xs text-blue-700 mt-1'>{getValues('subtitle')?.length || 0}/120 ký tự</div>
+            <div className='text-xs text-blue-700 mt-1'>{subtitleLength}/120 ký tự</div>
             {errors.subtitle && <p className='text-red-500 text-xs'>{errors.subtitle.message}</p>}
           </div>
         </CardContent>
@@ -78,42 +155,29 @@ const BaseInfomation = ({ register, control, errors, setValue, getValues }: Comm
         </CardHeader>
         <CardContent className='grid md:grid-cols-2 gap-6'>
           <div>
-            <Label className='text-blue-900'>Ngôn ngữ *</Label>
-            <Controller
-              control={control}
-              name='language'
-              render={({ field }) => (
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger className='mt-2 border-blue-300 focus:ring-blue-300'>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className='bg-blue-50'>
-                    <SelectItem value='english'>Tiếng Anh</SelectItem>
-                    <SelectItem value='spanish'>Tiếng Tây Ban Nha</SelectItem>
-                    <SelectItem value='french'>Tiếng Pháp</SelectItem>
-                    <SelectItem value='german'>Tiếng Đức</SelectItem>
-                  </SelectContent>
-                </Select>
-              )}
-            />
-            {errors.language && <p className='text-red-500 text-xs'>{errors.language.message}</p>}
-          </div>
-
-          <div>
             <Label className='text-blue-900'>Danh mục *</Label>
             <Controller
               control={control}
               name='category'
               render={({ field }) => (
-                <Select value={field.value} onValueChange={field.onChange}>
+                <Select value={field.value || ''} onValueChange={handleCategoryChange}>
                   <SelectTrigger className='mt-2 border-blue-300 focus:ring-blue-300'>
-                    <SelectValue />
+                    <SelectValue
+                      placeholder={categories && categories.length > 0 ? 'Chọn danh mục' : 'Chưa có danh mục'}
+                    />
                   </SelectTrigger>
                   <SelectContent className='bg-blue-50'>
-                    <SelectItem value='development'>Phát triển</SelectItem>
-                    <SelectItem value='business'>Kinh doanh</SelectItem>
-                    <SelectItem value='design'>Thiết kế</SelectItem>
-                    <SelectItem value='marketing'>Marketing</SelectItem>
+                    {categories && categories.length > 0 ? (
+                      categories.map((cat) => (
+                        <SelectItem key={cat.id} value={cat.name}>
+                          {cat.name}
+                        </SelectItem>
+                      ))
+                    ) : (
+                      <p className='text-red-500 text-xs'>
+                        Chưa có danh mục nào. Vui lòng thêm danh mục trong trang quản trị.
+                      </p>
+                    )}
                   </SelectContent>
                 </Select>
               )}
@@ -123,22 +187,42 @@ const BaseInfomation = ({ register, control, errors, setValue, getValues }: Comm
         </CardContent>
       </Card>
 
-      <DynamicListInput
-        title='Bạn sẽ học được gì từ khóa học này?'
-        placeholder='Nhập nội dung bạn sẽ học'
-        items={getValues('learnItems') || []}
-        onChange={(items) => setValue('learnItems', items)}
-        icon={<BookOpen className='h-5 w-5 text-blue-700' />}
+      <Controller
+        control={control}
+        name='learnItems'
+        render={({ field }) => (
+          <DynamicListInput
+            title='Bạn sẽ học được gì từ khóa học này?'
+            placeholder='Nhập nội dung bạn sẽ học'
+            items={field.value || []}
+            onChange={field.onChange}
+            icon={<BookOpen className='h-5 w-5 text-blue-700' />}
+          />
+        )}
       />
 
-      <DynamicListInput
-        title='Yêu cầu trước của khóa học này?'
-        placeholder='Nhập yêu cầu trước'
-        items={getValues('requirements') || []}
-        onChange={(items) => setValue('requirements', items)}
-        icon={<Info className='h-5 w-5 text-blue-700' />}
+      <Controller
+        control={control}
+        name='requirements'
+        render={({ field }) => (
+          <DynamicListInput
+            title='Yêu cầu trước của khóa học này?'
+            placeholder='Nhập yêu cầu trước'
+            items={field.value || []}
+            onChange={field.onChange}
+            icon={<Info className='h-5 w-5 text-blue-700' />}
+          />
+        )}
       />
-    </>
+
+      <CustomButton
+        label='Lưu thông tin'
+        className='bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow mt-4'
+        icon={<Save className='h-5 w-5' />}
+        type='submit'
+        isLoader={loading}
+      />
+    </form>
   )
 }
 

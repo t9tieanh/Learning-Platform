@@ -22,7 +22,7 @@ public class S3Config {
     @Bean
     public S3AsyncClient s3AsyncClient() {
         return S3AsyncClient.builder()
-                .region(Region.AP_SOUTHEAST_1)
+                .region(Region.of(region))
                 .credentialsProvider(
                         StaticCredentialsProvider.create(
                                 AwsBasicCredentials.create(accessKey, secretKey)

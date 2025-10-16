@@ -42,7 +42,7 @@ const router = createBrowserRouter([
         children: [
           { path: '', element: <TCHomePage /> },
           { path: 'course', element: <TC_Course /> },
-          { path: 'create-course', element: <TC_CreateCourse /> },
+          { path: 'course/:id', element: <TC_CreateCourse /> },
           { path: 'profile', element: <TC_Profile /> },
           { path: 'course-details/:id', element: <TC_CourseDetail /> },
           // Alias cũ (nếu ai truy cập không có id sẽ 404 hoặc có thể điều hướng)

@@ -6,5 +6,7 @@ export type Props = {
   control: Control<LandingPageFormValues>
   errors: FieldErrors<LandingPageFormValues>
   setValue: any
+  handleSubmit: any
   getValues: any
+  watch?: any
 }
