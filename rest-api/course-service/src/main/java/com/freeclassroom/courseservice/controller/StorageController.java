@@ -27,7 +27,7 @@ public class StorageController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Resource>  getFile(@PathVariable String id) throws Exception {
+    public ResponseEntity<Resource> getFile(@PathVariable String id) throws Exception {
         try {
             byte[] fileBytes = cloudFrontService.getFile(id);
 

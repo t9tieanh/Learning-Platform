@@ -44,7 +44,7 @@ const CustomTextarea = React.forwardRef<HTMLTextAreaElement, CustomTextareaProps
           </Label>
         )}
 
-        <Textarea ref={ref} rows={rows} {...rest} onChange={handleChange} />
+        <Textarea className={`h-full ${className}`} ref={ref} rows={rows} {...rest} onChange={handleChange} />
 
         {error && (
           <p className='text-xs text-red-500 mt-1'>{typeof error === 'string' ? error : 'Trường này không hợp lệ'}</p>

@@ -1,6 +1,7 @@
+/* eslint-disable react/no-children-prop */
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Plus, ChevronDown, ChevronRight, GripVertical, Trash2, Send, X } from 'lucide-react'
+import { Plus, ChevronDown, ChevronRight, GripVertical, Trash2, Send, X, BookOpen } from 'lucide-react'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { Chapter, UpdateChapterSchema, UpdateChapterFormValues } from '@/utils/create-course/curriculum'
 import LessonForm from './LessonForm'
@@ -11,6 +12,9 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import CustomTextarea from '@/components/common/Textarea'
+import chapterService from '@/services/course/chapter.service'
+import CustomDialog from '@/components/common/Dialog'
+import AddVideoForm from './addVideo/AddVideoForm'
 
 const ChapterForm = ({
   chapter,
@@ -34,9 +38,33 @@ const ChapterForm = ({
     resolver: yupResolver(UpdateChapterSchema) as any
   })
 
+  // for dialog add video, lecture
+  const [open, setOpen] = useState(false)
+
+  const updateChapter = async (data: UpdateChapterFormValues) => {
+    const result = await chapterService.updateChapter({
+      id: chapter.id,
+      title: data.title,
+      position: chapter.position,
+      description: data.description
+    })
+
+    if (result && result.code === 200 && result.result) {
+      if (setChapters) {
+        setChapters((prevChapters) =>
+          prevChapters.map((ch) =>
+            ch.id === chapter.id ? { ...ch, title: data.title, description: data.description } : ch
+          )
+        )
+      }
+      setUpdateTitle(false)
+    }
+  }
+
   const addLecture = (sectionId: string, type: 'video' | 'quiz' | 'article') => {
     // Logic to add a new lecture to the section
     console.log(`Add ${type} lecture to section ${sectionId}`)
+    setOpen(true)
   }
 
   // Toggle section open/close
@@ -63,7 +91,7 @@ const ChapterForm = ({
                 <span className='font-medium text-gray-800'>Phần {chapter.position + 1}:</span>
 
                 {updateTitle ? (
-                  <form className='space-y-2 w-full' onSubmit={handleSubmit((data) => console.log(data))}>
+                  <form className='space-y-2 w-full' onSubmit={handleSubmit(updateChapter)}>
                     <CustomInput placeholder='Nhập tiêu đề mới' type='text' {...register('title')} />
                     {errors.title && <span className='text-red-500 text-xs'>{errors.title.message}</span>}
 
@@ -165,6 +193,19 @@ const ChapterForm = ({
           </div>
         </CollapsibleContent>
       </Collapsible>
+      <CustomDialog
+        open={open}
+        setOpen={setOpen}
+        title={
+          <>
+            <BookOpen className='h-4 w-4 mr-2' />
+            Thêm bài giảng mới
+          </>
+        }
+        description='Hãy thêm Thêm bài giảng cho khóa học của bạn !'
+        children={<AddVideoForm />}
+        size='xl'
+      />
     </div>
   )
 }

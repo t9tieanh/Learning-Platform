@@ -14,7 +14,7 @@ const TC_CreateCourse = () => {
   const renderContent = () => {
     switch (activeSection) {
       case 'curriculum':
-        return <CurriculumForm />
+        return <CurriculumForm id={id as string} />
       case 'pricing':
         return <PricingForm />
       case 'setup':

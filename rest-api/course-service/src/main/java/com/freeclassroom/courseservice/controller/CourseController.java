@@ -40,7 +40,7 @@ public class CourseController {
         return tagService.getTagsByCourseId(id);
     }
 
-    // GET
+
     @GetMapping("/details/{id}")
     ApiResponse<CourseResponse> getCourse(@PathVariable String id) {
         return courseService.getCourse(id);

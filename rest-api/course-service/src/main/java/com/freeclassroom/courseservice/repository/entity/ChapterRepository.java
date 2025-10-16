@@ -19,4 +19,6 @@ public interface ChapterRepository extends JpaRepository<ChapterEntity, String> 
 
     @Query("SELECT c.course.instructorId FROM ChapterEntity c WHERE c.id = :chapterId")
     Optional<String> findInstructorIdByChapterId(@Param("chapterId") String chapterId);
+
+    Optional<ChapterEntity> findById(String id);
 }

@@ -31,7 +31,7 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
 
     @NonFinal
     private String[] publicEndpoints = {
-            "/user.*", "/auth.*", "/course.*",
+            "/user.*", "/auth.*", "/course.*", "/learning/storage.*",
     };
 
     ObjectMapper objectMapper;

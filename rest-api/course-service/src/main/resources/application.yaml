@@ -1,5 +1,6 @@
 server:
   port: 8081
+  backendUri: localhost:8888/api/v1/learning/storage
 
 redis:
   host: localhost

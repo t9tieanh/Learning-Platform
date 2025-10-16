@@ -22,7 +22,6 @@ import software.amazon.awssdk.transfer.s3.progress.LoggingTransferListener;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.Date;
 import java.util.concurrent.CompletableFuture;
 
@@ -41,6 +40,10 @@ public class AmazonS3Client {
     @Value("${aws.key-store}")
     @NonFinal
     String keyStore;
+
+    @Value("${server.backendUri}")
+    @NonFinal
+    String backendUri;
 
     private String generateFileName(MultipartFile multiPart) {
         return new Date().getTime() + "-" + multiPart.getOriginalFilename().replace(" ", "_");
@@ -85,16 +88,18 @@ public class AmazonS3Client {
     public String uploadFile(MultipartFile multipartFile) throws IOException {
 
         String fileUrl = "";
+        String fileUrlReturn = "";
         File file = fileUtils.convertMultiPartToFile(multipartFile);
         try {
             String fileName = generateFileName(multipartFile);
             fileUrl = keyStore + "/" + fileName;
+            fileUrlReturn = backendUri + "/" + fileName;
             uploadWithProgress(fileUrl, fileUtils.convertMultiPartToFile(multipartFile));
         } catch (Exception e) {
             throw new CustomExeption(ErrorCode.UPLOAD_NOT_COMPLETED);
         } finally {
             file.delete();
         }
-        return fileUrl;
+        return fileUrlReturn;
     }
 }

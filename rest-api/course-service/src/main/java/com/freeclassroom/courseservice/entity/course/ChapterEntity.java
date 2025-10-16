@@ -22,6 +22,7 @@ public class ChapterEntity extends AbstractEntity {
     String title;
     String description;
     Long position;
+    Boolean isOpen;
 
     // Course
     @ManyToOne
@@ -29,6 +30,12 @@ public class ChapterEntity extends AbstractEntity {
     CourseEntity course;
 
     // Lesson
-    @OneToMany(mappedBy = "chapter")
+    @OneToMany(mappedBy = "chapter", cascade = CascadeType.ALL, orphanRemoval = true)
     List<LessonEntity> lessons;
+
+    public void prePersist() {
+        if (isOpen == null) {
+            isOpen = false;
+        }
+    }
 }
