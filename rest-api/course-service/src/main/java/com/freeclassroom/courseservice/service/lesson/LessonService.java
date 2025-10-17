@@ -21,12 +21,13 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.io.IOException;
+
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Service
 @Slf4j
 public class LessonService implements ILessonService{
-    LessonRepository lessonRepo;
     ChapterRepository chapterRepo;
 
     IUploadFileService uploadFileService;
@@ -34,69 +35,45 @@ public class LessonService implements ILessonService{
     LessonMapper lessonMapper;
 
     @Override
-    public ApiResponse<CreationResponse> addVideo(CreationVideoRequest lesson){
-        ChapterEntity chapter =  chapterRepo.findById(lesson.getChapterId()).orElseThrow(
-                () -> new CustomExeption(ErrorCode.CHAPTER_NOT_FOUND)
-        );
-
-        //upload file
-        String imageUri = uploadFileService.uploadFile(lesson.getFile());
-
-        //mapping to entity
-        LessonEntity newLesson = lessonMapper.toEntity(lesson);
-        newLesson.setType(EnumLessonType.Video);
-        newLesson.setUrl(imageUri);
-
-        //save
-        newLesson.setChapter(chapter);
-        chapter.getLessons().add(newLesson);
-        chapterRepo.save(chapter);
-
-        return ApiResponse.<CreationResponse>builder()
-                .code(200)
-                .message("Thêm video thành công !")
-                .result(CreationResponse.builder()
-                        .name(newLesson.getTitle())
-                        .id(newLesson.getId())
-                        .build())
-                .build();
-    }
-
-    @Override
-    public Flux<ServerSentEvent<String>> addVideoWithProgress(CreationVideoRequest lesson) {
-        ChapterEntity chapter =  chapterRepo.findById(lesson.getChapterId()).orElseThrow(
-                () -> new CustomExeption(ErrorCode.CHAPTER_NOT_FOUND)
-        );
+    public Flux<ServerSentEvent<String>> addVideoWithProgress(CreationVideoRequest lesson) throws IOException {
+        ChapterEntity chapter = chapterRepo.findById(lesson.getChapterId())
+                .orElseThrow(() -> new CustomExeption(ErrorCode.CHAPTER_NOT_FOUND));
 
         return uploadFileService.uploadFileWithProgress(lesson.getFile())
-                .map(percent -> ServerSentEvent.<String>builder()
-                        .event("progress")
-                        .data("{\"percent\": " + percent + "}")
-                        .build())
-                .concatWith(
-                        Mono.defer(() -> {
-                            //mapping to entity
-                            LessonEntity newLesson = lessonMapper.toEntity(lesson);
-                            newLesson.setType(EnumLessonType.Video);
-                            newLesson.setUrl(imageUri);
+                .flatMap(event -> {
+                    // ongoing upload
+                    if (event.getFileUrl() == null) {
+                        return Mono.just(ServerSentEvent.<String>builder()
+                                .event("uploading")
+                                .data("{\"progress\": " + event.getProgress() + "}")
+                                .build());
+                    }
 
-                            //save
-                            newLesson.setChapter(chapter);
-                            chapter.getLessons().add(newLesson);
-                            chapterRepo.save(chapter);
+                    // when finish upload
+                    String fileUrl = event.getFileUrl();
 
-                            return Flux.just(
-                                    ServerSentEvent.<String>builder()
-                                            .event("saving_db")
-                                            .data("{\"message\": \"Saving lesson info to DB...\"}")
-                                            .build(),
-                                    ServerSentEvent.<String>builder()
-                                            .event("completed")
-                                            .data("{\"lessonId\": \"" + newLesson.getId() + "\", \"message\": \"Lesson created successfully\"}")
-                                            .build(),
-                                    ServerSentEvent.<String>builder().data("[DONE]").build()
-                            );
-                        }
-                )
+                    // send event "saving_db"
+                    ServerSentEvent<String> savingEvent = ServerSentEvent.<String>builder()
+                            .event("saving_db")
+                            .data("{\"message\": \"Saving lesson info to DB...\"}")
+                            .build();
+
+                    // save to db
+                    LessonEntity newLesson = lessonMapper.toEntity(lesson);
+                    newLesson.setType(EnumLessonType.Video);
+                    newLesson.setUrl(fileUrl);
+                    newLesson.setChapter(chapter);
+
+                    chapter.getLessons().add(newLesson);
+                    chapterRepo.save(chapter);
+
+                    ServerSentEvent<String> completedEvent = ServerSentEvent.<String>builder()
+                            .event("completed")
+                            .data("{\"lessonId\": \"" + newLesson.getId() + "\", \"message\": \"Lesson created successfully\"}")
+                            .build();
+
+                    return Flux.just(savingEvent, completedEvent);
+                });
     }
+
 }

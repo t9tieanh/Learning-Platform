@@ -29,11 +29,6 @@ public class StorageController {
         return this.uploadFileService.uploadFile(file);
     }
 
-    @PostMapping(value = "/upload-with-progress", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<Double> uploadFileWithProgress(@RequestPart("file") MultipartFile file) throws IOException {
-        return uploadFileService.uploadFileWithProgress(file);
-    }
-
     @GetMapping("/{id}")
     public ResponseEntity<Resource> getFile(@PathVariable String id) throws Exception {
         try {

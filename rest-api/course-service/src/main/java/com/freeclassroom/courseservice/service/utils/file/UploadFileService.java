@@ -1,5 +1,6 @@
 package com.freeclassroom.courseservice.service.utils.file;
 
+import com.freeclassroom.courseservice.dto.utils.UploadProgressEvent;
 import com.freeclassroom.courseservice.exception.CustomExeption;
 import com.freeclassroom.courseservice.exception.ErrorCode;
 import com.freeclassroom.courseservice.service.utils.cloudinary.CloudinaryClient;
@@ -43,7 +44,7 @@ public class UploadFileService implements IUploadFileService {
     }
 
     @Override
-    public Flux<Double> uploadFileWithProgress(MultipartFile multipartFile) throws IOException {
+    public Flux<UploadProgressEvent> uploadFileWithProgress(MultipartFile multipartFile) throws IOException {
         return amazonS3Client.uploadFileWithProgress(multipartFile);
     }
 }

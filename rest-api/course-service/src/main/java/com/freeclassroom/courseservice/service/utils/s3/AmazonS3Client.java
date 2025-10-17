@@ -1,5 +1,6 @@
 package com.freeclassroom.courseservice.service.utils.s3;
 
+import com.freeclassroom.courseservice.dto.utils.UploadProgressEvent;
 import com.freeclassroom.courseservice.exception.CustomExeption;
 import com.freeclassroom.courseservice.exception.ErrorCode;
 import com.freeclassroom.courseservice.service.utils.other.FileUtils;
@@ -87,14 +88,14 @@ public class AmazonS3Client {
         }
     }
 
-    public Flux<Double> uploadFileWithProgress(MultipartFile multipartFile) throws IOException {
-        Sinks.Many<Double> sink = Sinks.many().multicast().onBackpressureBuffer();
+    public Flux<UploadProgressEvent> uploadFileWithProgress(MultipartFile multipartFile) throws IOException {
+        Sinks.Many<UploadProgressEvent> sink = Sinks.many().unicast().onBackpressureBuffer();
 
         File file = fileUtils.convertMultiPartToFile(multipartFile);
         String fileName = generateFileName(multipartFile);
         String key = keyStore + "/" + fileName;
 
-        TransferListenerS3 listener = new TransferListenerS3(sink);
+        TransferListenerS3 listener = new TransferListenerS3(sink, backendUri + "/" + fileName);
 
         CompletableFuture.runAsync(() -> {
             try (S3TransferManager tm = S3TransferManager.builder()
@@ -107,9 +108,12 @@ public class AmazonS3Client {
                         .source(file.toPath())
                         .build();
 
-                tm.uploadFile(req)
-                        .completionFuture()
-                        .join(); // block ở thread riêng
+                tm.uploadFile(req).completionFuture().join();
+
+                // Báo complete khi upload xong
+                sink.tryEmitNext(new UploadProgressEvent(100.0,backendUri + "/" + fileName));
+                sink.tryEmitComplete();
+
             } catch (Exception e) {
                 log.error("Upload failed", e);
                 sink.tryEmitError(e);
