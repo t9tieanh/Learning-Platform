@@ -8,8 +8,8 @@ const HomePage = () => {
   return (
     <div className='home-page-container'>
       <Banner />
-      <CourseList />
-      <CourseList />
+      <CourseList title='Khóa học bán chạy nhất' />
+      <CourseList title='Khóa học hot tháng này' />
       <TrendingCategories />
       <WhyChooseUsSection />
       <HighlightedArticles />

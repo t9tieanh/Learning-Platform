@@ -13,6 +13,7 @@ import Profile from './pages/Profile'
 import User from '@/pages/User'
 import TCHomePage from './pages/TC_HomePage'
 import ForgotPass from './pages/ForgotPass'
+import CoursePage from './pages/CoursePage'
 import TC_Course from './pages/TC_Courses'
 import TC_CreateCourse from './pages/TC_CreateCourse'
 import TC_Profile from './pages/TC_Profile'
@@ -30,13 +31,14 @@ const router = createBrowserRouter([
           { path: '', element: <HomePage /> },
           { path: 'course/:id', element: <Course /> },
           { path: 'my-cart', element: <CartPage /> },
-          { path: 'profile', element: <Profile /> }
+          { path: 'profile', element: <Profile /> },
         ]
       },
       { path: 'auth', element: <AuthLayout /> },
       { path: 'user/verify', element: <User /> },
       { path: '*', element: <NotFound /> },
       { path: 'forgot', element: <ForgotPass /> },
+      { path: 'course-page', element: <CoursePage /> },
       {
         path: 'teacher',
         children: [
