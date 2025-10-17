@@ -11,6 +11,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Sinks;
 import software.amazon.awssdk.core.async.AsyncRequestBody;
 import software.amazon.awssdk.services.s3.S3AsyncClient;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
@@ -83,6 +85,40 @@ public class AmazonS3Client {
 
             upload.completionFuture().join();
         }
+    }
+
+    public Flux<Double> uploadFileWithProgress(MultipartFile multipartFile) throws IOException {
+        Sinks.Many<Double> sink = Sinks.many().multicast().onBackpressureBuffer();
+
+        File file = fileUtils.convertMultiPartToFile(multipartFile);
+        String fileName = generateFileName(multipartFile);
+        String key = keyStore + "/" + fileName;
+
+        TransferListenerS3 listener = new TransferListenerS3(sink);
+
+        CompletableFuture.runAsync(() -> {
+            try (S3TransferManager tm = S3TransferManager.builder()
+                    .s3Client(s3client)
+                    .build()) {
+
+                UploadFileRequest req = UploadFileRequest.builder()
+                        .putObjectRequest(b -> b.bucket(bucketName).key(key))
+                        .addTransferListener(listener)
+                        .source(file.toPath())
+                        .build();
+
+                tm.uploadFile(req)
+                        .completionFuture()
+                        .join(); // block ở thread riêng
+            } catch (Exception e) {
+                log.error("Upload failed", e);
+                sink.tryEmitError(e);
+            } finally {
+                file.delete();
+            }
+        });
+
+        return sink.asFlux();
     }
 
     public String uploadFile(MultipartFile multipartFile) throws IOException {

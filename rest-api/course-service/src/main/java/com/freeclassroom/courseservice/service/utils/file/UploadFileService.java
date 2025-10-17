@@ -10,6 +10,9 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import reactor.core.publisher.Flux;
+
+import java.io.IOException;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -37,5 +40,10 @@ public class UploadFileService implements IUploadFileService {
             log.error("Upload failed", e);
             throw new CustomExeption(ErrorCode.UPLOAD_NOT_COMPLETED);
         }
+    }
+
+    @Override
+    public Flux<Double> uploadFileWithProgress(MultipartFile multipartFile) throws IOException {
+        return amazonS3Client.uploadFileWithProgress(multipartFile);
     }
 }

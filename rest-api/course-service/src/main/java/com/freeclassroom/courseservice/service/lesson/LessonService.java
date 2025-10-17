@@ -16,7 +16,10 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -57,5 +60,43 @@ public class LessonService implements ILessonService{
                         .id(newLesson.getId())
                         .build())
                 .build();
+    }
+
+    @Override
+    public Flux<ServerSentEvent<String>> addVideoWithProgress(CreationVideoRequest lesson) {
+        ChapterEntity chapter =  chapterRepo.findById(lesson.getChapterId()).orElseThrow(
+                () -> new CustomExeption(ErrorCode.CHAPTER_NOT_FOUND)
+        );
+
+        return uploadFileService.uploadFileWithProgress(lesson.getFile())
+                .map(percent -> ServerSentEvent.<String>builder()
+                        .event("progress")
+                        .data("{\"percent\": " + percent + "}")
+                        .build())
+                .concatWith(
+                        Mono.defer(() -> {
+                            //mapping to entity
+                            LessonEntity newLesson = lessonMapper.toEntity(lesson);
+                            newLesson.setType(EnumLessonType.Video);
+                            newLesson.setUrl(imageUri);
+
+                            //save
+                            newLesson.setChapter(chapter);
+                            chapter.getLessons().add(newLesson);
+                            chapterRepo.save(chapter);
+
+                            return Flux.just(
+                                    ServerSentEvent.<String>builder()
+                                            .event("saving_db")
+                                            .data("{\"message\": \"Saving lesson info to DB...\"}")
+                                            .build(),
+                                    ServerSentEvent.<String>builder()
+                                            .event("completed")
+                                            .data("{\"lessonId\": \"" + newLesson.getId() + "\", \"message\": \"Lesson created successfully\"}")
+                                            .build(),
+                                    ServerSentEvent.<String>builder().data("[DONE]").build()
+                            );
+                        }
+                )
     }
 }

@@ -12,6 +12,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import reactor.core.publisher.Flux;
+
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/storage")
@@ -24,6 +27,11 @@ public class StorageController {
     @PostMapping("/upload-file")
     public String uploadFile(@RequestPart(value = "file") MultipartFile file) {
         return this.uploadFileService.uploadFile(file);
+    }
+
+    @PostMapping(value = "/upload-with-progress", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<Double> uploadFileWithProgress(@RequestPart("file") MultipartFile file) throws IOException {
+        return uploadFileService.uploadFileWithProgress(file);
     }
 
     @GetMapping("/{id}")
