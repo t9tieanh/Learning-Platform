@@ -53,24 +53,32 @@ const CurriculumForm: React.FC<{ id: string }> = ({ id }: { id: string }) => {
   }
 
   const getTotalStats = () => {
-    const totallessons = Chapters?.reduce((acc, Chapter) => acc + Chapter.lessons.length, 0)
-    const totalDuration = Chapters?.reduce(
-      (acc, Chapter) =>
-        acc +
-        Chapter?.lessons?.reduce((secAcc, lecture) => {
-          if (lecture.duration) {
-            const [min, sec] = lecture.duration.split(':').map(Number)
-            return secAcc + min * 60 + sec
-          }
-          return secAcc
-        }, 0),
-      0
-    )
+    const totallessons = (Chapters || []).reduce((acc, chap) => acc + (chap.lessons?.length || 0), 0)
 
-    const hours = Math.floor(totalDuration / 3600)
-    const minutes = Math.floor((totalDuration % 3600) / 60)
+    const totalSeconds = (Chapters || []).reduce((acc, chap) => {
+      const chapterSeconds = (chap.lessons || []).reduce((secAcc, lecture) => {
+        // lecture.duration may be number (seconds) or string ("mm:ss" or "hh:mm:ss")
+        const dur = lecture.duration
+        if (typeof dur === 'number') return secAcc + dur
+        if (typeof dur === 'string') {
+          const parts = dur.split(':').map(Number).reverse() // sec, min, hour
+          let seconds = 0
+          if (parts[0]) seconds += parts[0]
+          if (parts[1]) seconds += parts[1] * 60
+          if (parts[2]) seconds += parts[2] * 3600
+          return secAcc + seconds
+        }
+        return secAcc
+      }, 0)
+      return acc + chapterSeconds
+    }, 0)
 
-    return { totallessons, totalDuration: `${hours}h ${minutes}m` }
+    const hours = Math.floor(totalSeconds / 3600)
+    const minutes = Math.floor((totalSeconds % 3600) / 60)
+
+    const totalDuration = `${hours}h ${minutes}m`
+
+    return { totallessons, totalDuration, totalSeconds }
   }
 
   const stats = getTotalStats()

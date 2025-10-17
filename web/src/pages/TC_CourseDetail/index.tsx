@@ -87,7 +87,7 @@ export default function CourseDetailPage() {
   }
 
   const handleEdit = () => {
-    toast.success('Đang chuyển đến trang chỉnh sửa...')
+    navigate('/teacher/course/' + id)
   }
 
   const handlePublish = () => {

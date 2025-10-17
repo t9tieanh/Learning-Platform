@@ -203,7 +203,7 @@ const ChapterForm = ({
           </>
         }
         description='Hãy thêm Thêm bài giảng cho khóa học của bạn !'
-        children={<AddVideoForm />}
+        children={<AddVideoForm chapterId={chapter.id} />}
         size='xl'
       />
     </div>

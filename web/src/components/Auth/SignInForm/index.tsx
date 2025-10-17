@@ -7,7 +7,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { FcGoogle } from 'react-icons/fc'
 import CustomCheckbox from '../../common/CustomCheckbox'
 import { FaSquareFacebook } from 'react-icons/fa6'
-import { BookOpen } from 'lucide-react'
 import { SignInFormInputs, signInSchema } from '@/utils/auth'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
