@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.Where;
 
 import java.util.List;
 
@@ -16,10 +17,12 @@ import java.util.List;
 @NoArgsConstructor(force = true)
 @SuperBuilder
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@Where(clause = "deleted = false")
 public class ChapterEntity extends AbstractEntity {
     String title;
     String description;
     Long position;
+    Boolean isOpen;
 
     // Course
     @ManyToOne
@@ -27,6 +30,12 @@ public class ChapterEntity extends AbstractEntity {
     CourseEntity course;
 
     // Lesson
-    @OneToMany(mappedBy = "chapter")
+    @OneToMany(mappedBy = "chapter", cascade = CascadeType.ALL, orphanRemoval = true)
     List<LessonEntity> lessons;
+
+    public void prePersist() {
+        if (isOpen == null) {
+            isOpen = false;
+        }
+    }
 }

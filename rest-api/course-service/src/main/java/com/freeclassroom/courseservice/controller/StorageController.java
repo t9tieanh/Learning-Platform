@@ -12,6 +12,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import reactor.core.publisher.Flux;
+
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/storage")
@@ -27,7 +30,7 @@ public class StorageController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Resource>  getFile(@PathVariable String id) throws Exception {
+    public ResponseEntity<Resource> getFile(@PathVariable String id) throws Exception {
         try {
             byte[] fileBytes = cloudFrontService.getFile(id);
 

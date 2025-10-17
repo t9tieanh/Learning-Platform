@@ -2,7 +2,6 @@ package com.freeclassroom.courseservice.controller;
 
 import com.freeclassroom.courseservice.dto.request.common.FileUploadRequest;
 import com.freeclassroom.courseservice.dto.request.course.CreationCourseRequest;
-import com.freeclassroom.courseservice.dto.request.course.GetCourseRequest;
 import com.freeclassroom.courseservice.dto.request.course.InstructorRequest;
 import com.freeclassroom.courseservice.dto.request.course.UpdateTagsRequest;
 import com.freeclassroom.courseservice.dto.response.ApiResponse;
@@ -22,7 +21,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/courses")
@@ -42,7 +40,7 @@ public class CourseController {
         return tagService.getTagsByCourseId(id);
     }
 
-    // GET
+
     @GetMapping("/details/{id}")
     ApiResponse<CourseResponse> getCourse(@PathVariable String id) {
         return courseService.getCourse(id);
