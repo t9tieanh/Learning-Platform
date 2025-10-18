@@ -1,6 +1,6 @@
 package com.freeclassroom.courseservice.dto.response.chapter;
 
-import com.freeclassroom.courseservice.entity.course.LessonEntity;
+import com.freeclassroom.courseservice.dto.response.lesson.LessonDto;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -18,5 +18,5 @@ public class ChapterDto {
     Long position;
     Boolean isOpen;
 
-    List<LessonEntity> lessons;
+    List<LessonDto> lessons;
 }

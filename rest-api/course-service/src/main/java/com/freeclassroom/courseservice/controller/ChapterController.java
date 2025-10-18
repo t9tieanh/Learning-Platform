@@ -46,4 +46,9 @@ public class ChapterController {
     public ApiResponse<ChapterResponse> getChapterById(@PathVariable String id) {
         return chapterService.findById(id);
     }
+
+    @DeleteMapping("{id}")
+    public ApiResponse<CreationResponse> deleteChapterById(@PathVariable String id) {
+        return chapterService.deleteChapterById(id);
+    }
 }

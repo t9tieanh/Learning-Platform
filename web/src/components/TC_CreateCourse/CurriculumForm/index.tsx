@@ -2,15 +2,21 @@
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Plus } from 'lucide-react'
+import { Plus, Upload } from 'lucide-react'
 import TitleComponent from '@/components/TC_CreateCourse/common/Title'
-import { Chapter } from '@/utils/create-course/curriculum'
+import { Chapter, CreationVideoFormValues } from '@/utils/create-course/curriculum'
 import ChapterForm from './ChapterForm'
 import chapterService from '@/services/course/chapter.service'
-import { toast } from 'react-toastify'
+import { toast } from 'sonner'
+import UploadProgress from './UploadProgress'
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
+import { useUpload } from '@/hooks/useUpload.hook'
 
 const CurriculumForm: React.FC<{ id: string }> = ({ id }: { id: string }) => {
   const [Chapters, setChapters] = useState<Chapter[]>([])
+  const [uploadProgress, setUploadProgress] = useState<{ progress: number; title: string }[]>([
+    { progress: 85, title: 'Test thử thôi nha' }
+  ])
 
   useEffect(() => {
     const fetchChapters = async () => {
@@ -83,6 +89,43 @@ const CurriculumForm: React.FC<{ id: string }> = ({ id }: { id: string }) => {
 
   const stats = getTotalStats()
 
+  // Handle form submission for save lesson
+  const onSubmit = async (newVideo: CreationVideoFormValues, selectedFile: File, chapterId: string) => {
+    if (!selectedFile) {
+      toast.error('Vui lòng chọn file video trước khi lưu bài giảng')
+      return
+    }
+
+    const { upload } = useUpload({
+      accessToken: '', // Provide access token if needed
+      uri: 'learning/lessons/video'
+    })
+
+    // FormData cho cả video và lesson metadata
+    const formData = new FormData()
+    formData.append('video', selectedFile)
+    formData.append(
+      'lesson',
+      new Blob(
+        [
+          JSON.stringify({
+            title: newVideo.title,
+            content: newVideo.content,
+            isPublic: newVideo.isPublic,
+            chapterId: chapterId
+          })
+        ],
+        { type: 'application/json' }
+      )
+    )
+
+    try {
+      await upload(formData)
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
   return (
     <div className='max-w-6xl space-y-8 mx-auto'>
       <TitleComponent
@@ -107,6 +150,28 @@ const CurriculumForm: React.FC<{ id: string }> = ({ id }: { id: string }) => {
           </>
         }
       />
+
+      {uploadProgress && uploadProgress.length > 0 && (
+        <>
+          <Accordion
+            type='single'
+            collapsible
+            className='w-full p-4 border border-blue-200/60 shadow-sm rounded-2xl bg-white'
+            defaultValue='item-1'
+          >
+            <AccordionItem value='item-1'>
+              <AccordionTrigger>
+                <span className='flex items-center gap-1 text-base px-3'>
+                  <Upload className='h-5 w-5' /> Tiến độ tải lên
+                </span>
+              </AccordionTrigger>
+              <AccordionContent className='flex flex-col gap-4 text-balance space-y-4 p-4'>
+                <UploadProgress progressLst={uploadProgress} />
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </>
+      )}
 
       <Card className='border border-blue-200/60 shadow-sm bg-white'>
         <CardHeader>

@@ -1,8 +1,6 @@
 package com.freeclassroom.courseservice.service.lesson;
 
 import com.freeclassroom.courseservice.dto.request.lesson.CreationVideoRequest;
-import com.freeclassroom.courseservice.dto.response.ApiResponse;
-import com.freeclassroom.courseservice.dto.response.common.CreationResponse;
 import com.freeclassroom.courseservice.entity.course.ChapterEntity;
 import com.freeclassroom.courseservice.entity.course.LessonEntity;
 import com.freeclassroom.courseservice.enums.entity.EnumLessonType;
@@ -10,7 +8,6 @@ import com.freeclassroom.courseservice.exception.CustomExeption;
 import com.freeclassroom.courseservice.exception.ErrorCode;
 import com.freeclassroom.courseservice.mapper.LessonMapper;
 import com.freeclassroom.courseservice.repository.entity.ChapterRepository;
-import com.freeclassroom.courseservice.repository.entity.LessonRepository;
 import com.freeclassroom.courseservice.service.utils.file.IUploadFileService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -60,7 +57,7 @@ public class LessonService implements ILessonService{
 
                     // save to db
                     LessonEntity newLesson = lessonMapper.toEntity(lesson);
-                    newLesson.setType(EnumLessonType.Video);
+                    newLesson.setType(EnumLessonType.video);
                     newLesson.setUrl(fileUrl);
                     newLesson.setChapter(chapter);
 

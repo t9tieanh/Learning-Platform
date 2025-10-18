@@ -10,7 +10,7 @@ import { BookOpen } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import userService from '@/services/user/user.service'
-import { toast } from 'react-toastify'
+import { toast } from 'sonner'
 import { SignUpFormInputs, signUpSchema } from '@/utils/auth'
 import useLoading from '@/hooks/useLoading.hook'
 

@@ -6,11 +6,12 @@ import CustomTextarea from '@/components/common/Textarea'
 import CustomCheckbox from '@/components/common/CustomCheckbox'
 import { useEffect, useRef, useState } from 'react'
 import { MdCancel } from 'react-icons/md'
-import { toast } from 'react-toastify'
+import { toast } from 'sonner'
 import { CreationVideoFormValues, CreationVideoSchema } from '@/utils/create-course/curriculum'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { useAuthStore } from '@/stores/useAuth.stores'
+import { useUpload } from '@/hooks/useUpload.hook'
 
 const AddVideoForm = ({ chapterId }: { chapterId: string }) => {
   const {
@@ -23,9 +24,13 @@ const AddVideoForm = ({ chapterId }: { chapterId: string }) => {
     resolver: yupResolver(CreationVideoSchema) as any
   })
 
-  const [progress, setProgress] = useState<number>(0)
+  // data auth
   const { data, setData } = useAuthStore()
-  const [message, setMessage] = useState<string>('')
+
+  const { upload, progress, message, isUploading } = useUpload({
+    accessToken: data?.accessToken as string,
+    uri: 'learning/lessons/video'
+  })
 
   const handleSelectFile = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -60,9 +65,9 @@ const AddVideoForm = ({ chapterId }: { chapterId: string }) => {
       new Blob(
         [
           JSON.stringify({
-            title: 'My lesson',
-            content: 'Description...',
-            isPublic: true,
+            title: newVideo.title,
+            content: newVideo.content,
+            isPublic: newVideo.isPublic,
             chapterId: chapterId
           })
         ],
@@ -71,64 +76,9 @@ const AddVideoForm = ({ chapterId }: { chapterId: string }) => {
     )
 
     try {
-      const response = await fetch('http://localhost:8888/api/v1/learning/lessons/video', {
-        method: 'POST',
-        headers: {
-          Authorization: 'Bearer ' + data?.accessToken
-        },
-        body: formData
-      })
-
-      if (!response.ok || !response.body) {
-        throw new Error('Upload failed')
-      }
-
-      // Đọc dữ liệu SSE từ response stream
-      const reader = response.body.pipeThrough(new TextDecoderStream()).getReader()
-
-      let buffer = ''
-
-      while (true) {
-        const { value, done } = await reader.read()
-        if (done) break
-
-        buffer += value
-        const events = buffer.split('\n\n') // SSE events cách nhau bằng 2 dòng trống
-
-        for (let i = 0; i < events.length - 1; i++) {
-          const eventBlock = events[i].trim()
-          if (!eventBlock) continue
-
-          const lines = eventBlock.split('\n')
-          const dataLine = lines.find((l) => l.startsWith('data:'))
-          const eventLine = lines.find((l) => l.startsWith('event:'))
-
-          if (dataLine) {
-            const event = eventLine ? eventLine.replace('event:', '').trim() : 'message'
-            const jsonStr = dataLine.replace('data:', '').trim()
-
-            try {
-              const parsed = JSON.parse(jsonStr)
-
-              if (event === 'uploading') {
-                setProgress(Math.round(parsed.progress * 100))
-              } else if (event === 'saving_db') {
-                setMessage(parsed.message)
-              } else if (event === 'completed') {
-                setMessage(parsed.message)
-                setProgress(100)
-              }
-            } catch {
-              console.warn('Không parse được:', jsonStr)
-            }
-          }
-        }
-
-        buffer = events[events.length - 1] // Giữ phần thừa lại để ghép event tiếp theo
-      }
+      await upload(formData)
     } catch (err) {
       console.error(err)
-      setMessage('Lỗi khi upload')
     }
   }
 
@@ -242,15 +192,6 @@ const AddVideoForm = ({ chapterId }: { chapterId: string }) => {
             className='bg-primary text-white hover:bg-primary/90 rounded-2xl mt-2'
             type='submit'
           />
-          <>{message && <p className='text-green-500 text-xs'>{message}</p>}</>
-          <div className='w-full mt-auto'></div>
-          <div className='w-full bg-gray-200 rounded-full h-4'>
-            <div
-              className='bg-blue-600 h-4 rounded-full transition-all duration-500'
-              style={{ width: `${progress}%` }}
-            ></div>
-          </div>
-          <p className='text-sm text-gray-600 mt-1'>Tiến độ tải lên: {progress}%</p>
         </div>
       </form>
     </div>

@@ -52,6 +52,15 @@ class ChapterService {
     })
     return response.data
   }
+
+  async deleteChapter(id: string): Promise<
+    ApiResponse<{
+      id: string
+    }>
+  > {
+    const response = await axiosClient.axiosInstance.delete(`/learning/chapters/${id}`)
+    return response.data
+  }
 }
 
 export default new ChapterService()

@@ -2,27 +2,25 @@
 import { useState, useCallback } from 'react'
 
 interface UploadOptions {
-  accessToken?: string
-  chapterId: string
+  accessToken: string
   uri: string
-  formData: FormData
 }
 
 interface UploadResult {
-  upload: (file: File, lessonMeta: { title: string; content: string; isPublic: boolean }) => Promise<void>
+  upload: (formData: FormData) => Promise<void>
   progress: number
   message: string
   isUploading: boolean
 }
 
-export function useUpload({ accessToken, chapterId, uri, formData }: UploadOptions): UploadResult {
+export function useUpload({ accessToken, uri }: UploadOptions): UploadResult {
   const [progress, setProgress] = useState(0)
   const [message, setMessage] = useState('')
   const [isUploading, setIsUploading] = useState(false)
 
   const upload = useCallback(
-    async (file: File, lessonMeta: { title: string; content: string; isPublic: boolean }) => {
-      if (!file) {
+    async (formData: FormData) => {
+      if (!formData.get('video')) {
         throw new Error('Vui lòng chọn file video trước khi lưu bài giảng')
       }
 
@@ -91,7 +89,7 @@ export function useUpload({ accessToken, chapterId, uri, formData }: UploadOptio
         setIsUploading(false)
       }
     },
-    [accessToken, chapterId, formData, uri]
+    [accessToken, uri]
   )
 
   return { upload, progress, message, isUploading }

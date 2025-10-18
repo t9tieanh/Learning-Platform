@@ -37,5 +37,6 @@ public class ChapterEntity extends AbstractEntity {
         if (isOpen == null) {
             isOpen = false;
         }
+        super.prePersist();
     }
 }
