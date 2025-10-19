@@ -1,6 +1,5 @@
 import React from 'react'
 import App from './App'
-import { ToastContainer } from 'react-toastify'
 import ReactDOM from 'react-dom/client'
 import { RouterProvider, createBrowserRouter } from 'react-router-dom'
 import HomePage from './pages/HomePage'
@@ -59,6 +58,5 @@ const router = createBrowserRouter([
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <>
     <RouterProvider router={router} />
-    <ToastContainer />
   </>
 )

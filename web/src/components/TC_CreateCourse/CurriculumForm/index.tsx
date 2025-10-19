@@ -2,15 +2,21 @@
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Plus } from 'lucide-react'
+import { Plus, Upload } from 'lucide-react'
 import TitleComponent from '@/components/TC_CreateCourse/common/Title'
-import { Chapter } from '@/utils/create-course/curriculum'
+import { Chapter, CreationVideoFormValues } from '@/utils/create-course/curriculum'
 import ChapterForm from './ChapterForm'
 import chapterService from '@/services/course/chapter.service'
-import { toast } from 'react-toastify'
+import { toast } from 'sonner'
+import UploadProgress from './UploadProgress'
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
+import { useUpload } from '@/hooks/useUpload.hook'
 
 const CurriculumForm: React.FC<{ id: string }> = ({ id }: { id: string }) => {
   const [Chapters, setChapters] = useState<Chapter[]>([])
+  const [uploadProgress, setUploadProgress] = useState<{ progress: number; title: string }[]>([
+    { progress: 85, title: 'Test thử thôi nha' }
+  ])
 
   useEffect(() => {
     const fetchChapters = async () => {
@@ -53,27 +59,72 @@ const CurriculumForm: React.FC<{ id: string }> = ({ id }: { id: string }) => {
   }
 
   const getTotalStats = () => {
-    const totallessons = Chapters?.reduce((acc, Chapter) => acc + Chapter.lessons.length, 0)
-    const totalDuration = Chapters?.reduce(
-      (acc, Chapter) =>
-        acc +
-        Chapter?.lessons?.reduce((secAcc, lecture) => {
-          if (lecture.duration) {
-            const [min, sec] = lecture.duration.split(':').map(Number)
-            return secAcc + min * 60 + sec
-          }
-          return secAcc
-        }, 0),
-      0
-    )
+    const totallessons = (Chapters || []).reduce((acc, chap) => acc + (chap.lessons?.length || 0), 0)
 
-    const hours = Math.floor(totalDuration / 3600)
-    const minutes = Math.floor((totalDuration % 3600) / 60)
+    const totalSeconds = (Chapters || []).reduce((acc, chap) => {
+      const chapterSeconds = (chap.lessons || []).reduce((secAcc, lecture) => {
+        // lecture.duration may be number (seconds) or string ("mm:ss" or "hh:mm:ss")
+        const dur = lecture.duration
+        if (typeof dur === 'number') return secAcc + dur
+        if (typeof dur === 'string') {
+          const parts = dur.split(':').map(Number).reverse() // sec, min, hour
+          let seconds = 0
+          if (parts[0]) seconds += parts[0]
+          if (parts[1]) seconds += parts[1] * 60
+          if (parts[2]) seconds += parts[2] * 3600
+          return secAcc + seconds
+        }
+        return secAcc
+      }, 0)
+      return acc + chapterSeconds
+    }, 0)
 
-    return { totallessons, totalDuration: `${hours}h ${minutes}m` }
+    const hours = Math.floor(totalSeconds / 3600)
+    const minutes = Math.floor((totalSeconds % 3600) / 60)
+
+    const totalDuration = `${hours}h ${minutes}m`
+
+    return { totallessons, totalDuration, totalSeconds }
   }
 
   const stats = getTotalStats()
+
+  // Handle form submission for save lesson
+  const onSubmit = async (newVideo: CreationVideoFormValues, selectedFile: File, chapterId: string) => {
+    if (!selectedFile) {
+      toast.error('Vui lòng chọn file video trước khi lưu bài giảng')
+      return
+    }
+
+    const { upload } = useUpload({
+      accessToken: '', // Provide access token if needed
+      uri: 'learning/lessons/video'
+    })
+
+    // FormData cho cả video và lesson metadata
+    const formData = new FormData()
+    formData.append('video', selectedFile)
+    formData.append(
+      'lesson',
+      new Blob(
+        [
+          JSON.stringify({
+            title: newVideo.title,
+            content: newVideo.content,
+            isPublic: newVideo.isPublic,
+            chapterId: chapterId
+          })
+        ],
+        { type: 'application/json' }
+      )
+    )
+
+    try {
+      await upload(formData)
+    } catch (err) {
+      console.error(err)
+    }
+  }
 
   return (
     <div className='max-w-6xl space-y-8 mx-auto'>
@@ -99,6 +150,28 @@ const CurriculumForm: React.FC<{ id: string }> = ({ id }: { id: string }) => {
           </>
         }
       />
+
+      {uploadProgress && uploadProgress.length > 0 && (
+        <>
+          <Accordion
+            type='single'
+            collapsible
+            className='w-full p-4 border border-blue-200/60 shadow-sm rounded-2xl bg-white'
+            defaultValue='item-1'
+          >
+            <AccordionItem value='item-1'>
+              <AccordionTrigger>
+                <span className='flex items-center gap-1 text-base px-3'>
+                  <Upload className='h-5 w-5' /> Tiến độ tải lên
+                </span>
+              </AccordionTrigger>
+              <AccordionContent className='flex flex-col gap-4 text-balance space-y-4 p-4'>
+                <UploadProgress progressLst={uploadProgress} />
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </>
+      )}
 
       <Card className='border border-blue-200/60 shadow-sm bg-white'>
         <CardHeader>

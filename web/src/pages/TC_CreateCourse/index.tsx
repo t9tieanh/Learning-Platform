@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import CourseSidebar from '@/components/TC_CreateCourse/CourseSidebar'
-import CurriculumForm from '@/components/TC_CreateCourse/CurriculumForm/CurriculumForm'
+import CurriculumForm from '@/components/TC_CreateCourse/CurriculumForm'
 import LandingPageForm from '@/components/TC_CreateCourse/LandingPageForm'
 import PricingForm from '@/components/TC_CreateCourse/PricingForm/PricingForm'
 import SetupForm from '@/components/TC_CreateCourse/SetupForm/SetupForm'

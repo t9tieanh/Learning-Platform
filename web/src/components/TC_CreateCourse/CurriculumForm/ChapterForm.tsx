@@ -15,14 +15,14 @@ import CustomTextarea from '@/components/common/Textarea'
 import chapterService from '@/services/course/chapter.service'
 import CustomDialog from '@/components/common/Dialog'
 import AddVideoForm from './addVideo/AddVideoForm'
+import { toast } from 'sonner'
+import { showConfirmToast } from '@/components/common/ShowConfirmToast'
 
 const ChapterForm = ({
   chapter,
-  updateSectionTitle,
   setChapters
 }: {
   chapter: Chapter
-  updateSectionTitle?: (sectionId: string, title: string) => void
   setChapters?: React.Dispatch<React.SetStateAction<Chapter[]>>
 }) => {
   const [updateTitle, setUpdateTitle] = useState(false)
@@ -67,6 +67,29 @@ const ChapterForm = ({
     setOpen(true)
   }
 
+  // Handle delete chapter
+  const handleDeleteChapter = async (e: React.MouseEvent) => {
+    e.stopPropagation()
+    const confirmed = await showConfirmToast({
+      title: 'Xóa chương',
+      description: 'Bạn có chắc muốn xóa chương này? Hành động không thể hoàn tác.',
+      confirmLabel: 'Có, xóa',
+      cancelLabel: 'Hủy'
+    })
+
+    if (!confirmed) return
+
+    const result = await chapterService.deleteChapter(chapter.id)
+    if (result && result.code === 200 && result.message) {
+      toast.success(result.message || 'Xóa chương thành công')
+      if (setChapters) {
+        setChapters((prevChapters) => prevChapters.filter((ch) => ch.id !== chapter.id))
+      }
+    } else {
+      toast.error(result.message || 'Xóa chương thất bại. Vui lòng thử lại.')
+    }
+  }
+
   // Toggle section open/close
   const toggleSection = (sectionId: string) => {
     if (!setChapters) return
@@ -88,7 +111,7 @@ const ChapterForm = ({
                 <ChevronRight className='h-4 w-4 text-blue-500' />
               )}
               <div className='group relative flex space-x-2 px-2 py-1 rounded-md'>
-                <span className='font-medium text-gray-800'>Phần {chapter.position + 1}:</span>
+                <span className='font-medium text-gray-800'>Phần {chapter.position}:</span>
 
                 {updateTitle ? (
                   <form className='space-y-2 w-full' onSubmit={handleSubmit(updateChapter)}>
@@ -137,22 +160,22 @@ const ChapterForm = ({
               <Badge variant='outline' className='border-blue-300 text-blue-600 bg-blue-50'>
                 {chapter.lessons.length} bài
               </Badge>
-              <Button
-                variant='ghost'
-                size='icon'
-                className='text-red-500 hover:bg-red-50'
+              <CustomButton
+                icon={<Trash2 className='h-4 w-4' />}
+                className='text-red-500 hover:bg-gray-60 bg-white'
                 onClick={(e) => {
-                  e.stopPropagation()
+                  handleDeleteChapter(e)
                 }}
-              >
-                <Trash2 className='h-4 w-4' />
-              </Button>
+              />
             </div>
           </div>
         </CollapsibleTrigger>
 
         <CollapsibleContent>
           <div className='p-4 pb-4 space-y-2'>
+            {chapter.lessons.length === 0 && (
+              <p className='text-gray-500 text-sm px-4'>Chưa có bài giảng nào trong phần này.</p>
+            )}
             {chapter.lessons.map((lesson) => (
               <>
                 <LessonForm key={lesson.id} lesson={lesson} />
@@ -203,7 +226,7 @@ const ChapterForm = ({
           </>
         }
         description='Hãy thêm Thêm bài giảng cho khóa học của bạn !'
-        children={<AddVideoForm />}
+        children={<AddVideoForm chapterId={chapter.id} />}
         size='xl'
       />
     </div>

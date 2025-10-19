@@ -29,3 +29,15 @@ export type UpdateChapterFormValues = {
   title: string
   description: string
 }
+
+export const CreationVideoSchema = yup.object({
+  title: yup.string().required('Vui lòng nhập tiêu đề').max(60, 'Tối đa 60 ký tự'),
+  content: yup.string().required('Vui lòng nhập nội dung video').max(120, 'Tối đa 120 ký tự'),
+  isPublic: yup.boolean().default(false)
+})
+
+export type CreationVideoFormValues = {
+  title: string
+  content: string
+  isPublic: boolean
+}

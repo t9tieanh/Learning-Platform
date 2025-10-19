@@ -1,14 +1,37 @@
 import CustomInput from '@/components/common/Input'
 import { Label } from '@/components/ui/label'
 import CustomButton from '@/components/common/Button'
-import { Upload, Video as VideoIcon } from 'lucide-react'
+import { Upload, Video as VideoIcon, MousePointer2 } from 'lucide-react'
 import CustomTextarea from '@/components/common/Textarea'
 import CustomCheckbox from '@/components/common/CustomCheckbox'
 import { useEffect, useRef, useState } from 'react'
-import { MdCancel } from "react-icons/md";
-import { MousePointer2 } from 'lucide-react';
+import { MdCancel } from 'react-icons/md'
+import { toast } from 'sonner'
+import { CreationVideoFormValues, CreationVideoSchema } from '@/utils/create-course/curriculum'
+import { useForm } from 'react-hook-form'
+import { yupResolver } from '@hookform/resolvers/yup'
+import { useAuthStore } from '@/stores/useAuth.stores'
+import { useUpload } from '@/hooks/useUpload.hook'
 
-const AddVideoForm = () => {
+const AddVideoForm = ({ chapterId }: { chapterId: string }) => {
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    formState: { errors }
+  } = useForm<CreationVideoFormValues>({
+    resolver: yupResolver(CreationVideoSchema) as any
+  })
+
+  // data auth
+  const { data, setData } = useAuthStore()
+
+  const { upload, progress, message, isUploading } = useUpload({
+    accessToken: data?.accessToken as string,
+    uri: 'learning/lessons/video'
+  })
+
   const handleSelectFile = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (file) {
@@ -25,6 +48,38 @@ const AddVideoForm = () => {
     setSelectedFile(null)
     const inp = document.getElementById('video-file') as HTMLInputElement | null
     if (inp) inp.value = ''
+  }
+
+  // Handle form submission for save lesson
+  const onSubmit = async (newVideo: CreationVideoFormValues) => {
+    if (!selectedFile) {
+      toast.error('Vui lòng chọn file video trước khi lưu bài giảng')
+      return
+    }
+
+    // FormData cho cả video và lesson metadata
+    const formData = new FormData()
+    formData.append('video', selectedFile)
+    formData.append(
+      'lesson',
+      new Blob(
+        [
+          JSON.stringify({
+            title: newVideo.title,
+            content: newVideo.content,
+            isPublic: newVideo.isPublic,
+            chapterId: chapterId
+          })
+        ],
+        { type: 'application/json' }
+      )
+    )
+
+    try {
+      await upload(formData)
+    } catch (err) {
+      console.error(err)
+    }
   }
 
   const [videoSrc, setVideoSrc] = useState<string | null>(null)
@@ -49,7 +104,7 @@ const AddVideoForm = () => {
 
   return (
     <div className='add-video-form'>
-      <form className='flex items-stretch space-x-4 h-96'>
+      <form className='flex items-stretch space-x-4 h-96' onSubmit={handleSubmit(onSubmit)}>
         <div className='file-upload flex flex-col justify-center items-center gap-3 p-4 border-2 border-blue-600 h-full flex-1 rounded-2xl'>
           {videoSrc ? (
             /* eslint-disable-next-line jsx-a11y/media-has-caption */
@@ -108,13 +163,34 @@ const AddVideoForm = () => {
         </div>
 
         <div className='px-4 h-full flex flex-col gap-2'>
-          <CustomInput placeholder='Nhập tiêu đề video' className='w-full' label='Tiêu đề video' id='video-title' />
-          <CustomTextarea placeholder='Nhập mô tả video' className='h-full' id='video-description' />
-          <CustomCheckbox id='free-preview' label='Đặt video này làm bài giảng xem trước miễn phí' className='mt-2' />
+          <CustomInput
+            placeholder='Nhập tiêu đề video'
+            className='w-full'
+            label='Tiêu đề video'
+            id='video-title'
+            {...register('title')}
+          />
+          <p>{errors.title && <span className='text-red-500 text-xs'>{errors.title.message}</span>}</p>
+          <CustomTextarea
+            placeholder='Nhập mô tả video'
+            className='h-full'
+            id='video-description'
+            {...register('content')}
+          />
+          <p>{errors.content && <span className='text-red-500 text-xs'>{errors.content.message}</span>}</p>
+          <CustomCheckbox
+            id='free-preview'
+            label='Đặt video này làm bài giảng xem trước miễn phí'
+            className='mt-2'
+            checked={!!watch('isPublic')}
+            onChange={(e) => setValue('isPublic', e.target.checked)}
+          />
+          <p>{errors.isPublic && <span className='text-red-500 text-xs'>{errors.isPublic.message}</span>}</p>
           <CustomButton
             label='Lưu bài giảng'
             icon={<Upload className='h-4 w-4 ml-1' />}
             className='bg-primary text-white hover:bg-primary/90 rounded-2xl mt-2'
+            type='submit'
           />
         </div>
       </form>

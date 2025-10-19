@@ -16,4 +16,5 @@ public interface IChapterService {
     ApiResponse<CreationResponse> addChapter(CreationChapterRequest newChapter);
     ApiResponse<ChapterResponse> updateChapter(String chapterId , UpdateChapterRequest updateChapter);
     boolean canEditChapter(String chapterId, String instructorId);
+    ApiResponse<CreationResponse> deleteChapterById(String chapterId);
 }

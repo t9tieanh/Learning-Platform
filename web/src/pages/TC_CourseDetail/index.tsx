@@ -12,7 +12,7 @@ import { ReviewsList } from '@/components/TC_CourseDetail/ReviewsList'
 import { StatsSidebar } from '@/components/TC_CourseDetail/StatsSidebar'
 import { VideoModal } from '@/components/TC_CourseDetail/VideoModal'
 import { Button } from '@/components/ui/button'
-import { toast } from 'react-toastify'
+import { toast } from 'sonner'
 import { Separator } from '@/components/ui/separator'
 import { useParams, useNavigate } from 'react-router-dom'
 import courseService from '@/services/course.service'
@@ -87,7 +87,7 @@ export default function CourseDetailPage() {
   }
 
   const handleEdit = () => {
-    toast.success('Đang chuyển đến trang chỉnh sửa...')
+    navigate('/teacher/course/' + id)
   }
 
   const handlePublish = () => {

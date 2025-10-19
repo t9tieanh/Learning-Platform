@@ -126,4 +126,28 @@ public class ChapterService implements IChapterService {
 
         return ownerId.equals(instructorId);
     }
+
+    public ApiResponse<CreationResponse> deleteChapterById(String chapterId) {
+        //cout by lesson
+        ChapterEntity chapter = chapterRepo.findById(chapterId).orElseThrow(
+                () -> new CustomExeption(ErrorCode.CHAPTER_NOT_FOUND)
+        );
+
+        if (chapter.getLessons().isEmpty()) {
+            chapterRepo.deleteById(chapterId);
+        }
+        else {
+            chapter.setDeleted(true);
+            chapterRepo.save(chapter);
+        }
+        return ApiResponse.<CreationResponse>builder()
+                .code(200)
+                .message("Xóa chapter thành công !")
+                .result(
+                        CreationResponse.builder()
+                                .id(chapterId)
+                                .build()
+                )
+                .build();
+    }
 }

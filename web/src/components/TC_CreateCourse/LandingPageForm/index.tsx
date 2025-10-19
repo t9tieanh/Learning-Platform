@@ -12,7 +12,7 @@ import CustomButton from '@/components/common/Button'
 import { useEffect } from 'react'
 import courseService from '@/services/course/course.service'
 import { useNavigate } from 'react-router'
-import { toast } from 'react-toastify'
+import { toast } from 'sonner'
 import tagsService from '@/services/course/tags.service'
 
 const LandingPageForm: React.FC<{ id: string }> = ({ id }: { id: string }) => {
