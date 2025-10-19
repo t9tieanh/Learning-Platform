@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { CourseCard } from '@/components/AllCourse/CourseCard'
 import { FilterSidebar } from '@/components/AllCourse/FilterSidebar'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { SortBar } from '@/components/AllCourse/SortBar'
 import { Button } from '@/components/ui/button'
-import { TrendingUp, Clock, ArrowDown, ArrowUp, ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 import instructorAvatar from '@/assets/images/course.jpg'
 
@@ -136,6 +136,7 @@ const Index = () => {
       thumbnail: instructorAvatar
     }
   ]
+  const [sortValue, setSortValue] = useState('popular')
 
   return (
     <div className='flex min-h-screen bg-white'>
@@ -154,52 +155,7 @@ const Index = () => {
           </div>
 
           {/* Sort Bar */}
-          <div className='flex items-center justify-between mb-8 bg-card/60 backdrop-blur-sm border border-border/60 rounded-xl px-5 py-3 shadow-sm'>
-            {/* Bên trái: tổng số khóa học */}
-            <p className='text-sm sm:text-base text-muted-foreground'>
-              Hiển thị <span className='font-semibold text-primary'>{courses.length}</span> khóa học được tìm thấy
-            </p>
-
-            {/* Bên phải: bộ lọc sắp xếp */}
-            <div className='flex items-center gap-3'>
-              <span className='text-sm text-muted-foreground hidden sm:block'>Sắp xếp theo:</span>
-
-              <Select defaultValue='popular'>
-                <SelectTrigger className='w-[180px] bg-background/70 border-border/70 hover:border-primary/40 transition-all duration-200'>
-                  <SelectValue placeholder='Chọn cách sắp xếp' />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value='popular'>
-                    <div className='flex items-center gap-2'>
-                      <TrendingUp className='w-4 h-4 text-primary' />
-                      <span>Phổ biến nhất</span>
-                    </div>
-                  </SelectItem>
-
-                  <SelectItem value='newest'>
-                    <div className='flex items-center gap-2'>
-                      <Clock className='w-4 h-4 text-blue-500' />
-                      <span>Mới nhất</span>
-                    </div>
-                  </SelectItem>
-
-                  <SelectItem value='price-low'>
-                    <div className='flex items-center gap-2'>
-                      <ArrowDown className='w-4 h-4 text-green-500' />
-                      <span>Giá thấp nhất</span>
-                    </div>
-                  </SelectItem>
-
-                  <SelectItem value='price-high'>
-                    <div className='flex items-center gap-2'>
-                      <ArrowUp className='w-4 h-4 text-orange-500' />
-                      <span>Giá cao nhất</span>
-                    </div>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+          <SortBar totalCourses={courses.length} sortValue={sortValue} onSortChange={setSortValue} />
 
           {/* Course List */}
           <div className='flex flex-col gap-4 mb-8'>

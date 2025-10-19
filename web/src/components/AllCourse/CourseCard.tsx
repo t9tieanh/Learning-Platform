@@ -33,7 +33,7 @@ export const CourseCard = ({
   thumbnail
 }: CourseCardProps) => {
   return (
-    <Card className='overflow-hidden group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-border/60 bg-card/60 backdrop-blur-sm cursor-pointer'>
+    <Card className='overflow-hidden group hover:shadow-xl border border-border/60 bg-card/60 backdrop-blur-sm cursor-pointer'>
       <div className='flex flex-row items-stretch h-40'>
         <div className='w-72 h-full flex-shrink-0 overflow-hidden'>
           <img src={thumbnail} alt={title} className='w-full h-full object-cover object-center' />
@@ -55,11 +55,10 @@ export const CourseCard = ({
                 {[...Array(5)].map((_, i) => (
                   <Star
                     key={i}
-                    className={`w-3.5 h-3.5 ${
-                      i < Math.floor(rating)
+                    className={`w-3.5 h-3.5 ${i < Math.floor(rating)
                         ? 'fill-yellow-400 text-yellow-400 drop-shadow-sm'
                         : 'text-muted-foreground/20'
-                    }`}
+                      }`}
                   />
                 ))}
               </div>
