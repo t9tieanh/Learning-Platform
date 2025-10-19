@@ -6,7 +6,7 @@ import userService from '@/services/user/user.service'
 import { useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
-import { toast } from 'react-toastify'
+import { toast } from 'sonner'
 import * as yup from 'yup'
 import useLoading from '@/hooks/useLoading.hook'
 

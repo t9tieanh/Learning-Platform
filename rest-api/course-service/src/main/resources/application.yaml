@@ -1,5 +1,6 @@
 server:
   port: 8081
+  backendUri: localhost:8888/api/v1/learning/storage
 
 redis:
   host: localhost
@@ -37,6 +38,7 @@ spring:
   sql:
     init:
       mode: never
+#      mode: always
   servlet:
     multipart:
       max-file-size: 500MB

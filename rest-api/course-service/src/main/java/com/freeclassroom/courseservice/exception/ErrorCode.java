@@ -29,6 +29,7 @@ public enum ErrorCode {
     CATEGORY_NOT_FOUND(1012, "Danh mục (category) không tồn tại !", HttpStatus.OK),
     TAG_NOT_FOUND(1013, "Tag không tồn tại !", HttpStatus.OK),
     COURSE_NOT_FOUND(1013, "Khóa học không tồn tại !", HttpStatus.OK),
+    CHAPTER_NOT_FOUND(1013, "Chapter không tồn tại !", HttpStatus.OK),
 
     UPLOAD_NOT_COMPLETED(12345, "Upload file thất bại !", HttpStatus.OK),
     FILE_NOT_FOUND(400, "Không tìm thấy file trong hệ thống !", HttpStatus.OK),

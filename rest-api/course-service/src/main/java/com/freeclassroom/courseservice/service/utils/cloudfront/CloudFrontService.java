@@ -40,6 +40,10 @@ public class CloudFrontService implements ICloudFrontService {
     @NonFinal
     private String distributionDomainName;
 
+    @Value("${aws.key-store}")
+    @NonFinal
+    String keyStore;
+
     @Value("${aws.cloudfront.privateKeyPath}")
     @NonFinal
     private Resource privateKeyResource;
@@ -62,7 +66,7 @@ public class CloudFrontService implements ICloudFrontService {
     private SignedUrl generateSignedUrlCanned(String resourcePath) throws Exception {
         String safePath = resourcePath.replace(" ", "%20");
         String normalizedPath = safePath.startsWith("/") ? safePath : "/" + safePath;
-        String fullUrl = "https://" + distributionDomainName + normalizedPath;
+        String fullUrl = "https://" + distributionDomainName + "/" + keyStore + normalizedPath;
 
         Instant expiration = Instant.now().plus(defaultExpireDays, ChronoUnit.DAYS);
         Path privateKey = privateKeyResource.getFile().toPath();

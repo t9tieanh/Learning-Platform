@@ -9,7 +9,7 @@ import { Props as CommonProps } from '@/utils/common/reactHookFormProps'
 import { BookOpen, FileText, Info, Save } from 'lucide-react'
 import useCategory from '@/hooks/useCategory.hook'
 import CustomButton from '@/components/common/Button'
-import { toast } from 'react-toastify'
+import { toast } from 'sonner'
 import courseService from '@/services/course/course.service'
 import useLoading from '@/hooks/useLoading.hook'
 import { useCallback, useMemo } from 'react'
@@ -87,7 +87,7 @@ const BaseInfomation = ({
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className ='space-y-6'>
+    <form onSubmit={handleSubmit(onSubmit)} className='space-y-6'>
       <Card className='border border-blue-200 shadow-sm bg-blue-50'>
         <CardHeader className='bg-blue-200/40 rounded-t-lg'>
           <CardTitle className='text-lg font-medium text-blue-900 flex items-center gap-2'>

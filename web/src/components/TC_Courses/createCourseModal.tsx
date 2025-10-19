@@ -9,7 +9,7 @@ import CustomCombobox from '../common/Combobox'
 import useCategory from '@/hooks/useCategory.hook'
 import courseService from '@/services/course/course.service'
 import useLoading from '@/hooks/useLoading.hook'
-import { toast } from 'react-toastify'
+import { toast } from 'sonner'
 
 const CreateCourseModal = () => {
   const {

@@ -26,5 +26,4 @@ public class CategoryController {
     ApiResponse<List<CategoryResponse>> getAllCategory() {
         return categoryService.getAllCategory();
     }
-
 }

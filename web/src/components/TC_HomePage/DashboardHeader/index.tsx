@@ -1,15 +1,17 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Bell, User } from 'lucide-react'
+import { Bell, User, LogOut } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { useAuthStore } from '@/stores/useAuth.stores'
 import { useNavigate } from 'react-router-dom'
+import { toast } from 'sonner'
+import CustomButton from '@/components/common/Button'
 
 const DashboardHeader = () => {
-  const { data } = useAuthStore()
+  const { data, setData } = useAuthStore()
   const navigate = useNavigate()
   const displayName = data?.name || 'Giảng viên'
   const initials = (data?.name || 'GV')
@@ -17,6 +19,13 @@ const DashboardHeader = () => {
     .map((n) => n[0])
     .join('')
     .toUpperCase()
+
+  const handleLogout = () => {
+    setData(null)
+    toast.success('Đăng xuất thành công!')
+    navigate('/auth')
+  }
+
   return (
     <div className='flex flex-col md:flex-row items-start md:items-center justify-between mb-6 gap-4 md:gap-0'>
       <div>
@@ -68,15 +77,29 @@ const DashboardHeader = () => {
             >
               <Avatar className='w-8 h-8 md:w-10 md:h-10 ring-2 ring-primary/50'>
                 <AvatarImage src={data?.avatarUrl} alt='Avatar' />
-                <AvatarFallback className='bg-primary text-white font-bold'>{initials}</AvatarFallback>
+                <AvatarFallback className='text-white font-bold'>{initials}</AvatarFallback>
               </Avatar>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align='end'>
-            <DropdownMenuItem className='flex items-center gap-2' onClick={() => navigate('/teacher/profile')}>
-              <User size={16} /> Tài khoản
+            <DropdownMenuItem>
+              <CustomButton
+                label='Tài khoản'
+                className='w-full bg-blue-600 text-white hover:bg-blue-700 rounded-md'
+                type='button'
+                onClick={() => navigate('/teacher/profile')}
+                icon={<User className='h-4 w-4 ml-1 text-white' />}
+              />
             </DropdownMenuItem>
-            <DropdownMenuItem>Đăng xuất</DropdownMenuItem>
+            <DropdownMenuItem>
+              <CustomButton
+                label='Đăng xuất'
+                className='w-full bg-red-600 text-white hover:bg-red-700 rounded-md'
+                type='button'
+                onClick={handleLogout}
+                icon={<LogOut className='h-4 w-4 ml-1 text-white' />}
+              />
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

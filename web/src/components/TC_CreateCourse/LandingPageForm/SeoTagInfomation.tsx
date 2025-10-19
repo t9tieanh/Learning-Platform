@@ -7,7 +7,7 @@ import useTags from '@/hooks/useTags.hook'
 import CustomButton from '@/components/common/Button'
 import tagsService from '@/services/course/tags.service'
 import useLoading from '@/hooks/useLoading.hook'
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 
 interface SeoTagInfomationProps {
   formProps: CommonProps

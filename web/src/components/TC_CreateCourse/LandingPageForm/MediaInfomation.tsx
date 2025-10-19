@@ -8,7 +8,7 @@ import { Props as CommonProps } from '@/utils/common/reactHookFormProps'
 import CustomButton from '@/components/common/Button'
 import useLoading from '@/hooks/useLoading.hook'
 import { ChangeEvent, useRef } from 'react'
-import { toast } from 'react-toastify'
+import { toast } from 'sonner'
 import courseService from '@/services/course/course.service'
 
 interface MediaInfomationProps {

@@ -38,7 +38,7 @@ public class CourseEntity extends AbstractEntity {
     String instructorId;
 
     // Chapter
-    @OneToMany(mappedBy = "course")
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
     List<ChapterEntity> chapters;
 
     // Enrollment
