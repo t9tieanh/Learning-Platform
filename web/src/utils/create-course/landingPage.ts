@@ -30,4 +30,5 @@ export type LandingPageFormValues = {
   tags: { id: string; name: string; imageUrl: string }[] | undefined
   learnItems: string[] | undefined
   requirements: string[] | undefined
+  introductoryVideo: string | undefined
 }

@@ -27,6 +27,8 @@ public class CourseEntity extends AbstractEntity {
     String shortDescription;
     String longDescription;
     String thumbnailUrl;
+
+    String introductoryVideo;
     String language;
     Double originalPrice;
     Double finalPrice;

@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -117,4 +118,41 @@ public class CloudFrontService implements ICloudFrontService {
         ResponseEntity<byte[]> response = restTemplate.exchange(uri, HttpMethod.GET, entity, byte[].class);
         return response.getBody();
     }
+
+    @Override
+    public ResponseEntity<Resource> streamFile(String resourcePath, String rangeHeader) throws Exception {
+        String signedUrl = this.getSignedUrl(resourcePath);
+
+        CloseableHttpClient httpClient = HttpClients.createDefault();
+        HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory(httpClient);
+        RestTemplate restTemplate = new RestTemplate(factory);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.USER_AGENT, "Mozilla/5.0");
+        headers.add(HttpHeaders.ACCEPT, "*/*");
+
+        if (rangeHeader != null && !rangeHeader.isEmpty()) {
+            headers.add(HttpHeaders.RANGE, rangeHeader);
+        }
+
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+        URI uri = new URI(signedUrl);
+
+        ResponseEntity<byte[]> response = restTemplate.exchange(uri, HttpMethod.GET, entity, byte[].class);
+
+        HttpHeaders responseHeaders = new HttpHeaders();
+        response.getHeaders().forEach((key, value) -> {
+            if (HttpHeaders.CONTENT_TYPE.equalsIgnoreCase(key)
+                    || HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(key)
+                    || HttpHeaders.ACCEPT_RANGES.equalsIgnoreCase(key)
+                    || HttpHeaders.CONTENT_RANGE.equalsIgnoreCase(key)) {
+                responseHeaders.put(key, value);
+            }
+        });
+
+        return ResponseEntity.status(response.getStatusCode())
+                .headers(responseHeaders)
+                .body(new ByteArrayResource(response.getBody()));
+    }
+
 }

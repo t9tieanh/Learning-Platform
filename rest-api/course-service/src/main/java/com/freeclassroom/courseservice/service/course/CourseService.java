@@ -12,9 +12,12 @@ import com.freeclassroom.courseservice.dto.response.course.CourseResponse;
 import com.freeclassroom.courseservice.dto.response.course.PageResponse;
 import com.freeclassroom.courseservice.entity.category.CategoryEntity;
 import com.freeclassroom.courseservice.entity.category.TagEntity;
+import com.freeclassroom.courseservice.entity.course.ChapterEntity;
 import com.freeclassroom.courseservice.entity.course.CourseEntity;
+import com.freeclassroom.courseservice.entity.course.LessonEntity;
 import com.freeclassroom.courseservice.enums.entity.EnumCourseProgressStep;
 import com.freeclassroom.courseservice.enums.entity.EnumCourseStatus;
+import com.freeclassroom.courseservice.enums.entity.EnumLessonType;
 import com.freeclassroom.courseservice.exception.CustomExeption;
 import com.freeclassroom.courseservice.exception.ErrorCode;
 import com.freeclassroom.courseservice.grpc.client.UserGrpcClient;
@@ -34,8 +37,13 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -240,4 +248,40 @@ public class CourseService implements ICourseService {
         }
     }
 
+    @Override
+    public Flux<ServerSentEvent<String>> updateVideoIntroduce(MultipartFile avatar, String courseId) throws IOException {
+        CourseEntity course = courseRepo.findById(courseId)
+                .orElseThrow(() -> new CustomExeption(ErrorCode.COURSE_NOT_FOUND));
+
+        return fileService.uploadFileWithProgress(avatar)
+                .flatMap(event -> {
+                    // ongoing upload
+                    if (event.getFileUrl() == null) {
+                        return Mono.just(ServerSentEvent.<String>builder()
+                                .event("uploading")
+                                .data("{\"progress\": " + event.getProgress() + "}")
+                                .build());
+                    }
+
+                    // when finish upload
+                    String fileUrl = event.getFileUrl();
+
+                    // send event "saving_db"
+                    ServerSentEvent<String> savingEvent = ServerSentEvent.<String>builder()
+                            .event("saving_db")
+                            .data("{\"message\": \"Upload file thành công, đang lưu những dữ liệu còn lại !...\"}")
+                            .build();
+
+                    // save to db
+                    course.setIntroductoryVideo(fileUrl);
+                    courseRepo.save(course);
+
+                    ServerSentEvent<String> completedEvent = ServerSentEvent.<String>builder()
+                            .event("completed")
+                            .data("{\"lessonId\": \"" + course.getId() + "\", \"message\": \"Video giới thiệu đã được tải lên thành công !\"}")
+                            .build();
+
+                    return Flux.just(savingEvent, completedEvent);
+                });
+    }
 }

@@ -22,4 +22,5 @@ public class CourseInfoResponse {
     Double finalPrice;
     Set<String> outcomes;
     Set<String> requirements;
+    String introductoryVideo;
 }

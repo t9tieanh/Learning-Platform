@@ -1,16 +1,30 @@
-import Progress from './addVideo/UploadProgress'
-const UploadProgress = ({
-  progressLst
-}: {
-  progressLst: {
-    title: string
-    progress: number
-  }[]
-}) => {
+import { MultiUploadItem } from '@/hooks/useMultiUpload'
+import { Progress as ProgressShadcn } from '@/components/ui/progress'
+import { Spinner } from '@/components/ui/spinner'
+import { CircleCheckBig } from 'lucide-react'
+
+const UploadProgress = ({ progressLst }: { progressLst: MultiUploadItem[] }) => {
   return (
     <>
       {progressLst?.map((item) => (
-        <Progress key={item.title} progress={item.progress} title={item.title} />
+        <>
+          <div key={item.id} className='flex items-center gap-3 py-4 px-4 bg-blue-50 rounded-lg border border-blue-200'>
+            <div className='flex items-center gap-1 min-w-48'>
+              {item.progress !== 100 ? (
+                <Spinner className='size-4 text-red-500' />
+              ) : (
+                <CircleCheckBig className='h-4 w-4 text-green-500' />
+              )}
+              <div className=''>
+                <span className='font-medium text-sm'>{item.title || 'Bài giảng chưa có tiêu đề'}</span>
+              </div>
+            </div>
+            <div className='flex-1'>
+              <span className='text-sm text-gray-600'>{item.message}</span>
+              <ProgressShadcn className='progressIndicator' value={item.progress} />
+            </div>
+          </div>
+        </>
       ))}
     </>
   )
