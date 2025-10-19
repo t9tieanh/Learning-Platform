@@ -55,7 +55,7 @@ public class CourseEntity extends AbstractEntity {
     List<TagEntity> tags;
 
     // Category
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     CategoryEntity category;
 
     @Enumerated(EnumType.STRING)

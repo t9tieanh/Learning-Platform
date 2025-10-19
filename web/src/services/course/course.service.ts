@@ -1,6 +1,7 @@
 import axiosClient from '@/lib/axiosClient.lib'
 import { ApiResponse } from '@/types/response.type'
 import { useAuthStore } from '@/stores/useAuth.stores'
+import { Course, CourseResponse } from '@/types/course.type'
 
 function decodeJwtPayload(token: string): any | null {
   try {
@@ -109,6 +110,20 @@ class CourseService {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
+    })
+    return response.data
+  }
+
+  async getBestSellerCourses(limit = 4): Promise<Course[]> {
+    const response = await axiosClient.axiosInstance.get('learning/courses/best-seller', {
+      params: { limit }
+    })
+    return response.data
+  }
+
+  async getTrendyCourseThisMonth(limit = 4): Promise<Course[]> {
+    const response = await axiosClient.axiosInstance.get('learning/courses/trend', {
+      params: { limit }
     })
     return response.data
   }

@@ -1,5 +1,6 @@
 package com.freeclassroom.courseservice.service.course;
 
+import com.example.grpc.user.GetUserResponse;
 import com.freeclassroom.courseservice.dto.request.common.FileUploadRequest;
 import com.freeclassroom.courseservice.dto.request.course.CreationCourseRequest;
 import com.freeclassroom.courseservice.dto.request.course.GetCourseRequest;
@@ -10,6 +11,7 @@ import com.freeclassroom.courseservice.dto.response.common.FileUploadResponse;
 import com.freeclassroom.courseservice.dto.response.course.CourseInfoResponse;
 import com.freeclassroom.courseservice.dto.response.course.CourseResponse;
 import com.freeclassroom.courseservice.dto.response.course.PageResponse;
+import com.freeclassroom.courseservice.dto.response.user.InstructorResponse;
 import com.freeclassroom.courseservice.entity.category.CategoryEntity;
 import com.freeclassroom.courseservice.entity.category.TagEntity;
 import com.freeclassroom.courseservice.entity.course.CourseEntity;
@@ -248,14 +250,32 @@ public class CourseService implements ICourseService {
             List<CourseEntity> courseEntities = courseRepo.findBestSellerCourses(pageable);
 
             List<CourseResponse> courses = courseEntities.stream()
-                    .map(courseMapper::toDto)
+                    .map(entity -> {
+                        CourseResponse dto = courseMapper.toDto(entity);
+
+                        // Gọi sang user-service để lấy instructor
+                        GetUserResponse user = userGrpcClient.getUser(
+                                entity.getInstructorId().toString()
+                        );
+
+                        dto.setInstructor(new InstructorResponse(
+                                user.getId(),
+                                user.getName(),
+                                user.getEmail(),
+                                user.getImage()
+                        ));
+                        return dto;
+                    })
                     .toList();
+
             return ApiResponse.<List<CourseResponse>>builder()
                     .code(HttpStatus.OK.value())
                     .message("Thành công")
                     .result(courses)
                     .build();
+
         } catch (Exception e) {
+            e.printStackTrace();
             return ApiResponse.<List<CourseResponse>>builder()
                     .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
                     .message("Lỗi: " + e.getMessage())
@@ -273,8 +293,24 @@ public class CourseService implements ICourseService {
             List<CourseEntity> courseEntities = courseRepo.getTrendyCourse(pageable, month, year);
 
             List<CourseResponse> courses = courseEntities.stream()
-                    .map(courseMapper::toDto)
+                    .map(entity -> {
+                        CourseResponse dto = courseMapper.toDto(entity);
+
+                        // Gọi sang user-service để lấy instructor
+                        GetUserResponse user = userGrpcClient.getUser(
+                                entity.getInstructorId().toString()
+                        );
+
+                        dto.setInstructor(new InstructorResponse(
+                                user.getId(),
+                                user.getName(),
+                                user.getEmail(),
+                                user.getImage()
+                        ));
+                        return dto;
+                    })
                     .toList();
+
             return ApiResponse.<List<CourseResponse>>builder()
                     .code(HttpStatus.OK.value())
                     .message("Thành công")

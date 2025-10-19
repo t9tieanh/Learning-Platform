@@ -1,10 +1,27 @@
 import CourseCard from '@/components/common/CourseCard'
-
+import { Course } from '@/types/course.type'
+import { useEffect, useState } from 'react'
+import courseService from '@/services/course/course.service'
 interface CourseListProps {
   title: string
+  fetcher: () => Promise<any>
 }
 
-const CourseList = ({ title }: CourseListProps) => {
+const CourseList = ({ title, fetcher }: CourseListProps) => {
+  const [courses, setCourses] = useState<Course[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetcher()
+      .then((data: any) => setCourses(data.result))
+      .catch((err) => console.error('Lỗi khi load best seller:', err))
+      .finally(() => setLoading(false))
+  }, [fetcher, title])
+
+  if (loading) {
+    return <p className='text-center mt-12 text-gray-500'>Đang tải...</p>
+  }
+
   return (
     <div className='course-list-container mt-12'>
       <div className='flex items-center mt-6'>
@@ -18,38 +35,9 @@ const CourseList = ({ title }: CourseListProps) => {
         </div>
       </div>
       <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-6 mx-auto max-w-7xl px-4'>
-        <CourseCard
-          course={{
-            id: 1,
-            title: 'Khóa học 1',
-            price: '100.000 VNĐ',
-            image: 'https://files.fullstack.edu.vn/f8-prod/courses/19/66aa28194b52b.png'
-          }}
-        />
-        <CourseCard
-          course={{
-            id: 2,
-            title: 'Khóa học 2',
-            price: '200.000 VNĐ',
-            image: 'https://files.fullstack.edu.vn/f8-prod/courses/12.png'
-          }}
-        />
-        <CourseCard
-          course={{
-            id: 3,
-            title: 'Khóa học 3',
-            price: '300.000 VNĐ',
-            image: 'https://files.fullstack.edu.vn/f8-prod/courses/12.png'
-          }}
-        />
-        <CourseCard
-          course={{
-            id: 4,
-            title: 'Khóa học 4',
-            price: '400.000 VNĐ',
-            image: 'https://files.fullstack.edu.vn/f8-prod/courses/12.png'
-          }}
-        />
+        {courses.map((course) => (
+          <CourseCard key={course.id} course={course} />
+        ))}
       </div>
     </div>
   )
