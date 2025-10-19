@@ -1,8 +1,6 @@
 package com.freeclassroom.courseservice.controller;
 
 import com.freeclassroom.courseservice.dto.request.lesson.CreationVideoRequest;
-import com.freeclassroom.courseservice.dto.response.ApiResponse;
-import com.freeclassroom.courseservice.dto.response.common.CreationResponse;
 import com.freeclassroom.courseservice.exception.CustomExeption;
 import com.freeclassroom.courseservice.exception.ErrorCode;
 import com.freeclassroom.courseservice.service.lesson.ILessonService;

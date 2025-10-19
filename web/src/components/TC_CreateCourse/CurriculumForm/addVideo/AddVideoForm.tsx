@@ -6,14 +6,20 @@ import CustomTextarea from '@/components/common/Textarea'
 import CustomCheckbox from '@/components/common/CustomCheckbox'
 import { useEffect, useRef, useState } from 'react'
 import { MdCancel } from 'react-icons/md'
-import { toast } from 'sonner'
 import { CreationVideoFormValues, CreationVideoSchema } from '@/utils/create-course/curriculum'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
-import { useAuthStore } from '@/stores/useAuth.stores'
-import { useUpload } from '@/hooks/useUpload.hook'
+import { HandleAddLesson } from '@/components/TC_CreateCourse/CurriculumForm/index'
 
-const AddVideoForm = ({ chapterId }: { chapterId: string }) => {
+const AddVideoForm = ({
+  chapterId,
+  handleAddLesson,
+  setOpen
+}: {
+  chapterId: string
+  handleAddLesson: HandleAddLesson
+  setOpen: React.Dispatch<React.SetStateAction<boolean>>
+}) => {
   const {
     register,
     handleSubmit,
@@ -22,14 +28,6 @@ const AddVideoForm = ({ chapterId }: { chapterId: string }) => {
     formState: { errors }
   } = useForm<CreationVideoFormValues>({
     resolver: yupResolver(CreationVideoSchema) as any
-  })
-
-  // data auth
-  const { data, setData } = useAuthStore()
-
-  const { upload, progress, message, isUploading } = useUpload({
-    accessToken: data?.accessToken as string,
-    uri: 'learning/lessons/video'
   })
 
   const handleSelectFile = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -48,38 +46,6 @@ const AddVideoForm = ({ chapterId }: { chapterId: string }) => {
     setSelectedFile(null)
     const inp = document.getElementById('video-file') as HTMLInputElement | null
     if (inp) inp.value = ''
-  }
-
-  // Handle form submission for save lesson
-  const onSubmit = async (newVideo: CreationVideoFormValues) => {
-    if (!selectedFile) {
-      toast.error('Vui lòng chọn file video trước khi lưu bài giảng')
-      return
-    }
-
-    // FormData cho cả video và lesson metadata
-    const formData = new FormData()
-    formData.append('video', selectedFile)
-    formData.append(
-      'lesson',
-      new Blob(
-        [
-          JSON.stringify({
-            title: newVideo.title,
-            content: newVideo.content,
-            isPublic: newVideo.isPublic,
-            chapterId: chapterId
-          })
-        ],
-        { type: 'application/json' }
-      )
-    )
-
-    try {
-      await upload(formData)
-    } catch (err) {
-      console.error(err)
-    }
   }
 
   const [videoSrc, setVideoSrc] = useState<string | null>(null)
@@ -104,7 +70,10 @@ const AddVideoForm = ({ chapterId }: { chapterId: string }) => {
 
   return (
     <div className='add-video-form'>
-      <form className='flex items-stretch space-x-4 h-96' onSubmit={handleSubmit(onSubmit)}>
+      <form
+        className='flex items-stretch space-x-4 h-96'
+        onSubmit={handleSubmit(handleAddLesson(selectedFile as File, chapterId, setOpen))}
+      >
         <div className='file-upload flex flex-col justify-center items-center gap-3 p-4 border-2 border-blue-600 h-full flex-1 rounded-2xl'>
           {videoSrc ? (
             /* eslint-disable-next-line jsx-a11y/media-has-caption */

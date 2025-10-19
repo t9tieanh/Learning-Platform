@@ -52,7 +52,7 @@ public class LessonService implements ILessonService{
                     // send event "saving_db"
                     ServerSentEvent<String> savingEvent = ServerSentEvent.<String>builder()
                             .event("saving_db")
-                            .data("{\"message\": \"Saving lesson info to DB...\"}")
+                            .data("{\"message\": \"Upload file thành công, đang lưu những dữ liệu còn lại !...\"}")
                             .build();
 
                     // save to db
@@ -66,7 +66,7 @@ public class LessonService implements ILessonService{
 
                     ServerSentEvent<String> completedEvent = ServerSentEvent.<String>builder()
                             .event("completed")
-                            .data("{\"lessonId\": \"" + newLesson.getId() + "\", \"message\": \"Lesson created successfully\"}")
+                            .data("{\"lessonId\": \"" + newLesson.getId() + "\", \"message\": \"Bài học đã được tải lên thành công !\"}")
                             .build();
 
                     return Flux.just(savingEvent, completedEvent);

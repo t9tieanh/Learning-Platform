@@ -10,26 +10,42 @@ import chapterService from '@/services/course/chapter.service'
 import { toast } from 'sonner'
 import UploadProgress from './UploadProgress'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
-import { useUpload } from '@/hooks/useUpload.hook'
+import useMultiUpload from '@/hooks/useMultiUpload'
+import { useAuthStore } from '@/stores/useAuth.stores'
+
+export type HandleAddLesson = (
+  selectedFile: File,
+  chapterId: string,
+  setOpen: React.Dispatch<React.SetStateAction<boolean>>
+) => (newVideo: CreationVideoFormValues) => Promise<void>
 
 const CurriculumForm: React.FC<{ id: string }> = ({ id }: { id: string }) => {
   const [Chapters, setChapters] = useState<Chapter[]>([])
-  const [uploadProgress, setUploadProgress] = useState<{ progress: number; title: string }[]>([
-    { progress: 85, title: 'Test thử thôi nha' }
-  ])
+
+  const { data } = useAuthStore()
+  const token = data?.accessToken
+
+  // fetch chapters when component mounts or id changes
+  const fetchChapters = async () => {
+    if (!id) return
+    try {
+      const response = await chapterService.getChaptersByCourseId(id)
+      if (response && response.code === 200 && response.result) {
+        setChapters(response.result)
+      }
+    } catch (error) {
+      console.log('Error fetching chapters:', error)
+    }
+  }
+
+  // hook must be called at top level of component
+  const { uploads, startUpload, cancelUpload, removeUpload, clearAll } = useMultiUpload({
+    accessToken: token,
+    uri: 'learning/lessons/video',
+    callback: fetchChapters
+  })
 
   useEffect(() => {
-    const fetchChapters = async () => {
-      if (!id) return
-      try {
-        const response = await chapterService.getChaptersByCourseId(id)
-        if (response && response.code === 200 && response.result) {
-          setChapters(response.result)
-        }
-      } catch (error) {
-        console.log('Error fetching chapters:', error)
-      }
-    }
     fetchChapters()
   }, [id])
 
@@ -90,39 +106,42 @@ const CurriculumForm: React.FC<{ id: string }> = ({ id }: { id: string }) => {
   const stats = getTotalStats()
 
   // Handle form submission for save lesson
-  const onSubmit = async (newVideo: CreationVideoFormValues, selectedFile: File, chapterId: string) => {
-    if (!selectedFile) {
-      toast.error('Vui lòng chọn file video trước khi lưu bài giảng')
-      return
-    }
+  const handleAddLesson: HandleAddLesson = (
+    selectedFile: File,
+    chapterId: string,
+    setOpen: React.Dispatch<React.SetStateAction<boolean>>
+  ) => {
+    return async (newVideo: CreationVideoFormValues) => {
+      if (!selectedFile) {
+        toast.error('Vui lòng chọn file video trước khi lưu bài giảng')
+        return
+      }
 
-    const { upload } = useUpload({
-      accessToken: '', // Provide access token if needed
-      uri: 'learning/lessons/video'
-    })
-
-    // FormData cho cả video và lesson metadata
-    const formData = new FormData()
-    formData.append('video', selectedFile)
-    formData.append(
-      'lesson',
-      new Blob(
-        [
-          JSON.stringify({
-            title: newVideo.title,
-            content: newVideo.content,
-            isPublic: newVideo.isPublic,
-            chapterId: chapterId
-          })
-        ],
-        { type: 'application/json' }
+      // FormData cho cả video và lesson metadata
+      const formData = new FormData()
+      formData.append('video', selectedFile)
+      formData.append(
+        'lesson',
+        new Blob(
+          [
+            JSON.stringify({
+              title: newVideo.title,
+              content: newVideo.content,
+              isPublic: newVideo.isPublic,
+              chapterId: chapterId
+            })
+          ],
+          { type: 'application/json' }
+        )
       )
-    )
 
-    try {
-      await upload(formData)
-    } catch (err) {
-      console.error(err)
+      try {
+        startUpload(selectedFile, formData, newVideo.title)
+        // Close the modal add video -> start upload video
+        setOpen(false)
+      } catch (err) {
+        console.error(err)
+      }
     }
   }
 
@@ -151,7 +170,7 @@ const CurriculumForm: React.FC<{ id: string }> = ({ id }: { id: string }) => {
         }
       />
 
-      {uploadProgress && uploadProgress.length > 0 && (
+      {uploads && uploads.length > 0 && (
         <>
           <Accordion
             type='single'
@@ -166,7 +185,7 @@ const CurriculumForm: React.FC<{ id: string }> = ({ id }: { id: string }) => {
                 </span>
               </AccordionTrigger>
               <AccordionContent className='flex flex-col gap-4 text-balance space-y-4 p-4'>
-                <UploadProgress progressLst={uploadProgress} />
+                <UploadProgress progressLst={uploads} />
               </AccordionContent>
             </AccordionItem>
           </Accordion>
@@ -174,12 +193,19 @@ const CurriculumForm: React.FC<{ id: string }> = ({ id }: { id: string }) => {
       )}
 
       <Card className='border border-blue-200/60 shadow-sm bg-white'>
-        <CardHeader>
-          <CardTitle className='text-lg font-semibold text-gray-800'>Nội dung khóa học</CardTitle>
+        <CardHeader className='flex items-center justify-between pb-0'>
+          <CardTitle className='text-lg font-semibold text-gray-800'>
+            <span>Nội dung khóa học</span>
+          </CardTitle>
         </CardHeader>
         <CardContent className='space-y-4'>
           {Chapters?.map((Chapter) => (
-            <ChapterForm key={Chapter.id} chapter={Chapter} setChapters={setChapters} />
+            <ChapterForm
+              key={Chapter.id}
+              chapter={Chapter}
+              setChapters={setChapters}
+              handleAddLesson={handleAddLesson}
+            />
           ))}
 
           <Button

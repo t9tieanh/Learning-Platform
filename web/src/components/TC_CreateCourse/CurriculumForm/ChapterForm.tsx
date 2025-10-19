@@ -17,22 +17,21 @@ import CustomDialog from '@/components/common/Dialog'
 import AddVideoForm from './addVideo/AddVideoForm'
 import { toast } from 'sonner'
 import { showConfirmToast } from '@/components/common/ShowConfirmToast'
+import { HandleAddLesson } from '@/components/TC_CreateCourse/CurriculumForm/index'
 
 const ChapterForm = ({
   chapter,
-  setChapters
+  setChapters,
+  handleAddLesson
 }: {
   chapter: Chapter
   setChapters?: React.Dispatch<React.SetStateAction<Chapter[]>>
+  handleAddLesson: HandleAddLesson
 }) => {
   const [updateTitle, setUpdateTitle] = useState(false)
   const {
-    control,
     register,
     handleSubmit,
-    watch,
-    setValue,
-    getValues,
     formState: { errors }
   } = useForm<UpdateChapterFormValues>({
     resolver: yupResolver(UpdateChapterSchema) as any
@@ -101,7 +100,7 @@ const ChapterForm = ({
   return (
     <div key={chapter.id} className='border border-blue-200 rounded-xl shadow-sm'>
       <Collapsible open={chapter.isOpen} onOpenChange={() => toggleSection(chapter.id)}>
-        <CollapsibleTrigger className='w-full'>
+        <CollapsibleTrigger className='w-full' asChild>
           <div className='flex items-center justify-between p-4 hover:bg-blue-100/50 border-b border-blue-200 rounded-t-xl'>
             <div className='flex items-center space-x-3'>
               <GripVertical className='h-4 w-4 text-blue-400' />
@@ -172,17 +171,17 @@ const ChapterForm = ({
         </CollapsibleTrigger>
 
         <CollapsibleContent>
-          <div className='p-4 pb-4 space-y-2'>
-            {chapter.lessons.length === 0 && (
-              <p className='text-gray-500 text-sm px-4'>Chưa có bài giảng nào trong phần này.</p>
-            )}
-            {chapter.lessons.map((lesson) => (
-              <>
-                <LessonForm key={lesson.id} lesson={lesson} />
-              </>
-            ))}
+          <div className='p-4 pb-4'>
+            <div className='lessons space-y-2'>
+              {chapter.lessons.length === 0 && (
+                <p className='text-gray-500 text-sm px-4'>Chưa có bài giảng nào trong phần này.</p>
+              )}
+              {chapter.lessons.map((lesson, index) => (
+                <LessonForm key={index} lesson={lesson} />
+              ))}
+            </div>
 
-            <div className='flex space-x-2 mt-4'>
+            <div className='flex space-x-2 mt-6'>
               <Button
                 variant='outline'
                 size='sm'
@@ -226,7 +225,7 @@ const ChapterForm = ({
           </>
         }
         description='Hãy thêm Thêm bài giảng cho khóa học của bạn !'
-        children={<AddVideoForm chapterId={chapter.id} />}
+        children={<AddVideoForm setOpen={setOpen} chapterId={chapter.id} handleAddLesson={handleAddLesson} />}
         size='xl'
       />
     </div>

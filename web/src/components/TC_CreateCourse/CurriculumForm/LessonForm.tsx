@@ -4,7 +4,7 @@ import { FileText, GripVertical, HelpCircle, Play, Trash2 } from 'lucide-react'
 import { Lesson } from '@/utils/create-course/curriculum'
 import { useCallback } from 'react'
 
-const LessonForm = ({ lesson }: { lesson: Lesson }) => {
+const LessonForm = ({ key, lesson }: { key: number; lesson: Lesson }) => {
   const getLectureIcon = useCallback((type: string) => {
     switch (type) {
       case 'video':
@@ -36,7 +36,7 @@ const LessonForm = ({ lesson }: { lesson: Lesson }) => {
 
   return (
     <>
-      <div key={lesson.id} className='flex items-center space-x-3 p-2 bg-blue-50 rounded-lg border border-blue-200'>
+      <div key={key} className='flex items-center space-x-3 p-2 bg-blue-50 rounded-lg border border-blue-200'>
         <GripVertical className='h-4 w-4 text-blue-400' />
         {getLectureIcon(lesson.type)}
         <div className='flex-1'>
