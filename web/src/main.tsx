@@ -14,6 +14,7 @@ import User from '@/pages/User'
 import TCHomePage from './pages/TC_HomePage'
 import ForgotPass from './pages/ForgotPass'
 import CoursePage from './pages/CoursePage'
+import AllCourse from './pages/AllCourse'
 import TC_Course from './pages/TC_Courses'
 import TC_CreateCourse from './pages/TC_CreateCourse'
 import TC_Profile from './pages/TC_Profile'
@@ -32,6 +33,7 @@ const router = createBrowserRouter([
           { path: 'course/:id', element: <Course /> },
           { path: 'my-cart', element: <CartPage /> },
           { path: 'profile', element: <Profile /> },
+          { path: 'all-course', element: <AllCourse /> }
         ]
       },
       { path: 'auth', element: <AuthLayout /> },

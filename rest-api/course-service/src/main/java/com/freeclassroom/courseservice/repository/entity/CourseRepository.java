@@ -27,4 +27,24 @@ public interface CourseRepository extends JpaRepository<CourseEntity, String> {
     @EntityGraph(attributePaths = {"enrollments"})
     @Query("select c from CourseEntity c where c.id = :id")
     Optional<CourseEntity> findByIdWithEnrollments(@Param("id") String id);
+
+    @Query("""
+        SELECT c 
+        FROM CourseEntity c 
+        LEFT JOIN c.enrollments e 
+        GROUP BY c 
+        ORDER BY COUNT(e) DESC
+    """)
+    List<CourseEntity> findBestSellerCourses(Pageable pageable);
+
+    @Query("""
+        SELECT c
+        FROM CourseEntity c
+        LEFT JOIN c.enrollments e
+        WHERE FUNCTION('MONTH', e.enrollmentDate) = :month
+          AND FUNCTION('YEAR', e.enrollmentDate) = :year
+        GROUP BY c
+        ORDER BY COUNT(e) DESC
+    """)
+    List<CourseEntity> getTrendyCourse(Pageable pageable, int month, int year);
 }

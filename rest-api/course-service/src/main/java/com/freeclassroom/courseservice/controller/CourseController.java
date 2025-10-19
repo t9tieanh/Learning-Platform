@@ -42,6 +42,15 @@ public class CourseController {
         return tagService.getTagsByCourseId(id);
     }
 
+    @GetMapping("/best-seller")
+    ApiResponse<List<CourseResponse>> getBestSellerCourse(@RequestParam(defaultValue = "4") int limit) {
+        return courseService.getBestSellerCourse(limit);
+    }
+
+    @GetMapping("/trend")
+    ApiResponse<List<CourseResponse>> getTrendCourse(@RequestParam(defaultValue = "4") int limit) {
+        return courseService.getTrendyCourse(limit);
+    }
     // GET
     @GetMapping("/details/{id}")
     ApiResponse<CourseResponse> getCourse(@PathVariable String id) {

@@ -36,6 +36,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -234,6 +235,54 @@ public class CourseService implements ICourseService {
         } catch (Exception e) {
             return ApiResponse.<CourseResponse>builder()
                     .code(HttpStatus.NOT_FOUND.value())
+                    .message("Lỗi: " + e.getMessage())
+                    .result(null)
+                    .build();
+        }
+    }
+
+    @Override
+    public ApiResponse<List<CourseResponse>> getBestSellerCourse(int limit) {
+        try {
+            Pageable pageable = PageRequest.of(0, limit);
+            List<CourseEntity> courseEntities = courseRepo.findBestSellerCourses(pageable);
+
+            List<CourseResponse> courses = courseEntities.stream()
+                    .map(courseMapper::toDto)
+                    .toList();
+            return ApiResponse.<List<CourseResponse>>builder()
+                    .code(HttpStatus.OK.value())
+                    .message("Thành công")
+                    .result(courses)
+                    .build();
+        } catch (Exception e) {
+            return ApiResponse.<List<CourseResponse>>builder()
+                    .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                    .message("Lỗi: " + e.getMessage())
+                    .result(null)
+                    .build();
+        }
+    }
+
+    @Override
+    public ApiResponse<List<CourseResponse>> getTrendyCourse(int limit) {
+        try {
+            int month = LocalDate.now().getMonthValue();
+            int year = LocalDate.now().getYear();
+            Pageable pageable = PageRequest.of(0, limit);
+            List<CourseEntity> courseEntities = courseRepo.getTrendyCourse(pageable, month, year);
+
+            List<CourseResponse> courses = courseEntities.stream()
+                    .map(courseMapper::toDto)
+                    .toList();
+            return ApiResponse.<List<CourseResponse>>builder()
+                    .code(HttpStatus.OK.value())
+                    .message("Thành công")
+                    .result(courses)
+                    .build();
+        } catch (Exception e) {
+            return ApiResponse.<List<CourseResponse>>builder()
+                    .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
                     .message("Lỗi: " + e.getMessage())
                     .result(null)
                     .build();

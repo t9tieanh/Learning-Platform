@@ -16,7 +16,7 @@ const Header: FC = () => {
   const { data, setData } = useAuthStore()
 
   return (
-    <div className=' p-3 w-full header-container'>
+    <div className=' p-3 w-full bg-white'>
       <NavigationMenu className='min-w-full mx-0'>
         <div className='flex items-center justify-between w-full p-1'>
           <NavigationMenuList className='text-left ml-2'>

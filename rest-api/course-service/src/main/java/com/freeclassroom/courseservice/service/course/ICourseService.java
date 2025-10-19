@@ -23,4 +23,6 @@ public interface ICourseService {
     ApiResponse<CourseInfoResponse> getCourseInfo(String id);
     @EntityGraph(attributePaths = {"outcomes", "requirements"})
     ApiResponse<CourseResponse> getCourse(String id);
+    ApiResponse<List<CourseResponse>> getBestSellerCourse(int limit);
+    ApiResponse<List<CourseResponse>> getTrendyCourse(int limit);
 }
