@@ -53,6 +53,7 @@ const LandingPageForm: React.FC<{ id: string }> = ({ id }: { id: string }) => {
           setValue('category', course.category || '') // Đây là giá trị từ API
           setValue('requirements', course.requirements || [])
           setValue('thumbnailUrl', course.thumbnailUrl || '')
+          setValue('introductoryVideo', course.introductoryVideo || '')
         } else {
           console.log('Failed to fetch course info')
           navigator('/teacher')

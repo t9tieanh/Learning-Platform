@@ -16,14 +16,13 @@ export type MultiUploadItem = {
 
 interface MultiUploadOptions {
   accessToken?: string
-  uri: string // endpoint path e.g. 'learning/lessons/video'
   baseUrl?: string // optional base API url, defaults to http://localhost:8888/api/v1
   callback?: () => Promise<void>
 }
 
 interface MultiUploadResult {
   uploads: MultiUploadItem[]
-  startUpload: (file: File, fd: FormData, titlePost: string) => string // returns upload id
+  startUpload: (file: File, fd: FormData, titlePost: string, uri: string) => string // returns upload id
   cancelUpload: (id: string) => void
   removeUpload: (id: string) => void
   clearAll: () => void
@@ -37,7 +36,6 @@ interface MultiUploadResult {
  */
 export function useMultiUpload({
   accessToken,
-  uri,
   baseUrl = 'http://localhost:8888/api/v1',
   callback
 }: MultiUploadOptions): MultiUploadResult {
@@ -55,7 +53,8 @@ export function useMultiUpload({
           fileName: patch.fileName ?? 'unknown',
           progress: patch.progress ?? 0,
           message: patch.message ?? '',
-          status: patch.status ?? 'idle'
+          status: patch.status ?? 'idle',
+          title: patch.title ?? ''
         }
         return [item, ...prev]
       }
@@ -116,7 +115,7 @@ export function useMultiUpload({
   )
 
   const startUpload = useCallback(
-    (file: File, fd: FormData, titlePost: string) => {
+    (file: File, fd: FormData, titlePost: string, uri: string) => {
       const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
       upsert(id, {
         id,
@@ -134,7 +133,7 @@ export function useMultiUpload({
 
       ;(async () => {
         // const fd = new FormData()
-        fd.append('video', file)
+        fd.append('file', file)
         // fd.append('lesson', new Blob([JSON.stringify(meta)], { type: 'application/json' }))
 
         try {
@@ -230,7 +229,7 @@ export function useMultiUpload({
 
       return id
     },
-    [accessToken, baseUrl, uri, upsert]
+    [accessToken, baseUrl, upsert]
   )
 
   useEffect(() => {

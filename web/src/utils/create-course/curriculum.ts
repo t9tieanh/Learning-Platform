@@ -30,14 +30,17 @@ export type UpdateChapterFormValues = {
   description: string
 }
 
-export const CreationVideoSchema = yup.object({
+export const CreationLessonSchema = yup.object({
   title: yup.string().required('Vui lòng nhập tiêu đề').max(60, 'Tối đa 60 ký tự'),
   content: yup.string().required('Vui lòng nhập nội dung video').max(120, 'Tối đa 120 ký tự'),
-  isPublic: yup.boolean().default(false)
+  isPublic: yup.boolean().default(false),
+  // duration in seconds (optional)
+  duration: yup.number().nullable()
 })
 
-export type CreationVideoFormValues = {
+export type CreationLessonFormValues = {
   title: string
   content: string
   isPublic: boolean
+  duration?: number | null
 }

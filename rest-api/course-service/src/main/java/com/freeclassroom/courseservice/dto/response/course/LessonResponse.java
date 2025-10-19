@@ -13,6 +13,7 @@ import java.util.List;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class LessonResponse {
+    String id;
     String title;
     String content;
     Long duration;

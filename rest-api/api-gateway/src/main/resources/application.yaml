@@ -6,10 +6,11 @@ app:
 
 logging:
   level:
-    org.springframework.cloud.gateway: DEBUG
+    org.springframework.cloud.gateway: TRACE
     org.springframework.http.server.reactive: DEBUG
     org.springframework.web.reactive: DEBUG
     reactor.netty.http.client: DEBUG
+
 
 spring:
   application:
@@ -53,3 +54,4 @@ spring:
             - Path=${app.api-prefix}/notify/**, ${app.api-prefix}/notify**
           filters:
             - StripPrefix=2
+            - AddResponseHeader=X-Gateway, passed

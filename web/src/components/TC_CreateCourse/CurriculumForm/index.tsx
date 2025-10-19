@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Plus, Upload } from 'lucide-react'
 import TitleComponent from '@/components/TC_CreateCourse/common/Title'
-import { Chapter, CreationVideoFormValues } from '@/utils/create-course/curriculum'
+import { Chapter, CreationLessonFormValues } from '@/utils/create-course/curriculum'
 import ChapterForm from './ChapterForm'
 import chapterService from '@/services/course/chapter.service'
 import { toast } from 'sonner'
@@ -16,8 +16,9 @@ import { useAuthStore } from '@/stores/useAuth.stores'
 export type HandleAddLesson = (
   selectedFile: File,
   chapterId: string,
-  setOpen: React.Dispatch<React.SetStateAction<boolean>>
-) => (newVideo: CreationVideoFormValues) => Promise<void>
+  setOpen: React.Dispatch<React.SetStateAction<boolean>>,
+  uri: string
+) => (newVideo: CreationLessonFormValues) => Promise<void>
 
 const CurriculumForm: React.FC<{ id: string }> = ({ id }: { id: string }) => {
   const [Chapters, setChapters] = useState<Chapter[]>([])
@@ -39,9 +40,8 @@ const CurriculumForm: React.FC<{ id: string }> = ({ id }: { id: string }) => {
   }
 
   // hook must be called at top level of component
-  const { uploads, startUpload, cancelUpload, removeUpload, clearAll } = useMultiUpload({
+  const { uploads, startUpload } = useMultiUpload({
     accessToken: token,
-    uri: 'learning/lessons/video',
     callback: fetchChapters
   })
 
@@ -79,11 +79,12 @@ const CurriculumForm: React.FC<{ id: string }> = ({ id }: { id: string }) => {
 
     const totalSeconds = (Chapters || []).reduce((acc, chap) => {
       const chapterSeconds = (chap.lessons || []).reduce((secAcc, lecture) => {
-        // lecture.duration may be number (seconds) or string ("mm:ss" or "hh:mm:ss")
         const dur = lecture.duration
+        if (!dur) return secAcc
+
         if (typeof dur === 'number') return secAcc + dur
         if (typeof dur === 'string') {
-          const parts = dur.split(':').map(Number).reverse() // sec, min, hour
+          const parts = dur.split(':').map(Number).reverse()
           let seconds = 0
           if (parts[0]) seconds += parts[0]
           if (parts[1]) seconds += parts[1] * 60
@@ -109,9 +110,10 @@ const CurriculumForm: React.FC<{ id: string }> = ({ id }: { id: string }) => {
   const handleAddLesson: HandleAddLesson = (
     selectedFile: File,
     chapterId: string,
-    setOpen: React.Dispatch<React.SetStateAction<boolean>>
+    setOpen: React.Dispatch<React.SetStateAction<boolean>>,
+    uri: string
   ) => {
-    return async (newVideo: CreationVideoFormValues) => {
+    return async (newVideo: CreationLessonFormValues) => {
       if (!selectedFile) {
         toast.error('Vui lòng chọn file video trước khi lưu bài giảng')
         return
@@ -119,7 +121,6 @@ const CurriculumForm: React.FC<{ id: string }> = ({ id }: { id: string }) => {
 
       // FormData cho cả video và lesson metadata
       const formData = new FormData()
-      formData.append('video', selectedFile)
       formData.append(
         'lesson',
         new Blob(
@@ -128,6 +129,7 @@ const CurriculumForm: React.FC<{ id: string }> = ({ id }: { id: string }) => {
               title: newVideo.title,
               content: newVideo.content,
               isPublic: newVideo.isPublic,
+              duration: newVideo.duration,
               chapterId: chapterId
             })
           ],
@@ -136,7 +138,7 @@ const CurriculumForm: React.FC<{ id: string }> = ({ id }: { id: string }) => {
       )
 
       try {
-        startUpload(selectedFile, formData, newVideo.title)
+        startUpload(selectedFile, formData, newVideo.title, uri)
         // Close the modal add video -> start upload video
         setOpen(false)
       } catch (err) {
@@ -184,7 +186,7 @@ const CurriculumForm: React.FC<{ id: string }> = ({ id }: { id: string }) => {
                   <Upload className='h-5 w-5' /> Tiến độ tải lên
                 </span>
               </AccordionTrigger>
-              <AccordionContent className='flex flex-col gap-4 text-balance space-y-4 p-4'>
+              <AccordionContent className='flex flex-col gap-3 text-balance p-4'>
                 <UploadProgress progressLst={uploads} />
               </AccordionContent>
             </AccordionItem>

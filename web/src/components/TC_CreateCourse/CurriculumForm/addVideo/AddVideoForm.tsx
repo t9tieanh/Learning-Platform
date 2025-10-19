@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import CustomInput from '@/components/common/Input'
 import { Label } from '@/components/ui/label'
 import CustomButton from '@/components/common/Button'
@@ -6,7 +7,7 @@ import CustomTextarea from '@/components/common/Textarea'
 import CustomCheckbox from '@/components/common/CustomCheckbox'
 import { useEffect, useRef, useState } from 'react'
 import { MdCancel } from 'react-icons/md'
-import { CreationVideoFormValues, CreationVideoSchema } from '@/utils/create-course/curriculum'
+import { CreationLessonFormValues, CreationLessonSchema } from '@/utils/create-course/curriculum'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { HandleAddLesson } from '@/components/TC_CreateCourse/CurriculumForm/index'
@@ -26,8 +27,8 @@ const AddVideoForm = ({
     watch,
     setValue,
     formState: { errors }
-  } = useForm<CreationVideoFormValues>({
-    resolver: yupResolver(CreationVideoSchema) as any
+  } = useForm<CreationLessonFormValues>({
+    resolver: yupResolver(CreationLessonSchema) as any
   })
 
   const handleSelectFile = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -38,6 +39,14 @@ const AddVideoForm = ({
       setVideoSrc(url)
       setSelectedFile(file)
     }
+  }
+
+  // when video metadata is loaded, capture duration and set into form
+  const handleLoadedMetadata = () => {
+    if (!videoRef.current) return
+    const seconds = Math.floor(videoRef.current.duration || 0)
+    // set duration into react-hook-form
+    setValue('duration', seconds)
   }
 
   const handleCancel = () => {
@@ -51,6 +60,15 @@ const AddVideoForm = ({
   const [videoSrc, setVideoSrc] = useState<string | null>(null)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const videoRef = useRef<HTMLVideoElement | null>(null)
+
+  const formatDuration = (seconds: number) => {
+    if (!seconds || seconds <= 0) return '0:00'
+    const hrs = Math.floor(seconds / 3600)
+    const mins = Math.floor((seconds % 3600) / 60)
+    const secs = seconds % 60
+    if (hrs > 0) return `${hrs}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`
+    return `${mins}:${String(secs).padStart(2, '0')}`
+  }
 
   // play when a new source is set
   useEffect(() => {
@@ -72,7 +90,7 @@ const AddVideoForm = ({
     <div className='add-video-form'>
       <form
         className='flex items-stretch space-x-4 h-96'
-        onSubmit={handleSubmit(handleAddLesson(selectedFile as File, chapterId, setOpen))}
+        onSubmit={handleSubmit(handleAddLesson(selectedFile as File, chapterId, setOpen, 'learning/lessons/video'))}
       >
         <div className='file-upload flex flex-col justify-center items-center gap-3 p-4 border-2 border-blue-600 h-full flex-1 rounded-2xl'>
           {videoSrc ? (
@@ -81,6 +99,7 @@ const AddVideoForm = ({
               ref={videoRef}
               src={videoSrc}
               controls
+              onLoadedMetadata={handleLoadedMetadata}
               className='w-full h-full max-h-[80%] object-contain rounded-lg bg-black'
             />
           ) : (
@@ -110,6 +129,9 @@ const AddVideoForm = ({
               <div className='text-xs text-gray-600'>
                 <div>{selectedFile.name}</div>
                 <div>{(selectedFile.size / (1024 * 1024)).toFixed(2)} MB</div>
+                {watch('duration') ? (
+                  <div>Thời lượng: {formatDuration(watch('duration') as number)}</div>
+                ) : null}
               </div>
               <div className='flex items-center gap-2'>
                 <CustomButton

@@ -18,6 +18,7 @@ import AddVideoForm from './addVideo/AddVideoForm'
 import { toast } from 'sonner'
 import { showConfirmToast } from '@/components/common/ShowConfirmToast'
 import { HandleAddLesson } from '@/components/TC_CreateCourse/CurriculumForm/index'
+import AddDocumentForm from './addVideo/AddDocumentForm'
 
 const ChapterForm = ({
   chapter,
@@ -39,6 +40,7 @@ const ChapterForm = ({
 
   // for dialog add video, lecture
   const [open, setOpen] = useState(false)
+  const [dialogType, setDialogType] = useState<'video' | 'document'>('video')
 
   const updateChapter = async (data: UpdateChapterFormValues) => {
     const result = await chapterService.updateChapter({
@@ -60,9 +62,8 @@ const ChapterForm = ({
     }
   }
 
-  const addLecture = (sectionId: string, type: 'video' | 'quiz' | 'article') => {
-    // Logic to add a new lecture to the section
-    console.log(`Add ${type} lecture to section ${sectionId}`)
+  const addLecture = (type: 'video' | 'quiz' | 'article') => {
+    setDialogType(type === 'video' ? 'video' : 'document')
     setOpen(true)
   }
 
@@ -177,7 +178,7 @@ const ChapterForm = ({
                 <p className='text-gray-500 text-sm px-4'>Chưa có bài giảng nào trong phần này.</p>
               )}
               {chapter.lessons.map((lesson, index) => (
-                <LessonForm key={index} lesson={lesson} />
+                <LessonForm key={index} lesson={lesson} setChapters={setChapters} />
               ))}
             </div>
 
@@ -185,7 +186,7 @@ const ChapterForm = ({
               <Button
                 variant='outline'
                 size='sm'
-                onClick={() => addLecture(chapter.id, 'video')}
+                onClick={() => addLecture('video')}
                 className='flex items-center space-x-1 border-blue-300 text-blue-600'
               >
                 <Plus className='h-4 w-4' />
@@ -195,7 +196,7 @@ const ChapterForm = ({
               <Button
                 variant='outline'
                 size='sm'
-                onClick={() => addLecture(chapter.id, 'quiz')}
+                onClick={() => addLecture('quiz')}
                 className='flex items-center space-x-1 border-blue-300 text-blue-600'
               >
                 <Plus className='h-4 w-4' />
@@ -205,7 +206,7 @@ const ChapterForm = ({
               <Button
                 variant='outline'
                 size='sm'
-                onClick={() => addLecture(chapter.id, 'article')}
+                onClick={() => addLecture('article')}
                 className='flex items-center space-x-1 border-blue-300 text-blue-600'
               >
                 <Plus className='h-4 w-4' />
@@ -225,7 +226,13 @@ const ChapterForm = ({
           </>
         }
         description='Hãy thêm Thêm bài giảng cho khóa học của bạn !'
-        children={<AddVideoForm setOpen={setOpen} chapterId={chapter.id} handleAddLesson={handleAddLesson} />}
+        children={
+          dialogType === 'video' ? (
+            <AddVideoForm setOpen={setOpen} chapterId={chapter.id} handleAddLesson={handleAddLesson} />
+          ) : (
+            <AddDocumentForm setOpen={setOpen} chapterId={chapter.id} handleAddLesson={handleAddLesson} />
+          )
+        }
         size='xl'
       />
     </div>

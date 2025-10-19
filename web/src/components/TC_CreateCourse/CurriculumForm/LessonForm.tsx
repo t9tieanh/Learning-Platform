@@ -1,10 +1,50 @@
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { FileText, GripVertical, HelpCircle, Play, Trash2 } from 'lucide-react'
-import { Lesson } from '@/utils/create-course/curriculum'
+import { Chapter, Lesson } from '@/utils/create-course/curriculum'
 import { useCallback } from 'react'
+import lessonService from '@/services/course/lesson.service'
+import { toast } from 'sonner'
+import showConfirmToast from '@/components/common/ShowConfirmToast'
 
-const LessonForm = ({ key, lesson }: { key: number; lesson: Lesson }) => {
+const LessonForm = ({
+  key,
+  lesson,
+  setChapters
+}: {
+  key: number
+  lesson: Lesson
+  setChapters?: React.Dispatch<React.SetStateAction<Chapter[]>>
+}) => {
+  const handleDelLesson = async (lessonId: string) => {
+    const confirmed = await showConfirmToast({
+      title: 'Xóa bài học',
+      description: 'Bạn có chắc muốn xóa bài học này? Hành động không thể hoàn tác.',
+      confirmLabel: 'Có, xóa',
+      cancelLabel: 'Hủy'
+    })
+
+    if (!confirmed) return
+    try {
+      const res = await lessonService.delLesson(lessonId)
+      if (res && res.code === 200) {
+        if (setChapters) {
+          setChapters((prevChapters) =>
+            prevChapters.map((ch) => ({
+              ...ch,
+              lessons: ch.lessons.filter((les: { id: string }) => les.id !== lessonId)
+            }))
+          )
+        }
+        toast.success(res.message || 'Xoá bài giảng thành công')
+      } else {
+        toast.error(res?.message || 'Xoá bài giảng thất bại, vui lòng thử lại')
+      }
+    } catch (error) {
+      toast.error('Xoá bài giảng thất bại, vui lòng thử lại')
+    }
+  }
+
   const getLectureIcon = useCallback((type: string) => {
     switch (type) {
       case 'video':
@@ -46,7 +86,12 @@ const LessonForm = ({ key, lesson }: { key: number; lesson: Lesson }) => {
           <Badge variant='secondary' className='capitalize bg-blue-100 text-blue-700'>
             {lesson.type === 'video' ? 'Video' : lesson.type === 'article' ? 'Bài viết' : 'Quiz'}
           </Badge>
-          <Button variant='ghost' size='icon' className='text-red-500 hover:bg-red-50'>
+          <Button
+            variant='ghost'
+            size='icon'
+            className='text-red-500 hover:bg-red-50'
+            onClick={() => handleDelLesson(lesson.id)}
+          >
             <Trash2 className='h-4 w-4' />
           </Button>
         </div>
