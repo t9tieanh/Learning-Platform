@@ -1,0 +1,65 @@
+package com.freeclassroom.courseservice.repository.entity;
+
+import com.freeclassroom.courseservice.entity.course.CourseEntity;
+import feign.Param;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+
+import java.util.List;
+import java.util.Optional;
+
+public interface CourseRepository extends JpaRepository<CourseEntity, String> {
+    Optional<CourseEntity> findByIdAndInstructorId(String id, String instructorId);
+    boolean existsByIdAndInstructorId(String id, String instructorId);
+
+    Page<CourseEntity> findByInstructorId(String instructorId, Pageable pageable);
+    @EntityGraph(attributePaths = {"tags"})
+    @Query("select c from CourseEntity c where c.id = :id")
+    Optional<CourseEntity> findByIdWithTags(@Param("id") String id);
+
+    @EntityGraph(attributePaths = {"chapters"})
+    @Query("select c from CourseEntity c where c.id = :id")
+    Optional<CourseEntity> findByIdWithChapters(@Param("id") String id);
+
+    @EntityGraph(attributePaths = {"enrollments"})
+    @Query("select c from CourseEntity c where c.id = :id")
+    Optional<CourseEntity> findByIdWithEnrollments(@Param("id") String id);
+
+    @Query("""
+        SELECT c 
+        FROM CourseEntity c 
+        LEFT JOIN c.enrollments e 
+        GROUP BY c 
+        ORDER BY COUNT(e) DESC
+    """)
+    List<CourseEntity> findBestSellerCourses(Pageable pageable);
+
+    @Query("""
+        SELECT c
+        FROM CourseEntity c
+        LEFT JOIN c.enrollments e
+        WHERE FUNCTION('MONTH', e.enrollmentDate) = :month
+          AND FUNCTION('YEAR', e.enrollmentDate) = :year
+        GROUP BY c
+        ORDER BY COUNT(e) DESC
+    """)
+    List<CourseEntity> getTrendyCourse(Pageable pageable, int month, int year);
+
+    @Query("""
+        SELECT c FROM CourseEntity c
+        WHERE (:search IS NULL OR LOWER(c.title) LIKE LOWER(CONCAT('%', :search, '%')))
+        AND (:category IS NULL OR c.category.name = :category)
+        AND (:minPrice IS NULL OR c.finalPrice >= :minPrice)
+        AND (:minRating IS NULL OR c.rating >= :minRating)
+    """)
+    Page<CourseEntity> findAllWithFilters(
+            @Param("search") String search,
+            @Param("category") String category,
+            @Param("minPrice") Double minPrice,
+            @Param("minRating") Double minRating,
+            Pageable pageable
+    );
+}

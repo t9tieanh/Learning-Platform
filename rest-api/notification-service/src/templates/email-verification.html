@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Mã OTP của bạn</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      body {
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        background-color: #f7f9fc;
+        margin: 0;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 480px;
+        margin: 0 auto;
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        padding: 30px;
+      }
+
+      .title {
+        font-size: 20px;
+        color: #333333;
+        margin-bottom: 16px;
+      }
+
+      .otp {
+        font-size: 32px;
+        font-weight: bold;
+        color: #1d4e8f;
+        background-color: #b2c7cd;
+        padding: 12px 24px;
+        border-radius: 8px;
+        display: inline-block;
+        letter-spacing: 4px;
+        margin: 20px 0;
+      }
+
+      .footer {
+        font-size: 12px;
+        color: #999999;
+        margin-top: 30px;
+        text-align: center;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <h2 class="title">Xin chào {{name}},</h2>
+
+      <p>Để tiếp tục tận hưởng dịch vụ. Bạn hãy ấn vào đây để xác thực tài khoản của mình.</p>
+
+      <p>Mã này sẽ hết hạn sau 5 phút. Nếu không phải bạn yêu cầu, vui lòng bỏ qua email này.</p>
+
+        <div style="text-align:center; margin: 24px 0;">
+          <a href="{{token}}" style="
+            display: inline-block;
+            padding: 12px 32px;
+            background-color: #1d4e8f;
+            color: #fff;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            box-shadow: 0 2px 8px rgba(29, 78, 143, 0.08);
+            transition: background 0.2s;
+          " target="_blank">Xác thực tài khoản</a>
+        </div>
+
+      <div class="footer">
+        © 2025 FreeClassRoom - dev by PhamTienAnh. All rights reserved.
+      </div>
+    </div>
+  </body>
+</html>

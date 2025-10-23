@@ -1,0 +1,10 @@
+node_modules/
+dist/
+build/
+public/
+webpack.config.js
+tailwind.config.ts
+postcss.config.js
+*.config.js
+*.config.ts
+src/components/ui/**/*
