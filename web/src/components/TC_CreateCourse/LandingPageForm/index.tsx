@@ -14,8 +14,15 @@ import courseService from '@/services/course/course.service'
 import { useNavigate } from 'react-router'
 import { toast } from 'sonner'
 import tagsService from '@/services/course/tags.service'
+import CourseProgressStep from '@/types/courseProgressStep'
 
-const LandingPageForm: React.FC<{ id: string }> = ({ id }: { id: string }) => {
+const LandingPageForm: React.FC<{ id: string; setActiveSection: (section: CourseProgressStep) => void }> = ({
+  id,
+  setActiveSection
+}: {
+  id: string
+  setActiveSection: (section: CourseProgressStep) => void
+}) => {
   const {
     control,
     register,
@@ -45,6 +52,10 @@ const LandingPageForm: React.FC<{ id: string }> = ({ id }: { id: string }) => {
         if (courseResponse.code === 200 && courseResponse.result) {
           const course = courseResponse.result
 
+          if (course.progressStep !== 'INTRO') {
+            setActiveSection(course.progressStep as CourseProgressStep)
+          }
+
           setValue('courseTitle', course.title || '')
           setValue('subtitle', course.shortDescription || '')
           setValue('description', course.longDescription || '')
@@ -63,7 +74,6 @@ const LandingPageForm: React.FC<{ id: string }> = ({ id }: { id: string }) => {
 
         // Set tags
         if (tagsResponse && tagsResponse.code === 200 && tagsResponse.result) {
-          // console.log('🏷️ Setting tags:', tagsResponse.result)
           setValue('tags', tagsResponse.result)
         }
       } catch (error) {

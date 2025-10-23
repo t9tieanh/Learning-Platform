@@ -8,6 +8,7 @@ import com.freeclassroom.courseservice.dto.response.common.CreationResponse;
 import com.freeclassroom.courseservice.dto.response.course.ChapterResponse;
 import com.freeclassroom.courseservice.entity.course.ChapterEntity;
 import com.freeclassroom.courseservice.entity.course.CourseEntity;
+import com.freeclassroom.courseservice.enums.entity.EnumCourseProgressStep;
 import com.freeclassroom.courseservice.exception.CustomExeption;
 import com.freeclassroom.courseservice.exception.ErrorCode;
 import com.freeclassroom.courseservice.mapper.ChapterMapper;
@@ -80,6 +81,7 @@ public class ChapterService implements IChapterService {
         chapter.setCourse(course);
 
         course.getChapters().add(chapter);
+        course.setProgressStep(EnumCourseProgressStep.CURRICULUM);
 
         courseRepo.save(course);
 
