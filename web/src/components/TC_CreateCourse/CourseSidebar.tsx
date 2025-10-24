@@ -58,7 +58,10 @@ const CourseSidebar: FC<CourseSidebarProps> = ({ activeSection = CourseProgressS
       <div className='p-6'>
         {/* Header */}
         <div className='mb-6'>
-          <h2 className='text-lg font-semibold mb-2'>Lên kế hoạch cho khoá học</h2>
+          <h2 className='text-lg font-semibold mb-2 items-center'>
+            <Settings className='inline-block h-5 w-5 mr-1' />
+            Lên kế hoạch cho khoá học
+          </h2>
           <p className='text-sm text-gray-400'>Hoàn thành tất cả các mục để xuất bản khoá học</p>
         </div>
 

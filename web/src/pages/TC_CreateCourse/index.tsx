@@ -17,9 +17,9 @@ const TC_CreateCourse = () => {
       case CourseProgressStep.CURRICULUM:
         return <CurriculumForm id={id as string} />
       case CourseProgressStep.PRICING:
-        return <PricingForm />
+        return <PricingForm id={id as string} />
       case CourseProgressStep.SETTINGS:
-        return <SetupForm />
+        return <SetupForm id={id as string} />
       default:
         return <LandingPageForm id={id as string} setActiveSection={setActiveSection} />
     }

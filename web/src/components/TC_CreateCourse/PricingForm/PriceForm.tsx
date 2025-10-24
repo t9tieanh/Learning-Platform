@@ -4,6 +4,9 @@ import CustomInput from '@/components/common/Input'
 import { toast } from 'sonner'
 import CustomButton from '@/components/common/Button'
 import { FaPaperPlane } from 'react-icons/fa'
+import courseService from '@/services/course/course.service'
+import { PriceFormValues } from '@/utils/create-course/price'
+import useLoading from '@/hooks/useLoading.hook'
 
 const PriceInput = ({
   currency,
@@ -85,16 +88,40 @@ const PriceForm = ({
   setCurrency,
   register,
   errors,
-  setValue
+  setValue,
+  courseId,
+  handleSubmit
 }: {
   currency: string
   setCurrency: (value: string) => void
   register?: any
   errors?: any
   setValue: any
+  courseId: string
+  handleSubmit: any
 }) => {
+  const { loading, startLoading, stopLoading } = useLoading()
+
+  // handle update price
+  const handleUpdatePrice = async (data: PriceFormValues) => {
+    try {
+      const originalPrice = Number(data.originalPrice) || 0
+      const finalPrice = Number(data.finalPrice) || 0
+
+      startLoading()
+      const result = await courseService.updatePrice(courseId, originalPrice, finalPrice)
+      if (result && result.code === 200) {
+        toast.success(result.message || 'Cập nhật giá khóa học thành công!')
+      } else toast.error(result.message || 'Cập nhật giá khóa học thất bại. Vui lòng thử lại.')
+    } catch (error) {
+      toast.error('Cập nhật giá khóa học thất bại. Vui lòng thử lại.')
+    } finally {
+      stopLoading()
+    }
+  }
+
   return (
-    <form>
+    <form onSubmit={handleSubmit(handleUpdatePrice)}>
       <Card className='border border-blue-200 shadow-sm bg-blue-50'>
         <CardHeader className='bg-blue-200/40 rounded-t-lg'>
           <CardTitle className='text-lg font-medium text-blue-900'>Giá khóa học</CardTitle>
@@ -128,7 +155,7 @@ const PriceForm = ({
 
           <div className='text-sm text-blue-700'>Giá phải nằm trong khoảng 50.000 VNĐ đến 20.000.000 VNĐ</div>
           <div className='flex justify-end'>
-            <CustomButton label='Lưu thay đổi' icon={<FaPaperPlane />} className='' />
+            <CustomButton label='Lưu thay đổi' icon={<FaPaperPlane />} isLoader={loading} />
           </div>
         </CardContent>
       </Card>

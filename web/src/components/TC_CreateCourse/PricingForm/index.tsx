@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import TitleComponent from '@/components/TC_CreateCourse/common/Title'
 import PriceForm from '@/components/TC_CreateCourse/PricingForm/PriceForm'
@@ -8,8 +8,9 @@ import PreviewPrice from '@/components/TC_CreateCourse/PricingForm/PreviewPrice'
 import { PriceFormSchema, PriceFormValues } from '@/utils/create-course/price'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
+import courseService from '@/services/course/course.service'
 
-const PricingForm = () => {
+const PricingForm = ({ id }: { id: string }) => {
   const {
     register,
     handleSubmit,
@@ -25,6 +26,8 @@ const PricingForm = () => {
     }
   })
   const [currency, setCurrency] = useState('VND')
+  const [yourIncome, setYourIncome] = useState(0)
+  const [platformFee, setPlatformFee] = useState(0)
 
   const suggestedPrices = [
     { price: 480000, tier: 'Cơ bản', description: 'Phù hợp cho khóa học ngắn' },
@@ -33,19 +36,20 @@ const PricingForm = () => {
     { price: 4_800_000, tier: 'Chuyên nghiệp', description: 'Cho nội dung cấp chuyên gia' }
   ]
 
-  const calculateEarnings = (price: number) => {
-    if (isNaN(price)) return { instructor: '0.00', udemy: '0.00' }
-
-    const instructorShare = price * 0.63
-    const udemyShare = price * 0.37
-
-    return {
-      instructor: instructorShare.toFixed(2),
-      udemy: udemyShare.toFixed(2)
+  const getPrice = async () => {
+    const response = await courseService.getPrice(id)
+    if (response && response.code === 200 && response.result) {
+      const { originalPrice, finalPrice, yourIncome, platformFee } = response.result
+      setValue('originalPrice', originalPrice)
+      setValue('finalPrice', finalPrice)
+      setYourIncome(yourIncome)
+      setPlatformFee(platformFee)
     }
   }
 
-  const earnings = calculateEarnings(getValues('finalPrice'))
+  useEffect(() => {
+    getPrice()
+  }, [id])
 
   return (
     <div className='max-w-6xl space-y-8 mx-auto'>
@@ -64,6 +68,8 @@ const PricingForm = () => {
             register={register}
             errors={errors}
             setValue={setValue}
+            courseId={id}
+            handleSubmit={handleSubmit}
           />
           <SuggestedPrice
             suggestedPrices={suggestedPrices}
@@ -75,7 +81,7 @@ const PricingForm = () => {
         </div>
 
         <div className='space-y-6'>
-          <PreviewPrice earnings={earnings} coursePrice={getValues('finalPrice')} />
+          <PreviewPrice coursePrice={getValues('finalPrice')} yourIncome={yourIncome} platformFee={platformFee} />
           <Orientation />
         </div>
       </div>

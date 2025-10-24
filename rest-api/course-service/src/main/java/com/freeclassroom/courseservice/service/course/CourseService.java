@@ -8,9 +8,7 @@ import com.freeclassroom.courseservice.dto.request.course.UpdateTagsRequest;
 import com.freeclassroom.courseservice.dto.response.ApiResponse;
 import com.freeclassroom.courseservice.dto.response.common.CreationResponse;
 import com.freeclassroom.courseservice.dto.response.common.FileUploadResponse;
-import com.freeclassroom.courseservice.dto.response.course.CourseInfoResponse;
-import com.freeclassroom.courseservice.dto.response.course.CourseResponse;
-import com.freeclassroom.courseservice.dto.response.course.PageResponse;
+import com.freeclassroom.courseservice.dto.response.course.*;
 import com.freeclassroom.courseservice.entity.category.CategoryEntity;
 import com.freeclassroom.courseservice.entity.category.TagEntity;
 import com.freeclassroom.courseservice.entity.course.ChapterEntity;
@@ -32,7 +30,9 @@ import com.freeclassroom.courseservice.service.utils.file.IUploadFileService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -63,6 +63,9 @@ public class CourseService implements ICourseService {
     LessonMapper lessonMapper;
 
     IUploadFileService fileService;
+
+    @NonFinal
+    private Double PLATFORM_FEES = 0.1d;
 
     UserGrpcClient userGrpcClient;
     @Override
@@ -297,7 +300,7 @@ public class CourseService implements ICourseService {
         //set price for course
         course.setOriginalPrice(newPrice.getOriginalPrice());
         course.setFinalPrice(newPrice.getFinalPrice());
-        course.setProgressStep(course.getProgressStep());
+        course.setProgressStep(EnumCourseProgressStep.PRICING);
 
         //save entity
         courseRepo.save(course);
@@ -308,6 +311,75 @@ public class CourseService implements ICourseService {
                 .result(
                         CreationResponse.builder()
                                 .id(course.getId())
+                                .build()
+                )
+                .build();
+    }
+
+    @Override
+    public ApiResponse<PriceCourseResponse> getPrice(String courseId) {
+        CourseEntity course = courseRepo.findById(courseId)
+                .orElseThrow(() -> new CustomExeption(ErrorCode.COURSE_NOT_FOUND));
+
+        return ApiResponse.<PriceCourseResponse>builder()
+                .code(200)
+                .message("Lấy thông tin giá khóa học thành công !")
+                .result(
+                        PriceCourseResponse.builder()
+                                .id(course.getId())
+                                .originalPrice(course.getOriginalPrice())
+                                .finalPrice(course.getFinalPrice())
+                                .platformFee(PLATFORM_FEES)
+                                // ammount instructor receive
+                                .yourIncome(course.getFinalPrice() * (1 - PLATFORM_FEES))
+                                .build()
+                )
+                .build();
+    }
+
+    @Override
+    public ApiResponse<CourseOverviewResponse> getOverview(String courseId) {
+        CourseEntity course = courseRepo.findById(courseId)
+                .orElseThrow(() -> new CustomExeption(ErrorCode.COURSE_NOT_FOUND));
+
+        return ApiResponse.<CourseOverviewResponse>builder()
+                .code(200)
+                .message("Lấy thông tin tổng quan của khóa học thành công !")
+                .result(
+                        CourseOverviewResponse.builder()
+                                .videoDuration(courseRepo.getTotalVideoDurationByCourseId(courseId))
+                                .lessonNum(courseRepo.countLessonsByCourseId(courseId))
+                                .finalPrice(course.getFinalPrice())
+                                .courseId(course.getId())
+                                .build()
+                )
+                .build();
+    }
+
+    @Override
+    public ApiResponse<CreationResponse> requestApproval(String id) {
+        CourseEntity course = courseRepo.findById(id)
+                .orElseThrow(() -> new CustomExeption(ErrorCode.COURSE_NOT_FOUND));
+
+        if (courseRepo.countLessonsByCourseId(id) == 0)
+            throw new CustomExeption(ErrorCode.COURSE_WITHOUT_VIDEO);
+
+        if (!course.getProgressStep().equals(EnumCourseProgressStep.PRICING)
+                || course.getFinalPrice() == 0 || course.getOriginalPrice() == 0 )
+            throw new CustomExeption(ErrorCode.COURSE_WITHOUT_PRICE);
+
+        // -> maybe approval
+        course.setProgressStep(EnumCourseProgressStep.SETTINGS);
+        course.setStatus(EnumCourseStatus.PENDING_REVIEW);
+        courseRepo.save(course);
+
+        return ApiResponse.<CreationResponse>builder()
+                .code(200)
+                .message("Gửi yêu cầu duyệt thành công !, chúng tôi sẽ liên hệ với bạn trong khoảng thời gian sớm nhất !")
+                .result(
+                        CreationResponse.builder()
+                                .id(course.getId())
+                                .name(course.getTitle())
                                 .build()
                 )
                 .build();

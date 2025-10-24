@@ -114,6 +114,58 @@ class CourseService {
     })
     return response.data
   }
+
+  async updatePrice(
+    courseId: string,
+    originalPrice: number,
+    finalPrice: number
+  ): Promise<
+    ApiResponse<{
+      id: string
+    }>
+  > {
+    const response = await axiosClient.axiosInstance.patch(`learning/courses/${courseId}/price`, {
+      originalPrice,
+      finalPrice
+    })
+    return response.data
+  }
+
+  async getPrice(courseId: string): Promise<
+    ApiResponse<{
+      originalPrice: number
+      finalPrice: number
+      id: string
+      name: string
+      yourIncome: number
+      platformFee: number
+    }>
+  > {
+    const response = await axiosClient.axiosInstance.get(`learning/courses/${courseId}/price`)
+    return response.data
+  }
+
+  async getCourseOverview(courseId: string): Promise<
+    ApiResponse<{
+      lessonNum: number
+      videoDuration: number
+      courseId: string
+      finalPrice: string
+    }>
+  > {
+    const response = await axiosClient.axiosInstance.get(`learning/courses/${courseId}/overview`)
+    return response.data
+  }
+
+  async requestApproval(courseId: string): Promise<
+    ApiResponse<{
+      id: string
+      name: string
+    }>
+  > {
+    const response = await axiosClient.axiosInstance.post(`learning/courses/${courseId}/request-approval`)
+    return response.data
+  }
 }
 
 export default new CourseService()
