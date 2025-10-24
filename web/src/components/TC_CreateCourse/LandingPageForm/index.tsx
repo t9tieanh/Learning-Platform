@@ -6,22 +6,30 @@ import MediaInfomation from './MediaInfomation'
 import SeoTagInfomation from './SeoTagInfomation'
 import { Info, Video, Tag, Send } from 'lucide-react'
 import { landingPageSchema, LandingPageFormValues } from '@/utils/create-course/landingPage'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import CustomButton from '@/components/common/Button'
 import { useEffect } from 'react'
-import courseService from '@/services/course/course.service'
 import { useNavigate } from 'react-router'
 import { toast } from 'sonner'
 import tagsService from '@/services/course/tags.service'
-import CourseProgressStep from '@/types/courseProgressStep'
 
-const LandingPageForm: React.FC<{ id: string; setActiveSection: (section: CourseProgressStep) => void }> = ({
+const LandingPageForm = ({
   id,
-  setActiveSection
+  courseInfo
 }: {
   id: string
-  setActiveSection: (section: CourseProgressStep) => void
+  courseInfo: {
+    courseTitle: string
+    subtitle: string
+    description: string
+    language: string
+    learnItems: string[]
+    category: string
+    requirements: string[]
+    thumbnailUrl: string
+    introductoryVideo: string
+  }
 }) => {
   const {
     control,
@@ -30,9 +38,11 @@ const LandingPageForm: React.FC<{ id: string; setActiveSection: (section: Course
     watch,
     setValue,
     getValues,
+    reset,
     formState: { errors }
   } = useForm<LandingPageFormValues>({
-    resolver: yupResolver(landingPageSchema) as any
+    resolver: yupResolver(landingPageSchema) as any,
+    defaultValues: {} // optional empty, we'll reset when courseInfo arrives
   })
 
   const navigator = useNavigate()
@@ -42,35 +52,8 @@ const LandingPageForm: React.FC<{ id: string; setActiveSection: (section: Course
       if (!id) return
 
       try {
-        // Fetch course info và tags song song
-        const [courseResponse, tagsResponse] = await Promise.all([
-          courseService.getCourseInfo(id),
-          tagsService.getAllByCourseId(id)
-        ])
-
-        // Set course info
-        if (courseResponse.code === 200 && courseResponse.result) {
-          const course = courseResponse.result
-
-          if (course.progressStep !== 'INTRO') {
-            setActiveSection(course.progressStep as CourseProgressStep)
-          }
-
-          setValue('courseTitle', course.title || '')
-          setValue('subtitle', course.shortDescription || '')
-          setValue('description', course.longDescription || '')
-          setValue('language', course.language || '')
-          setValue('learnItems', course.outcomes || [])
-          setValue('category', course.category || '') // Đây là giá trị từ API
-          setValue('requirements', course.requirements || [])
-          setValue('thumbnailUrl', course.thumbnailUrl || '')
-          setValue('introductoryVideo', course.introductoryVideo || '')
-        } else {
-          console.log('Failed to fetch course info')
-          navigator('/teacher')
-          toast.error(courseResponse.message || 'Không tìm thấy khóa học')
-          return
-        }
+        // fetch course info và tags song song
+        const tagsResponse = await tagsService.getAllByCourseId(id)
 
         // Set tags
         if (tagsResponse && tagsResponse.code === 200 && tagsResponse.result) {
@@ -85,6 +68,23 @@ const LandingPageForm: React.FC<{ id: string; setActiveSection: (section: Course
 
     fetchCourseData()
   }, [id, setValue, navigator])
+
+  // khi courseInfo từ parent thay đổi -> reset form
+  useEffect(() => {
+    if (!courseInfo) return
+    reset({
+      courseTitle: courseInfo.courseTitle,
+      subtitle: courseInfo.subtitle,
+      description: courseInfo.description,
+      language: courseInfo.language,
+      learnItems: courseInfo.learnItems,
+      category: courseInfo.category,
+      requirements: courseInfo.requirements,
+      thumbnailUrl: courseInfo.thumbnailUrl,
+      introductoryVideo: courseInfo.introductoryVideo
+    })
+  }, [courseInfo, reset])
+
   // Watch form values
   const formValues = watch()
 
