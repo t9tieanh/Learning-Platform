@@ -3,6 +3,7 @@ package com.freeclassroom.courseservice.controller;
 import com.freeclassroom.courseservice.dto.request.common.FileUploadRequest;
 import com.freeclassroom.courseservice.dto.request.course.CreationCourseRequest;
 import com.freeclassroom.courseservice.dto.request.course.InstructorRequest;
+import com.freeclassroom.courseservice.dto.request.course.UpdatePriceRequest;
 import com.freeclassroom.courseservice.dto.request.course.UpdateTagsRequest;
 import com.freeclassroom.courseservice.dto.response.ApiResponse;
 import com.freeclassroom.courseservice.dto.response.category.TagResponse;
@@ -76,6 +77,15 @@ public class CourseController {
             @ModelAttribute FileUploadRequest request
     ) {
         return courseService.updateAvatar(request, id);
+    }
+
+    @PreAuthorize("@courseService.isTeacherOfCourse(#id, authentication.name)")
+    @PatchMapping("{id}/price")
+    ApiResponse<CreationResponse> updatePrice(
+            @PathVariable("id") String id,
+            @RequestBody UpdatePriceRequest newPrice
+    ) {
+        return courseService.updatePrice(newPrice, id);
     }
 
     @PreAuthorize("@courseService.isTeacherOfCourse(#id, authentication.name)")

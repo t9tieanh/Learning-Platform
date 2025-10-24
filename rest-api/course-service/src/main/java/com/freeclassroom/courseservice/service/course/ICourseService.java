@@ -3,6 +3,7 @@ package com.freeclassroom.courseservice.service.course;
 import com.freeclassroom.courseservice.dto.request.common.FileUploadRequest;
 import com.freeclassroom.courseservice.dto.request.course.CreationCourseRequest;
 import com.freeclassroom.courseservice.dto.request.course.GetCourseRequest;
+import com.freeclassroom.courseservice.dto.request.course.UpdatePriceRequest;
 import com.freeclassroom.courseservice.dto.request.course.UpdateTagsRequest;
 import com.freeclassroom.courseservice.dto.response.ApiResponse;
 import com.freeclassroom.courseservice.dto.response.common.CreationResponse;
@@ -28,4 +29,5 @@ public interface ICourseService {
     @EntityGraph(attributePaths = {"outcomes", "requirements"})
     ApiResponse<CourseResponse> getCourse(String id);
     Flux<ServerSentEvent<String>> updateVideoIntroduce(MultipartFile avatar, String courseId) throws IOException;
+    ApiResponse<CreationResponse> updatePrice(UpdatePriceRequest newPrice, String courseId);
 }

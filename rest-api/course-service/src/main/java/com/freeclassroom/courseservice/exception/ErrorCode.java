@@ -31,6 +31,7 @@ public enum ErrorCode {
     COURSE_NOT_FOUND(1013, "Khóa học không tồn tại !", HttpStatus.OK),
     CHAPTER_NOT_FOUND(1013, "Chapter không tồn tại !", HttpStatus.OK),
     LESSON_NOT_FOUND(1013, "Bài học không tồn tại !", HttpStatus.OK),
+    PRICE_NOT_RIGHT(400, "Giá niêm yết (giá gốc) phải nhỏ hơn thực tế (giá bán) !", HttpStatus.OK),
 
     UPLOAD_NOT_COMPLETED(12345, "Upload file thất bại !", HttpStatus.OK),
     FILE_NOT_FOUND(400, "Không tìm thấy file trong hệ thống !", HttpStatus.OK),

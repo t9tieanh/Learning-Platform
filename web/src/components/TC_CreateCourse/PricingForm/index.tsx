@@ -5,9 +5,25 @@ import PriceForm from '@/components/TC_CreateCourse/PricingForm/PriceForm'
 import SuggestedPrice from '@/components/TC_CreateCourse/PricingForm/SuggestedPrice'
 import Orientation from '@/components/TC_CreateCourse/PricingForm/Orientation'
 import PreviewPrice from '@/components/TC_CreateCourse/PricingForm/PreviewPrice'
+import { PriceFormSchema, PriceFormValues } from '@/utils/create-course/price'
+import { useForm } from 'react-hook-form'
+import { yupResolver } from '@hookform/resolvers/yup'
 
 const PricingForm = () => {
-  const [coursePrice, setCoursePrice] = useState<number>(480000)
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    getValues,
+    formState: { errors }
+  } = useForm<PriceFormValues>({
+    resolver: yupResolver(PriceFormSchema),
+    defaultValues: {
+      originalPrice: 50000,
+      finalPrice: 50000
+    }
+  })
   const [currency, setCurrency] = useState('VND')
 
   const suggestedPrices = [
@@ -29,7 +45,7 @@ const PricingForm = () => {
     }
   }
 
-  const earnings = calculateEarnings(coursePrice)
+  const earnings = calculateEarnings(getValues('finalPrice'))
 
   return (
     <div className='max-w-6xl space-y-8 mx-auto'>
@@ -45,14 +61,21 @@ const PricingForm = () => {
           <PriceForm
             currency={currency}
             setCurrency={setCurrency}
-            coursePrice={coursePrice}
-            setCoursePrice={setCoursePrice}
+            register={register}
+            errors={errors}
+            setValue={setValue}
           />
-          <SuggestedPrice suggestedPrices={suggestedPrices} coursePrice={coursePrice} setCoursePrice={setCoursePrice} />
+          <SuggestedPrice
+            suggestedPrices={suggestedPrices}
+            coursePrice={getValues('finalPrice')}
+            setCoursePrice={(price: number) => {
+              setValue('finalPrice', price)
+            }}
+          />
         </div>
 
         <div className='space-y-6'>
-          <PreviewPrice earnings={earnings} coursePrice={coursePrice} />
+          <PreviewPrice earnings={earnings} coursePrice={getValues('finalPrice')} />
           <Orientation />
         </div>
       </div>

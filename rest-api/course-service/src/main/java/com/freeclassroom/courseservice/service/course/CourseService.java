@@ -3,6 +3,7 @@ package com.freeclassroom.courseservice.service.course;
 import com.freeclassroom.courseservice.dto.request.common.FileUploadRequest;
 import com.freeclassroom.courseservice.dto.request.course.CreationCourseRequest;
 import com.freeclassroom.courseservice.dto.request.course.GetCourseRequest;
+import com.freeclassroom.courseservice.dto.request.course.UpdatePriceRequest;
 import com.freeclassroom.courseservice.dto.request.course.UpdateTagsRequest;
 import com.freeclassroom.courseservice.dto.response.ApiResponse;
 import com.freeclassroom.courseservice.dto.response.common.CreationResponse;
@@ -283,5 +284,32 @@ public class CourseService implements ICourseService {
 
                     return Flux.just(savingEvent, completedEvent);
                 });
+    }
+
+    @Override
+    public ApiResponse<CreationResponse> updatePrice(UpdatePriceRequest newPrice, String courseId) {
+        if (newPrice.getOriginalPrice() > newPrice.getFinalPrice())
+            throw new CustomExeption(ErrorCode.PRICE_NOT_RIGHT);
+
+        CourseEntity course = courseRepo.findById(courseId)
+                .orElseThrow(() -> new CustomExeption(ErrorCode.COURSE_NOT_FOUND));
+
+        //set price for course
+        course.setOriginalPrice(newPrice.getOriginalPrice());
+        course.setFinalPrice(newPrice.getFinalPrice());
+        course.setProgressStep(course.getProgressStep());
+
+        //save entity
+        courseRepo.save(course);
+
+        return ApiResponse.<CreationResponse>builder()
+                .code(200)
+                .message("Chỉnh sửa giá cho khóa học thành công !")
+                .result(
+                        CreationResponse.builder()
+                                .id(course.getId())
+                                .build()
+                )
+                .build();
     }
 }
