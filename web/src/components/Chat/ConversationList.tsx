@@ -57,81 +57,65 @@ const mockConversations: Conversation[] = [
     lastMessage: "Đã nhận được file rồi",
     time: "Thứ 2",
   },
-  {
-    id: "5",
-    name: "Hoàng Anh E",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=5",
-    lastMessage: "Đã nhận được file rồi",
-    time: "Thứ 2",
-  },
-  {
-    id: "5",
-    name: "Hoàng Anh E",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=5",
-    lastMessage: "Đã nhận được file rồi",
-    time: "Thứ 2",
-  },
-  {
-    id: "5",
-    name: "Hoàng Anh E",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=5",
-    lastMessage: "Đã nhận được file rồi",
-    time: "Thứ 2",
-  },
-  
 ];
 
 export const ConversationList = ({ selectedId, onSelect }: ConversationListProps) => {
   return (
-    <div className="flex h-full min-h-0 flex-col bg-card border-r border-border">
+    <div className="flex h-full min-h-0 flex-col bg-white border-r border-slate-200">
       {/* Header */}
-      <div className="p-4 border-b border-border">
-        <h2 className="text-2xl font-bold mb-4">Tin nhắn</h2>
+      <div className="p-4 border-b border-slate-200 bg-gradient-to-r from-blue-50 to-blue-100 shadow-sm">
+        <h2 className="text-2xl font-bold mb-3 text-blue-600 tracking-wide pl-1">Đoạn chat</h2>
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-blue-400" />
           <Input
-            placeholder="Tìm kiếm tin nhắn..."
-            className="pl-10 bg-white border-2 border-slate-300 rounded-xl"
+            placeholder="Tìm kiếm..."
+            className="pl-9 rounded-full border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 bg-white shadow-sm"
           />
         </div>
       </div>
 
-      {/* Conversations */}
-      <div className="flex-1 min-h-0 overflow-y-auto">
+      {/* Conversation list */}
+      <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent">
         {mockConversations.map((conversation) => (
           <button
             key={conversation.id}
             onClick={() => onSelect(conversation.id)}
             className={cn(
-              "w-full p-4 flex items-center gap-3 hover:bg-blue-400/20 transition-colors text-left relative",
-              selectedId === conversation.id && "bg-blue-400/20"
+              "group w-full flex items-center gap-3 p-4 text-left transition-all duration-150 border-b border-slate-100",
+              "hover:bg-blue-50/60",
+              selectedId === conversation.id && "bg-blue-100/60"
             )}
           >
-            <div className="relative">
-              <Avatar className="h-14 w-14">
+            {/* Avatar */}
+            <div className="relative flex-shrink-0">
+              <Avatar className="h-12 w-12 ring-1 ring-slate-200">
                 <AvatarImage src={conversation.avatar} />
                 <AvatarFallback>{conversation.name[0]}</AvatarFallback>
               </Avatar>
               {conversation.online && (
-                <div className="absolute bottom-0 right-0 h-4 w-4 bg-green-500 rounded-full border-2 border-card" />
+                <div className="absolute bottom-0 right-0 h-3.5 w-3.5 bg-green-500 rounded-full border-2 border-white shadow-[0_0_4px_#22c55e]" />
               )}
             </div>
 
+            {/* Info */}
             <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between mb-1">
-                <h3 className="font-semibold truncate">{conversation.name}</h3>
-                <span className="text-xs text-muted-foreground">{conversation.time}</span>
+              <div className="flex items-center justify-between mb-0.5">
+                <h3 className="font-semibold text-slate-800 truncate">
+                  {conversation.name}
+                </h3>
+                <span className="text-xs text-slate-400 shrink-0 ml-2">
+                  {conversation.time}
+                </span>
               </div>
-              <p className="text-sm text-muted-foreground truncate">
+              <p className="text-sm text-slate-500 truncate">
                 {conversation.lastMessage}
               </p>
             </div>
 
+            {/* Unread badge */}
             {conversation.unread && (
-              <div className="h-5 w-5 rounded-full bg-primary flex items-center justify-center">
-                <span className="text-xs text-primary-foreground font-semibold">
-                  {conversation.unread}
-                </span>
+              <div className="flex items-center justify-center h-5 min-w-[20px] px-1.5 rounded-full bg-blue-500 text-white text-xs font-semibold">
+                {conversation.unread}
               </div>
             )}
           </button>

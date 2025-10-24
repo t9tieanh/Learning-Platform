@@ -1,7 +1,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Phone, Video, MoreVertical, Send, Image, Smile, ChevronLeft } from "lucide-react";
+import { Phone, Video, MoreVertical, Send, Image, Paperclip, ChevronLeft } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
@@ -79,17 +79,16 @@ const mockMessages: Message[] = [
     timestamp: "14:27",
   },
 ];
-
 export const ChatArea = ({ conversationId, onBack }: ChatAreaProps) => {
   const [message, setMessage] = useState("");
 
   if (!conversationId) {
     return (
-      <div className="flex items-center justify-center h-full bg-background">
+      <div className="flex items-center justify-center h-full bg-gray-50">
         <div className="text-center">
           <div className="text-6xl mb-4">💬</div>
           <h3 className="text-xl font-semibold mb-2">Chọn một cuộc trò chuyện</h3>
-          <p className="text-muted-foreground">
+          <p className="text-gray-500">
             Chọn từ danh sách bên trái để bắt đầu nhắn tin
           </p>
         </div>
@@ -99,21 +98,20 @@ export const ChatArea = ({ conversationId, onBack }: ChatAreaProps) => {
 
   const handleSend = () => {
     if (message.trim()) {
-      // Handle send message
       setMessage("");
     }
   };
 
   return (
-    <div className="flex flex-col flex-1 h-full min-h-0 bg-background">
+    <div className="flex flex-col flex-1 h-full min-h-0 bg-gray-50">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-border bg-card">
+      <div className="flex items-center justify-between px-4 py-3 bg-white border-b shadow-sm">
         <div className="flex items-center gap-3">
           {onBack && (
             <Button
               variant="ghost"
               size="icon"
-              className="md:hidden"
+              className="md:hidden text-gray-600 hover:bg-gray-100"
               onClick={onBack}
             >
               <ChevronLeft className="h-5 w-5" />
@@ -124,26 +122,26 @@ export const ChatArea = ({ conversationId, onBack }: ChatAreaProps) => {
             <AvatarFallback>N</AvatarFallback>
           </Avatar>
           <div>
-            <h3 className="font-semibold">Nguyễn Văn A</h3>
-            <p className="text-xs text-muted-foreground">Đang hoạt động</p>
+            <h3 className="font-semibold text-gray-800">Nguyễn Văn A</h3>
+            <p className="text-xs text-green-500">● Đang hoạt động</p>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon">
+          <Button variant="ghost" size="icon" className="text-gray-600 hover:bg-gray-100">
             <Phone className="h-5 w-5" />
           </Button>
-          <Button variant="ghost" size="icon">
-            <Video className="h-5 w-5 " />
+          <Button variant="ghost" size="icon" className="text-gray-600 hover:bg-gray-100">
+            <Video className="h-5 w-5" />
           </Button>
-          <Button variant="ghost" size="icon">
+          <Button variant="ghost" size="icon" className="text-gray-600 hover:bg-gray-100">
             <MoreVertical className="h-5 w-5" />
           </Button>
         </div>
       </div>
 
       {/* Messages */}
-      <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
         {mockMessages.map((msg) => (
           <div
             key={msg.id}
@@ -161,19 +159,19 @@ export const ChatArea = ({ conversationId, onBack }: ChatAreaProps) => {
 
             <div
               className={cn(
-                "max-w-[70%] rounded-2xl px-4 py-2 shadow-sm",
+                "max-w-[70%] px-4 py-2 rounded-2xl shadow-sm transition-colors",
                 msg.sender === "me"
-                  ? "bg-blue-500 text-white"
-                  : "bg-card text-card-foreground border border-border"
+                  ? "bg-blue-500 text-white rounded-br-none"
+                  : "bg-white text-gray-800 border border-gray-200 rounded-bl-none"
               )}
             >
-              <p className="text-sm">{msg.content}</p>
+              <p className="text-sm leading-relaxed">{msg.content}</p>
               <p
                 className={cn(
-                  "text-xs mt-1",
+                  "text-[11px] mt-1 text-right",
                   msg.sender === "me"
-                    ? "text-primary-foreground/70"
-                    : "text-muted-foreground"
+                    ? "text-blue-100"
+                    : "text-gray-400"
                 )}
               >
                 {msg.timestamp}
@@ -184,29 +182,29 @@ export const ChatArea = ({ conversationId, onBack }: ChatAreaProps) => {
       </div>
 
       {/* Input */}
-      <div className="p-4 border-t  bg-card">
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" className="text-primary">
+      <div className="p-4 bg-white border-t shadow-sm">
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="icon" className="text-gray-500 hover:bg-gray-100">
             <Image className="h-5 w-5" />
           </Button>
-          <Button variant="ghost" size="icon" className="text-primary">
-            <Smile className="h-5 w-5" />
+          <Button variant="ghost" size="icon" className="text-gray-500 hover:bg-gray-100">
+            <Paperclip className="h-5 w-5" />
           </Button>
 
           <Input
-            placeholder="Aa"
+            placeholder="Nhập tin nhắn..."
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyPress={(e) => e.key === "Enter" && handleSend()}
-            className="flex-1 border bg-slate-100 rounded-full active:border-2 focus:border-blue-500 active:border-blue-600"
+            className="flex-1 rounded-full bg-gray-100 border-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-0 px-4 py-2 text-sm placeholder-gray-500"
           />
 
           <Button
-            size="icon"   
+            size="icon"
             onClick={handleSend}
-            className="rounded-full bg-blue-500"
+            className="rounded-full bg-blue-500 hover:bg-blue-600 transition"
           >
-            <Send className="h-5 w-5" />
+            <Send className="h-5 w-5 text-white" />
           </Button>
         </div>
       </div>
