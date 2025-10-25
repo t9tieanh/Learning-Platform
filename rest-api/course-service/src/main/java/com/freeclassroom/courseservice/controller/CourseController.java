@@ -3,14 +3,13 @@ package com.freeclassroom.courseservice.controller;
 import com.freeclassroom.courseservice.dto.request.common.FileUploadRequest;
 import com.freeclassroom.courseservice.dto.request.course.CreationCourseRequest;
 import com.freeclassroom.courseservice.dto.request.course.InstructorRequest;
+import com.freeclassroom.courseservice.dto.request.course.UpdatePriceRequest;
 import com.freeclassroom.courseservice.dto.request.course.UpdateTagsRequest;
 import com.freeclassroom.courseservice.dto.response.ApiResponse;
 import com.freeclassroom.courseservice.dto.response.category.TagResponse;
 import com.freeclassroom.courseservice.dto.response.common.CreationResponse;
 import com.freeclassroom.courseservice.dto.response.common.FileUploadResponse;
-import com.freeclassroom.courseservice.dto.response.course.CourseInfoResponse;
-import com.freeclassroom.courseservice.dto.response.course.CourseResponse;
-import com.freeclassroom.courseservice.dto.response.course.PageResponse;
+import com.freeclassroom.courseservice.dto.response.course.*;
 import com.freeclassroom.courseservice.service.course.ICourseService;
 import com.freeclassroom.courseservice.service.tag.ITagService;
 import lombok.AccessLevel;
@@ -35,6 +34,7 @@ public class CourseController {
     ITagService tagService;
 
     @GetMapping("/{id}/info")
+    @PreAuthorize("@courseService.isTeacherOfCourse(#id, authentication.name)")
     ApiResponse<CourseInfoResponse> getCourseInfo(@PathVariable("id") String id) {
         return courseService.getCourseInfo(id);
     }
@@ -46,6 +46,7 @@ public class CourseController {
 
 
     @GetMapping("/details/{id}")
+    @PreAuthorize("@courseService.isTeacherOfCourse(#id, authentication.name)")
     ApiResponse<CourseResponse> getCourse(@PathVariable String id) {
         return courseService.getCourse(id);
     }
@@ -79,10 +80,41 @@ public class CourseController {
     }
 
     @PreAuthorize("@courseService.isTeacherOfCourse(#id, authentication.name)")
+    @PatchMapping("{id}/price")
+    ApiResponse<CreationResponse> updatePrice(
+            @PathVariable("id") String id,
+            @RequestBody UpdatePriceRequest newPrice
+    ) {
+        return courseService.updatePrice(newPrice, id);
+    }
+
+    @PreAuthorize("@courseService.isTeacherOfCourse(#id, authentication.name)")
+    @GetMapping("{id}/price")
+    ApiResponse<PriceCourseResponse> getPrice(
+            @PathVariable("id") String id
+    ) {
+        return courseService.getPrice(id);
+    }
+
+    @PreAuthorize("@courseService.isTeacherOfCourse(#id, authentication.name)")
+    @GetMapping("{id}/overview")
+    ApiResponse<CourseOverviewResponse> getCourseOverview(
+            @PathVariable("id") String id
+    ) {
+        return courseService.getOverview(id);
+    }
+
+    @PreAuthorize("@courseService.isTeacherOfCourse(#id, authentication.name)")
     @PostMapping("{id}/video-introduction")
     Flux<ServerSentEvent<String>> updateVideoIntro(@RequestPart(value = "file") MultipartFile video,
         @PathVariable("id") String id
     ) throws IOException {
         return courseService.updateVideoIntroduce(video, id);
+    }
+
+    @PreAuthorize("@courseService.isTeacherOfCourse(#id, authentication.name)")
+    @PostMapping("{id}/request-approval")
+    ApiResponse<CreationResponse> requestApproval(@PathVariable("id") String id) {
+        return courseService.requestApproval(id);
     }
 }

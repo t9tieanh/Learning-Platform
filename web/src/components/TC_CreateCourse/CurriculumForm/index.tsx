@@ -220,14 +220,6 @@ const CurriculumForm: React.FC<{ id: string }> = ({ id }: { id: string }) => {
           </Button>
         </CardContent>
       </Card>
-
-      <div className='flex justify-between pt-6 border-t'>
-        <Button variant='outline'>Quay lại</Button>
-        <div className='space-x-3'>
-          <Button variant='outline'>Lưu nháp</Button>
-          <Button className='bg-primary hover:bg-primary/90'>Tiếp tục</Button>
-        </div>
-      </div>
     </div>
   )
 }

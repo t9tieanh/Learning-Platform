@@ -27,4 +27,23 @@ public interface CourseRepository extends JpaRepository<CourseEntity, String> {
     @EntityGraph(attributePaths = {"enrollments"})
     @Query("select c from CourseEntity c where c.id = :id")
     Optional<CourseEntity> findByIdWithEnrollments(@Param("id") String id);
+
+    @Query("""
+        SELECT COALESCE(SUM(l.duration), 0)
+        FROM CourseEntity c
+        JOIN c.chapters ch
+        JOIN ch.lessons l
+        WHERE c.id = :courseId
+          AND l.type = com.freeclassroom.courseservice.enums.entity.EnumLessonType.video and l.deleted = false
+    """)
+    Double getTotalVideoDurationByCourseId(@Param("courseId") String courseId);
+
+    @Query("""
+        SELECT COUNT(l)
+        FROM CourseEntity c
+        JOIN c.chapters ch
+        JOIN ch.lessons l
+        WHERE c.id = :courseId and l.deleted = false
+    """)
+    Long countLessonsByCourseId(@Param("courseId") String courseId);
 }

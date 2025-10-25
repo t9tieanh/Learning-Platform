@@ -13,7 +13,6 @@ interface ReviewsListProps {
 }
 
 export function ReviewsList({ reviews, reviewsPerPage = 5, courseId }: ReviewsListProps) {
-  // Local state cho chế độ API load-more
   const [items, setItems] = useState<Review[]>(reviews)
   const [cursor, setCursor] = useState<string | null>(null)
   const [hasMore, setHasMore] = useState(false)
@@ -21,8 +20,7 @@ export function ReviewsList({ reviews, reviewsPerPage = 5, courseId }: ReviewsLi
   const [loadingMore, setLoadingMore] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const useApiMode = !!courseId // nếu có courseId thì dùng API; nếu không dùng mảng reviews truyền vào
-
+  const useApiMode = !!courseId
   const mapFeedbackToReview = (f: FeedbackItem): Review => ({
     id: String(f._id),
     reviewerName: f.userName || 'User',
@@ -45,7 +43,7 @@ export function ReviewsList({ reviews, reviewsPerPage = 5, courseId }: ReviewsLi
         setHasMore(res.hasMore)
         setCursor(res.nextCursor)
       } catch (e: any) {
-        if (!cancelled) setError(e.message || 'Không tải được đánh giá')
+        if (!cancelled) setError('Chưa tải được đánh giá')
       } finally {
         if (!cancelled) setInitialLoaded(true)
       }
@@ -58,7 +56,6 @@ export function ReviewsList({ reviews, reviewsPerPage = 5, courseId }: ReviewsLi
 
   const handleLoadMore = async () => {
     if (!useApiMode) {
-      // Fallback chế độ local (không dùng API) -> giữ logic cũ tăng visibleCount
       setItems((prev) => [...prev, ...reviews.slice(prev.length, prev.length + reviewsPerPage)])
       return
     }
@@ -75,7 +72,7 @@ export function ReviewsList({ reviews, reviewsPerPage = 5, courseId }: ReviewsLi
       setHasMore(res.hasMore)
       setCursor(res.nextCursor)
     } catch (e: any) {
-      setError(e.message || 'Không tải thêm được đánh giá')
+      setError('Chưa tải được đánh giá')
     } finally {
       setLoadingMore(false)
     }
@@ -98,7 +95,7 @@ export function ReviewsList({ reviews, reviewsPerPage = 5, courseId }: ReviewsLi
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.45 }}
-      className='space-y-6'
+      className='space-y-6 bg-white p-5 rounded-lg shadow-md'
     >
       <h2 className='text-2xl font-bold'>Đánh giá từ học viên</h2>
 

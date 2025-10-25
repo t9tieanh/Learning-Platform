@@ -1,14 +1,33 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import TitleComponent from '@/components/TC_CreateCourse/common/Title'
 import PriceForm from '@/components/TC_CreateCourse/PricingForm/PriceForm'
 import SuggestedPrice from '@/components/TC_CreateCourse/PricingForm/SuggestedPrice'
 import Orientation from '@/components/TC_CreateCourse/PricingForm/Orientation'
 import PreviewPrice from '@/components/TC_CreateCourse/PricingForm/PreviewPrice'
+import { PriceFormSchema, PriceFormValues } from '@/utils/create-course/price'
+import { useForm } from 'react-hook-form'
+import { yupResolver } from '@hookform/resolvers/yup'
+import courseService from '@/services/course/course.service'
 
-const PricingForm = () => {
-  const [coursePrice, setCoursePrice] = useState<number>(480000)
+const PricingForm = ({ id }: { id: string }) => {
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    getValues,
+    formState: { errors }
+  } = useForm<PriceFormValues>({
+    resolver: yupResolver(PriceFormSchema),
+    defaultValues: {
+      originalPrice: 50000,
+      finalPrice: 50000
+    }
+  })
   const [currency, setCurrency] = useState('VND')
+  const [yourIncome, setYourIncome] = useState(0)
+  const [platformFee, setPlatformFee] = useState(0)
 
   const suggestedPrices = [
     { price: 480000, tier: 'Cơ bản', description: 'Phù hợp cho khóa học ngắn' },
@@ -17,19 +36,20 @@ const PricingForm = () => {
     { price: 4_800_000, tier: 'Chuyên nghiệp', description: 'Cho nội dung cấp chuyên gia' }
   ]
 
-  const calculateEarnings = (price: number) => {
-    if (isNaN(price)) return { instructor: '0.00', udemy: '0.00' }
-
-    const instructorShare = price * 0.63
-    const udemyShare = price * 0.37
-
-    return {
-      instructor: instructorShare.toFixed(2),
-      udemy: udemyShare.toFixed(2)
+  const getPrice = async () => {
+    const response = await courseService.getPrice(id)
+    if (response && response.code === 200 && response.result) {
+      const { originalPrice, finalPrice, yourIncome, platformFee } = response.result
+      setValue('originalPrice', originalPrice)
+      setValue('finalPrice', finalPrice)
+      setYourIncome(yourIncome)
+      setPlatformFee(platformFee)
     }
   }
 
-  const earnings = calculateEarnings(coursePrice)
+  useEffect(() => {
+    getPrice()
+  }, [id])
 
   return (
     <div className='max-w-6xl space-y-8 mx-auto'>
@@ -45,24 +65,24 @@ const PricingForm = () => {
           <PriceForm
             currency={currency}
             setCurrency={setCurrency}
-            coursePrice={coursePrice}
-            setCoursePrice={setCoursePrice}
+            register={register}
+            errors={errors}
+            setValue={setValue}
+            courseId={id}
+            handleSubmit={handleSubmit}
           />
-          <SuggestedPrice suggestedPrices={suggestedPrices} coursePrice={coursePrice} setCoursePrice={setCoursePrice} />
+          <SuggestedPrice
+            suggestedPrices={suggestedPrices}
+            coursePrice={getValues('finalPrice')}
+            setCoursePrice={(price: number) => {
+              setValue('finalPrice', price)
+            }}
+          />
         </div>
 
         <div className='space-y-6'>
-          <PreviewPrice earnings={earnings} coursePrice={coursePrice} />
+          <PreviewPrice coursePrice={getValues('finalPrice')} yourIncome={yourIncome} platformFee={platformFee} />
           <Orientation />
-        </div>
-      </div>
-
-      {/* Nút hành động */}
-      <div className='flex justify-between pt-6 border-t'>
-        <Button variant='outline'>Quay lại</Button>
-        <div className='space-x-3'>
-          <Button variant='outline'>Lưu bản nháp</Button>
-          <Button className='bg-primary hover:bg-primary/90'>Tiếp tục</Button>
         </div>
       </div>
     </div>

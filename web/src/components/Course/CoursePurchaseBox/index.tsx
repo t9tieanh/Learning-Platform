@@ -24,15 +24,6 @@ const CoursePurchaseBox = () => {
               </div>
             </div>
 
-            {/* Countdown Timer */}
-            <div className='bg-course-urgent/5 border border-course-urgent/20 rounded-xl p-3 text-center bg-red-100 border-red-300 text-red-600'>
-              <div className='flex items-center justify-center gap-2 text-course-urgent mb-1'>
-                <FaClock className='w-4 h-4' />
-                <span className='text-sm font-medium'>Thời gian ưu đãi còn lại</span>
-              </div>
-              <div className='text-lg font-bold text-course-urgent'>2 ngày 3 giờ</div>
-            </div>
-
             {/* Action Buttons */}
             <div className='space-y-3 pt-2'>
               <Button size='lg' className='w-full h-12 text-base'>

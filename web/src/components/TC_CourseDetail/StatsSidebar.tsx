@@ -1,6 +1,5 @@
 import { motion } from 'framer-motion'
-import { DollarSign, Users, Star, Share2, Eye, Globe } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { DollarSign, Users, Star } from 'lucide-react'
 import { Separator } from '@/components/ui/separator'
 
 interface StatsSidebarProps {
@@ -8,20 +7,9 @@ interface StatsSidebarProps {
   studentsCount: number
   rating: number
   status: 'published' | 'draft'
-  onPublish: () => void
-  onUnpublish: () => void
-  onShare: () => void
 }
 
-export function StatsSidebar({
-  revenue,
-  studentsCount,
-  rating,
-  status,
-  onPublish,
-  onUnpublish,
-  onShare
-}: StatsSidebarProps) {
+export function StatsSidebar({ revenue, studentsCount, rating }: StatsSidebarProps) {
   return (
     <motion.div
       initial={{ opacity: 0, x: 20 }}
@@ -29,8 +17,7 @@ export function StatsSidebar({
       transition={{ delay: 0.2 }}
       className='space-y-6 sticky top-6'
     >
-      {/* Stats Card */}
-      <div className='rounded-xl bg-gradient-card p-6 shadow-md'>
+      <div className='rounded-xl bg-gradient-card p-6 shadow-md bg-white'>
         <h3 className='text-lg font-semibold mb-4'>Thống kê nhanh</h3>
 
         <div className='space-y-4'>
@@ -74,28 +61,6 @@ export function StatsSidebar({
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Actions Card */}
-      <div className='rounded-xl bg-card p-6 shadow-md space-y-3'>
-        <h3 className='text-lg font-semibold mb-4'>Hành động</h3>
-
-        {status === 'published' ? (
-          <Button onClick={onUnpublish} variant='outline' className='w-full gap-2'>
-            <Globe className='h-4 w-4' />
-            Gỡ xuất bản
-          </Button>
-        ) : (
-          <Button onClick={onPublish} className='w-full gap-2 shadow-primary'>
-            <Globe className='h-4 w-4' />
-            Xuất bản khóa học
-          </Button>
-        )}
-
-        <Button onClick={onShare} variant='outline' className='w-full gap-2'>
-          <Share2 className='h-4 w-4' />
-          Chia sẻ
-        </Button>
       </div>
     </motion.div>
   )

@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { ArrowLeft, Plus, Loader2 } from 'lucide-react'
-// import { mockCourse } from '@/lib/mockCourse' // ĐÃ THAY BẰNG DỮ LIỆU THẬT
 import { Lesson } from '@/types/course.type'
 import { CourseHero } from '@/components/TC_CourseDetail/CourseHero'
 import { CourseSummary } from '@/components/TC_CourseDetail/CourseSummary'
@@ -18,8 +17,6 @@ import { useParams, useNavigate } from 'react-router-dom'
 import courseService from '@/services/course.service'
 import { ApiResponse } from '@/types/response.type'
 
-// Kiểu tạm thời cho dữ liệu trả về từ API backend (CourseResponse)
-// Bạn có thể tạo file riêng nếu backend ổn định
 interface CourseResponseDTO {
   id: string
   title: string
@@ -29,7 +26,6 @@ interface CourseResponseDTO {
   status: string
   price?: number
   createdAt?: string
-  // tuỳ backend: tags, sections, lessons...
   tagNames?: string[]
   categories?: string[]
   chapters?: Array<{
@@ -88,18 +84,6 @@ export default function CourseDetailPage() {
 
   const handleEdit = () => {
     navigate('/teacher/course/' + id)
-  }
-
-  const handlePublish = () => {
-    toast.success('Khóa học đã được xuất bản!')
-  }
-
-  const handleUnpublish = () => {
-    toast.info('Khóa học đã được gỡ xuất bản')
-  }
-
-  const handleShare = () => {
-    toast.success('Link chia sẻ đã được sao chép!')
   }
 
   const handleAddSection = () => {
@@ -182,7 +166,7 @@ export default function CourseDetailPage() {
   const goBack = () => navigate(-1)
 
   return (
-    <div className='min-h-screen bg-background'>
+    <div className='min-h-screen bg-white-200'>
       {/* Header */}
       <header className='sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60'>
         <div className='container mx-auto px-4 py-4'>
@@ -277,9 +261,6 @@ export default function CourseDetailPage() {
                 studentsCount={course.students || 0}
                 rating={course.rating || 5}
                 status={course.status === 'published' ? 'published' : 'draft'}
-                onPublish={handlePublish}
-                onUnpublish={handleUnpublish}
-                onShare={handleShare}
               />
             </aside>
           </div>
@@ -312,19 +293,6 @@ export default function CourseDetailPage() {
           videoUrl={currentVideo.url}
           title={currentVideo.title}
         />
-      )}
-
-      {/* Mobile Sticky CTA */}
-      {course && !loading && !error && (
-        <div className='fixed bottom-0 left-0 right-0 z-40 border-t bg-background/95 backdrop-blur p-4 lg:hidden'>
-          <Button
-            onClick={course.status === 'published' ? handleUnpublish : handlePublish}
-            className='w-full shadow-primary'
-            size='lg'
-          >
-            {course.status === 'published' ? 'Gỡ xuất bản' : 'Xuất bản khóa học'}
-          </Button>
-        </div>
       )}
     </div>
   )
