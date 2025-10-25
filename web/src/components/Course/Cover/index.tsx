@@ -16,7 +16,7 @@ interface CoverProps {
 const Cover = ({ video, title, shortDescription, teacher }: CoverProps) => {
   const [isOpen, setIsOpen] = useState(false)
   return (
-    <div className='cover-container min-h-96 bg-blue-300 flex flex-col md:flex-row items-center justify-center mx-auto w-full px-4 py-8'>
+    <div className='cover-container min-h-96 bg-[#0C356A] flex flex-col md:flex-row items-center justify-center mx-auto w-full py-16'>
       <div
         className='video-introduction relative p-0 md:p-10 mb-6 md:mb-0 cursor-pointer'
         role='button'
@@ -39,7 +39,6 @@ const Cover = ({ video, title, shortDescription, teacher }: CoverProps) => {
             className='flex items-center gap-2 bg-white/80 text-slate-700 px-4 py-2 rounded-full font-semibold shadow-md hover:bg-white transition transition-transform duration-300 hover:scale-105'
           >
             <PlayCircle className='h-5 w-5' />
-            Play
           </button>
         </div>
       </div>
