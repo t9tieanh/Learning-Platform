@@ -69,7 +69,7 @@ export const ConversationList = ({ selectedId, onSelect }: ConversationListProps
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-blue-400" />
           <Input
             placeholder="Tìm kiếm..."
-            className="pl-9 rounded-full border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 bg-white shadow-sm"
+            className="pl-9 !rounded-lg !border !border-slate-300 focus:!border-blue-500 focus:!ring-1 focus:!ring-blue-200 bg-white shadow-sm"
           />
         </div>
       </div>
