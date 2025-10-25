@@ -1,9 +1,6 @@
-import { BiSolidDetail } from 'react-icons/bi'
 import Sections from './detail/Sections'
 import './style.scss'
-import { FaSquarePollHorizontal } from 'react-icons/fa6'
 import Requirement from './detail/Requirements'
-import { FaUserGraduate } from 'react-icons/fa'
 import TeacherInfo from './detail/TeacherInfo'
 
 const CourseContent = () => {

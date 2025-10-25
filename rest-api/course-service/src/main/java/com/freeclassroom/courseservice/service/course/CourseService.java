@@ -321,17 +321,26 @@ public class CourseService implements ICourseService {
         CourseEntity course = courseRepo.findById(courseId)
                 .orElseThrow(() -> new CustomExeption(ErrorCode.COURSE_NOT_FOUND));
 
+        Double originalPrice = 0d;
+        Double finalPrice = 0d;
+
+        if (course.getFinalPrice() != null && course.getOriginalPrice() != null) {
+            originalPrice = course.getOriginalPrice();
+            finalPrice = course.getFinalPrice();
+        }
+
+
         return ApiResponse.<PriceCourseResponse>builder()
                 .code(200)
                 .message("Lấy thông tin giá khóa học thành công !")
                 .result(
                         PriceCourseResponse.builder()
                                 .id(course.getId())
-                                .originalPrice(course.getOriginalPrice())
-                                .finalPrice(course.getFinalPrice())
+                                .originalPrice(originalPrice)
+                                .finalPrice(finalPrice)
                                 .platformFee(PLATFORM_FEES)
                                 // ammount instructor receive
-                                .yourIncome(course.getFinalPrice() * (1 - PLATFORM_FEES))
+                                .yourIncome(finalPrice * (1 - PLATFORM_FEES))
                                 .build()
                 )
                 .build();
