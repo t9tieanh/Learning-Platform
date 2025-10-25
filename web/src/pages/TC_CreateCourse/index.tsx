@@ -7,6 +7,8 @@ import SetupForm from '@/components/TC_CreateCourse/SetupForm/SetupForm'
 import { useParams } from 'react-router-dom'
 import CourseProgressStep from '@/types/courseProgressStep'
 import courseService from '@/services/course/course.service'
+import CustomButton from '@/components/common/Button'
+import { ArrowLeftToLine, SendHorizontal } from 'lucide-react'
 
 const TC_CreateCourse = () => {
   const [activeSection, setActiveSection] = useState<CourseProgressStep>(CourseProgressStep.INTRO)
@@ -29,7 +31,7 @@ const TC_CreateCourse = () => {
     category: '',
     requirements: [],
     thumbnailUrl: '',
-    introductoryVideo: '',
+    introductoryVideo: ''
   })
 
   const { id } = useParams<{ id: string }>()
@@ -57,7 +59,7 @@ const TC_CreateCourse = () => {
       }
     }
     getCourseInfo()
-  }, [])
+  }, [id])
 
   const renderContent = () => {
     switch (activeSection) {
@@ -72,11 +74,51 @@ const TC_CreateCourse = () => {
     }
   }
 
+  // Navigation order for the course creation steps
+  const stepOrder: CourseProgressStep[] = [
+    CourseProgressStep.INTRO,
+    CourseProgressStep.CURRICULUM,
+    CourseProgressStep.PRICING,
+    CourseProgressStep.SETTINGS
+  ]
+
+  const goNext = () => {
+    const idx = stepOrder.indexOf(activeSection)
+    if (idx === -1) return
+    const next = stepOrder[idx + 1]
+    if (next) setActiveSection(next)
+  }
+
+  const goBack = () => {
+    const idx = stepOrder.indexOf(activeSection)
+    if (idx === -1) return
+    const prev = stepOrder[idx - 1]
+    if (prev) setActiveSection(prev)
+  }
+
   return (
     <div className='h-screen bg-background'>
       <div className='flex h-screen'>
         <CourseSidebar activeSection={activeSection} onSectionChange={setActiveSection} />
-        <main className='flex-1 p-8 min-h-screen overflow-auto'>{renderContent()}</main>
+        <main className='flex-1 p-8 min-h-screen overflow-auto'>
+          {renderContent()}
+          <div className='max-w-6xl mx-auto flex justify-between mt-5'>
+            <CustomButton
+              label='Quay lại'
+              className='bg-gray-100 text-black hover:bg-gray-200'
+              icon={<ArrowLeftToLine />}
+              onClick={goBack}
+              disabled={activeSection === stepOrder[0]}
+            />
+            <CustomButton
+              label='Tiếp tục'
+              className='bg-blue-500 text-white hover:bg-blue-600'
+              icon={<SendHorizontal />}
+              onClick={goNext}
+              disabled={activeSection === stepOrder[stepOrder.length - 1]}
+            />
+          </div>
+        </main>
       </div>
     </div>
   )

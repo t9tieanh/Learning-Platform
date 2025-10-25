@@ -48,8 +48,6 @@ const sidebarItems: SidebarItem[] = [
 ]
 
 const CourseSidebar: FC<CourseSidebarProps> = ({ activeSection = CourseProgressStep.INTRO, onSectionChange }) => {
-  const completedCount = sidebarItems.filter((i) => i.completed).length
-
   return (
     <aside
       className='md:w-80 w-full bg-gray-950 border-r border-gray-800 overflow-y-auto text-white'

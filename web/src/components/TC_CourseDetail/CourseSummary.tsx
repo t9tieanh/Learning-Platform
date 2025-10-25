@@ -11,14 +11,7 @@ interface CourseSummaryProps {
   tags?: string[]
 }
 
-export function CourseSummary({
-  shortDescription,
-  studentsCount,
-  rating,
-  reviewsCount,
-  category,
-  tags = []
-}: CourseSummaryProps) {
+export function CourseSummary({ shortDescription, category, tags = [] }: CourseSummaryProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}

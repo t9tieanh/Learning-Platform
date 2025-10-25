@@ -1,12 +1,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { CheckCircle, CheckSquare } from 'lucide-react'
+import { CheckCircle, CheckSquare, Send } from 'lucide-react'
 import TitleComponent from '@/components/TC_CreateCourse/common/Title'
 import { useEffect, useState } from 'react'
 import courseService from '@/services/course/course.service'
 import { toast } from 'sonner'
 import CustomButton from '@/components/common/Button'
-import { BsSendCheckFill } from "react-icons/bs";
-import { Send } from 'lucide-react';
+import { BsSendCheckFill } from 'react-icons/bs'
 import useLoading from '@/hooks/useLoading.hook'
 
 const SetupForm = ({ id }: { id: string }) => {
@@ -90,7 +89,9 @@ const SetupForm = ({ id }: { id: string }) => {
 
           <Card className='border border-blue-200 shadow-sm bg-blue-50'>
             <CardHeader className='bg-blue-200/40 rounded-t-lg'>
-              <CardTitle className='text-lg font-medium text-blue-900 flex gap-1 items-center'><Send className='h-5 w-5' /> Sẵn sàng xuất bản?</CardTitle>
+              <CardTitle className='text-lg font-medium text-blue-900 flex gap-1 items-center'>
+                <Send className='h-5 w-5' /> Sẵn sàng xuất bản?
+              </CardTitle>
             </CardHeader>
 
             <CardContent className='space-y-4'>

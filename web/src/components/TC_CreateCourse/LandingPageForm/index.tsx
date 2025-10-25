@@ -182,13 +182,6 @@ const LandingPageForm = ({
           <PreviewComponent {...formValues} />
         </div>
       </div>
-
-      {/* Action Buttons */}
-      <div className='flex justify-end pt-6 border-t border-border/60'>
-        <div className='space-x-3'>
-          <CustomButton className='bg-primary/90 hover:bg-primary' label='Tiếp tục' icon={<Send className='mr-2' />} />
-        </div>
-      </div>
     </div>
   )
 }
