@@ -16,10 +16,14 @@ import com.freeclassroom.courseservice.service.tag.ITagService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import reactor.core.publisher.Flux;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -93,5 +97,13 @@ public class CourseController {
             @ModelAttribute FileUploadRequest request
     ) {
         return courseService.updateAvatar(request, id);
+    }
+
+    @PreAuthorize("@courseService.isTeacherOfCourse(#id, authentication.name)")
+    @PostMapping("{id}/video-introduction")
+    Flux<ServerSentEvent<String>> updateVideoIntro(@RequestPart(value = "file") MultipartFile video,
+        @PathVariable("id") String id
+    ) throws IOException {
+        return courseService.updateVideoIntroduce(video, id);
     }
 }

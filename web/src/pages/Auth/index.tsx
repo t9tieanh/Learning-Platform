@@ -13,10 +13,14 @@ interface SlidingLoginSignupProps {
 }
 
 const AuthPage: React.FC<SlidingLoginSignupProps> = ({ isSignUpMode, setIsSignUpMode }) => {
+  // handle redirect oauth2 google
   const { loading, startLoading, stopLoading } = useLoading()
   const navigator = useNavigate()
+
   const [searchParams] = useSearchParams()
   const code = searchParams.get('code')
+
+  // Get state and actions
   const { data, setData } = useAuthStore()
 
   useEffect(() => {
@@ -32,6 +36,7 @@ const AuthPage: React.FC<SlidingLoginSignupProps> = ({ isSignUpMode, setIsSignUp
       const response = await userService.loginWithGoogle(authorizationCode)
 
       if (response && response.result && response.code === 200) {
+        // save to localstorage
         setData(response.result)
         toast.success('Đăng nhập thành công!')
         navigator('/')
@@ -45,6 +50,7 @@ const AuthPage: React.FC<SlidingLoginSignupProps> = ({ isSignUpMode, setIsSignUp
     }
   }
 
+  // check if already logged in
   useEffect(() => {
     if (code) {
       exchangeTokenForOauth2(code)

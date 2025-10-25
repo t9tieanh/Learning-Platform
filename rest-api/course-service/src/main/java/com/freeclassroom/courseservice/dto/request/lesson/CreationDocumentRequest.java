@@ -1,24 +1,19 @@
-package com.freeclassroom.courseservice.dto.response.course;
-
+package com.freeclassroom.courseservice.dto.request.lesson;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
-
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class LessonResponse {
-    String id;
+public class CreationDocumentRequest {
+    String chapterId;
     String title;
     String content;
-    Long duration;
     Long position;
     Boolean isPublic;
-
-    List<ResourceResponse> resources;
+    MultipartFile file;
 }

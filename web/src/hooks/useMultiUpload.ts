@@ -10,18 +10,19 @@ export type MultiUploadItem = {
   fileName: string
   progress: number // 0..100
   message: string
+  title?: string
   status: UploadStatus
 }
 
 interface MultiUploadOptions {
   accessToken?: string
-  uri: string // endpoint path e.g. 'learning/lessons/video'
   baseUrl?: string // optional base API url, defaults to http://localhost:8888/api/v1
+  callback?: () => Promise<void>
 }
 
 interface MultiUploadResult {
   uploads: MultiUploadItem[]
-  startUpload: (file: File, fd: FormData) => string // returns upload id
+  startUpload: (file: File, fd: FormData, titlePost: string, uri: string) => string // returns upload id
   cancelUpload: (id: string) => void
   removeUpload: (id: string) => void
   clearAll: () => void
@@ -35,8 +36,8 @@ interface MultiUploadResult {
  */
 export function useMultiUpload({
   accessToken,
-  uri,
-  baseUrl = 'http://localhost:8888/api/v1'
+  baseUrl = 'http://localhost:8888/api/v1',
+  callback
 }: MultiUploadOptions): MultiUploadResult {
   const [uploads, setUploads] = useState<MultiUploadItem[]>([])
   const controllersRef = useRef<Record<string, AbortController | null>>({})
@@ -52,7 +53,8 @@ export function useMultiUpload({
           fileName: patch.fileName ?? 'unknown',
           progress: patch.progress ?? 0,
           message: patch.message ?? '',
-          status: patch.status ?? 'idle'
+          status: patch.status ?? 'idle',
+          title: patch.title ?? ''
         }
         return [item, ...prev]
       }
@@ -113,9 +115,16 @@ export function useMultiUpload({
   )
 
   const startUpload = useCallback(
-    (file: File, fd: FormData) => {
+    (file: File, fd: FormData, titlePost: string, uri: string) => {
       const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
-      upsert(id, { id, fileName: file.name, progress: 0, message: '', status: 'uploading' })
+      upsert(id, {
+        id,
+        fileName: file.name,
+        progress: 0,
+        message: 'Tài liệu đang được tải lên...',
+        status: 'uploading',
+        title: titlePost
+      })
 
       const controller = new AbortController()
       controllersRef.current[id] = controller
@@ -124,7 +133,7 @@ export function useMultiUpload({
 
       ;(async () => {
         // const fd = new FormData()
-        fd.append('video', file)
+        fd.append('file', file)
         // fd.append('lesson', new Blob([JSON.stringify(meta)], { type: 'application/json' }))
 
         try {
@@ -139,7 +148,10 @@ export function useMultiUpload({
           })
 
           if (!resp.ok || !resp.body) {
-            upsert(id, { status: 'error', message: `Upload failed: ${resp.statusText || resp.status}` })
+            upsert(id, {
+              status: 'error',
+              message: `Đã có lỗi trong quá trình tải lên: ${resp.statusText || resp.status}`
+            })
             return
           }
 
@@ -170,7 +182,7 @@ export function useMultiUpload({
                   const parsed = JSON.parse(jsonStr)
                   if (ev === 'uploading' && typeof parsed.progress === 'number') {
                     const p = Math.round(parsed.progress * 100)
-                    upsert(id, { progress: p })
+                    upsert(id, { progress: p, message: `Tài liệu đang được tải lên...(${p}%)` })
                   } else if (ev === 'saving_db') {
                     upsert(id, { message: parsed.message ?? '' })
                   } else if (ev === 'completed') {
@@ -193,7 +205,7 @@ export function useMultiUpload({
             upsert(id, { status: 'cancelled', message: 'Cancelled' })
           } else {
             console.error(err)
-            upsert(id, { status: 'error', message: err?.message ?? 'Upload error' })
+            upsert(id, { status: 'error', message: err?.message ?? 'Có lỗi trong quá trình upload' })
           }
         } finally {
           controllersRef.current[id] = null
@@ -204,12 +216,20 @@ export function useMultiUpload({
             } catch {}
             readersRef.current[id] = null
           }
+          // call callback after upload finished
+          if (callback && typeof callback === 'function') {
+            try {
+              await callback()
+            } catch (e) {
+              console.error('Callback error after upload:', e)
+            }
+          }
         }
       })()
 
       return id
     },
-    [accessToken, baseUrl, uri, upsert]
+    [accessToken, baseUrl, upsert]
   )
 
   useEffect(() => {

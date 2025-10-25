@@ -7,7 +7,7 @@ interface UploadOptions {
 }
 
 interface UploadResult {
-  upload: (formData: FormData) => Promise<void>
+  upload: (formData: FormData, callback?: () => Promise<void>) => Promise<void>
   progress: number
   message: string
   isUploading: boolean
@@ -19,9 +19,9 @@ export function useUpload({ accessToken, uri }: UploadOptions): UploadResult {
   const [isUploading, setIsUploading] = useState(false)
 
   const upload = useCallback(
-    async (formData: FormData) => {
-      if (!formData.get('video')) {
-        throw new Error('Vui lòng chọn file video trước khi lưu bài giảng')
+    async (formData: FormData, callback?: () => Promise<void>) => {
+      if (!formData.get('file')) {
+        throw new Error('Vui lòng chọn file trước khi lưu bài giảng')
       }
 
       setProgress(0)
@@ -82,6 +82,8 @@ export function useUpload({ accessToken, uri }: UploadOptions): UploadResult {
 
           buffer = events[events.length - 1]
         }
+        // finish upload -> call callback
+        if (callback) await callback()
       } catch (err) {
         console.error(err)
         setMessage('Lỗi khi upload')

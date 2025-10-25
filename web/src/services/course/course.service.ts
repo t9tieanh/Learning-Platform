@@ -110,6 +110,8 @@ class CourseService {
       outcomes: string[]
       requirements: string[]
       category: string
+      introductoryVideo: string
+      progressStep: string
     }>
   > {
     const response = await axiosClient.axiosInstance.get(`learning/courses/${courseId}/info`)

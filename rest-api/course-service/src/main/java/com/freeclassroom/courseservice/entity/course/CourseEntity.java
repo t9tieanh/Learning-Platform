@@ -27,10 +27,12 @@ public class CourseEntity extends AbstractEntity {
     String shortDescription;
     String longDescription;
     String thumbnailUrl;
+    Double rating;
+
+    String introductoryVideo;
     String language;
     Double originalPrice;
     Double finalPrice;
-    Double rating;
 
     @Enumerated(EnumType.STRING)
     EnumCourseStatus status;

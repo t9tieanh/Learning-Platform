@@ -11,7 +11,11 @@ import com.freeclassroom.courseservice.dto.response.course.CourseInfoResponse;
 import com.freeclassroom.courseservice.dto.response.course.CourseResponse;
 import com.freeclassroom.courseservice.dto.response.course.PageResponse;
 import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.http.codec.ServerSentEvent;
+import org.springframework.web.multipart.MultipartFile;
+import reactor.core.publisher.Flux;
 
+import java.io.IOException;
 import java.util.List;
 
 public interface ICourseService {
@@ -27,4 +31,5 @@ public interface ICourseService {
     ApiResponse<List<CourseResponse>> getTrendyCourse(int limit);
     ApiResponse<PageResponse<CourseResponse>> getAllCourses(int page, int limit, String search, String category,
                                                             Double minPrice, Double minRating);
+    Flux<ServerSentEvent<String>> updateVideoIntroduce(MultipartFile avatar, String courseId) throws IOException;
 }

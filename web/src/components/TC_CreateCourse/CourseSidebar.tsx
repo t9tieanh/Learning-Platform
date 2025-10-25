@@ -1,9 +1,10 @@
 import { cn } from '@/lib/utils'
 import { BookOpen, Image, DollarSign, Settings, CheckCircle } from 'lucide-react'
 import { FC } from 'react'
+import CourseProgressStep from '@/types/courseProgressStep'
 
 interface SidebarItem {
-  id: string
+  id: CourseProgressStep
   label: string
   description: string
   icon: FC<{ className?: string }>
@@ -11,34 +12,34 @@ interface SidebarItem {
 }
 
 interface CourseSidebarProps {
-  activeSection?: string
-  onSectionChange?: (section: string) => void
+  activeSection?: CourseProgressStep
+  onSectionChange?: (section: CourseProgressStep) => void
 }
 
 const sidebarItems: SidebarItem[] = [
   {
-    id: 'landing',
+    id: CourseProgressStep.INTRO,
     label: 'Trang giới thiệu khoá học',
     icon: Image,
     description: 'Tạo trang quảng bá khoá học của bạn',
     completed: false
   },
   {
-    id: 'curriculum',
+    id: CourseProgressStep.CURRICULUM,
     label: 'Giáo trình',
     icon: BookOpen,
     description: 'Cấu trúc nội dung khoá học',
     completed: false
   },
   {
-    id: 'pricing',
+    id: CourseProgressStep.PRICING,
     label: 'Định giá',
     icon: DollarSign,
     description: 'Đặt giá và khuyến mãi cho khoá học',
     completed: false
   },
   {
-    id: 'setup',
+    id: CourseProgressStep.SETTINGS,
     label: 'Cài đặt khoá học',
     icon: Settings,
     description: 'Cấu hình cài đặt và chính sách khoá học',
@@ -46,7 +47,7 @@ const sidebarItems: SidebarItem[] = [
   }
 ]
 
-const CourseSidebar: FC<CourseSidebarProps> = ({ activeSection = 'landing', onSectionChange }) => {
+const CourseSidebar: FC<CourseSidebarProps> = ({ activeSection = CourseProgressStep.INTRO, onSectionChange }) => {
   const completedCount = sidebarItems.filter((i) => i.completed).length
 
   return (
@@ -70,7 +71,7 @@ const CourseSidebar: FC<CourseSidebarProps> = ({ activeSection = 'landing', onSe
             return (
               <button
                 key={item.id}
-                onClick={() => onSectionChange?.(item.id)}
+                onClick={() => onSectionChange?.(item.id as CourseProgressStep)}
                 aria-current={isActive ? 'page' : undefined}
                 className={cn(
                   'w-full text-left p-3 rounded-lg transition-colors group focus:outline-none focus:ring-2 focus:ring-primary/50',
@@ -105,26 +106,6 @@ const CourseSidebar: FC<CourseSidebarProps> = ({ activeSection = 'landing', onSe
             )
           })}
         </nav>
-
-        {/* Progress
-        <div className='mt-8 p-4 bg-gray-900 rounded-lg border border-gray-800'>
-          <div className='flex items-center justify-between mb-2'>
-            <span className='text-sm font-medium text-white'>Tiến độ khoá học</span>
-            <span className='text-xs text-gray-400'>
-              {completedCount}/{sidebarItems.length} đã hoàn thành
-            </span>
-          </div>
-          <div className='w-full bg-gray-800 rounded-full h-2 overflow-hidden'>
-            <div
-              className='bg-primary h-2 rounded-full transition-all duration-300'
-              style={{ width: `${(completedCount / sidebarItems.length) * 100}%` }}
-              aria-valuemin={0}
-              aria-valuemax={sidebarItems.length}
-              aria-valuenow={completedCount}
-              role='progressbar'
-            />
-          </div>
-        </div> */}
       </div>
     </aside>
   )
