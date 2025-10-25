@@ -20,13 +20,14 @@ export function InstructorCard({ instructor }: InstructorCardProps) {
 
       <div className='flex flex-col items-center text-center space-y-4'>
         <Avatar className='h-24 w-24 shadow-md'>
-          <AvatarImage src={instructor.avatar} alt={instructor.name} />
+          <AvatarImage src={instructor.image} alt={instructor.name} />
           <AvatarFallback className='text-2xl'>
-            {instructor.name
-              .split(' ')
-              .map((n) => n[0])
-              .join('')
-              .toUpperCase()}
+            {instructor.name ||
+              ''
+                .split(' ')
+                .map((n) => n[0])
+                .join('')
+                .toUpperCase()}
           </AvatarFallback>
         </Avatar>
 

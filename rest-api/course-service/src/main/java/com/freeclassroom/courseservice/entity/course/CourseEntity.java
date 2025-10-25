@@ -27,6 +27,7 @@ public class CourseEntity extends AbstractEntity {
     String shortDescription;
     String longDescription;
     String thumbnailUrl;
+    Double rating;
 
     String introductoryVideo;
     String language;
@@ -57,7 +58,7 @@ public class CourseEntity extends AbstractEntity {
     List<TagEntity> tags;
 
     // Category
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     CategoryEntity category;
 
     @Enumerated(EnumType.STRING)

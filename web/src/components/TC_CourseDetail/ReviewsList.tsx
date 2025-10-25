@@ -5,6 +5,7 @@ import { Review } from '@/types/course.type'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import feedbackService, { FeedbackItem } from '@/services/feedback.service'
+import { Loader } from '../ui/loader'
 
 interface ReviewsListProps {
   reviews: Review[]
@@ -104,11 +105,7 @@ export function ReviewsList({ reviews, reviewsPerPage = 5, courseId }: ReviewsLi
         {!useApiMode && visibleReviews.length === 0 && (
           <p className='text-sm text-muted-foreground'>Chưa có đánh giá</p>
         )}
-        {useApiMode && !initialLoaded && (
-          <div className='flex items-center gap-2 text-sm text-muted-foreground'>
-            <Loader2 className='h-4 w-4 animate-spin' /> Đang tải đánh giá...
-          </div>
-        )}
+        {useApiMode && !initialLoaded && <Loader />}
         {visibleReviews.map((review, index) => (
           <motion.div
             key={review.id}

@@ -29,6 +29,41 @@ public interface CourseRepository extends JpaRepository<CourseEntity, String> {
     Optional<CourseEntity> findByIdWithEnrollments(@Param("id") String id);
 
     @Query("""
+        SELECT c 
+        FROM CourseEntity c 
+        LEFT JOIN c.enrollments e 
+        GROUP BY c 
+        ORDER BY COUNT(e) DESC
+    """)
+    List<CourseEntity> findBestSellerCourses(Pageable pageable);
+
+    @Query("""
+        SELECT c
+        FROM CourseEntity c
+        LEFT JOIN c.enrollments e
+        WHERE FUNCTION('MONTH', e.enrollmentDate) = :month
+          AND FUNCTION('YEAR', e.enrollmentDate) = :year
+        GROUP BY c
+        ORDER BY COUNT(e) DESC
+    """)
+    List<CourseEntity> getTrendyCourse(Pageable pageable, int month, int year);
+
+    @Query("""
+        SELECT c FROM CourseEntity c
+        WHERE (:search IS NULL OR LOWER(c.title) LIKE LOWER(CONCAT('%', :search, '%')))
+        AND (:category IS NULL OR c.category.name = :category)
+        AND (:minPrice IS NULL OR c.finalPrice >= :minPrice)
+        AND (:minRating IS NULL OR c.rating >= :minRating)
+    """)
+    Page<CourseEntity> findAllWithFilters(
+            @Param("search") String search,
+            @Param("category") String category,
+            @Param("minPrice") Double minPrice,
+            @Param("minRating") Double minRating,
+            Pageable pageable
+    );
+
+    @Query("""
         SELECT COALESCE(SUM(l.duration), 0)
         FROM CourseEntity c
         JOIN c.chapters ch
