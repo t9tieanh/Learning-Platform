@@ -291,7 +291,7 @@ public class CourseService implements ICourseService {
 
     @Override
     public ApiResponse<CreationResponse> updatePrice(UpdatePriceRequest newPrice, String courseId) {
-        if (newPrice.getOriginalPrice() > newPrice.getFinalPrice())
+        if (newPrice.getOriginalPrice() < newPrice.getFinalPrice())
             throw new CustomExeption(ErrorCode.PRICE_NOT_RIGHT);
 
         CourseEntity course = courseRepo.findById(courseId)
