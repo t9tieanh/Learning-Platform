@@ -1,9 +1,11 @@
 /* eslint-disable jsx-a11y/media-has-caption */
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import './style.scss'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Play } from 'lucide-react'
 import CustomButton from '@/components/common/Button'
+import { Badge } from '@/components/ui/badge'
+import PreviewPublicLesson from '../CourseContent/detail/Sections/previewPublicLesson'
 
 interface CoverProps {
   video: string
@@ -14,10 +16,30 @@ interface CoverProps {
     name: string
     avatar: string
   }
+  tags?: { id: string; name: string; imageUrl: string }[]
 }
 
-const Cover = ({ video, image, title, shortDescription, teacher }: CoverProps) => {
-  const [isOpen, setIsOpen] = useState(false)
+const Cover = ({ video, image, title, shortDescription, teacher, tags }: CoverProps) => {
+  const [preview, setPreview] = useState<{
+    openPreview: boolean
+    previewUrl: string | null
+    previewTitle: string
+    subTitle: string
+  }>({
+    openPreview: false,
+    previewUrl: video,
+    previewTitle: title,
+    subTitle: `🚀${shortDescription}`
+  })
+
+  useEffect(() => {
+    setPreview((prev) => ({
+      ...prev,
+      previewUrl: video,
+      previewTitle: title,
+      subTitle: `🚀${shortDescription}`
+    }))
+  }, [video, title, shortDescription])
 
   return (
     <div className='cover-container min-h-96 bg-[#0C356A] flex flex-col md:flex-row items-center justify-center mx-auto w-full py-16'>
@@ -25,10 +47,13 @@ const Cover = ({ video, image, title, shortDescription, teacher }: CoverProps) =
         className='video-introduction relative p-0 md:p-10 mb-6 md:mb-0 cursor-pointer'
         role='button'
         tabIndex={0}
-        onClick={() => setIsOpen(true)}
+        onClick={() => setPreview((prev) => ({ ...prev, openPreview: true }))}
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
-            setIsOpen(true)
+            setPreview((prev) => ({
+              ...prev,
+              openPreview: true
+            }))
           }
         }}
       >
@@ -42,27 +67,10 @@ const Cover = ({ video, image, title, shortDescription, teacher }: CoverProps) =
         </div>
       </div>
 
-      {isOpen && (
-        <div className='fixed inset-0 bg-black/70 flex items-center justify-center z-50'>
-          <div className='bg-black rounded-xl overflow-hidden max-w-4xl w-full relative'>
-            <video src={`http://${video}`} controls autoPlay className='w-full h-[500px] rounded-xl' />
-            <CustomButton
-              type='button'
-              onClick={() => setIsOpen(false)}
-              aria-label='Close video'
-              className='absolute bg-transparent hover:bg-black/50 top-3 right-3 text-white text-4xl font-bold z-50'
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') setIsOpen(false)
-              }}
-            >
-              ×
-            </CustomButton>
-          </div>
-        </div>
-      )}
+      <PreviewPublicLesson preview={preview} setPreview={setPreview} />
 
       <div className='title-container text-left text-white'>
-        <h1 className='text-2xl md:text-4xl font-bold mb-4 max-w-xl text-justify'>{title}</h1>
+        <h1 className='text-2xl md:text-4xl font-bold mb-4 max-w-xl text-justify'>Khóa học {title}</h1>
         <div className='flex items-center gap-2 mb-4'>
           <Avatar>
             <AvatarImage src={teacher.avatar} />
@@ -71,6 +79,21 @@ const Cover = ({ video, image, title, shortDescription, teacher }: CoverProps) =
           <div className='text-lg text-white-200'>{teacher.name}</div>
         </div>
         <p className='text-sm md:text-base max-w-xl text-justify text-gray-200'>{shortDescription}</p>
+        <div className='flex flex-wrap gap-2 mt-2'>
+          {tags?.map((tag) => (
+            <Badge
+              key={tag.id}
+              variant='outline'
+              className='text-xs px-3 border-none text-black bg-white flex items-center'
+            >
+              <Avatar>
+                <AvatarImage src={tag.imageUrl} />
+                <AvatarFallback>{tag.name.charAt(0)}</AvatarFallback>
+              </Avatar>
+              {tag.name}
+            </Badge>
+          ))}
+        </div>
       </div>
     </div>
   )

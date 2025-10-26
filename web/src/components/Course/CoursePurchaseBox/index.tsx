@@ -1,10 +1,10 @@
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { FaPaperPlane, FaShoppingCart, FaTag, FaClock } from 'react-icons/fa'
+import { FaPaperPlane, FaShoppingCart, FaTag } from 'react-icons/fa'
 import { useState } from 'react'
 
-const CoursePurchaseBox = () => {
+const CoursePurchaseBox = ({ originalPrice, finalPrice }: { originalPrice: number; finalPrice: number }) => {
   const [discountCode, setDiscountCode] = useState('')
 
   return (
@@ -15,8 +15,8 @@ const CoursePurchaseBox = () => {
             {/* Price Section */}
             <div className='text-center space-y-3'>
               <div className='flex items-center justify-center gap-3'>
-                <span className='text-3xl font-bold text-course-price text-blue-800'>₫279,000</span>
-                <span className='text-lg text-gray-400 line-through'>₫300,000</span>
+                <span className='text-3xl font-bold text-course-price text-blue-800'>₫{finalPrice}</span>
+                <span className='text-lg text-gray-400 line-through'>₫{originalPrice}</span>
               </div>
             </div>
 

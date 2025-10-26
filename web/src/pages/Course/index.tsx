@@ -4,7 +4,7 @@ import WhatYouWillLearn from '@/components/Course/WhatYouWillLearn'
 import CoursePurchaseBox from '@/components/Course/CoursePurchaseBox'
 import CourseContent from '@/components/Course/CourseContent'
 import Feedback from '@/components/Course/Feedback'
-import courseUserService, { CourseResponse } from '@/services/course/courseuser.service'
+import courseUserService, { CourseResponse } from '@/services/course/course-user.service'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -35,8 +35,6 @@ const Course = () => {
     fetchCourseDetailData()
   }, [])
 
-  console.log('Course Detail:', courseDetail)
-
   return (
     <div className='course-page bg-white'>
       <Cover
@@ -48,17 +46,25 @@ const Course = () => {
           name: courseDetail?.instructor.name || '',
           avatar: courseDetail?.instructor.image || 'https://images.icon-icons.com/1378/PNG/512/avatardefault_92824.png'
         }}
+        tags={courseDetail?.tags || []}
       />
       <WhatYouWillLearn learningPoints={courseDetail?.outcomes || []} />
       <div className='grid grid-cols-3 gap-4 bg-white'>
         <div className='col-span-2'>
-          <CourseContent />
+          <CourseContent
+            requirements={courseDetail?.requirements || []}
+            sections={courseDetail?.chapters || []}
+            content={courseDetail?.longDescription || ''}
+          />
         </div>
         <div className='col-span-1'>
-          <CoursePurchaseBox />
+          <CoursePurchaseBox
+            originalPrice={courseDetail?.originalPrice || 0}
+            finalPrice={courseDetail?.finalPrice || 0}
+          />
         </div>
       </div>
-      <div className='feedback-container w-full py-10 bg-blue-200'>
+      <div className='feedback-container w-full py-10 bg-[#0C356A]'>
         <Feedback />
       </div>
     </div>

@@ -24,11 +24,13 @@ export interface CourseResponse {
     description: string | null
     position: number
     isOpen: boolean
+    lessonNum: number
+    duration: number
   }[]
   tags: {
     id: string
     name: string
-    imageUrl: string | null
+    imageUrl: string
   }[]
   category: {
     id: string

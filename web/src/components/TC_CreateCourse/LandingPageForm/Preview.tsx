@@ -69,12 +69,12 @@ const PreviewComponent = ({
             <h2 className='text-xl font-semibold text-blue-900 line-clamp-2'>{courseTitle}</h2>
             <p className='text-blue-700 text-sm line-clamp-2'>{subtitle}</p>
 
-            <div className='flex items-center space-x-4 text-sm text-blue-600'>
+            {/* <div className='flex items-center space-x-4 text-sm text-blue-600'>
               <div className='flex items-center space-x-1'>
                 <Clock className='h-4 w-4 text-blue-500' />
                 <span>42 giờ</span>
               </div>
-            </div>
+            </div> */}
 
             <div className='flex flex-wrap gap-2'>
               {tags?.map((tag) => (
