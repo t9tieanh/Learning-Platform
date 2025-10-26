@@ -26,7 +26,6 @@ const router = createBrowserRouter([
     path: '/',
     element: <App />,
     children: [
-      // Default Layout (Header & Footer)
       {
         path: '',
         element: <DefaultLayout />,
@@ -35,18 +34,14 @@ const router = createBrowserRouter([
           { path: 'course/:id', element: <Course /> },
           { path: 'my-cart', element: <CartPage /> },
           { path: 'profile', element: <Profile /> },
-          { path: 'courses', element: <AllCourse /> },
+          { path: 'courses', element: <AllCourse /> }
         ]
       },
-      // Header Layout
       {
         path: '',
         element: <HeaderLayout />,
-        children: [
-          { path: 'chat', element: <Chat /> }
-        ]
+        children: [{ path: 'chat', element: <Chat /> }]
       },
-      // Not has Layout
       { path: 'auth', element: <AuthLayout /> },
       { path: 'user/verify', element: <User /> },
       { path: '*', element: <NotFound /> },
@@ -60,15 +55,12 @@ const router = createBrowserRouter([
           { path: 'course/:id', element: <TC_CreateCourse /> },
           { path: 'profile', element: <TC_Profile /> },
           { path: 'course-details/:id', element: <TC_CourseDetail /> },
-          // Alias cũ (nếu ai truy cập không có id sẽ 404 hoặc có thể điều hướng)
           { path: 'course-details', element: <NotFound /> }
         ]
       },
       { path: 'user/verify', element: <User /> },
       { path: 'TC_CourseDetail/:id', element: <TC_CourseDetail /> },
-      { path: '*', element: <NotFound /> },
-      // { path: 'chat', element: <Chat /> }
-
+      { path: '*', element: <NotFound /> }
     ]
   }
 ])

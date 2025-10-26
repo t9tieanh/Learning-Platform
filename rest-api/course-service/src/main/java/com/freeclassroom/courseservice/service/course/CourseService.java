@@ -65,6 +65,7 @@ public class CourseService implements ICourseService {
     CategoryRepository categoryRepo;
     TagRepository tagRepo;
     ChapterRepository chapterRepo;
+    UserGrpcClient userGrpcClient;
 
     CourseMapper courseMapper;
     LessonMapper lessonMapper;
@@ -74,7 +75,6 @@ public class CourseService implements ICourseService {
     @NonFinal
     private Double PLATFORM_FEES = 0.1d;
 
-    UserGrpcClient userGrpcClient;
     @Override
     public ApiResponse<CreationResponse> createCourse(CreationCourseRequest request, String userId) {
         CourseEntity newCourse = null;
@@ -339,7 +339,6 @@ public class CourseService implements ICourseService {
         }
     }
 
-
     // general code
     private List<CourseResponse> getInstructorGrpc(List<CourseEntity> courseEntities) {
         return courseEntities.stream()
@@ -361,6 +360,7 @@ public class CourseService implements ICourseService {
                 })
                 .toList();
     }
+
     @Override
     public Flux<ServerSentEvent<String>> updateVideoIntroduce(MultipartFile avatar, String courseId) throws IOException {
         CourseEntity course = courseRepo.findById(courseId)

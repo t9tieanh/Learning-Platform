@@ -1,7 +1,6 @@
 import CourseCard from '@/components/common/CourseCard'
 import { Course } from '@/types/course.type'
 import { useEffect, useState } from 'react'
-import courseService from '@/services/course/course.service'
 import { Loader } from '@/components/ui/loader'
 interface CourseListProps {
   title: string

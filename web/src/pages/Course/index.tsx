@@ -4,20 +4,52 @@ import WhatYouWillLearn from '@/components/Course/WhatYouWillLearn'
 import CoursePurchaseBox from '@/components/Course/CoursePurchaseBox'
 import CourseContent from '@/components/Course/CourseContent'
 import Feedback from '@/components/Course/Feedback'
+import courseUserService, { CourseResponse } from '@/services/course/courseuser.service'
+import { useEffect, useState } from 'react'
+import { toast } from 'sonner'
+import { useNavigate, useParams } from 'react-router-dom'
 
 const Course = () => {
+  const [courseDetail, setCourseDetail] = useState<CourseResponse | null>(null)
+  const navigate = useNavigate()
+  const { id } = useParams<{ id: string }>()
+
+  useEffect(() => {
+    const fetchCourseDetailData = async () => {
+      try {
+        const response = await courseUserService.getCourseDetails(id as string)
+        if (response && response.code === 200 && response.result) {
+          setCourseDetail(response.result)
+        } else {
+          console.log('Failed to fetch course details')
+          toast.error(response.message || 'Không thể tải chi tiết khóa học')
+          navigate('/courses')
+        }
+      } catch (error) {
+        console.log('Error fetching course detail data:', error)
+        toast.error('Không thể tải chi tiết khóa học')
+        navigate('/courses')
+      }
+    }
+
+    fetchCourseDetailData()
+  }, [])
+
+  console.log('Course Detail:', courseDetail)
+
   return (
     <div className='course-page bg-white'>
       <Cover
-        video='https://i.ytimg.com/vi/5yHpfICfx_k/maxresdefault.jpg'
-        title='Học chỉnh sửa video với Adobe Premiere Pro cho người mới bắt đầu (2025)'
-        shortDescription='Trong khóa học này, bạn sẽ học các kiến thức cơ bản về chỉnh sửa video bằng Adobe Premiere Pro. Dù bạn là người mới hoàn toàn hay đã có chút kinh nghiệm, khóa học này sẽ giúp bạn tạo ra những video chất lượng chuyên nghiệp.'
+        image={courseDetail?.thumbnailUrl || ''}
+        video={courseDetail?.introductoryVideo || ''}
+        title={courseDetail?.title || ''}
+        shortDescription={courseDetail?.shortDescription || ''}
         teacher={{
-          name: 'Phạm Tiến Anh',
-          avatar: 'https://i.pravatar.cc/150?img=3'
+          name: courseDetail?.instructor.name || '',
+          avatar: courseDetail?.instructor.image || 'https://images.icon-icons.com/1378/PNG/512/avatardefault_92824.png'
         }}
       />
-      <WhatYouWillLearn />
+      <WhatYouWillLearn learningPoints={courseDetail?.outcomes || []} />
       <div className='grid grid-cols-3 gap-4 bg-white'>
         <div className='col-span-2'>
           <CourseContent />

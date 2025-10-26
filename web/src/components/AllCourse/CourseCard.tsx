@@ -1,7 +1,9 @@
 import { Star, Clock, BookOpen } from 'lucide-react'
 import { Card } from '@/components/ui/card'
+import { useNavigate } from 'react-router-dom'
 
 interface CourseCardProps {
+  id: string
   title: string
   description: string
   originalPrice: number
@@ -20,6 +22,7 @@ interface CourseCardProps {
 }
 
 export const CourseCard = ({
+  id,
   title,
   description,
   originalPrice,
@@ -32,8 +35,17 @@ export const CourseCard = ({
   level,
   thumbnail
 }: CourseCardProps) => {
+  const navigate = useNavigate()
+
+  const handleClick = () => {
+    navigate(`/course/${id}`)
+  }
+
   return (
-    <Card className='overflow-hidden group hover:shadow-xl border border-border/60 bg-card/60 backdrop-blur-sm cursor-pointer'>
+    <Card
+      className='overflow-hidden group hover:shadow-xl border border-border/60 bg-card/60 backdrop-blur-sm cursor-pointer'
+      onClick={handleClick}
+    >
       <div className='flex flex-row items-stretch h-40'>
         <div className='w-72 h-full flex-shrink-0 overflow-hidden'>
           <img src={thumbnail} alt={title} className='w-full h-full object-cover object-center' />
@@ -48,17 +60,17 @@ export const CourseCard = ({
             <p className='text-sm text-muted-foreground/80 mb-2 line-clamp-2'>{description}</p>
             <p className='text-xs text-muted-foreground italic mb-2'>{instructor.name}</p>
 
-            {/* ⭐ Rating */}
             <div className='flex items-center gap-2 mb-2'>
               <span className='text-sm font-semibold text-yellow-500'>{rating}</span>
               <div className='flex items-center gap-0.5'>
                 {[...Array(5)].map((_, i) => (
                   <Star
                     key={i}
-                    className={`w-3.5 h-3.5 ${i < Math.floor(rating)
+                    className={`w-3.5 h-3.5 ${
+                      i < Math.floor(rating)
                         ? 'fill-yellow-400 text-yellow-400 drop-shadow-sm'
                         : 'text-muted-foreground/20'
-                      }`}
+                    }`}
                   />
                 ))}
               </div>
@@ -80,7 +92,6 @@ export const CourseCard = ({
             </div>
           </div>
         </div>
-        {/* 💰 Giá */}
         <div className='w-32 flex-shrink-0 pr-5 flex flex-col items-end justify-start'>
           <p className='text-xl font-bold text-orange-500/90'>₫{salePrice.toLocaleString('vi-VN')}</p>
           {originalPrice > salePrice && (

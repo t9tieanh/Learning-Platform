@@ -1,14 +1,7 @@
 import React from 'react'
 import { CheckCircle2 } from 'lucide-react'
 
-const WhatYouWillLearn = () => {
-  const learningPoints = [
-    'Nắm vững các thao tác cơ bản',
-    'Biết cách cắt ghép, chỉnh sửa, thêm hiệu ứng',
-    'Thành thạo các kỹ thuật xử lý màu sắc',
-    'Tự tin xây dựng quy trình chỉnh sửa video hoàn chỉnh'
-  ]
-
+const WhatYouWillLearn = ({ learningPoints }: { learningPoints: string[] }) => {
   return (
     <section className='my-8 bg-white'>
       <div className='shrink-0'>
