@@ -14,4 +14,8 @@ public class ChapterUserDto {
     String description;
     Long position;
     Boolean isOpen;
+
+    // addition
+    Long lessonNum;
+    Double duration;
 }

@@ -409,8 +409,8 @@ public class CourseService implements ICourseService {
         //set price for course
         course.setOriginalPrice(newPrice.getOriginalPrice());
         course.setFinalPrice(newPrice.getFinalPrice());
-        course.setProgressStep(EnumCourseProgressStep.PRICING);
-
+        if (!course.getProgressStep().equals(EnumCourseProgressStep.COMPLETED))
+            course.setProgressStep(EnumCourseProgressStep.PRICING);
         //save entity
         courseRepo.save(course);
 

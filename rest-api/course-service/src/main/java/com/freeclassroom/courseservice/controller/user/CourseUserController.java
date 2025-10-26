@@ -1,4 +1,4 @@
-package com.freeclassroom.courseservice.controller;
+package com.freeclassroom.courseservice.controller.user;
 
 import com.freeclassroom.courseservice.dto.response.ApiResponse;
 import com.freeclassroom.courseservice.dto.response.course.CourseUserDetailResponse;

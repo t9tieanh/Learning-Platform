@@ -1,4 +1,4 @@
-package com.freeclassroom.courseservice.controller;
+package com.freeclassroom.courseservice.controller.user;
 
 import com.freeclassroom.courseservice.dto.response.ApiResponse;
 import com.freeclassroom.courseservice.dto.response.category.TagResponse;
@@ -6,7 +6,6 @@ import com.freeclassroom.courseservice.service.tag.ITagService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;

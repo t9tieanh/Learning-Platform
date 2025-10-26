@@ -12,6 +12,7 @@ import com.freeclassroom.courseservice.exception.CustomExeption;
 import com.freeclassroom.courseservice.exception.ErrorCode;
 import com.freeclassroom.courseservice.grpc.client.UserGrpcClient;
 import com.freeclassroom.courseservice.mapper.CourseMapper;
+import com.freeclassroom.courseservice.repository.entity.ChapterRepository;
 import com.freeclassroom.courseservice.repository.entity.CourseRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class CourseUserService implements ICourseUserService{
     CourseRepository courseRepo;
+    ChapterRepository chapterRepo;
     UserGrpcClient userGrpcClient;
 
     CourseMapper courseMapper;
@@ -52,6 +54,12 @@ public class CourseUserService implements ICourseUserService{
                 user.getEmail(),
                 user.getImage()
         ));
+
+        // get add infomation of chapter
+        response.getChapters().forEach(chapter -> {
+            chapter.setDuration(chapterRepo.getTotalVideoDurationByChapterId(chapter.getId()));
+            chapter.setLessonNum(chapterRepo.countLessonsByChapterId(chapter.getId()));
+        });
 
         return ApiResponse.<CourseUserDetailResponse>builder()
                 .code(200)

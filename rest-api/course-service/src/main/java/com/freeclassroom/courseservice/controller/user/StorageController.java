@@ -1,4 +1,4 @@
-package com.freeclassroom.courseservice.controller;
+package com.freeclassroom.courseservice.controller.user;
 
 import com.freeclassroom.courseservice.service.utils.cloudfront.ICloudFrontService;
 import com.freeclassroom.courseservice.service.utils.file.IUploadFileService;
@@ -10,10 +10,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import reactor.core.publisher.Flux;
-
-import java.io.IOException;
-import java.util.Arrays;
 
 import static org.springframework.http.MediaTypeFactory.getMediaType;
 
