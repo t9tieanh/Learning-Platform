@@ -2,9 +2,12 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import chatService from "@/services/chat/chat.service";
 import { ConversationListItem } from "@/types/chat.type";
+import { SocketContext } from "@/api/socket/socket.context";
+import { useAuthStore } from "@/stores/useAuth.stores";
+import { useLocation } from "react-router-dom";
 
 interface ConversationListProps {
   selected?: ConversationListItem | null;
@@ -14,6 +17,11 @@ interface ConversationListProps {
 export const ConversationList = ({ selected, onSelect }: ConversationListProps) => {
   const [conversations, setConversations] = useState<ConversationListItem[]>([])
   const [searchText, setSearchText] = useState("")
+  const { socket } = useContext(SocketContext)
+  const { data } = useAuthStore()
+  const myId = data?.userId
+  const location = useLocation()
+  const myRole: 'instructor' | 'student' = location.pathname.startsWith('/teacher') ? 'instructor' : 'student'
 
   useEffect(() => {
     let mounted = true
@@ -27,6 +35,49 @@ export const ConversationList = ({ selected, onSelect }: ConversationListProps) 
       })()
     return () => { mounted = false }
   }, [])
+
+  // Join tất cả phòng theo danh sách hội thoại để nhận realtime preview (kể cả khi chưa mở ChatArea)
+  useEffect(() => {
+    if (!socket || !myId || conversations.length === 0) return
+    for (const c of conversations) {
+      const payload = myRole === 'instructor'
+        ? { instructorId: myId, studentId: c.peerId }
+        : { instructorId: c.peerId, studentId: myId }
+      socket.emit('join_room', payload)
+    }
+  }, [socket, myId, myRole, conversations])
+
+  // Lắng nghe socket để cập nhật last message realtime và move-to-top
+  useEffect(() => {
+    if (!socket) return
+    const onReceive = (payload: { senderId: string; message: string; instructorId?: string; studentId?: string; createdAt: number }) => {
+      const { instructorId, studentId, senderId, message, createdAt } = payload
+      if (!myId || !instructorId || !studentId) return
+      if (myId !== instructorId && myId !== studentId) return
+      const peer = myId === instructorId ? studentId : instructorId
+      setConversations((prev) => {
+        const idx = prev.findIndex(c => c.peerId === peer)
+        if (idx === -1) return prev
+        const item = prev[idx]
+        const updated: ConversationListItem = {
+          ...item,
+          lastMessage: {
+            _id: `temp_${Date.now()}`,
+            content: message,
+            senderId,
+            senderRole: senderId === instructorId ? 'instructor' : 'student',
+            createdAt: new Date(createdAt).toISOString()
+          },
+          lastMessageAt: new Date(createdAt).toISOString(),
+          unreadCount: selected && selected.peerId === peer ? item.unreadCount : (item.unreadCount + 1 || 1)
+        }
+        const next = [updated, ...prev.filter((_, i) => i !== idx)]
+        return next
+      })
+    }
+    socket.on('receive_message', onReceive)
+    return () => { socket.off('receive_message', onReceive) }
+  }, [socket, myId, selected])
 
   const filtered = useMemo(() => {
     if (!searchText.trim()) return conversations
@@ -83,7 +134,9 @@ export const ConversationList = ({ selected, onSelect }: ConversationListProps) 
                 )}
               </div>
               <p className="text-sm text-slate-500 truncate">
-                {c.lastMessage?.content || 'Bắt đầu cuộc trò chuyện'}
+                {c.lastMessage
+                  ? `${c.lastMessage.senderId === myId ? 'You: ' : ''}${c.lastMessage.content}`
+                  : 'Bắt đầu cuộc trò chuyện'}
               </p>
             </div>
 

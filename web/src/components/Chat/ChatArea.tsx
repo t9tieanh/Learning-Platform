@@ -35,7 +35,6 @@ export const ChatArea = ({ conversationId, peerId: peerFromProps, peerName, peer
 
   const [peerId, setPeerId] = useState<string>(peerFromProps || "")
   const { data } = useAuthStore()
-  console.log('[DATA USER]', data)
   const myId = data?.userId
   const location = useLocation()
   console.log('messages', messages);

@@ -1,7 +1,7 @@
 import { Types } from 'mongoose'
 import Conversation, { IConversation } from '~/models/message/conversation.model'
 import Message, { IMessage } from '~/models/message/message.model'
-
+import socket from '~/socket'
 interface DirectConversationResult {
     conversation: IConversation
     isNew: boolean
@@ -81,26 +81,36 @@ const sendMessage = async (
     senderRole: 'student' | 'instructor',
     content: string
 ): Promise<IMessage> => {
-    const convId = ensureObjectId(conversationId)
-    const sender = ensureObjectId(senderId)
+    try {
+        const convId = (conversationId);
+        const sender = (senderId);
 
-    const message = await Message.create({
-        conversationId: convId,
-        senderId: sender,
-        senderRole,
-        content,
-        type: 'text',
-        status: 'sent'
-    })
+        console.log({ conversationId, senderId, senderRole, content });
 
-    // cập nhật last message của conversation
-    await Conversation.findByIdAndUpdate(convId, {
-        lastMessageId: message._id,
-        lastMessageAt: message.createdAt
-    })
+        const message = await Message.create({
+            conversationId: convId,
+            senderId: sender,
+            senderRole,
+            content,
+            type: 'text',
+            status: 'sent',
+        });
 
-    return message
-}
+        // cập nhật last message của conversation
+        await Conversation.findByIdAndUpdate(convId, {
+            lastMessageId: message._id,
+            lastMessageAt: message.createdAt,
+        });
+
+        // socket.emit("receive_message", message);
+
+        return message;
+    } catch (error) {
+        console.error('Error in sendMessage:', error);
+        throw new Error(`Không thể gửi tin nhắn: ${error instanceof Error ? error.message : String(error)}`);
+    }
+};
+
 
 // Đánh dấu đã đọc tin nhắn (toàn bộ hoặc đến một messageId)
 const markRead = async (conversationId: string, readerId: string, messageId?: string) => {

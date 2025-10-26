@@ -138,14 +138,20 @@ const getMessages = async (req: Request, res: Response) => {
 
 const sendMessage = async (req: Request, res: Response) => {
     try {
-        const currentUserId = (req.user as any)?.userId as string
+        const currentUserId = (req.user as any)?.sub as string
         if (!currentUserId) throw new Error('Thiếu thông tin người dùng (token)')
 
+        console.log('[REQ DATA]', req.data)
         const { conversationId, content, senderRole } = req.data as {
             conversationId: string
             content: string
             senderRole: 'student' | 'instructor'
         }
+
+        console.log('conversationId:', conversationId);
+        console.log('currentUserId:', currentUserId);
+        console.log('senderRole:', senderRole);
+        console.log('content:', content);
 
         const message = await ChatService.sendMessage(conversationId, currentUserId, senderRole, content)
 
