@@ -8,6 +8,7 @@ import HeaderLayout from './layouts/HeaderLayout'
 import Course from './pages/Course'
 import CartPage from './pages/Cart'
 import AuthLayout from './layouts/AuthLayout'
+import TC_Layout from './layouts/TC_Layout'
 import NotFound from './pages/NotFound'
 import Profile from './pages/Profile'
 import User from '@/pages/User'
@@ -20,6 +21,7 @@ import TC_Course from './pages/TC_Courses'
 import TC_CreateCourse from './pages/TC_CreateCourse'
 import TC_Profile from './pages/TC_Profile'
 import TC_CourseDetail from './pages/TC_CourseDetail'
+import { SocketProvider } from '@/api/socket/socket.context'
 
 const router = createBrowserRouter([
   {
@@ -52,6 +54,8 @@ const router = createBrowserRouter([
       { path: '*', element: <NotFound /> },
       { path: 'forgot', element: <ForgotPass /> },
       { path: 'course-page', element: <CoursePage /> },
+
+      // Instructor
       {
         path: 'teacher',
         children: [
@@ -62,6 +66,13 @@ const router = createBrowserRouter([
           { path: 'course-details/:id', element: <TC_CourseDetail /> },
           // Alias cũ (nếu ai truy cập không có id sẽ 404 hoặc có thể điều hướng)
           { path: 'course-details', element: <NotFound /> }
+        ]
+      },
+      {
+        path: 'teacher',
+        element: <TC_Layout />,
+        children: [
+          { path: 'chat', element: <Chat /> }
         ]
       },
       { path: 'user/verify', element: <User /> },
@@ -75,6 +86,8 @@ const router = createBrowserRouter([
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <>
-    <RouterProvider router={router} />
+    <SocketProvider>
+      <RouterProvider router={router} />
+    </SocketProvider>
   </>
 )

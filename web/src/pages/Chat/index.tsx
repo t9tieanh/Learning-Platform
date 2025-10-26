@@ -1,9 +1,14 @@
 import { useState } from "react";
+import { useLocation } from "react-router-dom";
 import { ConversationList } from "@/components/Chat/ConversationList";
 import { ChatArea } from "@/components/Chat/ChatArea";
+import { ConversationListItem } from "@/types/chat.type";
 
 const Chat = () => {
-    const [selectedConversation, setSelectedConversation] = useState<string>();
+    const [selectedConversation, setSelectedConversation] = useState<ConversationListItem | null>(null);
+    const location = useLocation()
+    const forcedRole: 'instructor' | 'student' =
+        location.pathname.startsWith('/teacher') ? 'instructor' : 'student'
 
     return (
         <div className="flex h-screen overflow-hidden min-h-0">
@@ -12,8 +17,8 @@ const Chat = () => {
                 className={`w-full md:w-96 lg:w-[400px] h-full min-h-0 ${selectedConversation ? "hidden md:block" : "block"}`}
             >
                 <ConversationList
-                    selectedId={selectedConversation}
-                    onSelect={setSelectedConversation}
+                    selected={selectedConversation}
+                    onSelect={(c) => setSelectedConversation(c)}
                 />
             </div>
 
@@ -22,8 +27,12 @@ const Chat = () => {
                 className={`flex-1 h-full min-h-0 overflow-hidden ${selectedConversation ? "block" : "hidden"} md:block`}
             >
                 <ChatArea
-                    conversationId={selectedConversation}
-                    onBack={() => setSelectedConversation(undefined)}
+                    conversationId={selectedConversation?.conversationId}
+                    peerId={selectedConversation?.peerId}
+                    peerName={selectedConversation?.peerName}
+                    peerAvatar={selectedConversation?.peerAvatar}
+                    onBack={() => setSelectedConversation(null)}
+                    forcedRole={forcedRole}
                 />
             </div>
         </div>

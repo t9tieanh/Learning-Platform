@@ -1,28 +1,33 @@
-import mongoose, { Schema, Document, Model, Types } from 'mongoose'
+import mongoose, { Schema, Document, Types } from 'mongoose';
 
 export interface IConversation extends Document {
-  id: Types.ObjectId
-  members: string[]
-  avatarUrl: string
-  name: string
-  createdAt: Date
-  updatedAt: Date
+  key: string; // ví dụ: dm:u1:u2
+  type: 'direct';
+  participants: String[];
+  lastMessageId?: String;
+  lastMessageAt?: Date;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
-const ConversationSchema: Schema = new Schema({
-  members: [{ type: String }],
-  avatarUrl: { type: String, required: true },
-  name: { type: String, required: true },
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now }
-}).set('toJSON', {
-  transform: function (doc, ret) {
-    //delete ret.__v
+const conversationSchema = new Schema<IConversation>(
+  {
+    key: { type: String, required: true, unique: true },
+    type: { type: String, enum: ['direct'], default: 'direct' },
+    participants: [
+      {
+        type: String,
+        ref: 'User',
+        required: true,
+      },
+    ],
+    lastMessageId: {
+      type: String,
+      ref: 'Message',
+    },
+    lastMessageAt: { type: Date },
+  },
+  { timestamps: true },
+);
 
-    return ret
-  }
-})
-
-const ConversationModel: Model<IConversation> = mongoose.model<IConversation>('Conversation', ConversationSchema)
-
-export { ConversationModel }
+export default mongoose.model<IConversation>('Conversation', conversationSchema);

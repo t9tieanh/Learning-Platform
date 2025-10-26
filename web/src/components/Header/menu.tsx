@@ -10,6 +10,7 @@ const Menu = ({ username, name, avatarUrl }: { username: string; name: string; a
 
   const handleLogout = () => {
     setData(null)
+    navigate('/')
   }
 
   return (

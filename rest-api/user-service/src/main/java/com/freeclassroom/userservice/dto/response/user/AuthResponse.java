@@ -10,7 +10,7 @@ import lombok.experimental.FieldDefaults;
 public class AuthResponse {
     String accessToken;
     String refreshToken;
-
+    String userId;
     String name;
     String username;
     String email;

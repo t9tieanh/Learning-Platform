@@ -1,35 +1,68 @@
-import mongoose, { Schema, Document, Model, Types } from 'mongoose'
-import { IConversation } from './conversation.model'
+import mongoose, { Schema, Document, Types } from 'mongoose';
+
+export type MessageType = 'text' | 'image' | 'file' | 'system';
+export type SenderRole = 'student' | 'instructor';
+export type MessageStatus = 'sending' | 'sent' | 'delivered' | 'read';
 
 export interface IMessage extends Document {
-  id: Types.ObjectId
-  senderId: string
-  conversation: IConversation['_id']
-  message: string
-  replyTo: IMessage['_id']
-  attachmentUri: string
-  content: string
-  createdAt: Date
-  updatedAt: Date
+  conversationId: String;
+  senderId: String;
+  senderRole: SenderRole;
+  content?: string;
+  type: MessageType;
+  status: MessageStatus;
+  deliveredTo: String[];
+  readBy: String[];
+  createdAt: Date;
 }
 
-const MessageSchema: Schema = new Schema({
-  senderId: { type: String, required: true },
-  conversation: { type: Schema.Types.ObjectId, ref: 'Conversation', required: true },
-  message: { type: String, required: true },
-  replyTo: { type: Schema.Types.ObjectId, ref: 'Message' },
-  attachmentUri: { type: String },
-  content: { type: String, required: true },
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now }
-}).set('toJSON', {
-  transform: function (doc, ret) {
-    //delete ret.__v
+const messageSchema = new Schema<IMessage>(
+  {
+    conversationId: {
+      type: String,
+      ref: 'Conversation',
+      required: true,
+    },
+    senderId: {
+      type: String,
+      ref: 'User',
+      required: true,
+    },
+    senderRole: {
+      type: String,
+      enum: ['student', 'instructor'],
+      required: true,
+    },
+    content: {
+      type: String,
+      trim: true,
+    },
+    type: {
+      type: String,
+      enum: ['text', 'image', 'file', 'system'],
+      default: 'text',
+    },
+    status: {
+      type: String,
+      enum: ['sending', 'sent', 'delivered', 'read'],
+      default: 'sent',
+    },
+    deliveredTo: [
+      {
+        type: String,
+        ref: 'User',
+      },
+    ],
+    readBy: [
+      {
+        type: String,
+        ref: 'User',
+      },
+    ],
+  },
+  {
+    timestamps: { createdAt: true, updatedAt: false },
+  },
+);
 
-    return ret
-  }
-})
-
-const MessageModel: Model<IMessage> = mongoose.model<IMessage>('Message', MessageSchema)
-
-export { MessageModel }
+export default mongoose.model<IMessage>('Message', messageSchema);

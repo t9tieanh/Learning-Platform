@@ -46,6 +46,7 @@ class UserService {
       email: string
       userName: string
       avatarUrl?: string
+      userId?: string
     }>
   > {
     const response = await axiosClient.axiosInstance.post(`auth/oauth2/google`, null, {
