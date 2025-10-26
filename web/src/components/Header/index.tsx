@@ -16,7 +16,7 @@ const Header: FC = () => {
   const { data, setData } = useAuthStore()
 
   return (
-    <div className=' p-3 w-full header-container'>
+    <div className=' p-3 w-full bg-white'>
       <NavigationMenu className='min-w-full mx-0'>
         <div className='flex items-center justify-between w-full p-1'>
           <NavigationMenuList className='text-left ml-2'>
@@ -30,30 +30,32 @@ const Header: FC = () => {
                 <TabsList className='flex gap-6 bg-transparent px-4 py-2'>
                   <TabsTrigger
                     value='home'
+                    onClick={() => navigate('/')}
                     className='tab-page font-semibold px-4 py-4 rounded-lg transition-colors duration-200 hover:bg-blue-100 hover:text-blue-700 data-[state=active]:bg-blue-500 data-[state=active]:text-white'
                   >
-                    <House className='w-5 h-5 mb-1' />
+                    <House className='w-5 h-5' />
                     Trang chủ
                   </TabsTrigger>
                   <TabsTrigger
                     value='course'
+                    onClick={() => navigate('/courses')}
                     className='tab-page font-semibold px-4 py-4 rounded-lg transition-colors duration-200 hover:bg-blue-100 hover:text-blue-700 data-[state=active]:bg-blue-500 data-[state=active]:text-white'
                   >
-                    <BookOpen className='w-5 h-5 mb-1' />
+                    <BookOpen className='w-5 h-5' />
                     Khóa học
                   </TabsTrigger>
                   <TabsTrigger
                     value='about'
                     className='tab-page font-semibold px-4 py-4 rounded-lg transition-colors duration-200 hover:bg-blue-100 hover:text-blue-700 data-[state=active]:bg-blue-500 data-[state=active]:text-white'
                   >
-                    <Building2 className='w-5 h-5 mb-1' />
+                    <Building2 className='w-5 h-5' />
                     Về chúng tôi
                   </TabsTrigger>
                   <TabsTrigger
                     value='blog'
                     className='tab-page font-semibold px-4 py-4 rounded-lg transition-colors duration-200 hover:bg-blue-100 hover:text-blue-700 data-[state=active]:bg-blue-500 data-[state=active]:text-white'
                   >
-                    <StickyNote className='w-5 h-5 mb-1' />
+                    <StickyNote className='w-5 h-5' />
                     Blog
                   </TabsTrigger>
                 </TabsList>

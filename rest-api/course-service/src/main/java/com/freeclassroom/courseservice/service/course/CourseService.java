@@ -1,5 +1,6 @@
 package com.freeclassroom.courseservice.service.course;
 
+import com.example.grpc.user.GetUserResponse;
 import com.freeclassroom.courseservice.dto.request.common.FileUploadRequest;
 import com.freeclassroom.courseservice.dto.request.course.CreationCourseRequest;
 import com.freeclassroom.courseservice.dto.request.course.GetCourseRequest;
@@ -9,6 +10,8 @@ import com.freeclassroom.courseservice.dto.response.ApiResponse;
 import com.freeclassroom.courseservice.dto.response.common.CreationResponse;
 import com.freeclassroom.courseservice.dto.response.common.FileUploadResponse;
 import com.freeclassroom.courseservice.dto.response.course.*;
+
+import com.freeclassroom.courseservice.dto.response.user.InstructorResponse;
 import com.freeclassroom.courseservice.entity.category.CategoryEntity;
 import com.freeclassroom.courseservice.entity.category.TagEntity;
 import com.freeclassroom.courseservice.entity.course.ChapterEntity;
@@ -17,6 +20,7 @@ import com.freeclassroom.courseservice.entity.course.LessonEntity;
 import com.freeclassroom.courseservice.enums.entity.EnumCourseProgressStep;
 import com.freeclassroom.courseservice.enums.entity.EnumCourseStatus;
 import com.freeclassroom.courseservice.enums.entity.EnumLessonType;
+
 import com.freeclassroom.courseservice.exception.CustomExeption;
 import com.freeclassroom.courseservice.exception.ErrorCode;
 import com.freeclassroom.courseservice.grpc.client.UserGrpcClient;
@@ -38,6 +42,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -252,6 +259,108 @@ public class CourseService implements ICourseService {
         }
     }
 
+    @Override
+    public ApiResponse<List<CourseResponse>> getBestSellerCourse(int limit) {
+        try {
+            Pageable pageable = PageRequest.of(0, limit);
+            List<CourseEntity> courseEntities = courseRepo.findBestSellerCourses(pageable);
+
+            List<CourseResponse> courses = getInstructorGrpc(courseEntities);
+
+            return ApiResponse.<List<CourseResponse>>builder()
+                    .code(HttpStatus.OK.value())
+                    .message("Thành công")
+                    .result(courses)
+                    .build();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ApiResponse.<List<CourseResponse>>builder()
+                    .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                    .message("Lỗi: " + e.getMessage())
+                    .result(null)
+                    .build();
+        }
+    }
+
+    @Override
+    public ApiResponse<List<CourseResponse>> getTrendyCourse(int limit) {
+        try {
+            int month = LocalDate.now().getMonthValue();
+            int year = LocalDate.now().getYear();
+            Pageable pageable = PageRequest.of(0, limit);
+            List<CourseEntity> courseEntities = courseRepo.getTrendyCourse(pageable, month, year);
+
+            List<CourseResponse> courses = getInstructorGrpc(courseEntities);
+
+            return ApiResponse.<List<CourseResponse>>builder()
+                    .code(HttpStatus.OK.value())
+                    .message("Thành công")
+                    .result(courses)
+                    .build();
+        } catch (Exception e) {
+            return ApiResponse.<List<CourseResponse>>builder()
+                    .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                    .message("Lỗi: " + e.getMessage())
+                    .result(null)
+                    .build();
+        }
+    }
+
+    @Override
+    public ApiResponse<PageResponse<CourseResponse>> getAllCourses(int page, int limit, String search, String category, Double minPrice, Double minRating) {
+        try {
+            Pageable pageable = PageRequest.of(Math.max(page - 1, 0), limit, Sort.by(Sort.Direction.DESC, "createdAt"));
+
+            Page<CourseEntity> result = courseRepo.findAllWithFilters(search, category, minPrice, minRating, pageable);
+
+            List<CourseResponse> content = getInstructorGrpc(result.getContent());
+
+            PageResponse<CourseResponse> pageResponse = new PageResponse<>(
+                    content,
+                    result.getNumber() + 1,
+                    result.getSize(),
+                    result.getTotalElements(),
+                    result.getTotalPages()
+            );
+
+            return ApiResponse.<PageResponse<CourseResponse>>builder()
+                    .code(HttpStatus.OK.value())
+                    .message("Lấy danh sách khóa học thành công")
+                    .result(pageResponse)
+                    .build();
+
+        } catch (Exception e) {
+            return ApiResponse.<PageResponse<CourseResponse>>builder()
+                    .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                    .message("Lỗi: " + e.getMessage())
+                    .result(null)
+                    .build();
+        }
+    }
+
+
+    // general code
+    private List<CourseResponse> getInstructorGrpc(List<CourseEntity> courseEntities) {
+        return courseEntities.stream()
+                .map(entity -> {
+                    CourseResponse dto = courseMapper.toDto(entity);
+
+                    // Gọi sang user-service để lấy instructor
+                    GetUserResponse user = userGrpcClient.getUser(
+                            entity.getInstructorId().toString()
+                    );
+
+                    dto.setInstructor(new InstructorResponse(
+                            user.getId(),
+                            user.getName(),
+                            user.getEmail(),
+                            user.getImage()
+                    ));
+                    return dto;
+                })
+                .toList();
+    }
     @Override
     public Flux<ServerSentEvent<String>> updateVideoIntroduce(MultipartFile avatar, String courseId) throws IOException {
         CourseEntity course = courseRepo.findById(courseId)

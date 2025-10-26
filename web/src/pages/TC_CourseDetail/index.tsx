@@ -16,6 +16,7 @@ import { Separator } from '@/components/ui/separator'
 import { useParams, useNavigate } from 'react-router-dom'
 import courseService from '@/services/course.service'
 import { ApiResponse } from '@/types/response.type'
+import { Loader } from '@/components/ui/loader'
 
 interface CourseResponseDTO {
   id: string
@@ -180,12 +181,7 @@ export default function CourseDetailPage() {
 
       {/* Main Content */}
       <main className='container mx-auto px-4 py-8'>
-        {loading && (
-          <div className='flex flex-col items-center justify-center py-20 gap-4'>
-            <Loader2 className='h-10 w-10 animate-spin text-primary' />
-            <p className='text-muted-foreground'>Đang tải dữ liệu khóa học...</p>
-          </div>
-        )}
+        {loading && <Loader />}
         {!loading && error && (
           <div className='flex flex-col items-center justify-center py-20 gap-4'>
             <p className='text-destructive font-medium'>Không tải được khoá học: {error}</p>

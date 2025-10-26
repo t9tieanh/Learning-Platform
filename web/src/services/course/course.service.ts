@@ -1,6 +1,7 @@
 import axiosClient from '@/lib/axiosClient.lib'
 import { ApiResponse } from '@/types/response.type'
 import { useAuthStore } from '@/stores/useAuth.stores'
+import { Course } from '@/types/course.type'
 
 function decodeJwtPayload(token: string): any | null {
   try {
@@ -44,6 +45,27 @@ type Paginated<T> = {
 }
 
 class CourseService {
+  async getAllCourses(params?: {
+    page?: number
+    limit?: number
+    search?: string
+    category?: string
+    minPrice?: number
+    minRating?: number
+  }): Promise<ApiResponse<Paginated<any>>> {
+    const { page = 1, limit = 10, search, category, minPrice, minRating } = params || {}
+    const response = await axiosClient.axiosInstance.get('learning/courses', {
+      params: {
+        page,
+        limit,
+        search,
+        category,
+        minPrice,
+        minRating
+      }
+    })
+    return response.data
+  }
   async createCourse(request: {
     id?: string
     title: string
@@ -164,6 +186,20 @@ class CourseService {
     }>
   > {
     const response = await axiosClient.axiosInstance.post(`learning/courses/${courseId}/request-approval`)
+    return response.data
+  }
+
+  async getBestSellerCourses(limit = 4): Promise<Course[]> {
+    const response = await axiosClient.axiosInstance.get('learning/courses/best-seller', {
+      params: { limit }
+    })
+    return response.data
+  }
+
+  async getTrendyCourseThisMonth(limit = 4): Promise<Course[]> {
+    const response = await axiosClient.axiosInstance.get('learning/courses/trend', {
+      params: { limit }
+    })
     return response.data
   }
 }
