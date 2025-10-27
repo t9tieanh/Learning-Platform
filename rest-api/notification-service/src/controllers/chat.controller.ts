@@ -15,7 +15,13 @@ const createOrGetDirect = async (req: Request, res: Response) => {
 
         if (!currentUserId) throw new Error('Thiếu thông tin người dùng (token)')
 
-        const result = await ChatService.createOrGetDirect(currentUserId, peerId)
+        const currentRole = req.query.myRole;
+
+        if (currentRole !== 'student' && currentRole !== 'instructor') {
+            return res.status(400).json({ message: 'Role người dùng không hợp lệ' });
+        }
+
+        const result = await ChatService.createOrGetDirect(currentUserId, peerId, currentRole)
 
         sendResponse(res, {
             code: StatusCodes.OK,
@@ -41,15 +47,19 @@ const listConversations = async (req: Request, res: Response) => {
         const currentUserId = (req.user as any)?.sub as string
         if (!currentUserId) throw new Error('Thiếu thông tin người dùng (token)')
 
-        const conversations = await ChatService.listConversations(currentUserId)
+        const currentRole = req.query.myRole;
 
-        // Map thêm thông tin peer + last message + unread count
+        if (currentRole !== 'student' && currentRole !== 'instructor') {
+            return res.status(400).json({ message: 'Role người dùng không hợp lệ' });
+        }
+        const conversations = await ChatService.listConversations(currentUserId, currentRole)
+
         const me = String(currentUserId)
 
         const enriched = await Promise.all(
             conversations.map(async (c) => {
-                const peerId = c.participants.map(String).find((id) => id !== me) || me
-
+                const peer = c.participants.find(p => p.userId !== me)
+                const peerId = peer?.userId || me
                 // Lấy last message nếu có
                 let lastMessage: any = null
                 if (c.lastMessageId) {
@@ -147,11 +157,6 @@ const sendMessage = async (req: Request, res: Response) => {
             content: string
             senderRole: 'student' | 'instructor'
         }
-
-        console.log('conversationId:', conversationId);
-        console.log('currentUserId:', currentUserId);
-        console.log('senderRole:', senderRole);
-        console.log('content:', content);
 
         const message = await ChatService.sendMessage(conversationId, currentUserId, senderRole, content)
 

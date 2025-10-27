@@ -27,7 +27,7 @@ export const ConversationList = ({ selected, onSelect }: ConversationListProps) 
     let mounted = true
       ; (async () => {
         try {
-          const res = await chatService.getConversations()
+          const res = await chatService.getConversations(myRole)
           if (mounted) setConversations(res.result || [])
         } catch (e) {
           console.error('Load conversations error', e)

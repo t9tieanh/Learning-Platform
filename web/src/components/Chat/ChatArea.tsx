@@ -37,12 +37,10 @@ export const ChatArea = ({ conversationId, peerId: peerFromProps, peerName, peer
   const { data } = useAuthStore()
   const myId = data?.userId
   const location = useLocation()
-  console.log('messages', messages);
-  // Derive defaults from route if no peer provided: /chat => student u1 chats with u2, /teacher/chat => instructor u2 chats with u1
   useEffect(() => {
     const isTeacher = location.pathname.startsWith('/teacher')
     const defaultRole: Role = forcedRole ?? (isTeacher ? 'instructor' : 'student')
-    const defaultPeerId = defaultRole === 'instructor' ? 'u1' : 'u2'
+    const defaultPeerId = defaultRole === 'instructor' ? '' : ''
     setMyRole(defaultRole)
     // If peer provided from props, use it; else set default for quick testing
     setPeerId(peerFromProps || defaultPeerId)
@@ -101,16 +99,26 @@ export const ChatArea = ({ conversationId, peerId: peerFromProps, peerName, peer
 
   if (!peerId) {
     return (
-      <div className="flex items-center justify-center h-full bg-gray-50">
-        <div className="text-center">
-          <div className="text-6xl mb-4">💬</div>
-          <h3 className="text-xl font-semibold mb-2">Chọn một cuộc trò chuyện</h3>
-          <p className="text-gray-500">
-            Chọn từ danh sách bên trái để bắt đầu nhắn tin
-          </p>
+      <div className="flex flex-col items-center justify-center h-full bg-gradient-to-br from-indigo-50 via-blue-50 to-cyan-50 text-center p-6">
+        <div className="w-40 h-40 mb-6">
+          {/* Có thể dùng Lottie hoặc ảnh gif */}
+          <img
+            src="https://media.tenor.com/DO8xX2RZ5tEAAAAM/no-messages-empty.gif"
+            alt="No chats yet"
+            className="w-full h-full object-contain mx-auto drop-shadow-lg animate-fadeIn"
+          />
         </div>
+
+        <h3 className="text-2xl font-semibold text-gray-700 mb-2 animate-slideUp">
+          Bạn chưa có cuộc trò chuyện nào
+        </h3>
+
+        <p className="text-gray-500 max-w-sm animate-fadeIn delay-150">
+          Hãy chọn một người để bắt đầu trò chuyện hoặc đợi ai đó nhắn tin cho bạn 💬
+        </p>
       </div>
     );
+
   }
 
   const handleSend = () => {
@@ -152,7 +160,7 @@ export const ChatArea = ({ conversationId, peerId: peerFromProps, peerName, peer
             </Button>
           )}
           <Avatar className="h-10 w-10">
-            <AvatarImage src={peerAvatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=1"} />
+            <AvatarImage src={peerAvatar} />
             <AvatarFallback>{(peerName || peerId || 'N')[0]}</AvatarFallback>
           </Avatar>
           <div>
@@ -186,7 +194,7 @@ export const ChatArea = ({ conversationId, peerId: peerFromProps, peerName, peer
           >
             {msg.senderId !== myId && (
               <Avatar className="h-8 w-8">
-                <AvatarImage src="https://api.dicebear.com/7.x/avataaars/svg?seed=1" />
+                <AvatarImage src={peerAvatar} />
                 <AvatarFallback>N</AvatarFallback>
               </Avatar>
             )}

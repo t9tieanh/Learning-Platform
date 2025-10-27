@@ -3,8 +3,10 @@ import { ApiResponse } from '@/types/response.type'
 import { ConversationListItem, CursorPage, MessageItem, SenderRole } from '@/types/chat.type'
 
 class ChatService {
-    async getConversations(): Promise<ApiResponse<ConversationListItem[]>> {
-        const res = await axiosClient.axiosInstance.get('notify/chat/conversations')
+    async getConversations(myRole: string): Promise<ApiResponse<ConversationListItem[]>> {
+        const res = await axiosClient.axiosInstance.get('notify/chat/conversations', {
+            params: { myRole },
+        })
         return res.data
     }
 

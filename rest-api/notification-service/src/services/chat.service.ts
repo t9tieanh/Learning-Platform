@@ -21,9 +21,11 @@ const buildDirectKey = (a: string, b: string) => {
 }
 
 // Tạo hoặc lấy cuộc trò chuyện 1-1
-const createOrGetDirect = async (currentUserId: string, peerId: string): Promise<DirectConversationResult> => {
+const createOrGetDirect = async (currentUserId: string, peerId: string, currentRole: string): Promise<DirectConversationResult> => {
     const me = (currentUserId)
     const peer = (peerId)
+
+    const peerRole: 'student' | 'instructor' = currentRole === 'student' ? 'instructor' : 'student';
 
     const key = buildDirectKey(String(me), String(peer))
 
@@ -33,7 +35,10 @@ const createOrGetDirect = async (currentUserId: string, peerId: string): Promise
         conv = await Conversation.create({
             key,
             type: 'direct',
-            participants: [me, peer]
+            participants: [
+                { userId: me, role: currentRole },
+                { userId: peer, role: peerRole },
+            ],
         })
         return { conversation: conv, isNew: true }
     }
@@ -41,38 +46,65 @@ const createOrGetDirect = async (currentUserId: string, peerId: string): Promise
     return { conversation: conv, isNew: false }
 }
 
-// Danh sách hội thoại của user hiện tại
-const listConversations = async (currentUserId: string) => {
-    const me = (currentUserId)
+// Danh sách hội thoại của user hiện tại (phân theo student và instructor)
 
-    const conversations = await Conversation.find({ participants: me })
-        .sort({ lastMessageAt: -1, updatedAt: -1 })
-        .lean()
+const listConversations = async (currentUserId: string, currentRole: 'student' | 'instructor') => {
+    const conversations = await Conversation.find({
+        'participants.userId': currentUserId,
+    })
+        .sort({ lastMessageAt: -1 })
+        .lean();
 
-    return conversations
+    const filtered = conversations.filter(conv => {
+        const me = conv.participants.find(p => p.userId === currentUserId);
+        const other = conv.participants.find(p => p.userId !== currentUserId);
+        if (!me || !other) return false;
+
+        if (currentRole === 'student') return other.role === 'instructor';
+        if (currentRole === 'instructor') return other.role === 'student';
+        return false;
+    });
+
+    return filtered;
 }
+
 
 // Lấy danh sách tin nhắn theo conversationId (cursor-based)
 const getMessages = async (conversationId: string, cursor?: string, limit = 20) => {
-    const convId = ensureObjectId(conversationId)
+    try {
+        const convId = String(conversationId);
 
-    const query: any = { conversationId: convId }
+        // Validate conversationId
+        if (!convId) {
+            throw new Error('Thiếu conversationId');
+        }
 
-    if (cursor && Types.ObjectId.isValid(cursor)) {
-        query._id = { $lt: new Types.ObjectId(cursor) }
+        const query: any = { conversationId: convId };
+
+        // Phân trang nếu có cursor
+        if (cursor) {
+            if (Types.ObjectId.isValid(cursor)) {
+                query._id = { $lt: new Types.ObjectId(cursor) };
+            } else {
+                console.warn('[getMessages] ⚠️ Cursor không hợp lệ:', cursor);
+            }
+        }
+
+        const docs = await Message.find(query)
+            .sort({ _id: -1 })
+            .limit(limit + 1)
+            .lean();
+
+        const hasMore = docs.length > limit;
+        const items = hasMore ? docs.slice(0, limit) : docs;
+        const nextCursor = hasMore ? String(items[items.length - 1]._id) : null;
+
+        return { items, hasMore, nextCursor };
+    } catch (error) {
+        console.error('[getMessages] ❌ Lỗi khi lấy tin nhắn:', error);
+        return { items: [], hasMore: false, nextCursor: null, error: (error as Error).message };
     }
-
-    const docs = await Message.find(query)
-        .sort({ _id: -1 })
-        .limit(limit + 1)
-        .lean()
-
-    const hasMore = docs.length > limit
-    const items = hasMore ? docs.slice(0, limit) : docs
-    const nextCursor = hasMore ? String(items[items.length - 1]._id) : null
-
-    return { items, hasMore, nextCursor }
-}
+};
 
 // Gửi tin nhắn trong hội thoại
 const sendMessage = async (
