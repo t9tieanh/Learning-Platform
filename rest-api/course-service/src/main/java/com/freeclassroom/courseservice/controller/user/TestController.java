@@ -1,4 +1,4 @@
-package com.freeclassroom.courseservice.controller;
+package com.freeclassroom.courseservice.controller.user;
 
 import com.example.grpc.user.GetUserResponse;
 import com.freeclassroom.courseservice.grpc.client.UserGrpcClient;

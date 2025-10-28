@@ -65,6 +65,7 @@ public class CourseService implements ICourseService {
     CategoryRepository categoryRepo;
     TagRepository tagRepo;
     ChapterRepository chapterRepo;
+    UserGrpcClient userGrpcClient;
 
     CourseMapper courseMapper;
     LessonMapper lessonMapper;
@@ -74,7 +75,6 @@ public class CourseService implements ICourseService {
     @NonFinal
     private Double PLATFORM_FEES = 0.1d;
 
-    UserGrpcClient userGrpcClient;
     @Override
     public ApiResponse<CreationResponse> createCourse(CreationCourseRequest request, String userId) {
         CourseEntity newCourse = null;
@@ -339,7 +339,6 @@ public class CourseService implements ICourseService {
         }
     }
 
-
     // general code
     private List<CourseResponse> getInstructorGrpc(List<CourseEntity> courseEntities) {
         return courseEntities.stream()
@@ -361,6 +360,7 @@ public class CourseService implements ICourseService {
                 })
                 .toList();
     }
+
     @Override
     public Flux<ServerSentEvent<String>> updateVideoIntroduce(MultipartFile avatar, String courseId) throws IOException {
         CourseEntity course = courseRepo.findById(courseId)
@@ -400,7 +400,7 @@ public class CourseService implements ICourseService {
 
     @Override
     public ApiResponse<CreationResponse> updatePrice(UpdatePriceRequest newPrice, String courseId) {
-        if (newPrice.getOriginalPrice() > newPrice.getFinalPrice())
+        if (newPrice.getOriginalPrice() < newPrice.getFinalPrice())
             throw new CustomExeption(ErrorCode.PRICE_NOT_RIGHT);
 
         CourseEntity course = courseRepo.findById(courseId)
@@ -409,8 +409,8 @@ public class CourseService implements ICourseService {
         //set price for course
         course.setOriginalPrice(newPrice.getOriginalPrice());
         course.setFinalPrice(newPrice.getFinalPrice());
-        course.setProgressStep(EnumCourseProgressStep.PRICING);
-
+        if (!course.getProgressStep().equals(EnumCourseProgressStep.COMPLETED))
+            course.setProgressStep(EnumCourseProgressStep.PRICING);
         //save entity
         courseRepo.save(course);
 

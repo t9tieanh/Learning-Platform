@@ -1,4 +1,4 @@
-package com.freeclassroom.courseservice.controller;
+package com.freeclassroom.courseservice.controller.instructor;
 
 import com.freeclassroom.courseservice.dto.request.common.FileUploadRequest;
 import com.freeclassroom.courseservice.dto.request.course.CreationCourseRequest;

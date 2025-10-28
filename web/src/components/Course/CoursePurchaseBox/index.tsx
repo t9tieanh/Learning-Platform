@@ -1,10 +1,10 @@
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { FaPaperPlane, FaShoppingCart, FaTag, FaClock } from 'react-icons/fa'
+import { FaPaperPlane, FaShoppingCart, FaTag } from 'react-icons/fa'
 import { useState } from 'react'
 
-const CoursePurchaseBox = () => {
+const CoursePurchaseBox = ({ originalPrice, finalPrice }: { originalPrice: number; finalPrice: number }) => {
   const [discountCode, setDiscountCode] = useState('')
 
   return (
@@ -15,12 +15,8 @@ const CoursePurchaseBox = () => {
             {/* Price Section */}
             <div className='text-center space-y-3'>
               <div className='flex items-center justify-center gap-3'>
-                <span className='text-3xl font-bold text-course-price text-blue-800'>₫279,000</span>
-                <span className='text-lg text-gray-400 line-through'>₫300,000</span>
-              </div>
-              <div className='inline-flex items-center gap-2 bg-course-discount/10 text-course-discount px-3 py-1 rounded-full text-sm font-medium text-green-500 bg-green-100'>
-                <FaTag className='w-3 h-3' />
-                7% giảm giá
+                <span className='text-3xl font-bold text-course-price text-blue-800'>₫{finalPrice}</span>
+                <span className='text-lg text-gray-400 line-through'>₫{originalPrice}</span>
               </div>
             </div>
 
@@ -55,9 +51,7 @@ const CoursePurchaseBox = () => {
                   onChange={(e) => setDiscountCode(e.target.value)}
                   className='flex-1 border-primary/20 focus:border-primary'
                 />
-                <Button className='px-4 bg-green-600' disabled={!discountCode}>
-                  Áp dụng
-                </Button>
+                <Button className='px-4 bg-red-500 hover:bg-red-600 text-white'>Áp dụng</Button>
               </div>
             </div>
           </CardContent>
