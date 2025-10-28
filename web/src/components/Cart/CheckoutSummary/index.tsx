@@ -28,7 +28,7 @@ const OrderDetail = ({ order }: { order: OrderDetailProps }) => {
           &nbsp;
           <span className='text-sm text-gray-500 line-through'>₫{order.price.toLocaleString()}</span>
         </div>
-        <CustomButton icon={<Trash />} variant={'icon'} className='hover:text-red-500' />
+        <CustomButton icon={<Trash />} className='hover:text-red-500' />
       </div>
       <hr />
     </>
@@ -52,7 +52,7 @@ const CheckoutSummary = () => {
   ]
 
   return (
-    <div className='p-3 checkout-section shadow-md'>
+    <div className='p-3 checkout-section'>
       <div className='checkout-title'>
         <p className='text-lg font-semibold mb-1 flex items-center'>
           <CiDiscount1 />

@@ -15,22 +15,22 @@ interface CartItemCardProps {
 
 const CartItemCard = ({ cardItem }: { cardItem: CartItemCardProps }) => {
   return (
-    <Card className='cart-item-card flex flex-row gap-4 items-center p-4 mt-3 border-none shadow-md hover:-translate-y-1 transition-all duration-300 ease-in-out'>
-      <img src={cardItem.image} alt={cardItem.title} className='max-w-80 max-h-80 object-cover rounded' />
+    <Card className='cart-item-card flex flex-row gap-4 items-center p-4 mt-3 border-none'>
+      <img src={cardItem?.image} alt={cardItem?.title} className='max-w-80 max-h-80 object-cover rounded' />
       <div className='flex justify-between flex-1'>
         <div>
           <CardTitle className='max-w-80 font-bold text-base'>{cardItem.title}</CardTitle>
           <CardDescription>
             <div className='flex items-center teacher-section py-2'>
               <Avatar className='w-5 h-5 mr-1'>
-                <AvatarImage src={cardItem.image} alt={cardItem.title} />
-                <AvatarFallback>{cardItem.teacherName.charAt(0)}</AvatarFallback>
+                <AvatarImage src={cardItem?.image} alt={cardItem?.title} />
+                <AvatarFallback>{cardItem?.teacherName.charAt(0)}</AvatarFallback>
               </Avatar>
-              <p className='teacher-name'>{cardItem.teacherName}</p>
+              <p className='teacher-name'>{cardItem?.teacherName}</p>
             </div>
             <div className='rating flex'>
-              <p className='rating-count font-bold text-yellow-600'>{cardItem.rating}</p>
-              <Rating defaultValue={cardItem.rating} readOnly>
+              <p className='rating-count font-bold text-yellow-600'>{cardItem?.rating}</p>
+              <Rating defaultValue={cardItem?.rating} readOnly>
                 {Array.from({ length: 5 }).map((_, index) => (
                   <RatingButton size={16} className='w-5 text-yellow-600' key={index} />
                 ))}
@@ -44,12 +44,8 @@ const CartItemCard = ({ cardItem }: { cardItem: CartItemCardProps }) => {
             {cardItem.basePrice && <CardDescription className='line-through'>{cardItem.basePrice} VNĐ</CardDescription>}
           </div>
           <div className='flex items-center gap-2 mt-2'>
-            <Button
-              variant={'icon'}
-              icon={<MousePointer2 />}
-              className='bg-slate-200 hover:bg-slate-50 hover:text-blue-500'
-            />
-            <Button variant={'icon'} icon={<Trash2 />} className='bg-slate-200 hover:bg-slate-50 hover:text-red-500' />
+            <Button icon={<MousePointer2 />} className='bg-slate-200 hover:bg-slate-50 hover:text-blue-500' />
+            <Button icon={<Trash2 />} className='bg-slate-200 hover:bg-slate-50 hover:text-red-500' />
           </div>
         </div>
       </div>
