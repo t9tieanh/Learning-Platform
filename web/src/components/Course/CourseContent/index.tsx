@@ -7,11 +7,22 @@ import { Accordion } from '@/components/ui/accordion'
 const CourseContent = ({
   requirements,
   sections,
-  content
+  content,
+  instructor
 }: {
   requirements: string[]
   sections: Section[]
   content: string
+  instructor: {
+    id: string
+    name: string
+    image: string
+    phone: string
+    description: string
+    email: string
+    username: string | null
+    numCourse: number
+  }
 }) => {
   return (
     <div className='course-content-container min-h-24 pt-0 pb-12'>
@@ -39,7 +50,7 @@ const CourseContent = ({
       <div className='py-6'>
         <h4 className='font-bold bg-primary text-white p-2 rounded-r-3xl max-w-80 pl-12'>Thông tin giáo viên</h4>
       </div>
-      <TeacherInfo />
+      <TeacherInfo teacher={instructor} />
     </div>
   )
 }

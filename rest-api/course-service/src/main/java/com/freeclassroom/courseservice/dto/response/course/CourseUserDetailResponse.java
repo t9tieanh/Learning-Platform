@@ -3,11 +3,6 @@ package com.freeclassroom.courseservice.dto.response.course;
 import com.freeclassroom.courseservice.dto.response.category.CategoryResponse;
 import com.freeclassroom.courseservice.dto.response.category.TagResponse;
 import com.freeclassroom.courseservice.dto.response.chapter.ChapterUserDto;
-import com.freeclassroom.courseservice.dto.response.user.InstructorResponse;
-import com.freeclassroom.courseservice.entity.course.ChapterEntity;
-import com.freeclassroom.courseservice.entity.member.EnrollmentsEntity;
-import com.freeclassroom.courseservice.enums.entity.EnumCourseStatus;
-import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -33,7 +28,7 @@ public class CourseUserDetailResponse {
     Double originalPrice;
     Double finalPrice;
 
-    InstructorResponse instructor;
+    InstructorCourseResponse instructor;
     List<ChapterUserDto> chapters;
 
     // Tag

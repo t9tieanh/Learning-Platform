@@ -15,8 +15,12 @@ export interface CourseResponse {
   instructor: {
     id: string
     name: string
-    email: string | null
-    image: string | null
+    image: string
+    phone: string
+    description: string
+    email: string
+    username: string | null
+    numCourse: number
   }
   chapters: {
     id: string

@@ -1,10 +1,9 @@
 package com.freeclassroom.courseservice.service.course;
 
-import com.cloudinary.Api;
 import com.example.grpc.user.GetUserResponse;
 import com.freeclassroom.courseservice.dto.response.ApiResponse;
 import com.freeclassroom.courseservice.dto.response.course.CourseUserDetailResponse;
-import com.freeclassroom.courseservice.dto.response.user.InstructorResponse;
+import com.freeclassroom.courseservice.dto.response.course.InstructorCourseResponse;
 import com.freeclassroom.courseservice.entity.course.CourseEntity;
 import com.freeclassroom.courseservice.enums.entity.EnumCourseProgressStep;
 import com.freeclassroom.courseservice.enums.entity.EnumCourseStatus;
@@ -48,12 +47,16 @@ public class CourseUserService implements ICourseUserService{
                 course.getInstructorId().toString()
         );
 
-        response.setInstructor(new InstructorResponse(
-                user.getId(),
-                user.getName(),
-                user.getEmail(),
-                user.getImage()
-        ));
+        response.setInstructor(InstructorCourseResponse.builder()
+                .phone(user.getPhone())
+                .name(user.getName())
+                .email(user.getEmail())
+                .image(user.getImage())
+                .username(user.getUsername())
+                .description(user.getDescription())
+                .id(user.getId())
+                .numCourse(courseRepo.countByInstructorIdAndNotDeleted(user.getId()))
+                .build());
 
         // get add infomation of chapter
         response.getChapters().forEach(chapter -> {

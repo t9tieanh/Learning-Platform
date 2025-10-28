@@ -55,6 +55,18 @@ const Course = () => {
             requirements={courseDetail?.requirements || []}
             sections={courseDetail?.chapters || []}
             content={courseDetail?.longDescription || ''}
+            instructor={
+              courseDetail?.instructor as {
+                id: string
+                name: string
+                image: string
+                phone: string
+                description: string
+                email: string
+                username: string | null
+                numCourse: number
+              }
+            }
           />
         </div>
         <div className='col-span-1'>
