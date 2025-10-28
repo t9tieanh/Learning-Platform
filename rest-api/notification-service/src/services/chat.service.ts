@@ -146,15 +146,14 @@ const sendMessage = async (
 
 // Đánh dấu đã đọc tin nhắn (toàn bộ hoặc đến một messageId)
 const markRead = async (conversationId: string, readerId: string, messageId?: string) => {
-    const convId = ensureObjectId(conversationId)
-    const reader = ensureObjectId(readerId)
+    const convId = (conversationId)
 
-    const filter: any = { conversationId: convId, readBy: { $ne: reader } }
+    const filter: any = { conversationId: convId, status: { $ne: 'read' } }
     if (messageId && Types.ObjectId.isValid(messageId)) {
         filter._id = { $lte: new Types.ObjectId(messageId) }
     }
 
-    const result = await Message.updateMany(filter, { $addToSet: { readBy: reader } })
+    const result = await Message.updateMany(filter, { $set: { status: 'read' } })
 
     return { updated: result.modifiedCount }
 }

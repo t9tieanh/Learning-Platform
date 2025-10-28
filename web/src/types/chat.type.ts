@@ -24,7 +24,7 @@ export type MessageItem = {
     senderRole: SenderRole
     content: string
     type: 'text' | 'image' | 'file' | 'system'
-    status: 'sending' | 'sent' | 'delivered' | 'read'
+    status: 'sent' | 'read'
     createdAt: string
 }
 

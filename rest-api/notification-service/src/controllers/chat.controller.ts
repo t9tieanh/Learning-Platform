@@ -5,11 +5,9 @@ import ChatService from '~/services/chat.service'
 import { getUser } from '~/grpc/userClient'
 import Message from '~/models/message/message.model'
 
-// Lưu ý: req.user được gán từ middleware authenticate (JWT)
 
 const createOrGetDirect = async (req: Request, res: Response) => {
     try {
-        // console.log('req', req)
         const currentUserId = (req.user as any)?.sub as string
         const { peerId } = req.body as { peerId: string }
 
@@ -78,7 +76,7 @@ const listConversations = async (req: Request, res: Response) => {
                 // Đếm tin nhắn chưa đọc
                 const unreadCount = await Message.countDocuments({
                     conversationId: c._id,
-                    readBy: { $ne: currentUserId },
+                    status: 'sent',
                     senderId: { $ne: currentUserId }
                 })
 
@@ -186,7 +184,7 @@ const sendMessage = async (req: Request, res: Response) => {
 
 const markRead = async (req: Request, res: Response) => {
     try {
-        const currentUserId = (req.user as any)?.userId as string
+        const currentUserId = (req.user as any)?.sub as string
         if (!currentUserId) throw new Error('Thiếu thông tin người dùng (token)')
 
         const { conversationId, messageId } = req.data as { conversationId: string; messageId?: string }

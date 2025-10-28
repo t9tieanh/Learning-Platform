@@ -2,7 +2,7 @@ import mongoose, { Schema, Document, Types } from 'mongoose';
 
 export type MessageType = 'text' | 'image' | 'file' | 'system';
 export type SenderRole = 'student' | 'instructor';
-export type MessageStatus = 'sending' | 'sent' | 'delivered' | 'read';
+export type MessageStatus = 'sent'  | 'read';
 
 export interface IMessage extends Document {
   conversationId: String;
@@ -12,7 +12,6 @@ export interface IMessage extends Document {
   type: MessageType;
   status: MessageStatus;
   deliveredTo: String[];
-  readBy: String[];
   createdAt: Date;
 }
 
@@ -44,16 +43,10 @@ const messageSchema = new Schema<IMessage>(
     },
     status: {
       type: String,
-      enum: ['sending', 'sent', 'delivered', 'read'],
+      enum: ['sent', 'read'],
       default: 'sent',
     },
     deliveredTo: [
-      {
-        type: String,
-        ref: 'User',
-      },
-    ],
-    readBy: [
       {
         type: String,
         ref: 'User',

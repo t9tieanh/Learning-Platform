@@ -88,12 +88,20 @@ export const ConversationList = ({ selected, onSelect }: ConversationListProps) 
     return () => { socket.off('receive_message', onReceive) }
   }, [socket, myId, selected])
 
+  // Khi người dùng chọn mở một cuộc trò chuyện, reset số lượng tin chưa đọc ở item đó về 0
+  // Mục tiêu: đồng bộ UI với trạng thái đã đọc sau khi ChatArea gọi API markRead
+  useEffect(() => {
+    if (!selected) return
+    setConversations((prev) => prev.map(c => c.conversationId === selected.conversationId ? { ...c, unreadCount: 0 } : c))
+  }, [selected?.conversationId])
+
   const filtered = useMemo(() => {
     if (!searchText.trim()) return conversations
     const q = searchText.trim().toLowerCase()
     return conversations.filter(c => (c.peerName || '').toLowerCase().includes(q))
   }, [conversations, searchText])
 
+  console.log('[FILTERED]', filtered)
   return (
     <div className="flex h-full min-h-0 flex-col bg-white border-r border-slate-200">
       {/* Header */}
