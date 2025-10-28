@@ -2,6 +2,7 @@ import React from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Star, BookOpen } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
 
 interface Teacher {
   id: string
@@ -12,11 +13,16 @@ interface Teacher {
   email: string
   username: string | null
   numCourse: number
+  expertise: {
+    id: string
+    name: string
+    image: string
+  }[]
 }
 
 const TeacherInfo = ({ teacher }: { teacher: Teacher }) => {
   return (
-    <Card className='ml-12'>
+    <Card className='ml-12 border-none'>
       <CardContent className='p-6'>
         <div className='flex flex-col md:flex-row gap-6'>
           {/* Teacher Avatar and Basic Info */}
@@ -61,18 +67,29 @@ const TeacherInfo = ({ teacher }: { teacher: Teacher }) => {
               <h4 className='font-semibold text-foreground mb-3'>Giới thiệu</h4>
               <p className='text-muted-foreground leading-relaxed text-base text-justify'>{teacher?.description}</p>
             </div>
-
-            {/* Skills
             <div>
               <h4 className='font-semibold text-foreground mb-3'>Chuyên môn</h4>
               <div className='flex flex-wrap gap-2'>
-                {teacher?.skills.map((skill, index) => (
-                  <Badge key={index} variant='secondary' className='bg-primary/10 text-primary hover:bg-primary/20'>
-                    {skill}
+                {teacher?.expertise.map((skill, index) => (
+                  <Badge
+                    key={index}
+                    variant='secondary'
+                    className='bg-primary/10 p-1 px-2 text-primary hover:bg-primary/20'
+                  >
+                    <Avatar className='w-20 h-20 ring-4 ring-primary/20 w-6 h-6 mr-2'>
+                      <AvatarImage src={skill?.image} alt={skill?.name} />
+                      <AvatarFallback className='text-2xl font-semibold bg-gradient-primary text-primary-foreground'>
+                        {skill?.name
+                          .split(' ')
+                          .map((n) => n[0])
+                          .join('')}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>{skill.name}</div>
                   </Badge>
                 ))}
               </div>
-            </div> */}
+            </div>
           </div>
         </div>
       </CardContent>

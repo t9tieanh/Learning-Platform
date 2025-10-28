@@ -56,7 +56,7 @@ const Course = () => {
             sections={courseDetail?.chapters || []}
             content={courseDetail?.longDescription || ''}
             instructor={
-              courseDetail?.instructor as {
+              courseDetail?.instructor as unknown as {
                 id: string
                 name: string
                 image: string
@@ -65,6 +65,11 @@ const Course = () => {
                 email: string
                 username: string | null
                 numCourse: number
+                expertise: {
+                  id: string
+                  name: string
+                  image: string
+                }[]
               }
             }
           />

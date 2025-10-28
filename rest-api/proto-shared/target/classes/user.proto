@@ -9,6 +9,12 @@ enum AccountStatus {
   INACTIVE = 1;
 }
 
+message Expertise {
+  string id = 1;
+  string name = 2;
+  string image = 3;
+}
+
 message GetUserRequest {
   string id = 1;
 }
@@ -23,4 +29,6 @@ message GetUserResponse {
   string username = 7;
   AccountStatus status = 8;
   repeated string roles = 9;
+
+  repeated Expertise expertises = 10;
 }

@@ -17,7 +17,7 @@ const CourseCard = ({ course, className }: { course: Course; className?: string 
     <>
       <Card className={`p-0 gap-0 course-card ${className}`} onClick={handleClick}>
         <CardHeader className='p-0'>
-          <img alt='Course' className='h-48 w-full object-cover rounded-2xl' src={course.thumbnailUrl} />
+          <img alt='Course' className='h-48 w-full object-cover rounded-2xl' src={course.thumbnailUrl || 'https://static.vecteezy.com/system/resources/thumbnails/004/141/669/small/no-photo-or-blank-image-icon-loading-images-or-missing-image-mark-image-not-available-or-image-coming-soon-sign-simple-nature-silhouette-in-frame-isolated-illustration-vector.jpg'} />
         </CardHeader>
         <CardContent className='p-4 pt-1'>
           <CardTitle className='text-lg font-bold'>{course.title}</CardTitle>

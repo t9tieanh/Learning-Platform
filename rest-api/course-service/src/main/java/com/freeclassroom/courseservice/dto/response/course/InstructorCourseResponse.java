@@ -3,6 +3,8 @@ package com.freeclassroom.courseservice.dto.response.course;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.List;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -19,4 +21,5 @@ public class InstructorCourseResponse {
     String username;
 
     Long numCourse;
+    List<ExpertiseResponse> expertise;
 }

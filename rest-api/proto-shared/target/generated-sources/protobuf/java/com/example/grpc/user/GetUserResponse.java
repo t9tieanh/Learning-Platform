@@ -27,6 +27,7 @@ private static final long serialVersionUID = 0L;
     status_ = 0;
     roles_ =
         com.google.protobuf.LazyStringArrayList.emptyList();
+    expertises_ = java.util.Collections.emptyList();
   }
 
   @java.lang.Override
@@ -377,6 +378,47 @@ private static final long serialVersionUID = 0L;
     return roles_.getByteString(index);
   }
 
+  public static final int EXPERTISES_FIELD_NUMBER = 10;
+  @SuppressWarnings("serial")
+  private java.util.List<com.example.grpc.user.Expertise> expertises_;
+  /**
+   * <code>repeated .Expertise expertises = 10;</code>
+   */
+  @java.lang.Override
+  public java.util.List<com.example.grpc.user.Expertise> getExpertisesList() {
+    return expertises_;
+  }
+  /**
+   * <code>repeated .Expertise expertises = 10;</code>
+   */
+  @java.lang.Override
+  public java.util.List<? extends com.example.grpc.user.ExpertiseOrBuilder> 
+      getExpertisesOrBuilderList() {
+    return expertises_;
+  }
+  /**
+   * <code>repeated .Expertise expertises = 10;</code>
+   */
+  @java.lang.Override
+  public int getExpertisesCount() {
+    return expertises_.size();
+  }
+  /**
+   * <code>repeated .Expertise expertises = 10;</code>
+   */
+  @java.lang.Override
+  public com.example.grpc.user.Expertise getExpertises(int index) {
+    return expertises_.get(index);
+  }
+  /**
+   * <code>repeated .Expertise expertises = 10;</code>
+   */
+  @java.lang.Override
+  public com.example.grpc.user.ExpertiseOrBuilder getExpertisesOrBuilder(
+      int index) {
+    return expertises_.get(index);
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -417,6 +459,9 @@ private static final long serialVersionUID = 0L;
     }
     for (int i = 0; i < roles_.size(); i++) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 9, roles_.getRaw(i));
+    }
+    for (int i = 0; i < expertises_.size(); i++) {
+      output.writeMessage(10, expertises_.get(i));
     }
     getUnknownFields().writeTo(output);
   }
@@ -460,6 +505,10 @@ private static final long serialVersionUID = 0L;
       size += dataSize;
       size += 1 * getRolesList().size();
     }
+    for (int i = 0; i < expertises_.size(); i++) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeMessageSize(10, expertises_.get(i));
+    }
     size += getUnknownFields().getSerializedSize();
     memoizedSize = size;
     return size;
@@ -492,6 +541,8 @@ private static final long serialVersionUID = 0L;
     if (status_ != other.status_) return false;
     if (!getRolesList()
         .equals(other.getRolesList())) return false;
+    if (!getExpertisesList()
+        .equals(other.getExpertisesList())) return false;
     if (!getUnknownFields().equals(other.getUnknownFields())) return false;
     return true;
   }
@@ -522,6 +573,10 @@ private static final long serialVersionUID = 0L;
     if (getRolesCount() > 0) {
       hash = (37 * hash) + ROLES_FIELD_NUMBER;
       hash = (53 * hash) + getRolesList().hashCode();
+    }
+    if (getExpertisesCount() > 0) {
+      hash = (37 * hash) + EXPERTISES_FIELD_NUMBER;
+      hash = (53 * hash) + getExpertisesList().hashCode();
     }
     hash = (29 * hash) + getUnknownFields().hashCode();
     memoizedHashCode = hash;
@@ -664,6 +719,13 @@ private static final long serialVersionUID = 0L;
       status_ = 0;
       roles_ =
           com.google.protobuf.LazyStringArrayList.emptyList();
+      if (expertisesBuilder_ == null) {
+        expertises_ = java.util.Collections.emptyList();
+      } else {
+        expertises_ = null;
+        expertisesBuilder_.clear();
+      }
+      bitField0_ = (bitField0_ & ~0x00000200);
       return this;
     }
 
@@ -690,9 +752,22 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public com.example.grpc.user.GetUserResponse buildPartial() {
       com.example.grpc.user.GetUserResponse result = new com.example.grpc.user.GetUserResponse(this);
+      buildPartialRepeatedFields(result);
       if (bitField0_ != 0) { buildPartial0(result); }
       onBuilt();
       return result;
+    }
+
+    private void buildPartialRepeatedFields(com.example.grpc.user.GetUserResponse result) {
+      if (expertisesBuilder_ == null) {
+        if (((bitField0_ & 0x00000200) != 0)) {
+          expertises_ = java.util.Collections.unmodifiableList(expertises_);
+          bitField0_ = (bitField0_ & ~0x00000200);
+        }
+        result.expertises_ = expertises_;
+      } else {
+        result.expertises_ = expertisesBuilder_.build();
+      }
     }
 
     private void buildPartial0(com.example.grpc.user.GetUserResponse result) {
@@ -819,6 +894,32 @@ private static final long serialVersionUID = 0L;
         }
         onChanged();
       }
+      if (expertisesBuilder_ == null) {
+        if (!other.expertises_.isEmpty()) {
+          if (expertises_.isEmpty()) {
+            expertises_ = other.expertises_;
+            bitField0_ = (bitField0_ & ~0x00000200);
+          } else {
+            ensureExpertisesIsMutable();
+            expertises_.addAll(other.expertises_);
+          }
+          onChanged();
+        }
+      } else {
+        if (!other.expertises_.isEmpty()) {
+          if (expertisesBuilder_.isEmpty()) {
+            expertisesBuilder_.dispose();
+            expertisesBuilder_ = null;
+            expertises_ = other.expertises_;
+            bitField0_ = (bitField0_ & ~0x00000200);
+            expertisesBuilder_ = 
+              com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                 getExpertisesFieldBuilder() : null;
+          } else {
+            expertisesBuilder_.addAllMessages(other.expertises_);
+          }
+        }
+      }
       this.mergeUnknownFields(other.getUnknownFields());
       onChanged();
       return this;
@@ -891,6 +992,19 @@ private static final long serialVersionUID = 0L;
               roles_.add(s);
               break;
             } // case 74
+            case 82: {
+              com.example.grpc.user.Expertise m =
+                  input.readMessage(
+                      com.example.grpc.user.Expertise.parser(),
+                      extensionRegistry);
+              if (expertisesBuilder_ == null) {
+                ensureExpertisesIsMutable();
+                expertises_.add(m);
+              } else {
+                expertisesBuilder_.addMessage(m);
+              }
+              break;
+            } // case 82
             default: {
               if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                 done = true; // was an endgroup tag
@@ -1574,6 +1688,246 @@ private static final long serialVersionUID = 0L;
       bitField0_ |= 0x00000100;
       onChanged();
       return this;
+    }
+
+    private java.util.List<com.example.grpc.user.Expertise> expertises_ =
+      java.util.Collections.emptyList();
+    private void ensureExpertisesIsMutable() {
+      if (!((bitField0_ & 0x00000200) != 0)) {
+        expertises_ = new java.util.ArrayList<com.example.grpc.user.Expertise>(expertises_);
+        bitField0_ |= 0x00000200;
+       }
+    }
+
+    private com.google.protobuf.RepeatedFieldBuilderV3<
+        com.example.grpc.user.Expertise, com.example.grpc.user.Expertise.Builder, com.example.grpc.user.ExpertiseOrBuilder> expertisesBuilder_;
+
+    /**
+     * <code>repeated .Expertise expertises = 10;</code>
+     */
+    public java.util.List<com.example.grpc.user.Expertise> getExpertisesList() {
+      if (expertisesBuilder_ == null) {
+        return java.util.Collections.unmodifiableList(expertises_);
+      } else {
+        return expertisesBuilder_.getMessageList();
+      }
+    }
+    /**
+     * <code>repeated .Expertise expertises = 10;</code>
+     */
+    public int getExpertisesCount() {
+      if (expertisesBuilder_ == null) {
+        return expertises_.size();
+      } else {
+        return expertisesBuilder_.getCount();
+      }
+    }
+    /**
+     * <code>repeated .Expertise expertises = 10;</code>
+     */
+    public com.example.grpc.user.Expertise getExpertises(int index) {
+      if (expertisesBuilder_ == null) {
+        return expertises_.get(index);
+      } else {
+        return expertisesBuilder_.getMessage(index);
+      }
+    }
+    /**
+     * <code>repeated .Expertise expertises = 10;</code>
+     */
+    public Builder setExpertises(
+        int index, com.example.grpc.user.Expertise value) {
+      if (expertisesBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureExpertisesIsMutable();
+        expertises_.set(index, value);
+        onChanged();
+      } else {
+        expertisesBuilder_.setMessage(index, value);
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .Expertise expertises = 10;</code>
+     */
+    public Builder setExpertises(
+        int index, com.example.grpc.user.Expertise.Builder builderForValue) {
+      if (expertisesBuilder_ == null) {
+        ensureExpertisesIsMutable();
+        expertises_.set(index, builderForValue.build());
+        onChanged();
+      } else {
+        expertisesBuilder_.setMessage(index, builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .Expertise expertises = 10;</code>
+     */
+    public Builder addExpertises(com.example.grpc.user.Expertise value) {
+      if (expertisesBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureExpertisesIsMutable();
+        expertises_.add(value);
+        onChanged();
+      } else {
+        expertisesBuilder_.addMessage(value);
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .Expertise expertises = 10;</code>
+     */
+    public Builder addExpertises(
+        int index, com.example.grpc.user.Expertise value) {
+      if (expertisesBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureExpertisesIsMutable();
+        expertises_.add(index, value);
+        onChanged();
+      } else {
+        expertisesBuilder_.addMessage(index, value);
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .Expertise expertises = 10;</code>
+     */
+    public Builder addExpertises(
+        com.example.grpc.user.Expertise.Builder builderForValue) {
+      if (expertisesBuilder_ == null) {
+        ensureExpertisesIsMutable();
+        expertises_.add(builderForValue.build());
+        onChanged();
+      } else {
+        expertisesBuilder_.addMessage(builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .Expertise expertises = 10;</code>
+     */
+    public Builder addExpertises(
+        int index, com.example.grpc.user.Expertise.Builder builderForValue) {
+      if (expertisesBuilder_ == null) {
+        ensureExpertisesIsMutable();
+        expertises_.add(index, builderForValue.build());
+        onChanged();
+      } else {
+        expertisesBuilder_.addMessage(index, builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .Expertise expertises = 10;</code>
+     */
+    public Builder addAllExpertises(
+        java.lang.Iterable<? extends com.example.grpc.user.Expertise> values) {
+      if (expertisesBuilder_ == null) {
+        ensureExpertisesIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, expertises_);
+        onChanged();
+      } else {
+        expertisesBuilder_.addAllMessages(values);
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .Expertise expertises = 10;</code>
+     */
+    public Builder clearExpertises() {
+      if (expertisesBuilder_ == null) {
+        expertises_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000200);
+        onChanged();
+      } else {
+        expertisesBuilder_.clear();
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .Expertise expertises = 10;</code>
+     */
+    public Builder removeExpertises(int index) {
+      if (expertisesBuilder_ == null) {
+        ensureExpertisesIsMutable();
+        expertises_.remove(index);
+        onChanged();
+      } else {
+        expertisesBuilder_.remove(index);
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .Expertise expertises = 10;</code>
+     */
+    public com.example.grpc.user.Expertise.Builder getExpertisesBuilder(
+        int index) {
+      return getExpertisesFieldBuilder().getBuilder(index);
+    }
+    /**
+     * <code>repeated .Expertise expertises = 10;</code>
+     */
+    public com.example.grpc.user.ExpertiseOrBuilder getExpertisesOrBuilder(
+        int index) {
+      if (expertisesBuilder_ == null) {
+        return expertises_.get(index);  } else {
+        return expertisesBuilder_.getMessageOrBuilder(index);
+      }
+    }
+    /**
+     * <code>repeated .Expertise expertises = 10;</code>
+     */
+    public java.util.List<? extends com.example.grpc.user.ExpertiseOrBuilder> 
+         getExpertisesOrBuilderList() {
+      if (expertisesBuilder_ != null) {
+        return expertisesBuilder_.getMessageOrBuilderList();
+      } else {
+        return java.util.Collections.unmodifiableList(expertises_);
+      }
+    }
+    /**
+     * <code>repeated .Expertise expertises = 10;</code>
+     */
+    public com.example.grpc.user.Expertise.Builder addExpertisesBuilder() {
+      return getExpertisesFieldBuilder().addBuilder(
+          com.example.grpc.user.Expertise.getDefaultInstance());
+    }
+    /**
+     * <code>repeated .Expertise expertises = 10;</code>
+     */
+    public com.example.grpc.user.Expertise.Builder addExpertisesBuilder(
+        int index) {
+      return getExpertisesFieldBuilder().addBuilder(
+          index, com.example.grpc.user.Expertise.getDefaultInstance());
+    }
+    /**
+     * <code>repeated .Expertise expertises = 10;</code>
+     */
+    public java.util.List<com.example.grpc.user.Expertise.Builder> 
+         getExpertisesBuilderList() {
+      return getExpertisesFieldBuilder().getBuilderList();
+    }
+    private com.google.protobuf.RepeatedFieldBuilderV3<
+        com.example.grpc.user.Expertise, com.example.grpc.user.Expertise.Builder, com.example.grpc.user.ExpertiseOrBuilder> 
+        getExpertisesFieldBuilder() {
+      if (expertisesBuilder_ == null) {
+        expertisesBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+            com.example.grpc.user.Expertise, com.example.grpc.user.Expertise.Builder, com.example.grpc.user.ExpertiseOrBuilder>(
+                expertises_,
+                ((bitField0_ & 0x00000200) != 0),
+                getParentForChildren(),
+                isClean());
+        expertises_ = null;
+      }
+      return expertisesBuilder_;
     }
     @java.lang.Override
     public final Builder setUnknownFields(

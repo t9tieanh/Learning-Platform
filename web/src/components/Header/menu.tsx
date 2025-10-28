@@ -26,14 +26,12 @@ const Menu = ({ username, name, avatarUrl }: { username: string; name: string; a
           </div>
         </div>
         <hr />
-        {/* Trang giảng viên */}
         <CustomButton
           className='w-full bg-blue-600 hover:bg-blue-700'
           label='Trang giảng viên'
           icon={<GraduationCap className='w-4 h-4 mr-2' />}
           onClick={() => navigate('/teacher', { state: { user: data } })}
         />
-        {/* Đăng xuất */}
         <CustomButton
           className='w-full bg-red-700 hover:bg-red-800'
           label='Đăng xuất'

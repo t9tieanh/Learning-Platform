@@ -16,6 +16,11 @@ public final class UserProto {
         (com.google.protobuf.ExtensionRegistryLite) registry);
   }
   static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_Expertise_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_Expertise_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
     internal_static_GetUserRequest_descriptor;
   static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
@@ -34,31 +39,39 @@ public final class UserProto {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\nuser.proto\"\034\n\016GetUserRequest\022\n\n\002id\030\001 \001" +
-      "(\t\"\256\001\n\017GetUserResponse\022\n\n\002id\030\001 \001(\t\022\014\n\004na" +
-      "me\030\002 \001(\t\022\r\n\005image\030\003 \001(\t\022\r\n\005phone\030\004 \001(\t\022\023" +
-      "\n\013description\030\005 \001(\t\022\r\n\005email\030\006 \001(\t\022\020\n\010us" +
-      "ername\030\007 \001(\t\022\036\n\006status\030\010 \001(\0162\016.AccountSt" +
-      "atus\022\r\n\005roles\030\t \003(\t*)\n\rAccountStatus\022\n\n\006" +
-      "ACTIVE\020\000\022\014\n\010INACTIVE\020\001B$\n\025com.example.gr" +
-      "pc.userB\tUserProtoP\001b\006proto3"
+      "\n\nuser.proto\"4\n\tExpertise\022\n\n\002id\030\001 \001(\t\022\014\n" +
+      "\004name\030\002 \001(\t\022\r\n\005image\030\003 \001(\t\"\034\n\016GetUserReq" +
+      "uest\022\n\n\002id\030\001 \001(\t\"\316\001\n\017GetUserResponse\022\n\n\002" +
+      "id\030\001 \001(\t\022\014\n\004name\030\002 \001(\t\022\r\n\005image\030\003 \001(\t\022\r\n" +
+      "\005phone\030\004 \001(\t\022\023\n\013description\030\005 \001(\t\022\r\n\005ema" +
+      "il\030\006 \001(\t\022\020\n\010username\030\007 \001(\t\022\036\n\006status\030\010 \001" +
+      "(\0162\016.AccountStatus\022\r\n\005roles\030\t \003(\t\022\036\n\nexp" +
+      "ertises\030\n \003(\0132\n.Expertise*)\n\rAccountStat" +
+      "us\022\n\n\006ACTIVE\020\000\022\014\n\010INACTIVE\020\001B$\n\025com.exam" +
+      "ple.grpc.userB\tUserProtoP\001b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
         });
-    internal_static_GetUserRequest_descriptor =
+    internal_static_Expertise_descriptor =
       getDescriptor().getMessageTypes().get(0);
+    internal_static_Expertise_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_Expertise_descriptor,
+        new java.lang.String[] { "Id", "Name", "Image", });
+    internal_static_GetUserRequest_descriptor =
+      getDescriptor().getMessageTypes().get(1);
     internal_static_GetUserRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_GetUserRequest_descriptor,
         new java.lang.String[] { "Id", });
     internal_static_GetUserResponse_descriptor =
-      getDescriptor().getMessageTypes().get(1);
+      getDescriptor().getMessageTypes().get(2);
     internal_static_GetUserResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_GetUserResponse_descriptor,
-        new java.lang.String[] { "Id", "Name", "Image", "Phone", "Description", "Email", "Username", "Status", "Roles", });
+        new java.lang.String[] { "Id", "Name", "Image", "Phone", "Description", "Email", "Username", "Status", "Roles", "Expertises", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)
