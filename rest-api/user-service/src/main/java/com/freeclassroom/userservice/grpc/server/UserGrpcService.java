@@ -1,10 +1,8 @@
 package com.freeclassroom.userservice.grpc.server;
 
-import com.example.grpc.user.AccountStatus;
-import com.example.grpc.user.GetUserRequest;
-import com.example.grpc.user.GetUserResponse;
-import com.example.grpc.user.UserServiceGrpc;
+import com.example.grpc.user.*;
 import com.freeclassroom.userservice.entity.user.UserEntity;
+import com.freeclassroom.userservice.exception.ErrorCode;
 import com.freeclassroom.userservice.repository.entity.UserRepository;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
@@ -13,18 +11,13 @@ import net.devh.boot.grpc.server.service.GrpcService;
 @GrpcService
 @RequiredArgsConstructor
 public class UserGrpcService extends UserServiceGrpc.UserServiceImplBase {
-    private final UserRepository userRepository;
+    private final UserRepository userRepo;
 
     @Override
     public void getUser(GetUserRequest request, StreamObserver<GetUserResponse> responseObserver) {
         String id = request.getId();
-        UserEntity user = userRepository.findById(id).orElse(null);
-        if(user == null) {
-            responseObserver.onError(
-                    new RuntimeException("User not found with id" + id)
-            );
-            return;
-        }
+        UserEntity user = userRepo.findByIdWithExpertises(request.getId())
+                .orElseThrow(() -> new RuntimeException("User not found with id" + id));
 
         GetUserResponse.Builder builder = GetUserResponse.newBuilder()
                 .setId(user.getId().toString())
@@ -41,6 +34,13 @@ public class UserGrpcService extends UserServiceGrpc.UserServiceImplBase {
                 );
 
         user.getRoles().forEach(role -> builder.addRoles(role.getName()));
+        user.getExpertises().forEach(expertise -> builder.addExpertises(
+                Expertise.newBuilder()
+                        .setId(expertise.getId().toString())
+                        .setName(expertise.getName())
+                        .setImage(expertise.getImage() == null ? "" : expertise.getImage())
+                        .build()
+        ));
 
         responseObserver.onNext(builder.build()); //send object
         responseObserver.onCompleted(); // notify completed

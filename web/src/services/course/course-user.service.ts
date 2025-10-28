@@ -21,6 +21,11 @@ export interface CourseResponse {
     email: string
     username: string | null
     numCourse: number
+    expertise: {
+      id: string
+      name: string
+      image: string
+    }
   }
   chapters: {
     id: string

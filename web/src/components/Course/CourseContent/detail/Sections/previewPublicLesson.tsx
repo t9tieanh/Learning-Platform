@@ -20,9 +20,7 @@ const PreviewPublicLesson = ({
       setOpen={(v: boolean) => {
         setPreview((prev: any) => ({
           ...prev,
-          openPreview: v,
-          previewUrl: v ? prev.previewUrl : null,
-          previewTitle: v ? prev.previewTitle : ''
+          openPreview: v
         }))
       }}
       title={

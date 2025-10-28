@@ -127,4 +127,28 @@ public interface GetUserResponseOrBuilder extends
    */
   com.google.protobuf.ByteString
       getRolesBytes(int index);
+
+  /**
+   * <code>repeated .Expertise expertises = 10;</code>
+   */
+  java.util.List<com.example.grpc.user.Expertise> 
+      getExpertisesList();
+  /**
+   * <code>repeated .Expertise expertises = 10;</code>
+   */
+  com.example.grpc.user.Expertise getExpertises(int index);
+  /**
+   * <code>repeated .Expertise expertises = 10;</code>
+   */
+  int getExpertisesCount();
+  /**
+   * <code>repeated .Expertise expertises = 10;</code>
+   */
+  java.util.List<? extends com.example.grpc.user.ExpertiseOrBuilder> 
+      getExpertisesOrBuilderList();
+  /**
+   * <code>repeated .Expertise expertises = 10;</code>
+   */
+  com.example.grpc.user.ExpertiseOrBuilder getExpertisesOrBuilder(
+      int index);
 }

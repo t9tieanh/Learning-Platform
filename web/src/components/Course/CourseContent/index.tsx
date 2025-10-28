@@ -22,6 +22,11 @@ const CourseContent = ({
     email: string
     username: string | null
     numCourse: number
+    expertise: {
+      id: string
+      name: string
+      image: string
+    }[]
   }
 }) => {
   return (

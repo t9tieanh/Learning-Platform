@@ -7,21 +7,19 @@ interface RequirementsProps {
 
 const Requirements: React.FC<RequirementsProps> = ({ requirements }) => {
   return (
-    <div className='space-y-4'>
-      {requirements.map((requirement, index) => (
-        <div
-          key={index}
-          className='flex ml-10 gap-4 p-4 bg-primary/5 border border-primary/20 rounded-lg transition-colors duration-200'
-        >
-          <div className='flex-shrink-0 mt-1 '>
-            <div className='w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center'>
-              {React.createElement(CheckCircle2, { className: 'w-4 h-4 text-primary' })}
+    <ul className='space-y-4 max-w-3xl ml-14 my-8'>
+      {requirements &&
+        requirements?.map((title, index) => (
+          <li key={index} className='flex items-center space-x-4 group'>
+            <div className='flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white transition-colors duration-300'>
+              <CheckCircle2 size={22} strokeWidth={2.2} />
             </div>
-          </div>
-          <p className='text-slate-600 leading-relaxed text-base'>{requirement}</p>
-        </div>
-      ))}
-    </div>
+            <span className='text-base font-medium text-foreground group-hover:text-primary transition-colors duration-300'>
+              {title}
+            </span>
+          </li>
+        ))}
+    </ul>
   )
 }
 

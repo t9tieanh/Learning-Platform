@@ -1,5 +1,6 @@
 package com.freeclassroom.userservice.controller;
 
+import com.freeclassroom.userservice.dto.request.expertise.AddExpertiseRequest;
 import com.freeclassroom.userservice.dto.response.ApiResponse;
 import com.freeclassroom.userservice.dto.response.common.CreationResponse;
 import com.freeclassroom.userservice.service.expertise.ExpertiseService;
@@ -22,9 +23,9 @@ public class SelfController {
 
     @PostMapping("/expertises")
     @PreAuthorize("isAuthenticated()")
-    public ApiResponse<Set<CreationResponse>> addExpertiseToCurrentUser(@RequestBody List<String> expertiseIds) {
+    public ApiResponse<Set<CreationResponse>> addExpertiseToCurrentUser(@RequestBody AddExpertiseRequest request) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        return expertiseService.addBulkExpertiseForUser(username, expertiseIds);
+        return expertiseService.addBulkExpertiseForUser(username, request.getExpertiseIds());
     }
 
     @PostMapping("/expertises/{expertiseId}")

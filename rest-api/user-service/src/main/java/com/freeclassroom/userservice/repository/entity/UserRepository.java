@@ -1,6 +1,7 @@
 package com.freeclassroom.userservice.repository.entity;
 
 import com.freeclassroom.userservice.entity.user.UserEntity;
+import feign.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -18,4 +19,7 @@ public interface UserRepository extends JpaRepository<UserEntity, String> {
     boolean existsByUsernameOrEmail(String username, String email);
     boolean existsByUsername(String s);
     boolean existsByEmail(String s);
+
+    @Query("SELECT u FROM UserEntity u LEFT JOIN FETCH u.expertises WHERE u.id = :id")
+    Optional<UserEntity> findByIdWithExpertises(@Param("id") String id);
 }

@@ -3,6 +3,7 @@ package com.freeclassroom.courseservice.service.course;
 import com.example.grpc.user.GetUserResponse;
 import com.freeclassroom.courseservice.dto.response.ApiResponse;
 import com.freeclassroom.courseservice.dto.response.course.CourseUserDetailResponse;
+import com.freeclassroom.courseservice.dto.response.course.ExpertiseResponse;
 import com.freeclassroom.courseservice.dto.response.course.InstructorCourseResponse;
 import com.freeclassroom.courseservice.entity.course.CourseEntity;
 import com.freeclassroom.courseservice.enums.entity.EnumCourseProgressStep;
@@ -54,6 +55,15 @@ public class CourseUserService implements ICourseUserService{
                 .image(user.getImage())
                 .username(user.getUsername())
                 .description(user.getDescription())
+                .expertise(
+                        user.getExpertisesList().stream()
+                                .map(expertise -> ExpertiseResponse.builder()
+                                        .id(expertise.getId())
+                                        .name(expertise.getName())
+                                        .image(expertise.getImage())
+                                        .build())
+                                .toList()
+                )
                 .id(user.getId())
                 .numCourse(courseRepo.countByInstructorIdAndNotDeleted(user.getId()))
                 .build());
