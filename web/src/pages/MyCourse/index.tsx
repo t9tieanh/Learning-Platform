@@ -1,13 +1,14 @@
+import Banner from '@/components/MyCourse/banner'
+import CourseList from '@/components/MyCourse/course-list'
+
 const MyCoursePage = () => {
   return (
-    <div className='min-h-screen'>
-      <div className='cart-banner text-neutral-900 p-8 pb-0 pl-10'>
-        <h1 className='text-base font-bold mb-4 flex items-center'>
-          &nbsp;Chào mừng đã trở lại, bắt đầu học tập cùng Learnova nào !
-        </h1>
-        <p className='text-base flex items-center text-black mt-2'>
-          &nbsp;Chốt đơn ngay hôm nay để nhận mức giá ưu đãi cực khủng – cơ hội chỉ đến một lần!
-        </p>
+    <div className='min-h-screen bg-gray-50'>
+      <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6'>
+        <Banner />
+        <div className='course-list'>
+          <CourseList />
+        </div>
       </div>
     </div>
   )

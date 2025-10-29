@@ -1,5 +1,5 @@
 import { Sigma } from 'lucide-react'
-import CartItemCard from './detail/CartItemCard'
+import CartItemCard from './cartItemCard'
 
 const CardSection = () => {
   const cardItems = [

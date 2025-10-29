@@ -59,7 +59,10 @@ const Header: FC = () => {
           {/* Right Section */}
           <NavigationMenuList className='flex items-center gap-2 md:gap-4'>
             {/* Cart Icon */}
-            <button onClick={() => navigate('/my-cart')} className='p-2 hover:bg-gray-100 rounded-full transition-colors'>
+            <button
+              onClick={() => navigate('/my-cart')}
+              className='p-2 hover:bg-gray-100 rounded-full transition-colors'
+            >
               <ShoppingCart className='w-5 h-5' />
             </button>
 

@@ -50,7 +50,10 @@ const CartItemCard = ({ cardItem }: { cardItem: CartItemCardProps }) => {
             )}
           </div>
           <div className='flex items-center gap-2'>
-            <Button icon={<MousePointer2 size={18} />} className='bg-slate-200 hover:bg-slate-50 hover:text-blue-500 p-2' />
+            <Button
+              icon={<MousePointer2 size={18} />}
+              className='bg-slate-200 hover:bg-slate-50 hover:text-blue-500 p-2'
+            />
             <Button icon={<Trash2 size={18} />} className='bg-slate-200 hover:bg-slate-50 hover:text-red-500 p-2' />
           </div>
         </div>
