@@ -1,36 +1,30 @@
 .cart-banner {
-	/* min-height: 350px; */
-	width: 100%;
-	padding: 50px;
-	position: relative;
-}
+	.cart-icon {
+		display: inline-block;
+		transform-origin: center;
+		transition: transform 0.15s ease;
+		animation: cart-wiggle 4s ease-in-out infinite;
+	}
 
-/* cart icon animation */
-.cart-banner .cart-icon {
-	display: inline-block;
-	transform-origin: center;
-	transition: transform 0.15s ease;
-	animation: cart-wiggle 4s ease-in-out infinite;
-}
+	@keyframes cart-wiggle {
+		0%, 100% { transform: rotate(0) translateX(0); }
+		10% { transform: rotate(-10deg) translateX(-2px); }
+		20% { transform: rotate(10deg) translateX(2px); }
+		30% { transform: rotate(-6deg) translateX(-1px); }
+		40% { transform: rotate(6deg) translateX(1px); }
+		50% { transform: rotate(0); }
+	}
 
-@keyframes cart-wiggle {
-	0%, 100% { transform: rotate(0) translateX(0); }
-	10% { transform: rotate(-10deg) translateX(-2px); }
-	20% { transform: rotate(10deg) translateX(2px); }
-	30% { transform: rotate(-6deg) translateX(-1px); }
-	40% { transform: rotate(6deg) translateX(1px); }
-	50% { transform: rotate(0); }
-}
+	/* scale up slightly on hover */
+	.cart-banner .cart-icon:hover {
+		transform: scale(1.08);
+		animation-duration: 1s;
+	}
 
-/* scale up slightly on hover */
-.cart-banner .cart-icon:hover {
-	transform: scale(1.08);
-	animation-duration: 1s;
-}
-
-/* Respect reduced motion preference */
-@media (prefers-reduced-motion: reduce) {
-	.cart-banner .cart-icon {
-		animation: none;
+	/* Respect reduced motion preference */
+	@media (prefers-reduced-motion: reduce) {
+		.cart-banner .cart-icon {
+			animation: none;
+		}
 	}
 }

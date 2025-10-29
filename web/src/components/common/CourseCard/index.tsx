@@ -5,6 +5,7 @@ import { IoPaperPlane } from 'react-icons/io5'
 import './style.scss'
 import { Course } from '@/types/course.type'
 import { useNavigate } from 'react-router-dom'
+import ImageNotFound from '@/assets/images/image-not-found.png'
 
 const CourseCard = ({ course, className }: { course: Course; className?: string }) => {
   const navigate = useNavigate()
@@ -17,7 +18,11 @@ const CourseCard = ({ course, className }: { course: Course; className?: string 
     <>
       <Card className={`p-0 gap-0 course-card ${className}`} onClick={handleClick}>
         <CardHeader className='p-0'>
-          <img alt='Course' className='h-48 w-full object-cover rounded-2xl' src={course.thumbnailUrl || 'https://static.vecteezy.com/system/resources/thumbnails/004/141/669/small/no-photo-or-blank-image-icon-loading-images-or-missing-image-mark-image-not-available-or-image-coming-soon-sign-simple-nature-silhouette-in-frame-isolated-illustration-vector.jpg'} />
+          <img
+            alt='Course'
+            className='h-48 w-full object-cover rounded-2xl'
+            src={course.thumbnailUrl || ImageNotFound}
+          />
         </CardHeader>
         <CardContent className='p-4 pt-1'>
           <CardTitle className='text-lg font-bold'>{course.title}</CardTitle>

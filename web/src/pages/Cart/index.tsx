@@ -5,19 +5,21 @@ import RecommendedCourses from '@/components/Cart/RecommendedCourses'
 
 const CartPage = () => {
   return (
-    <div className='cart-page bg-gray-50'>
-      <Banner />
-      <div className='py-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 mx-4 lg:mx-12 min-h-[60vh] mt-5 gap-6'>
-        <div className='lg:col-span-3 md:col-span-1'>
-          <CardSection />
+    <div className='min-h-screen bg-gray-50'>
+      <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6'>
+        <Banner />
+        <div className='py-5 grid grid-cols-1 md:grid-cols-4 items-start min-h-[60vh] gap-6'>
+          <div className='md:col-span-3'>
+            <CardSection />
+          </div>
+          <div className='md:col-span-1'>
+            <CheckoutSummary />
+          </div>
         </div>
-        <div className='lg:col-span-1 md:col-span-1'>
-          <CheckoutSummary />
+        <div className='bg-white p-6 rounded-lg'>
+          <RecommendedCourses />
         </div>
       </div>
-      {/* <div className='mx-12 mt-10 min-h-[60vh]'>
-        <RecommendedCourses />
-      </div> */}
     </div>
   )
 }

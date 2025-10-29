@@ -1,7 +1,6 @@
 import { CiDiscount1 } from 'react-icons/ci'
 import CustomButton from '@/components/common/Button'
 import { GrLinkNext } from 'react-icons/gr'
-import './style.scss'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Trash, MousePointer2 } from 'lucide-react'
 
@@ -15,7 +14,7 @@ interface OrderDetailProps {
 const OrderDetail = ({ order }: { order: OrderDetailProps }) => {
   return (
     <>
-      <h4 className='font-semibold mb-5 text-sm flex items-center gap-2 p-2'>
+      <h4 className='font-semibold mb-5 text-gray-600 text-sm flex items-center gap-2 p-2'>
         <Avatar>
           <AvatarImage src={order.image} alt='User Avatar' />
           <AvatarFallback>{order.title}</AvatarFallback>
@@ -52,16 +51,16 @@ const CheckoutSummary = () => {
   ]
 
   return (
-    <div className='p-3 checkout-section'>
+    <div className='p-3 border-gray-300 border-1 rounded-xl p-4 bg-white'>
       <div className='checkout-title'>
-        <p className='text-lg font-semibold mb-1 flex items-center'>
+        <p className='text-base font-semibold mb-1 flex items-center'>
           <CiDiscount1 />
           &nbsp;Tổng tiền
         </p>
         <hr />
       </div>
       <div className='mt-3 p-1'>
-        <div className='flex items-center justify-between p-2 font-bold text-2xl'>
+        <div className='flex items-center justify-between p-2 font-bold text-xl'>
           ₫279,000 VND
           <div>
             <span className='line-through font-normal text-sm text-gray-500'>₫300,000</span>
