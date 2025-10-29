@@ -27,7 +27,7 @@ const TeacherInfo = ({ teacher }: { teacher: Teacher }) => {
         <div className='flex flex-col md:flex-row gap-6'>
           {/* Teacher Avatar and Basic Info */}
           <div className='flex flex-col items-center md:items-start gap-4 md:w-1/3'>
-            <Avatar className='w-20 h-20 ring-4 ring-primary/20'>
+            <Avatar className='w-20 h-20 shadow-lg'>
               <AvatarImage src={teacher?.image} alt={teacher?.name} />
               <AvatarFallback className='text-2xl font-semibold bg-gradient-primary text-primary-foreground'>
                 {teacher?.name
@@ -74,9 +74,9 @@ const TeacherInfo = ({ teacher }: { teacher: Teacher }) => {
                   <Badge
                     key={index}
                     variant='secondary'
-                    className='bg-primary/10 p-1 px-2 text-primary hover:bg-primary/20'
+                    className='bg-white shadow-lg text-black p-1 px-2 hover:bg-primary/20'
                   >
-                    <Avatar className='w-20 h-20 ring-4 ring-primary/20 w-6 h-6 mr-2'>
+                    <Avatar className='w-20 h-20 w-6 h-6 mr-2'>
                       <AvatarImage src={skill?.image} alt={skill?.name} />
                       <AvatarFallback className='text-2xl font-semibold bg-gradient-primary text-primary-foreground'>
                         {skill?.name

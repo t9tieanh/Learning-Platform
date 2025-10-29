@@ -8,6 +8,7 @@ import courseUserService, { CourseResponse } from '@/services/course/course-user
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { useNavigate, useParams } from 'react-router-dom'
+import AvatarNotFound from '@/assets/images/avatar-not-found.png'
 
 const Course = () => {
   const [courseDetail, setCourseDetail] = useState<CourseResponse | null>(null)
@@ -44,7 +45,7 @@ const Course = () => {
         shortDescription={courseDetail?.shortDescription || ''}
         teacher={{
           name: courseDetail?.instructor.name || '',
-          avatar: courseDetail?.instructor.image || 'https://images.icon-icons.com/1378/PNG/512/avatardefault_92824.png'
+          avatar: courseDetail?.instructor.image || AvatarNotFound
         }}
         tags={courseDetail?.tags || []}
       />

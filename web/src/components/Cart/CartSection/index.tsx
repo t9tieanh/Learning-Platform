@@ -1,4 +1,3 @@
-import './style.scss'
 import { Sigma } from 'lucide-react'
 import CartItemCard from './detail/CartItemCard'
 
@@ -31,9 +30,9 @@ const CardSection = () => {
   ]
 
   return (
-    <div className='cart-section p-2'>
+    <div className='cart-section p-5 bg-white rounded-lg'>
       <div className='total-cart-item'>
-        <p className='text-lg font-semibold mb-1 flex items-center'>
+        <p className='text-sm font-semibold mb-1 flex items-center'>
           <Sigma />
           Có
           <span className='text-red-400'>&nbsp;3&nbsp;</span>khóa học trong giỏ hàng !
