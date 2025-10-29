@@ -45,7 +45,7 @@ const router = createBrowserRouter([
         path: '',
         element: <HeaderLayout />,
         children: [
-          { path: 'chat', element: <Chat /> }
+          { path: 'chat/:id', element: <Chat /> }
         ]
       },
       // Not has Layout
@@ -72,7 +72,7 @@ const router = createBrowserRouter([
         path: 'teacher',
         element: <TC_Layout />,
         children: [
-          { path: 'chat', element: <Chat /> }
+          { path: 'chat/:id', element: <Chat /> }
         ]
       },
       { path: 'user/verify', element: <User /> },

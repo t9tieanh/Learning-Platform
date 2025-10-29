@@ -206,12 +206,74 @@ const markRead = async (req: Request, res: Response) => {
     }
 }
 
+const updateMessage = async (req: Request, res: Response) => {
+    try {
+        const currentUserId = (req.user as any)?.sub as string
+        if (!currentUserId) throw new Error('Thiếu thông tin người dùng (token)')
+
+        const { conversationId, messageId, content } = req.data as {
+            conversationId: string; messageId: string; content: string
+        }
+
+        const updated = await ChatService.updateMessage(conversationId, messageId, currentUserId, content)
+
+        sendResponse(res, {
+            code: StatusCodes.OK,
+            message: 'Chỉnh sửa tin nhắn thành công',
+            result: {
+                _id: String(updated._id),
+                conversationId: String(updated.conversationId),
+                senderId: String(updated.senderId),
+                senderRole: updated.senderRole,
+                content: updated.content || '',
+                type: updated.type,
+                status: updated.status,
+                createdAt: updated.createdAt,
+                updatedAt: (updated as any).updatedAt
+            }
+        })
+    } catch (e) {
+        const err = e as Error
+        sendResponse(res, {
+            code: StatusCodes.BAD_REQUEST,
+            message: err.message || 'Lỗi chỉnh sửa tin nhắn',
+            result: null
+        })
+    }
+}
+
+const deleteMessage = async (req: Request, res: Response) => {
+    try {
+        const currentUserId = (req.user as any)?.sub as string
+        if (!currentUserId) throw new Error('Thiếu thông tin người dùng (token)')
+
+        const { conversationId, messageId } = req.data as { conversationId: string; messageId: string }
+
+        const result = await ChatService.deleteMessage(conversationId, messageId, currentUserId)
+
+        sendResponse(res, {
+            code: StatusCodes.OK,
+            message: 'Xóa tin nhắn thành công',
+            result
+        })
+    } catch (e) {
+        const err = e as Error
+        sendResponse(res, {
+            code: StatusCodes.BAD_REQUEST,
+            message: err.message || 'Lỗi xóa tin nhắn',
+            result: null
+        })
+    }
+}
+
 const ChatController = {
     createOrGetDirect,
     listConversations,
     getMessages,
     sendMessage,
-    markRead
+    markRead,
+    updateMessage,
+    deleteMessage
 }
 
 export default ChatController

@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useLocation, useParams, useNavigate } from "react-router-dom";
 import { ConversationList } from "@/components/Chat/ConversationList";
 import { ChatArea } from "@/components/Chat/ChatArea";
 import { ConversationListItem } from "@/types/chat.type";
@@ -7,8 +7,17 @@ import { ConversationListItem } from "@/types/chat.type";
 const Chat = () => {
     const [selectedConversation, setSelectedConversation] = useState<ConversationListItem | null>(null);
     const location = useLocation()
+    const navigate = useNavigate()
+    const { peerId: peerIdParam } = useParams<{ peerId?: string }>()
     const forcedRole: 'instructor' | 'student' =
         location.pathname.startsWith('/teacher') ? 'instructor' : 'student'
+
+    // Khi user click chọn hội thoại, điều hướng theo /chat/:peerId hoặc /teacher/chat/:peerId
+    const handleSelect = (c: ConversationListItem) => {
+        setSelectedConversation(c)
+        const base = forcedRole === 'instructor' ? '/teacher/chat' : '/chat'
+        if (c?.peerId) navigate(`${base}/${c.peerId}`, { replace: false })
+    }
 
     return (
         <div className="flex h-screen overflow-hidden min-h-0">
@@ -18,7 +27,8 @@ const Chat = () => {
             >
                 <ConversationList
                     selected={selectedConversation}
-                    onSelect={(c) => setSelectedConversation(c)}
+                    onSelect={handleSelect}
+                    desiredPeerId={peerIdParam}
                 />
             </div>
 

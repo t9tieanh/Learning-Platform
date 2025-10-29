@@ -73,8 +73,9 @@ export default function GlobalChatNotifier() {
             const id = Math.random().toString(36).slice(2)
             const at = createdAt || Date.now()
             const onClick = () => {
-                // Navigate to chat; choose route by myRole for good measure
-                navigate(myRole === 'instructor' ? '/teacher/chat' : '/chat')
+                const base = myRole === 'instructor' ? '/teacher/chat' : '/chat'
+                if (peerId) navigate(`${base}/${peerId}`)
+                else navigate(base)
             }
             setToasts(prev => [...prev, { id, title, message, at, onClick, avatar: info?.avatar, senderName: info?.name }])
             // Auto dismiss

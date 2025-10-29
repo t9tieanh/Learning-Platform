@@ -1,13 +1,27 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Phone, Video, MoreVertical, Send, Image, Paperclip, ChevronLeft } from "lucide-react";
+import { Phone, Video, MoreVertical, Send, Image, Paperclip, ChevronLeft, Copy } from "lucide-react";
 import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { SocketContext } from "@/api/socket/socket.context";
 import { useLocation } from "react-router-dom";
 import chatService from "@/services/chat/chat.service";
 import { useAuthStore } from "@/stores/useAuth.stores";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { toast } from 'sonner';
 
 // Loại vai trò của người dùng trong phòng chat
 type Role = 'instructor' | 'student'
@@ -41,6 +55,11 @@ export const ChatArea = ({ conversationId, peerId: peerFromProps, peerName, peer
   const [myRole, setMyRole] = useState<"instructor" | "student">("student")
   // Ref tới vùng danh sách tin nhắn để auto scroll
   const scrollContainerRef = useRef<HTMLDivElement | null>(null)
+  // Chỉnh sửa tin nhắn
+  const [editOpen, setEditOpen] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editValue, setEditValue] = useState<string>("")
+  const [originalValue, setOriginalValue] = useState<string>("")
 
   const [peerId, setPeerId] = useState<string>(peerFromProps || "")
   const { data } = useAuthStore()
@@ -122,8 +141,11 @@ export const ChatArea = ({ conversationId, peerId: peerFromProps, peerName, peer
     socket.emit('join_room', ids)
     // Lắng nghe tin nhắn mới đến và append vào UI
     const onReceive = (data: { senderId: string; message: string; createdAt: number; instructorId?: string; studentId?: string; senderRole?: 'instructor' | 'student' }) => {
-      // Avoid duplicating the sender's own optimistic message
+      // Tránh trùng chính tin do mình gửi
       if (data.senderId === myId) return
+      // Chỉ nhận tin thuộc đúng phòng hiện tại (cặp instructorId/studentId trùng khớp)
+      const sameRoom = !!data.instructorId && !!data.studentId && data.instructorId === ids.instructorId && data.studentId === ids.studentId
+      if (!sameRoom) return
       setMessages((prev) => [
         ...prev,
         { id: Math.random().toString(36).slice(2), content: data.message, senderId: data.senderId, timestamp: data.createdAt }
@@ -225,6 +247,93 @@ export const ChatArea = ({ conversationId, peerId: peerFromProps, peerName, peer
     setMessage("")
   };
 
+  // Copy nội dung tin nhắn
+  const handleCopy = async (content: string) => {
+    try {
+      await navigator.clipboard.writeText(content)
+      toast.success("Đã sao chép nội dung")
+    } catch (e) {
+      console.error("Copy failed", e)
+    }
+  }
+
+  const handleDelete = async (id: string) => {
+    if (!conversationId) {
+      console.warn('No conversationId; skip delete')
+      return
+    }
+    try {
+      const res = await chatService.deleteMessage({ conversationId, messageId: id })
+      if (res?.result?.deleted) {
+        setMessages((prev) => {
+          const next = prev.filter((m) => m.id !== id)
+          // Nếu xoá tin cuối, cập nhật lại preview ở ConversationList
+          const newLast = next[next.length - 1]
+          window.dispatchEvent(
+            new CustomEvent('chat:conversation-last-changed', {
+              detail: {
+                conversationId,
+                lastMessage: newLast
+                  ? {
+                    _id: newLast.id,
+                    content: newLast.content,
+                    senderId: newLast.senderId,
+                    createdAt: new Date(newLast.timestamp).toISOString(),
+                  }
+                  : undefined,
+              },
+            })
+          )
+          return next
+        })
+        toast.success('Xóa tin nhắn thành công')
+      }
+    } catch (e) {
+      console.error('deleteMessage error', e)
+    }
+  }
+
+  // Bắt đầu chỉnh sửa
+  const handleStartEdit = (id: string, content: string) => {
+    setEditingId(id)
+    setOriginalValue(content)
+    setEditValue(content)
+    setEditOpen(true)
+  }
+
+  const handleConfirmEdit = async () => {
+    if (!editingId || !conversationId) return
+    const newText = editValue.trim()
+    if (!newText) return
+    try {
+      const res = await chatService.updateMessage({
+        conversationId,
+        messageId: editingId,
+        content: newText,
+      })
+      const updated = res?.result
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === editingId
+            ? {
+              ...m,
+              content: updated?.content ?? newText,
+              timestamp: updated?.createdAt
+                ? new Date(updated.createdAt).getTime()
+                : m.timestamp,
+            }
+            : m
+        )
+      )
+      toast.success('Cập nhật tin nhắn thành công')
+    } catch (e) {
+      toast.error('Cập nhật thất bại')
+    } finally {
+      setEditOpen(false)
+      setEditingId(null)
+    }
+  }
+
   return (
     <div className="flex flex-col flex-1 h-full min-h-0 bg-gray-50">
       {/* Header */}
@@ -279,7 +388,7 @@ export const ChatArea = ({ conversationId, peerId: peerFromProps, peerName, peer
               <div
                 key={msg.id}
                 className={cn(
-                  "flex items-end gap-2",
+                  "group flex items-end gap-2",
                   isMine ? "justify-end" : "justify-start"
                 )}
               >
@@ -288,6 +397,43 @@ export const ChatArea = ({ conversationId, peerId: peerFromProps, peerName, peer
                     <AvatarImage src={peerAvatar} />
                     <AvatarFallback>N</AvatarFallback>
                   </Avatar>
+                )}
+
+                {isMine && (
+                  <div className="mr-1 opacity-0 group-hover:opacity-100 transition">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 hover:bg-gray-100"
+                      onClick={() => handleCopy(msg.content)}
+                    >
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 hover:bg-gray-100"
+                        >
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent
+                        align="start"
+                        side="bottom"
+                        sideOffset={4}
+                        className="w-40 -translate-x-32 -translate-y-4"
+                      >
+                        <DropdownMenuItem onClick={() => handleDelete(msg.id)}>
+                          Xoá tin nhắn
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleStartEdit(msg.id, msg.content)}>
+                          Chỉnh sửa tin
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
                 )}
 
                 <div
@@ -354,6 +500,36 @@ export const ChatArea = ({ conversationId, peerId: peerFromProps, peerName, peer
           </Button>
         </div>
       </div>
+
+      {/* Dialog chỉnh sửa tin nhắn */}
+      <Dialog open={editOpen} onOpenChange={setEditOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Chỉnh sửa tin nhắn</DialogTitle>
+          </DialogHeader>
+          <div className="mt-2">
+            <Input
+              value={editValue}
+              onChange={(e) => setEditValue(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault()
+                  handleConfirmEdit()
+                }
+              }}
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditOpen(false)}>Huỷ</Button>
+            <Button
+              onClick={handleConfirmEdit}
+              disabled={
+                editValue.trim() === originalValue.trim() || editValue.trim() === ''
+              }
+            >Lưu</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

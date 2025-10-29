@@ -29,6 +29,16 @@ class ChatService {
         const res = await axiosClient.axiosInstance.post('notify/chat/messages/read', { conversationId, messageId })
         return res.data
     }
+
+    async updateMessage(body: { conversationId: string; messageId: string; content: string }): Promise<ApiResponse<MessageItem>> {
+        const res = await axiosClient.axiosInstance.patch('notify/chat/messages', body)
+        return res.data
+    }
+
+    async deleteMessage(body: { conversationId: string; messageId: string }): Promise<ApiResponse<{ deleted: boolean }>> {
+        const res = await axiosClient.axiosInstance.delete('notify/chat/messages', { data: body })
+        return res.data
+    }
 }
 
 export default new ChatService()

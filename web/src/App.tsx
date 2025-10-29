@@ -18,8 +18,13 @@ const App: FC = () => {
         toastOptions={{
           style: {
             background: 'white',
-            color: 'black'
-          }
+            width: 'fit-content',
+            padding: '15px 20px 15px 20px'
+          },
+          classNames: {
+            success: "bg-green-500 text-white",
+            error: "bg-red-400 text-white",
+          },
         }}
       />
     </div>

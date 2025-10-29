@@ -158,12 +158,68 @@ const markRead = async (conversationId: string, readerId: string, messageId?: st
     return { updated: result.modifiedCount }
 }
 
+const updateMessage = async (conversationId: string, messageId: string, editorId: string, content: string) => {
+    const convId = (conversationId)
+    const msgId = (messageId)
+
+    // Chỉ cho phép chỉnh sửa tin nhắn do chính mình gửi
+    const updated = await Message.findOneAndUpdate(
+        { _id: msgId, conversationId: convId, senderId: editorId },
+        { $set: { content } },
+        { new: true }
+    )
+
+    if (!updated) {
+        throw new Error('Không tìm thấy tin nhắn hoặc bạn không có quyền chỉnh sửa')
+    }
+
+    // Nếu đây là lastMessage của cuộc trò chuyện thì không cần đổi lastMessageId,
+    // nhưng vẫn đảm bảo lastMessageAt hợp lý (dựa trên createdAt của tin nhắn)
+    await Conversation.findByIdAndUpdate(convId, {
+        $set: { lastMessageAt: updated.createdAt, lastMessageId: updated._id }
+    })
+
+    return updated
+}
+
+const deleteMessage = async (conversationId: string, messageId: string, requesterId: string) => {
+    const convId = (conversationId)
+    const msgId = (messageId)
+
+    const msg = await Message.findOne({ _id: msgId, conversationId: convId, senderId: requesterId })
+    if (!msg) {
+        throw new Error('Không tìm thấy tin nhắn hoặc bạn không có quyền xóa')
+    }
+
+    await Message.deleteOne({ _id: msgId })
+
+    const conv = await Conversation.findById(convId)
+    if (conv && String(conv.lastMessageId) === String(msgId)) {
+        const last = await Message.find({ conversationId: convId })
+            .sort({ _id: -1 })
+            .limit(1)
+            .lean()
+        const nextLast = last[0]
+        await Conversation.findByIdAndUpdate(convId, {
+            $set: {
+                lastMessageId: nextLast ? nextLast._id : undefined,
+                lastMessageAt: nextLast ? nextLast.createdAt : undefined,
+            },
+            $unset: !nextLast ? { lastMessageId: 1, lastMessageAt: 1 } : undefined
+        } as any)
+    }
+
+    return { deleted: true }
+}
+
 const ChatService = {
     createOrGetDirect,
     listConversations,
     getMessages,
     sendMessage,
-    markRead
+    markRead,
+    updateMessage,
+    deleteMessage
 }
 
 export default ChatService

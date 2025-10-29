@@ -14,15 +14,15 @@ import { Circle, MinusCircle, Clock, XCircle, CheckCircle } from "lucide-react"
 interface ConversationListProps {
   selected?: ConversationListItem | null;
   onSelect: (item: ConversationListItem) => void;
+  desiredPeerId?: string;
 }
 
 const statuses = [
   { label: "Đang hoạt động", color: "text-green-500", icon: <CheckCircle className="h-4 w-4 text-green-500" /> }, // Đang onl
   { label: "Không làm phiền", color: "text-red-600", icon: <MinusCircle className="h-4 w-4 text-red-600" /> }, // Không gửi thông báo
-  { label: "Vắng mặt", color: "text-yellow-500", icon: <Clock className="h-4 w-4 text-yellow-500" /> }, // Không onl hoặc fake onl
 ]
 
-export const ConversationList = ({ selected, onSelect }: ConversationListProps) => {
+export const ConversationList = ({ selected, onSelect, desiredPeerId }: ConversationListProps) => {
   const [conversations, setConversations] = useState<ConversationListItem[]>([])
   const [searchText, setSearchText] = useState("")
   const [status, setStatus] = useState(statuses[0])
@@ -37,13 +37,33 @@ export const ConversationList = ({ selected, onSelect }: ConversationListProps) 
       ; (async () => {
         try {
           const res = await chatService.getConversations(myRole)
-          if (mounted) setConversations(res.result || [])
+          if (mounted) {
+            const list = res.result || []
+            setConversations(list)
+            // Tự động chọn hội thoại đầu tiên khi lần đầu vào trang nếu chưa chọn
+            if (!selected && list.length > 0) {
+              if (desiredPeerId) {
+                const found = list.find((c) => c.peerId === desiredPeerId)
+                onSelect(found || list[0])
+              } else {
+                onSelect(list[0])
+              }
+            }
+          }
         } catch (e) {
           console.error('Load conversations error', e)
         }
       })()
     return () => { mounted = false }
   }, [])
+
+  // Khi desiredPeerId thay đổi (đi theo URL), cố gắng chọn đúng hội thoại
+  useEffect(() => {
+    if (!desiredPeerId) return
+    if (selected?.peerId === desiredPeerId) return
+    const found = conversations.find((c) => c.peerId === desiredPeerId)
+    if (found) onSelect(found)
+  }, [desiredPeerId, conversations])
 
   // Join tất cả phòng theo danh sách hội thoại để nhận realtime preview (kể cả khi chưa mở ChatArea)
   useEffect(() => {
@@ -94,6 +114,44 @@ export const ConversationList = ({ selected, onSelect }: ConversationListProps) 
     if (!selected) return
     setConversations((prev) => prev.map(c => c.conversationId === selected.conversationId ? { ...c, unreadCount: 0 } : c))
   }, [selected?.conversationId])
+
+  // Nghe sự kiện cập nhật last message khi xóa/chỉnh sửa ở ChatArea
+  useEffect(() => {
+    const onLastChanged = (evt: Event) => {
+      const { conversationId, lastMessage } = (evt as CustomEvent<{ conversationId: string; lastMessage?: { _id: string; content: string; senderId: string; createdAt: string } }>).detail || {}
+      if (!conversationId) return
+      setConversations((prev) => {
+        const idx = prev.findIndex((c) => c.conversationId === conversationId)
+        if (idx === -1) return prev
+        const item = prev[idx]
+        const computedLast = lastMessage
+          ? {
+            _id: lastMessage._id,
+            content: lastMessage.content,
+            senderId: lastMessage.senderId,
+            createdAt: lastMessage.createdAt,
+            senderRole:
+              lastMessage.senderId === myId
+                ? myRole
+                : myRole === 'instructor'
+                  ? 'student'
+                  : 'instructor',
+          }
+          : undefined
+
+        const updated: ConversationListItem = {
+          ...item,
+          lastMessage: computedLast,
+          lastMessageAt: computedLast?.createdAt,
+        }
+        const next = [...prev]
+        next[idx] = updated
+        return next
+      })
+    }
+    window.addEventListener('chat:conversation-last-changed', onLastChanged as EventListener)
+    return () => window.removeEventListener('chat:conversation-last-changed', onLastChanged as EventListener)
+  }, [myId, myRole])
 
   const filtered = useMemo(() => {
     if (!searchText.trim()) return conversations
@@ -170,7 +228,7 @@ export const ConversationList = ({ selected, onSelect }: ConversationListProps) 
               </div>
               <p className="text-sm text-slate-500 truncate">
                 {c.lastMessage
-                  ? `${c.lastMessage.senderId === myId ? 'You: ' : ''}${c.lastMessage.content}`
+                  ? `${c.lastMessage.senderId === myId ? 'Bạn: ' : ''}${c.lastMessage.content}`
                   : 'Bắt đầu cuộc trò chuyện'}
               </p>
             </div>

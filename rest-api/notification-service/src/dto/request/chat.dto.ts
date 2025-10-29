@@ -55,3 +55,32 @@ export class ReadMessageDTO {
     @IsString()
     messageId?: string
 }
+
+export class UpdateMessageDTO {
+    // hội thoại chứa tin nhắn cần chỉnh sửa
+    @IsString()
+    @IsNotEmpty()
+    conversationId!: string
+
+    // id tin nhắn cần chỉnh sửa
+    @IsString()
+    @IsNotEmpty()
+    messageId!: string
+
+    // nội dung mới
+    @IsString()
+    @IsNotEmpty()
+    content!: string
+}
+
+export class DeleteMessageDTO {
+    // hội thoại chứa tin nhắn cần xóa
+    @IsString()
+    @IsNotEmpty()
+    conversationId!: string
+
+    // id tin nhắn cần xóa
+    @IsString()
+    @IsNotEmpty()
+    messageId!: string
+}

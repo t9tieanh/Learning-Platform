@@ -5,7 +5,9 @@ import {
     CreateDirectConversationDTO,
     GetMessagesDTO,
     SendMessageDTO,
-    ReadMessageDTO
+    ReadMessageDTO,
+    UpdateMessageDTO,
+    DeleteMessageDTO
 } from '../dto/request/chat.dto'
 
 const router = Router()
@@ -24,5 +26,11 @@ router.post('/messages', ValidateDto(SendMessageDTO), ChatController.sendMessage
 
 // Đánh dấu đã đọc tin nhắn (toàn bộ hoặc đến một messageId)
 router.post('/messages/read', ValidateDto(ReadMessageDTO), ChatController.markRead)
+
+// Chỉnh sửa nội dung tin nhắn (chỉ cho phép chủ sở hữu tin nhắn)
+router.patch('/messages', ValidateDto(UpdateMessageDTO), ChatController.updateMessage)
+
+// Xóa tin nhắn (chỉ cho phép chủ sở hữu tin nhắn)
+router.delete('/messages', ValidateDto(DeleteMessageDTO), ChatController.deleteMessage)
 
 export default router
