@@ -13,7 +13,6 @@ export const registerChatHandlers = (io: Server, socket: Socket) => {
     });
 
     socket.on("send_message", (data) => {
-        // data = { message, senderId, instructorId, studentId }
         const roomId = getRoomId(data.instructorId, data.studentId);
         console.log(`💬 Message from ${data.senderId} in ${roomId}:`, data.message);
         io.to(roomId).emit("receive_message", {
@@ -25,6 +24,17 @@ export const registerChatHandlers = (io: Server, socket: Socket) => {
             senderRole: data.senderId === data.instructorId ? 'instructor' : 'student'
         });
     });
+
+    socket.on("server_message_read", (data) => {
+        const { conversationId, senderId, peerId } = data;
+        const roomId = getRoomId(senderId, peerId);
+        console.log(`${data.peerId} read it`);
+        io.to(roomId).emit("message_read", {
+            conversationId,
+            senderId,
+            peerId
+        })
+    })
 
     socket.on("disconnect", () => {
         console.log(`❌ User disconnected: ${socket.id}`);

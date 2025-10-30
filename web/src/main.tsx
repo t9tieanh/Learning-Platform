@@ -38,14 +38,7 @@ const router = createBrowserRouter([
           { path: 'my-cart', element: <CartPage /> },
           { path: 'profile', element: <Profile /> },
           { path: 'courses', element: <AllCourse /> },
-        ]
-      },
-      // Header Layout
-      {
-        path: '',
-        element: <HeaderLayout />,
-        children: [
-          { path: 'chat/:id', element: <Chat /> }
+          { path: 'chat/:id', element: <Chat />, handle: { hideFooter: true } }
         ]
       },
       // Not has Layout
@@ -58,6 +51,7 @@ const router = createBrowserRouter([
       // Instructor
       {
         path: 'teacher',
+        element: <TC_Layout />,
         children: [
           { path: '', element: <TCHomePage /> },
           { path: 'course', element: <TC_Course /> },
@@ -65,14 +59,8 @@ const router = createBrowserRouter([
           { path: 'profile', element: <TC_Profile /> },
           { path: 'course-details/:id', element: <TC_CourseDetail /> },
           // Alias cũ (nếu ai truy cập không có id sẽ 404 hoặc có thể điều hướng)
+          { path: 'chat/:id', element: <Chat /> },
           { path: 'course-details', element: <NotFound /> }
-        ]
-      },
-      {
-        path: 'teacher',
-        element: <TC_Layout />,
-        children: [
-          { path: 'chat/:id', element: <Chat /> }
         ]
       },
       { path: 'user/verify', element: <User /> },

@@ -187,9 +187,9 @@ const markRead = async (req: Request, res: Response) => {
         const currentUserId = (req.user as any)?.sub as string
         if (!currentUserId) throw new Error('Thiếu thông tin người dùng (token)')
 
-        const { conversationId, messageId } = req.data as { conversationId: string; messageId?: string }
+        const { conversationId, peerId, messageId } = req.data as { conversationId: string; peerId: string, messageId: string }
 
-        const result = await ChatService.markRead(conversationId, currentUserId, messageId)
+        const result = await ChatService.markRead(conversationId, currentUserId, peerId, messageId)
 
         sendResponse(res, {
             code: StatusCodes.OK,

@@ -1,7 +1,7 @@
 import { Types } from 'mongoose'
 import Conversation, { IConversation } from '~/models/message/conversation.model'
 import Message, { IMessage } from '~/models/message/message.model'
-import socket from '~/socket'
+import socketClient from '~/socket';
 interface DirectConversationResult {
     conversation: IConversation
     isNew: boolean
@@ -145,17 +145,27 @@ const sendMessage = async (
 
 
 // Đánh dấu đã đọc tin nhắn (toàn bộ hoặc đến một messageId)
-const markRead = async (conversationId: string, readerId: string, messageId?: string) => {
-    const convId = (conversationId)
-
-    const filter: any = { conversationId: convId, status: { $ne: 'read' } }
-    if (messageId && Types.ObjectId.isValid(messageId)) {
-        filter._id = { $lte: new Types.ObjectId(messageId) }
+const markRead = async (conversationId: string, senderId: string, peerId: string, messageId?: string) => {
+    try {
+        console.log('READER ID', peerId);
+        if (peerId) {
+            const filter: any = { conversationId: conversationId, status: { $ne: 'read' } }
+            // if (messageId && Types.ObjectId.isValid(messageId)) {
+            //     filter._id = { $lte: new Types.ObjectId(messageId) }
+            // }
+            const result = await Message.updateMany(filter, { $set: { status: 'read' } })
+            socketClient.emit("server_message_read", {
+                conversationId,
+                senderId,
+                peerId
+            });
+            return { updated: result.modifiedCount }
+        }
+        return null;
+    } catch (error) {
+        console.error('❌ Error in markRead:', error);
+        return null;
     }
-
-    const result = await Message.updateMany(filter, { $set: { status: 'read' } })
-
-    return { updated: result.modifiedCount }
 }
 
 const updateMessage = async (conversationId: string, messageId: string, editorId: string, content: string) => {

@@ -25,8 +25,8 @@ class ChatService {
         return res.data
     }
 
-    async markRead(conversationId: string, messageId?: string): Promise<ApiResponse<{ updated: number }>> {
-        const res = await axiosClient.axiosInstance.post('notify/chat/messages/read', { conversationId, messageId })
+    async markRead(conversationId: string, peerId: string, messageId?: string): Promise<ApiResponse<{ updated: number }>> {
+        const res = await axiosClient.axiosInstance.post('notify/chat/messages/read', { conversationId, peerId, messageId })
         return res.data
     }
 

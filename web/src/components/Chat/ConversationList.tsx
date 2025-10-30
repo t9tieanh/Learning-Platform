@@ -65,16 +65,14 @@ export const ConversationList = ({ selected, onSelect, desiredPeerId }: Conversa
     if (found) onSelect(found)
   }, [desiredPeerId, conversations])
 
-  // Join tất cả phòng theo danh sách hội thoại để nhận realtime preview (kể cả khi chưa mở ChatArea)
-  useEffect(() => {
-    if (!socket || !myId || conversations.length === 0) return
-    for (const c of conversations) {
-      const payload = myRole === 'instructor'
-        ? { instructorId: myId, studentId: c.peerId }
-        : { instructorId: c.peerId, studentId: myId }
-      socket.emit('join_room', payload)
-    }
-  }, [socket, myId, myRole, conversations])
+  // useEffect(() => {
+  //   if (!socket || !myId || conversations.length === 0) return
+  //   for (const c of conversations) {
+  //     const payload = myRole === 'instructor'
+  //       ? { instructorId: myId, studentId: c.peerId }
+  //       : { instructorId: c.peerId, studentId: myId }
+  //   }
+  // }, [socket, myId, myRole, conversations])
 
   // Lắng nghe socket để cập nhật last message realtime và move-to-top
   useEffect(() => {
@@ -159,7 +157,6 @@ export const ConversationList = ({ selected, onSelect, desiredPeerId }: Conversa
     return conversations.filter(c => (c.peerName || '').toLowerCase().includes(q))
   }, [conversations, searchText])
 
-  console.log('[FILTERED]', filtered)
   return (
     <div className="flex h-full min-h-0 flex-col bg-white border-r border-slate-200">
       {/* Header */}

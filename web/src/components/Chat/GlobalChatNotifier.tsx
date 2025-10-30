@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState, useMemo } from 'react'
+import { useContext, useEffect, useState, useRef } from 'react'
 import { SocketContext } from '@/api/socket/socket.context'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/stores/useAuth.stores'
@@ -20,11 +20,13 @@ export default function GlobalChatNotifier() {
     const navigate = useNavigate()
     const { data } = useAuthStore()
     const myId = data?.userId
-    const isOnChatPage = /(^\/chat$)|(^\/teacher\/chat$)/.test(location.pathname)
+    const isOnChatPage =
+        location.pathname.includes('/chat') || location.pathname.includes('/teacher/chat');
     const myRole: 'instructor' | 'student' = location.pathname.startsWith('/teacher') ? 'instructor' : 'student'
 
     const [toasts, setToasts] = useState<ToastItem[]>([])
     const [peerMap, setPeerMap] = useState<Record<string, { name: string; avatar?: string; conversationId?: string }>>({})
+    const [joinedRole, setJoinedRole] = useState<string | null>(null);
 
     // Ensure socket connection exists globally
     useEffect(() => {
@@ -37,7 +39,8 @@ export default function GlobalChatNotifier() {
     useEffect(() => {
         let cancelled = false
             ; (async () => {
-                if (!socket || !myId || !isConnected) return
+                if (!socket || !myId || !isConnected) return;
+                if (joinedRole === myRole) return;
                 try {
                     const res = await chatService.getConversations(myRole)
                     const items = res.result || []
@@ -52,12 +55,13 @@ export default function GlobalChatNotifier() {
                         socket.emit('join_room', payload)
                     }
                     setPeerMap(map)
+                    setJoinedRole(myRole)
                 } catch (e) {
-                    // ignore
+                    console.error(e);
                 }
             })()
         return () => { cancelled = true }
-    }, [socket, myId, myRole, isConnected, location.pathname])
+    }, [socket, myId, myRole, isConnected, joinedRole])
 
     // Listen for messages and show toast if not on chat page and incoming
     useEffect(() => {

@@ -18,6 +18,7 @@ const AuthenticationGate = ({ children }: { children: ReactNode }) => {
 
     // 🧹 Khi component unmount → ngắt kết nối
     return () => {
+      console.log('NGAT KET NOI')
       disconnectSocket();
     };
   }, [connectSocket, disconnectSocket]);

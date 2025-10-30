@@ -30,7 +30,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         ...socket.auth,
         ...params
       }
-      console.log('[frontend][socket] attempting connect with auth', socket.auth);
+      // console.log('[frontend][socket] attempting connect with auth', socket.auth);
       socket.connect();
       // setIsConnected(true); // Chưa chắc connect được
     }
@@ -45,7 +45,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   useEffect(() => {
     const onConnect = () => {
-      console.log('[frontend][socket] connected id=', socket.id);
+      // console.log('[frontend][socket] connected id=', socket.id);
       setIsConnected(true);
       try {
         const authUser = (socket.auth as unknown as { user?: { id?: string; role?: string } })?.user;

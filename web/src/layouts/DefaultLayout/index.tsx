@@ -1,15 +1,19 @@
 import { FC } from 'react'
-import { Outlet } from 'react-router-dom'
+import { Outlet, useMatches } from 'react-router-dom'
 import Header from '@/components/Header'
 import { Footer } from '@/components/Footer/footer2'
 import AuthenticationGate from '@/components/auth-gate/AuthenticationGate'
 
 const DefaultLayout: FC = () => {
+  const matches = useMatches();
+  const current = matches[matches.length - 1];
+  const hideFooter = current?.handle?.hideFooter;
+
   return (
     <AuthenticationGate>
       <Header />
       <Outlet />
-      <Footer />
+      {!hideFooter && <Footer />}
     </AuthenticationGate>
   )
 }

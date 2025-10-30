@@ -1,4 +1,4 @@
-import { FC } from 'react'
+import { FC, useState } from 'react'
 import { NavigationMenu, NavigationMenuItem, NavigationMenuList } from '@/components/ui/navigation-menu'
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
 import CustomButton from '../common/Button'
@@ -14,6 +14,7 @@ import logo from '../../assets/images/logo1.png'
 const Header: FC = () => {
   const navigate = useNavigate()
   const { data, setData } = useAuthStore()
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false)
 
   return (
     <div className=' p-3 w-full bg-white'>
@@ -65,7 +66,7 @@ const Header: FC = () => {
           <NavigationMenuList className='text-right'>
             {data ? (
               <div className='profile flex gap-2 text-sm font-bold items-center'>
-                <Popover>
+                <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
                   <PopoverTrigger className='flex gap-2 items-center'>
                     <p className='ml-2'>
                       <span className='text-red-500 italic font-base'>Xin chào</span> {data.name}
@@ -80,6 +81,7 @@ const Header: FC = () => {
                       username={data.username as string}
                       name={data.name as string}
                       avatarUrl={data.avatarUrl as string}
+                      closeMenu={() => setIsPopoverOpen(false)}
                     />
                   </PopoverContent>
                 </Popover>

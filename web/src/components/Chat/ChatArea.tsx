@@ -48,7 +48,7 @@ interface ChatAreaProps {
 
 export const ChatArea = ({ conversationId, peerId: peerFromProps, peerName, peerAvatar, onBack, forcedRole }: ChatAreaProps) => {
 
-
+  // console.log('PERR OIIIIII', peerFromProps);
   const { socket, isConnected, connectSocket, disconnectSocket } = useContext(SocketContext)
   const [message, setMessage] = useState("")
   const [messages, setMessages] = useState<Message[]>([])
@@ -65,6 +65,14 @@ export const ChatArea = ({ conversationId, peerId: peerFromProps, peerName, peer
   const { data } = useAuthStore()
   const myId = data?.userId
   const location = useLocation()
+
+  useEffect(() => {
+    if (peerFromProps && peerFromProps !== peerId) {
+      setPeerId(peerFromProps)
+    }
+  }, [peerFromProps])
+
+
   useEffect(() => {
     const isTeacher = location.pathname.startsWith('/teacher')
     const defaultRole: Role = forcedRole ?? (isTeacher ? 'instructor' : 'student')
@@ -83,14 +91,16 @@ export const ChatArea = ({ conversationId, peerId: peerFromProps, peerName, peer
           const res = await chatService.getMessages({ conversationId, limit: 20 })
           const items = res.result?.items || []
           const mapped = items
-            .slice() // ensure copy before reverse
-            .reverse() // server returns newest-first; we want oldest-first display
+            .slice()
+            .reverse()
             .map(m => ({ id: m._id, content: m.content, senderId: m.senderId, timestamp: new Date(m.createdAt).getTime(), status: m.status }))
           if (mounted) setMessages(mapped)
-          // Gọi API đánh dấu đã đọc khi người dùng mở cuộc trò chuyện
-          // Mục đích: xóa số tin chưa đọc và bắn socket thông báo cho đối phương (server đảm nhiệm)
+
           try {
-            await chatService.markRead(conversationId)
+            const lastMessage = items[0]
+            if (lastMessage && lastMessage.senderId !== myId) {
+              await chatService.markRead(conversationId, peerId)
+            }
           } catch (e) {
             console.error('markRead on open error', e)
           }
@@ -100,7 +110,7 @@ export const ChatArea = ({ conversationId, peerId: peerFromProps, peerName, peer
         }
       })()
     return () => { mounted = false }
-  }, [conversationId])
+  }, [conversationId, peerId])
 
   // Hàm scroll xuống cuối danh sách tin nhắn
   const scrollToBottom = (behavior: ScrollBehavior = 'smooth') => {
@@ -138,7 +148,6 @@ export const ChatArea = ({ conversationId, peerId: peerFromProps, peerName, peer
 
   useEffect(() => {
     if (!isConnected || !myId || !peerId) return
-    socket.emit('join_room', ids)
     // Lắng nghe tin nhắn mới đến và append vào UI
     const onReceive = (data: { senderId: string; message: string; createdAt: number; instructorId?: string; studentId?: string; senderRole?: 'instructor' | 'student' }) => {
       // Tránh trùng chính tin do mình gửi
@@ -151,16 +160,21 @@ export const ChatArea = ({ conversationId, peerId: peerFromProps, peerName, peer
         { id: Math.random().toString(36).slice(2), content: data.message, senderId: data.senderId, timestamp: data.createdAt }
       ])
       // Khi đang mở cuộc trò chuyện, đánh dấu đã đọc ngay lập tức
-      if (conversationId) {
-        chatService.markRead(conversationId).catch((e) => console.error('markRead on receive error', e))
-      }
+      // if (conversationId) {
+      //   chatService.markRead(conversationId, peerId).catch((e) => console.error('markRead on receive error', e))
+      // }
     }
     socket.on('receive_message', onReceive)
 
     // Lắng nghe thông báo đã đọc từ đối phương để cập nhật trạng thái tin nhắn của mình
     // Kỳ vọng payload có conversationId và (tuỳ chọn) messageId đã được đọc
-    const onMessageRead = (payload: { conversationId: string; messageId?: string; readerId: string }) => {
+    const onMessageRead = async (payload: { conversationId: string; messageId?: string; readerId: string }) => {
       if (!conversationId || payload.conversationId !== conversationId) return
+      try {
+        await chatService.markRead(payload.conversationId, payload.readerId)
+      } catch (e) {
+        console.error('markRead error', e)
+      }
       // Cập nhật trạng thái 'read' cho tin nhắn gần nhất do mình gửi
       setMessages((prev) => {
         const next = [...prev]
@@ -186,7 +200,7 @@ export const ChatArea = ({ conversationId, peerId: peerFromProps, peerName, peer
       socket.off('receive_message', onReceive)
       socket.off('message_read', onMessageRead)
     }
-  }, [isConnected, socket, ids, myId, peerId])
+  }, [isConnected, socket, ids, myId, peerId, conversationId])
 
   if (!peerId) {
     return (

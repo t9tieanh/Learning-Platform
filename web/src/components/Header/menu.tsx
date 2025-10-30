@@ -1,16 +1,22 @@
+
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
 import CustomButton from '../common/Button'
 import { LogOut, GraduationCap } from 'lucide-react'
 import { useAuthStore } from '@/stores/useAuth.stores'
 import { useNavigate } from 'react-router-dom'
 
-const Menu = ({ username, name, avatarUrl }: { username: string; name: string; avatarUrl: string }) => {
+const Menu = ({ username, name, avatarUrl, closeMenu }: { username: string; name: string; avatarUrl: string; closeMenu: () => void }) => {
   const { data, setData } = useAuthStore()
   const navigate = useNavigate()
 
   const handleLogout = () => {
     setData(null)
     navigate('/')
+  }
+
+  const handleChat = () => {
+    navigate(`/chat/:id`, { state: { user: data } })
+    closeMenu()
   }
 
   return (
@@ -33,6 +39,12 @@ const Menu = ({ username, name, avatarUrl }: { username: string; name: string; a
           label='Trang giảng viên'
           icon={<GraduationCap className='w-4 h-4 mr-2' />}
           onClick={() => navigate('/teacher', { state: { user: data } })}
+        />
+        <CustomButton
+          className='w-full bg-blue-600 hover:bg-blue-700'
+          label='Tin nhắn'
+          icon={<GraduationCap className='w-4 h-4 mr-2' />}
+          onClick={handleChat}
         />
         {/* Đăng xuất */}
         <CustomButton

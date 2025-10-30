@@ -15,8 +15,6 @@ const START_SERVER = async () => {
   app.use('/notify', router)
   app.use(errorHandlingMiddleware)
 
-    // await seed()
-
   // tạo server duy nhất
   const server = http.createServer(app)
 
