@@ -16,7 +16,7 @@ const CartPage = () => {
             <CheckoutSummary />
           </div>
         </div>
-        <div className='bg-white p-6 rounded-lg'>
+        <div className='bg-white p-6 rounded-lg shadow-md'>
           <RecommendedCourses />
         </div>
       </div>

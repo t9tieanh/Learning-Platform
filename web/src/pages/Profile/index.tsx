@@ -1,8 +1,7 @@
 import { useState } from 'react'
-import { User, Settings, BookOpen } from 'lucide-react'
+import { User, BookOpen } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import PersonalInfo from '@/components/Profile/personal-info'
-import AccountSetting from '@/components/Profile/account-setting'
 import CourseStudied from '@/components/Profile/my-course'
 
 type ProfileSection = 'info' | 'settings' | 'courses'
@@ -18,12 +17,6 @@ const Profile = () => {
       description: 'Xem và chỉnh sửa thông tin'
     },
     {
-      id: 'settings' as ProfileSection,
-      title: 'Cài đặt',
-      icon: Settings,
-      description: 'Tùy chỉnh tài khoản'
-    },
-    {
       id: 'courses' as ProfileSection,
       title: 'Khóa học đã học',
       icon: BookOpen,
@@ -35,8 +28,6 @@ const Profile = () => {
     switch (activeSection) {
       case 'info':
         return <PersonalInfo />
-      case 'settings':
-        return <AccountSetting />
       case 'courses':
         return <CourseStudied />
       default:
@@ -66,7 +57,7 @@ const Profile = () => {
                       <button
                         key={item.id}
                         onClick={() => setActiveSection(item.id)}
-                        className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors rounded-lg mx-2 ${
+                        className={`w-full shadow-sm flex items-center gap-3 px-4 py-3 text-left transition-colors rounded-lg mx-2 ${
                           isActive
                             ? 'bg-primary text-primary-foreground shadow-sm'
                             : 'text-muted-foreground hover:text-foreground hover:bg-muted'

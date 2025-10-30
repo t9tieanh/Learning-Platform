@@ -51,7 +51,7 @@ const CheckoutSummary = () => {
   ]
 
   return (
-    <div className='p-3 border-gray-300 border-1 rounded-xl p-4 bg-white'>
+    <div className='p-3 border-gray-300 border-1 shadow-md rounded-xl p-4 bg-white'>
       <div className='checkout-title'>
         <p className='text-base font-semibold mb-1 flex items-center'>
           <CiDiscount1 />

@@ -23,12 +23,6 @@ const PersonalInfo = () => {
 
   return (
     <div className='space-y-6 shadow-sm rounded-xl'>
-      <div className='flex items-center justify-between'>
-        <h2 className='text-base flex align-items-center font-semibold text-white bg-gradient-to-r from-primary to-purple-600 px-6 py-3 rounded-2xl shadow-lg tracking-tight'>
-          <User className='mr-2' size={20} /> Thông tin cá nhân
-        </h2>
-      </div>
-
       <Card className='hover:bg-profile-card-hover transition-colors rounded-xl shadow-md'>
         <CardContent className='px-8'>
           <div className='flex gap-4 items-center text-center mb-8 px-4 py-6 rounded-xl bg-[#0C356A]'>
@@ -65,6 +59,7 @@ const PersonalInfo = () => {
           </div>
 
           {/* Info Grid */}
+          <h2 className='font-semibold text-base my-4'>Thông tin cơ bản</h2>
           <div className='grid gap-4 md:grid-cols-2'>
             {infoTabs.map((tab, index) => (
               <div
@@ -82,7 +77,7 @@ const PersonalInfo = () => {
 
           <div className='flex justify-end mt-8'>
             <CustomButton
-              className='rounded-lg hover:bg-primary-hover hover:scale-105'
+              className='hover:bg-primary-hover shadow-lg hover:scale-105'
               label='Chỉnh sửa'
               icon={<FaUserEdit className='h-5 w-5' />}
             />
