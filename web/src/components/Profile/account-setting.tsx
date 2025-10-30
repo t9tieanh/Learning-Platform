@@ -46,23 +46,6 @@ const AccountSetting = () => {
             </Button>
           </CardContent>
         </Card>
-
-        {/* Tài khoản */}
-        <Card className='border border-border shadow-sm hover:shadow-md transition-all duration-200 rounded-2xl md:col-span-2'>
-          <CardHeader>
-            <CardTitle className='text-lg font-semibold'>👤 Tài khoản</CardTitle>
-          </CardHeader>
-          <CardContent className='space-y-3'>
-            <Button variant='outline' className='w-full justify-start gap-2 hover:bg-primary p-6 rounded-xl'>
-              <Download className='w-4 h-4' />
-              Xuất dữ liệu
-            </Button>
-            <Button variant='destructive' className='w-full justify-start gap-2 hover:bg-red-700 p-6 rounded-xl'>
-              <Trash2 className='w-4 h-4' />
-              Xóa tài khoản
-            </Button>
-          </CardContent>
-        </Card>
       </div>
     </div>
   )
