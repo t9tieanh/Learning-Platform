@@ -1,5 +1,5 @@
-import Banner from '@/components/MyCourse/banner'
-import CourseList from '@/components/MyCourse/course-list'
+import Banner from '@/components/Profile/banner'
+import CourseList from '@/components/Profile/course-list'
 import {
   Pagination,
   PaginationContent,

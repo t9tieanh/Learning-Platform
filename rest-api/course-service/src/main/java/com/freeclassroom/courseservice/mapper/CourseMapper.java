@@ -4,6 +4,7 @@ import com.freeclassroom.courseservice.dto.request.course.CreationCourseRequest;
 import com.freeclassroom.courseservice.dto.response.course.CourseInfoResponse;
 import com.freeclassroom.courseservice.dto.response.course.CourseResponse;
 import com.freeclassroom.courseservice.dto.response.course.CourseUserDetailResponse;
+import com.freeclassroom.courseservice.dto.response.course.MyCourseResponse;
 import com.freeclassroom.courseservice.entity.course.CourseEntity;
 import com.freeclassroom.courseservice.entity.category.TagEntity;
 import org.mapstruct.Mapper;
@@ -36,4 +37,6 @@ public interface CourseMapper {
     CourseInfoResponse toInfoResponseDto(CourseEntity entity);
 
     CourseUserDetailResponse toResponseDto(CourseEntity entity);
+
+    MyCourseResponse toMyCourseResponseDto(CourseEntity entity);
 }

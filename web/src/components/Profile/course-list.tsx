@@ -1,4 +1,4 @@
-import CourseCard, { CourseCardProps } from '@/components/MyCourse/course-cart'
+import CourseCard, { CourseCardProps } from '@/components/Profile/course-cart'
 
 const courseMockData: CourseCardProps[] = [
   {

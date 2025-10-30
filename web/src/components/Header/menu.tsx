@@ -13,11 +13,11 @@ const Menu = ({ username, name, avatarUrl }: { username: string; name: string; a
   }
 
   const handleMyCoursesClick = () => {
-    navigate('/my-courses')
+    navigate('/me?mode=courses')
   }
 
   const handleProfileClick = () => {
-    navigate(`/profile`)
+    navigate(`/me?mode=info`)
   }
 
   return (

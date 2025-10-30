@@ -4,20 +4,19 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import PersonalInfo from '@/components/Profile/personal-info'
 import CourseStudied from '@/components/Profile/my-course'
 
-type ProfileSection = 'info' | 'settings' | 'courses'
-
 const Profile = () => {
-  const [activeSection, setActiveSection] = useState<ProfileSection>('info')
+  const params = new URLSearchParams(location.search)
+  const [activeSection, setActiveSection] = useState<string>(params.get('mode') || 'info')
 
   const navigationItems = [
     {
-      id: 'info' as ProfileSection,
+      id: 'info',
       title: 'Thông tin cá nhân',
       icon: User,
       description: 'Xem và chỉnh sửa thông tin'
     },
     {
-      id: 'courses' as ProfileSection,
+      id: 'courses',
       title: 'Khóa học đã học',
       icon: BookOpen,
       description: 'Lịch sử học tập'

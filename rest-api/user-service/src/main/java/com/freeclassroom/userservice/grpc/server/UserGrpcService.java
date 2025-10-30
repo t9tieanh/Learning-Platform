@@ -2,11 +2,12 @@ package com.freeclassroom.userservice.grpc.server;
 
 import com.example.grpc.user.*;
 import com.freeclassroom.userservice.entity.user.UserEntity;
-import com.freeclassroom.userservice.exception.ErrorCode;
 import com.freeclassroom.userservice.repository.entity.UserRepository;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import net.devh.boot.grpc.server.service.GrpcService;
+
+import java.util.List;
 
 @GrpcService
 @RequiredArgsConstructor
@@ -44,5 +45,26 @@ public class UserGrpcService extends UserServiceGrpc.UserServiceImplBase {
 
         responseObserver.onNext(builder.build()); //send object
         responseObserver.onCompleted(); // notify completed
+    }
+
+    @Override
+    public void getBulkTeachers(GetTeachersRequest request, StreamObserver<GetTeachersResponse> responseObserver) {
+        List<UserEntity> users = userRepo.findAllById(request.getTeacherIdsList());
+
+        GetTeachersResponse.Builder responseBuilder = GetTeachersResponse.newBuilder();
+
+        for (UserEntity userEntity : users) {
+            Teacher teacher = Teacher.newBuilder()
+                    .setId(userEntity.getId().toString())
+                    .setName(userEntity.getName() == null ? "" : userEntity.getName())
+                    .setEmail(userEntity.getEmail() == null ? "" : userEntity.getEmail())
+                    .setImage(userEntity.getImage() == null ? "" : userEntity.getImage())
+                    .build();
+
+            responseBuilder.addTeachers(teacher);
+        }
+
+        responseObserver.onNext(responseBuilder.build());
+        responseObserver.onCompleted();
     }
 }

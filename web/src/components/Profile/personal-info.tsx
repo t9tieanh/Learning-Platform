@@ -1,19 +1,40 @@
-import { useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import CustomButton from '@/components/common/Button'
 import { Mail, Phone, Calendar, User, Camera } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { FaUserEdit } from 'react-icons/fa'
-import { useAuthStore } from '@/stores/useAuth.stores'
+import userService from '@/services/user/user.service'
+import { Profile } from '@/types/profile'
+import { toast } from 'sonner'
 
 const PersonalInfo = () => {
-  const { data } = useAuthStore()
+  const [userInfo, setUserInfo] = useState<Profile | null>(null)
   const infoTabs = [
-    { label: 'Điện thoại', icon: <Phone className='w-4 h-4 text-primary' />, value: '' },
-    { label: 'Email', icon: <Mail className='w-4 h-4 text-primary' />, value: data?.email || '' },
-    { label: 'Tên đăng nhập', icon: <User className='w-4 h-4 text-primary' />, value: data?.username || '' },
-    { label: 'Ngày tham gia', icon: <Calendar className='w-4 h-4 text-primary' />, value: '' }
+    { label: 'Điện thoại', icon: <Phone className='w-4 h-4 text-primary' />, value: userInfo?.phone || '' },
+    { label: 'Email', icon: <Mail className='w-4 h-4 text-primary' />, value: userInfo?.email || '' },
+    { label: 'Tên đăng nhập', icon: <User className='w-4 h-4 text-primary' />, value: userInfo?.username || '' },
+    { label: 'Vị trí', icon: <Calendar className='w-4 h-4 text-primary' />, value: userInfo?.position || '' }
   ]
+
+  useEffect(() => {
+    // Fetch additional user info if needed
+    const fetchUserInfo = async () => {
+      try {
+        const response = await userService.getProfile()
+        if (response && response.result && response.code === 200) {
+          setUserInfo(response.result)
+        } else {
+          toast.error(response.message || 'Đã có lỗi xảy ra khi tải thông tin cá nhân.')
+        }
+      } catch (error) {
+        console.error('Error fetching user info:', error)
+        toast.error('Đã có lỗi xảy ra khi tải thông tin cá nhân.')
+      }
+    }
+
+    fetchUserInfo()
+  }, [])
 
   // Trigger file picker and handle avatar change (logic to be implemented later)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -34,7 +55,7 @@ const PersonalInfo = () => {
                 aria-label='Chọn ảnh đại diện mới'
               >
                 <Avatar className='h-28 w-28 shadow-lg cursor-pointer'>
-                  <AvatarImage src={data?.avatarUrl} alt={data?.name} className='object-cover' />
+                  <AvatarImage src={userInfo?.image} alt={userInfo?.name} className='object-cover' />
                   <AvatarFallback className='text-lg font-semibold bg-primary text-primary-foreground'>
                     <User className='h-6 w-6' />
                   </AvatarFallback>
@@ -53,8 +74,8 @@ const PersonalInfo = () => {
               />
             </div>
             <div>
-              <h3 className='text-3xl font-bold flex text-blue-500'>{data?.name}</h3>
-              <p className='text-sm text-white text-start'>@{data?.username}</p>
+              <h3 className='text-3xl font-bold flex text-blue-500'>{userInfo?.name}</h3>
+              <p className='text-sm text-white text-start'>@{userInfo?.username}</p>
             </div>
           </div>
 
@@ -73,6 +94,12 @@ const PersonalInfo = () => {
                 </div>
               </div>
             ))}
+          </div>
+
+          {/* Info Grid */}
+          <h2 className='font-semibold text-base my-4'>Mô tả</h2>
+          <div className='text-sm pb-4 text-foreground/90 leading-relaxed border-2 p-4 rounded-lg bg-white'>
+            {userInfo?.description || 'Chưa có mô tả cá nhân.'}
           </div>
 
           <div className='flex justify-end mt-8'>

@@ -24,10 +24,12 @@ public final class UserServiceProto {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\021userService.proto\032\nuser.proto2;\n\013UserS" +
+      "\n\021userService.proto\032\nuser.proto2y\n\013UserS" +
       "ervice\022,\n\007GetUser\022\017.GetUserRequest\032\020.Get" +
-      "UserResponseB+\n\025com.example.grpc.userB\020U" +
-      "serServiceProtoP\001b\006proto3"
+      "UserResponse\022<\n\017GetBulkTeachers\022\023.GetTea" +
+      "chersRequest\032\024.GetTeachersResponseB+\n\025co" +
+      "m.example.grpc.userB\020UserServiceProtoP\001b" +
+      "\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,

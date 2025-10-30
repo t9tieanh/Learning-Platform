@@ -1,10 +1,10 @@
 package com.freeclassroom.courseservice.grpc.client;
 
-import com.example.grpc.user.GetUserRequest;
-import com.example.grpc.user.GetUserResponse;
-import com.example.grpc.user.UserServiceGrpc;
+import com.example.grpc.user.*;
 import net.devh.boot.grpc.client.inject.GrpcClient;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class UserGrpcClient {
@@ -18,6 +18,14 @@ public class UserGrpcClient {
                 .build();
         System.out.println("rest:" + request);
         return userStub.getUser(request);
+    }
+
+    public GetTeachersResponse getBulkTeachers(List<String> instructorIds) {
+        GetTeachersRequest request = GetTeachersRequest.newBuilder()
+                .addAllTeacherIds(instructorIds)
+                .build();
+
+        return userStub.getBulkTeachers(request);
     }
 
     public String getUserName(String id) {
