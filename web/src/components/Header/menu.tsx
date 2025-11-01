@@ -13,13 +13,20 @@ const Menu = ({ username, name, avatarUrl }: { username: string; name: string; a
   }
 
   const handleMyCoursesClick = () => {
-    navigate('/my-courses')
+    navigate('/me?mode=courses')
+  }
+
+  const handleProfileClick = () => {
+    navigate(`/me?mode=info`)
   }
 
   return (
     <>
       <div className='grid gap-4 text-sm'>
-        <div className='space-y-2 flex items-center gap-2'>
+        <button
+          className='space-y-2 flex items-center gap-2 text-start w-full hover:bg-gray-100 p-2 rounded-lg'
+          onClick={handleProfileClick}
+        >
           <Avatar className='rounded-2xl'>
             <AvatarImage src={avatarUrl} alt={`@${username}`} />
             <AvatarFallback>{name}</AvatarFallback>
@@ -28,7 +35,7 @@ const Menu = ({ username, name, avatarUrl }: { username: string; name: string; a
             <p className='text-muted-foreground text-sm font-bold'>{name}</p>
             <p className='text-muted-foreground text-sm'>@{username}</p>
           </div>
-        </div>
+        </button>
         <hr />
         <div className='flex flex-col gap-2'>
           <CustomButton

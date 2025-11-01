@@ -31,9 +31,7 @@ import java.io.IOException;
 public class LessonService implements ILessonService{
     ChapterRepository chapterRepo;
     LessonRepository lessonRepo;
-
     IUploadFileService uploadFileService;
-
     LessonMapper lessonMapper;
 
     @Override

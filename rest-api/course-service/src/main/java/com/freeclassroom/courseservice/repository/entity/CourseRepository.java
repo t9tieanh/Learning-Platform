@@ -89,4 +89,14 @@ public interface CourseRepository extends JpaRepository<CourseEntity, String> {
       AND c.deleted = false
 """)
     Long countByInstructorIdAndNotDeleted(@Param("instructorId") String instructorId);
+
+    @Query("""
+    SELECT c FROM CourseEntity c
+    JOIN c.enrollments e
+    WHERE e.userId = :userId
+      AND c.deleted = false
+      AND c.status = com.freeclassroom.courseservice.enums.entity.EnumCourseStatus.PUBLISHED
+      AND c.progressStep = com.freeclassroom.courseservice.enums.entity.EnumCourseProgressStep.COMPLETED
+""")
+    Page<CourseEntity> findAllByUserId(@Param("userId") String userId, Pageable pageable);
 }

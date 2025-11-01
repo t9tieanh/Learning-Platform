@@ -3,6 +3,7 @@ package com.freeclassroom.userservice.service.user;
 import com.freeclassroom.userservice.dto.request.user.CreationUserRequest;
 import com.freeclassroom.userservice.dto.response.ApiResponse;
 import com.freeclassroom.userservice.dto.response.user.GetUserResponse;
+import com.freeclassroom.userservice.dto.response.user.MyProfileResponse;
 import com.freeclassroom.userservice.dto.response.user.UserResponse;
 
 public interface IUserService {
@@ -12,4 +13,5 @@ public interface IUserService {
     ApiResponse<UserResponse> verifyForgotPassword(String code, String newPassword);
     ApiResponse<Void> checkForgotPassword(String code);
     ApiResponse<GetUserResponse> getUser(String id);
+    ApiResponse<MyProfileResponse> geyMyProfile(String id);
 }

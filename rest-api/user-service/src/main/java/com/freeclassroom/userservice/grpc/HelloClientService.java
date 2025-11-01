@@ -17,6 +17,4 @@ public class HelloClientService {
         HelloReply reply = helloStub.sayHello(request);
         return reply.getMessage();
     }
-
-
 }

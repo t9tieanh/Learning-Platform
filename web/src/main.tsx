@@ -1,4 +1,3 @@
-import React from 'react'
 import App from './App'
 import ReactDOM from 'react-dom/client'
 import { RouterProvider, createBrowserRouter } from 'react-router-dom'
@@ -20,7 +19,6 @@ import TC_Course from './pages/TC_Courses'
 import TC_CreateCourse from './pages/TC_CreateCourse'
 import TC_Profile from './pages/TC_Profile'
 import TC_CourseDetail from './pages/TC_CourseDetail'
-import MyCoursePage from './pages/MyCourse'
 
 const router = createBrowserRouter([
   {
@@ -34,9 +32,8 @@ const router = createBrowserRouter([
           { path: '', element: <HomePage /> },
           { path: 'course/:id', element: <Course /> },
           { path: 'my-cart', element: <CartPage /> },
-          { path: 'profile', element: <Profile /> },
-          { path: 'courses', element: <AllCourse /> },
-          { path: 'my-courses', element: <MyCoursePage /> }
+          { path: 'me', element: <Profile /> },
+          { path: 'courses', element: <AllCourse /> }
         ]
       },
       {
@@ -48,7 +45,7 @@ const router = createBrowserRouter([
       { path: 'user/verify', element: <User /> },
       { path: '*', element: <NotFound /> },
       { path: 'forgot', element: <ForgotPass /> },
-      { path: 'course-page', element: <CoursePage /> },
+      { path: 'course-page/:courseId', element: <CoursePage /> },
       {
         path: 'teacher',
         children: [

@@ -8,4 +8,5 @@ option java_outer_classname = "UserServiceProto";
 
 service UserService {
   rpc GetUser (GetUserRequest) returns (GetUserResponse);
+  rpc GetBulkTeachers (GetTeachersRequest) returns (GetTeachersResponse);
 }

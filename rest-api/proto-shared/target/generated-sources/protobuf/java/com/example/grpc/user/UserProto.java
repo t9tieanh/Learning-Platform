@@ -30,6 +30,21 @@ public final class UserProto {
   static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_GetUserResponse_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_GetTeachersRequest_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_GetTeachersRequest_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_Teacher_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_Teacher_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_GetTeachersResponse_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_GetTeachersResponse_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -46,9 +61,13 @@ public final class UserProto {
       "\005phone\030\004 \001(\t\022\023\n\013description\030\005 \001(\t\022\r\n\005ema" +
       "il\030\006 \001(\t\022\020\n\010username\030\007 \001(\t\022\036\n\006status\030\010 \001" +
       "(\0162\016.AccountStatus\022\r\n\005roles\030\t \003(\t\022\036\n\nexp" +
-      "ertises\030\n \003(\0132\n.Expertise*)\n\rAccountStat" +
-      "us\022\n\n\006ACTIVE\020\000\022\014\n\010INACTIVE\020\001B$\n\025com.exam" +
-      "ple.grpc.userB\tUserProtoP\001b\006proto3"
+      "ertises\030\n \003(\0132\n.Expertise\")\n\022GetTeachers" +
+      "Request\022\023\n\013teacher_ids\030\001 \003(\t\"A\n\007Teacher\022" +
+      "\n\n\002id\030\001 \001(\t\022\014\n\004name\030\002 \001(\t\022\r\n\005email\030\003 \001(\t" +
+      "\022\r\n\005image\030\004 \001(\t\"1\n\023GetTeachersResponse\022\032" +
+      "\n\010teachers\030\001 \003(\0132\010.Teacher*)\n\rAccountSta" +
+      "tus\022\n\n\006ACTIVE\020\000\022\014\n\010INACTIVE\020\001B$\n\025com.exa" +
+      "mple.grpc.userB\tUserProtoP\001b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -72,6 +91,24 @@ public final class UserProto {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_GetUserResponse_descriptor,
         new java.lang.String[] { "Id", "Name", "Image", "Phone", "Description", "Email", "Username", "Status", "Roles", "Expertises", });
+    internal_static_GetTeachersRequest_descriptor =
+      getDescriptor().getMessageTypes().get(3);
+    internal_static_GetTeachersRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_GetTeachersRequest_descriptor,
+        new java.lang.String[] { "TeacherIds", });
+    internal_static_Teacher_descriptor =
+      getDescriptor().getMessageTypes().get(4);
+    internal_static_Teacher_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_Teacher_descriptor,
+        new java.lang.String[] { "Id", "Name", "Email", "Image", });
+    internal_static_GetTeachersResponse_descriptor =
+      getDescriptor().getMessageTypes().get(5);
+    internal_static_GetTeachersResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_GetTeachersResponse_descriptor,
+        new java.lang.String[] { "Teachers", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

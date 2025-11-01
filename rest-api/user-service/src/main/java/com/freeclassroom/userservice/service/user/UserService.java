@@ -4,6 +4,7 @@ import com.freeclassroom.userservice.configuration.RabbitMQConfig;
 import com.freeclassroom.userservice.dto.request.user.CreationUserRequest;
 import com.freeclassroom.userservice.dto.response.ApiResponse;
 import com.freeclassroom.userservice.dto.response.user.GetUserResponse;
+import com.freeclassroom.userservice.dto.response.user.MyProfileResponse;
 import com.freeclassroom.userservice.dto.response.user.UserResponse;
 import com.freeclassroom.userservice.entity.redis.OTPForgetPassword;
 import com.freeclassroom.userservice.entity.redis.PendingUserEntity;
@@ -175,6 +176,20 @@ public class UserService implements IUserService {
                     .message("Unexpected error: " + e.getMessage())
                     .build();
         }
+    }
+
+    @Override
+    public ApiResponse<MyProfileResponse> geyMyProfile(String id) {
+        UserEntity user = userRepository.findById(id)
+                .orElseThrow(() -> new CustomExeption(ErrorCode.USER_NOT_FOUND));
+
+        MyProfileResponse response = userMapper.toMyProfileResponse(user);
+
+        return ApiResponse.<MyProfileResponse>builder()
+                .code(HttpStatus.OK.value())
+                .message("Lấy thông tin profile thành công !")
+                .result(response)
+                .build();
     }
 
     public ApiResponse<UserResponse> verifyForgotPassword(String code, String newPassword) {

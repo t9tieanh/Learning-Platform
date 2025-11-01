@@ -30,10 +30,10 @@ const CardSection = () => {
   ]
 
   return (
-    <div className='cart-section p-5 bg-white rounded-lg'>
+    <div className='cart-section p-5 bg-white rounded-lg shadow-md'>
       <div className='total-cart-item'>
-        <p className='text-sm font-semibold mb-1 flex items-center'>
-          <Sigma />
+        <p className='text-sm font-semibold mb-1 flex'>
+          <Sigma className='w-5 h-5' />
           Có
           <span className='text-red-400'>&nbsp;3&nbsp;</span>khóa học trong giỏ hàng !
         </p>
