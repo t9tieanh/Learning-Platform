@@ -204,16 +204,14 @@ export const ChatArea = ({ conversationId, peerId: peerFromProps, peerName, peer
 
   if (!peerId) {
     return (
-      <div className="flex items-center justify-center h-full bg-gray-50">
-        <div className="text-center">
-          <div className="text-6xl mb-4">💬</div>
-          <h3 className="text-xl font-semibold mb-2">Chọn một cuộc trò chuyện</h3>
-          <p className="text-gray-500">
-            Chọn từ danh sách bên trái để bắt đầu nhắn tin
-          </p>
+      <div className='flex items-center justify-center h-full bg-gray-50'>
+        <div className='text-center'>
+          <div className='text-6xl mb-4'>💬</div>
+          <h3 className='text-xl font-semibold mb-2'>Chọn một cuộc trò chuyện</h3>
+          <p className='text-gray-500'>Chọn từ danh sách bên trái để bắt đầu nhắn tin</p>
         </div>
       </div>
-    );
+    )
   }
 
   // Gửi tin nhắn: phát socket + lưu DB + append optimistic
@@ -349,18 +347,13 @@ export const ChatArea = ({ conversationId, peerId: peerFromProps, peerName, peer
   }
 
   return (
-    <div className="flex flex-col flex-1 h-full min-h-0 bg-gray-50">
+    <div className='flex flex-col flex-1 h-full min-h-0 bg-gray-50'>
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 bg-white border-b shadow-sm">
-        <div className="flex items-center gap-3">
+      <div className='flex items-center justify-between px-4 py-3 bg-white border-b shadow-sm'>
+        <div className='flex items-center gap-3'>
           {onBack && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="md:hidden text-gray-600 hover:bg-gray-100"
-              onClick={onBack}
-            >
-              <ChevronLeft className="h-5 w-5" />
+            <Button variant='ghost' size='icon' className='md:hidden text-gray-600 hover:bg-gray-100' onClick={onBack}>
+              <ChevronLeft className='h-5 w-5' />
             </Button>
           )}
           <Avatar className="h-10 w-10">
@@ -373,15 +366,15 @@ export const ChatArea = ({ conversationId, peerId: peerFromProps, peerName, peer
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" className="text-gray-600 hover:bg-gray-100">
-            <Phone className="h-5 w-5" />
+        <div className='flex items-center gap-2'>
+          <Button variant='ghost' size='icon' className='text-gray-600 hover:bg-gray-100'>
+            <Phone className='h-5 w-5' />
           </Button>
-          <Button variant="ghost" size="icon" className="text-gray-600 hover:bg-gray-100">
-            <Video className="h-5 w-5" />
+          <Button variant='ghost' size='icon' className='text-gray-600 hover:bg-gray-100'>
+            <Video className='h-5 w-5' />
           </Button>
-          <Button variant="ghost" size="icon" className="text-gray-600 hover:bg-gray-100">
-            <MoreVertical className="h-5 w-5" />
+          <Button variant='ghost' size='icon' className='text-gray-600 hover:bg-gray-100'>
+            <MoreVertical className='h-5 w-5' />
           </Button>
         </div>
       </div>
@@ -488,29 +481,25 @@ export const ChatArea = ({ conversationId, peerId: peerFromProps, peerName, peer
       </div>
 
       {/* Input */}
-      <div className="p-4 bg-white border-t shadow-sm">
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" className="text-gray-500 hover:bg-gray-100">
-            <Image className="h-5 w-5" />
+      <div className='p-4 bg-white border-t shadow-sm'>
+        <div className='flex items-center gap-3'>
+          <Button variant='ghost' size='icon' className='text-gray-500 hover:bg-gray-100'>
+            <Image className='h-5 w-5' />
           </Button>
-          <Button variant="ghost" size="icon" className="text-gray-500 hover:bg-gray-100">
-            <Paperclip className="h-5 w-5" />
+          <Button variant='ghost' size='icon' className='text-gray-500 hover:bg-gray-100'>
+            <Paperclip className='h-5 w-5' />
           </Button>
 
           <Input
-            placeholder="Nhập tin nhắn..."
+            placeholder='Nhập tin nhắn...'
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSend()}
             className="flex-1 rounded-full bg-gray-100 border-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-0 px-4 py-2 text-sm placeholder-gray-500"
           />
 
-          <Button
-            size="icon"
-            onClick={handleSend}
-            className="rounded-full bg-blue-500 hover:bg-blue-600 transition"
-          >
-            <Send className="h-5 w-5 text-white" />
+          <Button size='icon' onClick={handleSend} className='rounded-full bg-blue-500 hover:bg-blue-600 transition'>
+            <Send className='h-5 w-5 text-white' />
           </Button>
         </div>
       </div>
@@ -545,5 +534,5 @@ export const ChatArea = ({ conversationId, peerId: peerFromProps, peerName, peer
         </DialogContent>
       </Dialog>
     </div>
-  );
-};
+  )
+}

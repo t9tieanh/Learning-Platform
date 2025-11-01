@@ -31,6 +31,7 @@ public enum ErrorCode {
     COURSE_NOT_FOUND(1013, "Khóa học không tồn tại !", HttpStatus.OK),
     COURSE_WITHOUT_VIDEO(1013, "Khóa học này chưa đăng bài giảng nào !", HttpStatus.OK),
     COURSE_WITHOUT_PRICE(1013, "Bạn chưa thêm giá cho khóa học này !", HttpStatus.OK),
+    COURSE_NOT_PUBLISHED(1013, "Khóa học này chưa được xuất bản !", HttpStatus.OK),
     CHAPTER_NOT_FOUND(1013, "Chapter không tồn tại !", HttpStatus.OK),
     LESSON_NOT_FOUND(1013, "Bài học không tồn tại !", HttpStatus.OK),
     PRICE_NOT_RIGHT(400, "Giá niêm yết (giá gốc) phải nhỏ hơn thực tế (giá bán) !", HttpStatus.OK),

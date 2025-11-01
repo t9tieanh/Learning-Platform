@@ -1,7 +1,5 @@
 package com.freeclassroom.courseservice.service.utils.cloudfront;
 
-import com.freeclassroom.courseservice.exception.CustomExeption;
-import com.freeclassroom.courseservice.exception.ErrorCode;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;

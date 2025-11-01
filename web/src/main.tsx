@@ -1,4 +1,3 @@
-import React from 'react'
 import App from './App'
 import ReactDOM from 'react-dom/client'
 import { RouterProvider, createBrowserRouter } from 'react-router-dom'
@@ -28,7 +27,6 @@ const router = createBrowserRouter([
     path: '/',
     element: <App />,
     children: [
-      // Default Layout (Header & Footer)
       {
         path: '',
         element: <DefaultLayout />,
@@ -36,19 +34,16 @@ const router = createBrowserRouter([
           { path: '', element: <HomePage /> },
           { path: 'course/:id', element: <Course /> },
           { path: 'my-cart', element: <CartPage /> },
-          { path: 'profile', element: <Profile /> },
+          { path: 'me', element: <Profile /> },
           { path: 'courses', element: <AllCourse /> },
           { path: 'chat/:id', element: <Chat />, handle: { hideFooter: true } }
         ]
       },
-      // Not has Layout
       { path: 'auth', element: <AuthLayout /> },
       { path: 'user/verify', element: <User /> },
       { path: '*', element: <NotFound /> },
       { path: 'forgot', element: <ForgotPass /> },
-      { path: 'course-page', element: <CoursePage /> },
-
-      // Instructor
+      { path: 'course-page/:courseId', element: <CoursePage /> },
       {
         path: 'teacher',
         element: <TC_Layout />,
@@ -65,9 +60,7 @@ const router = createBrowserRouter([
       },
       { path: 'user/verify', element: <User /> },
       { path: 'TC_CourseDetail/:id', element: <TC_CourseDetail /> },
-      { path: '*', element: <NotFound /> },
-      // { path: 'chat', element: <Chat /> }
-
+      { path: '*', element: <NotFound /> }
     ]
   }
 ])

@@ -158,7 +158,7 @@ export const ConversationList = ({ selected, onSelect, desiredPeerId }: Conversa
   }, [conversations, searchText])
 
   return (
-    <div className="flex h-full min-h-0 flex-col bg-white border-r border-slate-200">
+    <div className='flex h-full min-h-0 flex-col bg-white border-r border-slate-200'>
       {/* Header */}
       <div className="p-4 border-b border-slate-200 bg-slate-50 shadow-sm">
         <div className="flex justify-between items-center mb-2">
@@ -240,5 +240,5 @@ export const ConversationList = ({ selected, onSelect, desiredPeerId }: Conversa
         ))}
       </div>
     </div>
-  );
-};
+  )
+}

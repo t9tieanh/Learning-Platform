@@ -1,5 +1,6 @@
 import axiosClient from '../../lib/axiosClient.lib'
 import { ApiResponse } from '@/types/response.type'
+import { Profile } from '@/types/profile'
 
 class UserService {
   async signUp(newUser: {
@@ -81,6 +82,12 @@ class UserService {
       code,
       newPassword
     })
+    return response.data
+  }
+
+  //get user profile
+  async getProfile(): Promise<ApiResponse<Profile>> {
+    const response = await axiosClient.axiosInstance.get('self')
     return response.data
   }
 }

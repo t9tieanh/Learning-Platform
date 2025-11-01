@@ -21,4 +21,23 @@ public interface ChapterRepository extends JpaRepository<ChapterEntity, String> 
     Optional<String> findInstructorIdByChapterId(@Param("chapterId") String chapterId);
 
     Optional<ChapterEntity> findById(String id);
+
+    @Query("""
+    SELECT COALESCE(SUM(l.duration), 0)
+    FROM ChapterEntity ch
+    JOIN ch.lessons l
+    WHERE ch.id = :chapterId
+      AND l.type = com.freeclassroom.courseservice.enums.entity.EnumLessonType.video
+      AND l.deleted = false
+""")
+    Double getTotalVideoDurationByChapterId(@Param("chapterId") String chapterId);
+
+    @Query("""
+    SELECT COUNT(l)
+    FROM ChapterEntity ch
+    JOIN ch.lessons l
+    WHERE ch.id = :chapterId
+      AND l.deleted = false
+""")
+    Long countLessonsByChapterId(@Param("chapterId") String chapterId);
 }

@@ -20,6 +20,7 @@ public enum ErrorCode {
     INVALID_DOB(1008, "Ngày sinh phải từ {min} trở lên", HttpStatus.OK),
     UNAUTHENTICATED(1009, "Chưa xác thực", HttpStatus.UNAUTHORIZED), // 401
     OTP_SEND(1010, "Không thể gửi mã OTP", HttpStatus.OK),
+    EXPERTISE_NOT_FOUND(1010, "Expertise không tồn tại !", HttpStatus.OK),
 
     // wrong token user signup
     WRONG_VERFY_TOKEN(1002, "Token verify không đúng hoặc đã hết hạn", HttpStatus.OK),

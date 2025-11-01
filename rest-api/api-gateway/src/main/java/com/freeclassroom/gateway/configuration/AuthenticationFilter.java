@@ -34,6 +34,7 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
             "/user.*", "/auth.*",
             "/learning/courses.*", "/learning/categories.*",
             "/learning/storage.*",
+            "/learning/chapters-user.*"
     };
 
     ObjectMapper objectMapper;
