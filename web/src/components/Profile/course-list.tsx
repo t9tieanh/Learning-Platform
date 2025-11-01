@@ -1,54 +1,38 @@
-import CourseCard, { CourseCardProps } from '@/components/Profile/course-cart'
-
-const courseMockData: CourseCardProps[] = [
-  {
-    id: 'course1',
-    title: 'Khóa học React từ cơ bản đến nâng cao',
-    description: 'Học cách xây dựng ứng dụng web hiện đại với React.js',
-    instructor: {
-      name: 'Nguyễn Văn A',
-      avatar: 'https://randomuser.me/api/portraits/men/1.jpg'
-    },
-    rating: 4.5,
-    reviewCount: 120,
-    duration: '10 giờ',
-    lectures: 50,
-    level: 'Cơ bản',
-    thumbnail: 'https://files.fullstack.edu.vn/f8-prod/courses/12.png'
-  },
-  {
-    id: 'course2',
-    title: 'Lập trình Python cho người mới bắt đầu',
-    description: 'Khám phá thế giới lập trình với Python từ những bước đầu tiên',
-    instructor: {
-      name: 'Trần Thị B',
-      avatar: 'https://randomuser.me/api/portraits/women/2.jpg'
-    },
-    rating: 4.7,
-    reviewCount: 200,
-    duration: '15 giờ',
-    lectures: 70,
-    level: 'Cơ bản',
-    thumbnail: 'https://files.fullstack.edu.vn/f8-prod/courses/12.png'
-  },
-  {
-    id: 'course3',
-    title: 'Phát triển ứng dụng di động với Flutter',
-    description: 'Tạo ứng dụng di động đa nền tảng nhanh chóng và hiệu quả với Flutter',
-    instructor: {
-      name: 'Lê Văn C',
-      avatar: 'https://randomuser.me/api/portraits/men/3.jpg'
-    },
-    rating: 4.6,
-    reviewCount: 150,
-    duration: '12 giờ',
-    lectures: 60,
-    level: 'Trung cấp',
-    thumbnail: 'https://files.fullstack.edu.vn/f8-prod/courses/12.png'
-  }
-]
+import CourseCard from '@/components/Profile/course-cart'
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious
+} from '@/components/ui/pagination'
+import courseService from '@/services/course/course-student.service'
+import { CourseListItem } from '@/types/course-user'
+import { useEffect, useState } from 'react'
 
 const CourseList = () => {
+  // Store an array of items from the API
+  const [courses, setCourses] = useState<CourseListItem[]>([])
+
+  const fetchCourses = async () => {
+    try {
+      const response = await courseService.getMyCourse()
+      if (response.code === 200 && response.result && response.result.items) {
+        setCourses(response.result.items)
+      }
+    } catch (error) {
+      console.error('Error fetching courses:', error)
+    }
+  }
+
+  useEffect(() => {
+    // Load user's courses on mount
+    fetchCourses()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   return (
     <div className='cart-section p-5 bg-white rounded-lg'>
       <div className='total-cart-item'>
@@ -56,10 +40,26 @@ const CourseList = () => {
         <hr />
       </div>
       <div className='cart-item flex flex-col p-4 gap-4'>
-        {courseMockData.map((item, index) => (
-          <CourseCard key={index} {...item} />
+        {(courses.length > 0 ? courses : []).map((item) => (
+          <CourseCard key={item.id} courseItem={item} />
         ))}
       </div>
+      <Pagination className='flex justify-center mt-4'>
+        <PaginationContent>
+          <PaginationItem>
+            <PaginationPrevious href='#' />
+          </PaginationItem>
+          <PaginationItem>
+            <PaginationLink href='#'>1</PaginationLink>
+          </PaginationItem>
+          <PaginationItem>
+            <PaginationEllipsis />
+          </PaginationItem>
+          <PaginationItem>
+            <PaginationNext href='#' />
+          </PaginationItem>
+        </PaginationContent>
+      </Pagination>
     </div>
   )
 }

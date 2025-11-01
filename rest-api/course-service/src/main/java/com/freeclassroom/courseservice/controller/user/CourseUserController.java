@@ -19,16 +19,6 @@ import org.springframework.web.bind.annotation.*;
 public class CourseUserController {
     ICourseUserService courseUserService;
 
-    @GetMapping("/self")
-    @PreAuthorize("isAuthenticated()")
-    public ApiResponse<PagingResponse<MyCourseResponse>> getMyCourses(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
-    ) {
-        String userId = SecurityContextHolder.getContext().getAuthentication().getName();
-        return courseUserService.getCourseUsers(userId, page, size);
-    }
-
     @GetMapping("/{id}")
     ApiResponse<CourseUserDetailResponse> getCouseDetail(@PathVariable("id") String id) {
         return courseUserService.getCourseDetail(id);

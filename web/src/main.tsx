@@ -45,7 +45,7 @@ const router = createBrowserRouter([
       { path: 'user/verify', element: <User /> },
       { path: '*', element: <NotFound /> },
       { path: 'forgot', element: <ForgotPass /> },
-      { path: 'course-page', element: <CoursePage /> },
+      { path: 'course-page/:courseId', element: <CoursePage /> },
       {
         path: 'teacher',
         children: [
