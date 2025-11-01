@@ -4,7 +4,7 @@ import { CONNECT_DATABASES } from './config/connect'
 import { env } from '~/config/env'
 import { errorHandlingMiddleware } from '~/middleware/error-handler.midleware'
 import http from 'http'
-import { seedAll } from './seed/seedAll'
+import { seed } from './seed/seedAll'
 import router from '~/routes/index'
 
 const START_SERVER = async () => {
@@ -14,11 +14,6 @@ const START_SERVER = async () => {
 
   app.use('/notify', router)
   app.use(errorHandlingMiddleware)
-
-  app.get('/seeds-data', async (_req, res) => {
-    await seedAll()
-    res.status(200).json({ message: 'Seed data successfully!' })
-  })
 
   // tạo server duy nhất
   const server = http.createServer(app)

@@ -90,6 +90,7 @@ public class AuthenticationService implements IAuthenticationService {
                     .refreshToken(jwtService.generateToken(account,TokenEnum.REFRESH_TOKEN))
                     .email(account.getEmail())
                     .username(account.getUsername())
+                    .userId(account.getId())
                     .name(account.getName())
                     .avatarUrl(account.getImage())
                     .build();
@@ -180,6 +181,7 @@ public class AuthenticationService implements IAuthenticationService {
                         .refreshToken(jwtService.generateToken(account,TokenEnum.REFRESH_TOKEN))
                         .email(account.getEmail())
                         .username(account.getUsername())
+                        .userId(account.getId())
                         .name(account.getName())
                         .avatarUrl(account.getImage())
                         .build())
