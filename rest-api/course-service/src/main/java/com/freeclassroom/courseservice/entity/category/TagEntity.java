@@ -20,7 +20,6 @@ import java.util.List;
 @NoArgsConstructor(force = true)
 @SuperBuilder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Where(clause = "deleted = false")
 public class TagEntity extends AbstractEntity {
     String name;
     String imageUrl;

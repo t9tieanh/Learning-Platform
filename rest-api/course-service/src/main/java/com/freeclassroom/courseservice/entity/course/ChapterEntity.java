@@ -17,7 +17,7 @@ import java.util.List;
 @NoArgsConstructor(force = true)
 @SuperBuilder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Where(clause = "deleted = false")
+//@Where(clause = "deleted = false")
 public class ChapterEntity extends AbstractEntity {
     String title;
     String description;

@@ -7,6 +7,7 @@ import HeaderLayout from './layouts/HeaderLayout'
 import Course from './pages/Course'
 import CartPage from './pages/Cart'
 import AuthLayout from './layouts/AuthLayout'
+import TC_Layout from './layouts/TC_Layout'
 import NotFound from './pages/NotFound'
 import Profile from './pages/Profile'
 import User from '@/pages/User'
@@ -19,6 +20,7 @@ import TC_Course from './pages/TC_Courses'
 import TC_CreateCourse from './pages/TC_CreateCourse'
 import TC_Profile from './pages/TC_Profile'
 import TC_CourseDetail from './pages/TC_CourseDetail'
+import { SocketProvider } from '@/api/socket/socket.context'
 
 const router = createBrowserRouter([
   {
@@ -33,13 +35,9 @@ const router = createBrowserRouter([
           { path: 'course/:id', element: <Course /> },
           { path: 'my-cart', element: <CartPage /> },
           { path: 'me', element: <Profile /> },
-          { path: 'courses', element: <AllCourse /> }
+          { path: 'courses', element: <AllCourse /> },
+          { path: 'chat/:id', element: <Chat />, handle: { hideFooter: true } }
         ]
-      },
-      {
-        path: '',
-        element: <HeaderLayout />,
-        children: [{ path: 'chat', element: <Chat /> }]
       },
       { path: 'auth', element: <AuthLayout /> },
       { path: 'user/verify', element: <User /> },
@@ -48,12 +46,15 @@ const router = createBrowserRouter([
       { path: 'course-page/:courseId', element: <CoursePage /> },
       {
         path: 'teacher',
+        element: <TC_Layout />,
         children: [
           { path: '', element: <TCHomePage /> },
           { path: 'course', element: <TC_Course /> },
           { path: 'course/:id', element: <TC_CreateCourse /> },
           { path: 'profile', element: <TC_Profile /> },
           { path: 'course-details/:id', element: <TC_CourseDetail /> },
+          // Alias cũ (nếu ai truy cập không có id sẽ 404 hoặc có thể điều hướng)
+          { path: 'chat/:id', element: <Chat /> },
           { path: 'course-details', element: <NotFound /> }
         ]
       },
@@ -66,6 +67,8 @@ const router = createBrowserRouter([
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <>
-    <RouterProvider router={router} />
+    <SocketProvider>
+      <RouterProvider router={router} />
+    </SocketProvider>
   </>
 )

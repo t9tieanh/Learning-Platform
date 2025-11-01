@@ -37,7 +37,7 @@ const AuthPage: React.FC<SlidingLoginSignupProps> = ({ isSignUpMode, setIsSignUp
 
       if (response && response.result && response.code === 200) {
         // save to localstorage
-        setData(response.result)
+        setData(response.result as any)
         toast.success('Đăng nhập thành công!')
         navigator('/')
       } else {

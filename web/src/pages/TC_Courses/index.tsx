@@ -94,7 +94,7 @@ class TC_Course extends Component<Record<string, never>, State> {
           <AcademySidebar />
         </div>
         {/* Main content */}
-        <div className='flex-1 ml-64 p-6 space-y-6'>
+        <div className='flex-1 p-6 space-y-6'>
           <CourseSearchBar onSearch={(v) => this.setState({ search: v })} />
           {this.state.loading ? (
             <Loader />

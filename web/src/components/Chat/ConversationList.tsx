@@ -1,115 +1,239 @@
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Input } from '@/components/ui/input'
-import { Search } from 'lucide-react'
-import { cn } from '@/lib/utils'
-
-interface Conversation {
-  id: string
-  name: string
-  avatar: string
-  lastMessage: string
-  time: string
-  unread?: number
-  online?: boolean
-}
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Input } from "@/components/ui/input";
+import { Search } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { useContext, useEffect, useMemo, useState } from "react";
+import chatService from "@/services/chat/chat.service";
+import { ConversationListItem } from "@/types/chat.type";
+import { SocketContext } from "@/api/socket/socket.context";
+import { useAuthStore } from "@/stores/useAuth.stores";
+import { useLocation } from "react-router-dom";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Circle, MinusCircle, Clock, XCircle, CheckCircle } from "lucide-react"
 
 interface ConversationListProps {
-  selectedId?: string
-  onSelect: (id: string) => void
+  selected?: ConversationListItem | null;
+  onSelect: (item: ConversationListItem) => void;
+  desiredPeerId?: string;
 }
 
-const mockConversations: Conversation[] = [
-  {
-    id: '1',
-    name: 'Nguyễn Văn A',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=1',
-    lastMessage: 'Chào bạn, hẹn gặp lại nhé!',
-    time: '2 phút',
-    unread: 2,
-    online: true
-  },
-  {
-    id: '2',
-    name: 'Trần Thị B',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=2',
-    lastMessage: 'Cảm ơn bạn nhiều nha',
-    time: '1 giờ',
-    online: true
-  },
-  {
-    id: '3',
-    name: 'Lê Minh C',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=3',
-    lastMessage: 'Ok, tôi sẽ xem lại',
-    time: '3 giờ'
-  },
-  {
-    id: '4',
-    name: 'Phạm Thu D',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=4',
-    lastMessage: 'Bạn có rảnh không?',
-    time: 'Hôm qua'
-  },
-  {
-    id: '5',
-    name: 'Hoàng Anh E',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=5',
-    lastMessage: 'Đã nhận được file rồi',
-    time: 'Thứ 2'
-  }
+const statuses = [
+  { label: "Đang hoạt động", color: "text-green-500", icon: <CheckCircle className="h-4 w-4 text-green-500" /> }, // Đang onl
+  { label: "Không làm phiền", color: "text-red-600", icon: <MinusCircle className="h-4 w-4 text-red-600" /> }, // Không gửi thông báo
 ]
 
-export const ConversationList = ({ selectedId, onSelect }: ConversationListProps) => {
+export const ConversationList = ({ selected, onSelect, desiredPeerId }: ConversationListProps) => {
+  const [conversations, setConversations] = useState<ConversationListItem[]>([])
+  const [searchText, setSearchText] = useState("")
+  const [status, setStatus] = useState(statuses[0])
+  const { socket } = useContext(SocketContext)
+  const { data } = useAuthStore()
+  const myId = data?.userId
+  const location = useLocation()
+  const myRole: 'instructor' | 'student' = location.pathname.startsWith('/teacher') ? 'instructor' : 'student'
+
+  useEffect(() => {
+    let mounted = true
+      ; (async () => {
+        try {
+          const res = await chatService.getConversations(myRole)
+          if (mounted) {
+            const list = res.result || []
+            setConversations(list)
+            // Tự động chọn hội thoại đầu tiên khi lần đầu vào trang nếu chưa chọn
+            if (!selected && list.length > 0) {
+              if (desiredPeerId) {
+                const found = list.find((c) => c.peerId === desiredPeerId)
+                onSelect(found || list[0])
+              } else {
+                onSelect(list[0])
+              }
+            }
+          }
+        } catch (e) {
+          console.error('Load conversations error', e)
+        }
+      })()
+    return () => { mounted = false }
+  }, [])
+
+  // Khi desiredPeerId thay đổi (đi theo URL), cố gắng chọn đúng hội thoại
+  useEffect(() => {
+    if (!desiredPeerId) return
+    if (selected?.peerId === desiredPeerId) return
+    const found = conversations.find((c) => c.peerId === desiredPeerId)
+    if (found) onSelect(found)
+  }, [desiredPeerId, conversations])
+
+  // useEffect(() => {
+  //   if (!socket || !myId || conversations.length === 0) return
+  //   for (const c of conversations) {
+  //     const payload = myRole === 'instructor'
+  //       ? { instructorId: myId, studentId: c.peerId }
+  //       : { instructorId: c.peerId, studentId: myId }
+  //   }
+  // }, [socket, myId, myRole, conversations])
+
+  // Lắng nghe socket để cập nhật last message realtime và move-to-top
+  useEffect(() => {
+    if (!socket) return
+    const onReceive = (payload: { senderId: string; message: string; instructorId?: string; studentId?: string; createdAt: number }) => {
+      const { instructorId, studentId, senderId, message, createdAt } = payload
+      if (!myId || !instructorId || !studentId) return
+      if (myId !== instructorId && myId !== studentId) return
+      const peer = myId === instructorId ? studentId : instructorId
+      setConversations((prev) => {
+        const idx = prev.findIndex(c => c.peerId === peer)
+        if (idx === -1) return prev
+        const item = prev[idx]
+        const updated: ConversationListItem = {
+          ...item,
+          lastMessage: {
+            _id: `temp_${Date.now()}`,
+            content: message,
+            senderId,
+            senderRole: senderId === instructorId ? 'instructor' : 'student',
+            createdAt: new Date(createdAt).toISOString()
+          },
+          lastMessageAt: new Date(createdAt).toISOString(),
+          unreadCount: selected && selected.peerId === peer ? item.unreadCount : (item.unreadCount + 1 || 1)
+        }
+        const next = [updated, ...prev.filter((_, i) => i !== idx)]
+        return next
+      })
+    }
+    socket.on('receive_message', onReceive)
+    return () => { socket.off('receive_message', onReceive) }
+  }, [socket, myId, selected])
+
+  // Khi người dùng chọn mở một cuộc trò chuyện, reset số lượng tin chưa đọc ở item đó về 0
+  // Mục tiêu: đồng bộ UI với trạng thái đã đọc sau khi ChatArea gọi API markRead
+  useEffect(() => {
+    if (!selected) return
+    setConversations((prev) => prev.map(c => c.conversationId === selected.conversationId ? { ...c, unreadCount: 0 } : c))
+  }, [selected?.conversationId])
+
+  // Nghe sự kiện cập nhật last message khi xóa/chỉnh sửa ở ChatArea
+  useEffect(() => {
+    const onLastChanged = (evt: Event) => {
+      const { conversationId, lastMessage } = (evt as CustomEvent<{ conversationId: string; lastMessage?: { _id: string; content: string; senderId: string; createdAt: string } }>).detail || {}
+      if (!conversationId) return
+      setConversations((prev) => {
+        const idx = prev.findIndex((c) => c.conversationId === conversationId)
+        if (idx === -1) return prev
+        const item = prev[idx]
+        const computedLast = lastMessage
+          ? {
+            _id: lastMessage._id,
+            content: lastMessage.content,
+            senderId: lastMessage.senderId,
+            createdAt: lastMessage.createdAt,
+            senderRole:
+              lastMessage.senderId === myId
+                ? myRole
+                : myRole === 'instructor'
+                  ? 'student'
+                  : 'instructor',
+          }
+          : undefined
+
+        const updated: ConversationListItem = {
+          ...item,
+          lastMessage: computedLast,
+          lastMessageAt: computedLast?.createdAt,
+        }
+        const next = [...prev]
+        next[idx] = updated
+        return next
+      })
+    }
+    window.addEventListener('chat:conversation-last-changed', onLastChanged as EventListener)
+    return () => window.removeEventListener('chat:conversation-last-changed', onLastChanged as EventListener)
+  }, [myId, myRole])
+
+  const filtered = useMemo(() => {
+    if (!searchText.trim()) return conversations
+    const q = searchText.trim().toLowerCase()
+    return conversations.filter(c => (c.peerName || '').toLowerCase().includes(q))
+  }, [conversations, searchText])
+
   return (
     <div className='flex h-full min-h-0 flex-col bg-white border-r border-slate-200'>
       {/* Header */}
-      <div className='p-4 border-b border-slate-200 bg-gradient-to-r from-blue-50 to-blue-100 shadow-sm'>
-        <h2 className='text-2xl font-bold mb-3 text-blue-600 tracking-wide pl-1'>Đoạn chat</h2>
-        <div className='relative'>
-          <Search className='absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-blue-400' />
+      <div className="p-4 border-b border-slate-200 bg-slate-50 shadow-sm">
+        <div className="flex justify-between items-center mb-2">
+          <h2 className="text-2xl font-bold mb-3 text-[#3c3c3c] tracking-wide pl-1">Đoạn chat</h2>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white border border-slate-200 hover:bg-blue-50 transition-all shadow-sm">
+                {status.icon}
+                <span className="text-sm font-medium text-slate-700">{status.label}</span>
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              {statuses.map((s) => (
+                <DropdownMenuItem key={s.label} onClick={() => setStatus(s)} className="flex items-center gap-2">
+                  {s.icon}
+                  <span>{s.label}</span>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-blue-400" />
           <Input
-            placeholder='Tìm kiếm...'
-            className='pl-9 !rounded-lg !border !border-slate-300 focus:!border-blue-500 focus:!ring-1 focus:!ring-blue-200 bg-white shadow-sm'
+            placeholder="Tìm kiếm..."
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+            className="pl-9 !rounded-lg !border !border-slate-300 focus:!border-blue-500 focus:!ring-1 focus:!ring-blue-200 bg-white shadow-sm"
           />
         </div>
       </div>
 
       {/* Conversation list */}
-      <div className='flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent'>
-        {mockConversations.map((conversation) => (
+      <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent">
+        {filtered.map((c) => (
           <button
-            key={conversation.id}
-            onClick={() => onSelect(conversation.id)}
+            key={c.conversationId}
+            onClick={() => onSelect(c)}
             className={cn(
-              'group w-full flex items-center gap-3 p-4 text-left transition-all duration-150 border-b border-slate-100',
-              'hover:bg-blue-50/60',
-              selectedId === conversation.id && 'bg-blue-100/60'
+              "group w-full flex items-center gap-3 p-4 text-left transition-all duration-150 border-b border-slate-100",
+              "hover:bg-blue-50/60",
+              selected?.conversationId === c.conversationId && "bg-blue-100/60"
             )}
           >
             {/* Avatar */}
-            <div className='relative flex-shrink-0'>
-              <Avatar className='h-12 w-12 ring-1 ring-slate-200'>
-                <AvatarImage src={conversation.avatar} />
-                <AvatarFallback>{conversation.name[0]}</AvatarFallback>
+            <div className="relative flex-shrink-0">
+              <Avatar className="h-12 w-12 ring-1 ring-slate-200">
+                <AvatarImage src={c.peerAvatar} />
+                <AvatarFallback>{(c.peerName || '?')[0]}</AvatarFallback>
               </Avatar>
-              {conversation.online && (
-                <div className='absolute bottom-0 right-0 h-3.5 w-3.5 bg-green-500 rounded-full border-2 border-white shadow-[0_0_4px_#22c55e]' />
-              )}
             </div>
 
             {/* Info */}
-            <div className='flex-1 min-w-0'>
-              <div className='flex items-center justify-between mb-0.5'>
-                <h3 className='font-semibold text-slate-800 truncate'>{conversation.name}</h3>
-                <span className='text-xs text-slate-400 shrink-0 ml-2'>{conversation.time}</span>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between mb-0.5">
+                <h3 className="font-semibold text-slate-800 truncate">
+                  {c.peerName || c.peerId}
+                </h3>
+                {c.lastMessageAt && (
+                  <span className="text-xs text-slate-400 shrink-0 ml-2">
+                    {new Date(c.lastMessageAt).toLocaleTimeString()}
+                  </span>
+                )}
               </div>
-              <p className='text-sm text-slate-500 truncate'>{conversation.lastMessage}</p>
+              <p className="text-sm text-slate-500 truncate">
+                {c.lastMessage
+                  ? `${c.lastMessage.senderId === myId ? 'Bạn: ' : ''}${c.lastMessage.content}`
+                  : 'Bắt đầu cuộc trò chuyện'}
+              </p>
             </div>
 
             {/* Unread badge */}
-            {conversation.unread && (
-              <div className='flex items-center justify-center h-5 min-w-[20px] px-1.5 rounded-full bg-blue-500 text-white text-xs font-semibold'>
-                {conversation.unread}
+            {!!c.unreadCount && (
+              <div className="flex items-center justify-center h-5 min-w-[20px] px-1.5 rounded-full bg-blue-500 text-white text-xs font-semibold">
+                {c.unreadCount}
               </div>
             )}
           </button>

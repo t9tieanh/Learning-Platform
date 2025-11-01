@@ -10,7 +10,7 @@ const HomePage = () => {
         <AcademySidebar />
       </div>
 
-      <div className='flex-1 ml-64 overflow-auto '>
+      <div className='flex-1 overflow-auto '>
         <main className='p-4 md:p-8'>
           <DashboardHeader />
           <DashboardStats />

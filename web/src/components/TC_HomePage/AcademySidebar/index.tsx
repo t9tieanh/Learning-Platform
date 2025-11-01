@@ -59,6 +59,7 @@ const AcademySidebar = () => {
                 let onClick = undefined
                 if (item.name === 'Trang chủ') onClick = () => navigate('/teacher')
                 if (item.name === 'Khóa học') onClick = () => navigate('/teacher/course')
+                if (item.name === 'Tin nhắn') onClick = () => navigate('/teacher/chat/:id')
                 return (
                   <Button
                     key={itemIndex}

@@ -5,6 +5,7 @@ type authState = {
   data: {
     accessToken: string
     refreshToken: string
+    userId: string
     name?: string
     username?: string
     email?: string
