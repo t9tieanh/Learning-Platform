@@ -211,24 +211,24 @@ const updateMessage = async (req: Request, res: Response) => {
         const currentUserId = (req.user as any)?.sub as string
         if (!currentUserId) throw new Error('Thiếu thông tin người dùng (token)')
 
-        const { conversationId, messageId, content } = req.data as {
-            conversationId: string; messageId: string; content: string
+        const { conversationId, messageId, content, peerId } = req.data as {
+            conversationId: string; messageId: string; content: string, peerId: string
         }
 
-        const updated = await ChatService.updateMessage(conversationId, messageId, currentUserId, content)
+        const updated = await ChatService.updateMessage(conversationId, messageId, currentUserId, content, peerId)
 
         sendResponse(res, {
             code: StatusCodes.OK,
             message: 'Chỉnh sửa tin nhắn thành công',
             result: {
-                _id: String(updated._id),
-                conversationId: String(updated.conversationId),
-                senderId: String(updated.senderId),
-                senderRole: updated.senderRole,
-                content: updated.content || '',
-                type: updated.type,
-                status: updated.status,
-                createdAt: updated.createdAt,
+                _id: String(updated?._id),
+                conversationId: String(updated?.conversationId),
+                senderId: String(updated?.senderId),
+                senderRole: updated?.senderRole,
+                content: updated?.content || '',
+                type: updated?.type,
+                status: updated?.status,
+                createdAt: updated?.createdAt,
                 updatedAt: (updated as any).updatedAt
             }
         })

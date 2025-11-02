@@ -26,6 +26,7 @@ export type MessageItem = {
     type: 'text' | 'image' | 'file' | 'system'
     status: 'sent' | 'read'
     createdAt: string
+    peerId?: string
 }
 
 export type CursorPage<T> = {

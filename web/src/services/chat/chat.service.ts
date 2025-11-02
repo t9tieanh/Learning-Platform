@@ -30,7 +30,7 @@ class ChatService {
         return res.data
     }
 
-    async updateMessage(body: { conversationId: string; messageId: string; content: string }): Promise<ApiResponse<MessageItem>> {
+    async updateMessage(body: { conversationId: string; messageId: string; content: string, peerId: string }): Promise<ApiResponse<MessageItem>> {
         const res = await axiosClient.axiosInstance.patch('notify/chat/messages', body)
         return res.data
     }

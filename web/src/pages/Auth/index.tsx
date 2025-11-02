@@ -25,7 +25,7 @@ const AuthPage: React.FC<SlidingLoginSignupProps> = ({ isSignUpMode, setIsSignUp
 
   useEffect(() => {
     if (data) {
-      toast.info('Bạn đã đăng nhập rồi!')
+      // toast.info('Bạn đã đăng nhập rồi!')
       navigator('/')
     }
   }, [data, navigator])

@@ -36,6 +36,59 @@ export const registerChatHandlers = (io: Server, socket: Socket) => {
         })
     })
 
+    socket.on("server_last_message_update", (data) => {
+        const { conversationId, messageId, content, senderId, peerId, senderRole } = data;
+        let roomId;
+        if (senderRole === 'instructor') {
+            roomId = getRoomId(senderId, peerId);
+        } else {
+            roomId = getRoomId(peerId, senderId)
+        }
+        io.to(roomId).emit("last_message_update", {
+            conversationId,
+            messageId,
+            content,
+        })
+    })
+
+    socket.on("server_message_update", (data) => {
+        const { conversationId, messageId, content, senderId, peerId, senderRole } = data;
+        let roomId;
+        if (senderRole === 'instructor') {
+            roomId = getRoomId(senderId, peerId);
+        } else {
+            roomId = getRoomId(peerId, senderId)
+        }
+        io.to(roomId).emit("message_update", {
+            conversationId,
+            messageId,
+            content,
+        })
+    })
+
+    socket.on("server_message_delete", (data) => {
+        const { conversationId, messageId, instructorId, studentId } = data;
+        const roomId = getRoomId(instructorId, studentId);
+
+        console.log(`🗑️ Message ${messageId} deleted in ${roomId}`);
+        io.to(roomId).emit("message_delete", {
+            conversationId,
+            messageId,
+        });
+    });
+
+    socket.on("server_message_delete_last", (data) => {
+        const { conversationId, deletedMessageId, newLastMessage, instructorId, studentId } = data;
+        const roomId = getRoomId(instructorId, studentId);
+
+        console.log(`⚠️ Last message deleted in ${roomId}`);
+        io.to(roomId).emit("message_delete_last", {
+            conversationId,
+            deletedMessageId,
+            newLastMessage,
+        });
+    });
+
     socket.on("disconnect", () => {
         console.log(`❌ User disconnected: ${socket.id}`);
     });

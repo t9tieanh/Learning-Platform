@@ -148,26 +148,31 @@ export const ChatArea = ({ conversationId, peerId: peerFromProps, peerName, peer
 
   useEffect(() => {
     if (!isConnected || !myId || !peerId) return
-    // Lắng nghe tin nhắn mới đến và append vào UI
+
+    // --- Nhận tin nhắn mới ---
     const onReceive = (data: { senderId: string; message: string; createdAt: number; instructorId?: string; studentId?: string; senderRole?: 'instructor' | 'student' }) => {
-      // Tránh trùng chính tin do mình gửi
       if (data.senderId === myId) return
-      // Chỉ nhận tin thuộc đúng phòng hiện tại (cặp instructorId/studentId trùng khớp)
       const sameRoom = !!data.instructorId && !!data.studentId && data.instructorId === ids.instructorId && data.studentId === ids.studentId
       if (!sameRoom) return
       setMessages((prev) => [
         ...prev,
         { id: Math.random().toString(36).slice(2), content: data.message, senderId: data.senderId, timestamp: data.createdAt }
       ])
-      // Khi đang mở cuộc trò chuyện, đánh dấu đã đọc ngay lập tức
-      // if (conversationId) {
-      //   chatService.markRead(conversationId, peerId).catch((e) => console.error('markRead on receive error', e))
-      // }
     }
-    socket.on('receive_message', onReceive)
 
-    // Lắng nghe thông báo đã đọc từ đối phương để cập nhật trạng thái tin nhắn của mình
-    // Kỳ vọng payload có conversationId và (tuỳ chọn) messageId đã được đọc
+    // --- Nhận cập nhật tin nhắn (edit) ---
+    const onMessageUpdate = (data: { conversationId: string; content: string; messageId: string }) => {
+      if (!conversationId || data.conversationId !== conversationId) return
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === data.messageId
+            ? { ...m, content: data.content }
+            : m
+        )
+      )
+    }
+
+    // --- Nhận thông báo đã đọc ---
     const onMessageRead = async (payload: { conversationId: string; messageId?: string; readerId: string }) => {
       if (!conversationId || payload.conversationId !== conversationId) return
       try {
@@ -175,10 +180,8 @@ export const ChatArea = ({ conversationId, peerId: peerFromProps, peerName, peer
       } catch (e) {
         console.error('markRead error', e)
       }
-      // Cập nhật trạng thái 'read' cho tin nhắn gần nhất do mình gửi
       setMessages((prev) => {
         const next = [...prev]
-        // Ưu tiên tìm theo messageId, nếu không có thì lấy tin nhắn gần nhất do mình gửi
         if (payload.messageId) {
           const idx = next.findIndex(m => m.id === payload.messageId)
           if (idx !== -1 && next[idx].senderId === myId) {
@@ -195,10 +198,26 @@ export const ChatArea = ({ conversationId, peerId: peerFromProps, peerName, peer
         return next
       })
     }
+
+    // --- Khi tin nhắn bị xóa ---
+    const onMessageDelete = (data: { conversationId: string; messageId: string }) => {
+      console.log('data.conversationId', data.conversationId);
+      console.log('conversationId', conversationId);
+
+      if (!conversationId || data.conversationId !== conversationId) return
+      setMessages(prev => prev.filter(m => m.id !== data.messageId))
+    }
+
+    socket.on('receive_message', onReceive)
     socket.on('message_read', onMessageRead)
+    socket.on('message_update', onMessageUpdate)
+    socket.on('message_delete', onMessageDelete)
+
     return () => {
       socket.off('receive_message', onReceive)
+      socket.off('message_update', onMessageUpdate)
       socket.off('message_read', onMessageRead)
+      socket.off('message_delete', onMessageDelete)
     }
   }, [isConnected, socket, ids, myId, peerId, conversationId])
 
@@ -322,6 +341,7 @@ export const ChatArea = ({ conversationId, peerId: peerFromProps, peerName, peer
         conversationId,
         messageId: editingId,
         content: newText,
+        peerId: peerId,
       })
       const updated = res?.result
       setMessages((prev) =>
@@ -362,7 +382,6 @@ export const ChatArea = ({ conversationId, peerId: peerFromProps, peerName, peer
           </Avatar>
           <div>
             <h3 className="font-semibold text-gray-800">{peerName || peerId}</h3>
-            <p className="text-xs text-green-500">● Đang hoạt động</p>
           </div>
         </div>
 
@@ -411,17 +430,17 @@ export const ChatArea = ({ conversationId, peerId: peerFromProps, peerName, peer
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-7 w-7 hover:bg-gray-100"
+                      className="h-7 w-7 hover:text-blue-500 hover:bg-transparent"
                       onClick={() => handleCopy(msg.content)}
                     >
-                      <Copy className="h-4 w-4" />
+                      <Copy className="h-4 w-4 " />
                     </Button>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-7 w-7 hover:bg-gray-100"
+                          className="h-7 w-7 hover:bg-gray-100 hover:text-blue-500 hover:bg-transparent"
                         >
                           <MoreVertical className="h-4 w-4" />
                         </Button>
@@ -454,12 +473,24 @@ export const ChatArea = ({ conversationId, peerId: peerFromProps, peerName, peer
                   <p className="text-sm leading-relaxed">{msg.content}</p>
                   <p
                     className={cn(
-                      "text-[11px] mt-1 text-right",
+                      "text-[11px] mt-1 text-right space-x-1",
                       isMine ? "text-blue-100" : "text-gray-400"
                     )}
                   >
-                    {new Date(msg.timestamp).toLocaleTimeString()}
+                    <span className="font-medium">
+                      {new Date(msg.timestamp).toLocaleTimeString("vi-VN", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </span>
+                    <span className="opacity-70">
+                      {new Date(msg.timestamp).toLocaleDateString("vi-VN", {
+                        day: "2-digit",
+                        month: "2-digit",
+                      })}
+                    </span>
                   </p>
+
                 </div>
               </div>
             )

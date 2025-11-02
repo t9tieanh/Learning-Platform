@@ -134,7 +134,6 @@ const sendMessage = async (
             lastMessageAt: message.createdAt,
         });
 
-        // socket.emit("receive_message", message);
 
         return message;
     } catch (error) {
@@ -168,59 +167,140 @@ const markRead = async (conversationId: string, senderId: string, peerId: string
     }
 }
 
-const updateMessage = async (conversationId: string, messageId: string, editorId: string, content: string) => {
-    const convId = (conversationId)
-    const msgId = (messageId)
+const updateMessage = async (conversationId: string, messageId: string, senderId: string, content: string, peerId: string) => {
+    try {
+        console.log('conversationId', conversationId)
+        console.log('messageId', messageId)
+        console.log('senderId', senderId)
+        console.log('content', content)
 
-    // Chỉ cho phép chỉnh sửa tin nhắn do chính mình gửi
-    const updated = await Message.findOneAndUpdate(
-        { _id: msgId, conversationId: convId, senderId: editorId },
-        { $set: { content } },
-        { new: true }
-    )
+        const updated = await Message.findOneAndUpdate(
+            { _id: messageId, conversationId: conversationId, senderId: senderId },
+            { $set: { content } },
+            { new: true }
+        )
 
-    if (!updated) {
-        throw new Error('Không tìm thấy tin nhắn hoặc bạn không có quyền chỉnh sửa')
+        if (!updated) {
+            throw new Error('Không tìm thấy tin nhắn hoặc bạn không có quyền chỉnh sửa')
+        }
+
+        const conversation = await Conversation.findById(conversationId)
+        if (!conversation) {
+            throw new Error('Không tìm thấy cuộc trò chuyện')
+        }
+
+        const isLastMessage = conversation.lastMessageId?.toString() === messageId.toString()
+        const senderRole = updated.senderRole
+        console.log('isLastMessage', conversation.lastMessageId?.toString())
+        console.log('messageId', messageId)
+        if (isLastMessage) {
+            await Conversation.findByIdAndUpdate(conversationId, {
+                $set: { lastMessageAt: updated.createdAt, lastMessageId: updated._id }
+            })
+            socketClient.emit('server_last_message_update', {
+                conversationId,
+                messageId,
+                content,
+                senderId,
+                peerId,
+                senderRole,
+            })
+        }
+
+        socketClient.emit('server_message_update', {
+            conversationId,
+            messageId,
+            content,
+            senderId,
+            peerId,
+            senderRole,
+        })
+
+        return updated
+    } catch (err) {
+        console.error('Lỗi khi cập nhật tin nhắn:', err);
+        return null;
     }
-
-    // Nếu đây là lastMessage của cuộc trò chuyện thì không cần đổi lastMessageId,
-    // nhưng vẫn đảm bảo lastMessageAt hợp lý (dựa trên createdAt của tin nhắn)
-    await Conversation.findByIdAndUpdate(convId, {
-        $set: { lastMessageAt: updated.createdAt, lastMessageId: updated._id }
-    })
-
-    return updated
 }
 
 const deleteMessage = async (conversationId: string, messageId: string, requesterId: string) => {
-    const convId = (conversationId)
-    const msgId = (messageId)
+    try {
+        const msg = await Message.findOne({
+            _id: messageId,
+            conversationId,
+            senderId: requesterId,
+        });
+        if (!msg) {
+            throw new Error("Không tìm thấy tin nhắn hoặc bạn không có quyền xóa");
+        }
 
-    const msg = await Message.findOne({ _id: msgId, conversationId: convId, senderId: requesterId })
-    if (!msg) {
-        throw new Error('Không tìm thấy tin nhắn hoặc bạn không có quyền xóa')
+        await Message.deleteOne({ _id: messageId });
+
+        const conv = await Conversation.findById(conversationId);
+
+        const instructorId = conv?.participants?.find(
+            (p) => p.role === "instructor"
+        )?.userId;
+        const studentId = conv?.participants?.find(
+            (p) => p.role === "student"
+        )?.userId;
+
+        const isLast =
+            conv && String(conv.lastMessageId) === String(messageId);
+
+        if (isLast) {
+            const last = await Message.find({ conversationId })
+                .sort({ _id: -1 })
+                .limit(1)
+                .lean();
+
+            const nextLast = last[0];
+
+            const updateData: any = {};
+
+            if (nextLast) {
+                updateData.$set = {
+                    lastMessageId: nextLast._id,
+                    lastMessageAt: nextLast.createdAt,
+                };
+            } else {
+                updateData.$unset = {
+                    lastMessageId: 1,
+                    lastMessageAt: 1,
+                };
+            }
+
+            await Conversation.findByIdAndUpdate(conversationId, updateData);
+
+            socketClient.emit("server_message_delete_last", {
+                conversationId,
+                deletedMessageId: messageId,
+                newLastMessage: nextLast
+                    ? {
+                        id: nextLast._id,
+                        content: nextLast.content,
+                        createdAt: nextLast.createdAt,
+                    }
+                    : null,
+                instructorId,
+                studentId,
+            });
+        }
+
+        socketClient.emit("server_message_delete", {
+            conversationId,
+            messageId,
+            instructorId,
+            studentId,
+        });
+
+        return { deleted: true };
+    } catch (err) {
+        console.error("Lỗi khi xóa tin nhắn:", err);
+        return { deleted: false };
     }
+};
 
-    await Message.deleteOne({ _id: msgId })
-
-    const conv = await Conversation.findById(convId)
-    if (conv && String(conv.lastMessageId) === String(msgId)) {
-        const last = await Message.find({ conversationId: convId })
-            .sort({ _id: -1 })
-            .limit(1)
-            .lean()
-        const nextLast = last[0]
-        await Conversation.findByIdAndUpdate(convId, {
-            $set: {
-                lastMessageId: nextLast ? nextLast._id : undefined,
-                lastMessageAt: nextLast ? nextLast.createdAt : undefined,
-            },
-            $unset: !nextLast ? { lastMessageId: 1, lastMessageAt: 1 } : undefined
-        } as any)
-    }
-
-    return { deleted: true }
-}
 
 const ChatService = {
     createOrGetDirect,
