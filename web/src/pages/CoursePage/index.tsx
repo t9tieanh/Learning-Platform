@@ -8,13 +8,15 @@ import { CourseHeader } from '@/components/CoursePage/CourseHeader'
 import { CourseDetail } from '@/types/course-student'
 import courseService from '@/services/course/course-student.service'
 import { useParams } from 'react-router-dom'
+import { Lesson } from '@/types/course-student'
 
 const CoursePage = () => {
   type UILecture = { id: number; title: string; duration: string; type: 'video' | 'pdf'; url: string }
   const { courseId } = useParams<{ courseId: string }>()
   const [courseData, setCourseData] = useState<CourseDetail | null>(null)
 
-  const [currentLecture, setCurrentLecture] = useState<UILecture>()
+  const [currentLecture, setCurrentLecture] = useState<Lesson>()
+  const [currentLectureId, setCurrentLectureId] = useState<number>(-1)
   const [completedLectures, setCompletedLectures] = useState<Set<number>>(new Set())
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
@@ -34,7 +36,7 @@ const CoursePage = () => {
     }
 
     fetchCourseInfo()
-  }, [])
+  }, [courseId])
 
   // Map CourseDetail.chapters -> UI sections expected by CourseSidebar
   type UISection = { title: string; duration: string; lectures: UILecture[] }
@@ -45,8 +47,8 @@ const CoursePage = () => {
       title: ch.title,
       // simple total duration: sum of lesson durations
       duration: fmt(ch.lessons.reduce((sum, l) => (typeof l.duration === 'number' ? sum + l.duration : sum), 0)),
-      lectures: ch.lessons.map((l, idx) => ({
-        id: Number(String(l.id).replace(/\D/g, '')) || idx + 1,
+      lectures: ch.lessons.map((l) => ({
+        id: l.id,
         title: l.title,
         duration: fmt(l.duration),
         type: 'video',
@@ -81,14 +83,32 @@ const CoursePage = () => {
   }
 
   const handleSelectLecture = (lecture: UILecture) => {
-    setCurrentLecture(lecture)
+    // Convert UILecture (sidebar item) to domain Lesson type
+    setCurrentLecture({
+      id: String(lecture.id),
+      title: lecture.title,
+      content: lecture.url,
+      duration: null,
+      position: null,
+      type: lecture.type === 'pdf' ? 'article' : 'video'
+    })
+    setCurrentLectureId(lecture.id)
     setSidebarOpen(false)
   }
 
   // Initialize the first lecture as current
   useEffect(() => {
     if (!currentLecture && uiSections.length && uiSections[0].lectures.length) {
-      setCurrentLecture(uiSections[0].lectures[0])
+      const first = uiSections[0].lectures[0]
+      setCurrentLecture({
+        id: String(first.id),
+        title: first.title,
+        content: first.url,
+        duration: null,
+        position: null,
+        type: first.type === 'pdf' ? 'article' : 'video'
+      })
+      setCurrentLectureId(first.id)
     }
   }, [currentLecture, uiSections])
 
@@ -118,13 +138,7 @@ const CoursePage = () => {
       <div className='flex-1 flex overflow-hidden'>
         {/* Left Column - Video & Tabs */}
         <div className='flex-1 flex flex-col overflow-y-auto'>
-          <div className='p-6'>
-            <LessonViewer
-              url={currentLecture?.url}
-              title={currentLecture?.title ?? 'No lesson selected'}
-              type={currentLecture?.type}
-            />
-          </div>
+          <div className='p-6'>{currentLecture && <LessonViewer lesson={currentLecture} />}</div>
           <TabNavigation />
           <div className='p-6'>
             <CourseHeader courseData={{ title: courseData?.title || '', description: courseData?.longDescription }} />
@@ -135,7 +149,7 @@ const CoursePage = () => {
         <div className='hidden lg:block'>
           <CourseSidebar
             sections={uiSections}
-            currentLectureId={currentLecture?.id ?? -1}
+            currentLectureId={currentLectureId}
             completedLectures={completedLectures}
             onSelectLecture={handleSelectLecture}
             onToggleComplete={handleToggleComplete}
@@ -160,7 +174,7 @@ const CoursePage = () => {
             <div className='fixed right-0 top-0 bottom-0 z-50 lg:hidden'>
               <CourseSidebar
                 sections={uiSections}
-                currentLectureId={currentLecture?.id ?? -1}
+                currentLectureId={currentLectureId}
                 completedLectures={completedLectures}
                 onSelectLecture={handleSelectLecture}
                 onToggleComplete={handleToggleComplete}
