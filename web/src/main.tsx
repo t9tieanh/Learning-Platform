@@ -16,6 +16,7 @@ import ForgotPass from './pages/ForgotPass'
 import CoursePage from './pages/CoursePage'
 import AllCourse from './pages/AllCourse'
 import Chat from './pages/Chat'
+import Blog from './pages/Blog'
 import TC_Course from './pages/TC_Courses'
 import TC_CreateCourse from './pages/TC_CreateCourse'
 import TC_Profile from './pages/TC_Profile'
@@ -38,7 +39,8 @@ const router = createBrowserRouter([
           { path: 'my-cart', element: <CartPage /> },
           { path: 'me', element: <Profile /> },
           { path: 'courses', element: <AllCourse /> },
-          { path: 'chat/:id', element: <Chat />, handle: { hideFooter: true } }
+          { path: 'chat/:id', element: <Chat />, handle: { hideFooter: true } },
+          { path: 'blog', element: <Blog /> }
         ]
       },
       { path: 'auth', element: <AuthLayout /> },
