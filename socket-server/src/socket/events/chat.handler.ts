@@ -12,16 +12,24 @@ export const registerChatHandlers = (io: Server, socket: Socket) => {
         console.log(`✅ Client ${socket.id} joined room: ${roomId}`);
     });
 
-    socket.on("send_message", (data) => {
-        const roomId = getRoomId(data.instructorId, data.studentId);
-        console.log(`💬 Message from ${data.senderId} in ${roomId}:`, data.message);
+    socket.on("server_message_send", (data) => {
+        const { conversationId, messageId, content, senderId, peerId, senderRole } = data;
+        let roomId;
+        if (senderRole === 'instructor') {
+            roomId = getRoomId(senderId, peerId);
+        } else {
+            roomId = getRoomId(peerId, senderId);
+        }
+        console.log(`💬 Message from ${data.senderId} in ${roomId}:`, data.content);
         io.to(roomId).emit("receive_message", {
-            senderId: data.senderId,
-            message: data.message,
+            senderId: senderId,
+            message: content,
             createdAt: Date.now(),
-            instructorId: data.instructorId,
-            studentId: data.studentId,
-            senderRole: data.senderId === data.instructorId ? 'instructor' : 'student'
+            instructorId: senderRole === 'instructor' ? senderId : peerId,
+            studentId: senderRole !== 'instructor' ? senderId : peerId,
+            senderRole: senderRole,
+            messageId: messageId,
+            conversationId: conversationId
         });
     });
 

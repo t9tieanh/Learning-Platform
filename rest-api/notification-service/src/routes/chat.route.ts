@@ -7,7 +7,7 @@ import {
     SendMessageDTO,
     ReadMessageDTO,
     UpdateMessageDTO,
-    DeleteMessageDTO
+    DeleteMessageDTO,
 } from '../dto/request/chat.dto'
 
 const router = Router()
@@ -32,5 +32,4 @@ router.patch('/messages', ValidateDto(UpdateMessageDTO), ChatController.updateMe
 
 // Xóa tin nhắn (chỉ cho phép chủ sở hữu tin nhắn)
 router.delete('/messages', ValidateDto(DeleteMessageDTO), ChatController.deleteMessage)
-
 export default router

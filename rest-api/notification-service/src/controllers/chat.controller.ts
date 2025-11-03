@@ -5,7 +5,6 @@ import ChatService from '~/services/chat.service'
 import { getUser } from '~/grpc/userClient'
 import Message from '~/models/message/message.model'
 
-
 const createOrGetDirect = async (req: Request, res: Response) => {
     try {
         const currentUserId = (req.user as any)?.sub as string
@@ -18,7 +17,7 @@ const createOrGetDirect = async (req: Request, res: Response) => {
         if (currentRole !== 'student' && currentRole !== 'instructor') {
             return res.status(400).json({ message: 'Role người dùng không hợp lệ' });
         }
-
+        
         const result = await ChatService.createOrGetDirect(currentUserId, peerId, currentRole)
 
         sendResponse(res, {
@@ -150,13 +149,15 @@ const sendMessage = async (req: Request, res: Response) => {
         if (!currentUserId) throw new Error('Thiếu thông tin người dùng (token)')
 
         console.log('[REQ DATA]', req.data)
-        const { conversationId, content, senderRole } = req.data as {
+        const { conversationId, content, senderRole, peerId, senderId } = req.data as {
             conversationId: string
             content: string
-            senderRole: 'student' | 'instructor'
+            senderRole: 'student' | 'instructor',
+            peerId: string,
+            senderId: string
         }
 
-        const message = await ChatService.sendMessage(conversationId, currentUserId, senderRole, content)
+        const message = await ChatService.sendMessage(conversationId, currentUserId, senderRole, content, peerId)
 
         sendResponse(res, {
             code: StatusCodes.CREATED,

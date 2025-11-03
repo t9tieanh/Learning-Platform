@@ -150,15 +150,60 @@ export const ChatArea = ({ conversationId, peerId: peerFromProps, peerName, peer
     if (!isConnected || !myId || !peerId) return
 
     // --- Nhận tin nhắn mới ---
-    const onReceive = (data: { senderId: string; message: string; createdAt: number; instructorId?: string; studentId?: string; senderRole?: 'instructor' | 'student' }) => {
-      if (data.senderId === myId) return
-      const sameRoom = !!data.instructorId && !!data.studentId && data.instructorId === ids.instructorId && data.studentId === ids.studentId
-      if (!sameRoom) return
+    // const onReceive = (data: { messageId: string; senderId: string; message: string; createdAt: number; instructorId?: string; studentId?: string; senderRole?: 'instructor' | 'student' }) => {
+    //   if (data.senderId === myId) return
+    //   const sameRoom = !!data.instructorId && !!data.studentId && data.instructorId === ids.instructorId && data.studentId === ids.studentId
+    //   console.log('sameRoom', sameRoom);
+    //   if (!sameRoom) return
+    //   setMessages((prev) => [
+    //     ...prev,
+    //     { id: data.messageId, content: data.message, senderId: data.senderId, timestamp: data.createdAt }
+    //   ])
+    // }
+
+    const onReceive = (data: {
+      messageId: string;
+      senderId: string;
+      message: string;
+      createdAt: number;
+      instructorId?: string;
+      studentId?: string;
+      senderRole?: 'instructor' | 'student';
+    }) => {
+      console.log('[ON RECEIVE] Raw data:', data);
+      console.log('[ON RECEIVE] myId:', myId);
+      console.log('[ON RECEIVE] ids:', ids);
+
+      if (data.senderId === myId) {
+        console.log('[ON RECEIVE] Bỏ qua tin của chính mình');
+        return;
+      }
+
+      const sameRoom =
+        !!data.instructorId &&
+        !!data.studentId &&
+        data.instructorId === ids.instructorId &&
+        data.studentId === ids.studentId;
+
+      console.log('[ON RECEIVE] sameRoom:', sameRoom);
+
+      if (!sameRoom) {
+        console.log('[ON RECEIVE] Tin nhắn không cùng phòng -> bỏ qua');
+        return;
+      }
+
+      console.log('[ON RECEIVE] ✅ Thêm tin nhắn vào state');
       setMessages((prev) => [
         ...prev,
-        { id: Math.random().toString(36).slice(2), content: data.message, senderId: data.senderId, timestamp: data.createdAt }
-      ])
-    }
+        {
+          id: data.messageId,
+          content: data.message,
+          senderId: data.senderId,
+          timestamp: data.createdAt,
+        },
+      ]);
+    };
+
 
     // --- Nhận cập nhật tin nhắn (edit) ---
     const onMessageUpdate = (data: { conversationId: string; content: string; messageId: string }) => {
@@ -235,47 +280,82 @@ export const ChatArea = ({ conversationId, peerId: peerFromProps, peerName, peer
 
   // Gửi tin nhắn: phát socket + lưu DB + append optimistic
   // Đồng thời, hiển thị trạng thái 'Đã gửi' cho tin nhắn của mình, và sẽ cập nhật thành 'Đã đọc' khi nhận socket từ đối phương
-  const handleSend = () => {
-    if (!message.trim()) return
-    const payload = {
-      message: message.trim(),
-      senderId: myId,
-      senderRole: myRole as Role,
-      instructorId: ids.instructorId,
-      studentId: ids.studentId,
+  // const handleSend = () => {
+  //   if (!message.trim()) return
+  //   const payload = {
+  //     message: message.trim(),
+  //     senderId: myId,
+  //     senderRole: myRole as Role,
+  //     instructorId: ids.instructorId,
+  //     studentId: ids.studentId,
+  //   }
+  //   socket.emit('send_message', payload)
+  //   // Persist via REST (fire-and-forget)
+  //   let tempId = Math.random().toString(36).slice(2)
+  //   if (conversationId) {
+  //     chatService
+  //       .sendMessage({ conversationId, content: payload.message, senderRole: myRole, peerId: peerId })
+  //       .then((res) => {
+  //         const saved = res.result
+  //         // Cập nhật lại id và status dựa theo kết quả server cho bản ghi optimistic
+  //         setMessages((prev) => {
+  //           if (!saved) return prev
+  //           const next = [...prev]
+  //           const idx = next.findIndex(m => m.id === tempId)
+  //           if (idx !== -1) {
+  //             next[idx] = {
+  //               ...next[idx],
+  //               id: saved._id,
+  //               status: saved.status,
+  //               timestamp: new Date(saved.createdAt).getTime(),
+  //             }
+  //           }
+  //           return next
+  //         })
+  //       })
+  //       .catch((e) => console.error('sendMessage error', e))
+  //   }
+  //   // Optimistic append
+  //   setMessages((prev) => [
+  //     ...prev,
+  //     { id: tempId, content: payload.message, senderId: myId ?? 'unknown', timestamp: Date.now(), status: 'sent' }
+  //   ])
+  //   setMessage("")
+  // };
+
+  const handleSend = async () => {
+    const text = message.trim();
+    if (!text) return;
+
+    try {
+      // Gọi API — backend sẽ lưu DB và emit socket
+      const res = await chatService.sendMessage({
+        conversationId: conversationId ?? '',
+        senderId: myId ?? '',
+        senderRole: myRole,
+        content: text,
+        peerId,
+      });
+
+      const saved = res?.result;
+      if (saved) {
+        // Thêm tin nhắn mới vào UI khi backend trả về thành công
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: saved._id,
+            content: saved.content,
+            senderId: saved.senderId,
+            timestamp: new Date(saved.createdAt).getTime(),
+            status: saved.status,
+            // messageId: saved.messageId,
+          },
+        ]);
+      }
+      setMessage("");
+    } catch (e) {
+      console.error("sendMessage error", e);
     }
-    socket.emit('send_message', payload)
-    // Persist via REST (fire-and-forget)
-    let tempId = Math.random().toString(36).slice(2)
-    if (conversationId) {
-      chatService
-        .sendMessage({ conversationId, content: payload.message, senderRole: myRole })
-        .then((res) => {
-          const saved = res.result
-          // Cập nhật lại id và status dựa theo kết quả server cho bản ghi optimistic
-          setMessages((prev) => {
-            if (!saved) return prev
-            const next = [...prev]
-            const idx = next.findIndex(m => m.id === tempId)
-            if (idx !== -1) {
-              next[idx] = {
-                ...next[idx],
-                id: saved._id,
-                status: saved.status,
-                timestamp: new Date(saved.createdAt).getTime(),
-              }
-            }
-            return next
-          })
-        })
-        .catch((e) => console.error('sendMessage error', e))
-    }
-    // Optimistic append
-    setMessages((prev) => [
-      ...prev,
-      { id: tempId, content: payload.message, senderId: myId ?? 'unknown', timestamp: Date.now(), status: 'sent' }
-    ])
-    setMessage("")
   };
 
   // Copy nội dung tin nhắn

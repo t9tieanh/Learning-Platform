@@ -20,7 +20,7 @@ class ChatService {
         return res.data
     }
 
-    async sendMessage(body: { conversationId: string; content: string; senderRole: SenderRole }): Promise<ApiResponse<MessageItem>> {
+    async sendMessage(body: { conversationId: string; content: string; senderRole: SenderRole, peerId: string, senderId: string }): Promise<ApiResponse<MessageItem>> {
         const res = await axiosClient.axiosInstance.post('notify/chat/messages', body)
         return res.data
     }

@@ -8,6 +8,7 @@ import { ConversationListItem } from "@/types/chat.type";
 import { SocketContext } from "@/api/socket/socket.context";
 import { useAuthStore } from "@/stores/useAuth.stores";
 import { useLocation } from "react-router-dom";
+import useDebounce from "@/hooks/useDebounce.hook";
 interface ConversationListProps {
   selected?: ConversationListItem | null;
   onSelect: (item: ConversationListItem) => void;
@@ -135,6 +136,58 @@ export const ConversationList = ({ selected, onSelect, desiredPeerId }: Conversa
     }
   }, [socket])
 
+  useEffect(() => {
+    if (!socket) return;
+
+    const onDeleteLast = (data: {
+      conversationId: string;
+      deletedMessageId: string;
+      newLastMessage?: {
+        _id: string;
+        content: string;
+        senderId: string;
+        createdAt: string;
+      };
+    }) => {
+      const { conversationId, newLastMessage } = data;
+      console.log("🗑️ message_delete_last:", data);
+
+      setConversations((prev) => {
+        const idx = prev.findIndex((c) => c.conversationId === conversationId);
+        if (idx === -1) return prev;
+        const item = prev[idx];
+
+        const updated: ConversationListItem = {
+          ...item,
+          lastMessage: newLastMessage
+            ? {
+              _id: newLastMessage._id,
+              content: newLastMessage.content,
+              senderId: newLastMessage.senderId,
+              createdAt: newLastMessage.createdAt,
+              senderRole:
+                newLastMessage.senderId === myId
+                  ? myRole
+                  : myRole === "instructor"
+                    ? "student"
+                    : "instructor",
+            }
+            : undefined,
+          lastMessageAt: newLastMessage?.createdAt,
+        };
+
+        const next = [...prev];
+        next[idx] = updated;
+        return next;
+      });
+    };
+
+    socket.on("message_delete_last", onDeleteLast);
+
+    return () => {
+      socket.off("message_delete_last", onDeleteLast);
+    };
+  }, [socket, myId, myRole]);
 
   // Khi người dùng chọn mở một cuộc trò chuyện, reset số lượng tin chưa đọc ở item đó về 0
   // Mục tiêu: đồng bộ UI với trạng thái đã đọc sau khi ChatArea gọi API markRead
@@ -180,6 +233,8 @@ export const ConversationList = ({ selected, onSelect, desiredPeerId }: Conversa
     window.addEventListener('chat:conversation-last-changed', onLastChanged as EventListener)
     return () => window.removeEventListener('chat:conversation-last-changed', onLastChanged as EventListener)
   }, [myId, myRole])
+
+
 
   const filtered = useMemo(() => {
     if (!searchText.trim()) return conversations

@@ -111,17 +111,15 @@ const sendMessage = async (
     conversationId: string,
     senderId: string,
     senderRole: 'student' | 'instructor',
-    content: string
+    content: string,
+    peerId: string
 ): Promise<IMessage> => {
     try {
-        const convId = (conversationId);
-        const sender = (senderId);
-
         console.log({ conversationId, senderId, senderRole, content });
 
         const message = await Message.create({
-            conversationId: convId,
-            senderId: sender,
+            conversationId: conversationId,
+            senderId: senderId,
             senderRole,
             content,
             type: 'text',
@@ -129,11 +127,21 @@ const sendMessage = async (
         });
 
         // cập nhật last message của conversation
-        await Conversation.findByIdAndUpdate(convId, {
+        await Conversation.findByIdAndUpdate(conversationId, {
             lastMessageId: message._id,
             lastMessageAt: message.createdAt,
         });
 
+        const messageId = message.id;
+        console.log('messageId', messageId)
+        socketClient.emit('server_message_send', {
+            conversationId,
+            messageId,
+            content,
+            senderId,
+            peerId,
+            senderRole,
+        })
 
         return message;
     } catch (error) {
