@@ -4,6 +4,7 @@ export interface Lesson {
   content: string
   duration: number | null
   position: number | null
+  type: 'video' | 'article'
 }
 
 export interface Chapter {
