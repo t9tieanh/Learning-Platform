@@ -57,17 +57,6 @@ const DashboardHeader = () => {
       </div>
 
       <div className='flex items-center gap-2 md:gap-4 self-end md:self-auto'>
-        {/* Nút thông báo nổi bật */}
-        <Button
-          variant='ghost'
-          size='icon'
-          className='relative transition-all duration-200 hover:bg-primary/10 hover:shadow-lg border border-primary/30'
-        >
-          <Bell className='w-5 h-5 text-primary' />
-          <span className='absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full ring-2 ring-white animate-pulse'></span>
-        </Button>
-
-        {/* Avatar dropdown nổi bật */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
@@ -81,17 +70,17 @@ const DashboardHeader = () => {
               </Avatar>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align='end'>
-            <DropdownMenuItem className='!hover:bg-white'>
+          <DropdownMenuContent align='end' >
+            <DropdownMenuItem className='!bg-transparent hover:!bg-white hover:!text-primary transition-colors'>
               <CustomButton
                 label='Tài khoản'
-                className='w-full text-white rounded-md'
+                className='w-full text-white rounded-md hover:bg-blue-700'
                 type='button'
                 onClick={() => navigate('/teacher/profile')}
                 icon={<User className='h-4 w-4 ml-1 text-white' />}
               />
             </DropdownMenuItem>
-            <DropdownMenuItem>
+            <DropdownMenuItem className='!bg-transparent hover:!bg-white hover:!text-primary transition-colors'>
               <CustomButton
                 label='Đăng xuất'
                 className='w-full bg-red-600 text-white hover:bg-red-700 rounded-md'

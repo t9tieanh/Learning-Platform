@@ -20,6 +20,8 @@ import TC_Course from './pages/TC_Courses'
 import TC_CreateCourse from './pages/TC_CreateCourse'
 import TC_Profile from './pages/TC_Profile'
 import TC_CourseDetail from './pages/TC_CourseDetail'
+import TC_Blog from './pages/TC_Blog'
+import TC_BlogDetails from './pages/TC_BlogDetails'
 import { SocketProvider } from '@/api/socket/socket.context'
 
 const router = createBrowserRouter([
@@ -55,6 +57,8 @@ const router = createBrowserRouter([
           { path: 'course-details/:id', element: <TC_CourseDetail /> },
           // Alias cũ (nếu ai truy cập không có id sẽ 404 hoặc có thể điều hướng)
           { path: 'chat/:id', element: <Chat /> },
+          { path: 'blog', element: <TC_Blog /> },
+          { path: 'blog-details', element: <TC_BlogDetails /> },
           { path: 'course-details', element: <NotFound /> }
         ]
       },

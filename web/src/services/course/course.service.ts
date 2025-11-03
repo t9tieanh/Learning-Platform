@@ -54,7 +54,7 @@ class CourseService {
     minRating?: number
   }): Promise<ApiResponse<Paginated<any>>> {
     const { page = 1, limit = 10, search, category, minPrice, minRating } = params || {}
-    const response = await axiosClient.axiosInstance.get('learning/courses', {
+    const response = await axiosClient.axiosInstance.get('learning/courses-user', {
       params: {
         page,
         limit,
@@ -190,14 +190,14 @@ class CourseService {
   }
 
   async getBestSellerCourses(limit = 4): Promise<Course[]> {
-    const response = await axiosClient.axiosInstance.get('learning/courses/best-seller', {
+    const response = await axiosClient.axiosInstance.get('learning/courses-user/best-seller', {
       params: { limit }
     })
     return response.data
   }
 
   async getTrendyCourseThisMonth(limit = 4): Promise<Course[]> {
-    const response = await axiosClient.axiosInstance.get('learning/courses/trend', {
+    const response = await axiosClient.axiosInstance.get('learning/courses-user/trend', {
       params: { limit }
     })
     return response.data

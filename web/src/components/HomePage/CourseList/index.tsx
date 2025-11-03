@@ -2,6 +2,8 @@ import CourseCard from '@/components/common/CourseCard'
 import { Course } from '@/types/course.type'
 import { useEffect, useState } from 'react'
 import { Loader } from '@/components/ui/loader'
+import courseService from '@/services/course/course.service'
+
 interface CourseListProps {
   title: string
   fetcher: () => Promise<any>
@@ -10,12 +12,38 @@ interface CourseListProps {
 const CourseList = ({ title, fetcher }: CourseListProps) => {
   const [courses, setCourses] = useState<Course[]>([])
   const [loading, setLoading] = useState(true)
+  const [finalTitle, setFinalTitle] = useState(title)
+
+  // useEffect(() => {
+  //   fetcher()
+  //     .then((data: any) => setCourses(data.result))
+  //     .catch((err) => console.error('Lỗi khi load best seller:', err))
+  //     .finally(() => setLoading(false))
+  // }, [fetcher, title])
 
   useEffect(() => {
-    fetcher()
-      .then((data: any) => setCourses(data.result))
-      .catch((err) => console.error('Lỗi khi load best seller:', err))
-      .finally(() => setLoading(false))
+    const loadCourses = async () => {
+      try {
+        const data = await fetcher()
+        const result = data?.result || []
+
+        // Nếu không có dữ liệu, fallback sang best seller
+        if (!result || result.length === 0) {
+          const fallback = await courseService.getBestSellerCourses()
+          setCourses(fallback?.result || [])
+          setFinalTitle('Khóa học bán chạy nhất')
+        } else {
+          setCourses(result)
+          setFinalTitle(title)
+        }
+      } catch (err) {
+        console.error('Lỗi khi load khóa học:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadCourses()
   }, [fetcher, title])
 
   if (loading) {

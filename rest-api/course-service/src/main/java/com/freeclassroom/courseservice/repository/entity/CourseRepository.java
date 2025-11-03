@@ -31,7 +31,8 @@ public interface CourseRepository extends JpaRepository<CourseEntity, String> {
     @Query("""
         SELECT c 
         FROM CourseEntity c 
-        LEFT JOIN c.enrollments e 
+        LEFT JOIN c.enrollments e
+        WHERE c.status = 'PUBLISHED' AND c.progressStep = 'COMPLETED'
         GROUP BY c 
         ORDER BY COUNT(e) DESC
     """)
@@ -41,7 +42,9 @@ public interface CourseRepository extends JpaRepository<CourseEntity, String> {
         SELECT c
         FROM CourseEntity c
         LEFT JOIN c.enrollments e
-        WHERE FUNCTION('MONTH', e.enrollmentDate) = :month
+        WHERE c.status = 'PUBLISHED'
+          AND c.progressStep = 'COMPLETED'
+          AND FUNCTION('MONTH', e.enrollmentDate) = :month
           AND FUNCTION('YEAR', e.enrollmentDate) = :year
         GROUP BY c
         ORDER BY COUNT(e) DESC
@@ -50,7 +53,9 @@ public interface CourseRepository extends JpaRepository<CourseEntity, String> {
 
     @Query("""
         SELECT c FROM CourseEntity c
-        WHERE (:search IS NULL OR LOWER(c.title) LIKE LOWER(CONCAT('%', :search, '%')))
+        WHERE c.status = 'PUBLISHED'
+        AND c.progressStep = 'COMPLETED'
+        AND (:search IS NULL OR LOWER(c.title) LIKE LOWER(CONCAT('%', :search, '%')))
         AND (:category IS NULL OR c.category.name = :category)
         AND (:minPrice IS NULL OR c.finalPrice >= :minPrice)
         AND (:minRating IS NULL OR c.rating >= :minRating)
