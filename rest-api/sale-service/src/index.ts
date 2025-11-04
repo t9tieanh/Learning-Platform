@@ -4,17 +4,29 @@ import express from 'express';
 import cors from 'cors';
 import { errorHandlingMiddleware } from './middleware/error-handler.midleware'
 import RabbitMQService from './service/utils/rabbitmq.service';
+import session from 'express-session';
+import { env } from './config/env';
 //import elasticSearch from './service/utils/elasticSearch.service';
 
 const app = express();
+
+app.use(session({
+  secret: env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: true,
+  // cookie: { secure: true } -> production -> HTTPS
+  cookie: { secure: false } // -> development -> HTTP
+}))
+
 app.use(cors());
 app.use(express.json());
 
-app.get('/health', (_req, res) => res.json({ ok: true }));
+//health check
+app.get('/ping', (_req, res) => res.json({ message: 'pong' }));
 
 app.use(errorHandlingMiddleware);
 
-const PORT = process.env.PORT || 4000;
+const PORT = env.PORT || 4000;
 
 RabbitMQService.getInstance().then(() => {
   console.log('Connected to RabbitMQ');
