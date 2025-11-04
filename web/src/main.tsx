@@ -17,6 +17,8 @@ import CoursePage from './pages/CoursePage'
 import AllCourse from './pages/AllCourse'
 import Chat from './pages/Chat'
 import Blog from './pages/Blog'
+import BlogList from './pages/BlogList'
+import BlogDetails from './pages/BlogDetails'
 import TC_Course from './pages/TC_Courses'
 import TC_CreateCourse from './pages/TC_CreateCourse'
 import TC_Profile from './pages/TC_Profile'
@@ -40,7 +42,9 @@ const router = createBrowserRouter([
           { path: 'me', element: <Profile /> },
           { path: 'courses', element: <AllCourse /> },
           { path: 'chat/:id', element: <Chat />, handle: { hideFooter: true } },
-          { path: 'blog', element: <Blog /> }
+          { path: 'blog', element: <Blog /> },
+          { path: 'blogs', element: <BlogList /> },
+          { path: 'blog-details', element: <BlogDetails /> }
         ]
       },
       { path: 'auth', element: <AuthLayout /> },
