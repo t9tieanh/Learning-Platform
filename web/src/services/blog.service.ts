@@ -27,6 +27,13 @@ export interface CreateBlogRequest {
     markdown_file_url?: string[]
 }
 
+export interface UpdateBlogRequest {
+    title?: string
+    image_url?: string
+    content?: string
+    markdown_file_url?: string[]
+}
+
 async function getTrending(): Promise<BlogItem[]> {
     const res = await axiosClient.axiosInstance.get('/notify/blog/trending')
     return (res.data?.result || []) as BlogItem[]
@@ -57,6 +64,16 @@ async function create(body: CreateBlogRequest): Promise<BlogItem> {
     return res.data?.result as BlogItem
 }
 
-export const blogService = { getTrending, getNew, getAll, getDetails, create }
+async function update(id: string, body: UpdateBlogRequest): Promise<BlogItem> {
+    const res = await axiosClient.axiosInstance.patch(`/notify/blog/update/${id}`, body)
+    return res.data?.result as BlogItem
+}
+
+async function remove(id: string): Promise<{ deleted: boolean }> {
+    const res = await axiosClient.axiosInstance.delete(`/notify/blog/${id}`)
+    return res.data?.result as { deleted: boolean }
+}
+
+export const blogService = { getTrending, getNew, getAll, getDetails, create, update, remove }
 
 export default blogService

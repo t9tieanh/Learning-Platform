@@ -3,13 +3,14 @@ import Quill from "quill";
 import "quill/dist/quill.snow.css";
 
 interface RichTextEditorProps {
-    defaultValue?: any;
+    defaultValue?: any; // legacy delta support
+    initialHtml?: string; // preferred: set initial HTML content
     readOnly?: boolean;
     onChange?: (html: string) => void;
 }
 
 const QuillEditor = forwardRef<Quill | null, RichTextEditorProps>(
-    ({ defaultValue, readOnly = false, onChange }, ref) => {
+    ({ defaultValue, initialHtml, readOnly = false, onChange }, ref) => {
         const containerRef = useRef<HTMLDivElement | null>(null);
         const quillRef = useRef<Quill | null>(null);
 
@@ -30,8 +31,13 @@ const QuillEditor = forwardRef<Quill | null, RichTextEditorProps>(
                 else ref.current = quill;
             }
 
-            if (defaultValue) {
+            // Initialize content (prefer HTML, fallback to delta)
+            if (initialHtml && typeof initialHtml === 'string') {
+                quill.clipboard.dangerouslyPasteHTML(initialHtml);
+                onChange?.(quill.root.innerHTML);
+            } else if (defaultValue) {
                 quill.setContents(defaultValue);
+                onChange?.(quill.root.innerHTML);
             }
 
             quill.on("text-change", () => {

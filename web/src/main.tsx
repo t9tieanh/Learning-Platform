@@ -26,6 +26,7 @@ import TC_CourseDetail from './pages/TC_CourseDetail'
 import TC_Blog from './pages/TC_Blog'
 import TC_CreateBlog from './pages/TC_CreateBlog'
 import TC_BlogDetails from './pages/TC_BlogDetails'
+import TC_UpdateBlog from './pages/TC_UpdateBlog'
 import Home2 from './pages/Home2'
 import { SocketProvider } from '@/api/socket/socket.context'
 
@@ -69,7 +70,8 @@ const router = createBrowserRouter([
           { path: 'blogs', element: <TC_Blog /> },
           { path: 'create-blog', element: <TC_CreateBlog /> },
           { path: 'course-details', element: <NotFound /> },
-          { path: 'blog/:id', element: <TC_BlogDetails /> }
+          { path: 'blog/:id', element: <TC_BlogDetails /> },
+          { path: 'update-blog/:id', element: <TC_UpdateBlog /> }
         ]
       },
       { path: 'user/verify', element: <User /> },

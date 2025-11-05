@@ -1,4 +1,4 @@
-import { FC } from 'react'
+import { FC, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -16,6 +16,9 @@ import {
 } from '@/components/ui/table'
 import { MoreHorizontal } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { toast } from 'sonner'
+import { blogService } from '@/services/blog.service'
 
 interface BlogItem {
   id: string
@@ -27,10 +30,38 @@ interface BlogItem {
 
 interface BlogTableProps {
   courses: BlogItem[]
+  onDeleted?: (id: string) => void
 }
 
-const BlogTable: FC<BlogTableProps> = ({ courses }) => {
+const BlogTable: FC<BlogTableProps> = ({ courses, onDeleted }) => {
   const navigate = useNavigate()
+  const [confirmOpen, setConfirmOpen] = useState(false)
+  const [targetId, setTargetId] = useState<string | null>(null)
+
+  const askDelete = (e: React.MouseEvent, id: string) => {
+    e.stopPropagation()
+    setTargetId(id)
+    setConfirmOpen(true)
+  }
+
+  const handleDelete = async () => {
+    if (!targetId) return
+    try {
+      const res = await blogService.remove(targetId)
+      if (res?.deleted) {
+        toast.success('Đã xóa bài viết')
+        onDeleted?.(targetId)
+      } else {
+        toast.error('Không tìm thấy bài viết để xóa')
+      }
+    } catch (err) {
+      console.error(err)
+      toast.error('Xóa bài viết thất bại')
+    } finally {
+      setConfirmOpen(false)
+      setTargetId(null)
+    }
+  }
 
   return (
     <div className='overflow-x-auto rounded-xl border border-gray-200 dark:border-slate-700 shadow-sm'>
@@ -83,6 +114,9 @@ const BlogTable: FC<BlogTableProps> = ({ courses }) => {
                       variant='ghost'
                       size='icon'
                       className='rounded-full transition-all hover:bg-blue-50 hover:text-blue-600 focus-visible:ring-2 focus-visible:ring-blue-200'
+                      onClick={(e) => e.stopPropagation()}
+                      onMouseDown={(e) => e.stopPropagation()}
+                      onPointerDown={(e) => e.stopPropagation()}
                     >
                       <MoreHorizontal className='w-5 h-5' />
                     </Button>
@@ -93,14 +127,20 @@ const BlogTable: FC<BlogTableProps> = ({ courses }) => {
                   >
                     <DropdownMenuItem
                       className='rounded-md px-3 py-2 text-sm transition-colors data-[highlighted]:bg-blue-500 data-[highlighted]:text-white'
-                      onClick={() => navigate(`/teacher/blog/${blog.id}`)}
+                      onClick={(e) => { e.stopPropagation(); navigate(`/teacher/blog/${blog.id}`) }}
                     >
                       Xem chi tiết
                     </DropdownMenuItem>
-                    <DropdownMenuItem className='rounded-md px-3 py-2 text-sm transition-colors data-[highlighted]:bg-blue-500 data-[highlighted]:text-white'>
+                    <DropdownMenuItem
+                      className='rounded-md px-3 py-2 text-sm transition-colors data-[highlighted]:bg-blue-500 data-[highlighted]:text-white'
+                      onClick={(e) => { e.stopPropagation(); navigate(`/teacher/update-blog/${blog.id}`) }}
+                    >
                       Chỉnh sửa
                     </DropdownMenuItem>
-                    <DropdownMenuItem className='rounded-md px-3 py-2 text-sm text-red-600 transition-colors data-[highlighted]:bg-red-500 data-[highlighted]:text-white'>
+                    <DropdownMenuItem
+                      className='rounded-md px-3 py-2 text-sm text-red-600 transition-colors data-[highlighted]:bg-red-500 data-[highlighted]:text-white'
+                      onClick={(e) => askDelete(e, blog.id)}
+                    >
                       Xóa
                     </DropdownMenuItem>
                   </DropdownMenuContent>
@@ -110,6 +150,18 @@ const BlogTable: FC<BlogTableProps> = ({ courses }) => {
           ))}
         </TableBody>
       </Table>
+      <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <DialogContent className='sm:max-w-md'>
+          <DialogHeader>
+            <DialogTitle>Xác nhận xóa bài viết</DialogTitle>
+          </DialogHeader>
+          <p className='text-sm text-muted-foreground'>Bạn có chắc muốn xóa bài viết này? Hành động này không thể hoàn tác.</p>
+          <DialogFooter>
+            <Button variant='outline' onClick={() => setConfirmOpen(false)}>Hủy</Button>
+            <Button variant='destructive' onClick={handleDelete}>Xóa</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

@@ -17,19 +17,38 @@ interface BlogPost {
     content: string;
 }
 
-const BlogPostEditor = () => {
+type BlogPostEditorProps = {
+    initialTitle?: string;
+    initialImage?: string;
+};
+
+const BlogPostEditor = ({ initialTitle = "", initialImage = "" }: BlogPostEditorProps) => {
     const [post, setPost] = useState<BlogPost>({
-        title: "",
-        image: "",
+        title: initialTitle,
+        image: initialImage,
         content: "",
     });
-    const [imagePreview, setImagePreview] = useState<string>("");
+    const [imagePreview, setImagePreview] = useState<string>(initialImage || "");
     const setTitleStore = useBlogPostStore((s) => s.setTitle);
     const setImageStore = useBlogPostStore((s) => s.setImage);
 
     useEffect(() => {
         setTitleStore(post.title);
     }, [post.title, setTitleStore]);
+
+    // keep image in the global store in sync
+    useEffect(() => {
+        setImageStore(post.image);
+    }, [post.image, setImageStore]);
+
+    // When initial props change (e.g., switching into update mode), update local state
+    useEffect(() => {
+        if (initialTitle || initialImage) {
+            setPost((prev) => ({ ...prev, title: initialTitle, image: initialImage }));
+            setImagePreview(initialImage || "");
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [initialTitle, initialImage]);
 
     const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];

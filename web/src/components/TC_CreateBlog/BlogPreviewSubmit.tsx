@@ -14,9 +14,10 @@ import { useAuthStore } from "@/stores/useAuth.stores";
 
 type BlogPreviewSubmitProps = {
     contentHtml?: string;
+    blogId?: string; // if provided, submit will update instead of create
 };
 
-export default function BlogPreviewSubmit({ contentHtml }: BlogPreviewSubmitProps) {
+export default function BlogPreviewSubmit({ contentHtml, blogId }: BlogPreviewSubmitProps) {
     const navigate = useNavigate();
     const { title, image } = useBlogPostStore();
     const { data } = useAuthStore();
@@ -45,19 +46,30 @@ export default function BlogPreviewSubmit({ contentHtml }: BlogPreviewSubmitProp
 
         try {
             setSubmitting(true);
-            const created = await blogService.create({
-                instructor_id: instructorId,
-                title: title.trim(),
-                image_url: image,
-                content: contentHtml as string,
-            });
-            toast.success("Tạo blog thành công");
-            navigate('/teacher/blogs')
-            console.log("Created Blog:", created);
+            if (blogId) {
+                const updated = await blogService.update(blogId, {
+                    title: title.trim(),
+                    image_url: image,
+                    content: contentHtml as string,
+                });
+                toast.success("Cập nhật blog thành công");
+                navigate('/teacher/blogs');
+                console.log("Updated Blog:", updated);
+            } else {
+                const created = await blogService.create({
+                    instructor_id: instructorId,
+                    title: title.trim(),
+                    image_url: image,
+                    content: contentHtml as string,
+                });
+                toast.success("Tạo blog thành công");
+                navigate('/teacher/blogs');
+                console.log("Created Blog:", created);
+            }
         } catch (err: any) {
             // eslint-disable-next-line no-console
             console.error(err);
-            toast.error(err?.response?.data?.message || "Tạo blog thất bại");
+            toast.error(err?.response?.data?.message || (blogId ? "Cập nhật blog thất bại" : "Tạo blog thất bại"));
         } finally {
             setSubmitting(false);
         }
@@ -137,7 +149,7 @@ export default function BlogPreviewSubmit({ contentHtml }: BlogPreviewSubmitProp
                 <div className="flex justify-center items-center mt-0">
                     <Button onClick={handleSubmit} disabled={submitting} className="w-fit px-10 py-4">
                         <Upload className="mr-2 h-5 w-5" />
-                        {submitting ? "Đang tạo..." : "Đăng Bài Viết"}
+                        {submitting ? (blogId ? "Đang cập nhật..." : "Đang tạo...") : (blogId ? "Cập nhật Bài Viết" : "Đăng Bài Viết")}
                     </Button>
                 </div>
             </CardContent>

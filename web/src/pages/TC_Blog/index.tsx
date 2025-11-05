@@ -80,6 +80,7 @@ const TC_Blog: React.FC = () => {
                             shortDescription: b.content.slice(0, 80) + '...',
                             createdAt: b.created_at
                         }))}
+                        onDeleted={(id) => setBlogs((prev) => prev.filter((b) => b._id !== id))}
                     />
                 )}
 
