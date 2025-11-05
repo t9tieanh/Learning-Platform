@@ -62,7 +62,7 @@ export function CourseHero({ title, coverImage, status, publishedAt, price, onPl
       animate={{ opacity: 1, y: 0 }}
       className='relative overflow-hidden rounded-2xl shadow-lg'
     >
-      <div className='absolute inset-0 bg-slate-50' />
+      <div className='absolute inset-0 bg-[#0C356A]' />
 
       <div className='relative grid gap-6 p-8 lg:grid-cols-2 lg:gap-8'>
         <div className='flex flex-col justify-center space-y-6'>
@@ -83,7 +83,7 @@ export function CourseHero({ title, coverImage, status, publishedAt, price, onPl
             )}
           </div>
 
-          <h1 className='text-3xl font-bold tracking-tight lg:text-4xl xl:text-4xl text-slate-700'>{title}</h1>
+          <h1 className='text-3xl font-bold tracking-tight lg:text-4xl xl:text-4xl text-white'>{title}</h1>
 
           <div className='flex gap-3 flex-wrap'>
             <Button onClick={onEdit} size='lg' className='shadow-primary'>

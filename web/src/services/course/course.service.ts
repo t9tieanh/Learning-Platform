@@ -45,27 +45,12 @@ type Paginated<T> = {
 }
 
 class CourseService {
-  async getAllCourses(params?: {
-    page?: number
-    limit?: number
-    search?: string
-    category?: string
-    minPrice?: number
-    minRating?: number
-  }): Promise<ApiResponse<Paginated<any>>> {
-    const { page = 1, limit = 10, search, category, minPrice, minRating } = params || {}
-    const response = await axiosClient.axiosInstance.get('learning/courses', {
-      params: {
-        page,
-        limit,
-        search,
-        category,
-        minPrice,
-        minRating
-      }
-    })
+  async getCourseDetail(courseId: string): Promise<ApiResponse<any>> {
+    if (!courseId) throw new Error('Thiếu courseId')
+    const response = await axiosClient.axiosInstance.get(`learning/instructor/courses/details/${courseId}`)
     return response.data
   }
+
   async createCourse(request: {
     id?: string
     title: string
@@ -77,7 +62,7 @@ class CourseService {
     requirements?: string[]
     categoryIds: string
   }): Promise<ApiResponse<{ id: string; name: string }> | null> {
-    const response = await axiosClient.axiosInstance.post('learning/courses', request)
+    const response = await axiosClient.axiosInstance.post('learning/instructor/courses', request)
     return response.data
   }
 
@@ -94,7 +79,7 @@ class CourseService {
       page: options?.page ?? 1,
       limit: options?.limit ?? 10
     }
-    const response = await axiosClient.axiosInstance.post('learning/courses/teacher', body)
+    const response = await axiosClient.axiosInstance.post('learning/instructor/courses/teacher', body)
     return response.data
   }
 
@@ -114,7 +99,7 @@ class CourseService {
       progressStep: string
     }>
   > {
-    const response = await axiosClient.axiosInstance.get(`learning/courses/${courseId}/info`)
+    const response = await axiosClient.axiosInstance.get(`learning/instructor/courses/${courseId}/info`)
     return response.data
   }
 
@@ -129,7 +114,7 @@ class CourseService {
     const formData = new FormData()
     formData.append('file', file)
 
-    const response = await axiosClient.axiosInstance.patch(`learning/courses/${courseId}/avatar`, formData, {
+    const response = await axiosClient.axiosInstance.patch(`learning/instructor/courses/${courseId}/avatar`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
@@ -146,7 +131,7 @@ class CourseService {
       id: string
     }>
   > {
-    const response = await axiosClient.axiosInstance.patch(`learning/courses/${courseId}/price`, {
+    const response = await axiosClient.axiosInstance.patch(`learning/instructor/courses/${courseId}/price`, {
       originalPrice,
       finalPrice
     })
@@ -163,7 +148,7 @@ class CourseService {
       platformFee: number
     }>
   > {
-    const response = await axiosClient.axiosInstance.get(`learning/courses/${courseId}/price`)
+    const response = await axiosClient.axiosInstance.get(`learning/instructor/courses/${courseId}/price`)
     return response.data
   }
 
@@ -175,7 +160,7 @@ class CourseService {
       finalPrice: string
     }>
   > {
-    const response = await axiosClient.axiosInstance.get(`learning/courses/${courseId}/overview`)
+    const response = await axiosClient.axiosInstance.get(`learning/instructor/courses/${courseId}/overview`)
     return response.data
   }
 
@@ -185,21 +170,7 @@ class CourseService {
       name: string
     }>
   > {
-    const response = await axiosClient.axiosInstance.post(`learning/courses/${courseId}/request-approval`)
-    return response.data
-  }
-
-  async getBestSellerCourses(limit = 4): Promise<Course[]> {
-    const response = await axiosClient.axiosInstance.get('learning/courses/best-seller', {
-      params: { limit }
-    })
-    return response.data
-  }
-
-  async getTrendyCourseThisMonth(limit = 4): Promise<Course[]> {
-    const response = await axiosClient.axiosInstance.get('learning/courses/trend', {
-      params: { limit }
-    })
+    const response = await axiosClient.axiosInstance.post(`learning/instructor/courses/${courseId}/request-approval`)
     return response.data
   }
 }

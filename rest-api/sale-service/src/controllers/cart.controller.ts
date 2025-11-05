@@ -8,7 +8,7 @@ class CartController {
     async addToCart(req: Request, res: Response, next: NextFunction) {
         try {
             const { courseId } = req.data as AddToCartRequest;
-            const cart = await cartService.addToCart(req.session.cartId as string, courseId, !req.user);
+            const cart = await cartService.addToCart(req.session.cartId as string, courseId, req.user?.sub as string);
             sendResponse(res, {
                 code: 200,
                 message: 'Thêm vào giỏ hàng thành công',

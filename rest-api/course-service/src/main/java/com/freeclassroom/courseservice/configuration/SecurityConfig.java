@@ -39,7 +39,7 @@ public class SecurityConfig {
 
     private final CustomJwtDecoder jwtDecoder;
 
-    private final String[] PUBLIC_ENDPOINTS = {"/categories/**", "/tags/**", "/test/**", "/storage/**", "/courses-user/**"};
+    private final String[] PUBLIC_ENDPOINTS = {"/categories/**", "/tags/**", "/test/**", "/storage/**", "/courses/**"};
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
@@ -51,8 +51,6 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/swagger-ui.html"
                         ).permitAll()
-                        .requestMatchers(HttpMethod.GET, "/courses/*/info").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/courses/*/tags").permitAll()
                         .requestMatchers(HttpMethod.GET, "/chapters-user/*/public").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS).permitAll()

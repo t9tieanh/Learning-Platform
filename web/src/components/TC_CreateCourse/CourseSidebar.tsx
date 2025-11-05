@@ -50,7 +50,7 @@ const sidebarItems: SidebarItem[] = [
 const CourseSidebar: FC<CourseSidebarProps> = ({ activeSection = CourseProgressStep.INTRO, onSectionChange }) => {
   return (
     <aside
-      className='md:w-80 w-full bg-gray-950 border-r border-gray-800 overflow-y-auto text-white'
+      className='md:w-80 w-full bg-[#1D1D2A] border-r border-gray-800 overflow-y-auto text-white'
       aria-label='Course sidebar'
     >
       <div className='p-6'>

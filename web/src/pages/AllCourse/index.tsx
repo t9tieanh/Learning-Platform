@@ -5,7 +5,7 @@ import { SortBar } from '@/components/AllCourse/SortBar'
 import { Button } from '@/components/ui/button'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import instructorAvatar from '@/assets/images/course.jpg'
-import courseService from '@/services/course/course.service'
+import courseService from '@/services/course/course-user.service'
 import { Loader } from '@/components/ui/loader'
 import useDebounce from '@/hooks/useDebounce.hook'
 
