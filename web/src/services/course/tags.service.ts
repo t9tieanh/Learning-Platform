@@ -8,7 +8,7 @@ class TagsService {
   }
 
   async addTagsToCourse(courseId: string, tagIds: string[]): Promise<ApiResponse<null> | null> {
-    const response = await axiosClient.axiosInstance.patch(`learning/courses/${courseId}/tags`, {
+    const response = await axiosClient.axiosInstance.patch(`learning/instructor/courses/${courseId}/tags`, {
       tagIds
     })
     return response.data
@@ -17,7 +17,7 @@ class TagsService {
   async getAllByCourseId(
     courseId: string
   ): Promise<ApiResponse<{ id: string; name: string; imageUrl: string }[]> | null> {
-    const response = await axiosClient.axiosInstance.get(`learning/courses/${courseId}/tags`)
+    const response = await axiosClient.axiosInstance.get(`learning/instructor/courses/${courseId}/tags`)
     return response.data
   }
 }

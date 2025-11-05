@@ -3,7 +3,7 @@ import { Play } from 'lucide-react'
 import { Lesson } from '@/types/course-student'
 import { useAuthStore } from '@/stores/useAuth.stores'
 
-export const LessonViewer = ({ lesson }: {lesson: Lesson}) => {
+export const LessonViewer = ({ lesson }: { lesson: Lesson }) => {
   const { id } = lesson
   const backEndUri = import.meta.env.VITE_BACKEND_URI as string
   const { data } = useAuthStore()

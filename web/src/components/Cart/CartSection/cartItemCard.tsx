@@ -1,23 +1,54 @@
 import { Card, CardDescription, CardTitle } from '@/components/ui/card'
-import Button from '@/components/common/Button'
+import CustomButton from '@/components/common/Button'
 import { Trash2, MousePointer2 } from 'lucide-react'
 import { Rating, RatingButton } from '@/components/ui/shadcn-io/rating'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { CourseCart } from '@/types/cart.type'
+import cartService from '@/services/sale/cart.service'
+import { toast } from 'sonner'
+import { Dispatch, SetStateAction } from 'react'
+import { useCartStore } from '@/stores/useCart.stores'
 
-interface CartItemCardProps {
-  title: string
-  teacherName: string
-  image: string
-  basePrice?: number
-  price: number
-  rating?: number
-}
+const CartItemCard = ({
+  cardItem,
+  fetchCartItems,
+  setCourseSelected
+}: {
+  cardItem: CourseCart
+  fetchCartItems: () => void
+  setCourseSelected?: Dispatch<SetStateAction<CourseCart[]>>
+}) => {
+  const refresh = useCartStore((s) => s.refresh)
+  const handleRemoveFromCart = async () => {
+    try {
+      const response = await cartService.removeFromCart(cardItem.id)
+      if (response.code === 200 && response.message) {
+        toast.success(response.message)
+        // run both updates in parallel to speed up completion
+        await Promise.all([fetchCartItems(), refresh()])
+      } else {
+        toast.error(response.message || 'Chưa thể xóa khóa học khỏi giỏ hàng')
+      }
+    } catch (error: any) {
+      toast.error(error?.message || 'Chưa thể xóa khóa học khỏi giỏ hàng')
+      console.error('Error removing cart item:', error)
+    }
+  }
 
-const CartItemCard = ({ cardItem }: { cardItem: CartItemCardProps }) => {
+  const handleSelectCourse = async () => {
+    // Append the selected course to parent's selected list (keep existing + new)
+    setCourseSelected?.((prev = []) => {
+      // avoid duplicates by id
+      const exists = prev.some((c) => c.id === cardItem.id)
+      if (exists) return prev
+      return [...prev, cardItem]
+    })
+  }
+
   return (
     <Card className='cart-item-card text-gray-600 flex flex-col md:flex-row gap-4 p-4 mt-3 border-none'>
       <img
-        src={cardItem?.image}
+        src={cardItem?.thumbnail_url}
         alt={cardItem?.title}
         className='w-full md:w-[200px] h-[150px] md:h-[120px] object-cover rounded'
       />
@@ -27,10 +58,10 @@ const CartItemCard = ({ cardItem }: { cardItem: CartItemCardProps }) => {
           <CardDescription>
             <div className='flex items-center py-2'>
               <Avatar className='w-5 h-5 mr-1'>
-                <AvatarImage src={cardItem?.image} alt={cardItem?.title} />
-                <AvatarFallback>{cardItem?.teacherName.charAt(0)}</AvatarFallback>
+                <AvatarImage src={cardItem?.instructor?.image} alt={cardItem?.title} />
+                <AvatarFallback>{cardItem?.instructor.name.charAt(0)}</AvatarFallback>
               </Avatar>
-              <p className='teacher-name'>{cardItem?.teacherName}</p>
+              <p className='teacher-name'>{cardItem?.instructor.name}</p>
             </div>
             <div className='rating flex items-center gap-1'>
               <p className='rating-count font-bold text-yellow-600'>{cardItem?.rating}</p>
@@ -44,17 +75,24 @@ const CartItemCard = ({ cardItem }: { cardItem: CartItemCardProps }) => {
         </div>
         <div className='flex md:flex-col items-center md:items-end justify-between md:justify-start gap-4 md:gap-2'>
           <div className='text-right'>
-            <CardDescription className='text-red-500 font-semibold text-base'>{cardItem.price} VNĐ</CardDescription>
-            {cardItem.basePrice && (
-              <CardDescription className='line-through text-sm'>{cardItem.basePrice} VNĐ</CardDescription>
+            <CardDescription className='text-red-500 font-semibold text-base'>
+              {cardItem.final_price} VNĐ
+            </CardDescription>
+            {cardItem.original_price && (
+              <CardDescription className='line-through text-sm'>{cardItem.original_price} VNĐ</CardDescription>
             )}
           </div>
           <div className='flex items-center gap-2'>
-            <Button
+            <CustomButton
               icon={<MousePointer2 size={18} />}
-              className='bg-slate-200 hover:bg-slate-50 hover:text-blue-500 p-2'
+              className='hover:bg-slate-50 hover:text-blue-500 p-2'
+              onClick={handleSelectCourse}
             />
-            <Button icon={<Trash2 size={18} />} className='bg-slate-200 hover:bg-slate-50 hover:text-red-500 p-2' />
+            <CustomButton
+              icon={<Trash2 size={18} />}
+              className='bg-red-500 hover:bg-slate-50 hover:text-red-500 p-2'
+              onClick={handleRemoveFromCart}
+            />
           </div>
         </div>
       </div>

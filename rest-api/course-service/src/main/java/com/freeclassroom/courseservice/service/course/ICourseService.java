@@ -26,10 +26,6 @@ public interface ICourseService {
     ApiResponse<CourseInfoResponse> getCourseInfo(String id);
     @EntityGraph(attributePaths = {"outcomes", "requirements"})
     ApiResponse<CourseResponse> getCourse(String id);
-    ApiResponse<List<CourseResponse>> getBestSellerCourse(int limit);
-    ApiResponse<List<CourseResponse>> getTrendyCourse(int limit);
-    ApiResponse<PageResponse<CourseResponse>> getAllCourses(int page, int limit, String search, String category,
-                                                            Double minPrice, Double minRating);
     Flux<ServerSentEvent<String>> updateVideoIntroduce(MultipartFile avatar, String courseId) throws IOException;
     ApiResponse<CreationResponse> updatePrice(UpdatePriceRequest newPrice, String courseId);
     ApiResponse<PriceCourseResponse> getPrice(String courseId);

@@ -26,7 +26,7 @@ import java.io.IOException;
 import java.util.List;
 
 @RestController
-@RequestMapping("/courses")
+@RequestMapping("instructor/courses")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class CourseController {
@@ -44,16 +44,6 @@ public class CourseController {
         return tagService.getTagsByCourseId(id);
     }
 
-    @GetMapping("/best-seller")
-    ApiResponse<List<CourseResponse>> getBestSellerCourse(@RequestParam(defaultValue = "4") int limit) {
-        return courseService.getBestSellerCourse(limit);
-    }
-
-    @GetMapping("/trend")
-    ApiResponse<List<CourseResponse>> getTrendCourse(@RequestParam(defaultValue = "4") int limit) {
-        return courseService.getTrendyCourse(limit);
-    }
-    // GET
     @GetMapping("/details/{id}")
     @PreAuthorize("@courseService.isTeacherOfCourse(#id, authentication.name)")
     ApiResponse<CourseResponse> getCourse(@PathVariable String id) {
@@ -63,18 +53,6 @@ public class CourseController {
     @PostMapping("/teacher")
     ApiResponse<PageResponse<CourseResponse>> getCoursesByTeacherId(@RequestBody InstructorRequest request) {
         return courseService.getCoursesByTeacherId(request.getInstructorId(), request.getPage(), request.getLimit());
-    }
-
-    @GetMapping
-    ApiResponse<PageResponse<CourseResponse>> getAllCourse(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int limit,
-            @RequestParam(required = false) String search,
-            @RequestParam(required = false) String category,
-            @RequestParam(required = false) Double minPrice,
-            @RequestParam(required = false) Double minRating
-            ) {
-        return courseService.getAllCourses(page, limit, search, category, minPrice, minRating);
     }
 
     @PostMapping

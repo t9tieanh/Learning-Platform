@@ -1,5 +1,6 @@
 import { ApiResponse } from '@/types/response.type'
 import axiosClient from '@/lib/axiosClient.lib'
+import { Course } from '@/components/TC_Courses/CourseTypes'
 
 export interface CourseResponse {
   id: string
@@ -50,9 +51,53 @@ export interface CourseResponse {
   requirements: string[]
 }
 
+type Paginated<T> = {
+  items: T[]
+  page: number
+  size: number
+  totalElements: number
+  totalPages: number
+}
+
 class CourseUserService {
   async getCourseDetails(courseId: string): Promise<ApiResponse<CourseResponse>> {
-    const response = await axiosClient.axiosInstance.get(`learning/courses-user/${courseId}`)
+    const response = await axiosClient.axiosInstance.get(`learning/courses/${courseId}`)
+    return response.data
+  }
+
+  async getAllCourses(params?: {
+    page?: number
+    limit?: number
+    search?: string
+    category?: string
+    minPrice?: number
+    minRating?: number
+  }): Promise<ApiResponse<Paginated<any>>> {
+    const { page = 1, limit = 10, search, category, minPrice, minRating } = params || {}
+    const response = await axiosClient.axiosInstance.get('learning/courses', {
+      params: {
+        page,
+        limit,
+        search,
+        category,
+        minPrice,
+        minRating
+      }
+    })
+    return response.data
+  }
+
+  async getBestSellerCourses(limit = 4): Promise<Course[]> {
+    const response = await axiosClient.axiosInstance.get('learning/courses/best-seller', {
+      params: { limit }
+    })
+    return response.data
+  }
+
+  async getTrendyCourseThisMonth(limit = 4): Promise<Course[]> {
+    const response = await axiosClient.axiosInstance.get('learning/courses/trend', {
+      params: { limit }
+    })
     return response.data
   }
 }

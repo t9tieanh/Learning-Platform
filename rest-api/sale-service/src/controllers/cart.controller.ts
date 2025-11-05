@@ -8,7 +8,7 @@ class CartController {
     async addToCart(req: Request, res: Response, next: NextFunction) {
         try {
             const { courseId } = req.data as AddToCartRequest;
-            const cart = await cartService.addToCart(req.session.cartId as string, courseId, !req.user);
+            const cart = await cartService.addToCart(req.session.cartId as string, courseId, req.user?.sub as string);
             sendResponse(res, {
                 code: 200,
                 message: 'Thêm vào giỏ hàng thành công',
@@ -25,7 +25,22 @@ class CartController {
             sendResponse(res, {
                 code: 200,
                 message: 'Lấy danh sách giỏ hàng thành công',
-                result: cartItems
+                result: cartItems.courses
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async getCartItemCount(req: Request, res: Response, next: NextFunction) {
+        try {
+            const cartItemCount = await cartService.getCartItemCount(req.session.cartId as string);
+            sendResponse(res, {
+                code: 200,
+                message: 'Lấy số lượng giỏ hàng thành công',
+                result: {
+                    count: cartItemCount
+                }
             });
         } catch (error) {
             next(error);

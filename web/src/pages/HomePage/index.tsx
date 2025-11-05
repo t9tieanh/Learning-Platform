@@ -3,7 +3,7 @@ import CourseList from '@/components/HomePage/CourseList'
 import TrendingCategories from '@/components/HomePage/TrendingCategories'
 import WhyChooseUsSection from '@/components/HomePage/WhyChooseUsSection'
 import HighlightedArticles from '@/components/HomePage/HighlightedArticles'
-import courseService from '@/services/course/course.service'
+import courseService from '@/services/course/course-user.service'
 
 const HomePage = () => {
   return (

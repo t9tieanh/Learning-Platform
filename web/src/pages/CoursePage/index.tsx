@@ -5,10 +5,9 @@ import { TabNavigation } from '@/components/CoursePage/TabNavigation'
 import { CourseSidebar } from '@/components/CoursePage/CourseSidebar'
 import { Button } from '@/components/ui/button'
 import { CourseHeader } from '@/components/CoursePage/CourseHeader'
-import { CourseDetail } from '@/types/course-student'
+import { CourseDetail, Lesson } from '@/types/course-student'
 import courseService from '@/services/course/course-student.service'
 import { useParams } from 'react-router-dom'
-import { Lesson } from '@/types/course-student'
 
 const CoursePage = () => {
   type UILecture = { id: number; title: string; duration: string; type: 'video' | 'pdf'; url: string }

@@ -2,14 +2,16 @@ import prismaService from '../utils/prisma.service';
 import ApiError from '~/middleware/ApiError';
 import redisService from '../utils/redis.service';
 import courseGrpcClient from '~/grpc/courseClient.grpc';
+import courseService from './course.service';
 
 class CartService {
-    async addToCart(cartId: string, courseId: string, isGuest = false): Promise<{
+    async addToCart(cartId: string, courseId: string, userId: string): Promise<{
         id: string;
         cart_id: string;
         course_id: string;
     }> {
-        if (isGuest) {
+        // handle guest user
+        if (!userId) {
             // save cart for guest user in redis
             await redisService.sadd(`cart:${cartId}`, courseId);
             return {
@@ -21,6 +23,11 @@ class CartService {
 
         // DB work inside a transaction
         const createdItem = await prismaService.$transaction(async (tx) => {
+
+            if (await courseService.hasPurchasedCourse(courseId, userId)) {
+                throw new ApiError(403, 'Bạn đã mua khóa học này trước đó !');
+            }
+
             const cart = await tx.cart.findUnique({
                 where: { id: cartId }
             });
@@ -60,8 +67,10 @@ class CartService {
     }
 
     async removeFromCart(cartId: string, courseId: string, isGuest = false): Promise<void> {
+        // remove from redis first
+        await redisService.srem(`cart:${cartId}`, courseId);
+        
         if (isGuest) {
-            await redisService.srem(`cart:${cartId}`, courseId);
             return;
         }
 
@@ -151,6 +160,30 @@ class CartService {
 
         const coursesResponse = await courseGrpcClient.getBulkCourses(courseIds);
         return { courses: coursesResponse.courses };
+    }
+
+    async getCartItemCount(cartId: string): Promise<number> {
+         // find redis first
+        const cart = await redisService.smembers(`cart:${cartId}`);
+
+        // only use redis when set has members
+        if (cart && cart.length > 0) {
+            if (cart.length > 0) {
+                return cart.length;
+            }
+        }
+
+        // if not found in redis, find in db
+        const dbCart = await prismaService.cart.findUnique({
+            where: { id: cartId },
+            include: { items: true }
+        });
+
+        if (!dbCart) {
+            return 0;
+        }
+
+        return dbCart.items.length;
     }
 }
 

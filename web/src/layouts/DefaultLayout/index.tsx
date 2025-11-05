@@ -6,9 +6,9 @@ import AuthenticationGate from '@/components/auth-gate/AuthenticationGate'
 import ScrollToTop from '@/components/common/ScrollToTop'
 
 const DefaultLayout: FC = () => {
-  const matches = useMatches();
-  const current = matches[matches.length - 1];
-  const hideFooter = current?.handle?.hideFooter;
+  const matches = useMatches()
+  const current = matches[matches.length - 1]
+  const hideFooter = current?.handle?.hideFooter
 
   return (
     <AuthenticationGate>
