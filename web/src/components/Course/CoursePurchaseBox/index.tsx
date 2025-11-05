@@ -1,11 +1,38 @@
-import { Button } from '@/components/ui/button'
+import CustomButton from '@/components/common/Button'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { FaPaperPlane, FaShoppingCart, FaTag } from 'react-icons/fa'
 import { useState } from 'react'
+import cartService from '@/services/sale/cart.service'
+import { toast } from 'sonner'
+import { useCartStore } from '@/stores/useCart.stores'
 
-const CoursePurchaseBox = ({ originalPrice, finalPrice }: { originalPrice: number; finalPrice: number }) => {
+const CoursePurchaseBox = ({
+  originalPrice,
+  finalPrice,
+  courseId
+}: {
+  originalPrice: number
+  finalPrice: number
+  courseId: string
+}) => {
   const [discountCode, setDiscountCode] = useState('')
+  const refresh = useCartStore((s) => s.refresh)
+
+  const handleAddToCart = async () => {
+    try {
+      const response = await cartService.addToCart(courseId)
+      if (response && response.code === 200) {
+        toast.success(response.message || 'Thêm vào giỏ hàng thành công!')
+        await refresh()
+      } else {
+        toast.error(response.message || 'Không thể thêm vào giỏ hàng')
+      }
+    } catch (error) {
+      toast.error('Không thể thêm vào giỏ hàng')
+      console.error('Error adding to cart:', error)
+    }
+  }
 
   return (
     <div className='flex justify-center min-h-screen bg-gradient-to-br py-8'>
@@ -22,15 +49,18 @@ const CoursePurchaseBox = ({ originalPrice, finalPrice }: { originalPrice: numbe
 
             {/* Action Buttons */}
             <div className='space-y-3 pt-2'>
-              <Button size='lg' className='w-full h-12 text-base'>
-                <FaPaperPlane className='w-4 h-4' />
-                Mua ngay
-              </Button>
+              <CustomButton
+                className='w-full h-12 text-base'
+                icon={<FaPaperPlane className='w-4 h-4' />}
+                label='Mua ngay'
+              />
 
-              <Button variant='outline' size='lg' className='w-full h-12 text-base text-primary'>
-                <FaShoppingCart className='w-4 h-4' />
-                Thêm vào giỏ hàng
-              </Button>
+              <CustomButton
+                className='w-full h-12 text-base bg-red-500 hover:bg-red-600 text-white'
+                icon={<FaShoppingCart className='w-4 h-4' />}
+                label='Thêm vào giỏ hàng'
+                onClick={handleAddToCart}
+              />
             </div>
           </CardHeader>
 
@@ -51,7 +81,7 @@ const CoursePurchaseBox = ({ originalPrice, finalPrice }: { originalPrice: numbe
                   onChange={(e) => setDiscountCode(e.target.value)}
                   className='flex-1 border-primary/20 focus:border-primary'
                 />
-                <Button className='px-4 bg-red-500 hover:bg-red-600 text-white'>Áp dụng</Button>
+                <CustomButton className='px-4 bg-red-500 hover:bg-red-600 text-white' label='Áp dụng' />
               </div>
             </div>
           </CardContent>

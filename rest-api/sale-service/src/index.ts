@@ -1,13 +1,11 @@
 import 'reflect-metadata';
 import 'dotenv/config';
 import express from 'express';
-import cors from 'cors';
 import { errorHandlingMiddleware } from './middleware/error-handler.midleware'
 import RabbitMQService from './service/utils/rabbitmq.service';
 import session from 'express-session';
 import { env } from './config/env';
 import indexRoute from '~/routes';
-//import elasticSearch from './service/utils/elasticSearch.service';
 
 const app = express();
 
@@ -16,10 +14,13 @@ app.use(session({
   resave: false,
   saveUninitialized: true,
   // cookie: { secure: true } -> production -> HTTPS
-  cookie: { secure: false } // -> development -> HTTP
+  cookie: { 
+    secure: false,
+    httpOnly: true,
+    // sameSite: 'none'
+  }, // -> development -> HTTP
+  
 }));
-
-app.use(cors());
 app.use(express.json());
 
 //health check

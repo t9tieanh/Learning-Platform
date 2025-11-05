@@ -79,6 +79,7 @@ const Course = () => {
           <CoursePurchaseBox
             originalPrice={courseDetail?.originalPrice || 0}
             finalPrice={courseDetail?.finalPrice || 0}
+            courseId={courseDetail?.id || ''}
           />
         </div>
       </div>

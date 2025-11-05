@@ -1,48 +1,54 @@
 import { Sigma } from 'lucide-react'
 import CartItemCard from './cartItemCard'
+import { useEffect, useState, Dispatch, SetStateAction, type FC } from 'react'
+import cartService from '@/services/sale/cart.service'
+import { CourseCart } from '@/types/cart.type'
 
-const CardSection = () => {
-  const cardItems = [
-    {
-      title: 'Khóa học JavaScript cơ bản và nâng cao cho người mới bắt đầu',
-      teacherName: 'Teacher 1',
-      image: 'https://fnbstudy.vn/wp-content/uploads/2025/04/baner-Web-scaled.jpg',
-      basePrice: 200000,
-      price: 150000,
-      rating: 3
-    },
-    {
-      title: 'Làm chủ JavaScript ES6+ và ứng dụng thực tế trong dự án web hiện đại',
-      teacherName: 'Teacher 2',
-      image: 'https://files.fullstack.edu.vn/f8-prod/courses/7.png',
-      basePrice: 300000,
-      price: 250000,
-      rating: 4
-    },
-    {
-      title: 'Học chỉnh sửa video với Adobe Premiere Pro cho người mới bắt đầu (2025)',
-      teacherName: 'Teacher 2',
-      image: 'https://i.ytimg.com/vi/5yHpfICfx_k/maxresdefault.jpg',
-      basePrice: 300000,
-      price: 250000,
-      rating: 5
+const CardSection: FC<{ setCourseSelected?: Dispatch<SetStateAction<CourseCart[]>> }> = ({ setCourseSelected }) => {
+  const [cartItems, setCartItems] = useState<CourseCart[]>([])
+
+  const fetchCartItems = async () => {
+    try {
+      const response = await cartService.getCartItems()
+      if (response.code === 200 && response.result) {
+        setCartItems(response?.result)
+      } else {
+        throw new Error(response.message || 'Failed to fetch cart items')
+      }
+    } catch (error) {
+      console.error('Error fetching cart items:', error)
     }
-  ]
+  }
+
+  useEffect(() => {
+    fetchCartItems()
+  }, [])
 
   return (
-    <div className='cart-section p-5 bg-white rounded-lg shadow-md'>
+    <div className='cart-section p-5 bg-white rounded-lg min-h-95 md:min-h-[480px] shadow-md'>
       <div className='total-cart-item'>
         <p className='text-sm font-semibold mb-1 flex'>
           <Sigma className='w-5 h-5' />
           Có
-          <span className='text-red-400'>&nbsp;3&nbsp;</span>khóa học trong giỏ hàng !
+          <span className='text-red-400'>&nbsp;{cartItems?.length || 0}&nbsp;</span>khóa học trong giỏ hàng !
         </p>
         <hr />
       </div>
       <div className='cart-item flex flex-col'>
-        {cardItems.map((item, index) => (
-          <CartItemCard key={index} cardItem={item} />
-        ))}
+        {cartItems && cartItems.length > 0 ? (
+          cartItems?.map((item, index) => (
+            <CartItemCard
+              key={item.id ?? index}
+              cardItem={item}
+              fetchCartItems={fetchCartItems}
+              setCourseSelected={setCourseSelected}
+            />
+          ))
+        ) : (
+          <>
+            <p className='text-center p-3 text-base text-gray-500'>Giỏ hàng của bạn đang trống</p>
+          </>
+        )}
       </div>
     </div>
   )

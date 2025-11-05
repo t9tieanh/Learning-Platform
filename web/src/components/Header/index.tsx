@@ -1,5 +1,4 @@
-/* eslint-disable import/no-unresolved */
-import { FC, useState } from 'react'
+import { FC, useState, useEffect } from 'react'
 import { NavigationMenu, NavigationMenuItem, NavigationMenuList } from '@/components/ui/navigation-menu'
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
 import CustomButton from '../common/Button'
@@ -7,6 +6,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import './style.scss'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/stores/useAuth.stores'
+import { useCartStore } from '@/stores/useCart.stores'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { LogIn, UserPlus, House, BookOpen, Building2, StickyNote, ShoppingCart, Menu as MenuIcon } from 'lucide-react'
@@ -16,7 +16,14 @@ import logo from '../../assets/images/logo1.png'
 const Header: FC = () => {
   const navigate = useNavigate()
   const { data } = useAuthStore()
+  const count = useCartStore((s) => s.count)
+  const refresh = useCartStore((s) => s.refresh)
   const [isOpen, setIsOpen] = useState(false)
+
+  useEffect(() => {
+    // refresh cart count on header mount
+    refresh().catch(() => {})
+  }, [refresh])
 
   const menuItems = [
     { icon: <House className='w-5 h-5' />, label: 'Trang chủ', value: 'home', path: '/' },
@@ -61,9 +68,15 @@ const Header: FC = () => {
             {/* Cart Icon */}
             <button
               onClick={() => navigate('/my-cart')}
-              className='p-2 hover:bg-gray-100 rounded-full transition-colors'
+              className='relative p-2 hover:bg-gray-100 rounded-full transition-colors'
+              aria-label='Giỏ hàng'
             >
               <ShoppingCart className='w-5 h-5' />
+              {count > 0 && (
+                <span className='absolute -top-1 -right-1 bg-blue-500 text-white rounded-full text-xs w-5 h-5 flex items-center justify-center'>
+                  {count}
+                </span>
+              )}
             </button>
 
             {/* User Menu / Auth Buttons */}
@@ -84,6 +97,7 @@ const Header: FC = () => {
                       username={data.username as string}
                       name={data.name as string}
                       avatarUrl={data.avatarUrl as string}
+                      closeMenu={() => {}}
                     />
                   </PopoverContent>
                 </Popover>

@@ -30,7 +30,8 @@ class AxiosClient {
       baseURL: 'http://localhost:8888/api/v1',
       headers: {
         'Content-Type': 'application/json'
-      }
+      },
+      withCredentials: true
     })
     this._initializeInterceptors()
   }

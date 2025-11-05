@@ -152,6 +152,30 @@ class CartService {
         const coursesResponse = await courseGrpcClient.getBulkCourses(courseIds);
         return { courses: coursesResponse.courses };
     }
+
+    async getCartItemCount(cartId: string): Promise<number> {
+         // find redis first
+        const cart = await redisService.smembers(`cart:${cartId}`);
+
+        // only use redis when set has members
+        if (cart && cart.length > 0) {
+            if (cart.length > 0) {
+                return cart.length;
+            }
+        }
+
+        // if not found in redis, find in db
+        const dbCart = await prismaService.cart.findUnique({
+            where: { id: cartId },
+            include: { items: true }
+        });
+
+        if (!dbCart) {
+            return 0;
+        }
+
+        return dbCart.items.length;
+    }
 }
 
 export default new CartService();

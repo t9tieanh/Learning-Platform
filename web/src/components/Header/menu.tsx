@@ -1,11 +1,20 @@
-
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
 import CustomButton from '../common/Button'
-import { LogOut, GraduationCap, BookOpen, ShoppingCart } from 'lucide-react'
+import { LogOut, GraduationCap, BookOpen } from 'lucide-react'
 import { useAuthStore } from '@/stores/useAuth.stores'
 import { useNavigate } from 'react-router-dom'
 
-const Menu = ({ username, name, avatarUrl, closeMenu }: { username: string; name: string; avatarUrl: string; closeMenu: () => void }) => {
+const Menu = ({
+  username,
+  name,
+  avatarUrl,
+  closeMenu
+}: {
+  username: string
+  name: string
+  avatarUrl: string
+  closeMenu: () => void
+}) => {
   const { data, setData } = useAuthStore()
   const navigate = useNavigate()
 
