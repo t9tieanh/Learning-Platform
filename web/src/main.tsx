@@ -24,6 +24,7 @@ import TC_CreateCourse from './pages/TC_CreateCourse'
 import TC_Profile from './pages/TC_Profile'
 import TC_CourseDetail from './pages/TC_CourseDetail'
 import TC_Blog from './pages/TC_Blog'
+import TC_CreateBlog from './pages/TC_CreateBlog'
 import TC_BlogDetails from './pages/TC_BlogDetails'
 import Home2 from './pages/Home2'
 import { SocketProvider } from '@/api/socket/socket.context'
@@ -45,8 +46,8 @@ const router = createBrowserRouter([
           { path: 'chat/:id', element: <Chat />, handle: { hideFooter: true } },
           { path: 'blog', element: <Blog /> },
           { path: 'blogs', element: <BlogList /> },
-          { path: 'blog-details', element: <BlogDetails /> },
-          { path: 'home2', element: <Home2/>}
+          { path: 'blog-details/:id', element: <BlogDetails /> },
+          { path: 'home2', element: <Home2 /> }
         ]
       },
       { path: 'auth', element: <AuthLayout /> },
@@ -65,9 +66,10 @@ const router = createBrowserRouter([
           { path: 'course-details/:id', element: <TC_CourseDetail /> },
           // Alias cũ (nếu ai truy cập không có id sẽ 404 hoặc có thể điều hướng)
           { path: 'chat/:id', element: <Chat /> },
-          { path: 'blog', element: <TC_Blog /> },
-          { path: 'blog-details', element: <TC_BlogDetails /> },
-          { path: 'course-details', element: <NotFound /> }
+          { path: 'blogs', element: <TC_Blog /> },
+          { path: 'create-blog', element: <TC_CreateBlog /> },
+          { path: 'course-details', element: <NotFound /> },
+          { path: 'blog/:id', element: <TC_BlogDetails /> }
         ]
       },
       { path: 'user/verify', element: <User /> },

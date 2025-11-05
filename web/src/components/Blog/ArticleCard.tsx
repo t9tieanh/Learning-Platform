@@ -9,7 +9,7 @@ interface ArticleCardProps {
 
 export const ArticleCard = ({ image, category, title, slug }: ArticleCardProps) => {
   return (
-    <Link to={`/article/${slug}`} className="group">
+    <Link to={`/blog-details/${slug}`} className="group">
       <article className="flex gap-4 items-start transition-all mb-2">
         <img
           src={image}

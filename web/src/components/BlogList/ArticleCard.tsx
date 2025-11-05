@@ -1,8 +1,9 @@
 import { Calendar, User } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { useNavigate } from "react-router-dom";
 
 export interface Article {
-    id: number;
+    id: string;
     title: string;
     image: string;
     author: string;
@@ -14,8 +15,9 @@ interface ArticleCardProps {
 }
 
 export const ArticleCard = ({ article }: ArticleCardProps) => {
+    const navigate = useNavigate();
     return (
-        <Card className="group overflow-hidden border border-border bg-card hover:shadow-[var(--shadow-card-hover)] transition-all duration-300 cursor-pointer">
+        <Card onClick={() => navigate(`/blog-details/${article.id}`)} className="group overflow-hidden border border-border bg-card hover:shadow-[var(--shadow-card-hover)] transition-all duration-300 cursor-pointer">
             <div className="aspect-video overflow-hidden relative">
                 <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10" />
                 <img

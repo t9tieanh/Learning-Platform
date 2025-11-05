@@ -1,0 +1,203 @@
+import { Request, Response } from 'express'
+import { StatusCodes } from 'http-status-codes'
+import sendResponse from '~/dto/response/send-response'
+import BlogService from '~/services/blog.service'
+
+const getAll = async (req: Request, res: Response) => {
+    try {
+        const page = (req.data as any)?.page ?? (req.query.page ? Math.max(1, Number(req.query.page)) : 1)
+        const limit = (req.data as any)?.limit ?? (req.query.limit ? Math.min(100, Math.max(1, Number(req.query.limit))) : 10)
+        const search = (req.data as any)?.search ?? (req.query.q as string) ?? (req.query.search as string) ?? ''
+
+        const result = await BlogService.getAll({ page, limit, search })
+
+        sendResponse(res, {
+            code: StatusCodes.OK,
+            message: 'Lấy danh sách blog thành công',
+            result
+        })
+    } catch (e) {
+        const err = e as Error
+        sendResponse(res, {
+            code: StatusCodes.BAD_REQUEST,
+            message: err.message || 'Lỗi lấy danh sách blog',
+            result: null
+        })
+    }
+}
+
+const getNew = async (_req: Request, res: Response) => {
+    try {
+        const items = await BlogService.getNew(3)
+        sendResponse(res, {
+            code: StatusCodes.OK,
+            message: 'Lấy blog mới nhất thành công',
+            result: items
+        })
+    } catch (e) {
+        const err = e as Error
+        sendResponse(res, {
+            code: StatusCodes.BAD_REQUEST,
+            message: err.message || 'Lỗi lấy blog mới',
+            result: null
+        })
+    }
+}
+
+const getTrending = async (_req: Request, res: Response) => {
+    try {
+        // Assumption: trending by updatedAt desc due to lack of view/like fields
+        const items = await BlogService.getTrending(3)
+        sendResponse(res, {
+            code: StatusCodes.OK,
+            message: 'Lấy blog thịnh hành thành công',
+            result: items
+        })
+    } catch (e) {
+        const err = e as Error
+        sendResponse(res, {
+            code: StatusCodes.BAD_REQUEST,
+            message: err.message || 'Lỗi lấy blog thịnh hành',
+            result: null
+        })
+    }
+}
+
+const getDetails = async (req: Request, res: Response) => {
+    try {
+        const id = (req.data as any)?.id || (req.params?.id as string) || ''
+        if (!id) throw new Error('Thiếu tham số id')
+
+        const item = await BlogService.getDetails(id)
+        if (!item) {
+            return sendResponse(res, {
+                code: StatusCodes.NOT_FOUND,
+                message: 'Không tìm thấy blog',
+                result: null
+            })
+        }
+
+        sendResponse(res, {
+            code: StatusCodes.OK,
+            message: 'Lấy chi tiết blog thành công',
+            result: item
+        })
+    } catch (e) {
+        const err = e as Error
+        sendResponse(res, {
+            code: StatusCodes.BAD_REQUEST,
+            message: err.message || 'Lỗi lấy chi tiết blog',
+            result: null
+        })
+    }
+}
+
+const create = async (req: Request, res: Response) => {
+    try {
+        const { instructor_id, title, image_url, content, markdown_file_url } = (req.data as any) || (req.body as any)
+
+
+        if (!instructor_id || !title || !image_url || !content) {
+            throw new Error('Thiếu dữ liệu bắt buộc (instructor_id, title, image_url, content)')
+        }
+
+        const created = await BlogService.create({
+            instructor_id,
+            title,
+            image_url,
+            content,
+            markdown_file_url: markdown_file_url || []
+        })
+
+        sendResponse(res, {
+            code: StatusCodes.CREATED,
+            message: 'Tạo blog thành công',
+            result: created
+        })
+    } catch (e) {
+        const err = e as Error
+        sendResponse(res, {
+            code: StatusCodes.BAD_REQUEST,
+            message: err.message || 'Lỗi tạo blog',
+            result: null
+        })
+    }
+}
+
+const update = async (req: Request, res: Response) => {
+    try {
+        const id = (req.data as any)?.id || (req.params?.id as string) || ''
+        if (!id) throw new Error('Thiếu tham số id')
+
+        const { title, image_url, content, markdown_file_url } = (req.data as any) || (req.body as any)
+
+        const hasAny =
+            typeof title === 'string' ||
+            typeof image_url === 'string' ||
+            typeof content === 'string' ||
+            (Array.isArray(markdown_file_url) && markdown_file_url.length >= 0)
+
+        if (!hasAny) throw new Error('Thiếu dữ liệu cần cập nhật')
+
+        const updated = await BlogService.update(id, {
+            title,
+            image_url,
+            content,
+            markdown_file_url
+        })
+
+        if (!updated) {
+            return sendResponse(res, {
+                code: StatusCodes.NOT_FOUND,
+                message: 'Không tìm thấy blog để cập nhật',
+                result: null
+            })
+        }
+
+        sendResponse(res, {
+            code: StatusCodes.OK,
+            message: 'Cập nhật blog thành công',
+            result: updated
+        })
+    } catch (e) {
+        const err = e as Error
+        sendResponse(res, {
+            code: StatusCodes.BAD_REQUEST,
+            message: err.message || 'Lỗi cập nhật blog',
+            result: null
+        })
+    }
+}
+
+const remove = async (req: Request, res: Response) => {
+    try {
+        const id = (req.data as any)?.id || (req.params?.id as string) || ''
+        if (!id) throw new Error('Thiếu tham số id')
+
+        const result = await BlogService.remove(id)
+        sendResponse(res, {
+            code: StatusCodes.OK,
+            message: result.deleted ? 'Xóa blog thành công' : 'Không tìm thấy blog để xóa',
+            result
+        })
+    } catch (e) {
+        const err = e as Error
+        sendResponse(res, {
+            code: StatusCodes.BAD_REQUEST,
+            message: err.message || 'Lỗi xóa blog',
+            result: null
+        })
+    }
+}
+
+const BlogController = {
+    getAll,
+    getNew,
+    getTrending,
+    getDetails,
+    create,
+    update,
+    remove
+}
+
+export default BlogController

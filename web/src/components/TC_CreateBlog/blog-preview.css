@@ -1,0 +1,75 @@
+/* Typography overrides for Quill-rendered content inside preview */
+.blog-preview .ql-editor {
+    font-size: 18px;
+    /* base for normal paragraph */
+    line-height: 1.75;
+    text-align: justify;
+}
+
+.blog-preview .ql-editor h1 {
+    font-size: 30px;
+    /* distinct from article title */
+    line-height: 1.25;
+    font-weight: 800;
+    margin: 1.25em 0 0.5em;
+    text-align: justify;
+}
+
+.blog-preview .ql-editor h2 {
+    font-size: 26px;
+    line-height: 1.35;
+    font-weight: 700;
+    margin: 1.2em 0 0.5em;
+    text-align: justify;
+}
+
+.blog-preview .ql-editor h3 {
+    font-size: 22px;
+    line-height: 1.4;
+    font-weight: 700;
+    margin: 1.1em 0 0.5em;
+    text-align: justify;
+}
+
+.blog-preview .ql-editor p {
+    font-size: 18px;
+    line-height: 1.75;
+    margin: 0.7em 0;
+    text-align: justify;
+}
+
+/* Lists */
+.blog-preview .ql-editor ul,
+.blog-preview .ql-editor ol {
+    padding-left: 1.5rem;
+    margin: 0.75em 0 1em;
+    text-align: justify;
+}
+
+.blog-preview .ql-editor li {
+    margin: 0.25em 0;
+    text-align: justify;
+}
+
+.blog-preview .ql-editor a {
+    font-size: 22px;
+    line-height: 1.4;
+    font-weight: 700;
+    margin: 1.1em 0 0.5em;
+    text-align: justify;
+    color: rgb(53, 119, 241);
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+
+
+/* Optional: tighten spacing after headings followed by lists */
+.blog-preview .ql-editor h1+ul,
+.blog-preview .ql-editor h1+ol,
+.blog-preview .ql-editor h2+ul,
+.blog-preview .ql-editor h2+ol,
+.blog-preview .ql-editor h3+ul,
+.blog-preview .ql-editor h3+ol {
+    margin-top: 0.5em;
+}

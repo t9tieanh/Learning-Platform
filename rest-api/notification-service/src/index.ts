@@ -10,8 +10,8 @@ import router from '~/routes/index'
 const START_SERVER = async () => {
   const app = express()
 
-  app.use(express.json())
-
+  // app.use(express.json())
+  app.use(express.json({ limit: '10mb' }));
   app.use('/notify', router)
   app.use(errorHandlingMiddleware)
 

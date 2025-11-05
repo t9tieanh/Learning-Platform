@@ -1,5 +1,5 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@radix-ui/react-avatar'
-import { BookOpen, Calendar, Home, MessageSquare, BarChart3, HelpCircle, Settings , FileText} from 'lucide-react'
+import { BookOpen, Calendar, Home, MessageSquare, BarChart3, HelpCircle, Settings, FileText } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useAuthStore } from '@/stores/useAuth.stores'
 import { useNavigate } from 'react-router-dom'
@@ -60,13 +60,14 @@ const AcademySidebar = () => {
                 if (item.name === 'Trang chủ') onClick = () => navigate('/teacher')
                 if (item.name === 'Khóa học') onClick = () => navigate('/teacher/course')
                 if (item.name === 'Tin nhắn') onClick = () => navigate('/teacher/chat/:id')
+                if (item.name === 'Bài viết') onClick = () => navigate('/teacher/blogs')
                 return (
                   <Button
                     key={itemIndex}
                     variant={item.active ? 'secondary' : 'ghost'}
                     className={`w-full justify-start h-11 px-3 ${item.active
-                        ? 'bg-sidebar-accent text-sidebar-accent-foreground hover:bg-[#ababaf]'
-                        : 'text-sidebar-foreground/80 hover:bg-[#afafb3] hover:text-sidebar-accent-foreground'
+                      ? 'bg-sidebar-accent text-sidebar-accent-foreground hover:bg-[#ababaf]'
+                      : 'text-sidebar-foreground/80 hover:bg-[#afafb3] hover:text-sidebar-accent-foreground'
                       }`}
                     onClick={onClick}
                   >

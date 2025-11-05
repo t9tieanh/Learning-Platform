@@ -1,13 +1,16 @@
 import { FC } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Search } from 'lucide-react'
 import CustomButton from '@/components/common/Button'
 import { IoAddCircle } from 'react-icons/io5'
+
 
 interface BlogSearchBarProps {
     onSearch?: (value: string) => void
 }
 
 const BlogSearchBar: FC<BlogSearchBarProps> = ({ onSearch }) => {
+    const navigate = useNavigate();
     return (
         <div className='flex justify-between items-center flex-col sm:flex-row gap-4'>
             <div className='relative w-full sm:w-1/3'>
@@ -24,7 +27,7 @@ const BlogSearchBar: FC<BlogSearchBarProps> = ({ onSearch }) => {
                 className='bg-gradient-to-r from-indigo-500 to-blue-500 text-white px-6 py-2.5 rounded-xl shadow-md hover:shadow-lg hover:scale-105 transition'
                 label='Tạo bài viết mới'
                 icon={<IoAddCircle className='h-6 w-6 mr-2' />}
-
+                onClick={() => navigate('/teacher/create-blog')}
             />
         </div>
     )

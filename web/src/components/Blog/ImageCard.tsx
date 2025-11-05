@@ -8,11 +8,11 @@ interface ImageCardProps {
 
 export const ImageCard = ({ image, title, slug }: ImageCardProps) => {
     return (
-        <Link to={`/article/${slug}`} className="group">
+        <Link to={`/blog-details/${slug}`} className="group">
             <article className="relative rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all mb-8">
                 <div className="aspect-video relative overflow-hidden">
                     <img
-                        src='https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRf8GeTISd7jte64-n4rC99Ceicb3tk0dTnTg&s'
+                        src={image}
                         alt={title}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     />

@@ -7,7 +7,8 @@ import { StatusCodes } from 'http-status-codes'
 const validateDto = (dtoClass: any) => async (req: Request, res: Response, next: NextFunction) => {
   const payload: any = {
     ...req.body,
-    ...req.query
+    ...req.query,
+    ...req.params
   }
 
   // Nếu có file được upload thì thêm buffer & fileName
