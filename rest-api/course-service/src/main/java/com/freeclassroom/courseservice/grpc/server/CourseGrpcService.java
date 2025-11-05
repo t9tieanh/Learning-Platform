@@ -1,0 +1,110 @@
+package com.freeclassroom.courseservice.grpc.server;
+
+import com.example.grpc.course.CourseResponse;
+import com.example.grpc.course.GetCourseRequest;
+import com.example.grpc.course.GetCoursesRequest;
+import com.example.grpc.course.GetCoursesResponse;
+import com.example.grpc.user.CourseServiceGrpc.CourseServiceImplBase;
+import com.example.grpc.user.GetTeachersResponse;
+import com.example.grpc.user.GetUserResponse;
+import com.example.grpc.user.Teacher;
+import com.freeclassroom.courseservice.entity.course.CourseEntity;
+import com.freeclassroom.courseservice.exception.CustomExeption;
+import com.freeclassroom.courseservice.exception.ErrorCode;
+import com.freeclassroom.courseservice.grpc.client.UserGrpcClient;
+import com.freeclassroom.courseservice.repository.entity.CourseRepository;
+import io.grpc.stub.StreamObserver;
+import lombok.RequiredArgsConstructor;
+import net.devh.boot.grpc.server.service.GrpcService;
+
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+@GrpcService
+@RequiredArgsConstructor
+public class CourseGrpcService extends CourseServiceImplBase {
+    private final CourseRepository courseRepo;
+    private final UserGrpcClient userGrpcClient;
+
+    @Override
+    public void getCourse(GetCourseRequest request, StreamObserver<CourseResponse> responseObserver) {
+        CourseEntity course = courseRepo.findById(request.getId())
+                .orElseThrow(() -> new CustomExeption(ErrorCode.COURSE_NOT_FOUND));
+
+        CourseResponse.Builder builder = CourseResponse.newBuilder()
+                .setId(course.getId() != null ? course.getId() : "")
+                .setTitle(course.getTitle() != null ? course.getTitle() : "")
+                .setShortDescription(course.getShortDescription() != null ? course.getShortDescription() : "")
+                .setLongDescription(course.getLongDescription() != null ? course.getLongDescription() : "")
+                .setThumbnailUrl(course.getThumbnailUrl() != null ? course.getThumbnailUrl() : "")
+                .setRating(course.getRating() != null ? course.getRating() : 0.0)
+                .setIntroductoryVideo(course.getIntroductoryVideo() != null ? course.getIntroductoryVideo() : "")
+                .setLanguage(course.getLanguage() != null ? course.getLanguage() : "")
+                .setOriginalPrice(course.getOriginalPrice() != null ? course.getOriginalPrice() : 0.0)
+                .setFinalPrice(course.getFinalPrice() != null ? course.getFinalPrice() : 0.0);
+
+
+        GetUserResponse instructor = userGrpcClient.getUser(course.getInstructorId());
+        if (instructor != null) {
+            Teacher teacher = Teacher.newBuilder()
+                    .setId(instructor.getId() != null ? instructor.getId() : "")
+                    .setName(instructor.getName() != null ? instructor.getName() : "")
+                    .setEmail(instructor.getEmail() != null ? instructor.getEmail() : "")
+                    .setImage(instructor.getImage() != null ? instructor.getImage() : "")
+                    .build();
+            builder.setInstructor(teacher);
+        }
+
+        responseObserver.onNext(builder.build());
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void getBulkCourses(GetCoursesRequest request, StreamObserver<GetCoursesResponse> responseObserver) {
+        List<CourseEntity> myCourses = courseRepo.findAllById(request.getCourseIdsList());
+
+        // Get Instructor Info
+        List<String> instructorIds = myCourses
+                .stream()
+                .map(CourseEntity::getInstructorId)
+                .distinct()
+                .toList();
+
+        GetTeachersResponse teachersResponse = userGrpcClient.getBulkTeachers(instructorIds);
+
+        Map<String, Teacher> teacherMap = teachersResponse.getTeachersList()
+                .stream()
+                .collect(Collectors.toMap(Teacher::getId, t -> t));
+
+        List<CourseResponse> courseResponses = myCourses.stream()
+                .map(course -> {
+                    CourseResponse.Builder builder = CourseResponse.newBuilder()
+                            .setId(course.getId() != null ? course.getId() : "")
+                            .setTitle(course.getTitle() != null ? course.getTitle() : "")
+                            .setShortDescription(course.getShortDescription() != null ? course.getShortDescription() : "")
+                            .setLongDescription(course.getLongDescription() != null ? course.getLongDescription() : "")
+                            .setThumbnailUrl(course.getThumbnailUrl() != null ? course.getThumbnailUrl() : "")
+                            .setRating(course.getRating() != null ? course.getRating() : 0.0)
+                            .setIntroductoryVideo(course.getIntroductoryVideo() != null ? course.getIntroductoryVideo() : "")
+                            .setLanguage(course.getLanguage() != null ? course.getLanguage() : "")
+                            .setOriginalPrice(course.getOriginalPrice() != null ? course.getOriginalPrice() : 0.0)
+                            .setFinalPrice(course.getFinalPrice() != null ? course.getFinalPrice() : 0.0);
+
+                    Teacher teacher = teacherMap.get(course.getInstructorId());
+                    if (teacher != null) {
+                        builder.setInstructor(teacher);
+                    }
+
+                    return builder.build();
+                })
+                .toList();
+
+        GetCoursesResponse response = GetCoursesResponse.newBuilder()
+                .addAllCourses(courseResponses)
+                .build();
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+}

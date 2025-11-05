@@ -11,7 +11,7 @@ datasource db {
 
 model Cart {
   id         String      @id @default(uuid())
-  user_id    String
+  user_id    String      @unique
   created_at DateTime    @default(now())
   updated_at DateTime    @updatedAt
 
@@ -22,7 +22,6 @@ model Cart_Item {
   id        String   @id @default(uuid())
   cart_id   String
   course_id String
-  price     Float
 
   cart      Cart     @relation(fields: [cart_id], references: [id])
 }

@@ -12,11 +12,9 @@ public class UserGrpcClient {
     private UserServiceGrpc.UserServiceBlockingStub userStub;
 
     public GetUserResponse getUser(String id) {
-        System.out.println("id" + id);
         GetUserRequest request = GetUserRequest.newBuilder()
                 .setId(id)
                 .build();
-        System.out.println("rest:" + request);
         return userStub.getUser(request);
     }
 

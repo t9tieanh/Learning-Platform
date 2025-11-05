@@ -1,5 +1,5 @@
-# REST API - Report for GeekUp
-- Ứng viên thực hiện: Phạm Tiến Anh
+# Sale Service
+- Phạm Tiến Anh
 
 ## Công nghệ sử dụng
 
