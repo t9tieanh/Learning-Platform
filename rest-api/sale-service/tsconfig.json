@@ -2,6 +2,11 @@
   "compilerOptions": {
     "target": "ES2020",
     "module": "CommonJS",
+    "baseUrl": ".",
+    "paths": {
+      "~/*": ["src/*"],
+      "~": ["src"]
+    },
     "outDir": "dist",
     "rootDir": "src",
     "strict": true,
@@ -12,4 +17,6 @@
     "emitDecoratorMetadata": true
   },
   "include": ["src"]
+  ,
+  "exclude": ["src/createData/**", "node_modules", "dist"]
 }

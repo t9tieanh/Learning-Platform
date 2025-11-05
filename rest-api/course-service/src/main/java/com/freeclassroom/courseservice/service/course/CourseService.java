@@ -219,6 +219,7 @@ public class CourseService implements ICourseService {
     public boolean isTeacherOfCourse(String courseId, String userId) {
         return courseRepo.existsByIdAndInstructorId(courseId, userId);
     }
+
     public ApiResponse<CourseResponse> getCourse(String id) {
         try {
             CourseEntity entity = courseRepo.findByIdWithTags(id)

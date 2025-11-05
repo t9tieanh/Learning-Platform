@@ -6,6 +6,7 @@ import { errorHandlingMiddleware } from './middleware/error-handler.midleware'
 import RabbitMQService from './service/utils/rabbitmq.service';
 import session from 'express-session';
 import { env } from './config/env';
+import indexRoute from '~/routes';
 //import elasticSearch from './service/utils/elasticSearch.service';
 
 const app = express();
@@ -16,13 +17,15 @@ app.use(session({
   saveUninitialized: true,
   // cookie: { secure: true } -> production -> HTTPS
   cookie: { secure: false } // -> development -> HTTP
-}))
+}));
 
 app.use(cors());
 app.use(express.json());
 
 //health check
 app.get('/ping', (_req, res) => res.json({ message: 'pong' }));
+
+app.use(indexRoute);
 
 app.use(errorHandlingMiddleware);
 

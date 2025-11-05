@@ -12,7 +12,11 @@ export class LoginDto {
 
 // Các class khác cũng sửa tương tự:
 export class JwtPayloadDto {
-  userId!: string;
-  type: 'access' | 'refresh' | undefined;
+  sub!: string;
+  type!: 'ACCESS_TOKEN' | 'REFRESH_TOKEN'
+  scope!: string[];
+  iss!: string;
+  exp!: number;
+  iat!: number;
+  jti!: string;
 }
-

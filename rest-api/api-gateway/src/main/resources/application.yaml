@@ -47,6 +47,13 @@ spring:
           filters:
             - StripPrefix=3
 
+        - id: sale
+          uri: http://localhost:8082
+          predicates:
+            - Path=${app.api-prefix}/sale/**, ${app.api-prefix}/sale**
+          filters:
+            - StripPrefix=3
+
         - id: notify
           uri: http://localhost:8082
           predicates:

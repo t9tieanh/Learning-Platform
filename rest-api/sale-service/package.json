@@ -5,6 +5,8 @@
   "license": "MIT",
   "dependencies": {
     "@elastic/elasticsearch": "^7.17.0",
+    "@grpc/grpc-js": "^1.14.0",
+    "@grpc/proto-loader": "^0.8.0",
     "@prisma/client": "^6.16.2",
     "amqplib": "^0.10.9",
     "bcrypt": "^6.0.0",
@@ -35,13 +37,15 @@
     "@types/node": "^24.10.0",
     "@types/nodemailer": "^7.0.1",
     "ts-node-dev": "^2.0.0",
+    "tsc-alias": "^1.8.16",
+    "tsconfig-paths": "^4.2.0",
     "typescript": "^5.9.2"
   },
   "scripts": {
-    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "dev": "ts-node-dev --respawn --transpile-only -r tsconfig-paths/register src/index.ts",
     "seed": "ts-node prisma/seed.ts",
     "async-data": "ts-node src/createData/elasticSearch.seed.ts",
-    "build": "tsc",
+    "build": "tsc && tsc-alias",
     "start": "node dist/index.js",
     "lint:fix": "eslint . --ext .ts --fix",
     "generate-data": "npx ts-node src/createData/seed.ts",
