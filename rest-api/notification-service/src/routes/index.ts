@@ -6,7 +6,7 @@ import authen from '~/middleware/authen.middleware'
 
 const IndexRouter: Router = express.Router()
 
-// IndexRouter.use(authen)
+IndexRouter.use(authen)
 
 IndexRouter.use('/feedback', FeedbackRoute)
 IndexRouter.use('/chat', ChatRoute)
