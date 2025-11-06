@@ -17,20 +17,6 @@ spring:
 
   cloud:
     gateway:
-      globalcors:
-        corsConfigurations:
-          '[/**]':
-            allowedOrigins:
-              - "http://localhost:3000"
-            allowedMethods:
-              - GET
-              - POST
-              - PUT
-              - DELETE
-              - PATCH
-              - OPTIONS
-            allowedHeaders: "*"
-            allowCredentials: true
 
       routes:
         - id: user
@@ -44,6 +30,13 @@ spring:
           uri: http://localhost:8081
           predicates:
             - Path=${app.api-prefix}/learning/**, ${app.api-prefix}/learning**
+          filters:
+            - StripPrefix=3
+
+        - id: sale
+          uri: http://localhost:8082
+          predicates:
+            - Path=${app.api-prefix}/sale/**, ${app.api-prefix}/sale**
           filters:
             - StripPrefix=3
 

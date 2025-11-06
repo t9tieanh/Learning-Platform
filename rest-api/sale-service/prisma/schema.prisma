@@ -1,0 +1,79 @@
+// Prisma schema for SALE SERVICE (MySQL)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Cart {
+  id         String      @id @default(uuid())
+  user_id    String      @unique
+  created_at DateTime    @default(now())
+  updated_at DateTime    @updatedAt
+
+  items      Cart_Item[]
+}
+
+model Cart_Item {
+  id        String   @id @default(uuid())
+  cart_id   String
+  course_id String
+
+  cart      Cart     @relation(fields: [cart_id], references: [id])
+}
+
+model Order {
+  id          String        @id @default(uuid())
+  user_id     String
+  status      String
+  created_at  DateTime      @default(now())
+  updated_at  DateTime      @updatedAt
+
+  items       Order_Item[]
+  payment     Payment?
+  discount_id String?
+  discount    Discount?     @relation(fields: [discount_id], references: [id])
+}
+
+model Order_Item {
+  id         String   @id @default(uuid())
+  order_id   String
+  course_id  String
+  price      Float
+
+  order      Order    @relation(fields: [order_id], references: [id])
+}
+
+model Payment {
+  id          String   @id @default(uuid())
+  order_id    String   @unique
+  amount      Float
+  method      String
+  status      String
+  created_at  DateTime @default(now())
+
+  order       Order    @relation(fields: [order_id], references: [id])
+}
+
+model Discount {
+  id             String   @id @default(uuid())
+  name           String
+  code           String   @unique
+  value          Float
+  type           DiscountType
+  minOrderValue  Float?
+  maxDiscount    Float?
+  startDate      DateTime
+  endDate        DateTime
+
+  orders         Order[]
+}
+
+enum DiscountType {
+  Percent
+  Amount
+}

@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+import "course.proto";
+
+option java_multiple_files = true;
+option java_package = "com.example.grpc.user";
+option java_outer_classname = "CourseServiceProto";
+
+service CourseService {
+  rpc getCourse (GetCourseRequest) returns (CourseResponse);
+  rpc getBulkCourses (GetCoursesRequest) returns (GetCoursesResponse);
+}

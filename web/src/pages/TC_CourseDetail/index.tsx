@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import { Separator } from '@/components/ui/separator'
 import { useParams, useNavigate } from 'react-router-dom'
-import courseService from '@/services/course.service'
+import courseService from '@/services/course/course.service'
 import { ApiResponse } from '@/types/response.type'
 import { Loader } from '@/components/ui/loader'
 

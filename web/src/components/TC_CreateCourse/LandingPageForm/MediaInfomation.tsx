@@ -26,7 +26,7 @@ const MediaInfomation = ({ formProps, id }: MediaInfomationProps) => {
   const { data } = useAuthStore()
   const { upload, progress, message, isUploading } = useUpload({
     accessToken: data?.accessToken as string,
-    uri: `learning/courses/${id}/video-introduction`
+    uri: `learning/instructor/courses/${id}/video-introduction`
   })
 
   const handleImageChange = async (event: ChangeEvent<HTMLInputElement>) => {

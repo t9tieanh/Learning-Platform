@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.example.grpc.course";
+option java_outer_classname = "CourseProto";
+import "user.proto";
+
+message GetCourseRequest {
+  string id = 1;
+}
+
+message CourseResponse {
+  string id = 1;
+  string title = 2;
+  string short_description = 3;
+  string long_description = 4;
+  string thumbnail_url = 5;
+  double rating = 6;
+  string introductory_video = 7;
+  string language = 8;
+  double original_price = 9;
+  double final_price = 10;
+  Teacher instructor = 11;
+}
+
+// get bulk course
+message GetCoursesRequest {
+  repeated string course_ids = 1;
+}
+
+message GetCoursesResponse {
+  repeated CourseResponse courses = 1;
+}

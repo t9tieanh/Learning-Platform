@@ -7,10 +7,8 @@ import com.example.grpc.user.Teacher;
 import com.freeclassroom.courseservice.dto.response.ApiResponse;
 import com.freeclassroom.courseservice.dto.response.common.Pagination;
 import com.freeclassroom.courseservice.dto.response.common.PagingResponse;
-import com.freeclassroom.courseservice.dto.response.course.CourseUserDetailResponse;
-import com.freeclassroom.courseservice.dto.response.course.ExpertiseResponse;
-import com.freeclassroom.courseservice.dto.response.course.InstructorCourseResponse;
-import com.freeclassroom.courseservice.dto.response.course.MyCourseResponse;
+import com.freeclassroom.courseservice.dto.response.course.*;
+import com.freeclassroom.courseservice.dto.response.user.InstructorResponse;
 import com.freeclassroom.courseservice.entity.course.CourseEntity;
 import com.freeclassroom.courseservice.enums.entity.EnumCourseProgressStep;
 import com.freeclassroom.courseservice.enums.entity.EnumCourseStatus;
@@ -28,8 +26,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -147,5 +147,107 @@ public class CourseUserService implements ICourseUserService{
                                 .build()
                 )
                 .build();
+    }
+
+    @Override
+    public ApiResponse<List<CourseResponse>> getBestSellerCourse(int limit) {
+        try {
+            Pageable pageable = PageRequest.of(0, limit);
+            List<CourseEntity> courseEntities = courseRepo.findBestSellerCourses(pageable);
+
+            List<CourseResponse> courses = getInstructorGrpc(courseEntities);
+
+            return ApiResponse.<List<CourseResponse>>builder()
+                    .code(HttpStatus.OK.value())
+                    .message("Thành công")
+                    .result(courses)
+                    .build();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ApiResponse.<List<CourseResponse>>builder()
+                    .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                    .message("Lỗi: " + e.getMessage())
+                    .result(null)
+                    .build();
+        }
+    }
+
+    @Override
+    public ApiResponse<List<CourseResponse>> getTrendyCourse(int limit) {
+        try {
+            int month = LocalDate.now().getMonthValue();
+            int year = LocalDate.now().getYear();
+            Pageable pageable = PageRequest.of(0, limit);
+            List<CourseEntity> courseEntities = courseRepo.getTrendyCourse(pageable, month, year);
+
+            List<CourseResponse> courses = getInstructorGrpc(courseEntities);
+
+            return ApiResponse.<List<CourseResponse>>builder()
+                    .code(HttpStatus.OK.value())
+                    .message("Thành công")
+                    .result(courses)
+                    .build();
+        } catch (Exception e) {
+            return ApiResponse.<List<CourseResponse>>builder()
+                    .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                    .message("Lỗi: " + e.getMessage())
+                    .result(null)
+                    .build();
+        }
+    }
+
+    @Override
+    public ApiResponse<PageResponse<CourseResponse>> getAllCourses(int page, int limit, String search, String category, Double minPrice, Double minRating) {
+        try {
+            Pageable pageable = PageRequest.of(Math.max(page - 1, 0), limit, Sort.by(Sort.Direction.DESC, "createdAt"));
+
+            Page<CourseEntity> result = courseRepo.findAllWithFilters(search, category, minPrice, minRating, pageable);
+
+            List<CourseResponse> content = getInstructorGrpc(result.getContent());
+
+            PageResponse<CourseResponse> pageResponse = new PageResponse<>(
+                    content,
+                    result.getNumber() + 1,
+                    result.getSize(),
+                    result.getTotalElements(),
+                    result.getTotalPages()
+            );
+
+            return ApiResponse.<PageResponse<CourseResponse>>builder()
+                    .code(HttpStatus.OK.value())
+                    .message("Lấy danh sách khóa học thành công")
+                    .result(pageResponse)
+                    .build();
+
+        } catch (Exception e) {
+            return ApiResponse.<PageResponse<CourseResponse>>builder()
+                    .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                    .message("Lỗi: " + e.getMessage())
+                    .result(null)
+                    .build();
+        }
+    }
+
+    // general code
+    private List<CourseResponse> getInstructorGrpc(List<CourseEntity> courseEntities) {
+        return courseEntities.stream()
+                .map(entity -> {
+                    CourseResponse dto = courseMapper.toDto(entity);
+
+                    // Gọi sang user-service để lấy instructor
+                    GetUserResponse user = userGrpcClient.getUser(
+                            entity.getInstructorId().toString()
+                    );
+
+                    dto.setInstructor(new InstructorResponse(
+                            user.getId(),
+                            user.getName(),
+                            user.getEmail(),
+                            user.getImage()
+                    ));
+                    return dto;
+                })
+                .toList();
     }
 }

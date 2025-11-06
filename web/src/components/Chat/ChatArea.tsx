@@ -1,27 +1,16 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Phone, Video, MoreVertical, Send, Image, Paperclip, ChevronLeft, Copy } from "lucide-react";
-import { useContext, useEffect, useMemo, useRef, useState } from "react";
-import { cn } from "@/lib/utils";
-import { SocketContext } from "@/api/socket/socket.context";
-import { useLocation } from "react-router-dom";
-import chatService from "@/services/chat/chat.service";
-import { useAuthStore } from "@/stores/useAuth.stores";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { toast } from 'sonner';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Phone, Video, MoreVertical, Send, Image, Paperclip, ChevronLeft, Copy } from 'lucide-react'
+import { useContext, useEffect, useMemo, useRef, useState } from 'react'
+import { cn } from '@/lib/utils'
+import { SocketContext } from '@/api/socket/socket.context'
+import { useLocation } from 'react-router-dom'
+import chatService from '@/services/chat/chat.service'
+import { useAuthStore } from '@/stores/useAuth.stores'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { toast } from 'sonner'
 
 // Loại vai trò của người dùng trong phòng chat
 type Role = 'instructor' | 'student'
@@ -31,37 +20,43 @@ type Role = 'instructor' | 'student'
 //  - 'sent': đã gửi nhưng đối phương chưa đọc
 //  - 'read': đối phương đã đọc (nhận qua socket hoặc từ API)
 interface Message {
-  id: string;
-  content: string;
-  senderId: string;
-  timestamp: number;
+  id: string
+  content: string
+  senderId: string
+  timestamp: number
   status?: 'sent' | 'read'
 }
 interface ChatAreaProps {
-  conversationId?: string;
-  peerId?: string;
-  peerName?: string;
-  peerAvatar?: string;
-  onBack?: () => void;
+  conversationId?: string
+  peerId?: string
+  peerName?: string
+  peerAvatar?: string
+  onBack?: () => void
   forcedRole?: Role
 }
 
-export const ChatArea = ({ conversationId, peerId: peerFromProps, peerName, peerAvatar, onBack, forcedRole }: ChatAreaProps) => {
-
+export const ChatArea = ({
+  conversationId,
+  peerId: peerFromProps,
+  peerName,
+  peerAvatar,
+  onBack,
+  forcedRole
+}: ChatAreaProps) => {
   // console.log('PERR OIIIIII', peerFromProps);
   const { socket, isConnected, connectSocket, disconnectSocket } = useContext(SocketContext)
-  const [message, setMessage] = useState("")
+  const [message, setMessage] = useState('')
   const [messages, setMessages] = useState<Message[]>([])
-  const [myRole, setMyRole] = useState<"instructor" | "student">("student")
+  const [myRole, setMyRole] = useState<'instructor' | 'student'>('student')
   // Ref tới vùng danh sách tin nhắn để auto scroll
   const scrollContainerRef = useRef<HTMLDivElement | null>(null)
   // Chỉnh sửa tin nhắn
   const [editOpen, setEditOpen] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
-  const [editValue, setEditValue] = useState<string>("")
-  const [originalValue, setOriginalValue] = useState<string>("")
+  const [editValue, setEditValue] = useState<string>('')
+  const [originalValue, setOriginalValue] = useState<string>('')
 
-  const [peerId, setPeerId] = useState<string>(peerFromProps || "")
+  const [peerId, setPeerId] = useState<string>(peerFromProps || '')
   const { data } = useAuthStore()
   const myId = data?.userId
   const location = useLocation()
@@ -71,7 +66,6 @@ export const ChatArea = ({ conversationId, peerId: peerFromProps, peerName, peer
       setPeerId(peerFromProps)
     }
   }, [peerFromProps])
-
 
   useEffect(() => {
     const isTeacher = location.pathname.startsWith('/teacher')
@@ -85,31 +79,39 @@ export const ChatArea = ({ conversationId, peerId: peerFromProps, peerName, peer
   // Load messages when switching conversation
   useEffect(() => {
     let mounted = true
-      ; (async () => {
-        if (!conversationId) return
-        try {
-          const res = await chatService.getMessages({ conversationId, limit: 20 })
-          const items = res.result?.items || []
-          const mapped = items
-            .slice()
-            .reverse()
-            .map(m => ({ id: m._id, content: m.content, senderId: m.senderId, timestamp: new Date(m.createdAt).getTime(), status: m.status }))
-          if (mounted) setMessages(mapped)
+    ;(async () => {
+      if (!conversationId) return
+      try {
+        const res = await chatService.getMessages({ conversationId, limit: 20 })
+        const items = res.result?.items || []
+        const mapped = items
+          .slice()
+          .reverse()
+          .map((m) => ({
+            id: m._id,
+            content: m.content,
+            senderId: m.senderId,
+            timestamp: new Date(m.createdAt).getTime(),
+            status: m.status
+          }))
+        if (mounted) setMessages(mapped)
 
-          try {
-            const lastMessage = items[0]
-            if (lastMessage && lastMessage.senderId !== myId) {
-              await chatService.markRead(conversationId, peerId)
-            }
-          } catch (e) {
-            console.error('markRead on open error', e)
+        try {
+          const lastMessage = items[0]
+          if (lastMessage && lastMessage.senderId !== myId) {
+            await chatService.markRead(conversationId, peerId)
           }
         } catch (e) {
-          console.error('Load messages error', e)
-          if (mounted) setMessages([])
+          console.error('markRead on open error', e)
         }
-      })()
-    return () => { mounted = false }
+      } catch (e) {
+        console.error('Load messages error', e)
+        if (mounted) setMessages([])
+      }
+    })()
+    return () => {
+      mounted = false
+    }
   }, [conversationId, peerId])
 
   // Hàm scroll xuống cuối danh sách tin nhắn
@@ -132,7 +134,6 @@ export const ChatArea = ({ conversationId, peerId: peerFromProps, peerName, peer
     if (messages.length === 0) return
     scrollToBottom('smooth')
   }, [messages])
-
 
   const ids = useMemo(() => {
     return myRole === 'instructor'
@@ -228,7 +229,7 @@ export const ChatArea = ({ conversationId, peerId: peerFromProps, peerName, peer
       setMessages((prev) => {
         const next = [...prev]
         if (payload.messageId) {
-          const idx = next.findIndex(m => m.id === payload.messageId)
+          const idx = next.findIndex((m) => m.id === payload.messageId)
           if (idx !== -1 && next[idx].senderId === myId) {
             next[idx] = { ...next[idx], status: 'read' }
             return next
@@ -362,9 +363,9 @@ export const ChatArea = ({ conversationId, peerId: peerFromProps, peerName, peer
   const handleCopy = async (content: string) => {
     try {
       await navigator.clipboard.writeText(content)
-      toast.success("Đã sao chép nội dung")
+      toast.success('Đã sao chép nội dung')
     } catch (e) {
-      console.error("Copy failed", e)
+      console.error('Copy failed', e)
     }
   }
 
@@ -386,13 +387,13 @@ export const ChatArea = ({ conversationId, peerId: peerFromProps, peerName, peer
                 conversationId,
                 lastMessage: newLast
                   ? {
-                    _id: newLast.id,
-                    content: newLast.content,
-                    senderId: newLast.senderId,
-                    createdAt: new Date(newLast.timestamp).toISOString(),
-                  }
-                  : undefined,
-              },
+                      _id: newLast.id,
+                      content: newLast.content,
+                      senderId: newLast.senderId,
+                      createdAt: new Date(newLast.timestamp).toISOString()
+                    }
+                  : undefined
+              }
             })
           )
           return next
@@ -428,12 +429,10 @@ export const ChatArea = ({ conversationId, peerId: peerFromProps, peerName, peer
         prev.map((m) =>
           m.id === editingId
             ? {
-              ...m,
-              content: updated?.content ?? newText,
-              timestamp: updated?.createdAt
-                ? new Date(updated.createdAt).getTime()
-                : m.timestamp,
-            }
+                ...m,
+                content: updated?.content ?? newText,
+                timestamp: updated?.createdAt ? new Date(updated.createdAt).getTime() : m.timestamp
+              }
             : m
         )
       )
@@ -456,7 +455,7 @@ export const ChatArea = ({ conversationId, peerId: peerFromProps, peerName, peer
               <ChevronLeft className='h-5 w-5' />
             </Button>
           )}
-          <Avatar className="h-10 w-10">
+          <Avatar className='h-10 w-10'>
             <AvatarImage src={peerAvatar} />
             <AvatarFallback>{(peerName || peerId || 'N')[0]}</AvatarFallback>
           </Avatar>
@@ -481,32 +480,24 @@ export const ChatArea = ({ conversationId, peerId: peerFromProps, peerName, peer
       {/* Messages */}
       <div
         ref={scrollContainerRef}
-        className="flex-1 overflow-y-auto px-4 py-4 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent"
+        className='flex-1 overflow-y-auto px-4 py-4 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent'
       >
-        <div className="space-y-4">
+        <div className='space-y-4'>
           {messages.map((msg, index) => {
             const isMine = msg.senderId === myId
-            const isLastMyMessage =
-              isMine &&
-              messages.slice(index + 1).findIndex((m) => m.senderId === myId) === -1
+            const isLastMyMessage = isMine && messages.slice(index + 1).findIndex((m) => m.senderId === myId) === -1
 
             return (
-              <div
-                key={msg.id}
-                className={cn(
-                  "group flex items-end gap-2",
-                  isMine ? "justify-end" : "justify-start"
-                )}
-              >
+              <div key={msg.id} className={cn('group flex items-end gap-2', isMine ? 'justify-end' : 'justify-start')}>
                 {!isMine && (
-                  <Avatar className="h-8 w-8">
+                  <Avatar className='h-8 w-8'>
                     <AvatarImage src={peerAvatar} />
                     <AvatarFallback>N</AvatarFallback>
                   </Avatar>
                 )}
 
                 {isMine && (
-                  <div className="mr-1 opacity-0 group-hover:opacity-100 transition">
+                  <div className='mr-1 opacity-0 group-hover:opacity-100 transition'>
                     <Button
                       variant="ghost"
                       size="icon"
@@ -526,14 +517,12 @@ export const ChatArea = ({ conversationId, peerId: peerFromProps, peerName, peer
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent
-                        align="start"
-                        side="bottom"
+                        align='start'
+                        side='bottom'
                         sideOffset={4}
-                        className="w-40 -translate-x-32 -translate-y-4"
+                        className='w-40 -translate-x-32 -translate-y-4'
                       >
-                        <DropdownMenuItem onClick={() => handleDelete(msg.id)}>
-                          Xoá tin nhắn
-                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleDelete(msg.id)}>Xoá tin nhắn</DropdownMenuItem>
                         <DropdownMenuItem onClick={() => handleStartEdit(msg.id, msg.content)}>
                           Chỉnh sửa tin
                         </DropdownMenuItem>
@@ -544,10 +533,10 @@ export const ChatArea = ({ conversationId, peerId: peerFromProps, peerName, peer
 
                 <div
                   className={cn(
-                    "max-w-[70%] px-4 py-2 rounded-2xl shadow-sm transition-colors",
+                    'max-w-[70%] px-4 py-2 rounded-2xl shadow-sm transition-colors',
                     isMine
-                      ? "bg-blue-500 text-white rounded-br-none"
-                      : "bg-white text-gray-800 border border-gray-200 rounded-bl-none"
+                      ? 'bg-blue-500 text-white rounded-br-none'
+                      : 'bg-white text-gray-800 border border-gray-200 rounded-bl-none'
                   )}
                 >
                   <p className="text-sm leading-relaxed">{msg.content}</p>
@@ -582,10 +571,8 @@ export const ChatArea = ({ conversationId, peerId: peerFromProps, peerName, peer
           const lastMyMsg = messages[messages.length - 1]
           if (!lastMyMsg || lastMyMsg.senderId !== myId) return null
           return (
-            <div className="flex justify-end pr-4 mt-1">
-              <p className="text-[12px] text-gray-400 italic">
-                {lastMyMsg.status === 'read' ? 'Đã đọc' : 'Đã nhận'}
-              </p>
+            <div className='flex justify-end pr-4 mt-1'>
+              <p className='text-[12px] text-gray-400 italic'>{lastMyMsg.status === 'read' ? 'Đã đọc' : 'Đã nhận'}</p>
             </div>
           )
         })()}
@@ -605,8 +592,8 @@ export const ChatArea = ({ conversationId, peerId: peerFromProps, peerName, peer
             placeholder='Nhập tin nhắn...'
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSend()}
-            className="flex-1 rounded-full bg-gray-100 border-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-0 px-4 py-2 text-sm placeholder-gray-500"
+            onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+            className='flex-1 rounded-full bg-gray-100 border-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-0 px-4 py-2 text-sm placeholder-gray-500'
           />
 
           <Button size='icon' onClick={handleSend} className='rounded-full bg-blue-500 hover:bg-blue-600 transition'>
@@ -617,16 +604,16 @@ export const ChatArea = ({ conversationId, peerId: peerFromProps, peerName, peer
 
       {/* Dialog chỉnh sửa tin nhắn */}
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className='sm:max-w-md'>
           <DialogHeader>
             <DialogTitle>Chỉnh sửa tin nhắn</DialogTitle>
           </DialogHeader>
-          <div className="mt-2">
+          <div className='mt-2'>
             <Input
               value={editValue}
               onChange={(e) => setEditValue(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === "Enter") {
+                if (e.key === 'Enter') {
                   e.preventDefault()
                   handleConfirmEdit()
                 }
@@ -634,13 +621,15 @@ export const ChatArea = ({ conversationId, peerId: peerFromProps, peerName, peer
             />
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setEditOpen(false)}>Huỷ</Button>
+            <Button variant='outline' onClick={() => setEditOpen(false)}>
+              Huỷ
+            </Button>
             <Button
               onClick={handleConfirmEdit}
-              disabled={
-                editValue.trim() === originalValue.trim() || editValue.trim() === ''
-              }
-            >Lưu</Button>
+              disabled={editValue.trim() === originalValue.trim() || editValue.trim() === ''}
+            >
+              Lưu
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

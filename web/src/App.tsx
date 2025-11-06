@@ -22,9 +22,9 @@ const App: FC = () => {
             padding: '15px 20px 15px 20px'
           },
           classNames: {
-            success: "bg-green-500 text-white",
-            error: "bg-red-400 text-white",
-          },
+            success: 'bg-green-500 text-white',
+            error: 'bg-red-400 text-white'
+          }
         }}
       />
     </div>
