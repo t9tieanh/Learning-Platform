@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom/client'
 import { RouterProvider, createBrowserRouter } from 'react-router-dom'
 import HomePage from './pages/HomePage'
 import DefaultLayout from './layouts/DefaultLayout'
-import HeaderLayout from './layouts/HeaderLayout'
+import CheckoutPage from './pages/Checkout'
 import Course from './pages/Course'
 import CartPage from './pages/Cart'
 import AuthLayout from './layouts/AuthLayout'
@@ -36,7 +36,8 @@ const router = createBrowserRouter([
           { path: 'my-cart', element: <CartPage /> },
           { path: 'me', element: <Profile /> },
           { path: 'courses', element: <AllCourse /> },
-          { path: 'chat/:id', element: <Chat />, handle: { hideFooter: true } }
+          { path: 'chat/:id', element: <Chat />, handle: { hideFooter: true } },
+          { path: 'checkout', element: <CheckoutPage /> }
         ]
       },
       { path: 'auth', element: <AuthLayout /> },
