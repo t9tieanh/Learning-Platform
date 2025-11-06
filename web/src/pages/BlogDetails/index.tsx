@@ -67,14 +67,21 @@ const BlogDetails = () => {
 
                                 <div className="flex items-center gap-4 py-3 border-b border-border/50">
                                     <Avatar className="h-16 w-16 border-2 border-blue-300">
-                                        <AvatarImage src={''} alt={''} />
+                                        <AvatarImage src={blog.userAvt} alt={blog.userName || ''} />
                                         <AvatarFallback className="bg-muted text-muted-foreground">
-                                            {"BL"}
+                                            {blog.userName
+                                                ? blog.userName
+                                                    .split(' ')
+                                                    .filter(Boolean)
+                                                    .slice(0, 2)
+                                                    .map(word => word[0].toUpperCase())
+                                                    .join('')
+                                                : 'U'}
                                         </AvatarFallback>
                                     </Avatar>
 
                                     <div className="flex flex-col gap-2">
-                                        <p className="font-medium text-foreground text-xl">Blog</p>
+                                        <p className="font-medium text-foreground text-xl">{blog.userName}</p>
                                         <span className="items-center text-sm text-muted-foreground">
                                             <span className="font-semibold text-foreground">Đăng ngày:</span>{" "}
                                             <span className="italic">{new Date(blog.createdAt).toLocaleDateString('vi-VN')}</span>

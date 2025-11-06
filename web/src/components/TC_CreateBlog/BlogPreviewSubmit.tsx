@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from 'react-router-dom'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,8 @@ import "quill/dist/quill.snow.css";
 import "./blog-preview.css";
 import blogService from "@/services/blog.service"
 import { useAuthStore } from "@/stores/useAuth.stores";
+import userService from "@/services/user/user.service";
+import type { Profile } from "@/types/profile";
 
 type BlogPreviewSubmitProps = {
     contentHtml?: string;
@@ -22,8 +24,34 @@ export default function BlogPreviewSubmit({ contentHtml, blogId }: BlogPreviewSu
     const { title, image } = useBlogPostStore();
     const { data } = useAuthStore();
     const [submitting, setSubmitting] = useState(false);
+    const [profile, setProfile] = useState<Profile | null>(null);
 
     const hasContent = useMemo(() => Boolean(contentHtml && contentHtml.trim().length > 0), [contentHtml]);
+
+    useEffect(() => {
+        let mounted = true;
+        (async () => {
+            try {
+                const res = await userService.getProfile();
+                if (!mounted) return;
+                if (res?.result) setProfile(res.result);
+            } catch (_) {
+                // ignore, show fallback avatar/name
+            }
+        })();
+        return () => {
+            mounted = false;
+        };
+    }, []);
+
+    const initials = useMemo(() => {
+        const name = profile?.name || title || "";
+        if (!name) return "BL";
+        const parts = name.trim().split(/\s+/);
+        const first = parts[0]?.[0] || "";
+        const last = parts.length > 1 ? parts[parts.length - 1][0] : "";
+        return (first + last).toUpperCase() || "BL";
+    }, [profile?.name, title]);
 
     const handleSubmit = async () => {
         const instructorId = data?.userId || (data as any)?.id;
@@ -117,10 +145,20 @@ export default function BlogPreviewSubmit({ contentHtml, blogId }: BlogPreviewSu
                                     </h1>
                                 )}
                                 <div className="flex items-center gap-3 mt-1">
-                                    <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center border text-base font-semibold">BL</div>
+                                    {profile?.image ? (
+                                        <img
+                                            src={profile.image}
+                                            alt={profile.name}
+                                            className="h-12 w-12 rounded-full object-cover border"
+                                        />
+                                    ) : (
+                                        <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center border text-base font-semibold">
+                                            {initials}
+                                        </div>
+                                    )}
                                     <div className="text-sm text-muted-foreground">
-                                        <div className="font-medium text-foreground">Blogger</div>
-                                        <div className="flex flex-col gap-4">
+                                        <div className="text-lg font-semibold text-foreground">{profile?.name || "Blogger"}</div>
+                                        <div className="flex flex-col gap-0">
                                             <span>
                                                 <span className="font-medium text-foreground">Đăng ngày:</span> {today}
                                             </span>

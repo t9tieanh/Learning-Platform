@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import { HeroSection } from "@/components/Blog/HeroSection";
 import { ArticleCard } from "@/components/Blog/ArticleCard";
 import { FeaturedCard } from "@/components/Blog/FeaturedCard";
@@ -10,6 +11,7 @@ const Index = () => {
   const [latest, setLatest] = useState<BlogItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     let mounted = true;
@@ -82,6 +84,7 @@ const Index = () => {
 
             <button
               className="text-blue-600 font-medium hover:underline underline-offset-4 decoration-2 decoration-blue-600"
+              onClick={() => navigate('/blogs')}
             >
               Xem tất cả
             </button>

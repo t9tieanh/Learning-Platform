@@ -34,13 +34,16 @@ const Index = () => {
                 setError(null);
                 const res = await blogService.getAll({ page: currentPage, limit: ITEMS_PER_PAGE, search: searchQuery });
                 if (!mounted) return;
-                const mapped: Article[] = (res.items || []).map((b) => ({
+                const mapped: Article[] = (res.data || []).map((b) => ({
                     id: b._id,
                     title: b.title,
                     image: b.image_url,
-                    author: '',
+                    userName: b.userName,
+                    userAvt: b.userAvt,
                     createdAt: formatDate(b.createdAt),
                 }));
+
+                console.log('MAPPPED', mapped)
                 setArticles(mapped);
                 setTotalPages(res.totalPages || 1);
             } catch (e) {
@@ -58,10 +61,11 @@ const Index = () => {
         window.scrollTo({ top: 0, behavior: "smooth" });
     };
 
+    console.log('AC', articles);
     return (
         <div className="min-h-screen bg-background px-36">
             {/* Header */}
-            <header className="bg-card border-b border-border sticky top-0 z-50 backdrop-blur-sm bg-card/95">
+            <header className="bg-card border-b border-border backdrop-blur-sm bg-card/95">
                 <div className="container mx-auto px-4 py-6">
                     <h1 className="text-3xl font-semibold text-foreground mb-6 text-center">
                         Danh mục bài viết

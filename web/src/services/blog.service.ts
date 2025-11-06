@@ -9,6 +9,8 @@ export interface BlogItem {
     markdown_file_url: string[]
     createdAt: string
     updatedAt: string
+    userAvt: string
+    userName: string
 }
 
 export interface BlogListResponse {

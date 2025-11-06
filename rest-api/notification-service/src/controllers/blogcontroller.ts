@@ -2,6 +2,7 @@ import { Request, Response } from 'express'
 import { StatusCodes } from 'http-status-codes'
 import sendResponse from '~/dto/response/send-response'
 import BlogService from '~/services/blog.service'
+import { getUser } from '~/grpc/userClient'
 
 const getAll = async (req: Request, res: Response) => {
     try {
@@ -9,12 +10,26 @@ const getAll = async (req: Request, res: Response) => {
         const limit = (req.data as any)?.limit ?? (req.query.limit ? Math.min(100, Math.max(1, Number(req.query.limit))) : 10)
         const search = (req.data as any)?.search ?? (req.query.q as string) ?? (req.query.search as string) ?? ''
 
-        const result = await BlogService.getAll({ page, limit, search })
+        const blogs = await BlogService.getAll({ page, limit, search })
+
+        const data = await Promise.all(
+            blogs.items.map(async b => {
+                const user = await getUser(b.instructor_id);
+                return {
+                    ...b,
+                    userName: user?.name || '',
+                    userAvt: user?.image || '',
+                }
+            })
+        )
 
         sendResponse(res, {
             code: StatusCodes.OK,
             message: 'Lấy danh sách blog thành công',
-            result
+            result: {
+                ...blogs,
+                data,
+            }
         })
     } catch (e) {
         const err = e as Error
@@ -77,10 +92,16 @@ const getDetails = async (req: Request, res: Response) => {
             })
         }
 
+        const user = await getUser(item.instructor_id);
+
         sendResponse(res, {
             code: StatusCodes.OK,
             message: 'Lấy chi tiết blog thành công',
-            result: item
+            result: {
+                ...item,
+                userName: user?.name || '',
+                userAvt: user?.image || '',
+            }
         })
     } catch (e) {
         const err = e as Error

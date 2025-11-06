@@ -6,7 +6,8 @@ export interface Article {
     id: string;
     title: string;
     image: string;
-    author: string;
+    userName: string;
+    userAvt: string
     createdAt: string;
 }
 
@@ -33,7 +34,7 @@ export const ArticleCard = ({ article }: ArticleCardProps) => {
                 <div className="flex items-center gap-4 text-sm text-muted-foreground">
                     <div className="flex items-center gap-1.5">
                         <User className="h-4 w-4" />
-                        <span>{article.author}</span>
+                        <span>{article.userName}</span>
                     </div>
                     <div className="flex items-center gap-1.5">
                         <Calendar className="h-4 w-4" />

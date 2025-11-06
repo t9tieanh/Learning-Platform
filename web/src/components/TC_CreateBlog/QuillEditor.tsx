@@ -31,7 +31,6 @@ const QuillEditor = forwardRef<Quill | null, RichTextEditorProps>(
                 else ref.current = quill;
             }
 
-            // Initialize content (prefer HTML, fallback to delta)
             if (initialHtml && typeof initialHtml === 'string') {
                 quill.clipboard.dangerouslyPasteHTML(initialHtml);
                 onChange?.(quill.root.innerHTML);
@@ -54,6 +53,18 @@ const QuillEditor = forwardRef<Quill | null, RichTextEditorProps>(
                 quillRef.current.enable(!readOnly);
             }
         }, [readOnly]);
+
+        useEffect(() => {
+            const quill = quillRef.current;
+            if (!quill) return;
+            if (typeof initialHtml !== 'string') return;
+            const current = quill.root.innerHTML;
+            if (current.trim() !== initialHtml.trim()) {
+                quill.setSelection(0, 0);
+                quill.clipboard.dangerouslyPasteHTML(initialHtml);
+                onChange?.(quill.root.innerHTML);
+            }
+        }, [initialHtml]);
 
         return (
             <div className="border border-gray-300 rounded-lg overflow-hidden bg-white shadow-sm">

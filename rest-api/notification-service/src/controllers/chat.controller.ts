@@ -17,7 +17,7 @@ const createOrGetDirect = async (req: Request, res: Response) => {
         if (currentRole !== 'student' && currentRole !== 'instructor') {
             return res.status(400).json({ message: 'Role người dùng không hợp lệ' });
         }
-        
+
         const result = await ChatService.createOrGetDirect(currentUserId, peerId, currentRole)
 
         sendResponse(res, {

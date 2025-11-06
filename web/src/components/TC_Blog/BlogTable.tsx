@@ -26,6 +26,8 @@ interface BlogItem {
   image: string
   shortDescription: string
   createdAt: string
+  userName: string
+  userAvt: string
 }
 
 interface BlogTableProps {
@@ -98,7 +100,10 @@ const BlogTable: FC<BlogTableProps> = ({ courses, onDeleted }) => {
                     {blog.title}
                   </div>
                   <p className='text-sm text-gray-400 dark:text-gray-500 font-light mt-1'>
-                    {blog.shortDescription}
+                    <div
+                      className="text-gray-700"
+                      dangerouslySetInnerHTML={{ __html: blog.shortDescription }}
+                    />
                   </p>
                 </div>
               </TableCell>
