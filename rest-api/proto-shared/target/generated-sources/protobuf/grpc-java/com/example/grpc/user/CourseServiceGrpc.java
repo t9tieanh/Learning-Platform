@@ -77,6 +77,37 @@ public final class CourseServiceGrpc {
     return getGetBulkCoursesMethod;
   }
 
+  private static volatile io.grpc.MethodDescriptor<com.example.grpc.course.EnrolledCoursesRequest,
+      com.example.grpc.course.GetCoursesResponse> getListEnrolledCoursesMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "listEnrolledCourses",
+      requestType = com.example.grpc.course.EnrolledCoursesRequest.class,
+      responseType = com.example.grpc.course.GetCoursesResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<com.example.grpc.course.EnrolledCoursesRequest,
+      com.example.grpc.course.GetCoursesResponse> getListEnrolledCoursesMethod() {
+    io.grpc.MethodDescriptor<com.example.grpc.course.EnrolledCoursesRequest, com.example.grpc.course.GetCoursesResponse> getListEnrolledCoursesMethod;
+    if ((getListEnrolledCoursesMethod = CourseServiceGrpc.getListEnrolledCoursesMethod) == null) {
+      synchronized (CourseServiceGrpc.class) {
+        if ((getListEnrolledCoursesMethod = CourseServiceGrpc.getListEnrolledCoursesMethod) == null) {
+          CourseServiceGrpc.getListEnrolledCoursesMethod = getListEnrolledCoursesMethod =
+              io.grpc.MethodDescriptor.<com.example.grpc.course.EnrolledCoursesRequest, com.example.grpc.course.GetCoursesResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "listEnrolledCourses"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.example.grpc.course.EnrolledCoursesRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.example.grpc.course.GetCoursesResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new CourseServiceMethodDescriptorSupplier("listEnrolledCourses"))
+              .build();
+        }
+      }
+    }
+    return getListEnrolledCoursesMethod;
+  }
+
   /**
    * Creates a new async stub that supports all call types for the service
    */
@@ -138,6 +169,13 @@ public final class CourseServiceGrpc {
         io.grpc.stub.StreamObserver<com.example.grpc.course.GetCoursesResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetBulkCoursesMethod(), responseObserver);
     }
+
+    /**
+     */
+    default void listEnrolledCourses(com.example.grpc.course.EnrolledCoursesRequest request,
+        io.grpc.stub.StreamObserver<com.example.grpc.course.GetCoursesResponse> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListEnrolledCoursesMethod(), responseObserver);
+    }
   }
 
   /**
@@ -182,6 +220,14 @@ public final class CourseServiceGrpc {
       io.grpc.stub.ClientCalls.asyncUnaryCall(
           getChannel().newCall(getGetBulkCoursesMethod(), getCallOptions()), request, responseObserver);
     }
+
+    /**
+     */
+    public void listEnrolledCourses(com.example.grpc.course.EnrolledCoursesRequest request,
+        io.grpc.stub.StreamObserver<com.example.grpc.course.GetCoursesResponse> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getListEnrolledCoursesMethod(), getCallOptions()), request, responseObserver);
+    }
   }
 
   /**
@@ -212,6 +258,13 @@ public final class CourseServiceGrpc {
     public com.example.grpc.course.GetCoursesResponse getBulkCourses(com.example.grpc.course.GetCoursesRequest request) {
       return io.grpc.stub.ClientCalls.blockingUnaryCall(
           getChannel(), getGetBulkCoursesMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public com.example.grpc.course.GetCoursesResponse listEnrolledCourses(com.example.grpc.course.EnrolledCoursesRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getListEnrolledCoursesMethod(), getCallOptions(), request);
     }
   }
 
@@ -246,10 +299,19 @@ public final class CourseServiceGrpc {
       return io.grpc.stub.ClientCalls.futureUnaryCall(
           getChannel().newCall(getGetBulkCoursesMethod(), getCallOptions()), request);
     }
+
+    /**
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.example.grpc.course.GetCoursesResponse> listEnrolledCourses(
+        com.example.grpc.course.EnrolledCoursesRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getListEnrolledCoursesMethod(), getCallOptions()), request);
+    }
   }
 
   private static final int METHODID_GET_COURSE = 0;
   private static final int METHODID_GET_BULK_COURSES = 1;
+  private static final int METHODID_LIST_ENROLLED_COURSES = 2;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -274,6 +336,10 @@ public final class CourseServiceGrpc {
           break;
         case METHODID_GET_BULK_COURSES:
           serviceImpl.getBulkCourses((com.example.grpc.course.GetCoursesRequest) request,
+              (io.grpc.stub.StreamObserver<com.example.grpc.course.GetCoursesResponse>) responseObserver);
+          break;
+        case METHODID_LIST_ENROLLED_COURSES:
+          serviceImpl.listEnrolledCourses((com.example.grpc.course.EnrolledCoursesRequest) request,
               (io.grpc.stub.StreamObserver<com.example.grpc.course.GetCoursesResponse>) responseObserver);
           break;
         default:
@@ -308,6 +374,13 @@ public final class CourseServiceGrpc {
               com.example.grpc.course.GetCoursesRequest,
               com.example.grpc.course.GetCoursesResponse>(
                 service, METHODID_GET_BULK_COURSES)))
+        .addMethod(
+          getListEnrolledCoursesMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.example.grpc.course.EnrolledCoursesRequest,
+              com.example.grpc.course.GetCoursesResponse>(
+                service, METHODID_LIST_ENROLLED_COURSES)))
         .build();
   }
 
@@ -358,6 +431,7 @@ public final class CourseServiceGrpc {
               .setSchemaDescriptor(new CourseServiceFileDescriptorSupplier())
               .addMethod(getGetCourseMethod())
               .addMethod(getGetBulkCoursesMethod())
+              .addMethod(getListEnrolledCoursesMethod())
               .build();
         }
       }

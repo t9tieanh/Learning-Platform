@@ -35,6 +35,11 @@ public final class CourseProto {
   static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_GetCoursesResponse_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_EnrolledCoursesRequest_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_EnrolledCoursesRequest_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -54,8 +59,10 @@ public final class CourseProto {
       "e\030\n \001(\001\022\034\n\ninstructor\030\013 \001(\0132\010.Teacher\"\'\n" +
       "\021GetCoursesRequest\022\022\n\ncourse_ids\030\001 \003(\t\"6" +
       "\n\022GetCoursesResponse\022 \n\007courses\030\001 \003(\0132\017." +
-      "CourseResponseB(\n\027com.example.grpc.cours" +
-      "eB\013CourseProtoP\001b\006proto3"
+      "CourseResponse\"V\n\026EnrolledCoursesRequest" +
+      "\022\022\n\nstudent_id\030\001 \001(\t\022\025\n\rinstructor_id\030\002 " +
+      "\001(\t\022\021\n\tuser_role\030\003 \001(\tB(\n\027com.example.gr" +
+      "pc.courseB\013CourseProtoP\001b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -86,6 +93,12 @@ public final class CourseProto {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_GetCoursesResponse_descriptor,
         new java.lang.String[] { "Courses", });
+    internal_static_EnrolledCoursesRequest_descriptor =
+      getDescriptor().getMessageTypes().get(4);
+    internal_static_EnrolledCoursesRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_EnrolledCoursesRequest_descriptor,
+        new java.lang.String[] { "StudentId", "InstructorId", "UserRole", });
     com.example.grpc.user.UserProto.getDescriptor();
   }
 

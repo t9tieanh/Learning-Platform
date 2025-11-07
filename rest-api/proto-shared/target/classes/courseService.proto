@@ -9,4 +9,5 @@ option java_outer_classname = "CourseServiceProto";
 service CourseService {
   rpc getCourse (GetCourseRequest) returns (CourseResponse);
   rpc getBulkCourses (GetCoursesRequest) returns (GetCoursesResponse);
+  rpc listEnrolledCourses (EnrolledCoursesRequest) returns (GetCoursesResponse);
 }

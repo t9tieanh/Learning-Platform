@@ -30,12 +30,12 @@ public class CourseUserController {
 
     @GetMapping("/best-seller")
     ApiResponse<List<CourseResponse>> getBestSellerCourse(@RequestParam(defaultValue = "4") int limit) {
-        return courseService.getBestSellerCourse(limit);
+        return courseUserService.getBestSellerCourse(limit);
     }
 
     @GetMapping("/trend")
     ApiResponse<List<CourseResponse>> getTrendCourse(@RequestParam(defaultValue = "4") int limit) {
-        return courseService.getTrendyCourse(limit);
+        return courseUserService.getTrendyCourse(limit);
     }
 
     @GetMapping
@@ -47,7 +47,7 @@ public class CourseUserController {
             @RequestParam(required = false) Double minPrice,
             @RequestParam(required = false) Double minRating
     ) {
-        return courseService.getAllCourses(page, limit, search, category, minPrice, minRating);
+        return courseUserService.getAllCourses(page, limit, search, category, minPrice, minRating);
     }
 
 }

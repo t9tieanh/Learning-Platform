@@ -31,3 +31,9 @@ message GetCoursesRequest {
 message GetCoursesResponse {
   repeated CourseResponse courses = 1;
 }
+
+message EnrolledCoursesRequest {
+  string student_id = 1;
+  string instructor_id = 2;
+  string user_role = 3;
+}

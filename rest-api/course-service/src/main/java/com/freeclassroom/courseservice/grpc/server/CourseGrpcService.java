@@ -1,18 +1,17 @@
 package com.freeclassroom.courseservice.grpc.server;
 
-import com.example.grpc.course.CourseResponse;
-import com.example.grpc.course.GetCourseRequest;
-import com.example.grpc.course.GetCoursesRequest;
-import com.example.grpc.course.GetCoursesResponse;
+import com.example.grpc.course.*;
 import com.example.grpc.user.CourseServiceGrpc.CourseServiceImplBase;
 import com.example.grpc.user.GetTeachersResponse;
 import com.example.grpc.user.GetUserResponse;
 import com.example.grpc.user.Teacher;
 import com.freeclassroom.courseservice.entity.course.CourseEntity;
+import com.freeclassroom.courseservice.entity.member.EnrollmentsEntity;
 import com.freeclassroom.courseservice.exception.CustomExeption;
 import com.freeclassroom.courseservice.exception.ErrorCode;
 import com.freeclassroom.courseservice.grpc.client.UserGrpcClient;
 import com.freeclassroom.courseservice.repository.entity.CourseRepository;
+import com.freeclassroom.courseservice.repository.entity.EnrollmentRepository;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import net.devh.boot.grpc.server.service.GrpcService;
@@ -25,6 +24,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CourseGrpcService extends CourseServiceImplBase {
     private final CourseRepository courseRepo;
+    private final EnrollmentRepository enrollmentRepo;
     private final UserGrpcClient userGrpcClient;
 
     @Override
@@ -98,6 +98,58 @@ public class CourseGrpcService extends CourseServiceImplBase {
 
                     return builder.build();
                 })
+                .toList();
+
+        GetCoursesResponse response = GetCoursesResponse.newBuilder()
+                .addAllCourses(courseResponses)
+                .build();
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void listEnrolledCourses(EnrolledCoursesRequest request, StreamObserver<GetCoursesResponse> responseObserver) {
+        if(request.getUserRole().equals("instructor")) {
+            // 1. Lấy danh sách enrollment của student
+            List<EnrollmentsEntity> enrollments = enrollmentRepo.findAllByUserId(request.getStudentId());
+
+            // 2. Lọc ra các courseId mà instructor trùng yêu cầu
+            List<String> courseIds = enrollments.stream()
+                    .map(enrollment -> enrollment.getCourse().getId())
+                    .distinct()
+                    .toList();
+
+            // Lấy tất cả course dựa trên courseIds
+            List<CourseEntity> courses = courseRepo.findAllById(courseIds);
+
+            // Chỉ giữ các course có instructor trùng instructorId
+            List<CourseEntity> filteredCourses = courses.stream()
+                    .filter(course -> course.getInstructorId().equals(request.getInstructorId()))
+                    .toList();
+
+            convertCourseDTO(responseObserver, filteredCourses);
+        } else {
+            List<CourseEntity> courses = courseRepo.findAllByInstructorId(request.getInstructorId());
+            convertCourseDTO(responseObserver, courses);
+        }
+    }
+
+    private void convertCourseDTO(StreamObserver<GetCoursesResponse> responseObserver, List<CourseEntity> courses) {
+        List<CourseResponse> courseResponses = courses.stream()
+                .map(course -> CourseResponse.newBuilder()
+                        .setId(course.getId() != null ? course.getId() : "")
+                        .setTitle(course.getTitle() != null ? course.getTitle() : "")
+                        .setShortDescription(course.getShortDescription() != null ? course.getShortDescription() : "")
+                        .setLongDescription(course.getLongDescription() != null ? course.getLongDescription() : "")
+                        .setThumbnailUrl(course.getThumbnailUrl() != null ? course.getThumbnailUrl() : "")
+                        .setRating(course.getRating() != null ? course.getRating() : 0.0)
+                        .setIntroductoryVideo(course.getIntroductoryVideo() != null ? course.getIntroductoryVideo() : "")
+                        .setLanguage(course.getLanguage() != null ? course.getLanguage() : "")
+                        .setOriginalPrice(course.getOriginalPrice() != null ? course.getOriginalPrice() : 0.0)
+                        .setFinalPrice(course.getFinalPrice() != null ? course.getFinalPrice() : 0.0)
+                        .build()
+                )
                 .toList();
 
         GetCoursesResponse response = GetCoursesResponse.newBuilder()

@@ -24,12 +24,14 @@ public final class CourseServiceProto {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\023courseService.proto\032\014course.proto2{\n\rC" +
-      "ourseService\022/\n\tgetCourse\022\021.GetCourseReq" +
-      "uest\032\017.CourseResponse\0229\n\016getBulkCourses\022" +
-      "\022.GetCoursesRequest\032\023.GetCoursesResponse" +
-      "B-\n\025com.example.grpc.userB\022CourseService" +
-      "ProtoP\001b\006proto3"
+      "\n\023courseService.proto\032\014course.proto2\300\001\n\r" +
+      "CourseService\022/\n\tgetCourse\022\021.GetCourseRe" +
+      "quest\032\017.CourseResponse\0229\n\016getBulkCourses" +
+      "\022\022.GetCoursesRequest\032\023.GetCoursesRespons" +
+      "e\022C\n\023listEnrolledCourses\022\027.EnrolledCours" +
+      "esRequest\032\023.GetCoursesResponseB-\n\025com.ex" +
+      "ample.grpc.userB\022CourseServiceProtoP\001b\006p" +
+      "roto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
