@@ -23,6 +23,15 @@ public class CourseUserController {
     ICourseUserService courseUserService;
     ICourseService courseService;
 
+    @GetMapping("/enrolled")
+    ApiResponse<List<CourseResponse>> listEnrolledCourses(
+            @RequestParam String userRole,
+            @RequestParam(required = false) String studentId,
+            @RequestParam String instructorId) {
+        return courseUserService.getEnrolledCourses(userRole, studentId, instructorId);
+    }
+
+
     @GetMapping("/{id}")
     ApiResponse<CourseUserDetailResponse> getCourseDetail(@PathVariable("id") String id) {
         return courseUserService.getCourseDetail(id);

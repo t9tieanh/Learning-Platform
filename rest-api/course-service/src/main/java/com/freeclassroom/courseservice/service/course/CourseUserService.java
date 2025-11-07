@@ -10,6 +10,7 @@ import com.freeclassroom.courseservice.dto.response.common.PagingResponse;
 import com.freeclassroom.courseservice.dto.response.course.*;
 import com.freeclassroom.courseservice.dto.response.user.InstructorResponse;
 import com.freeclassroom.courseservice.entity.course.CourseEntity;
+import com.freeclassroom.courseservice.entity.member.EnrollmentsEntity;
 import com.freeclassroom.courseservice.enums.entity.EnumCourseProgressStep;
 import com.freeclassroom.courseservice.enums.entity.EnumCourseStatus;
 import com.freeclassroom.courseservice.exception.CustomExeption;
@@ -18,6 +19,7 @@ import com.freeclassroom.courseservice.grpc.client.UserGrpcClient;
 import com.freeclassroom.courseservice.mapper.CourseMapper;
 import com.freeclassroom.courseservice.repository.entity.ChapterRepository;
 import com.freeclassroom.courseservice.repository.entity.CourseRepository;
+import com.freeclassroom.courseservice.repository.entity.EnrollmentRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -30,6 +32,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -41,6 +45,7 @@ import java.util.stream.Collectors;
 public class CourseUserService implements ICourseUserService{
     CourseRepository courseRepo;
     ChapterRepository chapterRepo;
+    EnrollmentRepository enrollmentRepo;
     UserGrpcClient userGrpcClient;
 
     CourseMapper courseMapper;
@@ -225,6 +230,53 @@ public class CourseUserService implements ICourseUserService{
                     .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
                     .message("Lỗi: " + e.getMessage())
                     .result(null)
+                    .build();
+        }
+    }
+
+    @Override
+    public ApiResponse<List<CourseResponse>> getEnrolledCourses(String userRole, String studentId, String instructorId) {
+        try {
+            List<CourseEntity> courses = new ArrayList<>();
+
+            if ("instructor".equals(userRole)) {
+                // 1. Lấy danh sách enrollment của student
+                List<EnrollmentsEntity> enrollments = enrollmentRepo.findAllByUserId(studentId);
+
+                // 2. Lọc ra các courseId mà instructor trùng yêu cầu
+                List<String> courseIds = enrollments.stream()
+                        .map(e -> e.getCourse().getId())
+                        .distinct()
+                        .toList();
+
+                // 3. Lấy tất cả course dựa trên courseIds
+                List<CourseEntity> allCourses = courseRepo.findAllById(courseIds);
+
+                // 4. Chỉ giữ course có instructorId trùng khớp
+                courses = allCourses.stream()
+                        .filter(c -> c.getInstructorId().equals(instructorId))
+                        .toList();
+            } else {
+                // Nếu không phải instructor thì lấy theo instructorId
+                courses = courseRepo.findAllByInstructorId(instructorId);
+            }
+
+            List<CourseResponse> response = new ArrayList<>();
+            for (CourseEntity course : courses) {
+                response.add(courseMapper.toDto(course));
+            }
+
+            return ApiResponse.<List<CourseResponse>>builder()
+                    .code(HttpStatus.OK.value())
+                    .message("Lấy danh sách khóa học thành công")
+                    .result(response)
+                    .build();
+        } catch (Exception e) {
+            e.printStackTrace(); // Log ra console hoặc dùng logger
+            return ApiResponse.<List<CourseResponse>>builder()
+                    .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                    .message("Đã xảy ra lỗi khi lấy danh sách khóa học: " + e.getMessage())
+                    .result(Collections.emptyList())
                     .build();
         }
     }

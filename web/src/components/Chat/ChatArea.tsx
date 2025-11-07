@@ -11,6 +11,9 @@ import { useAuthStore } from '@/stores/useAuth.stores'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { toast } from 'sonner'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import courseUserService from '@/services/course/course-user.service'
+import { EnrolledCourseItem } from '@/services/course/course-user.service'
 
 // Loại vai trò của người dùng trong phòng chat
 type Role = 'instructor' | 'student'
@@ -59,6 +62,7 @@ export const ChatArea = ({
   const [peerId, setPeerId] = useState<string>(peerFromProps || '')
   const { data } = useAuthStore()
   const myId = data?.userId
+  const [enrolledCourses, setEnrolledCourses] = useState<EnrolledCourseItem[]>([])
   const location = useLocation()
 
   useEffect(() => {
@@ -76,39 +80,69 @@ export const ChatArea = ({
     setPeerId(peerFromProps || defaultPeerId)
   }, [location.pathname, forcedRole, peerFromProps])
 
+  // Load enrolled courses (tooltip list) when have both roles identified
+  useEffect(() => {
+    let mounted = true
+      ; (async () => {
+        if (!myId) return
+        // Determine query params based on role: if I'm student -> studentId=myId & instructorId=peerId (if known)
+        // If I'm instructor -> instructorId=myId & studentId=peerId (if known)
+        const userRole = myRole === 'student' ? 'student' : 'instructor'
+        const studentId = myRole === 'student' ? myId : peerId
+        const instructorId = myRole === 'instructor' ? myId : peerId
+        if (!studentId || !instructorId) return // need both to list shared enrolled courses
+        try {
+          const res = await courseUserService.getEnrolledCourses({ userRole, studentId, instructorId })
+          const items = Array.isArray(res?.result) ? res.result : []
+          const mapped: EnrolledCourseItem[] = items.map((c: any) => ({
+            id: c.id || c._id || c.courseId || Math.random().toString(36).slice(2),
+            title: c.title || 'Không có tiêu đề',
+            thumbnailUrl: c.thumbnailUrl || 'https://placehold.co/60x60'
+          }))
+          if (mounted) setEnrolledCourses(mapped)
+        } catch (e) {
+          console.error('Fetch enrolled courses error', e)
+          if (mounted) setEnrolledCourses([])
+        }
+      })()
+    return () => {
+      mounted = false
+    }
+  }, [myId, peerId, myRole])
+
   // Load messages when switching conversation
   useEffect(() => {
     let mounted = true
-    ;(async () => {
-      if (!conversationId) return
-      try {
-        const res = await chatService.getMessages({ conversationId, limit: 20 })
-        const items = res.result?.items || []
-        const mapped = items
-          .slice()
-          .reverse()
-          .map((m) => ({
-            id: m._id,
-            content: m.content,
-            senderId: m.senderId,
-            timestamp: new Date(m.createdAt).getTime(),
-            status: m.status
-          }))
-        if (mounted) setMessages(mapped)
-
+      ; (async () => {
+        if (!conversationId) return
         try {
-          const lastMessage = items[0]
-          if (lastMessage && lastMessage.senderId !== myId) {
-            await chatService.markRead(conversationId, peerId)
+          const res = await chatService.getMessages({ conversationId, limit: 20 })
+          const items = res.result?.items || []
+          const mapped = items
+            .slice()
+            .reverse()
+            .map((m) => ({
+              id: m._id,
+              content: m.content,
+              senderId: m.senderId,
+              timestamp: new Date(m.createdAt).getTime(),
+              status: m.status
+            }))
+          if (mounted) setMessages(mapped)
+
+          try {
+            const lastMessage = items[0]
+            if (lastMessage && lastMessage.senderId !== myId) {
+              await chatService.markRead(conversationId, peerId)
+            }
+          } catch (e) {
+            console.error('markRead on open error', e)
           }
         } catch (e) {
-          console.error('markRead on open error', e)
+          console.error('Load messages error', e)
+          if (mounted) setMessages([])
         }
-      } catch (e) {
-        console.error('Load messages error', e)
-        if (mounted) setMessages([])
-      }
-    })()
+      })()
     return () => {
       mounted = false
     }
@@ -149,18 +183,6 @@ export const ChatArea = ({
 
   useEffect(() => {
     if (!isConnected || !myId || !peerId) return
-
-    // --- Nhận tin nhắn mới ---
-    // const onReceive = (data: { messageId: string; senderId: string; message: string; createdAt: number; instructorId?: string; studentId?: string; senderRole?: 'instructor' | 'student' }) => {
-    //   if (data.senderId === myId) return
-    //   const sameRoom = !!data.instructorId && !!data.studentId && data.instructorId === ids.instructorId && data.studentId === ids.studentId
-    //   console.log('sameRoom', sameRoom);
-    //   if (!sameRoom) return
-    //   setMessages((prev) => [
-    //     ...prev,
-    //     { id: data.messageId, content: data.message, senderId: data.senderId, timestamp: data.createdAt }
-    //   ])
-    // }
 
     const onReceive = (data: {
       messageId: string;
@@ -279,51 +301,6 @@ export const ChatArea = ({
     )
   }
 
-  // Gửi tin nhắn: phát socket + lưu DB + append optimistic
-  // Đồng thời, hiển thị trạng thái 'Đã gửi' cho tin nhắn của mình, và sẽ cập nhật thành 'Đã đọc' khi nhận socket từ đối phương
-  // const handleSend = () => {
-  //   if (!message.trim()) return
-  //   const payload = {
-  //     message: message.trim(),
-  //     senderId: myId,
-  //     senderRole: myRole as Role,
-  //     instructorId: ids.instructorId,
-  //     studentId: ids.studentId,
-  //   }
-  //   socket.emit('send_message', payload)
-  //   // Persist via REST (fire-and-forget)
-  //   let tempId = Math.random().toString(36).slice(2)
-  //   if (conversationId) {
-  //     chatService
-  //       .sendMessage({ conversationId, content: payload.message, senderRole: myRole, peerId: peerId })
-  //       .then((res) => {
-  //         const saved = res.result
-  //         // Cập nhật lại id và status dựa theo kết quả server cho bản ghi optimistic
-  //         setMessages((prev) => {
-  //           if (!saved) return prev
-  //           const next = [...prev]
-  //           const idx = next.findIndex(m => m.id === tempId)
-  //           if (idx !== -1) {
-  //             next[idx] = {
-  //               ...next[idx],
-  //               id: saved._id,
-  //               status: saved.status,
-  //               timestamp: new Date(saved.createdAt).getTime(),
-  //             }
-  //           }
-  //           return next
-  //         })
-  //       })
-  //       .catch((e) => console.error('sendMessage error', e))
-  //   }
-  //   // Optimistic append
-  //   setMessages((prev) => [
-  //     ...prev,
-  //     { id: tempId, content: payload.message, senderId: myId ?? 'unknown', timestamp: Date.now(), status: 'sent' }
-  //   ])
-  //   setMessage("")
-  // };
-
   const handleSend = async () => {
     const text = message.trim();
     if (!text) return;
@@ -387,11 +364,11 @@ export const ChatArea = ({
                 conversationId,
                 lastMessage: newLast
                   ? {
-                      _id: newLast.id,
-                      content: newLast.content,
-                      senderId: newLast.senderId,
-                      createdAt: new Date(newLast.timestamp).toISOString()
-                    }
+                    _id: newLast.id,
+                    content: newLast.content,
+                    senderId: newLast.senderId,
+                    createdAt: new Date(newLast.timestamp).toISOString()
+                  }
                   : undefined
               }
             })
@@ -429,10 +406,10 @@ export const ChatArea = ({
         prev.map((m) =>
           m.id === editingId
             ? {
-                ...m,
-                content: updated?.content ?? newText,
-                timestamp: updated?.createdAt ? new Date(updated.createdAt).getTime() : m.timestamp
-              }
+              ...m,
+              content: updated?.content ?? newText,
+              timestamp: updated?.createdAt ? new Date(updated.createdAt).getTime() : m.timestamp
+            }
             : m
         )
       )
@@ -445,6 +422,31 @@ export const ChatArea = ({
     }
   }
 
+
+  const courseList = (
+    <div className="flex flex-col gap-2 p-2 w-64 max-h-[300px] overflow-y-auto">
+      {enrolledCourses.length === 0 && (
+        <div className='text-xs text-gray-400 px-1 py-2'>Không có khóa học chung</div>
+      )}
+      {enrolledCourses.map((course) => (
+        <div
+          key={course.id}
+          className="flex items-center gap-3 p-1 rounded-md hover:bg-gray-100 transition"
+        >
+          <img
+            src={course.thumbnailUrl}
+            alt={course.title}
+            className="w-10 h-10 rounded-md object-cover"
+          />
+          <span className="text-sm font-medium text-gray-800 truncate">
+            {course.title}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+
+
   return (
     <div className='flex flex-col flex-1 h-full min-h-0 bg-gray-50'>
       {/* Header */}
@@ -455,13 +457,24 @@ export const ChatArea = ({
               <ChevronLeft className='h-5 w-5' />
             </Button>
           )}
-          <Avatar className='h-10 w-10'>
-            <AvatarImage src={peerAvatar} />
-            <AvatarFallback>{(peerName || peerId || 'N')[0]}</AvatarFallback>
-          </Avatar>
-          <div>
-            <h3 className="font-semibold text-gray-800">{peerName || peerId}</h3>
-          </div>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="flex items-center gap-3 cursor-pointer">
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage src={peerAvatar} />
+                    <AvatarFallback>{(peerName || peerId || "N")[0]}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <h3 className="font-semibold text-gray-800">{peerName || peerId}</h3>
+                  </div>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="bg-white shadow-xl border rounded-xl p-0">
+                {courseList}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
 
         <div className='flex items-center gap-2'>

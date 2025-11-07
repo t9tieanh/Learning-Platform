@@ -16,4 +16,6 @@ public interface ICourseUserService {
     ApiResponse<List<CourseResponse>> getTrendyCourse(int limit);
     ApiResponse<PageResponse<CourseResponse>> getAllCourses(int page, int limit, String search, String category,
                                                             Double minPrice, Double minRating);
+
+    ApiResponse<List<CourseResponse>> getEnrolledCourses(String userRole,String studentId,String instructorId);
 }
