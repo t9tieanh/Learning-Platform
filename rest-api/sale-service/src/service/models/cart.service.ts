@@ -122,10 +122,10 @@ class CartService {
             original_price: number;
             final_price: number;
             instructor: {
-            id: string;
-            name: string;
-            email: string;
-            image: string;
+                id: string;
+                name: string;
+                email: string;
+                image: string;
             };
         }[];
     }> {
@@ -136,7 +136,7 @@ class CartService {
         if (cart && cart.length > 0) {
             if (cart.length > 0) {
                 const coursesResponse = await courseGrpcClient.getBulkCourses(cart);
-                return { courses: coursesResponse.courses };
+                return { courses: coursesResponse };
             }
         }
 
@@ -159,7 +159,7 @@ class CartService {
         }
 
         const coursesResponse = await courseGrpcClient.getBulkCourses(courseIds);
-        return { courses: coursesResponse.courses };
+        return { courses: coursesResponse };
     }
 
     async getCartItemCount(cartId: string): Promise<number> {

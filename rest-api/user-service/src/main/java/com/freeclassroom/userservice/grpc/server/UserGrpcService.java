@@ -16,35 +16,42 @@ public class UserGrpcService extends UserServiceGrpc.UserServiceImplBase {
 
     @Override
     public void getUser(GetUserRequest request, StreamObserver<GetUserResponse> responseObserver) {
-        String id = request.getId();
-        UserEntity user = userRepo.findByIdWithExpertises(request.getId())
-                .orElseThrow(() -> new RuntimeException("User not found with id" + id));
+        try {
+            UserEntity user = userRepo.findByIdWithExpertises(request.getId())
+                    .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại !"));
 
-        GetUserResponse.Builder builder = GetUserResponse.newBuilder()
-                .setId(user.getId().toString())
-                .setName(user.getName() == null ? "" : user.getName())
-                .setImage(user.getImage() == null ? "" : user.getImage())
-                .setPhone(user.getPhone() == null ? "" : user.getPhone())
-                .setDescription(user.getDescription() == null ? "" : user.getDescription())
-                .setEmail(user.getEmail() == null ? "" : user.getEmail())
-                .setUsername(user.getUsername() == null ? "" : user.getUsername())
-                .setStatus(
-                        user.getStatus() != null && user.getStatus().name().equals("ACTIVE")
-                                ? AccountStatus.ACTIVE
-                                : AccountStatus.INACTIVE
-                );
+            GetUserResponse.Builder builder = GetUserResponse.newBuilder()
+                    .setId(user.getId().toString())
+                    .setName(user.getName() == null ? "" : user.getName())
+                    .setImage(user.getImage() == null ? "" : user.getImage())
+                    .setPhone(user.getPhone() == null ? "" : user.getPhone())
+                    .setDescription(user.getDescription() == null ? "" : user.getDescription())
+                    .setEmail(user.getEmail() == null ? "" : user.getEmail())
+                    .setUsername(user.getUsername() == null ? "" : user.getUsername())
+                    .setStatus(
+                            user.getStatus() != null && user.getStatus().name().equals("ACTIVE")
+                                    ? AccountStatus.ACTIVE
+                                    : AccountStatus.INACTIVE
+                    );
 
-        user.getRoles().forEach(role -> builder.addRoles(role.getName()));
-        user.getExpertises().forEach(expertise -> builder.addExpertises(
-                Expertise.newBuilder()
-                        .setId(expertise.getId().toString())
-                        .setName(expertise.getName())
-                        .setImage(expertise.getImage() == null ? "" : expertise.getImage())
-                        .build()
-        ));
+            user.getRoles().forEach(role -> builder.addRoles(role.getName()));
+            user.getExpertises().forEach(expertise -> builder.addExpertises(
+                    Expertise.newBuilder()
+                            .setId(expertise.getId().toString())
+                            .setName(expertise.getName())
+                            .setImage(expertise.getImage() == null ? "" : expertise.getImage())
+                            .build()
+            ));
 
-        responseObserver.onNext(builder.build()); //send object
-        responseObserver.onCompleted(); // notify completed
+            responseObserver.onNext(builder.build()); //send object
+            responseObserver.onCompleted(); // notify completed
+        } catch(Exception e) {
+            responseObserver.onError(
+                    io.grpc.Status.NOT_FOUND
+                            .withDescription(e.getMessage())
+                            .asRuntimeException()
+            );
+        }
     }
 
     @Override
