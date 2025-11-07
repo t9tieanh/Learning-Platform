@@ -7,7 +7,7 @@ class CourseService {
                 course_id: courseId,
                 order: {
                   user_id: userId,
-                   status: 'COMPLETED'
+                   status: 'Completed'
                 }
             }
         });

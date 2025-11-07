@@ -3,8 +3,16 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 async function main() {
-  // Create some discounts
-  const discountPercent = await prisma.discount.create({
+  // Create discounts useful for testing an order of 56_000
+  // 1) 10% off (WELCOME10) -> 56_000 -> 50_400
+  // 2) Fixed 5_000 off (FIX5K) -> 51_000
+  // 3) 50% off but capped at 10_000 (MAX50_10K) -> cap applies -> 46_000
+  // 4) Big amount that shouldn't apply for small orders (BIG50K) minOrderValue high
+
+  const now = new Date();
+  const in30d = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30);
+
+  const discountWelcome10 = await prisma.discount.create({
     data: {
       name: 'Welcome 10% Off',
       code: 'WELCOME10',
@@ -12,108 +20,139 @@ async function main() {
       type: 'Percent',
       minOrderValue: 0,
       maxDiscount: 100000,
-      startDate: new Date(),
-      endDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30),
+      startDate: now,
+      endDate: in30d,
     },
   });
 
-  const discountAmount = await prisma.discount.create({
+  const discountFix5k = await prisma.discount.create({
     data: {
-      name: 'Holiday 50K',
-      code: 'HOLIDAY50K',
+      name: 'Fixed 5K Off',
+      code: 'FIX5K',
+      value: 5000,
+      type: 'Amount',
+      minOrderValue: 0,
+      maxDiscount: null,
+      startDate: now,
+      endDate: in30d,
+    },
+  });
+
+  const discountMax50k = await prisma.discount.create({
+    data: {
+      name: '50% Off (cap 10K)',
+      code: 'MAX50_10K',
+      value: 50,
+      type: 'Percent',
+      minOrderValue: 0,
+      maxDiscount: 10000,
+      startDate: now,
+      endDate: in30d,
+    },
+  });
+
+  const discountBig50k = await prisma.discount.create({
+    data: {
+      name: 'Big 50K Off (min 200K)',
+      code: 'BIG50K',
       value: 50000,
       type: 'Amount',
       minOrderValue: 200000,
       maxDiscount: 50000,
-      startDate: new Date(),
+      startDate: now,
       endDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 60),
     },
   });
 
-  // Create a few carts for sample users (user_id is a string in this schema)
+  // Create a few carts for sample users
   const carts = [];
   for (let i = 1; i <= 3; i++) {
     const cart = await prisma.cart.create({ data: { user_id: `user-${i}` } });
     carts.push(cart);
   }
 
-  // Create cart items
+  // Create cart items (note price fields exist on Cart_Item in your schema?)
   await prisma.cart_Item.createMany({
     data: [
-      { cart_id: carts[0].id, course_id: 'course-101', price: 199000 },
-      { cart_id: carts[0].id, course_id: 'course-102', price: 299000 },
-      { cart_id: carts[1].id, course_id: 'course-103', price: 499000 },
-      { cart_id: carts[2].id, course_id: 'course-104', price: 149000 },
+      { cart_id: carts[0].id, course_id: 'course-101' },
+      { cart_id: carts[0].id, course_id: 'course-102' },
+      { cart_id: carts[1].id, course_id: 'course-103' },
+      { cart_id: carts[2].id, course_id: 'course-104' },
     ],
   });
 
-  // Create an order for user-1 using discountPercent
-  const order1 = await prisma.order.create({
+  // Create orders
+  // Order A: user-1, no discount, with two items summing to 56_000 (for testing)
+  // We'll use courses with prices 56_000 total in Order Items
+  const orderA = await prisma.order.create({
     data: {
       user_id: 'user-1',
-      status: 'PLACED',
-      discount_id: discountPercent.id,
+      status: 'Unconfirmed',
+      customer_name: 'User One',
+      customer_email: 'user1@example.com',
+      total: 56000,
     },
   });
 
-  // Add items to order1
   await prisma.order_Item.createMany({
     data: [
-      { order_id: order1.id, course_id: 'course-101', price: 199000 },
-      { order_id: order1.id, course_id: 'course-102', price: 299000 },
+      { order_id: orderA.id, course_id: 'course-201', price: 30000 },
+      { order_id: orderA.id, course_id: 'course-202', price: 26000 },
     ],
   });
 
-  // Create payment for order1
-  await prisma.payment.create({
-    data: {
-      order_id: order1.id,
-      amount: 498000,
-      method: 'CARD',
-      status: 'PAID',
-    },
-  });
-
-  // Create another order without discount
-  const order2 = await prisma.order.create({
+  // Order B: apply percent 10% (WELCOME10) -> 56_000 -> 50_400
+  const orderB = await prisma.order.create({
     data: {
       user_id: 'user-2',
-      status: 'PENDING',
+      status: 'Unconfirmed',
+      customer_name: 'User Two',
+      customer_email: 'user2@example.com',
+      total: 56000,
+      discount_id: discountWelcome10.id,
     },
   });
 
-  await prisma.order_Item.create({
-    data: { order_id: order2.id, course_id: 'course-103', price: 499000 } },
-  );
+  await prisma.order_Item.createMany({
+    data: [{ order_id: orderB.id, course_id: 'course-203', price: 56000 }],
+  });
 
-  // Create order with amount discount
-  const order3 = await prisma.order.create({
+  // Order C: apply fixed 5k (FIX5K) -> 56_000 -> 51_000
+  const orderC = await prisma.order.create({
     data: {
       user_id: 'user-3',
-      status: 'PLACED',
-      discount_id: discountAmount.id,
+      status: 'Unconfirmed',
+      customer_name: 'User Three',
+      customer_email: 'user3@example.com',
+      total: 56000,
+      discount_id: discountFix5k.id,
     },
   });
 
-  await prisma.order_Item.create({
-    data: { order_id: order3.id, course_id: 'course-104', price: 149000 } },
-  );
+  await prisma.order_Item.createMany({
+    data: [{ order_id: orderC.id, course_id: 'course-204', price: 56000 }],
+  });
 
-  await prisma.payment.create({
+  // Order D: apply capped percent MAX50_10K -> 56_000 raw deduction=28_000 cap=10_000 => 46_000
+  const orderD = await prisma.order.create({
     data: {
-      order_id: order3.id,
-      amount: 99000, // after discount example
-      method: 'CASH',
-      status: 'PAID',
+      user_id: 'user-4',
+      status: 'Unconfirmed',
+      customer_name: 'User Four',
+      customer_email: 'user4@example.com',
+      total: 56000,
+      discount_id: discountMax50k.id,
     },
+  });
+
+  await prisma.order_Item.createMany({
+    data: [{ order_id: orderD.id, course_id: 'course-205', price: 56000 }],
   });
 
   console.log('✅ Seed completed:');
-  console.log(`- Discounts: 2`);
+  console.log(`- Discounts: 4`);
   console.log(`- Carts: ${carts.length}`);
-  console.log(`- Cart items: created via createMany`);
-  console.log(`- Orders: 3`);
-  console.log(`- Payments: 2`);
+  console.log(`- Orders created: 4`);
 }
 
 main()

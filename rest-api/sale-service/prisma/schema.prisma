@@ -27,11 +27,14 @@ model Cart_Item {
 }
 
 model Order {
-  id          String        @id @default(uuid())
+  id          String        @id @default(cuid())
   user_id     String
-  status      String
+  status      OrderStatus   @default(Unconfirmed)
   created_at  DateTime      @default(now())
   updated_at  DateTime      @updatedAt
+  customer_name String
+  customer_email String
+  total Float
 
   items       Order_Item[]
   payment     Payment?
@@ -76,4 +79,10 @@ model Discount {
 enum DiscountType {
   Percent
   Amount
+}
+
+enum OrderStatus {
+  Unconfirmed
+  Pending
+  Completed
 }
