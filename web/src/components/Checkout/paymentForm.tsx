@@ -1,27 +1,48 @@
-import { SquareChartGantt, SkipBack } from 'lucide-react'
 import CustomButton from '@/components/common/Button'
 import CustomInput from '@/components/common/Input'
 import VnPayLogo from '@/assets/images/Icon-VNPAY-QR.webp'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import momoLogo from '@/assets/images/momo-logo.webp'
+import { User, WalletCards } from 'lucide-react'
 
 const PaymentForm = () => {
   return (
-    <div className='payment-form'>
-      <h2 className='text-lg font-semibold flex items-center mb-4 gap-2'>
-        <SquareChartGantt /> Xem lại thông tin thanh toán
-      </h2>
-      <form className='space-y-4 p-4 rounded-md'>
-        <CustomInput label='Họ và tên' placeholder='Nhập họ và tên của bạn' required />
-        <CustomInput label='Email nhận hóa đơn' placeholder='email@example.com' required />
-        <div className='flex justify-between'>
+    <div className='payment-form space-y-6'>
+      <Card className='shadow-sm'>
+        <CardHeader>
+          <CardTitle className='font-semibold text-base flex items-center gap-2'>
+            <User className='w-5 h-5' />
+            Thông tin liên hệ
+          </CardTitle>
+          <CardDescription>Email xác nhận đơn hàng sẽ được gửi về email này.</CardDescription>
+        </CardHeader>
+        <CardContent className='space-y-4'>
+          <CustomInput label='Họ và tên' placeholder='Nhập họ và tên của bạn' required />
+          <CustomInput label='Email nhận hóa đơn' placeholder='email@example.com' required />
+        </CardContent>
+      </Card>
+      <Card className='shadow-sm'>
+        <CardHeader>
+          <CardTitle className='font-semibold text-base flex items-center gap-2'>
+            <WalletCards className='w-5 h-5' />
+            Chọn phương thức thanh toán
+          </CardTitle>
+          <CardDescription>Vui lòng chọn phương thức thanh toán của bạn để hoàn thành đơn hàng.</CardDescription>
+        </CardHeader>
+        <CardContent className='space-y-4'>
           <CustomButton
             type='submit'
-            className='bg-white-600 text-black py-2 rounded-md hover:bg-gray-200 hover:text-white'
-            label='Trở lại'
-            icon={<SkipBack className='h-4 w-4 ml-1' />}
+            className='bg-white-600 text-black py-2 rounded-md hover:bg-gray-200'
+            label='Thanh toán bằng Momo'
+            icon={
+              <>
+                <img src={momoLogo} alt='Momo Logo' className='h-6 w-auto' />
+              </>
+            }
           />
           <CustomButton
             type='submit'
-            className='bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700'
+            className='bg-white-600 text-black py-2 rounded-md hover:bg-gray-200'
             label='Thanh toán bằng VnPay'
             icon={
               <>
@@ -29,8 +50,8 @@ const PaymentForm = () => {
               </>
             }
           />
-        </div>
-      </form>
+        </CardContent>
+      </Card>
     </div>
   )
 }
