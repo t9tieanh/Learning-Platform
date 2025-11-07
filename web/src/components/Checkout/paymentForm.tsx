@@ -17,7 +17,7 @@ const PaymentForm = () => {
           <CardDescription>Email xác nhận đơn hàng sẽ được gửi về email này.</CardDescription>
         </CardHeader>
         <CardContent className='space-y-4'>
-          <CustomInput label='Họ và tên' placeholder='Nhập họ và tên của bạn' required />
+          <CustomInput disabled label='Họ và tên' placeholder='Nhập họ và tên của bạn' required />
           <CustomInput label='Email nhận hóa đơn' placeholder='email@example.com' required />
         </CardContent>
       </Card>
@@ -29,10 +29,10 @@ const PaymentForm = () => {
           </CardTitle>
           <CardDescription>Vui lòng chọn phương thức thanh toán của bạn để hoàn thành đơn hàng.</CardDescription>
         </CardHeader>
-        <CardContent className='space-y-4'>
+        <CardContent className='space-x-4'>
           <CustomButton
             type='submit'
-            className='bg-white-600 text-black py-2 rounded-md hover:bg-gray-200'
+            className='bg-pink-200 text-black py-2 rounded-md hover:bg-gray-200 shadow-sm'
             label='Thanh toán bằng Momo'
             icon={
               <>
@@ -42,7 +42,7 @@ const PaymentForm = () => {
           />
           <CustomButton
             type='submit'
-            className='bg-white-600 text-black py-2 rounded-md hover:bg-gray-200'
+            className='bg-blue-300 text-gray py-2 rounded-md hover:bg-gray-200 shadow-sm'
             label='Thanh toán bằng VnPay'
             icon={
               <>

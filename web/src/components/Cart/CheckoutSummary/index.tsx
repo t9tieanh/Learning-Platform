@@ -30,7 +30,7 @@ const OrderDetail = ({ order }: { order: CourseCart }) => {
 
 const CheckoutSummary = ({ selectedCourses }: { selectedCourses?: CourseCart[] }) => {
   return (
-    <div className='p-3 border-gray-300 border-1 shadow-md rounded-xl p-4 bg-white'>
+    <div className='p-3 border-gray-300 border-1 shadow-sm rounded-xl p-4 bg-white'>
       <div className='checkout-title'>
         <p className='text-base font-semibold mb-1 flex items-center'>
           <CiDiscount1 />

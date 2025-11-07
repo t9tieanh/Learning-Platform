@@ -1,7 +1,8 @@
-import { BanknoteArrowDown } from 'lucide-react'
+import { BadgeCheckIcon, BanknoteArrowDown, DollarSign, MousePointer } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import CustomButton from '@/components/common/Button'
 import CustomInput from '@/components/common/Input'
+import { Badge } from '@/components/ui/badge'
 
 const OrderSummary = () => {
   const orderDetails = {
@@ -22,6 +23,11 @@ const OrderSummary = () => {
       }
     ],
     total: 300
+  }
+
+  const appliedDiscounts = {
+    code: 'SUMMER21',
+    amount: 50
   }
 
   return (
@@ -48,14 +54,34 @@ const OrderSummary = () => {
               </div>
             ))}
           </div>
-          <div className='discount flex items-end justify-between font-medium text-sm border-b border-gray-300 py-3'>
-            <CustomInput label='Mã giảm giá' placeholder='Nhập mã giảm giá' className='w-80 mr-2 flex-auto' />
-            <CustomButton label='Áp dụng' className='px-4 bg-blue-600 text-white hover:bg-blue-700 flex-none' />
+          <div className='discount-area'>
+            <div className='discount flex items-end justify-between font-medium text-sm border-gray-300'>
+              <CustomInput label='Mã giảm giá' placeholder='Nhập mã giảm giá' className='w-72 mr-2' />
+              <CustomButton
+                label='Áp dụng'
+                className='px-4 bg-blue-600 text-white hover:bg-blue-700'
+                icon={<MousePointer className='w-4 h-4 ml-1' />}
+              />
+            </div>
+            <div className='applied-discount text-end'>
+              {appliedDiscounts.code && (
+                <Badge className='text-sm mt-2'>
+                  <BadgeCheckIcon />
+                  <span className='text-white-600'>
+                    Mã giảm giá <span className='font-semibold italic'>{appliedDiscounts.code}</span>
+                  </span>
+                  <span className='text-white-600'>- {appliedDiscounts.amount} VNĐ</span>
+                </Badge>
+              )}
+            </div>
           </div>
         </CardContent>
+        <hr />
         <CardFooter>
           <div className='flex justify-between font-medium text-base gap-2'>
-            <span>Tổng cộng:</span>
+            <span className='flex items-center gap-1'>
+              <DollarSign className='w-5' /> Tổng cộng:
+            </span>
             <span>{orderDetails.total} VNĐ</span>
           </div>
         </CardFooter>

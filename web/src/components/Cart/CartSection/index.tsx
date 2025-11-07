@@ -25,7 +25,7 @@ const CardSection: FC<{ setCourseSelected?: Dispatch<SetStateAction<CourseCart[]
   }, [])
 
   return (
-    <div className='cart-section p-5 bg-white rounded-lg min-h-95 md:min-h-[480px] shadow-md'>
+    <div className='cart-section p-5 bg-white rounded-lg min-h-95 md:min-h-[480px] shadow-sm'>
       <div className='total-cart-item'>
         <p className='text-sm font-semibold mb-1 flex'>
           <Sigma className='w-5 h-5' />
