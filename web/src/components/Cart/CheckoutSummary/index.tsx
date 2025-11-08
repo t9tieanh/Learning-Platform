@@ -4,8 +4,24 @@ import { GrLinkNext } from 'react-icons/gr'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Trash, MousePointer2 } from 'lucide-react'
 import { CourseCart } from '@/types/cart.type'
+import { toast } from 'sonner'
+import { Dispatch, SetStateAction } from 'react'
+import orderService from '@/services/sale/order.service'
+import { useAuthStore } from '@/stores/useAuth.stores'
+import { useNavigate } from 'react-router-dom'
 
-const OrderDetail = ({ order }: { order: CourseCart }) => {
+const OrderDetail = ({
+  order,
+  setCourseSelected
+}: {
+  order: CourseCart
+  setCourseSelected: Dispatch<SetStateAction<CourseCart[]>>
+}) => {
+  const handleRemove = () => {
+    setCourseSelected((prev) => prev.filter((item) => item.id !== order.id))
+    toast.success('Đã xóa khóa học khỏi giỏ hàng.')
+  }
+
   return (
     <>
       <h4 className='font-semibold mb-5 text-gray-600 text-sm flex items-center gap-2 p-2'>
@@ -21,14 +37,49 @@ const OrderDetail = ({ order }: { order: CourseCart }) => {
           &nbsp;
           <span className='text-sm text-gray-500 line-through'>₫{order?.final_price.toLocaleString()}</span>
         </div>
-        <CustomButton icon={<Trash />} className='hover:text-red-500 hover:bg-gray-100 bg-red-500' />
+        <CustomButton
+          icon={<Trash />}
+          className='hover:text-red-500 hover:bg-gray-100 bg-red-500'
+          onClick={handleRemove}
+        />
       </div>
       <hr />
     </>
   )
 }
 
-const CheckoutSummary = ({ selectedCourses }: { selectedCourses?: CourseCart[] }) => {
+const CheckoutSummary = ({
+  selectedCourses,
+  setCourseSelected
+}: {
+  selectedCourses: CourseCart[]
+  setCourseSelected: Dispatch<SetStateAction<CourseCart[]>>
+}) => {
+  const { data } = useAuthStore()
+  const navigate = useNavigate()
+
+  const handleCheckout = async () => {
+    if (!data?.accessToken) {
+      toast.error('Vui lòng đăng nhập để thanh toán đơn hàng này !')
+      return
+    }
+
+    if (!selectedCourses || selectedCourses.length === 0) {
+      toast.error('Vui lòng chọn ít nhất một khóa học để đặt hàng.')
+      return
+    }
+
+    // Proceed to checkout process
+    const response = await orderService.createOrder(selectedCourses.map((course) => course.id))
+
+    if (response.code === 200 && response.message) {
+      toast.success(response.message || 'Tạo đơn hàng thành công !, Vui lòng hoàn thành đơn hàng này !')
+      navigate('/check-out')
+    } else {
+      toast.error(response.message || 'Có lỗi trong quá trình đặt hàng ! Vui lòng thử lại.')
+    }
+  }
+
   return (
     <div className='p-3 border-gray-300 border-1 shadow-sm rounded-xl p-4 bg-white'>
       <div className='checkout-title'>
@@ -50,7 +101,7 @@ const CheckoutSummary = ({ selectedCourses }: { selectedCourses?: CourseCart[] }
         <hr />
         <div className='order-detail'>
           {selectedCourses?.map((order, index) => (
-            <OrderDetail key={index} order={order} />
+            <OrderDetail key={index} order={order} setCourseSelected={setCourseSelected} />
           ))}
         </div>
         <div>
@@ -58,6 +109,7 @@ const CheckoutSummary = ({ selectedCourses }: { selectedCourses?: CourseCart[] }
             icon={<GrLinkNext />}
             label='Đặt hàng'
             className='bg-blue-500 hover:bg-blue-600 text-white w-full'
+            onClick={handleCheckout}
           />
           <CustomButton
             icon={<MousePointer2 />}

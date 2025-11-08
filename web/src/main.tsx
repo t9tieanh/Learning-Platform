@@ -37,7 +37,8 @@ const router = createBrowserRouter([
           { path: 'me', element: <Profile /> },
           { path: 'courses', element: <AllCourse /> },
           { path: 'chat/:id', element: <Chat />, handle: { hideFooter: true } },
-          { path: 'check-out', element: <CheckoutPage /> }
+          { path: 'check-out', element: <CheckoutPage /> },
+          { path: 'check-out/:id', element: <CheckoutPage /> }
         ]
       },
       { path: 'auth', element: <AuthLayout /> },

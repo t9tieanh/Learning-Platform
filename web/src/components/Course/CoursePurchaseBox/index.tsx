@@ -6,6 +6,7 @@ import { useState } from 'react'
 import cartService from '@/services/sale/cart.service'
 import { toast } from 'sonner'
 import { useCartStore } from '@/stores/useCart.stores'
+import orderService from '@/services/sale/order.service'
 
 const CoursePurchaseBox = ({
   originalPrice,
@@ -34,6 +35,23 @@ const CoursePurchaseBox = ({
     }
   }
 
+  // handle payment process
+  const handlePayment = async () => {
+    try {
+      const response = await orderService.createOrder([courseId])
+      if (response && response.code === 200 && response.result) {
+        // Redirect to payment page
+        toast.success('Tạo đơn hàng thành công !')
+        window.location.href = `/check-out`
+      } else {
+        toast.error(response.message || 'Không thể khởi tạo đơn hàng. Vui lòng thử lại.')
+      }
+    } catch (error) {
+      toast.error('Không thể khởi tạo đơn hàng. Vui lòng thử lại.')
+      console.error('Error processing payment:', error)
+    }
+  }
+
   return (
     <div className='flex justify-center min-h-screen bg-gradient-to-br py-8'>
       <div className='w-full max-w-md'>
@@ -53,6 +71,7 @@ const CoursePurchaseBox = ({
                 className='w-full h-12 text-base'
                 icon={<FaPaperPlane className='w-4 h-4' />}
                 label='Mua ngay'
+                onClick={handlePayment}
               />
 
               <CustomButton

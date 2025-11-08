@@ -41,7 +41,10 @@ class OrderService {
             ...orderData,
             items: orderItems.map(item => ({
                 course_id: item.id as string,
+                title: item.title as string,
                 price: item.final_price as number,
+                instructor_name: item.instructor.name as string, 
+                image: item.thumbnail_url as string
             })),
             user_id: userId,
             customer_name: user.name as string,
@@ -79,7 +82,8 @@ class OrderService {
             discount: {
                 code: discount.code,
                 type: discount.type,
-                value: discount.value
+                value: discount.value,
+                maxDiscount: discount.maxDiscount as number
             }
         };
         await redisService.set(`order:${userId}`, updatedOrder, await redisService.getTtl(`order:${userId}`) || 15 * 60);
@@ -87,7 +91,7 @@ class OrderService {
         return updatedOrder;
     }
 
-    async processPayment(userId: string, paymentMethod: string, ipAddress?: string): Promise<Order & { payment?: { payUrl: string } }> {
+    async processPayment(userId: string, receiveEmail: string, paymentMethod: string, ipAddress?: string): Promise<Order & { payment?: { payUrl: string } }> {
         const order = await this.getOrder(userId) as OrderDto;
         if (!order) {
             throw new ApiError(404, 'Đơn hàng không tồn tại, hoặc đã hết hạn !');
@@ -104,7 +108,7 @@ class OrderService {
             data: {
                 user_id: order.user_id,
                 customer_name: order.customer_name,
-                customer_email: order.customer_email,
+                customer_email: receiveEmail,
                 total: order.total,
                 status: OrderStatus.Pending,
                 discount_id: discount?.id || null,
@@ -116,6 +120,9 @@ class OrderService {
                 }
             }
         });
+
+        // del order in redis
+        await redisService.del(`order:${userId}`)
 
         // process payment via VNPAY
         // Generate VNPAY payment URL
@@ -135,6 +142,158 @@ class OrderService {
                 payUrl: payUri ? payUri.payUrl : ''
             }
         }
+    }
+
+
+    // verify otp for vnpay system
+    async verifyOrder(query: any): Promise<{ isSuccess: boolean, orderId: string, rawData: any, message: string, rspCode?: string }> {
+        const { orderId, amount, status, isValid } = vnpayService.getCallbackInfo(query)
+        
+        // 1. Validate VNPAY checksum
+        if (!isValid) {
+            return {
+                isSuccess: false,
+                orderId: orderId || '',
+                rawData: query,
+                message: 'Chữ ký không hợp lệ',
+                rspCode: '97'
+            }
+        }
+
+        // 2. Check VNPAY payment status
+        if (status !== '00') {
+            return {
+                isSuccess: false,
+                orderId: orderId || '',
+                rawData: query,
+                message: 'Thanh toán thất bại',
+                rspCode: status
+            }
+        }
+
+        // 3. Check if order exists
+        const order = await prismaService.order.findUnique({
+            where: { id: orderId }
+        })
+
+        if (!order) {
+            return {
+                isSuccess: false,
+                orderId: orderId || '',
+                rawData: query,
+                message: 'Đơn hàng không tồn tại',
+                rspCode: '01'
+            }
+        }
+
+        // 4. Check if order already processed
+        if (order.status === OrderStatus.Completed) {
+            return {
+                isSuccess: false, // Return success for idempotency
+                orderId: orderId,
+                rawData: query,
+                message: 'Đơn hàng đã được xử lý thành công trước đó',
+                rspCode: '00'
+            }
+        }
+
+        //5. check total ammount
+        if (order.total !== amount) {
+            return {
+                isSuccess: false,
+                orderId: orderId,
+                rawData: query,
+                message: 'Số tiền không hợp lệ',
+                rspCode: '00'
+            }
+        }
+
+
+        // 6. Process payment confirmation with transaction
+        const updatedOrder = await prismaService.$transaction(async (tx) => {
+            // Update order status to completed
+            return await tx.order.update({
+                where: { id: orderId },
+                data: { status: OrderStatus.Completed }
+            })
+        })
+
+        // note -> update course-service + send messase queue to notification service
+
+        //return response successs 
+        return {
+            isSuccess: true, // Return success for idempotency
+            orderId: orderId,
+            rawData: updatedOrder,
+            message: `Thanh toán đơn hàng ${orderId}! thành công`,
+            rspCode: '00'
+        }
+    }
+
+    async getOrderInfo(userId: string, orderId: string): Promise<OrderDto> {
+        const order = await prismaService.order.findFirst({
+            where: { id: orderId, user_id: userId },
+            select: {
+                id: true,
+                user_id: true,
+                customer_name: true,
+                customer_email: true,
+                total: true,
+                status: true,
+                discount: {
+                    select: {
+                        id: true,
+                        code: true,
+                        type: true,
+                        value: true,
+                        maxDiscount: true
+                    }
+                },
+                items: {
+                    select: {
+                        course_id: true,
+                        price: true
+                    }
+                }
+            }
+        })
+
+        if (!order) {
+            throw new ApiError(401, 'Bạn không có quyền xem order này !')
+        }
+
+        // enrich items with course info from course service
+        const courseIds = (order.items || []).map(i => i.course_id)
+        const courses = await courseClientGrpc.getBulkCourses(courseIds)
+        const courseMap = new Map<string, any>(courses.map(c => [c.id, c]))
+
+        const items = (order.items || []).map(i => {
+            const c = courseMap.get(i.course_id) || {}
+            return {
+                course_id: i.course_id,
+                price: i.price,
+                title: c.title || '',
+                instructor_name: c.instructor?.name || '',
+                image: c.thumbnail_url || ''
+            }
+        })
+
+        const result: OrderDto = {
+            user_id: order.user_id,
+            customer_name: order.customer_name,
+            customer_email: order.customer_email,
+            total: order.total,
+            status: order.status,
+            discount: order.discount ? {
+                code: order.discount.code,
+                type: order.discount.type,
+                value: order.discount.value,
+                maxDiscount: order.discount.maxDiscount ?? 0
+            } : undefined,
+            items,
+        }
+
+        return result
     }
 
     private async calculateBasePrice(userId: string): Promise<number> {

@@ -2,7 +2,7 @@ import { CreditCard } from 'lucide-react'
 
 const Banner = () => {
   return (
-    <div className='cart-banner px-4 py-6 rounded-xl bg-[#0C356A]'>
+    <div className='cart-banner px-4 py-6 rounded-t-xl bg-[#0C356A]'>
       <p className='text-3xl font-bold flex text-blue-500 items-center'>
         <CreditCard className='cart-icon text-blue-400 w-8 h-8' />
         &nbsp;Thanh toán đơn hàng.

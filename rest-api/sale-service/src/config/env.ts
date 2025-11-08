@@ -20,5 +20,6 @@ export const env = {
     REDIS_DB_HOST: process.env.REDIS_DB_HOST,
     REDIS_DB_PORT: parseInt(process.env.REDIS_DB_PORT || '6379', 10),
     REDIS_DB_PASSWORD: process.env.REDIS_DB_PASSWORD,
-    REDIS_DB_NAME: parseInt(process.env.REDIS_DB_NAME || '0', 10)
+    REDIS_DB_NAME: parseInt(process.env.REDIS_DB_NAME || '0', 10),
+    WEB_URL: process.env.WEB_URL || 'http://localhost:3000/check-out/'
 }
