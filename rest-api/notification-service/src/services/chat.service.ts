@@ -309,6 +309,43 @@ const deleteMessage = async (conversationId: string, messageId: string, requeste
     }
 };
 
+const sendFirstMesssage = async (courseName: string, instructorId: string, studentId: string) => {
+    try {
+        const { conversation } = await createOrGetDirect(
+            studentId,
+            instructorId,
+            'student'
+        )
+
+        const welcomeMessage = `Xin chào! 👋 Chào mừng bạn đến với khóa học "${courseName}" 🎓 — chúc bạn có một hành trình học tập thật tuyệt vời! 🚀 Nếu có bất kỳ thắc mắc nào, đừng ngần ngại đặt câu hỏi nhé 💬`;
+
+        const message = await Message.create({
+            conversationId: conversation._id,
+            senderId: instructorId,
+            senderRole: 'instructor',
+            content: welcomeMessage,
+            type: 'text',
+            status: 'send'
+        })
+
+        await Conversation.findByIdAndUpdate(conversation._id, {
+            lastMessageAt: message.createdAt,
+            lastMessageId: message._id
+        })
+
+        socketClient.emit('server_message_send', {
+            conversationId: conversation._id,
+            messageId: message._id,
+            content: welcomeMessage,
+            senderId: instructorId,
+            peerId: studentId,
+            senderRole: 'instructor'
+        })
+    } catch (error) {
+        console.error('❌ Lỗi khi gửi tin nhắn chào mừng:', error);
+    }
+}
+
 
 const ChatService = {
     createOrGetDirect,
