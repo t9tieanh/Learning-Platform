@@ -20,23 +20,23 @@ const CourseCard = ({ course, className }: { course: Course; className?: string 
   }
 
   const handleAddToCart = async () => {
-      try {
-        const response = await cartService.addToCart(course.id)
-        if (response && response.code === 200) {
-          toast.success(response.message || 'Thêm vào giỏ hàng thành công!')
-          await refresh()
-        } else {
-          toast.error(response.message || 'Không thể thêm vào giỏ hàng')
-        }
-      } catch (error) {
-        toast.error('Không thể thêm vào giỏ hàng')
-        console.error('Error adding to cart:', error)
+    try {
+      const response = await cartService.addToCart(course.id)
+      if (response && response.code === 200) {
+        toast.success(response.message || 'Thêm vào giỏ hàng thành công!')
+        await refresh()
+      } else {
+        toast.error(response.message || 'Không thể thêm vào giỏ hàng')
       }
+    } catch (error) {
+      toast.error('Không thể thêm vào giỏ hàng')
+      console.error('Error adding to cart:', error)
     }
+  }
 
   return (
     <>
-      <Card className={`p-0 gap-0 course-card group relative ${className}`} onClick={handleClick}>
+      <Card className={`p-0 gap-0 course-card group relative ${className}`}>
         <CardHeader className='p-0'>
           <div className='relative'>
             <img
@@ -47,26 +47,11 @@ const CourseCard = ({ course, className }: { course: Course; className?: string 
 
             {/* add-to-cart overlay shown on card hover */}
             <Button
-              onClick={async (e) => {
-                e.stopPropagation()
-                try {
-                  const res = await cartService.addToCart(course.id)
-                  if (res && res.code === 200) {
-                    toast.success(res.message || 'Đã thêm vào giỏ hàng')
-                    // refresh cart count if store available
-                    useCartStore.getState().refresh()
-                  } else {
-                    toast.error(res?.message || 'Thêm vào giỏ hàng thất bại')
-                  }
-                } catch (err: any) {
-                  console.error(err)
-                  toast.error(err?.message || 'Thêm vào giỏ hàng thất bại')
-                }
-              }}
+              onClick={handleAddToCart}
               className='hidden group-hover:flex items-center justify-center absolute top-2 right-2 bg-white rounded-full p-2 shadow-md hover:scale-105 transition-transform'
               aria-label='Thêm vào giỏ hàng'
             >
-              <ShoppingCart className='w-4 h-4 text-gray-700' />
+              <ShoppingCart className='w-4 h-4 text-gray-700 hover:text-white' />
             </Button>
           </div>
         </CardHeader>

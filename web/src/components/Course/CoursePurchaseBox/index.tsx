@@ -7,6 +7,8 @@ import cartService from '@/services/sale/cart.service'
 import { toast } from 'sonner'
 import { useCartStore } from '@/stores/useCart.stores'
 import orderService from '@/services/sale/order.service'
+import { useAuthStore } from '@/stores/useAuth.stores'
+import { useNavigate } from 'react-router-dom'
 
 const CoursePurchaseBox = ({
   originalPrice,
@@ -19,6 +21,8 @@ const CoursePurchaseBox = ({
 }) => {
   const [discountCode, setDiscountCode] = useState('')
   const refresh = useCartStore((s) => s.refresh)
+  const { data } = useAuthStore()
+  const navigator = useNavigate()
 
   const handleAddToCart = async () => {
     try {
@@ -38,11 +42,15 @@ const CoursePurchaseBox = ({
   // handle payment process
   const handlePayment = async () => {
     try {
+      if (!data?.accessToken) {
+        toast.error('Vui lòng đăng nhập để tiếp tục thanh toán.')
+        return
+      }
       const response = await orderService.createOrder([courseId])
       if (response && response.code === 200 && response.result) {
         // Redirect to payment page
         toast.success('Tạo đơn hàng thành công !')
-        window.location.href = `/check-out`
+        navigator('/check-out')
       } else {
         toast.error(response.message || 'Không thể khởi tạo đơn hàng. Vui lòng thử lại.')
       }
