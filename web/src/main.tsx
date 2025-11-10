@@ -15,6 +15,7 @@ import TCHomePage from './pages/TC_HomePage'
 import ForgotPass from './pages/ForgotPass'
 import CoursePage from './pages/CoursePage'
 import AllCourse from './pages/AllCourse'
+import About from './pages/AboutUs'
 import Chat from './pages/Chat'
 import Blog from './pages/Blog'
 import BlogList from './pages/BlogList'
@@ -48,7 +49,8 @@ const router = createBrowserRouter([
           { path: 'blog', element: <Blog /> },
           { path: 'blogs', element: <BlogList /> },
           { path: 'blog-details/:id', element: <BlogDetails /> },
-          { path: 'home2', element: <Home2 /> }
+          { path: 'home2', element: <Home2 /> },
+          { path: 'about', element: <About /> }
         ]
       },
       { path: 'auth', element: <AuthLayout /> },
