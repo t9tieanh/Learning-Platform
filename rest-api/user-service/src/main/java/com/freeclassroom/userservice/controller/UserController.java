@@ -1,6 +1,7 @@
 package com.freeclassroom.userservice.controller;
 
 import com.freeclassroom.userservice.dto.request.user.CreationUserRequest;
+import com.freeclassroom.userservice.dto.request.user.UpdateUserRequest;
 import com.freeclassroom.userservice.dto.response.ApiResponse;
 import com.freeclassroom.userservice.dto.response.common.CreationResponse;
 import com.freeclassroom.userservice.dto.response.user.GetUserResponse;
@@ -10,6 +11,7 @@ import com.freeclassroom.userservice.service.user.IUserService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -44,5 +46,13 @@ public class UserController {
     @PostMapping("/verify")
     ApiResponse<UserResponse> verifySignUp(@RequestParam("token") String token) {
         return userService.verifySignUp(token);
+    }
+
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    ApiResponse<GetUserResponse> updateUser(
+            @PathVariable String id,
+            @ModelAttribute UpdateUserRequest request
+    ) {
+        return userService.updateUser(id, request);
     }
 }

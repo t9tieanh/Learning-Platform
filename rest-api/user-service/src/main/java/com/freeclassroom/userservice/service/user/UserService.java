@@ -2,6 +2,7 @@ package com.freeclassroom.userservice.service.user;
 
 import com.freeclassroom.userservice.configuration.RabbitMQConfig;
 import com.freeclassroom.userservice.dto.request.user.CreationUserRequest;
+import com.freeclassroom.userservice.dto.request.user.UpdateUserRequest;
 import com.freeclassroom.userservice.dto.response.ApiResponse;
 import com.freeclassroom.userservice.dto.response.user.GetUserResponse;
 import com.freeclassroom.userservice.dto.response.user.MyProfileResponse;
@@ -16,6 +17,7 @@ import com.freeclassroom.userservice.mapper.user.UserMapper;
 import com.freeclassroom.userservice.repository.entity.UserRepository;
 import com.freeclassroom.userservice.repository.redis.OTPForgetPasswordRepository;
 import com.freeclassroom.userservice.repository.redis.PendingUserRepository;
+import com.freeclassroom.userservice.service.file.UploadFileService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -35,6 +37,7 @@ public class UserService implements IUserService {
     PendingUserRepository pendingUserRepo;
     OTPForgetPasswordRepository otpForgetPasswordRepo;
     UserMapper userMapper;
+    UploadFileService uploadFileService;
 
     // template rabbitmq
     RabbitTemplate rabbitTemplate;
@@ -190,6 +193,58 @@ public class UserService implements IUserService {
                 .message("Lấy thông tin profile thành công !")
                 .result(response)
                 .build();
+    }
+
+    @Override
+    public ApiResponse<GetUserResponse> updateUser(String id, UpdateUserRequest request) {
+        try {
+            UserEntity user = userRepository.findById(id)
+                    .orElseThrow(() -> new CustomExeption(ErrorCode.USER_NOT_FOUND));
+
+            if (request.getDescription() != null && !request.getDescription().equals(user.getDescription())) {
+                user.setDescription(request.getDescription());
+            }
+            if (request.getEmail() != null && !request.getEmail().equals(user.getEmail())) {
+                user.setEmail(request.getEmail());
+            }
+            if (request.getName() != null && !request.getName().equals(user.getName())) {
+                user.setName(request.getName());
+            }
+            if (request.getPhone() != null && !request.getPhone().equals(user.getPhone())) {
+                user.setPhone(request.getPhone());
+            }
+            if (request.getPosition() != null && !request.getPosition().equals(user.getPosition())) {
+                user.setPosition(request.getPosition());
+            }
+            if (request.getStatus() != null && !request.getStatus().equals(user.getStatus())) {
+                user.setStatus(request.getStatus());
+            }
+
+            if (request.getImage() != null && !request.getImage().isEmpty()) {
+                String uploadedUrl = uploadFileService.uploadFile(request.getImage());
+                user.setImage(uploadedUrl);
+            }
+
+            userRepository.save(user);
+
+            GetUserResponse response = userMapper.toDto(user);
+
+            return ApiResponse.<GetUserResponse>builder()
+                    .code(HttpStatus.OK.value())
+                    .message("Sửa thông tin profile thành công !")
+                    .result(response)
+                    .build();
+        } catch (CustomExeption e) {
+            return ApiResponse.<GetUserResponse>builder()
+                    .code(HttpStatus.OK.value())
+                    .message("Sửa thông tin profile thất bại !")
+                    .result(null)
+                    .build();
+        } catch (Exception e) {
+            throw new CustomExeption(ErrorCode.UNCATEGORIZED_EXEPTION);
+        }
+
+
     }
 
     public ApiResponse<UserResponse> verifyForgotPassword(String code, String newPassword) {

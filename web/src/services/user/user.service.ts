@@ -90,6 +90,31 @@ class UserService {
     const response = await axiosClient.axiosInstance.get('self')
     return response.data
   }
+
+  // update user (multipart for image)
+  async updateUser(id: string, data: {
+    description?: string
+    email?: string
+    imageFile?: File | null
+    name?: string
+    phone?: string
+    position?: string
+    status?: string | number
+  }): Promise<ApiResponse<Profile>> {
+    const form = new FormData()
+    if (data.description !== undefined) form.append('description', data.description)
+    if (data.email !== undefined) form.append('email', data.email)
+    if (data.name !== undefined) form.append('name', data.name)
+    if (data.phone !== undefined) form.append('phone', data.phone)
+    if (data.position !== undefined) form.append('position', data.position)
+    if (data.status !== undefined) form.append('status', String(data.status))
+    if (data.imageFile) form.append('image', data.imageFile)
+
+    const response = await axiosClient.axiosInstance.put(`user/${id}`, form, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    })
+    return response.data
+  }
 }
 
 export default new UserService()
