@@ -108,8 +108,11 @@ export default function BlogPreviewSubmit({ contentHtml, blogId }: BlogPreviewSu
         const dd = String(d.getDate()).padStart(2, "0");
         const mm = String(d.getMonth() + 1).padStart(2, "0");
         const yyyy = d.getFullYear();
-        return `${dd}/${mm}/${yyyy}`;
+        const hh = String(d.getHours()).padStart(2, "0");
+        const min = String(d.getMinutes()).padStart(2, "0");
+        return `${hh}:${min} ${dd}/${mm}/${yyyy} `;
     }, []);
+
 
     return (
         <Card className="border-border mt-8 p-2 py-8">

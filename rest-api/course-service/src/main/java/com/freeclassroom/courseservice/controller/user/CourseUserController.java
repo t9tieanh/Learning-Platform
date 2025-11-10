@@ -59,4 +59,9 @@ public class CourseUserController {
         return courseUserService.getAllCourses(page, limit, search, category, minPrice, minRating);
     }
 
+    @GetMapping("/count")
+    ApiResponse<Integer> countInstructorCourseValid (@RequestParam String instructorId) {
+        return courseUserService.countInstructorCourseValid(instructorId);
+    }
+
 }

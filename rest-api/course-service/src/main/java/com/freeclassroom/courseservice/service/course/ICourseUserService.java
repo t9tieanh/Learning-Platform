@@ -18,4 +18,5 @@ public interface ICourseUserService {
                                                             Double minPrice, Double minRating);
 
     ApiResponse<List<CourseResponse>> getEnrolledCourses(String userRole,String studentId,String instructorId);
+    ApiResponse<Integer> countInstructorCourseValid(String instructorId);
 }

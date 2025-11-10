@@ -255,10 +255,17 @@ public class CourseUserService implements ICourseUserService{
                 // 4. Chỉ giữ course có instructorId trùng khớp
                 courses = allCourses.stream()
                         .filter(c -> c.getInstructorId().equals(instructorId))
+                        .filter(c -> (EnumCourseStatus.PUBLISHED.name()).equalsIgnoreCase(String.valueOf(c.getStatus())))
+                        .filter(c -> (EnumCourseProgressStep.COMPLETED.name()).equalsIgnoreCase(String.valueOf(c.getProgressStep())))
                         .toList();
             } else {
                 // Nếu không phải instructor thì lấy theo instructorId
-                courses = courseRepo.findAllByInstructorId(instructorId);
+                List<CourseEntity> allCourses = courseRepo.findAllByInstructorId(instructorId);
+
+                courses = allCourses.stream()
+                        .filter(c -> (EnumCourseStatus.PUBLISHED.name()).equalsIgnoreCase(String.valueOf(c.getStatus())))
+                        .filter(c -> (EnumCourseProgressStep.COMPLETED.name()).equalsIgnoreCase(String.valueOf(c.getProgressStep())))
+                        .toList();
             }
 
             List<CourseResponse> response = new ArrayList<>();
@@ -277,6 +284,33 @@ public class CourseUserService implements ICourseUserService{
                     .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
                     .message("Đã xảy ra lỗi khi lấy danh sách khóa học: " + e.getMessage())
                     .result(Collections.emptyList())
+                    .build();
+        }
+    }
+
+    @Override
+    public ApiResponse<Integer> countInstructorCourseValid(String instructorId) {
+        try {
+            List<CourseEntity> courses = courseRepo.findAllByInstructorId(instructorId);
+            System.out.println("COURSES: " + courses);
+            long validCount = courses.stream()
+                    .filter(c -> EnumCourseStatus.PUBLISHED.name().equalsIgnoreCase(String.valueOf(c.getStatus())))
+                    .filter(c -> EnumCourseProgressStep.COMPLETED.name().equalsIgnoreCase(String.valueOf(c.getProgressStep())))
+                    .count();
+            System.out.println("validCount: " + validCount);
+
+            return ApiResponse.<Integer>builder()
+                    .code(HttpStatus.OK.value())
+                    .message("Lấy dữ liệu thành công")
+                    .result((int) validCount)
+                    .build();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ApiResponse.<Integer>builder()
+                    .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                    .message("Đã xảy ra lỗi khi đếm khóa học hợp lệ: " + e.getMessage())
+                    .result(0)
                     .build();
         }
     }

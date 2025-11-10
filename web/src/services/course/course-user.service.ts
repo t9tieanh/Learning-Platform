@@ -113,6 +113,12 @@ class CourseUserService {
     return response.data
   }
 
+  async countInstructorCourseValid(params: { instructorId: string }) {
+    const response = await axiosClient.axiosInstance.get('learning/courses/count', {
+      params
+    })
+    return response.data
+  }
 }
 
 export default new CourseUserService()

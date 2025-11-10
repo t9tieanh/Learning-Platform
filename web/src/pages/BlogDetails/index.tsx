@@ -84,11 +84,27 @@ const BlogDetails = () => {
                                         <p className="font-medium text-foreground text-xl">{blog.userName}</p>
                                         <span className="items-center text-sm text-muted-foreground">
                                             <span className="font-semibold text-foreground">Đăng ngày:</span>{" "}
-                                            <span className="italic">{new Date(blog.createdAt).toLocaleDateString('vi-VN')}</span>
+                                            <span className="italic">
+                                                {new Date(blog.createdAt).toLocaleString('vi-VN', {
+                                                    hour: '2-digit',
+                                                    minute: '2-digit',
+                                                    day: '2-digit',
+                                                    month: '2-digit',
+                                                    year: 'numeric',
+                                                })}
+                                            </span>
                                         </span>
                                         <span className="items-center text-sm text-muted-foreground">
                                             <span className="font-semibold text-foreground">Cập nhật:</span>{" "}
-                                            <span className="italic">{new Date(blog.updatedAt).toLocaleDateString('vi-VN')}</span>
+                                            <span className="italic">
+                                                {new Date(blog.updatedAt).toLocaleString('vi-VN', {
+                                                    hour: '2-digit',
+                                                    minute: '2-digit',
+                                                    day: '2-digit',
+                                                    month: '2-digit',
+                                                    year: 'numeric',
+                                                })}
+                                            </span>
                                         </span>
                                     </div>
                                 </div>

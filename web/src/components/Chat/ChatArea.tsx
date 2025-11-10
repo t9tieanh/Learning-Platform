@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Phone, Video, MoreVertical, Send, Image, Paperclip, ChevronLeft, Copy } from 'lucide-react'
 import { useContext, useEffect, useMemo, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import { SocketContext } from '@/api/socket/socket.context'
 import { useLocation } from 'react-router-dom'
@@ -63,7 +64,8 @@ export const ChatArea = ({
   const { data } = useAuthStore()
   const myId = data?.userId
   const [enrolledCourses, setEnrolledCourses] = useState<EnrolledCourseItem[]>([])
-  const location = useLocation()
+  const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (peerFromProps && peerFromProps !== peerId) {
@@ -426,12 +428,16 @@ export const ChatArea = ({
   const courseList = (
     <div className="flex flex-col gap-2 p-2 w-64 max-h-[300px] overflow-y-auto">
       {enrolledCourses.length === 0 && (
-        <div className='text-xs text-gray-400 px-1 py-2'>Không có khóa học chung</div>
+        <div className="text-xs text-gray-400 px-1 py-2">
+          Không có khóa học
+        </div>
       )}
+
       {enrolledCourses.map((course) => (
         <div
           key={course.id}
-          className="flex items-center gap-3 p-1 rounded-md hover:bg-gray-100 transition"
+          onClick={() => handleCourseClick(course.id)}
+          className="flex items-center gap-3 p-1 rounded-md hover:bg-gray-100 transition cursor-pointer"
         >
           <img
             src={course.thumbnailUrl}
@@ -445,6 +451,14 @@ export const ChatArea = ({
       ))}
     </div>
   );
+
+  const handleCourseClick = (id: string) => {
+    if (myRole === 'instructor') {
+      navigate(`/teacher/course-details/${id}`)
+    } else {
+      navigate(`/course/${id}`);
+    }
+  }
 
 
   return (
