@@ -8,20 +8,15 @@ import userService from '@/services/user/user.service'
 import { Profile } from '@/types/profile'
 import { toast } from 'sonner'
 import { useAuthStore } from '@/stores/useAuth.stores'
-
+import CertificateList from './CertificateList'
+import { Separator } from '@radix-ui/react-dropdown-menu'
 const PersonalInfo = () => {
   const [userInfo, setUserInfo] = useState<Profile | null>(null)
   const [editing, setEditing] = useState(false)
   const [saving, setSaving] = useState(false)
   const [form, setForm] = useState<{ name?: string; email?: string; phone?: string | null; position?: string | null; description?: string; imageFile?: File | null }>({})
-  const { data } = useAuthStore()
+  const { data, setData } = useAuthStore()
   const userId = (data as any)?.userId || (data as any)?.id
-  const infoTabs = [
-    { label: 'Điện thoại', icon: <Phone className='w-4 h-4 text-primary' />, value: userInfo?.phone || '' },
-    { label: 'Email', icon: <Mail className='w-4 h-4 text-primary' />, value: userInfo?.email || '' },
-    { label: 'Tên đăng nhập', icon: <User className='w-4 h-4 text-primary' />, value: userInfo?.username || '' },
-    { label: 'Vị trí', icon: <Calendar className='w-4 h-4 text-primary' />, value: userInfo?.position || '' }
-  ]
 
   useEffect(() => {
     // Fetch additional user info if needed
@@ -89,6 +84,16 @@ const PersonalInfo = () => {
         setUserInfo(res.result)
         setEditing(false)
         setForm((prev) => ({ ...prev, imageFile: undefined }))
+        // Sync auth store so Header updates avatar and name immediately
+        if (data && setData) {
+          setData({
+            ...data,
+            name: res.result.name ?? data.name,
+            email: res.result.email ?? data.email,
+            username: (res.result as any)?.username ?? data.username,
+            avatarUrl: (res.result as any)?.image ?? data.avatarUrl
+          })
+        }
         toast.success('Cập nhật thông tin thành công')
       } else {
         toast.error(res?.message || 'Cập nhật thất bại')
@@ -107,34 +112,47 @@ const PersonalInfo = () => {
         <CardContent className='px-8'>
           <div className='flex gap-4 items-center text-center mb-8 px-4 py-6 rounded-xl bg-[#0C356A]'>
             <div className='relative'>
-              <button
-                type='button'
-                className='group relative block rounded-full focus:outline-none focus:ring-2 focus:ring-primary/50'
-                onClick={() => fileInputRef.current?.click()}
-                aria-label='Chọn ảnh đại diện mới'
-              >
-                <Avatar className='h-28 w-28 shadow-lg cursor-pointer'>
-                  <AvatarImage src={form.imageFile ? URL.createObjectURL(form.imageFile) : userInfo?.image} alt={userInfo?.name} className='object-cover' />
-                  <AvatarFallback className='text-lg font-semibold bg-primary text-primary-foreground'>
-                    <User className='h-6 w-6' />
-                  </AvatarFallback>
-                </Avatar>
-                <div className='pointer-events-none absolute inset-0 flex items-center justify-center rounded-full bg-black/40 opacity-0 transition-opacity group-hover:opacity-100'>
-                  <Camera className='w-6 h-6 text-white' />
+              {editing ? (
+                <>
+                  <button
+                    type='button'
+                    className='group relative block rounded-full focus:outline-none focus:ring-2 focus:ring-primary/50'
+                    onClick={() => fileInputRef.current?.click()}
+                    aria-label='Chọn ảnh đại diện mới'
+                  >
+                    <Avatar className='h-28 w-28 shadow-lg cursor-pointer'>
+                      <AvatarImage src={form.imageFile ? URL.createObjectURL(form.imageFile) : userInfo?.image} alt={userInfo?.name} className='object-cover' />
+                      <AvatarFallback className='text-lg font-semibold bg-primary text-primary-foreground'>
+                        <User className='h-6 w-6' />
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className='pointer-events-none absolute inset-0 flex items-center justify-center rounded-full bg-black/40 opacity-0 transition-opacity group-hover:opacity-100'>
+                      <Camera className='w-6 h-6 text-white' />
+                    </div>
+                  </button>
+                  <input
+                    ref={fileInputRef}
+                    id='avatarUpload'
+                    type='file'
+                    accept='image/*'
+                    className='hidden'
+                    onChange={handleAvatarChange}
+                  />
+                </>
+              ) : (
+                <div className='relative'>
+                  <Avatar className='h-28 w-28 shadow-lg'>
+                    <AvatarImage src={userInfo?.image} alt={userInfo?.name} className='object-cover' />
+                    <AvatarFallback className='text-lg font-semibold bg-primary text-primary-foreground'>
+                      <User className='h-6 w-6' />
+                    </AvatarFallback>
+                  </Avatar>
                 </div>
-              </button>
-              <input
-                ref={fileInputRef}
-                id='avatarUpload'
-                type='file'
-                accept='image/*'
-                className='hidden'
-                onChange={handleAvatarChange}
-              />
+              )}
             </div>
             <div>
-              <h3 className='text-3xl font-bold flex text-blue-500'>{userInfo?.name}</h3>
-              <p className='text-sm text-white text-start'>@{userInfo?.username}</p>
+              <h3 className='text-3xl font-bold flex text-white mb-1'>{userInfo?.name}</h3>
+              <p className='text-sm text-slate-300 text-start'>@{userInfo?.username}</p>
             </div>
           </div>
 
@@ -174,14 +192,6 @@ const PersonalInfo = () => {
                   <div className='text-foreground text-sm font-sm'>{userInfo?.position || ''}</div>
                 </div>
               </div>
-              {/* Username (read only) */}
-              <div className='flex items-center border-2 gap-3 p-4 rounded-lg bg-white hover:bg-blue-100 transition-colors'>
-                <div className='p-2 rounded-md bg-primary/10'><User className='w-4 h-4 text-primary' /></div>
-                <div>
-                  <div className='text-sm font-medium text-muted-foreground'>Tên đăng nhập</div>
-                  <div className='text-foreground text-sm font-sm'>{userInfo?.username || ''}</div>
-                </div>
-              </div>
             </div>
           ) : (
             <div className='grid gap-4 md:grid-cols-2'>
@@ -190,7 +200,7 @@ const PersonalInfo = () => {
                 <div className='p-2 rounded-md bg-primary/10'><User className='w-4 h-4 text-primary' /></div>
                 <div className='flex-1'>
                   <div className='text-sm font-medium text-muted-foreground'>Họ và tên</div>
-                  <input className='w-full px-3 py-2 rounded-md border' value={form.name || ''} onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))} />
+                  <input className='text-sm w-full px-3 py-2 rounded-md border' value={form.name || ''} onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))} />
                 </div>
               </div>
               {/* Email editable */}
@@ -198,7 +208,7 @@ const PersonalInfo = () => {
                 <div className='p-2 rounded-md bg-primary/10'><Mail className='w-4 h-4 text-primary' /></div>
                 <div className='flex-1'>
                   <div className='text-sm font-medium text-muted-foreground'>Email</div>
-                  <input className='w-full px-3 py-2 rounded-md border' value={form.email || ''} onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))} />
+                  <input className='text-sm w-full px-3 py-2 rounded-md border' value={form.email || ''} onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))} />
                 </div>
               </div>
               {/* Phone editable */}
@@ -206,7 +216,7 @@ const PersonalInfo = () => {
                 <div className='p-2 rounded-md bg-primary/10'><Phone className='w-4 h-4 text-primary' /></div>
                 <div className='flex-1'>
                   <div className='text-sm font-medium text-muted-foreground'>Điện thoại</div>
-                  <input className='w-full px-3 py-2 rounded-md border' value={form.phone || ''} onChange={(e) => setForm((p) => ({ ...p, phone: e.target.value }))} />
+                  <input className='text-sm w-full px-3 py-2 rounded-md border' value={form.phone || ''} onChange={(e) => setForm((p) => ({ ...p, phone: e.target.value }))} />
                 </div>
               </div>
               {/* Position editable */}
@@ -214,7 +224,7 @@ const PersonalInfo = () => {
                 <div className='p-2 rounded-md bg-primary/10'><Calendar className='w-4 h-4 text-primary' /></div>
                 <div className='flex-1'>
                   <div className='text-sm font-medium text-muted-foreground'>Vị trí</div>
-                  <input className='w-full px-3 py-2 rounded-md border' value={form.position || ''} onChange={(e) => setForm((p) => ({ ...p, position: e.target.value }))} />
+                  <input className='text-sm w-full px-3 py-2 rounded-md border' value={form.position || ''} onChange={(e) => setForm((p) => ({ ...p, position: e.target.value }))} />
                 </div>
               </div>
               {/* Username read only */}
@@ -277,7 +287,14 @@ const PersonalInfo = () => {
             )}
           </div>
         </CardContent>
+
+        <Separator className="mx-10 bg-gray-300 h-[2px]" />
+        <div className='px-8'>
+          {userId && <CertificateList userId={String(userId)} />}
+        </div>
       </Card>
+
+
     </div>
   )
 }

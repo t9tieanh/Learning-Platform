@@ -22,7 +22,7 @@ const Header: FC = () => {
 
   useEffect(() => {
     // refresh cart count on header mount
-    refresh().catch(() => {})
+    refresh().catch(() => { })
   }, [refresh])
 
   const menuItems = [
@@ -97,7 +97,7 @@ const Header: FC = () => {
                       username={data.username as string}
                       name={data.name as string}
                       avatarUrl={data.avatarUrl as string}
-                      closeMenu={() => {}}
+                      closeMenu={() => { }}
                     />
                   </PopoverContent>
                 </Popover>
