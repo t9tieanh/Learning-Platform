@@ -36,4 +36,16 @@ public class CategoryService implements ICategoryService {
                         .collect(Collectors.toList()))
                 .build();
     }
+
+    @Override
+    public ApiResponse<List<CategoryResponse>> getValidCategory() {
+        List<CategoryEntity> result = categoryRepo.findAllWithPublishedAndCompletedCourses();
+        return ApiResponse.<List<CategoryResponse>>builder()
+                .message("Lấy category thành công")
+                .code(200)
+                .result(result.stream()
+                        .map(categoryMapper::toDto)
+                        .collect(Collectors.toList()))
+                .build();
+    }
 }

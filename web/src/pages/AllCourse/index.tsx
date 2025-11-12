@@ -18,7 +18,7 @@ const Index = () => {
   const [loading, setLoading] = useState(false)
   const [items, setItems] = useState<any[]>([])
   const [selectedCategories, setSelectedCategories] = useState<string[]>([])
-  const [sortValue, setSortValue] = useState('popular')
+  const [sortValue, setSortValue] = useState('')
   const [search, setSearch] = useState('')
   const [minPrice, setMinPrice] = useState<number | undefined>(undefined)
   const [minRating, setMinRating] = useState<number | undefined>(undefined)

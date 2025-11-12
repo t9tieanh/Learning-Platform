@@ -70,7 +70,7 @@ const PersonalInfo = () => {
       return
     }
     if (!hasChanges) return
-    try {
+    try { 
       setSaving(true)
       const res = await userService.updateUser(String(userId), {
         name: form.name,

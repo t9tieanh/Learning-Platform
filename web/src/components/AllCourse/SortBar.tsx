@@ -21,16 +21,9 @@ export const SortBar = ({ totalCourses, sortValue, onSortChange }: SortBarProps)
 
         <Select value={sortValue} onValueChange={onSortChange}>
           <SelectTrigger className='w-[180px] bg-background/70 border-border/70 hover:border-primary/40 transition-all duration-200'>
-            <SelectValue placeholder='Chọn cách sắp xếp' />
+            <SelectValue placeholder='Tiêu chí' />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value='popular'>
-              <div className='flex items-center gap-2'>
-                <TrendingUp className='w-4 h-4 text-primary' />
-                <span>Phổ biến nhất</span>
-              </div>
-            </SelectItem>
-
             <SelectItem value='newest'>
               <div className='flex items-center gap-2'>
                 <Clock className='w-4 h-4 text-blue-500' />
