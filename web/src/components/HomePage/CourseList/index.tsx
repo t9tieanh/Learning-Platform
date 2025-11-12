@@ -2,7 +2,7 @@ import CourseCard from '@/components/common/CourseCard'
 import { Course } from '@/types/course.type'
 import { useEffect, useState } from 'react'
 import { Loader } from '@/components/ui/loader'
-import courseService from '@/services/course/course.service'
+import courseService from '@/services/course/course-user.service'
 
 interface CourseListProps {
   title: string
@@ -14,19 +14,12 @@ const CourseList = ({ title, fetcher }: CourseListProps) => {
   const [loading, setLoading] = useState(true)
   const [finalTitle, setFinalTitle] = useState(title)
 
-  // useEffect(() => {
-  //   fetcher()
-  //     .then((data: any) => setCourses(data.result))
-  //     .catch((err) => console.error('Lỗi khi load best seller:', err))
-  //     .finally(() => setLoading(false))
-  // }, [fetcher, title])
-
   useEffect(() => {
     const loadCourses = async () => {
       try {
         const data = await fetcher()
         const result = data?.result || []
-
+        console.log('RESULT', result);
         // Nếu không có dữ liệu, fallback sang best seller
         if (!result || result.length === 0) {
           const fallback = await courseService.getBestSellerCourses()

@@ -46,7 +46,7 @@ const Index = () => {
           {/* Cột 1 - Bài viết nổi bật */}
           <div className="space-y-8">
             <section>
-              <h2 className="text-2xl font-bold mb-6">Bài viết nổi bật</h2>
+              <h2 className="text-2xl font-bold mb-6">Cập nhật gần đây</h2>
               <div className="space-y-6">
                 {loading && (
                   <div className="text-sm text-muted-foreground">Đang tải bài viết thịnh hành...</div>
@@ -70,8 +70,8 @@ const Index = () => {
           {/* Cột 2 - Bài viết đặc biệt / FeaturedCard */}
           <aside className="space-y-6">
             <FeaturedCard
-              title="Vieclam24h cho ra mắt: Báo cáo Thị trường Lao động Q2.2025"
-              description="Bức tranh toàn diện về tâm lý, hành vi và kỳ vọng của người lao động sau làn sóng cắt giảm. Báo cáo phân tích thách thức tuyển dụng từ phía doanh nghiệp và đưa ra các góc nhìn thực tiễn."
+              title="Khám phá Learnova – Nền tảng học trực tuyến toàn diện"
+              description="Learnova mang đến trải nghiệm học tập hiện đại với hàng trăm khóa học chất lượng cao từ các chuyên gia hàng đầu. Học viên có thể học mọi lúc, mọi nơi và theo dõi tiến trình học tập của mình dễ dàng."
               date="15/09/2025"
             />
           </aside>

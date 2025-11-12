@@ -9,7 +9,7 @@ interface FeaturedCardProps {
 
 export const FeaturedCard = ({ title, description, date }: FeaturedCardProps) => {
     return (
-        <Link to={`/article/`}>
+        <Link to={`/blog-details/690a0cf610380836bc82f2f2`}>
             <article
                 className="relative rounded-3xl overflow-hidden shadow-sm p-8 text-white hover:scale-[1.02] transition-transform"
                 style={{

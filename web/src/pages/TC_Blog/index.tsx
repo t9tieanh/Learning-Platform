@@ -5,6 +5,7 @@ import { Loader } from '@/components/ui/loader'
 import BlogTable from '@/components/TC_Blog/BlogTable'
 import BlogPagination from '@/components/TC_Blog/BlogPagination'
 import { blogService, type BlogItem } from '@/services/blog.service'
+import { useAuthStore } from '@/stores/useAuth.stores'
 
 interface Blog {
     _id: string
@@ -23,6 +24,8 @@ const TC_Blog: React.FC = () => {
     const [search, setSearch] = useState('')
     const [page, setPage] = useState(1)
     const [totalPages, setTotalPages] = useState(1)
+    const { data } = useAuthStore()
+    const myId = data?.userId
     const size = 5
 
     useEffect(() => {
@@ -31,7 +34,7 @@ const TC_Blog: React.FC = () => {
                 try {
                     setLoading(true)
                     setError(null)
-                    const res = await blogService.getAll({ page, limit: size, search })
+                    const res = await blogService.getAllByInstructorId({ page, limit: size, search, instructorId: myId })
                     if (!mounted) return
                     const mapped: Blog[] = (res.items || []).map((b: BlogItem) => ({
                         _id: b._id,

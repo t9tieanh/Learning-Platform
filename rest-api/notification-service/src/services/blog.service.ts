@@ -5,6 +5,7 @@ interface GetAllParams {
     page: number
     limit: number
     search?: string
+    instructorId?: string
 }
 
 interface CreateBlogParams {
@@ -22,13 +23,17 @@ interface UpdateBlogParams {
     markdown_file_url?: string[]
 }
 
-const getAll = async ({ page, limit, search = '' }: GetAllParams) => {
+const getAll = async ({ page, limit, search = '', instructorId }: GetAllParams) => {
     const skip = (page - 1) * limit
 
     const query: FilterQuery<IBlog> = {}
     if (search && search.trim()) {
         const regex = new RegExp(search.trim(), 'i')
         query.$or = [{ title: regex }, { content: regex }]
+    }
+
+    if (instructorId) {
+        query.instructor_id = instructorId
     }
 
     const [items, total] = await Promise.all([

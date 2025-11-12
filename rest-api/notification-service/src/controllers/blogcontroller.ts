@@ -41,6 +41,43 @@ const getAll = async (req: Request, res: Response) => {
     }
 }
 
+const getAllByInstructorId = async (req: Request, res: Response) => {
+    try {
+        const page = (req.data as any)?.page ?? (req.query.page ? Math.max(1, Number(req.query.page)) : 1)
+        const limit = (req.data as any)?.limit ?? (req.query.limit ? Math.min(100, Math.max(1, Number(req.query.limit))) : 10)
+        const search = (req.data as any)?.search ?? (req.query.q as string) ?? (req.query.search as string) ?? ''
+        const instructorId = req.data.instructorId;
+        const blogs = await BlogService.getAll({ page, limit, search, instructorId })
+
+        const data = await Promise.all(
+            blogs.items.map(async b => {
+                const user = await getUser(b.instructor_id);
+                return {
+                    ...b,
+                    userName: user?.name || '',
+                    userAvt: user?.image || '',
+                }
+            })
+        )
+
+        sendResponse(res, {
+            code: StatusCodes.OK,
+            message: 'Lấy danh sách blog thành công',
+            result: {
+                ...blogs,
+                data,
+            }
+        })
+    } catch (e) {
+        const err = e as Error
+        sendResponse(res, {
+            code: StatusCodes.BAD_REQUEST,
+            message: err.message || 'Lỗi lấy danh sách blog',
+            result: null
+        })
+    }
+}
+
 const getNew = async (_req: Request, res: Response) => {
     try {
         const items = await BlogService.getNew(3)
@@ -213,6 +250,7 @@ const remove = async (req: Request, res: Response) => {
 
 const BlogController = {
     getAll,
+    getAllByInstructorId,
     getNew,
     getTrending,
     getDetails,

@@ -46,6 +46,10 @@ export class GetBlogsDTO {
     @IsString()
     @Transform(({ obj }) => obj.search ?? obj.q ?? '')
     search?: string
+
+    @IsOptional()
+    @IsString()
+    instructorId?: string
 }
 
 export class GetNewBlogsDTO { }

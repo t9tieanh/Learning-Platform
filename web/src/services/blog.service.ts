@@ -61,6 +61,17 @@ async function getAll(params: { page?: number; limit?: number; search?: string }
     return (res.data?.result || { items: [], page: 1, limit, total: 0, totalPages: 1 }) as BlogListResponse
 }
 
+async function getAllByInstructorId(params: { page?: number; limit?: number; search?: string, instructorId?: string }): Promise<BlogListResponse> {
+    const { page = 1, limit = 6, search = '', instructorId } = params || {}
+    const qs = new URLSearchParams()
+    qs.set('page', String(page))
+    qs.set('limit', String(limit))
+    qs.set('instructorId', String(instructorId))
+    if (search) qs.set('search', search)
+    const res = await axiosClient.axiosInstance.get(`/notify/blog/tc-all?${qs.toString()}`)
+    return (res.data?.result || { items: [], page: 1, limit, total: 0, totalPages: 1 }) as BlogListResponse
+}
+
 async function create(body: CreateBlogRequest): Promise<BlogItem> {
     const res = await axiosClient.axiosInstance.post('/notify/blog/create', body)
     return res.data?.result as BlogItem
@@ -76,6 +87,6 @@ async function remove(id: string): Promise<{ deleted: boolean }> {
     return res.data?.result as { deleted: boolean }
 }
 
-export const blogService = { getTrending, getNew, getAll, getDetails, create, update, remove }
+export const blogService = { getTrending, getNew, getAll, getDetails, create, update, remove, getAllByInstructorId }
 
 export default blogService
