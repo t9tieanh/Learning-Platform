@@ -203,9 +203,16 @@ public class CourseUserService implements ICourseUserService{
     }
 
     @Override
-    public ApiResponse<PageResponse<CourseResponse>> getAllCourses(int page, int limit, String search, String category, Double minPrice, Double minRating) {
+    public ApiResponse<PageResponse<CourseResponse>> getAllCourses(int page, int limit, String search, String category,
+                                                                   Double minPrice, Double minRating, String sort) {
         try {
-            Pageable pageable = PageRequest.of(Math.max(page - 1, 0), limit, Sort.by(Sort.Direction.DESC, "createdAt"));
+            Sort sortOption = switch (sort) {
+                case "price-low" -> Sort.by(Sort.Direction.ASC, "finalPrice");
+                case "price-high" -> Sort.by(Sort.Direction.DESC, "finalPrice");
+                default -> Sort.by(Sort.Direction.DESC, "createdAt");
+            };
+
+            Pageable pageable = PageRequest.of(Math.max(page - 1, 0), limit, sortOption);
 
             Page<CourseEntity> result = courseRepo.findAllWithFilters(search, category, minPrice, minRating, pageable);
 

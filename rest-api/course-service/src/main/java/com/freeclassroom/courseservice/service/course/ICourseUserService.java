@@ -15,7 +15,7 @@ public interface ICourseUserService {
     ApiResponse<List<CourseResponse>> getBestSellerCourse(int limit);
     ApiResponse<List<CourseResponse>> getTrendyCourse(int limit);
     ApiResponse<PageResponse<CourseResponse>> getAllCourses(int page, int limit, String search, String category,
-                                                            Double minPrice, Double minRating);
+                                                            Double minPrice, Double minRating, String sort);
 
     ApiResponse<List<CourseResponse>> getEnrolledCourses(String userRole,String studentId,String instructorId);
     ApiResponse<Integer> countInstructorCourseValid(String instructorId);

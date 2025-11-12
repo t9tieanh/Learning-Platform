@@ -54,9 +54,10 @@ public class CourseUserController {
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String category,
             @RequestParam(required = false) Double minPrice,
-            @RequestParam(required = false) Double minRating
+            @RequestParam(required = false) Double minRating,
+            @RequestParam(required = false) String sort
     ) {
-        return courseUserService.getAllCourses(page, limit, search, category, minPrice, minRating);
+        return courseUserService.getAllCourses(page, limit, search, category, minPrice, minRating, sort);
     }
 
     @GetMapping("/count")

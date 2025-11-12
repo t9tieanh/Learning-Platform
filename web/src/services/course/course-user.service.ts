@@ -72,8 +72,9 @@ class CourseUserService {
     category?: string
     minPrice?: number
     minRating?: number
+    sort?: string
   }): Promise<ApiResponse<Paginated<any>>> {
-    const { page = 1, limit = 10, search, category, minPrice, minRating } = params || {}
+    const { page = 1, limit = 10, search, category, minPrice, minRating, sort } = params || {}
     const response = await axiosClient.axiosInstance.get('learning/courses', {
       params: {
         page,
@@ -81,9 +82,11 @@ class CourseUserService {
         search,
         category,
         minPrice,
-        minRating
+        minRating,
+        sort
       }
     })
+    console.log('RESPONSE', response.data)
     return response.data
   }
 
