@@ -11,10 +11,14 @@ export interface OrderDto {
         code: string;
         type: DiscountType;
         value: number;
+        maxDiscount: number;
     };
     items: {
         course_id: string;
         price: number;
+        title: string;
+        instructor_name: string;
+        image: string;
     }[];
-    ttl: number;
+    ttl?: number;
 }

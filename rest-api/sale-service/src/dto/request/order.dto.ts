@@ -3,6 +3,7 @@ import {
   IsNotEmpty, 
   IsArray, 
   ValidateNested, 
+  IsEmail,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -41,4 +42,11 @@ export class ApplyDiscountDto {
   @IsString()
   @IsNotEmpty()
   discountCode: string | undefined;
+}
+
+export class CreatePaymentUrlDto {
+  @IsString()
+  @IsNotEmpty()
+  @IsEmail()
+  email: string | undefined;
 }

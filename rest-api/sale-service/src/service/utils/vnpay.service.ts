@@ -145,7 +145,7 @@ export class VnpayService {
     const isValid = secureHash === signed
     return {
       orderId,
-      amount: vnp_Params['vnp_Amount'],
+      amount: parseInt(vnp_Params['vnp_Amount']) / 100,
       status: rspCode,
       isValid
     }

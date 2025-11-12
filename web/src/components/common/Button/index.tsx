@@ -3,7 +3,7 @@ import { Loader2Icon } from 'lucide-react'
 import React from 'react'
 
 type CustomButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
-  label?: string
+  label?: string | React.ReactNode
   icon?: React.ReactNode
   isLoader?: boolean
 }
