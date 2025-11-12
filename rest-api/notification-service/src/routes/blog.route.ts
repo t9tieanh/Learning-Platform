@@ -11,6 +11,7 @@ router.get('/all', ValidateDto(GetBlogsDTO), BlogController.getAll)
 
 router.get('/tc-all', authen, ValidateDto(GetBlogsDTO), BlogController.getAllByInstructorId)
 
+// router.get('/main-blog', ValidateDto(GetBlogsDTO), BlogController.getMainBlog)
 // Latest 3
 router.get('/new', BlogController.getNew)
 
