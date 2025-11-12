@@ -1,59 +1,52 @@
 import { 
   IsString, 
   IsNotEmpty, 
-  IsEnum, 
   IsArray, 
   ValidateNested, 
-  IsOptional, 
-  IsPhoneNumber, 
-  IsNumber, 
-  Min 
+  IsEmail,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
-enum PaymentMethod {
-  VNPAY = 'VNPAY',
-  CASH = 'CASH',
-}
+// enum PaymentMethod {
+//   VNPAY = 'VNPAY',
+//   CASH = 'CASH',
+// }
 
-class ReceiverInfoDto {
-  @IsString()
-  @IsNotEmpty()
-  name: string | undefined;
+// class ReceiverInfoDto {
+//   @IsString()
+//   @IsNotEmpty()
+//   name: string | undefined;
 
-  @IsPhoneNumber('VN')
-  phone: string | undefined;
+//   @IsPhoneNumber('VN')
+//   phone: string | undefined;
 
-  @IsString()
-  @IsNotEmpty()
-  address: string | undefined;
-}
+//   @IsString()
+//   @IsNotEmpty()
+//   address: string | undefined;
+// }
 
 class OrderItemDto {
   @IsString()
   @IsNotEmpty()
-  productVariantId: string | undefined;
-
-  @IsNumber()
-  @Min(1)
-  quantity: number | undefined;
+  courseId: string | undefined;
 }
 
 export class CreateOrderDto {
-  @IsEnum(PaymentMethod)
-  paymentMethod: PaymentMethod | undefined;
-
-  @ValidateNested()
-  @Type(() => ReceiverInfoDto)
-  receiverInfo: ReceiverInfoDto | undefined;
-
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => OrderItemDto)
   items: OrderItemDto[] | undefined;
+}
 
-  @IsOptional()
-  @IsArray()
-  @IsString({ each: true })
-  voucherCodes?: string[];
+export class ApplyDiscountDto {
+  @IsString()
+  @IsNotEmpty()
+  discountCode: string | undefined;
+}
+
+export class CreatePaymentUrlDto {
+  @IsString()
+  @IsNotEmpty()
+  @IsEmail()
+  email: string | undefined;
 }

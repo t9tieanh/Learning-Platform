@@ -39,16 +39,22 @@ class CourseGrpcClient {
         })
     }
 
-    async getBulkCourses(courseIds: string[]): Promise<any> {
-        return new Promise<any>((resolve, reject) => {
-            // with keepCase: true the request field name must match proto, e.g. "course_ids"
+    async getBulkCourses(courseIds: string[]): Promise<CourseDto[]> {
+        return new Promise<CourseDto[]>((resolve, reject) => {
             const req = { course_ids: courseIds }
             this.courseClient.getBulkCourses(req, (err: any, response: any) => {
                 if (err) {
                     console.error('grpc getBulkCourses error:', err)
                     return reject(err)
                 }
-                resolve(response)
+
+                if (!response || !Array.isArray(response.courses)) {
+                    console.warn('grpc getBulkCourses: invalid response, returning empty array', response)
+                    return resolve([])
+                }
+
+                // return courses exactly as the service returned them
+                resolve(response.courses as CourseDto[])
             })
         })
     }
@@ -61,6 +67,25 @@ class CourseGrpcClient {
             })
         })
     }
+}
+
+export interface CourseDto {
+    id: string;
+    title: string;
+    short_description: string;
+    long_description: string;
+    thumbnail_url: string;
+    rating: number;
+    introductory_video: string;
+    language: string;
+    original_price: number;
+    final_price: number;
+    instructor: {
+        id: string;
+        name: string;
+        email: string;
+        image: string;
+    };
 }
 
 export default new CourseGrpcClient()

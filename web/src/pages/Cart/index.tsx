@@ -17,10 +17,10 @@ const CartPage = () => {
             <CardSection setCourseSelected={setCourseSelected} />
           </div>
           <div className='md:col-span-1'>
-            <CheckoutSummary selectedCourses={courseSelected} />
+            <CheckoutSummary selectedCourses={courseSelected} setCourseSelected={setCourseSelected} />
           </div>
         </div>
-        <div className='bg-white p-6 rounded-lg shadow-md'>
+        <div className='bg-white p-6 rounded-lg shadow-sm'>
           <RecommendedCourses />
         </div>
       </div>

@@ -36,7 +36,9 @@ const CourseList = () => {
   return (
     <div className='cart-section p-5 bg-white rounded-lg'>
       <div className='total-cart-item'>
-        <p className='text-sm font-semibold mb-1 flex items-center'>Bạn đang sỡ hữu 8 khóa học !</p>
+        <p className='text-sm font-semibold mb-1 flex items-center'>
+          Bạn đang sỡ hữu &nbsp;<span className='text-primary'>{courses.length || 0}</span>&nbsp; khóa học !
+        </p>
         <hr />
       </div>
       <div className='cart-item flex flex-col p-4 gap-4'>

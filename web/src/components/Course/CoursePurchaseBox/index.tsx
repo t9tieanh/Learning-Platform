@@ -6,6 +6,9 @@ import { useState } from 'react'
 import cartService from '@/services/sale/cart.service'
 import { toast } from 'sonner'
 import { useCartStore } from '@/stores/useCart.stores'
+import orderService from '@/services/sale/order.service'
+import { useAuthStore } from '@/stores/useAuth.stores'
+import { useNavigate } from 'react-router-dom'
 
 const CoursePurchaseBox = ({
   originalPrice,
@@ -18,6 +21,8 @@ const CoursePurchaseBox = ({
 }) => {
   const [discountCode, setDiscountCode] = useState('')
   const refresh = useCartStore((s) => s.refresh)
+  const { data } = useAuthStore()
+  const navigator = useNavigate()
 
   const handleAddToCart = async () => {
     try {
@@ -31,6 +36,27 @@ const CoursePurchaseBox = ({
     } catch (error) {
       toast.error('Không thể thêm vào giỏ hàng')
       console.error('Error adding to cart:', error)
+    }
+  }
+
+  // handle payment process
+  const handlePayment = async () => {
+    try {
+      if (!data?.accessToken) {
+        toast.error('Vui lòng đăng nhập để tiếp tục thanh toán.')
+        return
+      }
+      const response = await orderService.createOrder([courseId])
+      if (response && response.code === 200 && response.result) {
+        // Redirect to payment page
+        toast.success('Tạo đơn hàng thành công !')
+        navigator('/check-out')
+      } else {
+        toast.error(response.message || 'Không thể khởi tạo đơn hàng. Vui lòng thử lại.')
+      }
+    } catch (error) {
+      toast.error('Không thể khởi tạo đơn hàng. Vui lòng thử lại.')
+      console.error('Error processing payment:', error)
     }
   }
 
@@ -53,6 +79,7 @@ const CoursePurchaseBox = ({
                 className='w-full h-12 text-base'
                 icon={<FaPaperPlane className='w-4 h-4' />}
                 label='Mua ngay'
+                onClick={handlePayment}
               />
 
               <CustomButton

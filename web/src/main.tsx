@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom/client'
 import { RouterProvider, createBrowserRouter } from 'react-router-dom'
 import HomePage from './pages/HomePage'
 import DefaultLayout from './layouts/DefaultLayout'
-import HeaderLayout from './layouts/HeaderLayout'
+import CheckoutPage from './pages/Checkout'
 import Course from './pages/Course'
 import CartPage from './pages/Cart'
 import AuthLayout from './layouts/AuthLayout'
@@ -50,7 +50,9 @@ const router = createBrowserRouter([
           { path: 'blogs', element: <BlogList /> },
           { path: 'blog-details/:id', element: <BlogDetails /> },
           { path: 'home2', element: <Home2 /> },
-          { path: 'about', element: <About /> }
+          { path: 'about', element: <About /> },
+          { path: 'check-out', element: <CheckoutPage /> },
+          { path: 'check-out/:id', element: <CheckoutPage /> }
         ]
       },
       { path: 'auth', element: <AuthLayout /> },

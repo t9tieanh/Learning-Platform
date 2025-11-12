@@ -7,6 +7,8 @@ import com.example.grpc.user.GetUserResponse;
 import com.example.grpc.user.Teacher;
 import com.freeclassroom.courseservice.entity.course.CourseEntity;
 import com.freeclassroom.courseservice.entity.member.EnrollmentsEntity;
+import com.freeclassroom.courseservice.enums.entity.EnumCourseProgressStep;
+import com.freeclassroom.courseservice.enums.entity.EnumCourseStatus;
 import com.freeclassroom.courseservice.exception.CustomExeption;
 import com.freeclassroom.courseservice.exception.ErrorCode;
 import com.freeclassroom.courseservice.grpc.client.UserGrpcClient;
@@ -18,6 +20,7 @@ import net.devh.boot.grpc.server.service.GrpcService;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @GrpcService
@@ -62,50 +65,67 @@ public class CourseGrpcService extends CourseServiceImplBase {
 
     @Override
     public void getBulkCourses(GetCoursesRequest request, StreamObserver<GetCoursesResponse> responseObserver) {
-        List<CourseEntity> myCourses = courseRepo.findAllById(request.getCourseIdsList());
+        try {
+            List<CourseEntity> myCourses = courseRepo.findAllById(request.getCourseIdsList());
 
-        // Get Instructor Info
-        List<String> instructorIds = myCourses
-                .stream()
-                .map(CourseEntity::getInstructorId)
-                .distinct()
-                .toList();
+            boolean hasInvalidCourse = myCourses.stream()
+                    .anyMatch(course ->
+                            !EnumCourseStatus.PUBLISHED.equals(course.getStatus()) ||
+                                    !EnumCourseProgressStep.COMPLETED.equals(course.getProgressStep())
+                    );
 
-        GetTeachersResponse teachersResponse = userGrpcClient.getBulkTeachers(instructorIds);
+            if (hasInvalidCourse) {
+                throw new CustomExeption(ErrorCode.COURSE_NOT_FOUND);
+            }
 
-        Map<String, Teacher> teacherMap = teachersResponse.getTeachersList()
-                .stream()
-                .collect(Collectors.toMap(Teacher::getId, t -> t));
+            List<String> instructorIds = myCourses.stream()
+                    .map(CourseEntity::getInstructorId)
+                    .filter(Objects::nonNull)
+                    .distinct()
+                    .toList();
 
-        List<CourseResponse> courseResponses = myCourses.stream()
-                .map(course -> {
-                    CourseResponse.Builder builder = CourseResponse.newBuilder()
-                            .setId(course.getId() != null ? course.getId() : "")
-                            .setTitle(course.getTitle() != null ? course.getTitle() : "")
-                            .setShortDescription(course.getShortDescription() != null ? course.getShortDescription() : "")
-                            .setLongDescription(course.getLongDescription() != null ? course.getLongDescription() : "")
-                            .setThumbnailUrl(course.getThumbnailUrl() != null ? course.getThumbnailUrl() : "")
-                            .setRating(course.getRating() != null ? course.getRating() : 0.0)
-                            .setIntroductoryVideo(course.getIntroductoryVideo() != null ? course.getIntroductoryVideo() : "")
-                            .setLanguage(course.getLanguage() != null ? course.getLanguage() : "")
-                            .setOriginalPrice(course.getOriginalPrice() != null ? course.getOriginalPrice() : 0.0)
-                            .setFinalPrice(course.getFinalPrice() != null ? course.getFinalPrice() : 0.0);
+            GetTeachersResponse teachersResponse = userGrpcClient.getBulkTeachers(instructorIds);
 
-                    Teacher teacher = teacherMap.get(course.getInstructorId());
-                    if (teacher != null) {
-                        builder.setInstructor(teacher);
-                    }
+            Map<String, Teacher> teacherMap = teachersResponse.getTeachersList()
+                    .stream()
+                    .collect(Collectors.toMap(Teacher::getId, t -> t));
 
-                    return builder.build();
-                })
-                .toList();
+            List<CourseResponse> courseResponses = myCourses.stream()
+                    .map(course -> {
+                        CourseResponse.Builder builder = CourseResponse.newBuilder()
+                                .setId(course.getId() != null ? course.getId() : "")
+                                .setTitle(course.getTitle() != null ? course.getTitle() : "")
+                                .setShortDescription(course.getShortDescription() != null ? course.getShortDescription() : "")
+                                .setLongDescription(course.getLongDescription() != null ? course.getLongDescription() : "")
+                                .setThumbnailUrl(course.getThumbnailUrl() != null ? course.getThumbnailUrl() : "")
+                                .setRating(course.getRating() != null ? course.getRating() : 0.0)
+                                .setIntroductoryVideo(course.getIntroductoryVideo() != null ? course.getIntroductoryVideo() : "")
+                                .setLanguage(course.getLanguage() != null ? course.getLanguage() : "")
+                                .setOriginalPrice(course.getOriginalPrice() != null ? course.getOriginalPrice() : 0.0)
+                                .setFinalPrice(course.getFinalPrice() != null ? course.getFinalPrice() : 0.0);
 
-        GetCoursesResponse response = GetCoursesResponse.newBuilder()
-                .addAllCourses(courseResponses)
-                .build();
+                        Teacher teacher = teacherMap.get(course.getInstructorId());
+                        if (teacher != null) {
+                            builder.setInstructor(teacher);
+                        }
 
-        responseObserver.onNext(response);
-        responseObserver.onCompleted();
+                        return builder.build();
+                    })
+                    .toList();
+
+            GetCoursesResponse response = GetCoursesResponse.newBuilder()
+                    .addAllCourses(courseResponses)
+                    .build();
+
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+        } catch (Exception e) {
+            responseObserver.onError(
+                    io.grpc.Status.NOT_FOUND
+                            .withDescription(e.getMessage())
+                            .asRuntimeException()
+            );
+        }
     }
 
     @Override
