@@ -5,7 +5,8 @@ import { ApplyDiscountDto, CreateOrderDto, CreatePaymentUrlDto } from '~/dto/req
 import Authentication from '~/middleware/auth.midleware';
 
 export const orderRouter = Router();
-orderRouter.get('/verify-order', orderController.verifyOrder);
+orderRouter.get('/verify-order/vnpay', orderController.verifyOrderForVnpay);
+orderRouter.get('/verify-order/momo', orderController.verifyOrderForMomo);
 orderRouter.use(Authentication());
 
 orderRouter.post('/', validateDto(CreateOrderDto), orderController.createOrder);

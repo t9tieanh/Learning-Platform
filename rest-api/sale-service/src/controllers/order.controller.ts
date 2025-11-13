@@ -3,6 +3,8 @@ import orderService from '~/service/models/order.service';
 import sendResposne from '~/dto/response/send-response';
 import { env } from '~/config/env'
 import ApiError from '~/middleware/ApiError';
+import orderPaymentSevice from '~/service/models/order-payment.service';
+import orderPaymentService from '~/service/models/order-payment.service';
 
 class OrderController {
     async createOrder(req: Request, res: Response, next: NextFunction) {
@@ -71,10 +73,28 @@ class OrderController {
         }
     }
 
-    async verifyOrder(req: Request, res: Response, next: NextFunction) {
+    async verifyOrderForVnpay(req: Request, res: Response, next: NextFunction) {
         try {
             const query = req.query;
-            const verificationResult = await orderService.verifyOrder(query);
+            const verificationResult = await orderPaymentService.verifyOrderForVnPay(query);
+            if (!verificationResult.isSuccess) {
+                sendResposne(res, {
+                    code: 400,
+                    message: 'Xác thực đơn hàng thất bại !',
+                    result: verificationResult
+                });
+                return;
+            }
+            return res.redirect(env.WEB_URL + verificationResult.orderId);
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async verifyOrderForMomo(req: Request, res: Response, next: NextFunction) {
+        try {
+            const query = req.query;
+            const verificationResult = await orderPaymentService.verifyOrderForMomo(query);
             if (!verificationResult.isSuccess) {
                 sendResposne(res, {
                     code: 400,

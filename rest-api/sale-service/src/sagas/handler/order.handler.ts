@@ -4,6 +4,7 @@ import { OrderStatus } from '@prisma/client';
 import rabbitMQService from '~/service/utils/rabbitmq.service';
 import { createEnvelope } from '../events/envelope';
 import { MessageType } from '../order/events';
+import orderService from '~/service/models/order.service';
 
 class OrderHandler {
   // send message to other services (notification service / course service)
@@ -26,7 +27,7 @@ class OrderHandler {
       // Send notification
       await this.sendMessage(
         MessageType.NOTIFICATION_SEND,
-        { orderId: order.id },
+        await orderService.getOrderInfo(order.user_id, message.orderId),
         `order-${order.id}`
       );
 

@@ -13,6 +13,7 @@ import rabbitMQService from '~/service/utils/rabbitmq.service';
 import { OrderCreatedPayload } from '~/sagas/order/dtos';
 import { createEnvelope } from '~/sagas/events/envelope';
 import { MessageType } from '~/sagas/order/events';
+import momoService from '../utils/momo.service';
 
 class OrderService {
     async createOrder(orderData: CreateOrderDto, userId: string) : Promise<{
@@ -132,16 +133,20 @@ class OrderService {
         // process payment via VNPAY
         // Generate VNPAY payment URL
         let payUri: { payUrl: string } | null = null
+        const amount = createdOrder.total;
         if (paymentMethod === 'VNPAY') {
-            const amount = createdOrder.total;
             payUri = await vnpayService.createPayment({
                 amount,
                 orderId: createdOrder.id,
                 ipAddr: ipAddress || '127.0.0.1'
             });
+        } else if (paymentMethod === 'MOMO') {
+            payUri = await momoService.createPayment({
+                 amount,
+                 orderId: createdOrder.id,
+                 ipAddr: ipAddress || '127.0.0.1'
+            });
         }
-
-        console.log('Created order:', payUri);
 
         return {
             ...createdOrder,
@@ -149,94 +154,6 @@ class OrderService {
                 payUrl: payUri ? payUri.payUrl : ''
             }
         }
-    }
-
-
-    // verify otp for vnpay system
-    async verifyOrder(query: any): Promise<{ isSuccess: boolean, orderId: string, rawData: any, message: string, rspCode?: string }> {
-        // validate callback and fetch order, throws ApiError on invalid
-        let orderRecord: any
-        let orderId: string = ''
-        try {
-            const result = await this.validateVnpayCallback(query)
-            orderRecord = result.order
-            orderId = result.orderId
-
-            // Update order status to Completed (simple approach)
-            // If you prefer to wait for saga completion, set another status like 'Processing'
-            const updated = await prismaService.order.update({
-                where: { id: orderId },
-                data: { status: OrderStatus.Completed },
-                include: { items: true }
-            })
-
-            // publish OrderCreated event to start downstream flows
-            const payload: OrderCreatedPayload = {
-                orderId: updated.id,
-                userId: updated.user_id,
-                amount: updated.total,
-                items: (updated.items || []).map((i: any) => ({ course_id: i.course_id, price: i.price }))
-            }
-
-            const envelope = createEnvelope({
-                type: MessageType.ORDER_CREATED,
-                payload,
-                correlationId: `order-${updated.id}`
-            })
-
-            try {
-                await rabbitMQService.sendMessageTopic(envelope, 'app_events', MessageType.ORDER_CREATED, 'topic', true)
-            } catch (pubErr) {
-                // if publishing fails, attempt to revert order status and report error
-                console.error('Failed to publish OrderCreated event:', pubErr)
-                await prismaService.order.update({ where: { id: orderId }, data: { status: OrderStatus.Cancel } })
-                return { isSuccess: false, orderId, rawData: null, message: 'Không thể đẩy event thanh toán', rspCode: '98' }
-            }
-
-            return { isSuccess: true, orderId, rawData: updated, message: `Thanh toán đơn hàng ${orderId} thành công`, rspCode: '00' }
-        } catch (err: any) {
-            // If error is ApiError we can map to appropriate response, otherwise mark order Cancel
-            console.error('Error verifying order:', err)
-            if (orderId) { 
-                try { await prismaService.order.update({ where: { id: orderId }, data: { status: OrderStatus.Cancel } }) } catch (e) { /* ignore */ }
-            }
-            if (err instanceof ApiError) {
-                if (err.status === StatusCodes.OK) {
-                    return { isSuccess: false, orderId: orderId || '', rawData: query, message: err.message, rspCode: '00' }
-                }
-                return { isSuccess: false, orderId: orderId || '', rawData: query, message: err.message, rspCode: String(err.status) }
-            }
-            return { isSuccess: false, orderId: '', rawData: null, message: 'Lỗi hệ thống', rspCode: '99' }
-        }
-    }
-
-    // Extract validation and order fetching into a helper
-    private async validateVnpayCallback(query: any): Promise<{ orderId: string, amount: number, order: any }> {
-        const { orderId, amount, status, isValid } = vnpayService.getCallbackInfo(query)
-
-        if (!isValid) {
-            throw new ApiError(StatusCodes.BAD_REQUEST, 'Chữ ký không hợp lệ')
-        }
-
-        if (status !== '00') {
-            throw new ApiError(StatusCodes.PAYMENT_REQUIRED, 'Thanh toán thất bại')
-        }
-
-        const order = await prismaService.order.findUnique({ where: { id: orderId }, select: { items: true, id: true, user_id: true, total: true, status: true } })
-        if (!order) {
-            throw new ApiError(StatusCodes.NOT_FOUND, 'Đơn hàng không tồn tại')
-        }
-
-        if (order.status === OrderStatus.Completed) {
-            // idempotent: consider already processed a success
-            throw new ApiError(StatusCodes.OK, 'Đơn hàng đã được xử lý trước đó')
-        }
-
-        if (order.total !== amount) {
-            throw new ApiError(StatusCodes.BAD_REQUEST, 'Số tiền không hợp lệ')
-        }
-
-        return { orderId, amount, order }
     }
 
     async getOrderInfo(userId: string, orderId: string): Promise<OrderDto> {
