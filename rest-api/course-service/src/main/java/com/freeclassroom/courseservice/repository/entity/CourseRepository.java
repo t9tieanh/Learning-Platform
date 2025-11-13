@@ -99,4 +99,7 @@ public interface CourseRepository extends JpaRepository<CourseEntity, String> {
       AND c.progressStep = com.freeclassroom.courseservice.enums.entity.EnumCourseProgressStep.COMPLETED
 """)
     Page<CourseEntity> findAllByUserId(@Param("userId") String userId, Pageable pageable);
+
+    @Query("SELECT c FROM CourseEntity c LEFT JOIN FETCH c.enrollments WHERE c.id IN :ids")
+    List<CourseEntity> findAllByIdWithEnrollments(@Param("ids") List<String> ids);
 }
