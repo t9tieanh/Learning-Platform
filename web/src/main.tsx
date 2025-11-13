@@ -8,6 +8,7 @@ import Course from './pages/Course'
 import CartPage from './pages/Cart'
 import AuthLayout from './layouts/AuthLayout'
 import TC_Layout from './layouts/TC_Layout'
+import AdminLayout from './layouts/AdminLayout'
 import NotFound from './pages/NotFound'
 import Profile from './pages/Profile'
 import User from '@/pages/User'
@@ -28,6 +29,12 @@ import TC_Blog from './pages/TC_Blog'
 import TC_CreateBlog from './pages/TC_CreateBlog'
 import TC_BlogDetails from './pages/TC_BlogDetails'
 import TC_UpdateBlog from './pages/TC_UpdateBlog'
+import AD_HomePage from './pages/AD_HomePage'
+import AD_Courses from './pages/AD_Courses'
+import AD_CourseDetails from './pages/AD_CourseDetails'
+import AD_Instructor from './pages/AD_Instructor'
+import AD_Certificates from './pages/AD_Certificates'
+import AD_Blogs from './pages/AD_Blogs'
 import Home2 from './pages/Home2'
 import { SocketProvider } from '@/api/socket/socket.context'
 
@@ -76,6 +83,18 @@ const router = createBrowserRouter([
           { path: 'course-details', element: <NotFound /> },
           { path: 'blog/:id', element: <TC_BlogDetails /> },
           { path: 'update-blog/:id', element: <TC_UpdateBlog /> }
+        ]
+      },
+      {
+        path: 'admin',
+        element: <AdminLayout />,
+        children: [
+          { index: true, element: <AD_HomePage /> },
+          { path: 'courses', element: <AD_Courses /> },
+          { path: 'course/:id', element: <AD_CourseDetails /> },
+          { path: 'instructors', element: <AD_Instructor /> },
+          { path: 'certificates', element: <AD_Certificates /> },
+          { path: 'blogs', element: <AD_Blogs /> }
         ]
       },
       { path: 'user/verify', element: <User /> },
