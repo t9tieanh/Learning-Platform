@@ -32,9 +32,11 @@ class UserService {
       email: string
       userName: string
       avatarUrl?: string
+      role?: string
     }>
   > {
     const response = await axiosClient.axiosInstance.post('auth', { username, password })
+    console.log('RESPONSE DATA', response)
     return response.data
   }
 

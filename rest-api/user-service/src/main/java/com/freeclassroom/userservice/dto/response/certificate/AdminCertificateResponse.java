@@ -1,4 +1,4 @@
-package com.freeclassroom.userservice.dto.request.certificates;
+package com.freeclassroom.userservice.dto.response.certificate;
 
 import com.freeclassroom.userservice.enums.CertificateStatus;
 import lombok.*;
@@ -9,7 +9,8 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class CreateCertReq {
+public class AdminCertificateResponse {
+    String id;
     String title;
     String organization;
     String credentialUrl;
@@ -17,4 +18,5 @@ public class CreateCertReq {
     String issueDate;
     String reason;
     CertificateStatus status;
+    String userId;
 }

@@ -1,5 +1,6 @@
 package com.freeclassroom.userservice.dto.response.certificate;
 
+import com.freeclassroom.userservice.enums.CertificateStatus;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -15,4 +16,9 @@ public class CertificateResponse {
     String credentialUrl;
     String imageUrl;
     String issueDate;
+    String reason;
+    CertificateStatus status;
+    String userId;
+    String userEmail;
+    String userName;
 }

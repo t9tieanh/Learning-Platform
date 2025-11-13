@@ -7,6 +7,7 @@ import com.freeclassroom.courseservice.dto.request.course.GetCourseRequest;
 import com.freeclassroom.courseservice.dto.request.course.UpdatePriceRequest;
 import com.freeclassroom.courseservice.dto.request.course.UpdateTagsRequest;
 import com.freeclassroom.courseservice.dto.response.ApiResponse;
+import com.freeclassroom.courseservice.dto.response.admin.GetDataInstructorResponse;
 import com.freeclassroom.courseservice.dto.response.common.CreationResponse;
 import com.freeclassroom.courseservice.dto.response.common.FileUploadResponse;
 import com.freeclassroom.courseservice.dto.response.course.*;
@@ -52,8 +53,10 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -400,5 +403,57 @@ public class CourseService implements ICourseService {
                                 .build()
                 )
                 .build();
+    }
+
+    @Override
+    public ApiResponse<List<GetDataInstructorResponse>> getDataInstructorPage() {
+        try {
+            List<CourseEntity> courses = courseRepo.findAll();
+
+            Set<String> instructorIds = courses.stream()
+                    .map(CourseEntity::getInstructorId)
+                    .collect(Collectors.toSet());
+
+            List<InstructorResponse> instructors = instructorIds.stream()
+                    .map(id -> {
+                        GetUserResponse user = userGrpcClient.getUser(id.toString());
+                        long totalCourses = courses.stream()
+                                .filter(c -> c.getInstructorId().equals(id))
+                                .count();
+                        return new InstructorResponse(
+                                user.getId(),
+                                user.getName(),
+                                user.getEmail(),
+                                "",
+                                totalCourses
+                        );
+                    })
+                    .toList();
+
+            List<GetDataInstructorResponse> responseList = instructors.stream()
+                    .map(i -> {
+                        GetDataInstructorResponse dto = new GetDataInstructorResponse();
+                        dto.setInstructorQuantity((long) instructors.size());
+                        dto.setInstructorName(i.getName());
+                        dto.setInstructorEmail(i.getEmail());
+                        dto.setTotalCourse(i.getTotalCourse());
+                        return dto;
+                    })
+                    .toList();
+
+            return ApiResponse.<List<GetDataInstructorResponse>>builder()
+                    .code(200)
+                    .message("Lấy data thành công")
+                    .result(responseList)
+                    .build();
+        }
+        catch (Exception e) {
+            e.printStackTrace(); // log lỗi để debug
+            return ApiResponse.<List<GetDataInstructorResponse>>builder()
+                    .code(500)
+                    .message("Có lỗi xảy ra khi lấy dữ liệu instructor: " + e.getMessage())
+                    .result(Collections.emptyList())
+                    .build();
+        }
     }
 }

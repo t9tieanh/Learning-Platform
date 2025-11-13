@@ -18,16 +18,30 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { mockCertificates, Certificate } from "@/types/mockData";
+import { Certificate } from "@/types/mockData";
+import certificateService from "@/services/certificate/certificate.service";
 import { Check, X } from "lucide-react";
 import { toast } from "sonner";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export default function Certificates() {
-  const [certificates, setCertificates] = useState<Certificate[]>(mockCertificates);
+  const [certificates, setCertificates] = useState<Certificate[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [selectedCert, setSelectedCert] = useState<Certificate | null>(null);
   const [showDialog, setShowDialog] = useState(false);
-  const [actionType, setActionType] = useState<"approve" | "reject">("approve");
+  const [actionType, setActionType] = useState<"confirmed" | "reject">("confirmed");
   const [rejectReason, setRejectReason] = useState("");
+  const [rejectOption, setRejectOption] = useState<string | null>(null);
+  const [confirmLoading, setConfirmLoading] = useState(false);
+
+  const REJECT_PRESETS = [
+    "Thông tin không khớp",
+    "Hình ảnh mờ/không rõ",
+    "Liên kết không hợp lệ",
+    "Không đúng khóa học",
+    "Khác",
+  ];
 
   useEffect(() => {
     if (selectedCert) {
@@ -35,32 +49,96 @@ export default function Certificates() {
     }
   }, [selectedCert]);
 
-  const handleAction = (cert: Certificate, type: "approve" | "reject") => {
+  useEffect(() => {
+    let active = true;
+    const fetchCertificates = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const res = await certificateService.adminGetCertificates();
+        console.log('RESPONSE', res)
+        if (!active) return;
+        const items = res.result ?? [];
+        const mapped: Certificate[] = items.map((c: any) => ({
+          id: c.id,
+          userName: c.userName ?? '—',
+          userEmail: c.userEmail ?? '-',
+          courseName: c.title ?? '—',
+          courseId: c.courseId ?? '',
+          submittedAt: c.issueDate ?? new Date().toISOString(),
+          status: (String(c.status).toLowerCase() as any) || 'pending',
+          certificateUrl: c.credentialUrl,
+          imageUrl: c.imageUrl,
+          organization: c.organization,
+          reason: c.reason ?? undefined,
+        }));
+        setCertificates(mapped);
+      } catch (e: any) {
+        if (!active) return;
+        const msg = e?.response?.data?.message || e?.message || 'Lỗi tải danh sách chứng chỉ';
+        setError(msg);
+        toast.error(msg);
+      } finally {
+        if (active) setLoading(false);
+      }
+    };
+    fetchCertificates();
+    return () => { active = false };
+  }, []);
+
+  const handleAction = (cert: Certificate, type: "confirmed" | "reject") => {
     setSelectedCert(cert);
     setActionType(type);
+    setRejectOption(null);
+    setRejectReason("");
     setShowDialog(true);
   };
 
-  const confirmAction = () => {
+  const confirmAction = async () => {
     if (!selectedCert) return;
+    const newStatus = actionType === "confirmed" ? "confirmed" : "rejected";
 
-    const newStatus = actionType === "approve" ? "approved" : "rejected";
-    setCertificates(
-      certificates.map((c) =>
-        c.id === selectedCert.id ? { ...c, status: newStatus } : c
-      )
-    );
+    // Determine reason to send
+    const effectiveReason =
+      newStatus === "rejected"
+        ? (rejectOption === "Khác" ? rejectReason.trim() : (rejectOption || "")).trim()
+        : "";
 
-    toast.success(
-      actionType === "approve"
-        ? "Đã xác nhận chứng chỉ"
-        : "Đã từ chối chứng chỉ"
-    );
-    setShowDialog(false);
-    setRejectReason("");
+    try {
+      setConfirmLoading(true);
+      const res = await certificateService.updateCertificate(
+        selectedCert.id,
+        newStatus,
+        effectiveReason
+      );
+      if (res.code && res.code !== 200) {
+        throw new Error(res.message || "Cập nhật chứng chỉ thất bại");
+      }
+
+      // Update local state
+      setCertificates(
+        certificates.map((c) =>
+          c.id === selectedCert.id
+            ? { ...c, status: newStatus, reason: newStatus === "rejected" ? effectiveReason : undefined }
+            : c
+        )
+      );
+
+      toast.success(
+        newStatus === "confirmed" ? "Đã xác nhận chứng chỉ" : "Đã từ chối chứng chỉ"
+      );
+      setShowDialog(false);
+      setRejectReason("");
+      setRejectOption(null);
+    } catch (e: any) {
+      const msg = e?.response?.data?.message || e?.message || "Không thể cập nhật chứng chỉ";
+      toast.error(msg);
+    } finally {
+      setConfirmLoading(false);
+    }
   };
 
-  const getStatusBadge = (status: Certificate["status"]) => {
+  const getStatusBadge = (status: Certificate["status"], reason?: string) => {
     switch (status) {
       case "pending":
         return (
@@ -71,7 +149,7 @@ export default function Certificates() {
             Chờ duyệt
           </Badge>
         );
-      case "approved":
+      case "confirmed":
         return (
           <Badge
             variant="outline"
@@ -82,19 +160,28 @@ export default function Certificates() {
         );
       case "rejected":
         return (
-          <Badge
-            variant="outline"
-            className="bg-red-100 text-red-800 border-red-300"
-          >
-            Từ chối
-          </Badge>
+          <TooltipProvider delayDuration={200}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Badge
+                  variant="outline"
+                  className="bg-red-100 text-red-800 border-red-300 cursor-help"
+                >
+                  Từ chối
+                </Badge>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{reason?.trim() ? reason : "Không có lý do"}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         );
     }
   };
 
 
   return (
-  <div className="space-y-8 p-6 bg-gray-50 min-h-full">
+    <div className="space-y-8 p-6 bg-gray-50 min-h-full">
       {/* Header */}
       <div className="space-y-2">
         <h2 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
@@ -107,85 +194,91 @@ export default function Certificates() {
 
       {/* Table container */}
       <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-sm">
-        <Table className="min-w-full">
-          <TableHeader className="bg-blue-50">
-            <TableRow>
-              <TableHead className="text-left text-gray-700 uppercase text-xs font-semibold tracking-wider py-3 px-4">
-                Tên người dùng
-              </TableHead>
-              <TableHead className="text-left text-gray-700 uppercase text-xs font-semibold tracking-wider py-3 px-4">
-                Khóa học
-              </TableHead>
-              <TableHead className="text-left text-gray-700 uppercase text-xs font-semibold tracking-wider py-3 px-4">
-                Ngày gửi
-              </TableHead>
-              <TableHead className="text-left text-gray-700 uppercase text-xs font-semibold tracking-wider py-3 px-4">
-                Trạng thái
-              </TableHead>
-              <TableHead className="text-left text-gray-700 uppercase text-xs font-semibold tracking-wider py-3 px-4">
-                Đường dẫn
-              </TableHead>
-              <TableHead className="text-right text-gray-700 uppercase text-xs font-semibold tracking-wider py-3 px-4">
-                Hành động
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-
-          <TableBody>
-            {certificates.map((cert) => (
-              <TableRow
-                key={cert.id}
-                className="hover:bg-blue-50/20 transition-colors border-b border-gray-100 last:border-0"
-              >
-                <TableCell className="py-4 px-4 font-medium text-gray-900">{cert.userName}</TableCell>
-                <TableCell className="py-4 px-4 text-gray-700">{cert.courseName}</TableCell>
-                <TableCell className="py-4 px-4 text-gray-500">
-                  {new Date(cert.submittedAt).toLocaleDateString("vi-VN")}
-                </TableCell>
-                <TableCell className="py-4 px-4">{getStatusBadge(cert.status)}</TableCell>
-                <TableCell className="py-4 px-4 text-left">
-                  {cert.certificateUrl ? (
-                    <a
-                      href={cert.certificateUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 hover:underline text-sm"
-                    >
-                      Xem chứng chỉ
-                    </a>
-                  ) : (
-                    <span className="text-gray-400 text-sm">Không có</span>
-                  )}
-                </TableCell>
-                <TableCell className="py-4 px-4 text-right">
-                  <div className="flex justify-end gap-2">
-                    {cert.status === "pending" && (
-                      <>
-                        <Button
-                          size="sm"
-                          className="flex items-center gap-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-sm transition-all"
-                          onClick={() => handleAction(cert, "approve")}
-                        >
-                          <Check className="h-4 w-4" />
-                          Duyệt
-                        </Button>
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          className="flex items-center gap-1 rounded-lg shadow-sm transition-all"
-                          onClick={() => handleAction(cert, "reject")}
-                        >
-                          <X className="h-4 w-4" />
-                          Từ chối
-                        </Button>
-                      </>
-                    )}
-                  </div>
-                </TableCell>
+        {loading ? (
+          <div className="p-8 text-center text-muted-foreground">Đang tải danh sách chứng chỉ...</div>
+        ) : error ? (
+          <div className="p-8 text-center text-red-500">{error}</div>
+        ) : (
+          <Table className="min-w-full">
+            <TableHeader className="bg-blue-50">
+              <TableRow>
+                <TableHead className="text-left text-gray-700 uppercase text-xs font-semibold tracking-wider py-3 px-4">
+                  Tên người dùng
+                </TableHead>
+                <TableHead className="text-left text-gray-700 uppercase text-xs font-semibold tracking-wider py-3 px-4">
+                  Khóa học
+                </TableHead>
+                <TableHead className="text-left text-gray-700 uppercase text-xs font-semibold tracking-wider py-3 px-4">
+                  Ngày gửi
+                </TableHead>
+                <TableHead className="text-left text-gray-700 uppercase text-xs font-semibold tracking-wider py-3 px-4">
+                  Trạng thái
+                </TableHead>
+                <TableHead className="text-left text-gray-700 uppercase text-xs font-semibold tracking-wider py-3 px-4">
+                  Đường dẫn
+                </TableHead>
+                <TableHead className="text-right text-gray-700 uppercase text-xs font-semibold tracking-wider py-3 px-4">
+                  Hành động
+                </TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+
+            <TableBody>
+              {certificates.map((cert) => (
+                <TableRow
+                  key={cert.id}
+                  className="hover:bg-blue-50/20 transition-colors border-b border-gray-100 last:border-0"
+                >
+                  <TableCell className="py-4 px-4 font-medium text-gray-900">{cert.userName} ({cert.userEmail})</TableCell>
+                  <TableCell className="py-4 px-4 text-gray-700">{cert.courseName}</TableCell>
+                  <TableCell className="py-4 px-4 text-gray-500">
+                    {new Date(cert.submittedAt).toLocaleDateString("vi-VN")}
+                  </TableCell>
+                  <TableCell className="py-4 px-4">{getStatusBadge(cert.status, cert.reason)}</TableCell>
+                  <TableCell className="py-4 px-4 text-left">
+                    {cert.certificateUrl ? (
+                      <a
+                        href={cert.certificateUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:underline text-sm"
+                      >
+                        Xem chứng chỉ
+                      </a>
+                    ) : (
+                      <span className="text-gray-400 text-sm">Không có</span>
+                    )}
+                  </TableCell>
+                  <TableCell className="py-4 px-4 text-right">
+                    <div className="flex justify-end gap-2">
+                      {cert.status === "pending" && (
+                        <>
+                          <Button
+                            size="sm"
+                            className="flex items-center gap-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-sm transition-all"
+                            onClick={() => handleAction(cert, "confirmed")}
+                          >
+                            <Check className="h-4 w-4" />
+                            Duyệt
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            className="flex items-center gap-1 rounded-lg shadow-sm transition-all"
+                            onClick={() => handleAction(cert, "reject")}
+                          >
+                            <X className="h-4 w-4" />
+                            Từ chối
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
       </div>
 
       {/* Dialog */}
@@ -193,7 +286,7 @@ export default function Certificates() {
         <DialogContent className="max-w-lg rounded-xl p-6 bg-white shadow-lg">
           <DialogHeader>
             <DialogTitle className="text-lg font-bold text-gray-900">
-              {actionType === "approve" ? "Xác nhận chứng chỉ?" : "Từ chối chứng chỉ?"}
+              {actionType === "confirmed" ? "Xác nhận chứng chỉ?" : "Từ chối chứng chỉ?"}
             </DialogTitle>
             <DialogDescription className="text-gray-600 mt-2 text-sm space-y-3">
               {selectedCert && (
@@ -208,8 +301,8 @@ export default function Certificates() {
                     <strong>Ngày gửi:</strong>{" "}
                     {new Date(selectedCert.submittedAt).toLocaleDateString("vi-VN")}
                   </p>
-                  <p>
-                    <strong>Trạng thái:</strong> {getStatusBadge(selectedCert.status)}
+                  <p className="flex items-center gap-2">
+                    <strong>Trạng thái:</strong> {getStatusBadge(selectedCert.status, selectedCert.reason)}
                   </p>
                   {selectedCert.organization && (
                     <p>
@@ -242,13 +335,34 @@ export default function Certificates() {
 
                   {/* Nếu từ chối thì textarea */}
                   {actionType === "reject" && (
-                    <Textarea
-                      placeholder="Nhập lý do..."
-                      value={rejectReason}
-                      onChange={(e) => setRejectReason(e.target.value)}
-                      rows={4}
-                      className="border-gray-300 focus:ring-2 focus:ring-red-400 focus:border-red-400 mt-2"
-                    />
+                    <div className="mt-2 space-y-3">
+                      <div className="flex flex-wrap gap-2">
+                        {REJECT_PRESETS.map((opt) => (
+                          <Button
+                            key={opt}
+                            type="button"
+                            variant={rejectOption === opt ? "default" : "outline"}
+                            className={
+                              rejectOption === opt
+                                ? "bg-red-600 hover:bg-red-700 text-white"
+                                : ""
+                            }
+                            onClick={() => setRejectOption(opt)}
+                          >
+                            {opt}
+                          </Button>
+                        ))}
+                      </div>
+                      {rejectOption === "Khác" && (
+                        <Textarea
+                          placeholder="Nhập lý do..."
+                          value={rejectReason}
+                          onChange={(e) => setRejectReason(e.target.value)}
+                          rows={4}
+                          className="border-gray-300 focus:ring-2 focus:ring-red-400 focus:border-red-400"
+                        />
+                      )}
+                    </div>
                   )}
                 </div>
               )}
@@ -261,10 +375,15 @@ export default function Certificates() {
             </Button>
             <Button
               onClick={confirmAction}
-              disabled={actionType === "reject" && !rejectReason.trim()}
+              disabled={
+                confirmLoading ||
+                (actionType === "reject" && (
+                  !rejectOption || (rejectOption === "Khác" && !rejectReason.trim())
+                ))
+              }
               className="bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
             >
-              Xác nhận
+              {confirmLoading ? "Đang xử lý..." : "Xác nhận"}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -337,7 +337,8 @@ public class CourseUserService implements ICourseUserService{
                             user.getId(),
                             user.getName(),
                             user.getEmail(),
-                            user.getImage()
+                            user.getImage(),
+                            0
                     ));
                     return dto;
                 })

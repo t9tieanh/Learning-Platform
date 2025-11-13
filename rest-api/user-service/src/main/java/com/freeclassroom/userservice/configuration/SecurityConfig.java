@@ -13,6 +13,8 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -40,6 +42,17 @@ public class SecurityConfig {
     private final String[] PUBLIC_ENDPOINTS = {"/auth/**", "/user/**", "test/**", "expertises/**"};
 
     @Bean
+    public JwtAuthenticationConverter jwtAuthenticationConverter() {
+        JwtGrantedAuthoritiesConverter customConverter = new JwtGrantedAuthoritiesConverter();
+        customConverter.setAuthorityPrefix("ROLE_");
+        customConverter.setAuthoritiesClaimName("roles");
+
+        JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
+        converter.setJwtGrantedAuthoritiesConverter(customConverter);
+        return converter;
+    }
+
+    @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
                 .csrf(csrf -> csrf.disable()) // Tắt CSRF để cho phép API hoạt động
@@ -58,7 +71,7 @@ public class SecurityConfig {
                 );
 
         httpSecurity.oauth2ResourceServer(oauth2 ->
-                oauth2.jwt(jwt -> jwt.decoder(jwtDecoder))
+                oauth2.jwt(jwt -> jwt.decoder(jwtDecoder).jwtAuthenticationConverter(jwtAuthenticationConverter()))
         );
 
         return httpSecurity.build();

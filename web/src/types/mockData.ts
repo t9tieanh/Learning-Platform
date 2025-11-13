@@ -12,7 +12,7 @@ export interface Course {
   instructor: string;
   instructorId: string;
   createdAt: string;
-  status: "pending" | "approved" | "rejected";
+  status: "pending" | "confirmed" | "rejected";
   description?: string;
   thumbnail?: string;
 }
@@ -23,10 +23,12 @@ export interface Certificate {
   courseName: string;
   courseId: string;
   submittedAt: string;
-  status: "pending" | "approved" | "rejected";
+  status: "pending" | "confirmed" | "rejected";
   certificateUrl?: string;
   imageUrl?: string;
   organization?: string;
+  userEmail?: string;
+  reason?: string;
 }
 
 export interface Blog {
@@ -74,7 +76,7 @@ export const mockCourses: Course[] = [
     instructor: "Nguyễn Văn An",
     instructorId: "1",
     createdAt: "2024-01-15",
-    status: "approved",
+    status: "confirmed",
     description: "Khóa học toàn diện về ReactJS, từ các khái niệm cơ bản đến các kỹ thuật nâng cao như hooks, context API, và performance optimization.",
   },
   {
@@ -92,7 +94,7 @@ export const mockCourses: Course[] = [
     instructor: "Lê Hoàng Cường",
     instructorId: "3",
     createdAt: "2024-03-10",
-    status: "approved",
+    status: "confirmed",
     description: "Khám phá các nguyên tắc cơ bản của thiết kế UI/UX, từ research, wireframing, prototyping đến testing.",
   },
   {
@@ -124,7 +126,7 @@ export const mockCertificates: Certificate[] = [
     courseName: "UI/UX Design Fundamentals",
     courseId: "3",
     submittedAt: "2024-03-27",
-    status: "approved",
+    status: "confirmed",
     certificateUrl: 'https://www.credly.com/badges/b2c04f72-b12c-482d-820b-14ccd2027f01/public_url',
     imageUrl: 'https://png.pngtree.com/png-vector/20210715/ourlarge/pngtree-certificate-graduation-template-design-with-blue-and-golden-png-image_3601584.jpg',
     organization: 'Amazon'

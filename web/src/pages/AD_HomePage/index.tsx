@@ -27,9 +27,9 @@ export default function Dashboard() {
 
       {/* Stats */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="border-none shadow-lg hover:shadow-xl transition-all duration-300 gradient-card group hover:-translate-y-1">
+        <Card className="border-none shadow-lg hover:shadow-xl transition-all duration-300 gradient-card group hover:-translate-y-1 bg-gradient-to-br from-background to-primary/5">
           <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between ">
               <CardDescription className="text-sm font-medium">Tổng khóa học</CardDescription>
               <div className="p-2 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
                 <BookOpen className="h-5 w-5 text-primary" />
@@ -39,7 +39,7 @@ export default function Dashboard() {
           </CardHeader>
         </Card>
 
-        <Card className="border-none shadow-lg hover:shadow-xl transition-all duration-300 gradient-card group hover:-translate-y-1">
+        <Card className="border-none shadow-lg hover:shadow-xl transition-all duration-300 gradient-card group hover:-translate-y-1 bg-gradient-to-br from-background to-primary/5">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardDescription className="text-sm font-medium">Giảng viên</CardDescription>
@@ -51,7 +51,7 @@ export default function Dashboard() {
           </CardHeader>
         </Card>
 
-        <Card className="border-none shadow-lg hover:shadow-xl transition-all duration-300 gradient-card group hover:-translate-y-1">
+        <Card className="border-none shadow-lg hover:shadow-xl transition-all duration-300 gradient-card group hover:-translate-y-1 bg-gradient-to-br from-background to-primary/5">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardDescription className="text-sm font-medium">Chứng chỉ chờ duyệt</CardDescription>
@@ -63,7 +63,7 @@ export default function Dashboard() {
           </CardHeader>
         </Card>
 
-        <Card className="border-none shadow-lg hover:shadow-xl transition-all duration-300 gradient-card group hover:-translate-y-1">
+        <Card className="border-none shadow-lg hover:shadow-xl transition-all duration-300 gradient-card group hover:-translate-y-1 bg-gradient-to-br from-background to-primary/5">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardDescription className="text-sm font-medium">Bài blog</CardDescription>

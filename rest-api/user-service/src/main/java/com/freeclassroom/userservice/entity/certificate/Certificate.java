@@ -1,6 +1,8 @@
 package com.freeclassroom.userservice.entity.certificate;
 
 import com.freeclassroom.userservice.entity.AbstractEntity;
+import com.freeclassroom.userservice.enums.CertificateStatus;
+import com.freeclassroom.userservice.enums.entity.EnumAccountStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
@@ -31,7 +33,9 @@ public class Certificate extends AbstractEntity {
     String credentialUrl;
     String imageUrl;
     boolean verified = false;
-    String verificationSource; // SYSTEM, MANUAL, API
-    String verifyNote; // optional detail
+    String verificationSource;
+    String verifyNote;
     LocalDateTime verifiedAt;
+    String reason;
+    CertificateStatus status;
 }

@@ -6,6 +6,7 @@ import com.freeclassroom.courseservice.dto.request.course.GetCourseRequest;
 import com.freeclassroom.courseservice.dto.request.course.UpdatePriceRequest;
 import com.freeclassroom.courseservice.dto.request.course.UpdateTagsRequest;
 import com.freeclassroom.courseservice.dto.response.ApiResponse;
+import com.freeclassroom.courseservice.dto.response.admin.GetDataInstructorResponse;
 import com.freeclassroom.courseservice.dto.response.common.CreationResponse;
 import com.freeclassroom.courseservice.dto.response.common.FileUploadResponse;
 import com.freeclassroom.courseservice.dto.response.course.*;
@@ -31,4 +32,5 @@ public interface ICourseService {
     ApiResponse<PriceCourseResponse> getPrice(String courseId);
     ApiResponse<CourseOverviewResponse> getOverview(String courseId);
     ApiResponse<CreationResponse> requestApproval(String id);
+    ApiResponse<List<GetDataInstructorResponse>> getDataInstructorPage();
 }

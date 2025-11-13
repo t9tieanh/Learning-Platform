@@ -6,6 +6,7 @@ import com.freeclassroom.userservice.dto.response.certificate.CertificateRespons
 import com.freeclassroom.userservice.dto.response.user.UserResponse;
 import com.freeclassroom.userservice.entity.certificate.Certificate;
 import com.freeclassroom.userservice.entity.user.UserEntity;
+import com.freeclassroom.userservice.enums.CertificateStatus;
 import com.freeclassroom.userservice.mapper.certificate.CertificateMapper;
 import com.freeclassroom.userservice.repository.entity.CertificateRepository;
 import com.freeclassroom.userservice.repository.entity.UserRepository;
@@ -34,10 +35,7 @@ import java.text.Normalizer;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -75,6 +73,7 @@ public class CertificateService implements ICertificateService {
             cert.setVerificationSource(result.source);
             cert.setVerifyNote(result.note);
             cert.setUserId(userId);
+            cert.setStatus(CertificateStatus.PENDING);
             if (result.verified) {
                 cert.setVerifiedAt(LocalDateTime.now());
             }
@@ -91,7 +90,7 @@ public class CertificateService implements ICertificateService {
 
             return ApiResponse.<CertificateResponse>builder()
                     .code(HttpStatus.OK.value())
-                    .message("Tạo chứng chỉ thành công!")
+                    .message("Chứng chỉ đã được tạo, vui lòng chờ xác nhận!")
                     .result(certificateMapper.toDto(cert))
                     .build();
 
@@ -150,6 +149,83 @@ public class CertificateService implements ICertificateService {
                     .result(false)
                     .build();
         }
+    }
+
+    @Override
+    public ApiResponse<List<CertificateResponse>> adminGetCertificates() {
+        try {
+            List<Certificate> certificates = certificateRepository.findAll();
+
+            // Lấy danh sách response, kèm thông tin user
+            List<CertificateResponse> responseList = certificates.stream()
+                    .map(cert -> {
+                        CertificateResponse dto = certificateMapper.toDto(cert);
+
+                        // Lấy user dựa vào userId
+                        cert.getUserId(); // giả sử Certificate có userId
+                        Optional<UserEntity> userOpt = userRepository.findById(cert.getUserId());
+                        userOpt.ifPresent(user -> {
+                            dto.setUserId(user.getId());
+                            dto.setUserName(user.getName());
+                            dto.setUserEmail(user.getEmail());
+                        });
+
+                        return dto;
+                    })
+                    .toList();
+
+            return ApiResponse.<List<CertificateResponse>>builder()
+                    .code(HttpStatus.OK.value())
+                    .message("Lấy danh sách chứng chỉ thành công!")
+                    .result(responseList)
+                    .build();
+
+        } catch (Exception e) {
+            return ApiResponse.<List<CertificateResponse>>builder()
+                    .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                    .message("Đã xảy ra lỗi khi lấy danh sách chứng chỉ.")
+                    .result(Collections.emptyList())
+                    .build();
+        }
+    }
+
+    @Override
+    public ApiResponse<Boolean> updateCertificate(String id, String reason, String status) {
+        try {
+            // Tìm certificate theo id
+            Optional<Certificate> optionalCert = certificateRepository.findById(id);
+            if (optionalCert.isEmpty()) {
+                return ApiResponse.<Boolean>builder()
+                        .code(HttpStatus.NOT_FOUND.value())
+                        .message("Chứng chỉ không tồn tại!")
+                        .result(false)
+                        .build();
+            }
+
+            Certificate certificate = optionalCert.get();
+
+            certificate.setStatus(CertificateStatus.valueOf(status.toUpperCase()));
+            certificate.setReason(reason);
+
+            certificateRepository.save(certificate);
+
+            CertificateResponse response = certificateMapper.toDto(certificate);
+
+            return ApiResponse.<Boolean>builder()
+                    .code(HttpStatus.OK.value())
+                    .message("Cập nhật chứng chỉ thành công!")
+                    .result(true)
+                    .build();
+
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return ApiResponse.<Boolean>builder()
+                    .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                    .message("Đã xảy ra lỗi khi cập nhật chứng chỉ.")
+                    .result(false)
+                    .build();
+        }
+
     }
 
     // Verification logic

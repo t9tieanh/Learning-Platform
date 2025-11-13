@@ -74,6 +74,8 @@ const CertificateList: FC<Props> = ({ userId }) => {
                         verificationSource: 'SYSTEM',
                         verifiedAt: c.issueDate,
                         imageUrl: c.imageUrl,
+                        status: c.status,
+                        reason: c.reason || '',
                     }))
                     if (mounted) setCertificates(mapped)
                 } catch (e) {
@@ -115,6 +117,7 @@ const CertificateList: FC<Props> = ({ userId }) => {
                     verificationSource: 'MANUAL',
                     verifiedAt: res.result.issueDate,
                     imageUrl: res.result.imageUrl,
+                    status: res.result.status,
                 }
                 setCertificates((prev) => [mapped, ...prev])
                 toast.success('Thêm chứng chỉ thành công!')

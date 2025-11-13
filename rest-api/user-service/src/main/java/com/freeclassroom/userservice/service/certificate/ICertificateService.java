@@ -10,4 +10,6 @@ public interface ICertificateService {
     ApiResponse<CertificateResponse> createCertificate(CreateCertReq req, String userId);
     ApiResponse<List<CertificateResponse>> getCertificates(String userId);
     ApiResponse<Boolean> deleteCertificate(String id);
+    ApiResponse<List<CertificateResponse>> adminGetCertificates();
+    ApiResponse<Boolean> updateCertificate(String id, String reason, String status);
 }

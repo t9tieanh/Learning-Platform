@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -10,23 +10,58 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { mockInstructors, Instructor } from "@/types/mockData";
+import courseService, { AdminInstructorSummary } from "@/services/course/course.service";
 import { Lock, Unlock, Users, UserCheck, UserX } from "lucide-react";
 import { toast } from "sonner";
 
 export default function Instructors() {
-  const [instructors, setInstructors] = useState<Instructor[]>(mockInstructors);
-  const [selectedInstructor, setSelectedInstructor] = useState<Instructor | null>(null);
+  type APIInstructor = AdminInstructorSummary;
 
-  const handleToggleStatus = (instructor: Instructor) => {
+  type InstructorRow = {
+    name: string;
+    email: string;
+    courseCount: number;
+  };
+
+  const [instructors, setInstructors] = useState<InstructorRow[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const [selectedInstructor, setSelectedInstructor] = useState<InstructorRow | null>(null);
+
+  const handleToggleStatus = (instructor: InstructorRow) => {
     setSelectedInstructor(instructor);
   };
 
   const stats = {
     total: instructors.length,
-    active: instructors.filter(i => i.status === "active").length,
-    locked: instructors.filter(i => i.status === "locked").length,
   };
+
+  useEffect(() => {
+    const fetchInstructors = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await courseService.getAdminInstructors();
+        if (data.code !== 200 || !Array.isArray(data.result)) {
+          throw new Error(data?.message || "Không lấy được danh sách giảng viên");
+        }
+        const mapped: InstructorRow[] = data.result.map((it: APIInstructor) => ({
+          name: it.instructorName,
+          email: it.instructorEmail,
+          courseCount: it.totalCourse,
+        }));
+        setInstructors(mapped);
+      } catch (err: any) {
+        const msg = err?.response?.data?.message || err?.message || "Lỗi khi tải danh sách giảng viên";
+        setError(msg);
+        toast.error(msg);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchInstructors();
+  }, []);
 
   return (
     <div className="space-y-8 p-6">
@@ -52,31 +87,14 @@ export default function Instructors() {
             </div>
           </div>
         </Card>
-        <Card className="p-4 border-none shadow-md bg-gradient-to-br from-background to-primary/5">
-          <div className="flex items-center gap-3">
-            <div className="p-3 bg-primary/10 rounded-lg">
-              <UserCheck className="h-5 w-5 text-primary" />
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Đang hoạt động</p>
-              <p className="text-2xl font-bold">{stats.active}</p>
-            </div>
-          </div>
-        </Card>
-        <Card className="p-4 border-none shadow-md bg-gradient-to-br from-background to-primary/5">
-          <div className="flex items-center gap-3">
-            <div className="p-3 bg-primary/10 rounded-lg">
-              <UserX className="h-5 w-5 text-primary" />
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Đã khóa</p>
-              <p className="text-2xl font-bold">{stats.locked}</p>
-            </div>
-          </div>
-        </Card>
       </div>
 
       <Card className="rounded-2xl border border-gray-100 bg-white shadow-sm hover:shadow-md transition-all overflow-hidden">
+        {loading ? (
+          <div className="p-8 text-center text-muted-foreground">Đang tải danh sách giảng viên...</div>
+        ) : error ? (
+          <div className="p-8 text-center text-red-500">{error}</div>
+        ) : (
         <Table>
           <TableHeader>
             <TableRow className="bg-blue-50 border-b border-gray-200">
@@ -89,7 +107,7 @@ export default function Instructors() {
           <TableBody>
             {instructors.map((instructor) => (
               <TableRow
-                key={instructor.id}
+                key={instructor.email}
                 className="group hover:bg-blue-50/30 transition-colors border-b border-gray-100 last:border-0"
               >
                 <TableCell className="py-4 px-4 font-medium text-gray-900">
@@ -110,6 +128,7 @@ export default function Instructors() {
             ))}
           </TableBody>
         </Table>
+        )}
       </Card>
 
     </div>

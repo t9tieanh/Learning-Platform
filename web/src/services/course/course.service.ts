@@ -45,6 +45,12 @@ type Paginated<T> = {
 }
 
 class CourseService {
+  // Admin: get instructor summaries
+  async getAdminInstructors(): Promise<ApiResponse<AdminInstructorSummary[]>> {
+    const response = await axiosClient.axiosInstance.get('learning/admin/instructor')
+    return response.data
+  }
+
   async getAllCourses(params?: {
     page?: number
     limit?: number
@@ -212,3 +218,11 @@ class CourseService {
 }
 
 export default new CourseService()
+
+// Types
+export type AdminInstructorSummary = {
+  instructorQuantity: number
+  instructorName: string
+  instructorEmail: string
+  totalCourse: number
+}

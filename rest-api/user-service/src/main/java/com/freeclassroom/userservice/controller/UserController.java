@@ -1,9 +1,11 @@
 package com.freeclassroom.userservice.controller;
 
 import com.freeclassroom.userservice.dto.request.certificates.CreateCertReq;
+import com.freeclassroom.userservice.dto.request.certificates.UpdateCertReq;
 import com.freeclassroom.userservice.dto.request.user.CreationUserRequest;
 import com.freeclassroom.userservice.dto.request.user.UpdateUserRequest;
 import com.freeclassroom.userservice.dto.response.ApiResponse;
+import com.freeclassroom.userservice.dto.response.admin.DataAdminHome;
 import com.freeclassroom.userservice.dto.response.certificate.CertificateResponse;
 import com.freeclassroom.userservice.dto.response.user.GetUserResponse;
 import com.freeclassroom.userservice.dto.response.user.UserResponse;
@@ -32,6 +34,11 @@ public class UserController {
                 .code(200)
                 .message("Chào mừng bạn đến với Learning Platform")
                 .build();
+    }
+
+    @GetMapping("/ad-certificates")
+    ApiResponse<List<CertificateResponse>> adminGetCertificates() {
+        return certificateService.adminGetCertificates();
     }
 
     @GetMapping("/{id}")
@@ -65,6 +72,18 @@ public class UserController {
         return certificateService.createCertificate(req, userId);
     }
 
+    @PostMapping("/update-certificate")
+    ApiResponse<Boolean> updateCertificate(
+            @RequestBody UpdateCertReq request
+    ) {
+        return certificateService.updateCertificate(request.getId(), request.getReason(), request.getStatus());
+    }
+
+    @GetMapping("/home-admin")
+    ApiResponse<DataAdminHome> getAdminData() {
+        return userService.getAdminData();
+    }
+
     @GetMapping("/certificates")
     ApiResponse<List<CertificateResponse>> getCertificates(
             @RequestParam("userId") String userId
@@ -76,6 +95,5 @@ public class UserController {
     ApiResponse<Boolean> deleteCertificate (@RequestParam("id") String id) {
         return certificateService.deleteCertificate(id);
     }
-
 
 }

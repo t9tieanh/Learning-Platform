@@ -4,6 +4,7 @@ import com.freeclassroom.userservice.configuration.RabbitMQConfig;
 import com.freeclassroom.userservice.dto.request.user.CreationUserRequest;
 import com.freeclassroom.userservice.dto.request.user.UpdateUserRequest;
 import com.freeclassroom.userservice.dto.response.ApiResponse;
+import com.freeclassroom.userservice.dto.response.admin.DataAdminHome;
 import com.freeclassroom.userservice.dto.response.user.GetUserResponse;
 import com.freeclassroom.userservice.dto.response.user.MyProfileResponse;
 import com.freeclassroom.userservice.dto.response.user.UserResponse;
@@ -245,6 +246,18 @@ public class UserService implements IUserService {
         }
 
 
+    }
+
+    @Override
+    public ApiResponse<DataAdminHome> getAdminData() {
+        // gRPC Course length
+
+        // gRPC Blogs length
+
+        // Lấy user có khóa học
+
+        // Lấy chứng chỉ có status PENDING
+        return null;
     }
 
     public ApiResponse<UserResponse> verifyForgotPassword(String code, String newPassword) {
