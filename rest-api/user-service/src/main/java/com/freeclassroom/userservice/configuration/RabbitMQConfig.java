@@ -34,6 +34,7 @@ public class RabbitMQConfig {
     public Queue forgotPasswordQueue() {
         return new Queue(FORGOT_PASSWORD_QUEUE, true);
     }
+    
 
     @Bean
     public Binding bindingVerifyRegister(Queue verifyRegisterQueue, DirectExchange userNotificationExchange) {

@@ -3,6 +3,8 @@ import { StatusCodes } from 'http-status-codes'
 import cartRouter from '~/routes/cart.route';
 import orderRouter from '~/routes/order.route';
 
+import testRouter from '~/routes/test.route';
+
 const IndexRouter: Router = express.Router()
 
 IndexRouter.route('/status').get(async (req: Request, res: Response) => {
@@ -13,5 +15,6 @@ IndexRouter.route('/status').get(async (req: Request, res: Response) => {
 
 IndexRouter.use('/cart', cartRouter)
 IndexRouter.use('/orders', orderRouter)
+IndexRouter.use('/test', testRouter);
 
 export default IndexRouter

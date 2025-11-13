@@ -7,7 +7,7 @@ export interface OrderItem {
 }
 
 export enum OrderStatus {
-  Unconfirmed = 'Unconfirmed',
+  Cancel = 'Cancel',
   Pending = 'Pending',
   Completed = 'Completed'
 }

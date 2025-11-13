@@ -33,7 +33,7 @@ class OrderService {
     return response.data
   }
 
-  async processPayment(paymentMethod: 'momo' | 'VNPAY', email: string): Promise<ApiResponse<OrderResponse>> {
+  async processPayment(paymentMethod: 'MOMO' | 'VNPAY', email: string): Promise<ApiResponse<OrderResponse>> {
     const response = await axiosClient.axiosInstance.post(`/sale/orders/payment/${paymentMethod}`, {
       email
     })
