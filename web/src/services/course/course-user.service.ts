@@ -13,6 +13,7 @@ export interface CourseResponse {
   language: string | null
   originalPrice: number | null
   finalPrice: number | null
+  purchased: boolean
   instructor: {
     id: string
     name: string

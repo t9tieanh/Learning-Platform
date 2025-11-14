@@ -1,6 +1,5 @@
 package com.freeclassroom.courseservice.service.course;
 
-import com.example.grpc.user.GetTeachersRequest;
 import com.example.grpc.user.GetTeachersResponse;
 import com.example.grpc.user.GetUserResponse;
 import com.example.grpc.user.Teacher;
@@ -18,6 +17,7 @@ import com.freeclassroom.courseservice.grpc.client.UserGrpcClient;
 import com.freeclassroom.courseservice.mapper.CourseMapper;
 import com.freeclassroom.courseservice.repository.entity.ChapterRepository;
 import com.freeclassroom.courseservice.repository.entity.CourseRepository;
+import com.freeclassroom.courseservice.repository.entity.EnrollmentRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -42,11 +42,12 @@ public class CourseUserService implements ICourseUserService{
     CourseRepository courseRepo;
     ChapterRepository chapterRepo;
     UserGrpcClient userGrpcClient;
+    EnrollmentRepository enrollmentRepo;
 
     CourseMapper courseMapper;
 
     @Override
-    public ApiResponse<CourseUserDetailResponse> getCourseDetail(String id) {
+    public ApiResponse<CourseUserDetailResponse> getCourseDetail(String id, String userId) {
         CourseEntity course = courseRepo.findById(id)
                 .orElseThrow(() -> new CustomExeption(ErrorCode.COURSE_NOT_FOUND));
 
@@ -54,8 +55,14 @@ public class CourseUserService implements ICourseUserService{
         if (!course.getStatus().equals(EnumCourseStatus.PUBLISHED) || !course.getProgressStep().equals(EnumCourseProgressStep.COMPLETED))
             throw new CustomExeption(ErrorCode.COURSE_NOT_PUBLISHED);
 
-
         CourseUserDetailResponse response = courseMapper.toResponseDto(course);
+
+        // check user is student buyed this course
+        response.setPurchased(false);
+        if (userId != null && !userId.equals("anonymousUser")) {
+            boolean purchased = enrollmentRepo.existsByUserIdAndCourse_Id(userId, course.getId());
+            response.setPurchased(purchased);
+        }
 
         //get info of instructor
         GetUserResponse user = userGrpcClient.getUser(
