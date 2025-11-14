@@ -6,7 +6,7 @@ import { renderTemplate } from '~/utils/templateUtil'
 
 // Interface cho options gửi mail
 export interface SendEmailOptions {
-  to: string[]
+  to: string | string[]
   subject: string
   text?: string
   html?: string
@@ -73,6 +73,20 @@ class NodeMailService {
         break
       }
 
+      case QueueNameEnum.ORDERCONFIRM: {
+        // Order confirmation notification - payload should contain customer and items
+        const orderNotification = notification as {
+          email?: string | string[]
+          to?: string | string[]
+          payload?: unknown
+        }
+
+        subject = 'Xác nhận đơn hàng của bạn'
+        to = orderNotification.email || orderNotification.to || []
+        templateName = 'order-confirmation.html'
+        templateData = orderNotification.payload || orderNotification
+        break
+      }
       // Thêm các loại khác nếu cần
       default:
         console.log(`Chưa thể gửi mail to ${notification.email}: ${notification.type}`)

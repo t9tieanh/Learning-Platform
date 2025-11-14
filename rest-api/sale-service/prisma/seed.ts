@@ -87,7 +87,7 @@ async function main() {
   const orderA = await prisma.order.create({
     data: {
       user_id: 'user-1',
-      status: 'Unconfirmed',
+      status: 'Pending',
       customer_name: 'User One',
       customer_email: 'user1@example.com',
       total: 56000,
@@ -105,7 +105,7 @@ async function main() {
   const orderB = await prisma.order.create({
     data: {
       user_id: 'user-2',
-      status: 'Unconfirmed',
+      status: 'Pending',
       customer_name: 'User Two',
       customer_email: 'user2@example.com',
       total: 56000,
@@ -121,7 +121,7 @@ async function main() {
   const orderC = await prisma.order.create({
     data: {
       user_id: 'user-3',
-      status: 'Unconfirmed',
+      status: 'Pending',
       customer_name: 'User Three',
       customer_email: 'user3@example.com',
       total: 56000,
@@ -137,7 +137,7 @@ async function main() {
   const orderD = await prisma.order.create({
     data: {
       user_id: 'user-4',
-      status: 'Unconfirmed',
+      status: 'Pending',
       customer_name: 'User Four',
       customer_email: 'user4@example.com',
       total: 56000,

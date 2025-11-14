@@ -79,6 +79,55 @@ class RabbitClient {
       throw new Error('RabbitMQ connection failed')
     }
   }
+
+  // Ensure exchange + queue exist and bind routing keys
+  public static async bindQueueToExchange(
+    queue: string,
+    exchange: string,
+    routingKeys: string | string[],
+    exchangeType: 'topic' | 'direct' | 'fanout' = 'topic'
+  ): Promise<void> {
+    if (!RabbitClient.channel) throw new Error('RabbitMQ channel is not initialized')
+    const keys = Array.isArray(routingKeys) ? routingKeys : [routingKeys]
+    await RabbitClient.channel.assertExchange(exchange, exchangeType, { durable: true })
+    await RabbitClient.channel.assertQueue(queue, { durable: true })
+    for (const k of keys) {
+      await RabbitClient.channel.bindQueue(queue, exchange, k)
+    }
+    console.log(`Bound queue ${queue} -> ${exchange} [${keys.join(',')}]`)
+  }
+
+  // Register consumer: bind then consume (handler receives parsed envelope)
+  public static async registerConsumer<T = any>(
+    queue: string,
+    exchange: string,
+    routingKeys: string | string[],
+    handler: (envelope: { type: string; version?: string; correlationId?: string; payload: T }) => Promise<void>,
+    exchangeType: 'topic' | 'direct' | 'fanout' = 'topic'
+  ): Promise<void> {
+    if (!RabbitClient.channel) throw new Error('RabbitMQ channel is not initialized')
+
+    //await RabbitClient.bindQueueToExchange(queue, exchange, routingKeys, exchangeType)
+
+    RabbitClient.channel.consume(
+      queue,
+      async (msg) => {
+        if (!msg) return
+        try {
+          const envelope = JSON.parse(msg.content.toString())
+          await handler(envelope)
+          RabbitClient.channel?.ack(msg)
+        } catch (err) {
+          console.error(`Error processing message from ${queue}`, err)
+          // nack and move to DLQ or drop depending on your policy
+          RabbitClient.channel?.nack(msg, false, false)
+        }
+      },
+      { noAck: false }
+    )
+
+    console.log(`Consumer registered on queue ${queue}`)
+  }
 }
 
 export default RabbitClient

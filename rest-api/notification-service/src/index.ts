@@ -4,7 +4,7 @@ import { CONNECT_DATABASES } from './config/connect'
 import { env } from '~/config/env'
 import { errorHandlingMiddleware } from '~/middleware/error-handler.midleware'
 import http from 'http'
-import { seed } from './seed/seedAll'
+import { initSagas } from '~/sagas/init/initSaga'
 import router from '~/routes/index'
 
 const START_SERVER = async () => {
@@ -14,6 +14,8 @@ const START_SERVER = async () => {
 
   app.use('/notify', router)
   app.use(errorHandlingMiddleware)
+
+  await initSagas()
 
   // tạo server duy nhất
   const server = http.createServer(app)

@@ -44,7 +44,7 @@ const gets = async (request: GetFeedBackDTO): Promise<FeedbackListResult> => {
 
   for (const item of items) {
     try {
-      const user = await getUser(item.userId);
+      const user = await getUser(item.userId)
       item.userName = user.name || ''
       item.userAvatar = user.image || ''
     } catch (err) {

@@ -63,7 +63,10 @@ const CoursePurchaseBox = ({
   return (
     <div className='flex justify-center min-h-screen bg-gradient-to-br py-8'>
       <div className='w-full max-w-md'>
-        <Card className='sticky top-8 bg-gradient-card shadow-lg border-0 rounded-2xl overflow-hidden backdrop-blur-sm'>
+        <Card
+          className='sticky bg-gradient-card shadow-lg border-0 rounded-2xl overflow-hidden backdrop-blur-sm'
+          style={{ top: 'calc(var(--main-header-height, 64px) + 100px)' }}
+        >
           <CardHeader className='pb-4'>
             {/* Price Section */}
             <div className='text-center space-y-3'>
@@ -108,7 +111,7 @@ const CoursePurchaseBox = ({
                   onChange={(e) => setDiscountCode(e.target.value)}
                   className='flex-1 border-primary/20 focus:border-primary'
                 />
-                <CustomButton className='px-4 bg-red-500 hover:bg-red-600 text-white' label='Áp dụng' />
+                <CustomButton className='px-4 bg-blue-500 hover:bg-blue-600 text-white' label='Áp dụng' />
               </div>
             </div>
           </CardContent>

@@ -1,27 +1,26 @@
-import mongoose, { Schema, Document, Types } from 'mongoose';
+import mongoose, { Schema, Document, Types } from 'mongoose'
 
 export interface IParticipant {
-  userId: string; // ID của user
-  role: 'student' | 'instructor';
+  userId: string // ID của user
+  role: 'student' | 'instructor'
 }
 export interface IConversation extends Document {
-  key: string;
-  type: 'direct';
-  participants: IParticipant[];
-  lastMessageId?: String;
-  lastMessageAt?: Date;
-  createdAt: Date;
-  updatedAt: Date;
+  key: string
+  type: 'direct'
+  participants: IParticipant[]
+  lastMessageId?: string
+  lastMessageAt?: Date
+  createdAt: Date
+  updatedAt: Date
 }
 
 const participantSchema = new Schema<IParticipant>(
   {
     userId: { type: String, ref: 'User', required: true },
-    role: { type: String, enum: ['student', 'instructor'], required: true },
+    role: { type: String, enum: ['student', 'instructor'], required: true }
   },
   { _id: false }
-);
-
+)
 
 const conversationSchema = new Schema<IConversation>(
   {
@@ -30,11 +29,11 @@ const conversationSchema = new Schema<IConversation>(
     participants: { type: [participantSchema], required: true },
     lastMessageId: {
       type: String,
-      ref: 'Message',
+      ref: 'Message'
     },
-    lastMessageAt: { type: Date },
+    lastMessageAt: { type: Date }
   },
-  { timestamps: true },
-);
+  { timestamps: true }
+)
 
-export default mongoose.model<IConversation>('Conversation', conversationSchema);
+export default mongoose.model<IConversation>('Conversation', conversationSchema)

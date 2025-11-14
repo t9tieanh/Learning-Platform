@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Xác nhận đơn hàng</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      body {
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        background-color: #f7f9fc;
+        margin: 0;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 680px;
+        margin: 0 auto;
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        padding: 30px;
+      }
+
+      .header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 20px;
+      }
+
+      .brand {
+        font-size: 18px;
+        font-weight: 700;
+        color: #1d4e8f;
+      }
+
+      .status {
+        font-size: 14px;
+        color: #ffffff;
+        background-color: #10b981;
+        padding: 6px 10px;
+        border-radius: 6px;
+      }
+
+      .title {
+        font-size: 20px;
+        color: #333333;
+        margin-bottom: 8px;
+      }
+
+      .meta {
+        font-size: 13px;
+        color: #666666;
+        margin-bottom: 18px;
+      }
+
+      .items {
+        border-top: 1px solid #eef2f6;
+        margin-top: 10px;
+      }
+
+      .item {
+        display: flex;
+        gap: 14px;
+        padding: 16px 0;
+        align-items: center;
+        border-bottom: 1px solid #f2f6f9;
+      }
+
+      .item img {
+        width: 80px;
+        height: 56px;
+        object-fit: cover;
+        border-radius: 6px;
+      }
+
+      .item .info {
+        flex: 1;
+      }
+
+      .item .info .name {
+        font-size: 15px;
+        color: #111827;
+        margin-bottom: 6px;
+      }
+
+      .item .info .instructor {
+        font-size: 13px;
+        color: #6b7280;
+        margin-bottom: 6px;
+      }
+
+      .price {
+        font-weight: 700;
+        color: #111827;
+        font-size: 14px;
+      }
+
+      .summary {
+        margin-top: 20px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 16px;
+      }
+
+      .summary .label {
+        color: #6b7280;
+        font-size: 13px;
+      }
+
+      .summary .value {
+        font-weight: 700;
+        color: #111827;
+        font-size: 14px;
+      }
+
+      .cta {
+        text-align: center;
+        margin-top: 26px;
+      }
+
+      .btn {
+        display: inline-block;
+        padding: 12px 28px;
+        background-color: #1d4e8f;
+        color: #fff;
+        border-radius: 6px;
+        text-decoration: none;
+        font-size: 15px;
+        font-weight: 600;
+      }
+
+      .footer {
+        font-size: 12px;
+        color: #999999;
+        margin-top: 30px;
+        text-align: center;
+      }
+
+      @media (max-width: 520px) {
+        .container { padding: 20px; }
+        .item img { width: 64px; height: 48px; }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <div class="header">
+        <div class="brand">Learnova</div>
+      </div>
+
+      <h2 class="title">Cảm ơn {{customer_name}} — đơn hàng của bạn đã được nhận</h2>
+      <div class="meta">Email: {{customer_email}} • Tổng tiền: {{total}} VND</div>
+
+      <div class="items">
+        <!-- Repeat this block for each item in payload.items (Handlebars syntax) -->
+        {{#each items}}
+        <div class="item">
+          <img src="{{this.image}}" alt="{{this.title}}" />
+
+          <div class="info">
+            <div class="name">{{this.title}}</div>
+            <div class="instructor">Giảng viên: {{this.instructor_name}}</div>
+            <div class="instructor">Mã khóa học: {{this.course_id}}</div>
+          </div>
+
+          <div class="price">{{this.price}} VND</div>
+        </div>
+        {{/each}}
+        <!-- end item block -->
+      </div>
+
+      <div class="summary">
+        <div>
+          <div class="label">Discount</div>
+          <div class="value">{{#if discount}}{{discount.code}} — {{discount.value}}{{else}}—{{/if}}</div>
+        </div>
+
+        <div>
+          <div class="label">Total</div>
+          <div class="value">{{total}} VND</div>
+        </div>
+      </div>
+
+      <div class="cta">
+        <a href="{{order_url}}" class="btn" target="_blank">Xem đơn hàng</a>
+      </div>
+
+      <div class="footer">
+        © 2025 FreeClassRoom - dev by PhamTienAnh. All rights reserved.
+      </div>
+    </div>
+  </body>
+</html>

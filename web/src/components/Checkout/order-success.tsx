@@ -22,7 +22,8 @@ const OrderSuccess = ({ order, id }: { order: Order; id: string }) => {
           </div>
           <h2 className='text-2xl font-semibold'>Cảm ơn bạn đã mua hàng</h2>
           <p className='text-sm text-gray-600 md:max-w-96'>
-            Bạn có thể truy cập khóa học trong mục Khóa học của tôi để có thể bắt đầu học tập ngay bây giờ. Chúng tôi sẽ gửi email xác nhận đơn hàng cho bạn sớm nhất có thể.
+            Bạn có thể truy cập khóa học trong mục Khóa học của tôi để có thể bắt đầu học tập ngay bây giờ. Chúng tôi sẽ
+            gửi email xác nhận đơn hàng cho bạn sớm nhất có thể.
           </p>
           <div className='my-4 text-sm text-gray-500'>
             Mã đơn hàng:
@@ -40,10 +41,12 @@ const OrderSuccess = ({ order, id }: { order: Order; id: string }) => {
           </div>
           <h2 className='text-2xl font-semibold'>Đơn hàng đang được xử lý</h2>
           <p className='text-sm text-gray-600 md:max-w-96'>
-            Hệ thống của chúng tôi đang xử lý đơn hàng. Vui lòng chờ trong khi chúng tôi hoàn tất thanh toán và kích hoạt khoá học cho bạn.
+            Hệ thống của chúng tôi đang xử lý đơn hàng. Vui lòng chờ trong khi chúng tôi hoàn tất thanh toán và kích
+            hoạt khoá học cho bạn.
           </p>
           <div className='text-sm text-gray-500'>
-            Nếu sau <span className='font-semibold'>1 giờ</span> đơn hàng vẫn chưa hoàn tất, vui lòng liên hệ bộ phận hỗ trợ để được kiểm tra và xử lý.
+            Nếu sau <span className='font-semibold'>1 giờ</span> đơn hàng vẫn chưa hoàn tất, vui lòng liên hệ bộ phận hỗ
+            trợ để được kiểm tra và xử lý.
           </div>
           <div className='my-4 text-sm text-gray-500'>
             Mã đơn hàng:
@@ -60,8 +63,8 @@ const OrderSuccess = ({ order, id }: { order: Order; id: string }) => {
         </div>
         <h2 className='text-2xl font-semibold'>Thanh toán không thành công !</h2>
         <p className='text-sm text-gray-600 md:max-w-96'>
-          Thanh toán không thành công. Vui lòng thử lại hoặc kiểm tra lại phương thức thanh toán của bạn.
-          Nếu tiền đã bị trừ, liên hệ bộ phận hỗ trợ để được kiểm tra và hoàn tiền trong vòng 3–5 ngày làm việc.
+          Thanh toán không thành công. Vui lòng thử lại hoặc kiểm tra lại phương thức thanh toán của bạn. Nếu tiền đã bị
+          trừ, liên hệ bộ phận hỗ trợ để được kiểm tra và hoàn tiền trong vòng 3–5 ngày làm việc.
         </p>
         <div className='my-4 text-sm text-gray-500'>
           Mã đơn hàng:
