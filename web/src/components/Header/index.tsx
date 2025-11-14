@@ -125,7 +125,7 @@ const Header: FC = () => {
                 <CustomButton
                   label='Đăng ký'
                   icon={<UserPlus className='w-4 h-4' />}
-                  className='hidden md:flex signup-btn shadow-lg bg-white-100 text-blue-700 hover:text-white hover:bg-blue-800 rounded-xl font-base hover:scale-105 transition-transform duration-300 ease-in-out'
+                  className='hidden md:flex signup-btn shadow-sm bg-white-100 text-blue-700 hover:text-white hover:bg-blue-800 rounded-xl font-base hover:scale-105 transition-transform duration-300 ease-in-out'
                   onClick={() => navigate('/auth?mode=signup')}
                 />
                 <CustomButton

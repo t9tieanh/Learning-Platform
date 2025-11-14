@@ -48,7 +48,6 @@ const Cover = ({ video, image, title, shortDescription, teacher, tags, showSmall
       {showSmallHeader && (
         <div
           className='fixed shadow-lg left-0 right-0 z-40 bg-[#0C356A] backdrop-blur-sm'
-
           style={{ top: 'var(--main-header-height, 100px)' }}
         >
           <div className='max-w-6xl mx-auto px-6 py-3 flex items-center justify-between min-h-[56px]'>
@@ -57,10 +56,10 @@ const Cover = ({ video, image, title, shortDescription, teacher, tags, showSmall
                 {title}
                 <span className='flex items-center gap-1 bg-white px-2 py-1 text-black'>
                   <Avatar className='w-6 h-6'>
-                  <AvatarImage src={teacher.avatar || AvatarNotFound} />
-                  <AvatarFallback>{teacher.name.charAt(0)}</AvatarFallback>
-                </Avatar>
-                {teacher.name}
+                    <AvatarImage src={teacher.avatar || AvatarNotFound} />
+                    <AvatarFallback>{teacher.name.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                  {teacher.name}
                 </span>
               </div>
             </div>
