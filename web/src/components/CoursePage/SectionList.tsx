@@ -6,8 +6,9 @@ interface Lecture {
   id: number
   title: string
   duration: string
-  type: 'video' | 'pdf'
+  type: 'video' | 'article'
   url: string
+  content: string
 }
 
 interface Section {
@@ -38,11 +39,13 @@ export const SectionList = ({
         const totalCount = section.lectures.length
 
         return (
-          <Collapsible key={index} defaultOpen={index === 1}>
+          <Collapsible key={index} defaultOpen={index === 1} className='shadow-sm pr-3'>
             <div className='border border-border rounded-lg overflow-hidden'>
               <CollapsibleTrigger className='w-full p-4 flex items-center justify-between hover:bg-sidebar-hover transition-colors group'>
                 <div className='flex-1 text-left'>
-                  <h3 className='font-semibold text-sm mb-1'>{section.title}</h3>
+                  <h3 className='font-semibold text-sm mb-1'>
+                    {index + 1}. {section.title}
+                  </h3>
                   <p className='text-xs text-muted-foreground'>
                     {completedCount} / {totalCount} | {section.duration}
                   </p>

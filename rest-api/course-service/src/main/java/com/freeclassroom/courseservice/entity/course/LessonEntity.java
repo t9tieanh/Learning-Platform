@@ -1,7 +1,7 @@
 package com.freeclassroom.courseservice.entity.course;
 
 import com.freeclassroom.courseservice.entity.AbstractEntity;
-import com.freeclassroom.courseservice.entity.member.LessonProgress;
+import com.freeclassroom.courseservice.entity.member.LessonProgressEntity;
 import com.freeclassroom.courseservice.enums.entity.EnumLessonType;
 import jakarta.persistence.*;
 import lombok.*;
@@ -35,5 +35,5 @@ public class LessonEntity extends AbstractEntity {
 
     // Lesson Progress
     @OneToMany(mappedBy = "lesson")
-    List<LessonProgress> progresses;
+    List<LessonProgressEntity> progresses;
 }

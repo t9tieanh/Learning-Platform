@@ -2,6 +2,7 @@
 import { Play } from 'lucide-react'
 import { Lesson } from '@/types/course-student'
 import { useAuthStore } from '@/stores/useAuth.stores'
+import VideoPlayer from './VideoPlayer'
 
 export const LessonViewer = ({ lesson }: { lesson: Lesson }) => {
   const { id } = lesson
@@ -17,14 +18,9 @@ export const LessonViewer = ({ lesson }: { lesson: Lesson }) => {
   }
 
   return (
-    <div className='w-full aspect-video bg-video-bg rounded-lg overflow-hidden relative group'>
+    <div className='w-full px-3 aspect-video bg-video-bg rounded-lg overflow-hidden relative group'>
       {lesson.type === 'video' ? (
-        <video
-          src={`${backEndUri}learning/lesson-student/${lesson.id}?token=${data?.accessToken}`}
-          controls
-          className='w-full h-full'
-          title={lesson.title}
-        />
+        <VideoPlayer lesson={lesson} />
       ) : lesson.type === 'article' ? (
         <iframe
           src={`${backEndUri}learning/lesson-student/${lesson.id}?token=${data?.accessToken}`}

@@ -1,5 +1,7 @@
 package com.freeclassroom.courseservice.dto.response.course.student;
 
+import com.freeclassroom.courseservice.enums.entity.EnumCompletionStatus;
+import com.freeclassroom.courseservice.enums.entity.EnumLessonProgress;
 import com.freeclassroom.courseservice.enums.entity.EnumLessonType;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -13,6 +15,7 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class LessonOverviewResponse {
+
     String id;
     String title;
     String content;
@@ -21,4 +24,7 @@ public class LessonOverviewResponse {
 
     @Enumerated(EnumType.STRING)
     EnumLessonType type;
+
+    @Enumerated(EnumType.STRING)
+    EnumLessonProgress completionStatus;
 }

@@ -1,12 +1,13 @@
-import { X } from 'lucide-react'
+import { X, TableOfContents } from 'lucide-react'
 import { SectionList } from './SectionList'
 
 interface Lecture {
   id: number
   title: string
   duration: string
-  type: 'video' | 'pdf'
+  type: 'video' | 'article'
   url: string
+  content: string
 }
 
 interface Section {
@@ -35,7 +36,9 @@ export const CourseSidebar = ({
   return (
     <aside className='w-full lg:w-[400px] h-full bg-sidebar-background border-l border-sidebar-border flex flex-col'>
       <div className='flex items-center justify-between p-4 border-b border-sidebar-border'>
-        <h2 className='text-lg font-semibold'>Course content</h2>
+        <h2 className='flex items-center gap-2 text-lg font-semibold'>
+          <TableOfContents className='w-5 h-5 mr-2' /> Nội dung khóa học
+        </h2>
         {onClose && (
           <button onClick={onClose} className='lg:hidden p-1 hover:bg-sidebar-hover rounded transition-colors'>
             <X className='w-5 h-5' />

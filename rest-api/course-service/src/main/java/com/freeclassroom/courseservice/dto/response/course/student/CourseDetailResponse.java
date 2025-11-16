@@ -20,6 +20,7 @@ public class CourseDetailResponse {
     String thumbnailUrl;
     String language;
     Double rating;
+    String introductoryVideo;
 
     EnumCourseStatus status;
     InstructorResponse instructor;

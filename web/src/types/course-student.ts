@@ -5,6 +5,7 @@ export interface Lesson {
   duration: number | null
   position: number | null
   type: 'video' | 'article'
+  introductionVideo?: string | null
 }
 
 export interface Chapter {
@@ -21,6 +22,7 @@ export interface CourseDetail {
   shortDescription: string
   longDescription: string
   thumbnailUrl: string
+  introductoryVideo: string
   language: string | null
   rating: number | null
   status: string
