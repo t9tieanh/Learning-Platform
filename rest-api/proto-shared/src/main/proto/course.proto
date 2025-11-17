@@ -42,3 +42,25 @@ message GetCourseAdminDataResponse {
   int64 totalCourse = 1;
   int64 totalInstructor = 2;
 }
+
+message GetCourseAndStudentResponse {
+  int64 totalCourse = 1;
+  int64 totalStudent = 2;
+}
+
+message GetChartDataRequest {
+  int64 year = 1;
+  string userId = 2;
+}
+
+message GetChartDataResponse {
+  string year = 1;
+  repeated MonthlyChartData monthlyData = 2;
+}
+
+message MonthlyChartData {
+  int64 month = 1;
+  double revenue = 2;
+  double profit = 3;
+  int64 studentCount = 4;
+}

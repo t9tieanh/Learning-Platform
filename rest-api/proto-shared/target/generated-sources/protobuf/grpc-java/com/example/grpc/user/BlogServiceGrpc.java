@@ -46,6 +46,37 @@ public final class BlogServiceGrpc {
     return getGetTotalBlogMethod;
   }
 
+  private static volatile io.grpc.MethodDescriptor<com.example.grpc.user.GetUserRequest,
+      com.example.grpc.course.TotalBlogResponse> getGetTotalInstructorBlogMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "getTotalInstructorBlog",
+      requestType = com.example.grpc.user.GetUserRequest.class,
+      responseType = com.example.grpc.course.TotalBlogResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<com.example.grpc.user.GetUserRequest,
+      com.example.grpc.course.TotalBlogResponse> getGetTotalInstructorBlogMethod() {
+    io.grpc.MethodDescriptor<com.example.grpc.user.GetUserRequest, com.example.grpc.course.TotalBlogResponse> getGetTotalInstructorBlogMethod;
+    if ((getGetTotalInstructorBlogMethod = BlogServiceGrpc.getGetTotalInstructorBlogMethod) == null) {
+      synchronized (BlogServiceGrpc.class) {
+        if ((getGetTotalInstructorBlogMethod = BlogServiceGrpc.getGetTotalInstructorBlogMethod) == null) {
+          BlogServiceGrpc.getGetTotalInstructorBlogMethod = getGetTotalInstructorBlogMethod =
+              io.grpc.MethodDescriptor.<com.example.grpc.user.GetUserRequest, com.example.grpc.course.TotalBlogResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "getTotalInstructorBlog"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.example.grpc.user.GetUserRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.example.grpc.course.TotalBlogResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new BlogServiceMethodDescriptorSupplier("getTotalInstructorBlog"))
+              .build();
+        }
+      }
+    }
+    return getGetTotalInstructorBlogMethod;
+  }
+
   /**
    * Creates a new async stub that supports all call types for the service
    */
@@ -100,6 +131,13 @@ public final class BlogServiceGrpc {
         io.grpc.stub.StreamObserver<com.example.grpc.course.TotalBlogResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetTotalBlogMethod(), responseObserver);
     }
+
+    /**
+     */
+    default void getTotalInstructorBlog(com.example.grpc.user.GetUserRequest request,
+        io.grpc.stub.StreamObserver<com.example.grpc.course.TotalBlogResponse> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetTotalInstructorBlogMethod(), responseObserver);
+    }
   }
 
   /**
@@ -136,6 +174,14 @@ public final class BlogServiceGrpc {
       io.grpc.stub.ClientCalls.asyncUnaryCall(
           getChannel().newCall(getGetTotalBlogMethod(), getCallOptions()), request, responseObserver);
     }
+
+    /**
+     */
+    public void getTotalInstructorBlog(com.example.grpc.user.GetUserRequest request,
+        io.grpc.stub.StreamObserver<com.example.grpc.course.TotalBlogResponse> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getGetTotalInstructorBlogMethod(), getCallOptions()), request, responseObserver);
+    }
   }
 
   /**
@@ -159,6 +205,13 @@ public final class BlogServiceGrpc {
     public com.example.grpc.course.TotalBlogResponse getTotalBlog(com.google.protobuf.Empty request) {
       return io.grpc.stub.ClientCalls.blockingUnaryCall(
           getChannel(), getGetTotalBlogMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public com.example.grpc.course.TotalBlogResponse getTotalInstructorBlog(com.example.grpc.user.GetUserRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getGetTotalInstructorBlogMethod(), getCallOptions(), request);
     }
   }
 
@@ -185,9 +238,18 @@ public final class BlogServiceGrpc {
       return io.grpc.stub.ClientCalls.futureUnaryCall(
           getChannel().newCall(getGetTotalBlogMethod(), getCallOptions()), request);
     }
+
+    /**
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.example.grpc.course.TotalBlogResponse> getTotalInstructorBlog(
+        com.example.grpc.user.GetUserRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getGetTotalInstructorBlogMethod(), getCallOptions()), request);
+    }
   }
 
   private static final int METHODID_GET_TOTAL_BLOG = 0;
+  private static final int METHODID_GET_TOTAL_INSTRUCTOR_BLOG = 1;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -208,6 +270,10 @@ public final class BlogServiceGrpc {
       switch (methodId) {
         case METHODID_GET_TOTAL_BLOG:
           serviceImpl.getTotalBlog((com.google.protobuf.Empty) request,
+              (io.grpc.stub.StreamObserver<com.example.grpc.course.TotalBlogResponse>) responseObserver);
+          break;
+        case METHODID_GET_TOTAL_INSTRUCTOR_BLOG:
+          serviceImpl.getTotalInstructorBlog((com.example.grpc.user.GetUserRequest) request,
               (io.grpc.stub.StreamObserver<com.example.grpc.course.TotalBlogResponse>) responseObserver);
           break;
         default:
@@ -235,6 +301,13 @@ public final class BlogServiceGrpc {
               com.google.protobuf.Empty,
               com.example.grpc.course.TotalBlogResponse>(
                 service, METHODID_GET_TOTAL_BLOG)))
+        .addMethod(
+          getGetTotalInstructorBlogMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.example.grpc.user.GetUserRequest,
+              com.example.grpc.course.TotalBlogResponse>(
+                service, METHODID_GET_TOTAL_INSTRUCTOR_BLOG)))
         .build();
   }
 
@@ -284,6 +357,7 @@ public final class BlogServiceGrpc {
           serviceDescriptor = result = io.grpc.ServiceDescriptor.newBuilder(SERVICE_NAME)
               .setSchemaDescriptor(new BlogServiceFileDescriptorSupplier())
               .addMethod(getGetTotalBlogMethod())
+              .addMethod(getGetTotalInstructorBlogMethod())
               .build();
         }
       }

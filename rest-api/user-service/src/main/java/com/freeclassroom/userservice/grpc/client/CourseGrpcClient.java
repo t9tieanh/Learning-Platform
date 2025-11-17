@@ -1,6 +1,7 @@
 package com.freeclassroom.userservice.grpc.client;
 
 import com.example.grpc.course.GetCourseAdminDataResponse;
+import com.example.grpc.course.GetCourseAndStudentResponse;
 import com.example.grpc.user.*;
 import com.google.protobuf.Empty;
 import net.devh.boot.grpc.client.inject.GrpcClient;
@@ -15,6 +16,13 @@ public class CourseGrpcClient {
 
     public GetCourseAdminDataResponse getCourseAdminData() {
         return courseStub.getCourseAdminData(Empty.getDefaultInstance());
+    }
+
+    public GetCourseAndStudentResponse getTotalCoursesAndStudent(String userId) {
+        GetUserRequest request = GetUserRequest.newBuilder()
+                .setId(userId)
+                .build();
+        return courseStub.getTotalCoursesAndStudent(request);
     }
 
 }

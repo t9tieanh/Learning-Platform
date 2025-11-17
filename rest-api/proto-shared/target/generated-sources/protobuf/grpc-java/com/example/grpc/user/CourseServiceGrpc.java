@@ -139,6 +139,68 @@ public final class CourseServiceGrpc {
     return getGetCourseAdminDataMethod;
   }
 
+  private static volatile io.grpc.MethodDescriptor<com.example.grpc.user.GetUserRequest,
+      com.example.grpc.course.GetCourseAndStudentResponse> getGetTotalCoursesAndStudentMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "getTotalCoursesAndStudent",
+      requestType = com.example.grpc.user.GetUserRequest.class,
+      responseType = com.example.grpc.course.GetCourseAndStudentResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<com.example.grpc.user.GetUserRequest,
+      com.example.grpc.course.GetCourseAndStudentResponse> getGetTotalCoursesAndStudentMethod() {
+    io.grpc.MethodDescriptor<com.example.grpc.user.GetUserRequest, com.example.grpc.course.GetCourseAndStudentResponse> getGetTotalCoursesAndStudentMethod;
+    if ((getGetTotalCoursesAndStudentMethod = CourseServiceGrpc.getGetTotalCoursesAndStudentMethod) == null) {
+      synchronized (CourseServiceGrpc.class) {
+        if ((getGetTotalCoursesAndStudentMethod = CourseServiceGrpc.getGetTotalCoursesAndStudentMethod) == null) {
+          CourseServiceGrpc.getGetTotalCoursesAndStudentMethod = getGetTotalCoursesAndStudentMethod =
+              io.grpc.MethodDescriptor.<com.example.grpc.user.GetUserRequest, com.example.grpc.course.GetCourseAndStudentResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "getTotalCoursesAndStudent"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.example.grpc.user.GetUserRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.example.grpc.course.GetCourseAndStudentResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new CourseServiceMethodDescriptorSupplier("getTotalCoursesAndStudent"))
+              .build();
+        }
+      }
+    }
+    return getGetTotalCoursesAndStudentMethod;
+  }
+
+  private static volatile io.grpc.MethodDescriptor<com.example.grpc.course.GetChartDataRequest,
+      com.example.grpc.course.GetChartDataResponse> getGetChartDataMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "getChartData",
+      requestType = com.example.grpc.course.GetChartDataRequest.class,
+      responseType = com.example.grpc.course.GetChartDataResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<com.example.grpc.course.GetChartDataRequest,
+      com.example.grpc.course.GetChartDataResponse> getGetChartDataMethod() {
+    io.grpc.MethodDescriptor<com.example.grpc.course.GetChartDataRequest, com.example.grpc.course.GetChartDataResponse> getGetChartDataMethod;
+    if ((getGetChartDataMethod = CourseServiceGrpc.getGetChartDataMethod) == null) {
+      synchronized (CourseServiceGrpc.class) {
+        if ((getGetChartDataMethod = CourseServiceGrpc.getGetChartDataMethod) == null) {
+          CourseServiceGrpc.getGetChartDataMethod = getGetChartDataMethod =
+              io.grpc.MethodDescriptor.<com.example.grpc.course.GetChartDataRequest, com.example.grpc.course.GetChartDataResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "getChartData"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.example.grpc.course.GetChartDataRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.example.grpc.course.GetChartDataResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new CourseServiceMethodDescriptorSupplier("getChartData"))
+              .build();
+        }
+      }
+    }
+    return getGetChartDataMethod;
+  }
+
   /**
    * Creates a new async stub that supports all call types for the service
    */
@@ -214,6 +276,20 @@ public final class CourseServiceGrpc {
         io.grpc.stub.StreamObserver<com.example.grpc.course.GetCourseAdminDataResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetCourseAdminDataMethod(), responseObserver);
     }
+
+    /**
+     */
+    default void getTotalCoursesAndStudent(com.example.grpc.user.GetUserRequest request,
+        io.grpc.stub.StreamObserver<com.example.grpc.course.GetCourseAndStudentResponse> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetTotalCoursesAndStudentMethod(), responseObserver);
+    }
+
+    /**
+     */
+    default void getChartData(com.example.grpc.course.GetChartDataRequest request,
+        io.grpc.stub.StreamObserver<com.example.grpc.course.GetChartDataResponse> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetChartDataMethod(), responseObserver);
+    }
   }
 
   /**
@@ -274,6 +350,22 @@ public final class CourseServiceGrpc {
       io.grpc.stub.ClientCalls.asyncUnaryCall(
           getChannel().newCall(getGetCourseAdminDataMethod(), getCallOptions()), request, responseObserver);
     }
+
+    /**
+     */
+    public void getTotalCoursesAndStudent(com.example.grpc.user.GetUserRequest request,
+        io.grpc.stub.StreamObserver<com.example.grpc.course.GetCourseAndStudentResponse> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getGetTotalCoursesAndStudentMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     */
+    public void getChartData(com.example.grpc.course.GetChartDataRequest request,
+        io.grpc.stub.StreamObserver<com.example.grpc.course.GetChartDataResponse> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getGetChartDataMethod(), getCallOptions()), request, responseObserver);
+    }
   }
 
   /**
@@ -318,6 +410,20 @@ public final class CourseServiceGrpc {
     public com.example.grpc.course.GetCourseAdminDataResponse getCourseAdminData(com.google.protobuf.Empty request) {
       return io.grpc.stub.ClientCalls.blockingUnaryCall(
           getChannel(), getGetCourseAdminDataMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public com.example.grpc.course.GetCourseAndStudentResponse getTotalCoursesAndStudent(com.example.grpc.user.GetUserRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getGetTotalCoursesAndStudentMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public com.example.grpc.course.GetChartDataResponse getChartData(com.example.grpc.course.GetChartDataRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getGetChartDataMethod(), getCallOptions(), request);
     }
   }
 
@@ -368,12 +474,30 @@ public final class CourseServiceGrpc {
       return io.grpc.stub.ClientCalls.futureUnaryCall(
           getChannel().newCall(getGetCourseAdminDataMethod(), getCallOptions()), request);
     }
+
+    /**
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.example.grpc.course.GetCourseAndStudentResponse> getTotalCoursesAndStudent(
+        com.example.grpc.user.GetUserRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getGetTotalCoursesAndStudentMethod(), getCallOptions()), request);
+    }
+
+    /**
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.example.grpc.course.GetChartDataResponse> getChartData(
+        com.example.grpc.course.GetChartDataRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getGetChartDataMethod(), getCallOptions()), request);
+    }
   }
 
   private static final int METHODID_GET_COURSE = 0;
   private static final int METHODID_GET_BULK_COURSES = 1;
   private static final int METHODID_LIST_ENROLLED_COURSES = 2;
   private static final int METHODID_GET_COURSE_ADMIN_DATA = 3;
+  private static final int METHODID_GET_TOTAL_COURSES_AND_STUDENT = 4;
+  private static final int METHODID_GET_CHART_DATA = 5;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -407,6 +531,14 @@ public final class CourseServiceGrpc {
         case METHODID_GET_COURSE_ADMIN_DATA:
           serviceImpl.getCourseAdminData((com.google.protobuf.Empty) request,
               (io.grpc.stub.StreamObserver<com.example.grpc.course.GetCourseAdminDataResponse>) responseObserver);
+          break;
+        case METHODID_GET_TOTAL_COURSES_AND_STUDENT:
+          serviceImpl.getTotalCoursesAndStudent((com.example.grpc.user.GetUserRequest) request,
+              (io.grpc.stub.StreamObserver<com.example.grpc.course.GetCourseAndStudentResponse>) responseObserver);
+          break;
+        case METHODID_GET_CHART_DATA:
+          serviceImpl.getChartData((com.example.grpc.course.GetChartDataRequest) request,
+              (io.grpc.stub.StreamObserver<com.example.grpc.course.GetChartDataResponse>) responseObserver);
           break;
         default:
           throw new AssertionError();
@@ -454,6 +586,20 @@ public final class CourseServiceGrpc {
               com.google.protobuf.Empty,
               com.example.grpc.course.GetCourseAdminDataResponse>(
                 service, METHODID_GET_COURSE_ADMIN_DATA)))
+        .addMethod(
+          getGetTotalCoursesAndStudentMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.example.grpc.user.GetUserRequest,
+              com.example.grpc.course.GetCourseAndStudentResponse>(
+                service, METHODID_GET_TOTAL_COURSES_AND_STUDENT)))
+        .addMethod(
+          getGetChartDataMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.example.grpc.course.GetChartDataRequest,
+              com.example.grpc.course.GetChartDataResponse>(
+                service, METHODID_GET_CHART_DATA)))
         .build();
   }
 
@@ -506,6 +652,8 @@ public final class CourseServiceGrpc {
               .addMethod(getGetBulkCoursesMethod())
               .addMethod(getListEnrolledCoursesMethod())
               .addMethod(getGetCourseAdminDataMethod())
+              .addMethod(getGetTotalCoursesAndStudentMethod())
+              .addMethod(getGetChartDataMethod())
               .build();
         }
       }

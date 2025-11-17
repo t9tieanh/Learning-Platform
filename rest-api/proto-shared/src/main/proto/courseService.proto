@@ -2,6 +2,7 @@ syntax = "proto3";
 
 import "google/protobuf/empty.proto";
 import "course.proto";
+import "user.proto";
 
 option java_multiple_files = true;
 option java_package = "com.example.grpc.user";
@@ -12,4 +13,6 @@ service CourseService {
   rpc getBulkCourses (GetCoursesRequest) returns (GetCoursesResponse);
   rpc listEnrolledCourses (EnrolledCoursesRequest) returns (GetCoursesResponse);
   rpc getCourseAdminData (google.protobuf.Empty) returns (GetCourseAdminDataResponse);
+  rpc getTotalCoursesAndStudent (GetUserRequest) returns (GetCourseAndStudentResponse);
+  rpc getChartData (GetChartDataRequest) returns (GetChartDataResponse);
 }

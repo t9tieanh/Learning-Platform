@@ -105,4 +105,19 @@ public interface CourseRepository extends JpaRepository<CourseEntity, String> {
       AND c.progressStep = com.freeclassroom.courseservice.enums.entity.EnumCourseProgressStep.COMPLETED
 """)
     Page<CourseEntity> findAllByUserId(@Param("userId") String userId, Pageable pageable);
+
+    @Query("SELECT c FROM CourseEntity c LEFT JOIN FETCH c.enrollments WHERE c.instructorId = :instructorId")
+    List<CourseEntity> findAllByInstructorIdWithEnrollments(@Param("instructorId") String instructorId);
+
+    @Query("""
+       SELECT MONTH(c.createdAt) AS month,
+              COUNT(c.id) AS totalCourse
+       FROM CourseEntity c
+       WHERE c.instructorId = :userId
+         AND YEAR(c.createdAt) = :year
+       GROUP BY MONTH(c.createdAt)
+       ORDER BY MONTH(c.createdAt)
+       """)
+    List<Object[]> countCoursesByMonth(@Param("userId") String userId,
+                                       @Param("year") long year);
 }

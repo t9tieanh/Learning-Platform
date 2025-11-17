@@ -28,17 +28,6 @@ import java.util.List;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PACKAGE, makeFinal = true)
 public class AuthenticationFilter implements GlobalFilter, Ordered {
-
-//    @NonFinal
-//    private String[] publicEndpoints = {
-//            "/user.*", "/auth.*",
-//            "/learning/courses.*", "/learning/categories.*",
-//            "/learning/storage.*",
-//            "/learning/chapters-user.*",
-//            "/learning/lesson-student.*",
-//            "/notify/blog.*"
-//    };
-
     private record PublicEndpoint(String pattern, String method) {}
 
     @NonFinal

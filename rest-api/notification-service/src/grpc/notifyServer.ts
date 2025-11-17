@@ -24,6 +24,14 @@ const blogServiceImpl = {
         console.log('Received request for total blogs');
         const totalBlog = await BlogModel.countDocuments();
         callback(null, { total: totalBlog.toString() });
+    },
+
+    getTotalInstructorBlog: async (call, callback) => {
+        console.log('Received request for total INSTRUCTOR blogs');
+        console.log('call', call.request);
+        const userId = call.request.id;
+        const totalInstructorBlog = await BlogModel.countDocuments({ instructor_id: userId })
+        callback(null, { total: totalInstructorBlog.toString() })
     }
 };
 

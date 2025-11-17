@@ -22,7 +22,7 @@ spring:
         - id: user
           uri: http://localhost:8080
           predicates:
-            - Path=${app.api-prefix}/user/**, ${app.api-prefix}/user**, ${app.api-prefix}/auth**, ${app.api-prefix}/auth/**, ${app.api-prefix}/self**, ${app.api-prefix}/self/**
+            - Path=${app.api-prefix}/user/**, ${app.api-prefix}/user**, ${app.api-prefix}/auth**, ${app.api-prefix}/auth/**, ${app.api-prefix}/self**, ${app.api-prefix}/self/**, ${app.api-prefix}/instructor**
           filters:
             - StripPrefix=2
 

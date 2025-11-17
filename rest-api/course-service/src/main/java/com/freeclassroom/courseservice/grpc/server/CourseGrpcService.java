@@ -3,6 +3,7 @@ package com.freeclassroom.courseservice.grpc.server;
 import com.example.grpc.course.*;
 import com.example.grpc.user.CourseServiceGrpc.CourseServiceImplBase;
 import com.example.grpc.user.GetTeachersResponse;
+import com.example.grpc.user.GetUserRequest;
 import com.example.grpc.user.GetUserResponse;
 import com.example.grpc.user.Teacher;
 import com.freeclassroom.courseservice.entity.course.CourseEntity;
@@ -20,9 +21,7 @@ import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import net.devh.boot.grpc.server.service.GrpcService;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @GrpcService
@@ -212,6 +211,72 @@ public class CourseGrpcService extends CourseServiceImplBase {
                             .withDescription("Failed to load admin data: " + e.getMessage())
                             .asRuntimeException()
             );
+        }
+    }
+
+
+    @Override
+    public void getTotalCoursesAndStudent(GetUserRequest request, StreamObserver<GetCourseAndStudentResponse> responseObserver) {
+        try {
+            List<CourseEntity> courseEntities = courseRepo.findAllByInstructorIdWithEnrollments(request.getId());
+
+            Set<EnrollmentsEntity> enrollmentsEntities = new HashSet<>();
+            for (CourseEntity course : courseEntities) {
+                if (course.getEnrollments() != null) {
+                    enrollmentsEntities.addAll(course.getEnrollments());
+                }
+            }
+
+            GetCourseAndStudentResponse response = GetCourseAndStudentResponse.newBuilder()
+                    .setTotalCourse(courseEntities.size())
+                    .setTotalStudent(enrollmentsEntities.size())
+                    .build();
+
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+        } catch (Exception e) {
+            responseObserver.onError(e);
+        }
+    }
+
+    @Override
+    public void getChartData(GetChartDataRequest request, StreamObserver<GetChartDataResponse> responseObserver) {
+        try {
+            long year = request.getYear();
+            String userId = request.getUserId();
+
+            List<Object[]> raw = courseRepo.countCoursesByMonth(userId, year);
+            Map<Integer, Long> monthToCourseCount = raw.stream()
+                    .collect(Collectors.toMap(
+                            row -> ((Integer) row[0]),   // month
+                            row -> ((Long) row[1])       // count
+                    ));
+
+            GetChartDataResponse.Builder response = GetChartDataResponse.newBuilder();
+            response.setYear(String.valueOf(year));
+
+            // Gọi gRPC qua Sale (coursesId, year)
+
+            // Response List(month, revenue, profit)
+
+            for (int month = 1; month <= 12; month++) {
+                long courseCount = monthToCourseCount.getOrDefault(month, 0L);
+
+                MonthlyChartData monthly = MonthlyChartData.newBuilder()
+                        .setMonth(month)
+                        .setRevenue(0)
+                        .setProfit(0)
+                        .setStudentCount(courseCount)
+                        .build();
+
+                response.addMonthlyData(monthly);
+            }
+
+            responseObserver.onNext(response.build());
+            responseObserver.onCompleted();
+
+        } catch (Exception e) {
+            responseObserver.onError(e);
         }
     }
 }
