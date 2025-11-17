@@ -1,0 +1,94 @@
+import * as React from 'react'
+import { Textarea } from '@/components/ui/textarea'
+import CustomButton from '@/components/common/Button'
+import lessonStudentService from '@/services/course/lesson-student.service'
+import { toast } from 'sonner'
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle
+} from '@/components/ui/drawer'
+import { useEffect } from 'react'
+import { Send, NotebookPen } from 'lucide-react'
+
+const NoteSection = ({
+  lessonId,
+  open,
+  setOpen
+}: {
+  lessonId: string
+  open: boolean
+  setOpen: (open: boolean) => void
+}) => {
+  const [noteContent, setNoteContent] = React.useState('')
+
+  const handleSaveNote = async () => {
+    try {
+      const response = await lessonStudentService.makeNote(lessonId, noteContent)
+      if (response && response.code === 200) {
+        toast.success(response.message)
+      } else {
+        toast.error(response.message || 'Ghi chú không được lưu. Vui lòng thử lại!')
+      }
+    } catch (error) {
+      toast.error('Ghi chú không được lưu. Vui lòng thử lại!')
+      console.error('Failed to save note', error)
+    }
+  }
+
+  useEffect(() => {
+    if (!open) return
+
+    const fetchNoteContent = async () => {
+      try {
+        const response = await lessonStudentService.getLessonInfo(lessonId)
+        if (response && response.code === 200 && response.result) {
+          setNoteContent(response.result.note)
+        }
+      } catch (error) {
+        console.error('Failed to fetch note content', error)
+      }
+    }
+
+    fetchNoteContent()
+  }, [open, lessonId])
+
+  return (
+    <Drawer open={open} onOpenChange={setOpen}>
+      <DrawerContent>
+        <div className='mx-auto text-start w-full max-w-sm'>
+          <DrawerHeader>
+            <DrawerTitle className='flex items-center gap-2'>
+              <NotebookPen />
+              Nhập ghi chú cho bài học này !
+            </DrawerTitle>
+            <DrawerDescription>
+              Hãy viết những điểm quan trọng, công thức, hoặc bất kỳ điều gì bạn muốn nhớ lại sau này để ôn tập hiệu quả hơn.
+            </DrawerDescription>
+          </DrawerHeader>
+          <div className='p-4 pb-0'>
+            <Textarea
+              placeholder='Nhập ghi chú của bạn tại đây...'
+              value={noteContent}
+              onChange={(e) => setNoteContent(e.target.value)}
+            />
+          </div>
+          <DrawerFooter>
+            <CustomButton icon={<Send />} onClick={() => handleSaveNote()}>
+              Lưu
+            </CustomButton>
+            <DrawerClose asChild>
+              <CustomButton className='bg-white text-black hover:bg-gray-100'>Hủy</CustomButton>
+            </DrawerClose>
+          </DrawerFooter>
+        </div>
+      </DrawerContent>
+    </Drawer>
+  )
+}
+
+export default NoteSection

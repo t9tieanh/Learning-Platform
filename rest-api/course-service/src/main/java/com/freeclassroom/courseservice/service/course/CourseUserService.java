@@ -46,7 +46,6 @@ public class CourseUserService implements ICourseUserService{
     ChapterRepository chapterRepo;
     EnrollmentRepository enrollmentRepo;
     UserGrpcClient userGrpcClient;
-    EnrollmentRepository enrollmentRepo;
 
     CourseMapper courseMapper;
 

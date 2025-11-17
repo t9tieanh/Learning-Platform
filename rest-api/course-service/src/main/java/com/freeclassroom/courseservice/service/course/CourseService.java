@@ -1,5 +1,6 @@
 package com.freeclassroom.courseservice.service.course;
 
+import com.example.grpc.user.GetUserResponse;
 import com.freeclassroom.courseservice.dto.request.common.FileUploadRequest;
 import com.freeclassroom.courseservice.dto.request.course.CreationCourseRequest;
 import com.freeclassroom.courseservice.dto.request.course.UpdatePriceRequest;
@@ -10,6 +11,7 @@ import com.freeclassroom.courseservice.dto.response.common.CreationResponse;
 import com.freeclassroom.courseservice.dto.response.common.FileUploadResponse;
 import com.freeclassroom.courseservice.dto.response.course.*;
 
+import com.freeclassroom.courseservice.dto.response.user.InstructorResponse;
 import com.freeclassroom.courseservice.entity.category.CategoryEntity;
 import com.freeclassroom.courseservice.entity.category.TagEntity;
 import com.freeclassroom.courseservice.entity.course.CourseEntity;
@@ -62,6 +64,7 @@ public class CourseService implements ICourseService {
 
     CourseMapper courseMapper;
     LessonMapper lessonMapper;
+    UserGrpcClient userGrpcClient;
 
     IUploadFileService fileService;
 

@@ -18,15 +18,15 @@ export type ConversationListItem = {
 }
 
 export type MessageItem = {
-    _id: string
-    conversationId: string
-    senderId: string
-    senderRole: SenderRole
-    content: string
-    type: 'text' | 'image' | 'file' | 'system'
-    status: 'sent' | 'read'
-    createdAt: string
-    peerId?: string
+  _id: string
+  conversationId: string
+  senderId: string
+  senderRole: SenderRole
+  content: string
+  type: 'text' | 'image' | 'file' | 'system'
+  status: 'sent' | 'read'
+  createdAt: string
+  peerId?: string
 }
 
 export type CursorPage<T> = {

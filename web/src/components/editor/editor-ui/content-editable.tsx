@@ -1,5 +1,5 @@
-import { JSX } from "react"
-import { ContentEditable as LexicalContentEditable } from "@lexical/react/LexicalContentEditable"
+import { JSX } from 'react'
+import { ContentEditable as LexicalContentEditable } from '@lexical/react/LexicalContentEditable'
 
 type Props = {
   placeholder: string
@@ -7,11 +7,7 @@ type Props = {
   placeholderClassName?: string
 }
 
-export function ContentEditable({
-  placeholder,
-  className,
-  placeholderClassName,
-}: Props): JSX.Element {
+export function ContentEditable({ placeholder, className, placeholderClassName }: Props): JSX.Element {
   return (
     <LexicalContentEditable
       className={

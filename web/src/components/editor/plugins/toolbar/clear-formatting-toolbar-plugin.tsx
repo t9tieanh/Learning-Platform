@@ -1,18 +1,13 @@
-import { useCallback } from "react"
-import { $isDecoratorBlockNode } from "@lexical/react/LexicalDecoratorBlockNode"
-import { $isHeadingNode, $isQuoteNode } from "@lexical/rich-text"
-import { $isTableSelection } from "@lexical/table"
-import { $getNearestBlockElementAncestorOrThrow } from "@lexical/utils"
-import {
-  $createParagraphNode,
-  $getSelection,
-  $isRangeSelection,
-  $isTextNode,
-} from "lexical"
-import { EraserIcon } from "lucide-react"
+import { useCallback } from 'react'
+import { $isDecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode'
+import { $isHeadingNode, $isQuoteNode } from '@lexical/rich-text'
+import { $isTableSelection } from '@lexical/table'
+import { $getNearestBlockElementAncestorOrThrow } from '@lexical/utils'
+import { $createParagraphNode, $getSelection, $isRangeSelection, $isTextNode } from 'lexical'
+import { EraserIcon } from 'lucide-react'
 
-import { useToolbarContext } from "@/components/editor/context/toolbar-context"
-import { Button } from "@/components/ui/button"
+import { useToolbarContext } from '@/components/editor/context/toolbar-context'
+import { Button } from '@/components/ui/button'
 
 export function ClearFormattingToolbarPlugin() {
   const { activeEditor } = useToolbarContext()
@@ -55,18 +50,18 @@ export function ClearFormattingToolbarPlugin() {
               textNode = extractedTextNode
             }
 
-            if (textNode.__style !== "") {
-              textNode.setStyle("")
+            if (textNode.__style !== '') {
+              textNode.setStyle('')
             }
             if (textNode.__format !== 0) {
               textNode.setFormat(0)
-              $getNearestBlockElementAncestorOrThrow(textNode).setFormat("")
+              $getNearestBlockElementAncestorOrThrow(textNode).setFormat('')
             }
             node = textNode
           } else if ($isHeadingNode(node) || $isQuoteNode(node)) {
             node.replace($createParagraphNode(), true)
           } else if ($isDecoratorBlockNode(node)) {
-            node.setFormat("")
+            node.setFormat('')
           }
         })
       }
@@ -75,13 +70,13 @@ export function ClearFormattingToolbarPlugin() {
 
   return (
     <Button
-      className="!h-8 !w-8"
-      aria-label="Clear formatting"
-      variant={"outline"}
-      size={"icon"}
+      className='!h-8 !w-8'
+      aria-label='Clear formatting'
+      variant={'outline'}
+      size={'icon'}
       onClick={clearFormatting}
     >
-      <EraserIcon className="h-4 w-4" />
+      <EraserIcon className='h-4 w-4' />
     </Button>
   )
 }
