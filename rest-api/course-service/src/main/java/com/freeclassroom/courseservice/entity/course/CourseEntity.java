@@ -25,6 +25,8 @@ import java.util.Set;
 public class CourseEntity extends AbstractEntity {
     String title;
     String shortDescription;
+
+    @Column(columnDefinition = "TEXT")
     String longDescription;
     String thumbnailUrl;
     Double rating;

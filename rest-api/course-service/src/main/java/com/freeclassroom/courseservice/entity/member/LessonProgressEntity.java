@@ -16,7 +16,7 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor(force = true)
 @SuperBuilder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class LessonProgress extends AbstractEntity {
+public class LessonProgressEntity extends AbstractEntity {
     @Enumerated(EnumType.STRING)
     EnumLessonProgress progress;
 
@@ -29,4 +29,7 @@ public class LessonProgress extends AbstractEntity {
     @ManyToOne
     @JoinColumn(name = "enrollment_id")
     EnrollmentsEntity enrollment;
+
+    @Column(columnDefinition = "TEXT")
+    String note;
 }

@@ -3,21 +3,29 @@ import { ChevronLeft } from 'lucide-react'
 import { LessonViewer } from '@/components/CoursePage/LessonViewer'
 import { TabNavigation } from '@/components/CoursePage/TabNavigation'
 import { CourseSidebar } from '@/components/CoursePage/CourseSidebar'
-import { Button } from '@/components/ui/button'
-import { CourseHeader } from '@/components/CoursePage/CourseHeader'
+import { LectureInfo } from '@/components/CoursePage/LectureInfo'
 import { CourseDetail, Lesson } from '@/types/course-student'
 import courseService from '@/services/course/course-student.service'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
 const CoursePage = () => {
-  type UILecture = { id: number; title: string; duration: string; type: 'video' | 'pdf'; url: string }
+  type UILecture = {
+    id: number
+    title: string
+    duration: string
+    type: 'video' | 'article'
+    content: string
+    url: string
+    completionStatus?: 'NOT_STARTED' | 'COMPLETED'
+  }
   const { courseId } = useParams<{ courseId: string }>()
   const [courseData, setCourseData] = useState<CourseDetail | null>(null)
 
   const [currentLecture, setCurrentLecture] = useState<Lesson>()
   const [currentLectureId, setCurrentLectureId] = useState<number>(-1)
-  const [completedLectures, setCompletedLectures] = useState<Set<number>>(new Set())
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const navigate = useNavigate()
 
   useEffect(() => {
     const fetchCourseInfo = async () => {
@@ -26,6 +34,19 @@ const CoursePage = () => {
         const response = await courseService.getCourseDetails(courseId)
         if (response && response.code === 200 && response.result) {
           setCourseData(response.result)
+
+          // select lecture introdution
+          setCurrentLecture({
+            id: 'introduction',
+            title: 'Giới thiệu khóa học',
+            content: response.result.longDescription || '',
+            duration: null,
+            introductionVideo: response.result.introductoryVideo as string,
+            position: null,
+            type: 'video',
+            completionStatus: 'COMPLETED',
+            thumbnailUrl: response.result.thumbnailUrl as string
+          })
         } else {
           console.log(response.message || 'Failed to fetch course details')
         }
@@ -50,36 +71,38 @@ const CoursePage = () => {
         id: l.id,
         title: l.title,
         duration: fmt(l.duration),
-        type: 'video',
-        url: l.content
+        type: l.type === 'article' ? 'article' : 'video',
+        url: l.content,
+        content: l.content,
+        completionStatus: l.completionStatus
       }))
     }))
   }, [courseData])
 
   // Load completed lectures from localStorage
-  useEffect(() => {
-    const saved = localStorage.getItem('completedLectures')
-    if (saved) {
-      setCompletedLectures(new Set(JSON.parse(saved)))
-    }
-  }, [])
+  // useEffect(() => {
+  //   const saved = localStorage.getItem('completedLectures')
+  //   if (saved) {
+  //     setCompletedLectures(new Set(JSON.parse(saved)))
+  //   }
+  // }, [])
 
   // Save completed lectures to localStorage
-  useEffect(() => {
-    localStorage.setItem('completedLectures', JSON.stringify(Array.from(completedLectures)))
-  }, [completedLectures])
+  // useEffect(() => {
+  //   localStorage.setItem('completedLectures', JSON.stringify(Array.from(completedLectures)))
+  // }, [completedLectures])
 
-  const handleToggleComplete = (lectureId: number) => {
-    setCompletedLectures((prev) => {
-      const next = new Set(prev)
-      if (next.has(lectureId)) {
-        next.delete(lectureId)
-      } else {
-        next.add(lectureId)
-      }
-      return next
-    })
-  }
+  // const handleToggleComplete = (lectureId: number) => {
+  //   setCompletedLectures((prev) => {
+  //     const next = new Set(prev)
+  //     if (next.has(lectureId)) {
+  //       next.delete(lectureId)
+  //     } else {
+  //       next.add(lectureId)
+  //     }
+  //     return next
+  //   })
+  // }
 
   const handleSelectLecture = (lecture: UILecture) => {
     // Convert UILecture (sidebar item) to domain Lesson type
@@ -89,7 +112,8 @@ const CoursePage = () => {
       content: lecture.url,
       duration: null,
       position: null,
-      type: lecture.type === 'pdf' ? 'article' : 'video'
+      type: lecture.type === 'article' ? 'article' : 'video',
+      completionStatus: lecture.completionStatus || 'NOT_STARTED'
     })
     setCurrentLectureId(lecture.id)
     setSidebarOpen(false)
@@ -105,53 +129,58 @@ const CoursePage = () => {
         content: first.url,
         duration: null,
         position: null,
-        type: first.type === 'pdf' ? 'article' : 'video'
+        type: first.type === 'article' ? 'article' : 'video',
+        completionStatus: first.completionStatus || 'NOT_STARTED'
       })
       setCurrentLectureId(first.id)
     }
   }, [currentLecture, uiSections])
 
   return (
-    <div className='min-h-screen bg-background flex flex-col'>
+    <div className='min-h-screen flex flex-col'>
       {/* Header */}
-      <header className='bg-blue-500 text-white border-b border-border px-6 py-3 flex items-center justify-between '>
+      <header className='bg-[#0C356A] shadow-lg text-white border-b border-border px-6 py-3 flex items-center justify-between '>
         <div className='flex items-center gap-4'>
-          <button className='flex items-center gap-2 text-white hover:text-foreground transition-colors'>
+          <button
+            className='ml-2 flex items-center gap-2 text-white hover:text-foreground transition-colors'
+            onClick={() => navigate('/')}
+          >
             <ChevronLeft className='w-5 h-5' />
             <span className='text-sm'>Home</span>
           </button>
           <div className='hidden sm:block w-px h-6 bg-border' />
-          <h1 className='text-sm font-medium hidden sm:block'>{courseData?.title}</h1>
-        </div>
-        <div className='flex items-center gap-2'>
-          <Button variant='outline' size='default' className='hidden md:flex bg-blue-500 border-2'>
-            Ghi chú
-          </Button>
-          <Button variant='outline' size='default' className='hidden md:flex bg-blue-500 border-2'>
-            Chia sẻ
-          </Button>
+          <div className='text-sm font-medium hidden sm:block !flex gap-2 items-center'>
+            <Avatar>
+              <AvatarImage src={courseData?.thumbnailUrl} />
+              <AvatarFallback>CN</AvatarFallback>
+            </Avatar>
+            {courseData?.title}
+          </div>
         </div>
       </header>
 
       {/* Main Content */}
       <div className='flex-1 flex overflow-hidden'>
         {/* Left Column - Video & Tabs */}
-        <div className='flex-1 flex flex-col overflow-y-auto'>
-          <div className='p-6'>{currentLecture && <LessonViewer lesson={currentLecture} />}</div>
-          <TabNavigation />
-          <div className='p-6'>
-            <CourseHeader courseData={{ title: courseData?.title || '', description: courseData?.longDescription }} />
+        <div className='flex-1 flex flex-col overflow-y-auto px-6 py-4'>
+          {currentLecture && <LessonViewer lesson={currentLecture} />}
+          <div className='mt-6 mx-auto w-full'>
+            <TabNavigation />
           </div>
+          {currentLecture && (
+            <div className='mt-6 px-6 mx-auto w-full'>
+              <LectureInfo lesson={currentLecture} thumbnailUri={courseData?.thumbnailUrl as string} />
+            </div>
+          )}
         </div>
 
         {/* Right Column - Course Sidebar (Desktop) */}
-        <div className='hidden lg:block'>
+        <div className='hidden lg:flex lg:flex-col lg:w-96 flex-shrink-0 border-l border-border overflow-y-auto'>
           <CourseSidebar
             sections={uiSections}
             currentLectureId={currentLectureId}
-            completedLectures={completedLectures}
             onSelectLecture={handleSelectLecture}
-            onToggleComplete={handleToggleComplete}
+            onClose={() => setSidebarOpen(false)}
           />
         </div>
 
@@ -174,9 +203,7 @@ const CoursePage = () => {
               <CourseSidebar
                 sections={uiSections}
                 currentLectureId={currentLectureId}
-                completedLectures={completedLectures}
                 onSelectLecture={handleSelectLecture}
-                onToggleComplete={handleToggleComplete}
                 onClose={() => setSidebarOpen(false)}
               />
             </div>

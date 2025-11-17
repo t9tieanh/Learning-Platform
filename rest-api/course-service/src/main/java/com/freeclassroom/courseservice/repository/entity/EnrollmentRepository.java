@@ -7,10 +7,13 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface EnrollmentRepository extends JpaRepository<EnrollmentsEntity, String> {
     boolean existsByUserIdAndCourse_Id(String userId, String courseId);
     boolean existsByUserIdAndCourse_Chapters_Lessons_Id(String userId, String lessonId);
+    Optional<EnrollmentsEntity> findByUserIdAndCourse_Chapters_Lessons_Id(String userId, String courseId);
+    Optional<EnrollmentsEntity> findByUserIdAndCourse_Id(String userId, String courseId);
 
     @Transactional
     @Modifying

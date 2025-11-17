@@ -81,7 +81,10 @@ public class ChapterService implements IChapterService {
         chapter.setCourse(course);
 
         course.getChapters().add(chapter);
-        course.setProgressStep(EnumCourseProgressStep.CURRICULUM);
+
+        // set status for add chapter
+        if (course.getStatus().equals(EnumCourseProgressStep.INTRO)) {}
+            course.setProgressStep(EnumCourseProgressStep.CURRICULUM);
 
         courseRepo.save(course);
 

@@ -32,10 +32,10 @@ public class CourseStudentController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("@courseStudentService.isEnrolledInCourse(#id, authentication.name)")
     public ApiResponse<CourseDetailResponse> getCourseChapter(
             @PathVariable("id") String id
     ){
-        return courseStudentService.getCourseChapter(id);
+        String userId = SecurityContextHolder.getContext().getAuthentication().getName();
+        return courseStudentService.getCourseChapter(id, userId);
     }
 }
