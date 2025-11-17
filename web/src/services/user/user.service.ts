@@ -1,6 +1,8 @@
 import axiosClient from '../../lib/axiosClient.lib'
 import { ApiResponse } from '@/types/response.type'
 import { Profile } from '@/types/profile'
+import { DataAdminHome } from '@/types/user'
+
 
 class UserService {
   async signUp(newUser: {
@@ -115,6 +117,11 @@ class UserService {
     const response = await axiosClient.axiosInstance.put(`user/${id}`, form, {
       headers: { 'Content-Type': 'multipart/form-data' }
     })
+    return response.data
+  }
+
+  async getAdminHome(): Promise<ApiResponse<DataAdminHome>> {
+    const response = await axiosClient.axiosInstance.get('user/home-admin')
     return response.data
   }
 }

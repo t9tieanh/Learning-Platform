@@ -107,7 +107,7 @@ class CourseService {
       page: options?.page ?? 1,
       limit: options?.limit ?? 10
     }
-    const response = await axiosClient.axiosInstance.post('learning/instructor/courses/teacher', body)
+    const response = await axiosClient.axiosInstance.post('learning/instructor/courses/', body)
     return response.data
   }
 

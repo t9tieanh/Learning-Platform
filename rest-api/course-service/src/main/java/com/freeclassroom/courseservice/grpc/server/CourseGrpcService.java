@@ -14,6 +14,8 @@ import com.freeclassroom.courseservice.exception.ErrorCode;
 import com.freeclassroom.courseservice.grpc.client.UserGrpcClient;
 import com.freeclassroom.courseservice.repository.entity.CourseRepository;
 import com.freeclassroom.courseservice.repository.entity.EnrollmentRepository;
+import com.google.protobuf.Empty;
+import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import net.devh.boot.grpc.server.service.GrpcService;
@@ -155,6 +157,8 @@ public class CourseGrpcService extends CourseServiceImplBase {
         }
     }
 
+
+
     private void convertCourseDTO(StreamObserver<GetCoursesResponse> responseObserver, List<CourseEntity> courses) {
         List<CourseResponse> courseResponses = courses.stream()
                 .map(course -> CourseResponse.newBuilder()
@@ -178,5 +182,36 @@ public class CourseGrpcService extends CourseServiceImplBase {
 
         responseObserver.onNext(response);
         responseObserver.onCompleted();
+    }
+
+    @Override
+    public void getCourseAdminData(
+            Empty request,
+            StreamObserver<GetCourseAdminDataResponse> responseObserve
+    ) {
+        try {
+            List<CourseEntity> courses = courseRepo.findAll();
+            long totalCourse = courses.size();
+
+            long totalInstructor = courses.stream()
+                    .map(CourseEntity::getInstructorId)
+                    .filter(Objects::nonNull)
+                    .distinct()
+                    .count();
+
+            GetCourseAdminDataResponse response = GetCourseAdminDataResponse.newBuilder()
+                    .setTotalCourse(totalCourse)
+                    .setTotalInstructor(totalInstructor)
+                    .build();
+
+            responseObserve.onNext(response);
+            responseObserve.onCompleted();
+        } catch (Exception e) {
+            responseObserve.onError(
+                    Status.INTERNAL
+                            .withDescription("Failed to load admin data: " + e.getMessage())
+                            .asRuntimeException()
+            );
+        }
     }
 }

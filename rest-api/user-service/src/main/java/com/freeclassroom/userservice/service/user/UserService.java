@@ -1,5 +1,7 @@
 package com.freeclassroom.userservice.service.user;
 
+import com.example.grpc.course.GetCourseAdminDataResponse;
+import com.example.grpc.course.TotalBlogResponse;
 import com.freeclassroom.userservice.configuration.RabbitMQConfig;
 import com.freeclassroom.userservice.dto.request.user.CreationUserRequest;
 import com.freeclassroom.userservice.dto.request.user.UpdateUserRequest;
@@ -8,13 +10,18 @@ import com.freeclassroom.userservice.dto.response.admin.DataAdminHome;
 import com.freeclassroom.userservice.dto.response.user.GetUserResponse;
 import com.freeclassroom.userservice.dto.response.user.MyProfileResponse;
 import com.freeclassroom.userservice.dto.response.user.UserResponse;
+import com.freeclassroom.userservice.entity.certificate.Certificate;
 import com.freeclassroom.userservice.entity.redis.OTPForgetPassword;
 import com.freeclassroom.userservice.entity.redis.PendingUserEntity;
 import com.freeclassroom.userservice.entity.user.UserEntity;
+import com.freeclassroom.userservice.enums.CertificateStatus;
 import com.freeclassroom.userservice.enums.entity.EnumAccountStatus;
 import com.freeclassroom.userservice.exception.CustomExeption;
 import com.freeclassroom.userservice.exception.ErrorCode;
+import com.freeclassroom.userservice.grpc.client.BlogGrpcClient;
+import com.freeclassroom.userservice.grpc.client.CourseGrpcClient;
 import com.freeclassroom.userservice.mapper.user.UserMapper;
+import com.freeclassroom.userservice.repository.entity.CertificateRepository;
 import com.freeclassroom.userservice.repository.entity.UserRepository;
 import com.freeclassroom.userservice.repository.redis.OTPForgetPasswordRepository;
 import com.freeclassroom.userservice.repository.redis.PendingUserRepository;
@@ -29,6 +36,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -39,6 +47,9 @@ public class UserService implements IUserService {
     OTPForgetPasswordRepository otpForgetPasswordRepo;
     UserMapper userMapper;
     UploadFileService uploadFileService;
+
+    CourseGrpcClient courseGrpcClient;
+    BlogGrpcClient blogGrpcClient;
 
     // template rabbitmq
     RabbitTemplate rabbitTemplate;
@@ -56,6 +67,7 @@ public class UserService implements IUserService {
     private String verifyForgotPassword;
 
     private final UserRepository userRepository;
+    private final CertificateRepository certificateRepository;
 
     public ApiResponse<UserResponse> registerUser(CreationUserRequest request) {
         // check user exits
@@ -250,14 +262,44 @@ public class UserService implements IUserService {
 
     @Override
     public ApiResponse<DataAdminHome> getAdminData() {
-        // gRPC Course length
+        DataAdminHome data = new DataAdminHome();
 
-        // gRPC Blogs length
+        try {
+            // gRPC Course length and User length
+            GetCourseAdminDataResponse courseResponse = courseGrpcClient.getCourseAdminData();
+            if (courseResponse != null) {
+                data.setCourseCnt(courseResponse.getTotalCourse());
+                data.setInstructorCnt(courseResponse.getTotalInstructor());
+            } else {
+                data.setCourseCnt(0);
+                data.setInstructorCnt(0);
+            }
+            System.out.println("RESPONSE COURSE GRPC: " + courseResponse);
 
-        // Lấy user có khóa học
+            // gRPC Blogs length
+            TotalBlogResponse blogResponse = blogGrpcClient.getTotalBlog();
+            data.setBlogCnt(blogResponse != null ? blogResponse.getTotal() : 0);
+            System.out.println("RESPONSE BLOG GRPC: " + blogResponse);
 
-        // Lấy chứng chỉ có status PENDING
-        return null;
+            // Lấy chứng chỉ có status PENDING
+            List<Certificate> certificateList = certificateRepository.findCertificatePending(CertificateStatus.PENDING);
+            data.setCertificateCnt(certificateList != null ? certificateList.size() : 0);
+
+            return ApiResponse.<DataAdminHome>builder()
+                    .code(HttpStatus.OK.value())
+                    .message("Lấy data thành công!")
+                    .result(data)
+                    .build();
+
+        } catch (Exception e) {
+            // Log lỗi chi tiết
+            e.printStackTrace();
+            return ApiResponse.<DataAdminHome>builder()
+                    .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                    .message("Lấy data thất bại: " + e.getMessage())
+                    .result(data)
+                    .build();
+        }
     }
 
     public ApiResponse<UserResponse> verifyForgotPassword(String code, String newPassword) {

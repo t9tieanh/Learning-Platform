@@ -9,7 +9,8 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class DataAdminHome {
-    int courseCnt;
-    int instructorCnt;
-    int certificateCnt;
+    long courseCnt;
+    long instructorCnt;
+    long certificateCnt;
+    long blogCnt;
 }

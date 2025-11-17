@@ -1,18 +1,38 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { mockCourses, mockInstructors, mockCertificates, mockBlogs } from "@/types/mockData";
 import { BookOpen, Users, Award, FileText, TrendingUp, Clock } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import userService from "@/services/user/user.service";
+import { DataAdminHome } from "@/types/user";
+import { toast } from "sonner";
 
 export default function Dashboard() {
-  const stats = {
-    totalCourses: mockCourses.length,
-    totalInstructors: mockInstructors.length,
-    pendingCertificates: mockCertificates.filter((c) => c.status === "pending").length,
-    totalBlogs: mockBlogs.length,
-  };
+  const [data, setData] = useState<DataAdminHome | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const pendingCourses = mockCourses.filter((c) => c.status === "pending");
+  useEffect(() => {
+    let active = true;
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const res = await userService.getAdminHome();
+        if (!active) return;
+        setData(res.result ?? null);
+      } catch (e: any) {
+        if (!active) return;
+        const msg = e?.response?.data?.message || e?.message || "Không thể tải dữ liệu admin";
+        setError(msg);
+        toast.error(msg);
+      } finally {
+        if (active) setLoading(false);
+      }
+    };
+    fetchData();
+    return () => { active = false };
+  }, []);
 
   return (
     <div className="space-y-8 p-6">
@@ -35,7 +55,7 @@ export default function Dashboard() {
                 <BookOpen className="h-5 w-5 text-primary" />
               </div>
             </div>
-            <CardTitle className="text-4xl font-bold mt-2">{stats.totalCourses}</CardTitle>
+            <CardTitle className="text-4xl font-bold mt-2">{data?.courseCnt ?? (loading ? '…' : 0)}</CardTitle>
           </CardHeader>
         </Card>
 
@@ -47,7 +67,7 @@ export default function Dashboard() {
                 <Users className="h-5 w-5 text-accent" />
               </div>
             </div>
-            <CardTitle className="text-4xl font-bold mt-2">{stats.totalInstructors}</CardTitle>
+            <CardTitle className="text-4xl font-bold mt-2">{data?.instructorCnt ?? (loading ? '…' : 0)}</CardTitle>
           </CardHeader>
         </Card>
 
@@ -59,7 +79,7 @@ export default function Dashboard() {
                 <Clock className="h-5 w-5 text-warning text-primary" />
               </div>
             </div>
-            <CardTitle className="text-4xl font-bold mt-2">{stats.pendingCertificates}</CardTitle>
+            <CardTitle className="text-4xl font-bold mt-2">{data?.certificateCnt ?? (loading ? '…' : 0)}</CardTitle>
           </CardHeader>
         </Card>
 
@@ -71,7 +91,7 @@ export default function Dashboard() {
                 <FileText className="h-5 w-5 text-primary" />
               </div>
             </div>
-            <CardTitle className="text-4xl font-bold mt-2">{stats.totalBlogs}</CardTitle>
+            <CardTitle className="text-4xl font-bold mt-2">{data?.blogCnt ?? (loading ? '…' : 0)}</CardTitle>
           </CardHeader>
         </Card>
       </div>
@@ -84,18 +104,21 @@ export default function Dashboard() {
             Khóa học chờ duyệt
           </CardTitle>
           <CardDescription>
-            {pendingCourses.length} khóa học đang chờ được xem xét
+            {/* Backend chưa trả danh sách chi tiết ở API này; có thể thay bằng fetch riêng nếu cần */}
+            {data?.courseCnt ?? 0} khóa học đang chờ được xem xét
           </CardDescription>
         </CardHeader>
         <CardContent className="pt-6">
-          {pendingCourses.length === 0 ? (
+          {/* Placeholder section: remove or replace with real list when available */}
+          {true ? (
             <div className="text-center py-8 text-muted-foreground">
               <BookOpen className="h-12 w-12 mx-auto mb-3 opacity-30" />
               <p>Không có khóa học nào chờ duyệt</p>
             </div>
           ) : (
             <div className="space-y-3">
-              {pendingCourses.map((course) => (
+              {/* Example mapping; replace when you have actual list */}
+              {[].map((course: any) => (
                 <Link
                   key={course.id}
                   to={`/courses/${course.id}`}
