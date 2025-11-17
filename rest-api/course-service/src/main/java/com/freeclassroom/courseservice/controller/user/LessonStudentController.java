@@ -1,7 +1,9 @@
 package com.freeclassroom.courseservice.controller.user;
 
+import com.freeclassroom.courseservice.dto.request.lesson.MakeNoteForLessonRequest;
 import com.freeclassroom.courseservice.dto.response.ApiResponse;
 import com.freeclassroom.courseservice.dto.response.common.CreationResponse;
+import com.freeclassroom.courseservice.dto.response.course.LessonInfoResponse;
 import com.freeclassroom.courseservice.dto.response.course.student.LessonOverviewResponse;
 import com.freeclassroom.courseservice.service.lesson.ILessonStudentService;
 import lombok.AccessLevel;
@@ -36,14 +38,21 @@ public class LessonStudentController {
 
     @GetMapping("/{id}/info")
     @PreAuthorize("@lessonStudentService.canViewLesson(#id, authentication.name)")
-    public ApiResponse<LessonOverviewResponse> getLessonInfo(@PathVariable String id) {
-        return lessonStudentService.getLessonInfo(id);
+    public ApiResponse<LessonInfoResponse> getLessonInfo(@PathVariable String id) {
+        String userId = SecurityContextHolder.getContext().getAuthentication().getName();
+        return lessonStudentService.getLessonInfo(id, userId);
     }
 
     @PostMapping("/{id}/mark-done")
-    @PreAuthorize("@lessonStudentService.canViewLesson(#id, authentication.name)")
     public ApiResponse<CreationResponse> markDone(@PathVariable String id) {
         String userId = SecurityContextHolder.getContext().getAuthentication().getName();
         return lessonStudentService.markDone(id, userId);
+    }
+
+    @PostMapping("/{id}/make-note")
+    @PreAuthorize("@lessonStudentService.canViewLesson(#id, authentication.name)")
+    public ApiResponse<CreationResponse> makeNote(@PathVariable String id, @RequestBody MakeNoteForLessonRequest request) {
+        String userId = SecurityContextHolder.getContext().getAuthentication().getName();
+        return lessonStudentService.makeNote(id, userId, request);
     }
 }

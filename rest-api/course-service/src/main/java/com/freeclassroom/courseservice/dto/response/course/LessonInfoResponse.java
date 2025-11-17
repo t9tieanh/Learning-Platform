@@ -1,4 +1,4 @@
-package com.freeclassroom.courseservice.dto.response.course.student;
+package com.freeclassroom.courseservice.dto.response.course;
 
 import com.freeclassroom.courseservice.enums.entity.EnumLessonProgress;
 import com.freeclassroom.courseservice.enums.entity.EnumLessonType;
@@ -13,12 +13,14 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class LessonOverviewResponse {
+public class LessonInfoResponse {
     String id;
     String title;
     String content;
     Long duration;
     Long position;
+
+    String note;
 
     @Enumerated(EnumType.STRING)
     EnumLessonType type;

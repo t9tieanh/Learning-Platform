@@ -1,8 +1,10 @@
 package com.freeclassroom.courseservice.service.lesson;
 
 import com.freeclassroom.courseservice.configuration.CustomJwtDecoder;
+import com.freeclassroom.courseservice.dto.request.lesson.MakeNoteForLessonRequest;
 import com.freeclassroom.courseservice.dto.response.ApiResponse;
 import com.freeclassroom.courseservice.dto.response.common.CreationResponse;
+import com.freeclassroom.courseservice.dto.response.course.LessonInfoResponse;
 import com.freeclassroom.courseservice.dto.response.course.student.LessonOverviewResponse;
 import com.freeclassroom.courseservice.entity.course.LessonEntity;
 import com.freeclassroom.courseservice.entity.member.EnrollmentsEntity;
@@ -10,7 +12,6 @@ import com.freeclassroom.courseservice.entity.member.LessonProgressEntity;
 import com.freeclassroom.courseservice.enums.entity.EnumLessonProgress;
 import com.freeclassroom.courseservice.exception.CustomExeption;
 import com.freeclassroom.courseservice.exception.ErrorCode;
-import com.freeclassroom.courseservice.mapper.LessonMapper;
 import com.freeclassroom.courseservice.mapper.LessonStudentMapper;
 import com.freeclassroom.courseservice.repository.entity.EnrollmentRepository;
 import com.freeclassroom.courseservice.repository.entity.LessonProgressRepository;
@@ -99,13 +100,25 @@ public class LessonStudentService implements ILessonStudentService {
     }
 
     @Override
-    public ApiResponse<LessonOverviewResponse> getLessonInfo(String id) {
-        LessonEntity lesson = lessonRepo.findById(id).orElseThrow(
+    public ApiResponse<LessonInfoResponse> getLessonInfo(String lessonId, String userId) {
+        LessonEntity lesson = lessonRepo.findById(lessonId).orElseThrow(
                 () -> new CustomExeption(ErrorCode.LESSON_NOT_FOUND)
         );
 
-        LessonOverviewResponse response = lessonMapper.toLessonOverviewResponse(lesson);
-        return ApiResponse.<LessonOverviewResponse>builder()
+        LessonInfoResponse response = lessonMapper.toLessonInfoResponse(lesson);
+
+        // get note of student
+        EnrollmentsEntity enrollment = enrollmentRepo.findByUserIdAndCourse_Chapters_Lessons_Id(userId, lessonId)
+                .orElseThrow(() -> new CustomExeption(ErrorCode.UNAUTHORIZED));
+        LessonProgressEntity lessonProgress = lessonProgressRepo.findByLesson_IdAndEnrollment_Id(
+                lessonId, enrollment.getId()
+        );
+
+        if (lessonProgress != null) {
+            response.setNote(lessonProgress.getNote());
+        }
+
+        return ApiResponse.<LessonInfoResponse>builder()
                 .message("Lấy thông tin lesson thành công !")
                 .code(200)
                 .result(response)
@@ -142,6 +155,40 @@ public class LessonStudentService implements ILessonStudentService {
                 )
                 .code(200)
                 .message("Đã ghi nhận học xong bài học này !")
+                .build();
+    }
+
+    @Override
+    public ApiResponse<CreationResponse> makeNote(String lessonId, String userId, MakeNoteForLessonRequest request) {
+        EnrollmentsEntity enrollment = enrollmentRepo.findByUserIdAndCourse_Chapters_Lessons_Id(userId, lessonId)
+                .orElseThrow(() -> new CustomExeption(ErrorCode.UNAUTHORIZED));
+
+        LessonProgressEntity lessonProgress = lessonProgressRepo.findByLesson_IdAndEnrollment_Id(
+                lessonId, enrollment.getId()
+        );
+
+        if (lessonProgress == null) {
+            lessonProgress = LessonProgressEntity.builder()
+                    .lesson(lessonRepo.findById(lessonId).orElseThrow(
+                            () -> new CustomExeption(ErrorCode.LESSON_NOT_FOUND)
+                    ))
+                    .enrollment(enrollment)
+                    .progress(EnumLessonProgress.NOT_STARTED)
+                    .note(request.getContent())
+                    .build();
+        } else
+            lessonProgress.setNote(request.getContent());
+
+        lessonProgressRepo.save(lessonProgress);
+
+        return ApiResponse.<CreationResponse>builder()
+                .result(
+                        CreationResponse.builder()
+                                .id(lessonId)
+                                .build()
+                )
+                .code(200)
+                .message("Lưu not cho lesson thành công !")
                 .build();
     }
 }

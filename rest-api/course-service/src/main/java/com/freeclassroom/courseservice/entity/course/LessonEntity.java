@@ -20,6 +20,8 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class LessonEntity extends AbstractEntity {
     String title;
+
+    @Column(columnDefinition = "TEXT")
     String content;
     Long duration;
     Long position;

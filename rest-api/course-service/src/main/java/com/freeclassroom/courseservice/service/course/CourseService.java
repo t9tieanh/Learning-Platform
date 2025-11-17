@@ -1,9 +1,7 @@
 package com.freeclassroom.courseservice.service.course;
 
-import com.example.grpc.user.GetUserResponse;
 import com.freeclassroom.courseservice.dto.request.common.FileUploadRequest;
 import com.freeclassroom.courseservice.dto.request.course.CreationCourseRequest;
-import com.freeclassroom.courseservice.dto.request.course.GetCourseRequest;
 import com.freeclassroom.courseservice.dto.request.course.UpdatePriceRequest;
 import com.freeclassroom.courseservice.dto.request.course.UpdateTagsRequest;
 import com.freeclassroom.courseservice.dto.response.ApiResponse;
@@ -11,15 +9,11 @@ import com.freeclassroom.courseservice.dto.response.common.CreationResponse;
 import com.freeclassroom.courseservice.dto.response.common.FileUploadResponse;
 import com.freeclassroom.courseservice.dto.response.course.*;
 
-import com.freeclassroom.courseservice.dto.response.user.InstructorResponse;
 import com.freeclassroom.courseservice.entity.category.CategoryEntity;
 import com.freeclassroom.courseservice.entity.category.TagEntity;
-import com.freeclassroom.courseservice.entity.course.ChapterEntity;
 import com.freeclassroom.courseservice.entity.course.CourseEntity;
-import com.freeclassroom.courseservice.entity.course.LessonEntity;
 import com.freeclassroom.courseservice.enums.entity.EnumCourseProgressStep;
 import com.freeclassroom.courseservice.enums.entity.EnumCourseStatus;
-import com.freeclassroom.courseservice.enums.entity.EnumLessonType;
 
 import com.freeclassroom.courseservice.exception.CustomExeption;
 import com.freeclassroom.courseservice.exception.ErrorCode;
@@ -36,7 +30,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -44,16 +37,13 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import org.springframework.http.codec.ServerSentEvent;
-import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -65,7 +55,6 @@ public class CourseService implements ICourseService {
     CategoryRepository categoryRepo;
     TagRepository tagRepo;
     ChapterRepository chapterRepo;
-    UserGrpcClient userGrpcClient;
 
     CourseMapper courseMapper;
     LessonMapper lessonMapper;
@@ -224,8 +213,6 @@ public class CourseService implements ICourseService {
         try {
             CourseEntity entity = courseRepo.findByIdWithTags(id)
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy khóa học"));
-
-            System.out.println("cate" + entity.getCategory().getName());
 
             courseRepo.findByIdWithChapters(id)
                     .ifPresent(e -> entity.setChapters(e.getChapters()));

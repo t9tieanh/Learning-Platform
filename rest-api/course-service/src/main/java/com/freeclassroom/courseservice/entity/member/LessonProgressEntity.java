@@ -29,4 +29,7 @@ public class LessonProgressEntity extends AbstractEntity {
     @ManyToOne
     @JoinColumn(name = "enrollment_id")
     EnrollmentsEntity enrollment;
+
+    @Column(columnDefinition = "TEXT")
+    String note;
 }
