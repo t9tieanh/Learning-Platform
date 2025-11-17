@@ -1,9 +1,12 @@
 package com.freeclassroom.courseservice.controller.user;
 
 import com.freeclassroom.courseservice.dto.response.ApiResponse;
+import com.freeclassroom.courseservice.dto.response.common.PagingResponse;
 import com.freeclassroom.courseservice.dto.response.course.CourseResponse;
 import com.freeclassroom.courseservice.dto.response.course.CourseUserDetailResponse;
+import com.freeclassroom.courseservice.dto.response.course.MyCourseResponse;
 import com.freeclassroom.courseservice.dto.response.course.PageResponse;
+import com.freeclassroom.courseservice.service.course.ICourseService;
 import com.freeclassroom.courseservice.service.course.ICourseUserService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +22,16 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class CourseUserController {
     ICourseUserService courseUserService;
+    ICourseService courseService;
+
+    @GetMapping("/enrolled")
+    ApiResponse<List<CourseResponse>> listEnrolledCourses(
+            @RequestParam String userRole,
+            @RequestParam(required = false) String studentId,
+            @RequestParam String instructorId) {
+        return courseUserService.getEnrolledCourses(userRole, studentId, instructorId);
+    }
+
 
     @GetMapping("/{id}")
     ApiResponse<CourseUserDetailResponse> getCouseDetail(@PathVariable("id") String id) {
@@ -43,8 +56,15 @@ public class CourseUserController {
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String category,
             @RequestParam(required = false) Double minPrice,
-            @RequestParam(required = false) Double minRating
+            @RequestParam(required = false) Double minRating,
+            @RequestParam(required = false) String sort
     ) {
-        return courseUserService.getAllCourses(page, limit, search, category, minPrice, minRating);
+        return courseUserService.getAllCourses(page, limit, search, category, minPrice, minRating, sort);
     }
+
+    @GetMapping("/count")
+    ApiResponse<Integer> countInstructorCourseValid (@RequestParam String instructorId) {
+        return courseUserService.countInstructorCourseValid(instructorId);
+    }
+
 }

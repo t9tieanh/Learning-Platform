@@ -53,7 +53,19 @@
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
   }
+}
+
+.ql-container.ql-snow {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.ql-toolbar.ql-snow {
+  border: none !important;
+  border-bottom: 1px solid #e5e7eb !important;
+  /* tuỳ chọn: để lại viền dưới cho toolbar */
 }

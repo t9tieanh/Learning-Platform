@@ -1,21 +1,31 @@
 package com.freeclassroom.userservice.service.user;
 
+import com.example.grpc.course.GetCourseAdminDataResponse;
+import com.example.grpc.course.TotalBlogResponse;
 import com.freeclassroom.userservice.configuration.RabbitMQConfig;
 import com.freeclassroom.userservice.dto.request.user.CreationUserRequest;
+import com.freeclassroom.userservice.dto.request.user.UpdateUserRequest;
 import com.freeclassroom.userservice.dto.response.ApiResponse;
+import com.freeclassroom.userservice.dto.response.admin.DataAdminHome;
 import com.freeclassroom.userservice.dto.response.user.GetUserResponse;
 import com.freeclassroom.userservice.dto.response.user.MyProfileResponse;
 import com.freeclassroom.userservice.dto.response.user.UserResponse;
+import com.freeclassroom.userservice.entity.certificate.Certificate;
 import com.freeclassroom.userservice.entity.redis.OTPForgetPassword;
 import com.freeclassroom.userservice.entity.redis.PendingUserEntity;
 import com.freeclassroom.userservice.entity.user.UserEntity;
+import com.freeclassroom.userservice.enums.CertificateStatus;
 import com.freeclassroom.userservice.enums.entity.EnumAccountStatus;
 import com.freeclassroom.userservice.exception.CustomExeption;
 import com.freeclassroom.userservice.exception.ErrorCode;
+import com.freeclassroom.userservice.grpc.client.BlogGrpcClient;
+import com.freeclassroom.userservice.grpc.client.CourseGrpcClient;
 import com.freeclassroom.userservice.mapper.user.UserMapper;
+import com.freeclassroom.userservice.repository.entity.CertificateRepository;
 import com.freeclassroom.userservice.repository.entity.UserRepository;
 import com.freeclassroom.userservice.repository.redis.OTPForgetPasswordRepository;
 import com.freeclassroom.userservice.repository.redis.PendingUserRepository;
+import com.freeclassroom.userservice.service.file.UploadFileService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -26,6 +36,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -35,6 +46,10 @@ public class UserService implements IUserService {
     PendingUserRepository pendingUserRepo;
     OTPForgetPasswordRepository otpForgetPasswordRepo;
     UserMapper userMapper;
+    UploadFileService uploadFileService;
+
+    CourseGrpcClient courseGrpcClient;
+    BlogGrpcClient blogGrpcClient;
 
     // template rabbitmq
     RabbitTemplate rabbitTemplate;
@@ -52,6 +67,7 @@ public class UserService implements IUserService {
     private String verifyForgotPassword;
 
     private final UserRepository userRepository;
+    private final CertificateRepository certificateRepository;
 
     public ApiResponse<UserResponse> registerUser(CreationUserRequest request) {
         // check user exits
@@ -190,6 +206,100 @@ public class UserService implements IUserService {
                 .message("Lấy thông tin profile thành công !")
                 .result(response)
                 .build();
+    }
+
+    @Override
+    public ApiResponse<GetUserResponse> updateUser(String id, UpdateUserRequest request) {
+        try {
+            UserEntity user = userRepository.findById(id)
+                    .orElseThrow(() -> new CustomExeption(ErrorCode.USER_NOT_FOUND));
+
+            if (request.getDescription() != null && !request.getDescription().equals(user.getDescription())) {
+                user.setDescription(request.getDescription());
+            }
+            if (request.getEmail() != null && !request.getEmail().equals(user.getEmail())) {
+                user.setEmail(request.getEmail());
+            }
+            if (request.getName() != null && !request.getName().equals(user.getName())) {
+                user.setName(request.getName());
+            }
+            if (request.getPhone() != null && !request.getPhone().equals(user.getPhone())) {
+                user.setPhone(request.getPhone());
+            }
+            if (request.getPosition() != null && !request.getPosition().equals(user.getPosition())) {
+                user.setPosition(request.getPosition());
+            }
+            if (request.getStatus() != null && !request.getStatus().equals(user.getStatus())) {
+                user.setStatus(request.getStatus());
+            }
+
+            if (request.getImage() != null && !request.getImage().isEmpty()) {
+                String uploadedUrl = uploadFileService.uploadFile(request.getImage());
+                user.setImage(uploadedUrl);
+            }
+
+            userRepository.save(user);
+
+            GetUserResponse response = userMapper.toDto(user);
+
+            return ApiResponse.<GetUserResponse>builder()
+                    .code(HttpStatus.OK.value())
+                    .message("Sửa thông tin profile thành công !")
+                    .result(response)
+                    .build();
+        } catch (CustomExeption e) {
+            return ApiResponse.<GetUserResponse>builder()
+                    .code(HttpStatus.OK.value())
+                    .message("Sửa thông tin profile thất bại !")
+                    .result(null)
+                    .build();
+        } catch (Exception e) {
+            throw new CustomExeption(ErrorCode.UNCATEGORIZED_EXEPTION);
+        }
+
+
+    }
+
+    @Override
+    public ApiResponse<DataAdminHome> getAdminData() {
+        DataAdminHome data = new DataAdminHome();
+
+        try {
+            // gRPC Course length and User length
+            GetCourseAdminDataResponse courseResponse = courseGrpcClient.getCourseAdminData();
+            if (courseResponse != null) {
+                data.setCourseCnt(courseResponse.getTotalCourse());
+                data.setInstructorCnt(courseResponse.getTotalInstructor());
+            } else {
+                data.setCourseCnt(0);
+                data.setInstructorCnt(0);
+            }
+            System.out.println("RESPONSE COURSE GRPC: " + courseResponse);
+
+            // gRPC Blogs length
+            TotalBlogResponse blogResponse = blogGrpcClient.getTotalBlog();
+            data.setBlogCnt(blogResponse != null ? blogResponse.getTotal() : 0);
+            System.out.println("RESPONSE BLOG GRPC: " + blogResponse);
+
+            // Lấy chứng chỉ có status PENDING
+            List<Certificate> certificateList = certificateRepository.findCertificatePending(CertificateStatus.PENDING);
+            data.setCertificateCnt(certificateList != null ? certificateList.size() : 0);
+
+            return ApiResponse.<DataAdminHome>builder()
+                    .code(HttpStatus.OK.value())
+                    .message("Lấy data thành công!")
+                    .result(data)
+                    .build();
+
+        } catch (Exception e) {
+            // Log lỗi chi tiết
+            e.printStackTrace();
+            return ApiResponse.<DataAdminHome>builder()
+                    .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                    .message("Lấy data thất bại: " + e.getMessage())
+                    .result(data)
+                    .build();
+        }
     }
 
     public ApiResponse<UserResponse> verifyForgotPassword(String code, String newPassword) {

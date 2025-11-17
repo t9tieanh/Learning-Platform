@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Phone, Video, MoreVertical, Send, Image, Paperclip, ChevronLeft, Copy } from 'lucide-react'
 import { useContext, useEffect, useMemo, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import { SocketContext } from '@/api/socket/socket.context'
 import { useLocation } from 'react-router-dom'
@@ -11,6 +12,9 @@ import { useAuthStore } from '@/stores/useAuth.stores'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { toast } from 'sonner'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import courseUserService from '@/services/course/course-user.service'
+import { EnrolledCourseItem } from '@/services/course/course-user.service'
 
 // Loại vai trò của người dùng trong phòng chat
 type Role = 'instructor' | 'student'
@@ -59,7 +63,9 @@ export const ChatArea = ({
   const [peerId, setPeerId] = useState<string>(peerFromProps || '')
   const { data } = useAuthStore()
   const myId = data?.userId
-  const location = useLocation()
+  const [enrolledCourses, setEnrolledCourses] = useState<EnrolledCourseItem[]>([])
+  const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (peerFromProps && peerFromProps !== peerId) {
@@ -76,39 +82,69 @@ export const ChatArea = ({
     setPeerId(peerFromProps || defaultPeerId)
   }, [location.pathname, forcedRole, peerFromProps])
 
+  // Load enrolled courses (tooltip list) when have both roles identified
+  useEffect(() => {
+    let mounted = true
+      ; (async () => {
+        if (!myId) return
+        // Determine query params based on role: if I'm student -> studentId=myId & instructorId=peerId (if known)
+        // If I'm instructor -> instructorId=myId & studentId=peerId (if known)
+        const userRole = myRole === 'student' ? 'student' : 'instructor'
+        const studentId = myRole === 'student' ? myId : peerId
+        const instructorId = myRole === 'instructor' ? myId : peerId
+        if (!studentId || !instructorId) return // need both to list shared enrolled courses
+        try {
+          const res = await courseUserService.getEnrolledCourses({ userRole, studentId, instructorId })
+          const items = Array.isArray(res?.result) ? res.result : []
+          const mapped: EnrolledCourseItem[] = items.map((c: any) => ({
+            id: c.id || c._id || c.courseId || Math.random().toString(36).slice(2),
+            title: c.title || 'Không có tiêu đề',
+            thumbnailUrl: c.thumbnailUrl || 'https://placehold.co/60x60'
+          }))
+          if (mounted) setEnrolledCourses(mapped)
+        } catch (e) {
+          console.error('Fetch enrolled courses error', e)
+          if (mounted) setEnrolledCourses([])
+        }
+      })()
+    return () => {
+      mounted = false
+    }
+  }, [myId, peerId, myRole])
+
   // Load messages when switching conversation
   useEffect(() => {
     let mounted = true
-    ;(async () => {
-      if (!conversationId) return
-      try {
-        const res = await chatService.getMessages({ conversationId, limit: 20 })
-        const items = res.result?.items || []
-        const mapped = items
-          .slice()
-          .reverse()
-          .map((m) => ({
-            id: m._id,
-            content: m.content,
-            senderId: m.senderId,
-            timestamp: new Date(m.createdAt).getTime(),
-            status: m.status
-          }))
-        if (mounted) setMessages(mapped)
-
+      ; (async () => {
+        if (!conversationId) return
         try {
-          const lastMessage = items[0]
-          if (lastMessage && lastMessage.senderId !== myId) {
-            await chatService.markRead(conversationId, peerId)
+          const res = await chatService.getMessages({ conversationId, limit: 20 })
+          const items = res.result?.items || []
+          const mapped = items
+            .slice()
+            .reverse()
+            .map((m) => ({
+              id: m._id,
+              content: m.content,
+              senderId: m.senderId,
+              timestamp: new Date(m.createdAt).getTime(),
+              status: m.status
+            }))
+          if (mounted) setMessages(mapped)
+
+          try {
+            const lastMessage = items[0]
+            if (lastMessage && lastMessage.senderId !== myId) {
+              await chatService.markRead(conversationId, peerId)
+            }
+          } catch (e) {
+            console.error('markRead on open error', e)
           }
         } catch (e) {
-          console.error('markRead on open error', e)
+          console.error('Load messages error', e)
+          if (mounted) setMessages([])
         }
-      } catch (e) {
-        console.error('Load messages error', e)
-        if (mounted) setMessages([])
-      }
-    })()
+      })()
     return () => {
       mounted = false
     }
@@ -149,42 +185,64 @@ export const ChatArea = ({
 
   useEffect(() => {
     if (!isConnected || !myId || !peerId) return
-    // Lắng nghe tin nhắn mới đến và append vào UI
+
     const onReceive = (data: {
-      senderId: string
-      message: string
-      createdAt: number
-      instructorId?: string
-      studentId?: string
-      senderRole?: 'instructor' | 'student'
+      messageId: string;
+      senderId: string;
+      message: string;
+      createdAt: number;
+      instructorId?: string;
+      studentId?: string;
+      senderRole?: 'instructor' | 'student';
     }) => {
-      // Tránh trùng chính tin do mình gửi
-      if (data.senderId === myId) return
-      // Chỉ nhận tin thuộc đúng phòng hiện tại (cặp instructorId/studentId trùng khớp)
+      console.log('[ON RECEIVE] Raw data:', data);
+      console.log('[ON RECEIVE] myId:', myId);
+      console.log('[ON RECEIVE] ids:', ids);
+
+      if (data.senderId === myId) {
+        console.log('[ON RECEIVE] Bỏ qua tin của chính mình');
+        return;
+      }
+
       const sameRoom =
         !!data.instructorId &&
         !!data.studentId &&
         data.instructorId === ids.instructorId &&
-        data.studentId === ids.studentId
-      if (!sameRoom) return
+        data.studentId === ids.studentId;
+
+      console.log('[ON RECEIVE] sameRoom:', sameRoom);
+
+      if (!sameRoom) {
+        console.log('[ON RECEIVE] Tin nhắn không cùng phòng -> bỏ qua');
+        return;
+      }
+
+      console.log('[ON RECEIVE] ✅ Thêm tin nhắn vào state');
       setMessages((prev) => [
         ...prev,
         {
-          id: Math.random().toString(36).slice(2),
+          id: data.messageId,
           content: data.message,
           senderId: data.senderId,
-          timestamp: data.createdAt
-        }
-      ])
-      // Khi đang mở cuộc trò chuyện, đánh dấu đã đọc ngay lập tức
-      // if (conversationId) {
-      //   chatService.markRead(conversationId, peerId).catch((e) => console.error('markRead on receive error', e))
-      // }
-    }
-    socket.on('receive_message', onReceive)
+          timestamp: data.createdAt,
+        },
+      ]);
+    };
 
-    // Lắng nghe thông báo đã đọc từ đối phương để cập nhật trạng thái tin nhắn của mình
-    // Kỳ vọng payload có conversationId và (tuỳ chọn) messageId đã được đọc
+
+    // --- Nhận cập nhật tin nhắn (edit) ---
+    const onMessageUpdate = (data: { conversationId: string; content: string; messageId: string }) => {
+      if (!conversationId || data.conversationId !== conversationId) return
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === data.messageId
+            ? { ...m, content: data.content }
+            : m
+        )
+      )
+    }
+
+    // --- Nhận thông báo đã đọc ---
     const onMessageRead = async (payload: { conversationId: string; messageId?: string; readerId: string }) => {
       if (!conversationId || payload.conversationId !== conversationId) return
       try {
@@ -192,10 +250,8 @@ export const ChatArea = ({
       } catch (e) {
         console.error('markRead error', e)
       }
-      // Cập nhật trạng thái 'read' cho tin nhắn gần nhất do mình gửi
       setMessages((prev) => {
         const next = [...prev]
-        // Ưu tiên tìm theo messageId, nếu không có thì lấy tin nhắn gần nhất do mình gửi
         if (payload.messageId) {
           const idx = next.findIndex((m) => m.id === payload.messageId)
           if (idx !== -1 && next[idx].senderId === myId) {
@@ -212,10 +268,26 @@ export const ChatArea = ({
         return next
       })
     }
+
+    // --- Khi tin nhắn bị xóa ---
+    const onMessageDelete = (data: { conversationId: string; messageId: string }) => {
+      console.log('data.conversationId', data.conversationId);
+      console.log('conversationId', conversationId);
+
+      if (!conversationId || data.conversationId !== conversationId) return
+      setMessages(prev => prev.filter(m => m.id !== data.messageId))
+    }
+
+    socket.on('receive_message', onReceive)
     socket.on('message_read', onMessageRead)
+    socket.on('message_update', onMessageUpdate)
+    socket.on('message_delete', onMessageDelete)
+
     return () => {
       socket.off('receive_message', onReceive)
+      socket.off('message_update', onMessageUpdate)
       socket.off('message_read', onMessageRead)
+      socket.off('message_delete', onMessageDelete)
     }
   }, [isConnected, socket, ids, myId, peerId, conversationId])
 
@@ -231,50 +303,40 @@ export const ChatArea = ({
     )
   }
 
-  // Gửi tin nhắn: phát socket + lưu DB + append optimistic
-  // Đồng thời, hiển thị trạng thái 'Đã gửi' cho tin nhắn của mình, và sẽ cập nhật thành 'Đã đọc' khi nhận socket từ đối phương
-  const handleSend = () => {
-    if (!message.trim()) return
-    const payload = {
-      message: message.trim(),
-      senderId: myId,
-      senderRole: myRole as Role,
-      instructorId: ids.instructorId,
-      studentId: ids.studentId
+  const handleSend = async () => {
+    const text = message.trim();
+    if (!text) return;
+
+    try {
+      // Gọi API — backend sẽ lưu DB và emit socket
+      const res = await chatService.sendMessage({
+        conversationId: conversationId ?? '',
+        senderId: myId ?? '',
+        senderRole: myRole,
+        content: text,
+        peerId,
+      });
+
+      const saved = res?.result;
+      if (saved) {
+        // Thêm tin nhắn mới vào UI khi backend trả về thành công
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: saved._id,
+            content: saved.content,
+            senderId: saved.senderId,
+            timestamp: new Date(saved.createdAt).getTime(),
+            status: saved.status,
+            // messageId: saved.messageId,
+          },
+        ]);
+      }
+      setMessage("");
+    } catch (e) {
+      console.error("sendMessage error", e);
     }
-    socket.emit('send_message', payload)
-    // Persist via REST (fire-and-forget)
-    const tempId = Math.random().toString(36).slice(2)
-    if (conversationId) {
-      chatService
-        .sendMessage({ conversationId, content: payload.message, senderRole: myRole })
-        .then((res) => {
-          const saved = res.result
-          // Cập nhật lại id và status dựa theo kết quả server cho bản ghi optimistic
-          setMessages((prev) => {
-            if (!saved) return prev
-            const next = [...prev]
-            const idx = next.findIndex((m) => m.id === tempId)
-            if (idx !== -1) {
-              next[idx] = {
-                ...next[idx],
-                id: saved._id,
-                status: saved.status,
-                timestamp: new Date(saved.createdAt).getTime()
-              }
-            }
-            return next
-          })
-        })
-        .catch((e) => console.error('sendMessage error', e))
-    }
-    // Optimistic append
-    setMessages((prev) => [
-      ...prev,
-      { id: tempId, content: payload.message, senderId: myId ?? 'unknown', timestamp: Date.now(), status: 'sent' }
-    ])
-    setMessage('')
-  }
+  };
 
   // Copy nội dung tin nhắn
   const handleCopy = async (content: string) => {
@@ -304,11 +366,11 @@ export const ChatArea = ({
                 conversationId,
                 lastMessage: newLast
                   ? {
-                      _id: newLast.id,
-                      content: newLast.content,
-                      senderId: newLast.senderId,
-                      createdAt: new Date(newLast.timestamp).toISOString()
-                    }
+                    _id: newLast.id,
+                    content: newLast.content,
+                    senderId: newLast.senderId,
+                    createdAt: new Date(newLast.timestamp).toISOString()
+                  }
                   : undefined
               }
             })
@@ -338,17 +400,18 @@ export const ChatArea = ({
       const res = await chatService.updateMessage({
         conversationId,
         messageId: editingId,
-        content: newText
+        content: newText,
+        peerId: peerId,
       })
       const updated = res?.result
       setMessages((prev) =>
         prev.map((m) =>
           m.id === editingId
             ? {
-                ...m,
-                content: updated?.content ?? newText,
-                timestamp: updated?.createdAt ? new Date(updated.createdAt).getTime() : m.timestamp
-              }
+              ...m,
+              content: updated?.content ?? newText,
+              timestamp: updated?.createdAt ? new Date(updated.createdAt).getTime() : m.timestamp
+            }
             : m
         )
       )
@@ -361,6 +424,43 @@ export const ChatArea = ({
     }
   }
 
+
+  const courseList = (
+    <div className="flex flex-col gap-2 p-2 w-64 max-h-[300px] overflow-y-auto">
+      {enrolledCourses.length === 0 && (
+        <div className="text-xs text-gray-400 px-1 py-2">
+          Không có khóa học
+        </div>
+      )}
+
+      {enrolledCourses.map((course) => (
+        <div
+          key={course.id}
+          onClick={() => handleCourseClick(course.id)}
+          className="flex items-center gap-3 p-1 rounded-md hover:bg-gray-100 transition cursor-pointer"
+        >
+          <img
+            src={course.thumbnailUrl}
+            alt={course.title}
+            className="w-10 h-10 rounded-md object-cover"
+          />
+          <span className="text-sm font-medium text-gray-800 truncate">
+            {course.title}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+
+  const handleCourseClick = (id: string) => {
+    if (myRole === 'instructor') {
+      navigate(`/teacher/course-details/${id}`)
+    } else {
+      navigate(`/course/${id}`);
+    }
+  }
+
+
   return (
     <div className='flex flex-col flex-1 h-full min-h-0 bg-gray-50'>
       {/* Header */}
@@ -371,14 +471,24 @@ export const ChatArea = ({
               <ChevronLeft className='h-5 w-5' />
             </Button>
           )}
-          <Avatar className='h-10 w-10'>
-            <AvatarImage src={peerAvatar} />
-            <AvatarFallback>{(peerName || peerId || 'N')[0]}</AvatarFallback>
-          </Avatar>
-          <div>
-            <h3 className='font-semibold text-gray-800'>{peerName || peerId}</h3>
-            <p className='text-xs text-green-500'>● Đang hoạt động</p>
-          </div>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="flex items-center gap-3 cursor-pointer">
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage src={peerAvatar} />
+                    <AvatarFallback>{(peerName || peerId || "N")[0]}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <h3 className="font-semibold text-gray-800">{peerName || peerId}</h3>
+                  </div>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="bg-white shadow-xl border rounded-xl p-0">
+                {courseList}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
 
         <div className='flex items-center gap-2'>
@@ -416,17 +526,21 @@ export const ChatArea = ({
                 {isMine && (
                   <div className='mr-1 opacity-0 group-hover:opacity-100 transition'>
                     <Button
-                      variant='ghost'
-                      size='icon'
-                      className='h-7 w-7 hover:bg-gray-100'
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 hover:text-blue-500 hover:bg-transparent"
                       onClick={() => handleCopy(msg.content)}
                     >
-                      <Copy className='h-4 w-4' />
+                      <Copy className="h-4 w-4 " />
                     </Button>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant='ghost' size='icon' className='h-7 w-7 hover:bg-gray-100'>
-                          <MoreVertical className='h-4 w-4' />
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 hover:bg-gray-100 hover:text-blue-500 hover:bg-transparent"
+                        >
+                          <MoreVertical className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent
@@ -452,10 +566,27 @@ export const ChatArea = ({
                       : 'bg-white text-gray-800 border border-gray-200 rounded-bl-none'
                   )}
                 >
-                  <p className='text-sm leading-relaxed'>{msg.content}</p>
-                  <p className={cn('text-[11px] mt-1 text-right', isMine ? 'text-blue-100' : 'text-gray-400')}>
-                    {new Date(msg.timestamp).toLocaleTimeString()}
+                  <p className="text-sm leading-relaxed">{msg.content}</p>
+                  <p
+                    className={cn(
+                      "text-[11px] mt-1 text-right space-x-1",
+                      isMine ? "text-blue-100" : "text-gray-400"
+                    )}
+                  >
+                    <span className="font-medium">
+                      {new Date(msg.timestamp).toLocaleTimeString("vi-VN", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </span>
+                    <span className="opacity-70">
+                      {new Date(msg.timestamp).toLocaleDateString("vi-VN", {
+                        day: "2-digit",
+                        month: "2-digit",
+                      })}
+                    </span>
                   </p>
+
                 </div>
               </div>
             )

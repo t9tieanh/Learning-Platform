@@ -56,9 +56,8 @@ const CoursesTable: FC<CoursesTableProps> = ({ courses, statusFilter = '', onCha
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <button
-                      className={`p-1 rounded-md border transition-colors ${
-                        statusFilter ? 'border-blue-300 text-blue-600 bg-white' : 'border-transparent text-blue-600'
-                      } hover:bg-blue-50`}
+                      className={`p-1 rounded-md border transition-colors ${statusFilter ? 'border-blue-300 text-blue-600 bg-white' : 'border-transparent text-blue-600'
+                        } hover:bg-blue-50`}
                       aria-label='Lọc theo trạng thái'
                     >
                       <Filter className='w-4 h-4' />

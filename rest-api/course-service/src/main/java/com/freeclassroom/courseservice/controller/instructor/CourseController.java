@@ -44,13 +44,14 @@ public class CourseController {
         return tagService.getTagsByCourseId(id);
     }
 
+    // GET
     @GetMapping("/details/{id}")
     @PreAuthorize("@courseService.isTeacherOfCourse(#id, authentication.name)")
     ApiResponse<CourseResponse> getCourse(@PathVariable String id) {
         return courseService.getCourse(id);
     }
 
-    @PostMapping("/teacher")
+    @PostMapping("/")
     ApiResponse<PageResponse<CourseResponse>> getCoursesByTeacherId(@RequestBody InstructorRequest request) {
         return courseService.getCoursesByTeacherId(request.getInstructorId(), request.getPage(), request.getLimit());
     }

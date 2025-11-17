@@ -13,6 +13,8 @@ interface Certificate {
   name: string
   image: string
   dateReceived: string
+  status?: string
+  reason?: string
 }
 
 interface Teacher {
@@ -151,6 +153,12 @@ export function CertificateSection({ teacher, onUpdateTeacher, setEditedTeacher,
                           e.currentTarget.style.display = 'none'
                         }}
                       />
+                      <div className='absolute top-2 left-2'>
+                        {/* Badge nhỏ hiển thị status */}
+                        <Badge variant={cert.status === 'active' ? 'default' : 'outline'} className='text-xs px-2 py-1'>
+                          {cert.status === 'active' ? 'Đã nhận' : cert.status === 'pending' ? 'Đang chờ' : 'Hết hạn'}
+                        </Badge>
+                      </div>
                       <div className='absolute top-2 right-2'>
                         <Badge variant='secondary' className='bg-background/80 backdrop-blur-sm'>
                           <Award className='w-3 h-3 mr-1' />

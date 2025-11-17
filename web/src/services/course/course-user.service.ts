@@ -73,8 +73,9 @@ class CourseUserService {
     category?: string
     minPrice?: number
     minRating?: number
+    sort?: string
   }): Promise<ApiResponse<Paginated<any>>> {
-    const { page = 1, limit = 10, search, category, minPrice, minRating } = params || {}
+    const { page = 1, limit = 10, search, category, minPrice, minRating, sort } = params || {}
     const response = await axiosClient.axiosInstance.get('learning/courses', {
       params: {
         page,
@@ -82,9 +83,11 @@ class CourseUserService {
         search,
         category,
         minPrice,
-        minRating
+        minRating,
+        sort
       }
     })
+    console.log('RESPONSE', response.data)
     return response.data
   }
 
@@ -101,6 +104,31 @@ class CourseUserService {
     })
     return response.data
   }
+
+  // Enrolled courses between a student and an instructor (for tooltip in chat)
+  async getEnrolledCourses(params: {
+    userRole: 'student' | 'instructor'
+    studentId: string
+    instructorId: string
+  }): Promise<ApiResponse<EnrolledCourseItem[]>> {
+    const response = await axiosClient.axiosInstance.get('learning/courses/enrolled', {
+      params
+    })
+    return response.data
+  }
+
+  async countInstructorCourseValid(params: { instructorId: string }) {
+    const response = await axiosClient.axiosInstance.get('learning/courses/count', {
+      params
+    })
+    return response.data
+  }
 }
 
 export default new CourseUserService()
+
+export type EnrolledCourseItem = {
+  id: string
+  title: string
+  thumbnailUrl: string | null
+}

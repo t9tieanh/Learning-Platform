@@ -2,12 +2,12 @@ import { Router } from 'express'
 import { ValidateDto } from '~/middleware'
 import ChatController from '../controllers/chat.controller'
 import {
-  CreateDirectConversationDTO,
-  GetMessagesDTO,
-  SendMessageDTO,
-  ReadMessageDTO,
-  UpdateMessageDTO,
-  DeleteMessageDTO
+    CreateDirectConversationDTO,
+    GetMessagesDTO,
+    SendMessageDTO,
+    ReadMessageDTO,
+    UpdateMessageDTO,
+    DeleteMessageDTO,
 } from '../dto/request/chat.dto'
 
 const router = Router()
@@ -32,5 +32,4 @@ router.patch('/messages', ValidateDto(UpdateMessageDTO), ChatController.updateMe
 
 // Xóa tin nhắn (chỉ cho phép chủ sở hữu tin nhắn)
 router.delete('/messages', ValidateDto(DeleteMessageDTO), ChatController.deleteMessage)
-
 export default router

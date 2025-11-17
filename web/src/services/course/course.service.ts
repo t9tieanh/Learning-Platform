@@ -45,6 +45,34 @@ type Paginated<T> = {
 }
 
 class CourseService {
+  // Admin: get instructor summaries
+  async getAdminInstructors(): Promise<ApiResponse<AdminInstructorSummary[]>> {
+    const response = await axiosClient.axiosInstance.get('learning/admin/instructor')
+    return response.data
+  }
+
+  async getAllCourses(params?: {
+    page?: number
+    limit?: number
+    search?: string
+    category?: string
+    minPrice?: number
+    minRating?: number
+  }): Promise<ApiResponse<Paginated<any>>> {
+    const { page = 1, limit = 10, search, category, minPrice, minRating } = params || {}
+    const response = await axiosClient.axiosInstance.get('learning/courses-user', {
+      params: {
+        page,
+        limit,
+        search,
+        category,
+        minPrice,
+        minRating
+      }
+    })
+    return response.data
+  }
+
   async getCourseDetail(courseId: string): Promise<ApiResponse<any>> {
     if (!courseId) throw new Error('Thiếu courseId')
     const response = await axiosClient.axiosInstance.get(`learning/instructor/courses/details/${courseId}`)
@@ -79,7 +107,7 @@ class CourseService {
       page: options?.page ?? 1,
       limit: options?.limit ?? 10
     }
-    const response = await axiosClient.axiosInstance.post('learning/instructor/courses/teacher', body)
+    const response = await axiosClient.axiosInstance.post('learning/instructor/courses/', body)
     return response.data
   }
 
@@ -173,6 +201,28 @@ class CourseService {
     const response = await axiosClient.axiosInstance.post(`learning/instructor/courses/${courseId}/request-approval`)
     return response.data
   }
+
+  async getBestSellerCourses(limit = 4): Promise<Course[]> {
+    const response = await axiosClient.axiosInstance.get('learning/courses-user/best-seller', {
+      params: { limit }
+    })
+    return response.data
+  }
+
+  async getTrendyCourseThisMonth(limit = 4): Promise<Course[]> {
+    const response = await axiosClient.axiosInstance.get('learning/courses-user/trend', {
+      params: { limit }
+    })
+    return response.data
+  }
 }
 
 export default new CourseService()
+
+// Types
+export type AdminInstructorSummary = {
+  instructorQuantity: number
+  instructorName: string
+  instructorEmail: string
+  totalCourse: number
+}

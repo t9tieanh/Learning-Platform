@@ -9,6 +9,8 @@ interface Certificate {
   name: string
   image: string
   dateReceived: string
+  status?: string
+  reason?: string
 }
 
 interface Teacher {

@@ -18,7 +18,7 @@ const Index = () => {
   const [loading, setLoading] = useState(false)
   const [items, setItems] = useState<any[]>([])
   const [selectedCategories, setSelectedCategories] = useState<string[]>([])
-  const [sortValue, setSortValue] = useState('popular')
+  const [sortValue, setSortValue] = useState('')
   const [search, setSearch] = useState('')
   const [minPrice, setMinPrice] = useState<number | undefined>(undefined)
   const [minRating, setMinRating] = useState<number | undefined>(undefined)
@@ -35,7 +35,8 @@ const Index = () => {
           category: selectedCategories.length === 1 ? selectedCategories[0] : undefined,
           search: debouncedSearch || undefined,
           minPrice,
-          minRating
+          minRating,
+          sort: sortValue || ''
         })
         const payload = res.result
         if (!mounted) return
@@ -58,7 +59,7 @@ const Index = () => {
     return () => {
       mounted = false
     }
-  }, [currentPage, pageSize, selectedCategories, debouncedSearch, minPrice, minRating])
+  }, [currentPage, pageSize, selectedCategories, debouncedSearch, minPrice, minRating, sortValue])
 
   const filteredItems = useMemo(() => {
     if (!selectedCategories || selectedCategories.length === 0) return items
@@ -127,7 +128,14 @@ const Index = () => {
             </p>
           </div>
 
-          <SortBar totalCourses={totalElements} sortValue={sortValue} onSortChange={setSortValue} />
+          <SortBar
+            totalCourses={totalElements}
+            sortValue={sortValue}
+            onSortChange={(v) => {
+              setSortValue(v)
+              setCurrentPage(1)
+            }}
+          />
 
           <div className='flex flex-col gap-4 mb-8'>
             {loading ? <Loader /> : mappedCourses.map((course) => <CourseCard key={course.id} {...course} />)}

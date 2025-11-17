@@ -14,4 +14,5 @@ public class InstructorResponse {
     String name;
     String email;
     String image;
+    long totalCourse;
 }

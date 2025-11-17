@@ -24,19 +24,31 @@ public final class CourseServiceProto {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\023courseService.proto\032\014course.proto2{\n\rC" +
-      "ourseService\022/\n\tgetCourse\022\021.GetCourseReq" +
-      "uest\032\017.CourseResponse\0229\n\016getBulkCourses\022" +
-      "\022.GetCoursesRequest\032\023.GetCoursesResponse" +
-      "B-\n\025com.example.grpc.userB\022CourseService" +
-      "ProtoP\001b\006proto3"
+      "\n\023courseService.proto\032\033google/protobuf/e" +
+      "mpty.proto\032\014course.proto\032\nuser.proto2\224\003\n" +
+      "\rCourseService\022/\n\tgetCourse\022\021.GetCourseR" +
+      "equest\032\017.CourseResponse\0229\n\016getBulkCourse" +
+      "s\022\022.GetCoursesRequest\032\023.GetCoursesRespon" +
+      "se\022C\n\023listEnrolledCourses\022\027.EnrolledCour" +
+      "sesRequest\032\023.GetCoursesResponse\022I\n\022getCo" +
+      "urseAdminData\022\026.google.protobuf.Empty\032\033." +
+      "GetCourseAdminDataResponse\022J\n\031getTotalCo" +
+      "ursesAndStudent\022\017.GetUserRequest\032\034.GetCo" +
+      "urseAndStudentResponse\022;\n\014getChartData\022\024" +
+      ".GetChartDataRequest\032\025.GetChartDataRespo" +
+      "nseB-\n\025com.example.grpc.userB\022CourseServ" +
+      "iceProtoP\001b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
+          com.google.protobuf.EmptyProto.getDescriptor(),
           com.example.grpc.course.CourseProto.getDescriptor(),
+          com.example.grpc.user.UserProto.getDescriptor(),
         });
+    com.google.protobuf.EmptyProto.getDescriptor();
     com.example.grpc.course.CourseProto.getDescriptor();
+    com.example.grpc.user.UserProto.getDescriptor();
   }
 
   // @@protoc_insertion_point(outer_class_scope)

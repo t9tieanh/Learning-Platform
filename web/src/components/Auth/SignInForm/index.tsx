@@ -25,7 +25,7 @@ const SignInForm: FC = () => {
   } = useForm<SignInFormInputs>({
     resolver: yupResolver(signInSchema)
   })
-  const navigator = useNavigate()
+  const navigate = useNavigate()
 
   // Get state and actions
   const { data, setData } = useAuthStore()
@@ -41,7 +41,12 @@ const SignInForm: FC = () => {
         // save to localstorage
         setData(response.result)
         toast.success('Đăng nhập thành công!')
-        navigator('/')
+        if (response.result.role === 'admin') {
+          console.log('ADMIN')
+          navigate('/admin')
+        } else {
+          navigate('/')
+        }
       } else toast.error(response.message)
     } catch (error: any) {
       toast.error('Đã có lỗi trong quá trình xử lý !')
@@ -92,7 +97,7 @@ const SignInForm: FC = () => {
                 <p
                   className='text-gray-700 text-sm font-bold'
                   onClick={() => {
-                    navigator('/forgot')
+                    navigate('/forgot')
                   }}
                 >
                   Quên mật khẩu ?

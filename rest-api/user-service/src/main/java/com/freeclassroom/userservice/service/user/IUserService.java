@@ -1,7 +1,9 @@
 package com.freeclassroom.userservice.service.user;
 
 import com.freeclassroom.userservice.dto.request.user.CreationUserRequest;
+import com.freeclassroom.userservice.dto.request.user.UpdateUserRequest;
 import com.freeclassroom.userservice.dto.response.ApiResponse;
+import com.freeclassroom.userservice.dto.response.admin.DataAdminHome;
 import com.freeclassroom.userservice.dto.response.user.GetUserResponse;
 import com.freeclassroom.userservice.dto.response.user.MyProfileResponse;
 import com.freeclassroom.userservice.dto.response.user.UserResponse;
@@ -14,4 +16,6 @@ public interface IUserService {
     ApiResponse<Void> checkForgotPassword(String code);
     ApiResponse<GetUserResponse> getUser(String id);
     ApiResponse<MyProfileResponse> geyMyProfile(String id);
+    ApiResponse<GetUserResponse> updateUser(String id, UpdateUserRequest request);
+    ApiResponse<DataAdminHome> getAdminData();
 }

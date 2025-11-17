@@ -6,6 +6,7 @@ import com.freeclassroom.userservice.dto.request.outbound.oauth2.GoogleExchanceT
 import com.freeclassroom.userservice.dto.response.ApiResponse;
 import com.freeclassroom.userservice.dto.response.auth.IntrospectResponse;
 import com.freeclassroom.userservice.dto.response.outbound.oauth2.GoogleGetUserInfo;
+import com.freeclassroom.userservice.entity.role.RoleEntity;
 import com.freeclassroom.userservice.enums.role.TokenEnum;
 import com.freeclassroom.userservice.dto.request.auth.AuthRequest;
 import com.freeclassroom.userservice.dto.response.user.AuthResponse;
@@ -29,6 +30,7 @@ import org.springframework.stereotype.Service;
 
 import java.text.ParseException;
 import java.util.Date;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -93,6 +95,10 @@ public class AuthenticationService implements IAuthenticationService {
                     .userId(account.getId())
                     .name(account.getName())
                     .avatarUrl(account.getImage())
+                    .role(account.getRoles().stream()
+                            .map(RoleEntity::getName)
+                            .collect(Collectors.joining(","))
+                    )
                     .build();
 
             return ApiResponse.<AuthResponse>builder()

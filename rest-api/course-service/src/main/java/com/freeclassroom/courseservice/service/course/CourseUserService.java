@@ -9,6 +9,7 @@ import com.freeclassroom.courseservice.dto.response.common.PagingResponse;
 import com.freeclassroom.courseservice.dto.response.course.*;
 import com.freeclassroom.courseservice.dto.response.user.InstructorResponse;
 import com.freeclassroom.courseservice.entity.course.CourseEntity;
+import com.freeclassroom.courseservice.entity.member.EnrollmentsEntity;
 import com.freeclassroom.courseservice.enums.entity.EnumCourseProgressStep;
 import com.freeclassroom.courseservice.enums.entity.EnumCourseStatus;
 import com.freeclassroom.courseservice.exception.CustomExeption;
@@ -30,6 +31,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -41,8 +44,8 @@ import java.util.stream.Collectors;
 public class CourseUserService implements ICourseUserService{
     CourseRepository courseRepo;
     ChapterRepository chapterRepo;
-    UserGrpcClient userGrpcClient;
     EnrollmentRepository enrollmentRepo;
+    UserGrpcClient userGrpcClient;
 
     CourseMapper courseMapper;
 
@@ -205,9 +208,16 @@ public class CourseUserService implements ICourseUserService{
     }
 
     @Override
-    public ApiResponse<PageResponse<CourseResponse>> getAllCourses(int page, int limit, String search, String category, Double minPrice, Double minRating) {
+    public ApiResponse<PageResponse<CourseResponse>> getAllCourses(int page, int limit, String search, String category,
+                                                                   Double minPrice, Double minRating, String sort) {
         try {
-            Pageable pageable = PageRequest.of(Math.max(page - 1, 0), limit, Sort.by(Sort.Direction.DESC, "createdAt"));
+            Sort sortOption = switch (sort) {
+                case "price-low" -> Sort.by(Sort.Direction.ASC, "finalPrice");
+                case "price-high" -> Sort.by(Sort.Direction.DESC, "finalPrice");
+                default -> Sort.by(Sort.Direction.DESC, "createdAt");
+            };
+
+            Pageable pageable = PageRequest.of(Math.max(page - 1, 0), limit, sortOption);
 
             Page<CourseEntity> result = courseRepo.findAllWithFilters(search, category, minPrice, minRating, pageable);
 
@@ -236,6 +246,87 @@ public class CourseUserService implements ICourseUserService{
         }
     }
 
+    @Override
+    public ApiResponse<List<CourseResponse>> getEnrolledCourses(String userRole, String studentId, String instructorId) {
+        try {
+            List<CourseEntity> courses = new ArrayList<>();
+
+            if ("instructor".equals(userRole)) {
+                // 1. Lấy danh sách enrollment của student
+                List<EnrollmentsEntity> enrollments = enrollmentRepo.findAllByUserId(studentId);
+
+                // 2. Lọc ra các courseId mà instructor trùng yêu cầu
+                List<String> courseIds = enrollments.stream()
+                        .map(e -> e.getCourse().getId())
+                        .distinct()
+                        .toList();
+
+                // 3. Lấy tất cả course dựa trên courseIds
+                List<CourseEntity> allCourses = courseRepo.findAllById(courseIds);
+
+                // 4. Chỉ giữ course có instructorId trùng khớp
+                courses = allCourses.stream()
+                        .filter(c -> c.getInstructorId().equals(instructorId))
+                        .filter(c -> (EnumCourseStatus.PUBLISHED.name()).equalsIgnoreCase(String.valueOf(c.getStatus())))
+                        .filter(c -> (EnumCourseProgressStep.COMPLETED.name()).equalsIgnoreCase(String.valueOf(c.getProgressStep())))
+                        .toList();
+            } else {
+                // Nếu không phải instructor thì lấy theo instructorId
+                List<CourseEntity> allCourses = courseRepo.findAllByInstructorId(instructorId);
+
+                courses = allCourses.stream()
+                        .filter(c -> (EnumCourseStatus.PUBLISHED.name()).equalsIgnoreCase(String.valueOf(c.getStatus())))
+                        .filter(c -> (EnumCourseProgressStep.COMPLETED.name()).equalsIgnoreCase(String.valueOf(c.getProgressStep())))
+                        .toList();
+            }
+
+            List<CourseResponse> response = new ArrayList<>();
+            for (CourseEntity course : courses) {
+                response.add(courseMapper.toDto(course));
+            }
+
+            return ApiResponse.<List<CourseResponse>>builder()
+                    .code(HttpStatus.OK.value())
+                    .message("Lấy danh sách khóa học thành công")
+                    .result(response)
+                    .build();
+        } catch (Exception e) {
+            e.printStackTrace(); // Log ra console hoặc dùng logger
+            return ApiResponse.<List<CourseResponse>>builder()
+                    .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                    .message("Đã xảy ra lỗi khi lấy danh sách khóa học: " + e.getMessage())
+                    .result(Collections.emptyList())
+                    .build();
+        }
+    }
+
+    @Override
+    public ApiResponse<Integer> countInstructorCourseValid(String instructorId) {
+        try {
+            List<CourseEntity> courses = courseRepo.findAllByInstructorId(instructorId);
+            System.out.println("COURSES: " + courses);
+            long validCount = courses.stream()
+                    .filter(c -> EnumCourseStatus.PUBLISHED.name().equalsIgnoreCase(String.valueOf(c.getStatus())))
+                    .filter(c -> EnumCourseProgressStep.COMPLETED.name().equalsIgnoreCase(String.valueOf(c.getProgressStep())))
+                    .count();
+            System.out.println("validCount: " + validCount);
+
+            return ApiResponse.<Integer>builder()
+                    .code(HttpStatus.OK.value())
+                    .message("Lấy dữ liệu thành công")
+                    .result((int) validCount)
+                    .build();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ApiResponse.<Integer>builder()
+                    .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                    .message("Đã xảy ra lỗi khi đếm khóa học hợp lệ: " + e.getMessage())
+                    .result(0)
+                    .build();
+        }
+    }
+
     // general code
     private List<CourseResponse> getInstructorGrpc(List<CourseEntity> courseEntities) {
         return courseEntities.stream()
@@ -251,7 +342,8 @@ public class CourseUserService implements ICourseUserService{
                             user.getId(),
                             user.getName(),
                             user.getEmail(),
-                            user.getImage()
+                            user.getImage(),
+                            0
                     ));
                     return dto;
                 })

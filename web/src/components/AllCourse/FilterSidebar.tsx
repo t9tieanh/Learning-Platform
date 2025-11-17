@@ -39,7 +39,7 @@ export const FilterSidebar = ({
     const fetchCategories = async () => {
       setLoadingCategories(true)
       try {
-        const res = await categoryService.getAllCategories()
+        const res = await categoryService.getValidCategories()
         if (!mounted) return
         setCategories(res?.result ?? [])
       } catch (e) {

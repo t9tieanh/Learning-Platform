@@ -14,6 +14,7 @@ import java.util.Optional;
 public interface CourseRepository extends JpaRepository<CourseEntity, String> {
     Optional<CourseEntity> findByIdAndInstructorId(String id, String instructorId);
     boolean existsByIdAndInstructorId(String id, String instructorId);
+    List<CourseEntity> findAllByInstructorId(String instructorId);
 
     Page<CourseEntity> findByInstructorId(String instructorId, Pageable pageable);
     @EntityGraph(attributePaths = {"tags"})
@@ -31,7 +32,8 @@ public interface CourseRepository extends JpaRepository<CourseEntity, String> {
     @Query("""
         SELECT c 
         FROM CourseEntity c 
-        LEFT JOIN c.enrollments e 
+        LEFT JOIN c.enrollments e
+        WHERE c.status = 'PUBLISHED' AND c.progressStep = 'COMPLETED'
         GROUP BY c 
         ORDER BY COUNT(e) DESC
     """)
@@ -41,7 +43,9 @@ public interface CourseRepository extends JpaRepository<CourseEntity, String> {
         SELECT c
         FROM CourseEntity c
         LEFT JOIN c.enrollments e
-        WHERE FUNCTION('MONTH', e.enrollmentDate) = :month
+        WHERE c.status = 'PUBLISHED'
+          AND c.progressStep = 'COMPLETED'
+          AND FUNCTION('MONTH', e.enrollmentDate) = :month
           AND FUNCTION('YEAR', e.enrollmentDate) = :year
         GROUP BY c
         ORDER BY COUNT(e) DESC
@@ -50,7 +54,9 @@ public interface CourseRepository extends JpaRepository<CourseEntity, String> {
 
     @Query("""
         SELECT c FROM CourseEntity c
-        WHERE (:search IS NULL OR LOWER(c.title) LIKE LOWER(CONCAT('%', :search, '%')))
+        WHERE c.status = 'PUBLISHED'
+        AND c.progressStep = 'COMPLETED'
+        AND (:search IS NULL OR LOWER(c.title) LIKE LOWER(CONCAT('%', :search, '%')))
         AND (:category IS NULL OR c.category.name = :category)
         AND (:minPrice IS NULL OR c.finalPrice >= :minPrice)
         AND (:minRating IS NULL OR c.rating >= :minRating)
@@ -100,6 +106,20 @@ public interface CourseRepository extends JpaRepository<CourseEntity, String> {
 """)
     Page<CourseEntity> findAllByUserId(@Param("userId") String userId, Pageable pageable);
 
+    @Query("SELECT c FROM CourseEntity c LEFT JOIN FETCH c.enrollments WHERE c.instructorId = :instructorId")
+    List<CourseEntity> findAllByInstructorIdWithEnrollments(@Param("instructorId") String instructorId);
+
+    @Query("""
+       SELECT MONTH(c.createdAt) AS month,
+              COUNT(c.id) AS totalCourse
+       FROM CourseEntity c
+       WHERE c.instructorId = :userId
+         AND YEAR(c.createdAt) = :year
+       GROUP BY MONTH(c.createdAt)
+       ORDER BY MONTH(c.createdAt)
+       """)
+    List<Object[]> countCoursesByMonth(@Param("userId") String userId,
+                                       @Param("year") long year);
     @Query("SELECT c FROM CourseEntity c LEFT JOIN FETCH c.enrollments WHERE c.id IN :ids")
     List<CourseEntity> findAllByIdWithEnrollments(@Param("ids") List<String> ids);
 }

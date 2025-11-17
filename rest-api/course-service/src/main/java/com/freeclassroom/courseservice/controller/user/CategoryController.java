@@ -23,4 +23,9 @@ public class CategoryController {
     ApiResponse<List<CategoryResponse>> getAllCategory() {
         return categoryService.getAllCategory();
     }
+
+    @GetMapping("/active")
+    ApiResponse<List<CategoryResponse>> getValidCategory() {
+        return categoryService.getValidCategory();
+    }
 }
