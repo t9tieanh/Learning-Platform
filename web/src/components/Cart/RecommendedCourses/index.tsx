@@ -1,9 +1,28 @@
 import { FaSearch } from 'react-icons/fa'
 import CourseCard from '@/components/Cart/RecommendedCourses/coursecart'
-import { mockCourses } from '@/data/course.mock'
+import courseUserService from '@/services/course/course-user.service'
+import { useEffect, useState } from 'react'
+import { Course } from '@/types/course.type'
 
 const RecommendedCourses = () => {
-  const courses = mockCourses.slice(0, 5)
+  const [courses, setCourses] = useState<Course[]>([])
+
+  useEffect(() => {
+    const fetchCourseDetail = async () => {
+      try {
+        const response = await courseUserService.getBestSellerCourses(4)
+        if (response && response.code === 200 && response.result) {
+          setCourses(response.result as unknown as Course[])
+        } else {
+          console.error('Không thể tải chi tiết khóa học')
+        }
+      } catch (error) {
+        console.error('Không thể tải chi tiết khóa học', error)
+      }
+    }
+
+    fetchCourseDetail()
+  }, [])
 
   return (
     <div className='recommended-courses'>

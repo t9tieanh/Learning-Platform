@@ -10,7 +10,7 @@ import com.freeclassroom.courseservice.dto.response.course.PageResponse;
 import java.util.List;
 
 public interface ICourseUserService {
-    ApiResponse<CourseUserDetailResponse> getCourseDetail(String courseId);
+    ApiResponse<CourseUserDetailResponse> getCourseDetail(String courseId, String userId);
     ApiResponse<PagingResponse<MyCourseResponse>> getCourseUsers(String userId, int page, int size);
     ApiResponse<List<CourseResponse>> getBestSellerCourse(int limit);
     ApiResponse<List<CourseResponse>> getTrendyCourse(int limit);

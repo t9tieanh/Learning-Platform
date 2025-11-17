@@ -13,6 +13,7 @@ export interface CourseResponse {
   language: string | null
   originalPrice: number | null
   finalPrice: number | null
+  purchased: boolean
   instructor: {
     id: string
     name: string
@@ -90,7 +91,7 @@ class CourseUserService {
     return response.data
   }
 
-  async getBestSellerCourses(limit = 4): Promise<Course[]> {
+  async getBestSellerCourses(limit = 4): Promise<ApiResponse<Course[]>> {
     const response = await axiosClient.axiosInstance.get('learning/courses/best-seller', {
       params: { limit }
     })

@@ -11,6 +11,7 @@ import com.freeclassroom.courseservice.service.course.ICourseUserService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -33,8 +34,9 @@ public class CourseUserController {
 
 
     @GetMapping("/{id}")
-    ApiResponse<CourseUserDetailResponse> getCourseDetail(@PathVariable("id") String id) {
-        return courseUserService.getCourseDetail(id);
+    ApiResponse<CourseUserDetailResponse> getCouseDetail(@PathVariable("id") String id) {
+        String userId = SecurityContextHolder.getContext().getAuthentication().getName();
+        return courseUserService.getCourseDetail(id, userId);
     }
 
     @GetMapping("/best-seller")

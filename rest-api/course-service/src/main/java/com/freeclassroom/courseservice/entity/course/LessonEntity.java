@@ -1,7 +1,7 @@
 package com.freeclassroom.courseservice.entity.course;
 
 import com.freeclassroom.courseservice.entity.AbstractEntity;
-import com.freeclassroom.courseservice.entity.member.LessonProgress;
+import com.freeclassroom.courseservice.entity.member.LessonProgressEntity;
 import com.freeclassroom.courseservice.enums.entity.EnumLessonType;
 import jakarta.persistence.*;
 import lombok.*;
@@ -20,6 +20,8 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class LessonEntity extends AbstractEntity {
     String title;
+
+    @Column(columnDefinition = "TEXT")
     String content;
     Long duration;
     Long position;
@@ -35,5 +37,5 @@ public class LessonEntity extends AbstractEntity {
 
     // Lesson Progress
     @OneToMany(mappedBy = "lesson")
-    List<LessonProgress> progresses;
+    List<LessonProgressEntity> progresses;
 }

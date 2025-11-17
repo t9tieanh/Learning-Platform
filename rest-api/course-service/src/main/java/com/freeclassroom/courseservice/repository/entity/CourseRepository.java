@@ -120,4 +120,6 @@ public interface CourseRepository extends JpaRepository<CourseEntity, String> {
        """)
     List<Object[]> countCoursesByMonth(@Param("userId") String userId,
                                        @Param("year") long year);
+    @Query("SELECT c FROM CourseEntity c LEFT JOIN FETCH c.enrollments WHERE c.id IN :ids")
+    List<CourseEntity> findAllByIdWithEnrollments(@Param("ids") List<String> ids);
 }

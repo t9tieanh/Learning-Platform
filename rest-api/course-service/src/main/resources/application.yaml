@@ -33,7 +33,10 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: false
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
     defer-datasource-initialization: true
   sql:
     init:
@@ -51,6 +54,13 @@ spring:
     refresh-token-expiration: 604800000 # 7 ngày (7 * 24 * 60 * 60 * 1000 ms)
     refreshable-duration: 604800000
     short-lived-token: 3600000
+
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+    virtual-host: /
 
 grpc:
   server:

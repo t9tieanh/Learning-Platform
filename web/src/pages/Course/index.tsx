@@ -9,6 +9,7 @@ import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { useNavigate, useParams } from 'react-router-dom'
 import AvatarNotFound from '@/assets/images/avatar-not-found.png'
+import LearnNow from '@/components/Course/LearnNow'
 
 const Course = () => {
   const [courseDetail, setCourseDetail] = useState<CourseResponse | null>(null)
@@ -22,23 +23,39 @@ const Course = () => {
         if (response && response.code === 200 && response.result) {
           setCourseDetail(response.result)
         } else {
-          console.log('Failed to fetch course details')
           toast.error(response.message || 'Không thể tải chi tiết khóa học')
           navigate('/courses')
         }
       } catch (error) {
-        console.log('Error fetching course detail data:', error)
         toast.error('Không thể tải chi tiết khóa học')
         navigate('/courses')
       }
     }
 
     fetchCourseDetailData()
-  }, [])
+  }, [id, navigate])
+
+  // show a compact top header with course title when cover scrolls out of view
+  const [showSmallHeader, setShowSmallHeader] = useState(false)
+  useEffect(() => {
+    const el = document.querySelector('.cover-container')
+    if (!el) return
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          setShowSmallHeader(!entry.isIntersecting)
+        })
+      },
+      { threshold: 0 }
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [courseDetail?.id])
 
   return (
     <div className='course-page bg-white'>
       <Cover
+        showSmallHeader={showSmallHeader}
         image={courseDetail?.thumbnailUrl || ''}
         video={courseDetail?.introductoryVideo || ''}
         title={courseDetail?.title || ''}
@@ -76,11 +93,17 @@ const Course = () => {
           />
         </div>
         <div className='col-span-1'>
-          <CoursePurchaseBox
-            originalPrice={courseDetail?.originalPrice || 0}
-            finalPrice={courseDetail?.finalPrice || 0}
-            courseId={courseDetail?.id || ''}
-          />
+          {courseDetail && courseDetail.purchased !== undefined && courseDetail.purchased ? (
+            <LearnNow courseId={courseDetail.id} />
+          ) : (
+            <>
+              <CoursePurchaseBox
+                originalPrice={courseDetail?.originalPrice || 0}
+                finalPrice={courseDetail?.finalPrice || 0}
+                courseId={courseDetail?.id || ''}
+              />
+            </>
+          )}
         </div>
       </div>
       <div className='feedback-container w-full py-10 bg-[#0C356A]'>

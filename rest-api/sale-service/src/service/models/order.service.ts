@@ -4,10 +4,16 @@ import userClientGrpc from '~/grpc/userClient.grpc';
 import courseClientGrpc from '~/grpc/courseClient.grpc';
 import ApiError from '~/middleware/ApiError';
 import { OrderStatus, Order } from '@prisma/client';
+import { StatusCodes } from 'http-status-codes';
 import redisService from '../utils/redis.service';
 import discountService from './discount.service';
 import vnpayService from '../../service/utils/vnpay.service'
 import { OrderDto } from '~/dto/response/order.dto';
+import rabbitMQService from '~/service/utils/rabbitmq.service';
+import { OrderCreatedPayload } from '~/sagas/order/dtos';
+import { createEnvelope } from '~/sagas/events/envelope';
+import { MessageType } from '~/sagas/order/events';
+import momoService from '../utils/momo.service';
 
 class OrderService {
     async createOrder(orderData: CreateOrderDto, userId: string) : Promise<{
@@ -50,7 +56,7 @@ class OrderService {
             customer_name: user.name as string,
             customer_email: user.email as string,
             total: orderItems.reduce((sum, item) => sum + (item.final_price || 0), 0),
-            status: OrderStatus.Unconfirmed
+            status: OrderStatus.Pending
         }
 
         await redisService.set(`order:${userId}`, newOrder, 15 * 60); // TTL 15 minutes
@@ -127,12 +133,18 @@ class OrderService {
         // process payment via VNPAY
         // Generate VNPAY payment URL
         let payUri: { payUrl: string } | null = null
+        const amount = createdOrder.total;
         if (paymentMethod === 'VNPAY') {
-            const amount = createdOrder.total;
             payUri = await vnpayService.createPayment({
                 amount,
                 orderId: createdOrder.id,
                 ipAddr: ipAddress || '127.0.0.1'
+            });
+        } else if (paymentMethod === 'MOMO') {
+            payUri = await momoService.createPayment({
+                 amount,
+                 orderId: createdOrder.id,
+                 ipAddr: ipAddress || '127.0.0.1'
             });
         }
 
@@ -141,92 +153,6 @@ class OrderService {
             payment: {
                 payUrl: payUri ? payUri.payUrl : ''
             }
-        }
-    }
-
-
-    // verify otp for vnpay system
-    async verifyOrder(query: any): Promise<{ isSuccess: boolean, orderId: string, rawData: any, message: string, rspCode?: string }> {
-        const { orderId, amount, status, isValid } = vnpayService.getCallbackInfo(query)
-        
-        // 1. Validate VNPAY checksum
-        if (!isValid) {
-            return {
-                isSuccess: false,
-                orderId: orderId || '',
-                rawData: query,
-                message: 'Chữ ký không hợp lệ',
-                rspCode: '97'
-            }
-        }
-
-        // 2. Check VNPAY payment status
-        if (status !== '00') {
-            return {
-                isSuccess: false,
-                orderId: orderId || '',
-                rawData: query,
-                message: 'Thanh toán thất bại',
-                rspCode: status
-            }
-        }
-
-        // 3. Check if order exists
-        const order = await prismaService.order.findUnique({
-            where: { id: orderId }
-        })
-
-        if (!order) {
-            return {
-                isSuccess: false,
-                orderId: orderId || '',
-                rawData: query,
-                message: 'Đơn hàng không tồn tại',
-                rspCode: '01'
-            }
-        }
-
-        // 4. Check if order already processed
-        if (order.status === OrderStatus.Completed) {
-            return {
-                isSuccess: false, // Return success for idempotency
-                orderId: orderId,
-                rawData: query,
-                message: 'Đơn hàng đã được xử lý thành công trước đó',
-                rspCode: '00'
-            }
-        }
-
-        //5. check total ammount
-        if (order.total !== amount) {
-            return {
-                isSuccess: false,
-                orderId: orderId,
-                rawData: query,
-                message: 'Số tiền không hợp lệ',
-                rspCode: '00'
-            }
-        }
-
-
-        // 6. Process payment confirmation with transaction
-        const updatedOrder = await prismaService.$transaction(async (tx) => {
-            // Update order status to completed
-            return await tx.order.update({
-                where: { id: orderId },
-                data: { status: OrderStatus.Completed }
-            })
-        })
-
-        // note -> update course-service + send messase queue to notification service
-
-        //return response successs 
-        return {
-            isSuccess: true, // Return success for idempotency
-            orderId: orderId,
-            rawData: updatedOrder,
-            message: `Thanh toán đơn hàng ${orderId}! thành công`,
-            rspCode: '00'
         }
     }
 

@@ -12,6 +12,7 @@ import OrderSuccess from '@/components/Checkout/order-success'
 const CheckoutPage = () => {
   const navigate = useNavigate()
   const [order, setOrder] = useState<Order | null>(null)
+  const [mode, setMode] = useState<'view' | 'pay'>('pay')
   const { id } = useParams<{ id: string }>()
 
   useEffect(() => {
@@ -23,6 +24,7 @@ const CheckoutPage = () => {
           response = await orderService.getOrder()
           if (response && response.code === 200 && response.result) {
             setOrder(response.result)
+            setMode('pay')
           } else if (response && response.message) {
             toast.error(response.message || 'Không thể lấy thông tin đơn hàng.')
             navigate('/')
@@ -31,10 +33,10 @@ const CheckoutPage = () => {
           // get id for show page notify success order
           response = await orderService.getOrderInfo(id)
           if (response && response.code === 200 && response.result) {
-            if (response.result.status === OrderStatus.Completed) {
-              setOrder(response.result)
-              return
-            }
+            setOrder(response.result)
+            setMode('view')
+            return
+          } else {
             toast.error('Đơn hàng này đã hết hạn thanh toán !')
             navigate('/')
             return
@@ -51,7 +53,7 @@ const CheckoutPage = () => {
 
   return (
     <div className='bg-gray-50'>
-      {order && order.status === OrderStatus.Completed && id ? (
+      {order && id && mode === 'view' ? (
         <OrderSuccess order={order} id={id as string} />
       ) : (
         <>

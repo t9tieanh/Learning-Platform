@@ -6,6 +6,7 @@ import RabbitMQService from './service/utils/rabbitmq.service';
 import session from 'express-session';
 import { env } from './config/env';
 import indexRoute from '~/routes';
+import { initSagas } from './sagas/init/initSaga';
 
 const app = express();
 
@@ -34,6 +35,7 @@ const PORT = env.PORT || 4000;
 
 RabbitMQService.getInstance().then(() => {
   console.log('Connected to RabbitMQ');
+  initSagas();
 }).catch((error) => {
   console.error('Failed to connect to RabbitMQ:', error);
 });

@@ -31,6 +31,8 @@ public class CourseUserDetailResponse {
     InstructorCourseResponse instructor;
     List<ChapterUserDto> chapters;
 
+    Boolean purchased;
+
     // Tag
     List<TagResponse> tags;
 

@@ -29,8 +29,17 @@ const PaymentForm = ({ order }: { order: Order | null }) => {
     }
   }
 
-  const handlePayWithMomo = () => {
-    toast.error('Chức năng thanh toán bằng Momo đang được phát triển.')
+  const handlePayWithMomo = async () => {
+    try {
+      const response = await orderService.processPayment('MOMO', receiveEmail)
+      if (response && response.code === 200 && response.result) {
+        window.location.href = response.result.payment.payUrl
+      } else {
+        toast.error(response.message || 'Không thể khởi tạo thanh toán Momo. Vui lòng thử lại.')
+      }
+    } catch (error: any) {
+      toast.error(error?.response?.data.message || 'Đã có lỗi xảy ra, vui lòng thử lại sau.')
+    }
   }
 
   return (

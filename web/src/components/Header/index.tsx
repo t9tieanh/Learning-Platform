@@ -1,4 +1,4 @@
-import { FC, useState, useEffect } from 'react'
+import { FC, useState, useEffect, useRef } from 'react'
 import { NavigationMenu, NavigationMenuItem, NavigationMenuList } from '@/components/ui/navigation-menu'
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
 import CustomButton from '../common/Button'
@@ -15,6 +15,7 @@ import logo from '../../assets/images/logo1.png'
 
 const Header: FC = () => {
   const navigate = useNavigate()
+  const rootRef = useRef<HTMLDivElement | null>(null)
   const { data } = useAuthStore()
   const count = useCartStore((s) => s.count)
   const refresh = useCartStore((s) => s.refresh)
@@ -25,6 +26,23 @@ const Header: FC = () => {
     refresh().catch(() => { })
   }, [refresh])
 
+  // publish header height as a CSS variable so pages can position elements under it
+  useEffect(() => {
+    const el = rootRef.current
+    if (!el) return
+    const setVar = () => {
+      const h = el.getBoundingClientRect().height || 0
+      try {
+        document.documentElement.style.setProperty('--main-header-height', `${Math.ceil(h)}px`)
+      } catch (e) {
+        // ignore
+      }
+    }
+    setVar()
+    window.addEventListener('resize', setVar)
+    return () => window.removeEventListener('resize', setVar)
+  }, [])
+
   const menuItems = [
     { icon: <House className='w-5 h-5' />, label: 'Trang chủ', value: 'home', path: '/' },
     { icon: <BookOpen className='w-5 h-5' />, label: 'Khóa học', value: 'course', path: '/courses' },
@@ -33,7 +51,7 @@ const Header: FC = () => {
   ]
 
   return (
-    <div className='p-3 w-full bg-white sticky top-0 z-50 shadow-sm'>
+    <div ref={rootRef} className='p-3 w-full bg-white sticky top-0 z-50 shadow-sm'>
       <NavigationMenu className='min-w-full mx-0'>
         <div className='max-w-7xl mx-auto flex items-center justify-between w-full p-1'>
           <NavigationMenuList className='text-left'>
@@ -107,7 +125,7 @@ const Header: FC = () => {
                 <CustomButton
                   label='Đăng ký'
                   icon={<UserPlus className='w-4 h-4' />}
-                  className='hidden md:flex signup-btn shadow-lg bg-white-100 text-blue-700 hover:text-white hover:bg-blue-800 rounded-xl font-base hover:scale-105 transition-transform duration-300 ease-in-out'
+                  className='hidden md:flex signup-btn shadow-sm bg-white-100 text-blue-700 hover:text-white hover:bg-blue-800 rounded-xl font-base hover:scale-105 transition-transform duration-300 ease-in-out'
                   onClick={() => navigate('/auth?mode=signup')}
                 />
                 <CustomButton

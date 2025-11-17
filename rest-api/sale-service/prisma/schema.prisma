@@ -29,7 +29,7 @@ model Cart_Item {
 model Order {
   id          String        @id @default(cuid())
   user_id     String
-  status      OrderStatus   @default(Unconfirmed)
+  status      OrderStatus   @default(Pending)
   created_at  DateTime      @default(now())
   updated_at  DateTime      @updatedAt
   customer_name String
@@ -82,7 +82,7 @@ enum DiscountType {
 }
 
 enum OrderStatus {
-  Unconfirmed
+  Cancel
   Pending
   Completed
 }

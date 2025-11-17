@@ -1,5 +1,6 @@
 package com.freeclassroom.courseservice.dto.response.course.student;
 
+import com.freeclassroom.courseservice.enums.entity.EnumLessonProgress;
 import com.freeclassroom.courseservice.enums.entity.EnumLessonType;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -21,4 +22,7 @@ public class LessonOverviewResponse {
 
     @Enumerated(EnumType.STRING)
     EnumLessonType type;
+
+    @Enumerated(EnumType.STRING)
+    EnumLessonProgress completionStatus;
 }
