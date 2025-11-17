@@ -17,13 +17,13 @@ const CoursePage = () => {
     type: 'video' | 'article'
     content: string
     url: string
+    completionStatus?: 'NOT_STARTED' | 'COMPLETED'
   }
   const { courseId } = useParams<{ courseId: string }>()
   const [courseData, setCourseData] = useState<CourseDetail | null>(null)
 
   const [currentLecture, setCurrentLecture] = useState<Lesson>()
   const [currentLectureId, setCurrentLectureId] = useState<number>(-1)
-  const [completedLectures, setCompletedLectures] = useState<Set<number>>(new Set())
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const navigate = useNavigate()
 
@@ -43,7 +43,9 @@ const CoursePage = () => {
             duration: null,
             introductionVideo: response.result.introductoryVideo as string,
             position: null,
-            type: 'video'
+            type: 'video',
+            completionStatus: 'COMPLETED',
+            thumbnailUrl: response.result.thumbnailUrl as string
           })
         } else {
           console.log(response.message || 'Failed to fetch course details')
@@ -71,35 +73,36 @@ const CoursePage = () => {
         duration: fmt(l.duration),
         type: l.type === 'article' ? 'article' : 'video',
         url: l.content,
-        content: l.content
+        content: l.content,
+        completionStatus: l.completionStatus
       }))
     }))
   }, [courseData])
 
   // Load completed lectures from localStorage
-  useEffect(() => {
-    const saved = localStorage.getItem('completedLectures')
-    if (saved) {
-      setCompletedLectures(new Set(JSON.parse(saved)))
-    }
-  }, [])
+  // useEffect(() => {
+  //   const saved = localStorage.getItem('completedLectures')
+  //   if (saved) {
+  //     setCompletedLectures(new Set(JSON.parse(saved)))
+  //   }
+  // }, [])
 
   // Save completed lectures to localStorage
-  useEffect(() => {
-    localStorage.setItem('completedLectures', JSON.stringify(Array.from(completedLectures)))
-  }, [completedLectures])
+  // useEffect(() => {
+  //   localStorage.setItem('completedLectures', JSON.stringify(Array.from(completedLectures)))
+  // }, [completedLectures])
 
-  const handleToggleComplete = (lectureId: number) => {
-    setCompletedLectures((prev) => {
-      const next = new Set(prev)
-      if (next.has(lectureId)) {
-        next.delete(lectureId)
-      } else {
-        next.add(lectureId)
-      }
-      return next
-    })
-  }
+  // const handleToggleComplete = (lectureId: number) => {
+  //   setCompletedLectures((prev) => {
+  //     const next = new Set(prev)
+  //     if (next.has(lectureId)) {
+  //       next.delete(lectureId)
+  //     } else {
+  //       next.add(lectureId)
+  //     }
+  //     return next
+  //   })
+  // }
 
   const handleSelectLecture = (lecture: UILecture) => {
     // Convert UILecture (sidebar item) to domain Lesson type
@@ -109,7 +112,8 @@ const CoursePage = () => {
       content: lecture.url,
       duration: null,
       position: null,
-      type: lecture.type === 'article' ? 'article' : 'video'
+      type: lecture.type === 'article' ? 'article' : 'video',
+      completionStatus: lecture.completionStatus || 'NOT_STARTED'
     })
     setCurrentLectureId(lecture.id)
     setSidebarOpen(false)
@@ -125,7 +129,8 @@ const CoursePage = () => {
         content: first.url,
         duration: null,
         position: null,
-        type: first.type === 'article' ? 'article' : 'video'
+        type: first.type === 'article' ? 'article' : 'video',
+        completionStatus: first.completionStatus || 'NOT_STARTED'
       })
       setCurrentLectureId(first.id)
     }
@@ -155,7 +160,7 @@ const CoursePage = () => {
       </header>
 
       {/* Main Content */}
-      <div className='flex-1 flex overflow-hidden gap-6'>
+      <div className='flex-1 flex overflow-hidden'>
         {/* Left Column - Video & Tabs */}
         <div className='flex-1 flex flex-col overflow-y-auto px-6 py-4'>
           {currentLecture && <LessonViewer lesson={currentLecture} />}
@@ -174,9 +179,8 @@ const CoursePage = () => {
           <CourseSidebar
             sections={uiSections}
             currentLectureId={currentLectureId}
-            completedLectures={completedLectures}
             onSelectLecture={handleSelectLecture}
-            onToggleComplete={handleToggleComplete}
+            onClose={() => setSidebarOpen(false)}
           />
         </div>
 
@@ -199,9 +203,7 @@ const CoursePage = () => {
               <CourseSidebar
                 sections={uiSections}
                 currentLectureId={currentLectureId}
-                completedLectures={completedLectures}
                 onSelectLecture={handleSelectLecture}
-                onToggleComplete={handleToggleComplete}
                 onClose={() => setSidebarOpen(false)}
               />
             </div>

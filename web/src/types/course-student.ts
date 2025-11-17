@@ -5,7 +5,11 @@ export interface Lesson {
   duration: number | null
   position: number | null
   type: 'video' | 'article'
+  completionStatus: 'NOT_STARTED' | 'COMPLETED'
+
+  // Optional video URL for video of course
   introductionVideo?: string | null
+  thumbnailUrl?: string | null
 }
 
 export interface Chapter {

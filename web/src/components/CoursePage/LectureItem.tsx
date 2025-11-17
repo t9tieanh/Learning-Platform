@@ -1,4 +1,5 @@
 import { TvMinimalPlay, File } from 'lucide-react'
+import { IoCheckmarkDoneCircle } from 'react-icons/io5'
 
 interface LectureItemProps {
   lecture: {
@@ -8,14 +9,13 @@ interface LectureItemProps {
     videoUrl?: string
     type: 'video' | 'article'
     content: string
+    completionStatus?: 'NOT_STARTED' | 'COMPLETED'
   }
   isActive: boolean
-  isCompleted: boolean
   onSelect: () => void
-  onToggleComplete: () => void
 }
 
-export const LectureItem = ({ lecture, isActive, isCompleted, onSelect, onToggleComplete }: LectureItemProps) => {
+export const LectureItem = ({ lecture, isActive, onSelect }: LectureItemProps) => {
   return (
     <div
       role='button'
@@ -47,7 +47,12 @@ export const LectureItem = ({ lecture, isActive, isCompleted, onSelect, onToggle
             />
           )}
           <p className={`text-sm leading-snug ${isActive ? 'text-primary font-medium' : 'text-foreground'}`}>
-            {lecture.title}
+            {lecture.title}{' '}
+            {lecture.completionStatus === 'COMPLETED' ? (
+              <IoCheckmarkDoneCircle className='inline-block w-4 h-4 text-primary' />
+            ) : (
+              ''
+            )}
           </p>
         </div>
         <p className='text-xs text-muted-foreground ml-6'>

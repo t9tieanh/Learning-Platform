@@ -9,6 +9,7 @@ interface Lecture {
   type: 'video' | 'article'
   url: string
   content: string
+  completionStatus?: 'NOT_STARTED' | 'COMPLETED'
 }
 
 interface Section {
@@ -20,22 +21,13 @@ interface Section {
 interface SectionListProps {
   sections: Section[]
   currentLectureId: number
-  completedLectures: Set<number>
   onSelectLecture: (lecture: Lecture) => void
-  onToggleComplete: (lectureId: number) => void
 }
 
-export const SectionList = ({
-  sections,
-  currentLectureId,
-  completedLectures,
-  onSelectLecture,
-  onToggleComplete
-}: SectionListProps) => {
+export const SectionList = ({ sections, currentLectureId, onSelectLecture }: SectionListProps) => {
   return (
     <div className='space-y-2'>
       {sections.map((section, index) => {
-        const completedCount = section.lectures.filter((l) => completedLectures.has(l.id)).length
         const totalCount = section.lectures.length
 
         return (
@@ -46,9 +38,9 @@ export const SectionList = ({
                   <h3 className='font-semibold text-sm mb-1'>
                     {index + 1}. {section.title}
                   </h3>
-                  <p className='text-xs text-muted-foreground'>
+                  {/* <p className='text-xs text-muted-foreground'>
                     {completedCount} / {totalCount} | {section.duration}
-                  </p>
+                  </p> */}
                 </div>
                 <ChevronDown className='w-5 h-5 text-muted-foreground transition-transform group-data-[state=open]:rotate-180' />
               </CollapsibleTrigger>
@@ -59,9 +51,7 @@ export const SectionList = ({
                       key={lecture.id}
                       lecture={lecture}
                       isActive={currentLectureId === lecture.id}
-                      isCompleted={completedLectures.has(lecture.id)}
                       onSelect={() => onSelectLecture(lecture)}
-                      onToggleComplete={() => onToggleComplete(lecture.id)}
                     />
                   ))}
                 </div>
