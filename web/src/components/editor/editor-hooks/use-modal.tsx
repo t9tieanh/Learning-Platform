@@ -1,16 +1,11 @@
-import { JSX, useCallback, useMemo, useState } from "react"
-import * as React from "react"
+import { JSX, useCallback, useMemo, useState } from 'react'
+import * as React from 'react'
 
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 
 export function useEditorModal(): [
   JSX.Element | null,
-  (title: string, showModal: (onClose: () => void) => JSX.Element) => void,
+  (title: string, showModal: (onClose: () => void) => JSX.Element) => void
 ] {
   const [modalContent, setModalContent] = useState<null | {
     closeOnClickOutside: boolean
@@ -40,15 +35,11 @@ export function useEditorModal(): [
   }, [modalContent, onClose])
 
   const showModal = useCallback(
-    (
-      title: string,
-      getContent: (onClose: () => void) => JSX.Element,
-      closeOnClickOutside = false
-    ) => {
+    (title: string, getContent: (onClose: () => void) => JSX.Element, closeOnClickOutside = false) => {
       setModalContent({
         closeOnClickOutside,
         content: getContent(onClose),
-        title,
+        title
       })
     },
     [onClose]

@@ -1,18 +1,12 @@
-import { useEffect, useState } from "react"
-import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext"
-import { IS_APPLE, mergeRegister } from "@lexical/utils"
-import {
-  CAN_REDO_COMMAND,
-  CAN_UNDO_COMMAND,
-  COMMAND_PRIORITY_CRITICAL,
-  REDO_COMMAND,
-  UNDO_COMMAND,
-} from "lexical"
-import { RedoIcon, UndoIcon } from "lucide-react"
+import { useEffect, useState } from 'react'
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
+import { IS_APPLE, mergeRegister } from '@lexical/utils'
+import { CAN_REDO_COMMAND, CAN_UNDO_COMMAND, COMMAND_PRIORITY_CRITICAL, REDO_COMMAND, UNDO_COMMAND } from 'lexical'
+import { RedoIcon, UndoIcon } from 'lucide-react'
 
-import { useToolbarContext } from "@/components/editor/context/toolbar-context"
-import { Button } from "@/components/ui/button"
-import { ButtonGroup } from "@/components/ui/button-group"
+import { useToolbarContext } from '@/components/editor/context/toolbar-context'
+import { Button } from '@/components/ui/button'
+import { ButtonGroup } from '@/components/ui/button-group'
 
 export function HistoryToolbarPlugin() {
   const [editor] = useLexicalComposerContext()
@@ -57,28 +51,28 @@ export function HistoryToolbarPlugin() {
         onClick={() => {
           activeEditor.dispatchCommand(UNDO_COMMAND, undefined)
         }}
-        title={IS_APPLE ? "Undo (⌘Z)" : "Undo (Ctrl+Z)"}
-        type="button"
-        aria-label="Undo"
-        size="icon"
-        className="!h-8 !w-8"
-        variant={"outline"}
+        title={IS_APPLE ? 'Undo (⌘Z)' : 'Undo (Ctrl+Z)'}
+        type='button'
+        aria-label='Undo'
+        size='icon'
+        className='!h-8 !w-8'
+        variant={'outline'}
       >
-        <UndoIcon className="size-4" />
+        <UndoIcon className='size-4' />
       </Button>
       <Button
         disabled={!canRedo || !isEditable}
         onClick={() => {
           activeEditor.dispatchCommand(REDO_COMMAND, undefined)
         }}
-        title={IS_APPLE ? "Redo (⇧⌘Z)" : "Redo (Ctrl+Y)"}
-        type="button"
-        aria-label="Redo"
-        variant={"outline"}
-        size="icon"
-        className="!h-8 !w-8"
+        title={IS_APPLE ? 'Redo (⇧⌘Z)' : 'Redo (Ctrl+Y)'}
+        type='button'
+        aria-label='Redo'
+        variant={'outline'}
+        size='icon'
+        className='!h-8 !w-8'
       >
-        <RedoIcon className="size-4" />
+        <RedoIcon className='size-4' />
       </Button>
     </ButtonGroup>
   )

@@ -1,36 +1,25 @@
-import { useEffect, useRef, useState } from "react"
-import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext"
-import type { LexicalCommand, LexicalEditor, RangeSelection } from "lexical"
+import { useEffect, useRef, useState } from 'react'
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
+import type { LexicalCommand, LexicalEditor, RangeSelection } from 'lexical'
 import {
   $getSelection,
   $isRangeSelection,
   COMMAND_PRIORITY_EDITOR,
   createCommand,
   REDO_COMMAND,
-  UNDO_COMMAND,
-} from "lexical"
-import { MicIcon } from "lucide-react"
+  UNDO_COMMAND
+} from 'lexical'
+import { MicIcon } from 'lucide-react'
 
-import { useReport } from "@/components/editor/editor-hooks/use-report"
-import { CAN_USE_DOM } from "@/components/editor/shared/can-use-dom"
-import { Button } from "@/components/ui/button"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
+import { useReport } from '@/components/editor/editor-hooks/use-report'
+import { CAN_USE_DOM } from '@/components/editor/shared/can-use-dom'
+import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 
-export const SPEECH_TO_TEXT_COMMAND: LexicalCommand<boolean> = createCommand(
-  "SPEECH_TO_TEXT_COMMAND"
-)
+export const SPEECH_TO_TEXT_COMMAND: LexicalCommand<boolean> = createCommand('SPEECH_TO_TEXT_COMMAND')
 
-const VOICE_COMMANDS: Readonly<
-  Record<
-    string,
-    (arg0: { editor: LexicalEditor; selection: RangeSelection }) => void
-  >
-> = {
-  "\n": ({ selection }) => {
+const VOICE_COMMANDS: Readonly<Record<string, (arg0: { editor: LexicalEditor; selection: RangeSelection }) => void>> = {
+  '\n': ({ selection }) => {
     selection.insertParagraph()
   },
   redo: ({ editor }) => {
@@ -38,12 +27,11 @@ const VOICE_COMMANDS: Readonly<
   },
   undo: ({ editor }) => {
     editor.dispatchCommand(UNDO_COMMAND, undefined)
-  },
+  }
 }
 
 export const SUPPORT_SPEECH_RECOGNITION: boolean =
-  CAN_USE_DOM &&
-  ("SpeechRecognition" in window || "webkitSpeechRecognition" in window)
+  CAN_USE_DOM && ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)
 
 function SpeechToTextPluginImpl() {
   const [editor] = useLexicalComposerContext()
@@ -60,37 +48,34 @@ function SpeechToTextPluginImpl() {
       recognition.current = new SpeechRecognition()
       recognition.current.continuous = true
       recognition.current.interimResults = true
-      recognition.current.addEventListener(
-        "result",
-        (event: typeof SpeechRecognition) => {
-          const resultItem = event.results.item(event.resultIndex)
-          const { transcript } = resultItem.item(0)
-          report(transcript)
+      recognition.current.addEventListener('result', (event: typeof SpeechRecognition) => {
+        const resultItem = event.results.item(event.resultIndex)
+        const { transcript } = resultItem.item(0)
+        report(transcript)
 
-          if (!resultItem.isFinal) {
-            return
-          }
-
-          editor.update(() => {
-            const selection = $getSelection()
-
-            if ($isRangeSelection(selection)) {
-              const command = VOICE_COMMANDS[transcript.toLowerCase().trim()]
-
-              if (command) {
-                command({
-                  editor,
-                  selection,
-                })
-              } else if (transcript.match(/\s*\n\s*/)) {
-                selection.insertParagraph()
-              } else {
-                selection.insertText(transcript)
-              }
-            }
-          })
+        if (!resultItem.isFinal) {
+          return
         }
-      )
+
+        editor.update(() => {
+          const selection = $getSelection()
+
+          if ($isRangeSelection(selection)) {
+            const command = VOICE_COMMANDS[transcript.toLowerCase().trim()]
+
+            if (command) {
+              command({
+                editor,
+                selection
+              })
+            } else if (transcript.match(/\s*\n\s*/)) {
+              selection.insertParagraph()
+            } else {
+              selection.insertText(transcript)
+            }
+          }
+        })
+      })
     }
 
     if (recognition.current) {
@@ -126,13 +111,13 @@ function SpeechToTextPluginImpl() {
             editor.dispatchCommand(SPEECH_TO_TEXT_COMMAND, !isSpeechToText)
             setIsSpeechToText(!isSpeechToText)
           }}
-          variant={isSpeechToText ? "secondary" : "ghost"}
-          title="Speech To Text"
-          aria-label={`${isSpeechToText ? "Enable" : "Disable"} speech to text`}
-          className="p-2"
-          size={"sm"}
+          variant={isSpeechToText ? 'secondary' : 'ghost'}
+          title='Speech To Text'
+          aria-label={`${isSpeechToText ? 'Enable' : 'Disable'} speech to text`}
+          className='p-2'
+          size={'sm'}
         >
-          <MicIcon className="size-4" />
+          <MicIcon className='size-4' />
         </Button>
       </TooltipTrigger>
       <TooltipContent>Speech To Text</TooltipContent>
@@ -140,6 +125,4 @@ function SpeechToTextPluginImpl() {
   )
 }
 
-export const SpeechToTextPlugin = SUPPORT_SPEECH_RECOGNITION
-  ? SpeechToTextPluginImpl
-  : () => null
+export const SpeechToTextPlugin = SUPPORT_SPEECH_RECOGNITION ? SpeechToTextPluginImpl : () => null

@@ -185,6 +185,21 @@ class CartService {
 
         return dbCart.items.length;
     }
+
+    async getCartId(userId: string): Promise<string> {
+      let userCart = await prismaService.cart.findUnique({
+        where: { user_id: userId },
+        select: { id: true }
+      });
+
+      if (!userCart) {
+        userCart = await prismaService.cart.create({
+          data: { user_id: userId },
+          select: { id: true }
+        });
+      }
+      return userCart.id;
+    }
 }
 
 export default new CartService();

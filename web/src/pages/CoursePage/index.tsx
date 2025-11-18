@@ -3,7 +3,6 @@ import { ChevronLeft } from 'lucide-react'
 import { LessonViewer } from '@/components/CoursePage/LessonViewer'
 import { TabNavigation } from '@/components/CoursePage/TabNavigation'
 import { CourseSidebar } from '@/components/CoursePage/CourseSidebar'
-import { LectureInfo } from '@/components/CoursePage/LectureInfo'
 import { CourseDetail, Lesson } from '@/types/course-student'
 import courseService from '@/services/course/course-student.service'
 import { useParams, useNavigate } from 'react-router-dom'
@@ -163,14 +162,13 @@ const CoursePage = () => {
       <div className='flex-1 flex overflow-hidden'>
         {/* Left Column - Video & Tabs */}
         <div className='flex-1 flex flex-col overflow-y-auto px-6 py-4'>
-          {currentLecture && <LessonViewer lesson={currentLecture} />}
-          <div className='mt-6 mx-auto w-full'>
-            <TabNavigation />
-          </div>
           {currentLecture && (
-            <div className='mt-6 px-6 mx-auto w-full'>
-              <LectureInfo lesson={currentLecture} thumbnailUri={courseData?.thumbnailUrl as string} />
-            </div>
+            <>
+              <LessonViewer lesson={currentLecture} />
+              <div className='mt-2 mx-auto w-full'>
+                <TabNavigation currentLecture={currentLecture} thumbnailUri={courseData?.thumbnailUrl as string} />
+              </div>
+            </>
           )}
         </div>
 

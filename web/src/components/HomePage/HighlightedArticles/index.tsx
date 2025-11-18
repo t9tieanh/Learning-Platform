@@ -16,27 +16,27 @@ const HighlightedArticles = () => {
 
   useEffect(() => {
     let mounted = true
-      ; (async () => {
-        try {
-          setLoading(true)
-          setError(null)
-          const res = await blogService.getAll({ page: 1, limit: 8 })
-          if (!mounted) return
-          const items = res.items || []
-          const mapped: HighlightArticle[] = items.map((b: any, idx: number) => ({
-            id: idx,
-            title: b.title ?? '—',
-            shortDescription: extractSummary(b.content) || '—',
-            thumbnail: b.image_url || b.thumbnail || ''
-          }))
-          setArticles(mapped)
-        } catch (e) {
-          console.error('Failed to load highlighted blogs', e)
-          if (mounted) setError('Không thể tải bài viết nổi bật')
-        } finally {
-          if (mounted) setLoading(false)
-        }
-      })()
+    ;(async () => {
+      try {
+        setLoading(true)
+        setError(null)
+        const res = await blogService.getAll({ page: 1, limit: 8 })
+        if (!mounted) return
+        const items = res.items || []
+        const mapped: HighlightArticle[] = items.map((b: any, idx: number) => ({
+          id: idx,
+          title: b.title ?? '—',
+          shortDescription: extractSummary(b.content) || '—',
+          thumbnail: b.image_url || b.thumbnail || ''
+        }))
+        setArticles(mapped)
+      } catch (e) {
+        console.error('Failed to load highlighted blogs', e)
+        if (mounted) setError('Không thể tải bài viết nổi bật')
+      } finally {
+        if (mounted) setLoading(false)
+      }
+    })()
     return () => {
       mounted = false
     }
@@ -58,14 +58,9 @@ const HighlightedArticles = () => {
     <div className='highlighted-articles-container mb-10'>
       <h4 className='font-bold bg-blue-500 text-white p-2 rounded-r-3xl max-w-80 pl-12 mt-6'>Bài viết nổi bật</h4>
       <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-6 mx-auto max-w-7xl px-4'>
-        {loading && (
-          <div className='col-span-4 text-center text-muted-foreground py-8'>Đang tải...</div>
-        )}
-        {error && !loading && (
-          <div className='col-span-4 text-center text-red-500 py-8'>{error}</div>
-        )}
-        {!loading && !error &&
-          articles.map((article) => <ArticlesCard key={article.id} article={article} />)}
+        {loading && <div className='col-span-4 text-center text-muted-foreground py-8'>Đang tải...</div>}
+        {error && !loading && <div className='col-span-4 text-center text-red-500 py-8'>{error}</div>}
+        {!loading && !error && articles.map((article) => <ArticlesCard key={article.id} article={article} />)}
       </div>
     </div>
   )

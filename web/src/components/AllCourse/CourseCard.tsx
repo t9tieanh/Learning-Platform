@@ -66,10 +66,11 @@ export const CourseCard = ({
                 {[...Array(5)].map((_, i) => (
                   <Star
                     key={i}
-                    className={`w-3.5 h-3.5 ${i < Math.floor(rating)
+                    className={`w-3.5 h-3.5 ${
+                      i < Math.floor(rating)
                         ? 'fill-yellow-400 text-yellow-400 drop-shadow-sm'
                         : 'text-muted-foreground/20'
-                      }`}
+                    }`}
                   />
                 ))}
               </div>

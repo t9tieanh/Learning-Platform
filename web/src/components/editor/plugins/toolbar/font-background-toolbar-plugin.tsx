@@ -1,20 +1,12 @@
-"use client"
+'use client'
 
-import { useCallback, useState } from "react"
-import {
-  $getSelectionStyleValueForProperty,
-  $patchStyleText,
-} from "@lexical/selection"
-import {
-  $getSelection,
-  $isRangeSelection,
-  $setSelection,
-  BaseSelection,
-} from "lexical"
-import { PaintBucketIcon } from "lucide-react"
+import { useCallback, useState } from 'react'
+import { $getSelectionStyleValueForProperty, $patchStyleText } from '@lexical/selection'
+import { $getSelection, $isRangeSelection, $setSelection, BaseSelection } from 'lexical'
+import { PaintBucketIcon } from 'lucide-react'
 
-import { useToolbarContext } from "@/components/editor/context/toolbar-context"
-import { useUpdateToolbarHandler } from "@/components/editor/editor-hooks/use-update-toolbar"
+import { useToolbarContext } from '@/components/editor/context/toolbar-context'
+import { useUpdateToolbarHandler } from '@/components/editor/editor-hooks/use-update-toolbar'
 import {
   ColorPicker,
   ColorPickerAlphaSlider,
@@ -24,24 +16,18 @@ import {
   ColorPickerFormatSelect,
   ColorPickerHueSlider,
   ColorPickerInput,
-  ColorPickerTrigger,
-} from "@/components/editor/editor-ui/color-picker"
-import { Button } from "@/components/ui/button"
+  ColorPickerTrigger
+} from '@/components/editor/editor-ui/color-picker'
+import { Button } from '@/components/ui/button'
 
 export function FontBackgroundToolbarPlugin() {
   const { activeEditor } = useToolbarContext()
 
-  const [bgColor, setBgColor] = useState("#fff")
+  const [bgColor, setBgColor] = useState('#fff')
 
   const $updateToolbar = (selection: BaseSelection) => {
     if ($isRangeSelection(selection)) {
-      setBgColor(
-        $getSelectionStyleValueForProperty(
-          selection,
-          "background-color",
-          "#fff"
-        )
-      )
+      setBgColor($getSelectionStyleValueForProperty(selection, 'background-color', '#fff'))
     }
   }
 
@@ -57,7 +43,7 @@ export function FontBackgroundToolbarPlugin() {
             $patchStyleText(selection, styles)
           }
         },
-        { tag: "historic" }
+        { tag: 'historic' }
       )
     },
     [activeEditor]
@@ -65,7 +51,7 @@ export function FontBackgroundToolbarPlugin() {
 
   const onBgColorSelect = useCallback(
     (value: string) => {
-      applyStyleText({ "background-color": value }, true)
+      applyStyleText({ 'background-color': value }, true)
     },
     [applyStyleText]
   )
@@ -73,7 +59,7 @@ export function FontBackgroundToolbarPlugin() {
   return (
     <ColorPicker
       modal
-      defaultFormat="hex"
+      defaultFormat='hex'
       defaultValue={bgColor}
       onValueChange={onBgColorSelect}
       onOpenChange={(open) => {
@@ -84,20 +70,20 @@ export function FontBackgroundToolbarPlugin() {
       }}
     >
       <ColorPickerTrigger asChild>
-        <Button variant={"outline"} size={"icon-sm"}>
-          <PaintBucketIcon className="h-4 w-4" />
+        <Button variant={'outline'} size={'icon-sm'}>
+          <PaintBucketIcon className='h-4 w-4' />
         </Button>
       </ColorPickerTrigger>
       <ColorPickerContent>
         <ColorPickerArea />
-        <div className="flex items-center gap-2">
+        <div className='flex items-center gap-2'>
           <ColorPickerEyeDropper />
-          <div className="flex flex-1 flex-col gap-2">
+          <div className='flex flex-1 flex-col gap-2'>
             <ColorPickerHueSlider />
             <ColorPickerAlphaSlider />
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className='flex items-center gap-2'>
           <ColorPickerFormatSelect />
           <ColorPickerInput />
         </div>

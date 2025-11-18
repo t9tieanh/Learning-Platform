@@ -148,7 +148,10 @@ const CourseTable = () => {
 
                   {/* Loại */}
                   <div>
-                    <Badge variant='outline' className='text-xs px-2 py-0.5 rounded-md text-zinc-600 dark:text-zinc-300'>
+                    <Badge
+                      variant='outline'
+                      className='text-xs px-2 py-0.5 rounded-md text-zinc-600 dark:text-zinc-300'
+                    >
                       {course.type}
                     </Badge>
                   </div>

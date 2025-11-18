@@ -1,13 +1,10 @@
-import { useCallback, useState } from "react"
-import {
-  $getSelectionStyleValueForProperty,
-  $patchStyleText,
-} from "@lexical/selection"
-import { $getSelection, $isRangeSelection, BaseSelection } from "lexical"
-import { BaselineIcon } from "lucide-react"
+import { useCallback, useState } from 'react'
+import { $getSelectionStyleValueForProperty, $patchStyleText } from '@lexical/selection'
+import { $getSelection, $isRangeSelection, BaseSelection } from 'lexical'
+import { BaselineIcon } from 'lucide-react'
 
-import { useToolbarContext } from "@/components/editor/context/toolbar-context"
-import { useUpdateToolbarHandler } from "@/components/editor/editor-hooks/use-update-toolbar"
+import { useToolbarContext } from '@/components/editor/context/toolbar-context'
+import { useUpdateToolbarHandler } from '@/components/editor/editor-hooks/use-update-toolbar'
 import {
   ColorPicker,
   ColorPickerAlphaSlider,
@@ -17,20 +14,18 @@ import {
   ColorPickerFormatSelect,
   ColorPickerHueSlider,
   ColorPickerInput,
-  ColorPickerTrigger,
-} from "@/components/editor/editor-ui/color-picker"
-import { Button } from "@/components/ui/button"
+  ColorPickerTrigger
+} from '@/components/editor/editor-ui/color-picker'
+import { Button } from '@/components/ui/button'
 
 export function FontColorToolbarPlugin() {
   const { activeEditor } = useToolbarContext()
 
-  const [fontColor, setFontColor] = useState("#000")
+  const [fontColor, setFontColor] = useState('#000')
 
   const $updateToolbar = (selection: BaseSelection) => {
     if ($isRangeSelection(selection)) {
-      setFontColor(
-        $getSelectionStyleValueForProperty(selection, "color", "#000")
-      )
+      setFontColor($getSelectionStyleValueForProperty(selection, 'color', '#000'))
     }
   }
 
@@ -59,7 +54,7 @@ export function FontColorToolbarPlugin() {
   return (
     <ColorPicker
       modal
-      defaultFormat="hex"
+      defaultFormat='hex'
       defaultValue={fontColor}
       onValueChange={onFontColorSelect}
       onOpenChange={(open) => {
@@ -70,20 +65,20 @@ export function FontColorToolbarPlugin() {
       }}
     >
       <ColorPickerTrigger asChild>
-        <Button variant="outline" size="icon-sm">
-          <BaselineIcon className="h-4 w-4" />
+        <Button variant='outline' size='icon-sm'>
+          <BaselineIcon className='h-4 w-4' />
         </Button>
       </ColorPickerTrigger>
       <ColorPickerContent>
         <ColorPickerArea />
-        <div className="flex items-center gap-2">
+        <div className='flex items-center gap-2'>
           <ColorPickerEyeDropper />
-          <div className="flex flex-1 flex-col gap-2">
+          <div className='flex flex-1 flex-col gap-2'>
             <ColorPickerHueSlider />
             <ColorPickerAlphaSlider />
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className='flex items-center gap-2'>
           <ColorPickerFormatSelect />
           <ColorPickerInput />
         </div>

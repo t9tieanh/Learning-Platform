@@ -4,15 +4,7 @@ import whychoose1 from '@/assets/images/whychoose1.png'
 import whychoose2 from '@/assets/images/whychoose2.png'
 import whychoose3 from '@/assets/images/whychoose3.png'
 
-const FeatureHomeCard = ({
-  title,
-  image,
-  description
-}: {
-  title: string
-  image: string
-  description: string
-}) => {
+const FeatureHomeCard = ({ title, image, description }: { title: string; image: string; description: string }) => {
   return (
     <motion.div
       className='p-4 flex justify-normal gap-3 max-w-xl'

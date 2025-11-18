@@ -8,12 +8,12 @@ export const LectureInfo = ({ lesson, thumbnailUri }: { lesson: Lesson; thumbnai
       <h2 className='text-xl flex items-center gap-2 font-semibold mb-2'>
         <Avatar>
           <AvatarImage src={thumbnailUri} />
-          <AvatarFallback>{lesson.title}</AvatarFallback>
+          <AvatarFallback>{lesson?.title}</AvatarFallback>
         </Avatar>
-        Bài học: {lesson.title}
+        Bài học: {lesson?.title}
       </h2>
 
-      {lesson.content && (
+      {lesson?.content && (
         <div className='flex items-start text-muted-foreground text-base mb-3'>
           <Info size={18} className='mt-1 mr-2' />
           <p>{lesson.content}</p>

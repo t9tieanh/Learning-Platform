@@ -65,10 +65,11 @@ const AcademySidebar = () => {
                   <Button
                     key={itemIndex}
                     variant={item.active ? 'secondary' : 'ghost'}
-                    className={`w-full justify-start h-11 px-3 ${item.active
-                      ? 'bg-sidebar-accent text-sidebar-accent-foreground hover:bg-[#ababaf]'
-                      : 'text-sidebar-foreground/80 hover:bg-[#afafb3] hover:text-sidebar-accent-foreground'
-                      }`}
+                    className={`w-full justify-start h-11 px-3 ${
+                      item.active
+                        ? 'bg-sidebar-accent text-sidebar-accent-foreground hover:bg-[#ababaf]'
+                        : 'text-sidebar-foreground/80 hover:bg-[#afafb3] hover:text-sidebar-accent-foreground'
+                    }`}
                     onClick={onClick}
                   >
                     <Icon className='w-5 h-5 mr-3' />

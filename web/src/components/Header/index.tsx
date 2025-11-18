@@ -23,7 +23,7 @@ const Header: FC = () => {
 
   useEffect(() => {
     // refresh cart count on header mount
-    refresh().catch(() => { })
+    refresh().catch(() => {})
   }, [refresh])
 
   // publish header height as a CSS variable so pages can position elements under it
@@ -115,7 +115,7 @@ const Header: FC = () => {
                       username={data.username as string}
                       name={data.name as string}
                       avatarUrl={data.avatarUrl as string}
-                      closeMenu={() => { }}
+                      closeMenu={() => {}}
                     />
                   </PopoverContent>
                 </Popover>

@@ -20,12 +20,13 @@ const AuthLayout: React.FC = () => {
   max-lg:before:bottom-[75%] before:z-[6] before:rounded-[50%] max-md:p-6
   lg:before:-translate-y-1/2 max-lg:before:-translate-x-1/2 before:bg-blue-400
   before:transition-all before:duration-\\[6000ms\\] lg:before:duration-\\[6000ms\\]
-  ${isSignUpMode
-          ? `lg:before:translate-x-full before:-translate-x-1/2 
+  ${
+    isSignUpMode
+      ? `lg:before:translate-x-full before:-translate-x-1/2 
        before:translate-y-full lg:before:right-[52%] before:right-[initial] sm:max-lg:before:bottom-[22%]
        max-sm:before:bottom-[20%] max-md:before:left-1/2`
-          : ''
-        }`}
+      : ''
+  }`}
     >
       <div className='absolute w-full h-full top-0 left-0'>
         <AuthPage isSignUpMode={isSignUpMode} setIsSignUpMode={setIsSignUpMode} />
@@ -44,8 +45,9 @@ const AuthLayout: React.FC = () => {
           <div
             style={{ transition: 'all 1500ms ease-in-out' }}
             className={`text-white items-center flex flex-col justify-center text-center transition-transform duration-\\[1.8s\\] lg:duration-\\[2.2s\\] ease-\\[ease-in-out\\] 
-               delay-\\[1.6s\\] lg:delay-\\[0.8s\\]   max-lg:pr-[15%]  max-md:px-4  max-md:py-2 ${isSignUpMode ? 'lg:translate-x-[-800px]   max-lg:translate-y-[-300px]' : ''
-              }`}
+               delay-\\[1.6s\\] lg:delay-\\[0.8s\\]   max-lg:pr-[15%]  max-md:px-4  max-md:py-2 ${
+                 isSignUpMode ? 'lg:translate-x-[-800px]   max-lg:translate-y-[-300px]' : ''
+               }`}
           >
             <h3 className='font-semibold leading-none text-[1.2rem] lg:text-[1.5rem]'>Mới tham gia?</h3>
             <p className='text-[0.7rem] lg:text-[0.95rem] px-0 py-2 lg:py-[0.7rem]'>
@@ -65,8 +67,9 @@ const AuthLayout: React.FC = () => {
             style={{ transition: 'all 1500ms ease-in-out' }}
             src={log}
             className={`max-md:hidden max-lg:translate-y-[-40px] w-[200px] lg:w-full scale-90 transition-transform 
-    duration-\\[1.8s\\] lg:duration-\\[2.2s\\] ease-\\[ease-in-out\\] delay-\\[1.2s\\] lg:delay-\\[0.8s\\] ${isSignUpMode ? 'lg:translate-x-[-800px] max-lg:translate-y-[-300px]' : ''
-              }`}
+    duration-\\[1.8s\\] lg:duration-\\[2.2s\\] ease-\\[ease-in-out\\] delay-\\[1.2s\\] lg:delay-\\[0.8s\\] ${
+      isSignUpMode ? 'lg:translate-x-[-800px] max-lg:translate-y-[-300px]' : ''
+    }`}
             alt='Đăng nhập'
           />
         </div>
@@ -78,8 +81,9 @@ const AuthLayout: React.FC = () => {
           <div
             style={{ transition: 'all 1500ms ease-in-out' }}
             className={`text-white transition-transform duration-\\[1.8s\\] lg:duration-\\[2.2s\\] ease-in-out delay-\\[1.6s\\]
-               lg:delay-\\[0.8s\\]   max-lg:pr-[15%] max-md:px-4  max-md:py-2 ${isSignUpMode ? '' : 'lg:translate-x-[800px]   max-lg:translate-y-[300px]'
-              }`}
+               lg:delay-\\[0.8s\\]   max-lg:pr-[15%] max-md:px-4  max-md:py-2 ${
+                 isSignUpMode ? '' : 'lg:translate-x-[800px]   max-lg:translate-y-[300px]'
+               }`}
           >
             <h3 className='font-semibold leading-none text-[1.2rem] lg:text-[1.5rem]'>Đã có tài khoản?</h3>
             <p className=' py-2 text-[0.7rem] lg:text-[0.95rem] px-0  lg:py-[0.7rem]'>
@@ -101,8 +105,9 @@ const AuthLayout: React.FC = () => {
             src={register}
             alt='Đăng ký'
             className={`max-md:hidden w-[200px] lg:w-full transition-transform duration-\\[1800ms\\] 
-    lg:duration-\\[2200ms\\] ease-in-out delay-\\[1200ms\\] lg:delay-\\[800ms\\] ${isSignUpMode ? '' : 'lg:translate-x-[800px] max-lg:translate-y-[300px]'
-              }`}
+    lg:duration-\\[2200ms\\] ease-in-out delay-\\[1200ms\\] lg:delay-\\[800ms\\] ${
+      isSignUpMode ? '' : 'lg:translate-x-[800px] max-lg:translate-y-[300px]'
+    }`}
           />
         </div>
       </div>
