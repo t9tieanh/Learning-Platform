@@ -62,12 +62,12 @@ const NoteSection = ({
       <DrawerContent>
         <div className='mx-auto text-start w-full max-w-sm'>
           <DrawerHeader>
-            <DrawerTitle className='flex items-center gap-2'>
+            <DrawerTitle className='flex items-center gap-2 text-center'>
               <NotebookPen />
               Nhập ghi chú cho bài học này !
             </DrawerTitle>
-            <DrawerDescription>
-              Hãy viết những điểm quan trọng, công thức, hoặc bất kỳ điều gì bạn muốn nhớ lại sau này để ôn tập hiệu quả hơn.
+            <DrawerDescription className='text-left'>
+              Hãy viết những điểm bạn muốn ghi nhớ từ bài học.
             </DrawerDescription>
           </DrawerHeader>
           <div className='p-4 pb-0'>
@@ -77,7 +77,7 @@ const NoteSection = ({
               onChange={(e) => setNoteContent(e.target.value)}
             />
           </div>
-          <DrawerFooter>
+          <DrawerFooter className='flex flex-row gap-2 justify-end'>
             <CustomButton icon={<Send />} onClick={() => handleSaveNote()}>
               Lưu
             </CustomButton>
