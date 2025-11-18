@@ -29,6 +29,7 @@ export const SectionList = ({ sections, currentLectureId, onSelectLecture }: Sec
     <div className='space-y-2'>
       {sections.map((section, index) => {
         const totalCount = section.lectures.length
+        const completedCount = section.lectures.filter((lecture) => lecture.completionStatus === 'COMPLETED').length
 
         return (
           <Collapsible key={index} defaultOpen={index === 1} className='shadow-sm pr-3'>
@@ -38,9 +39,9 @@ export const SectionList = ({ sections, currentLectureId, onSelectLecture }: Sec
                   <h3 className='font-semibold text-sm mb-1'>
                     {index + 1}. {section.title}
                   </h3>
-                  {/* <p className='text-xs text-muted-foreground'>
-                    {completedCount} / {totalCount} | {section.duration}
-                  </p> */}
+                  <p className='text-xs text-muted-foreground'>
+                    {completedCount} / {totalCount} hoàn thành | {section.duration}
+                  </p>
                 </div>
                 <ChevronDown className='w-5 h-5 text-muted-foreground transition-transform group-data-[state=open]:rotate-180' />
               </CollapsibleTrigger>

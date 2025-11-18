@@ -5,6 +5,7 @@ import rabbitMQService from '~/service/utils/rabbitmq.service';
 import { createEnvelope } from '../events/envelope';
 import { MessageType } from '../order/events';
 import orderService from '~/service/models/order.service';
+import cartService from '~/service/models/cart.service';
 
 class OrderHandler {
   // send message to other services (notification service / course service)
@@ -24,12 +25,21 @@ class OrderHandler {
       // Update status to Completed
       await prismaService.order.update({ where: { id: message.orderId }, data: { status: OrderStatus.Completed } });
 
+      const orderData = await orderService.getOrderInfo(order.user_id, message.orderId)
+
       // Send notification
       await this.sendMessage(
         MessageType.NOTIFICATION_SEND,
-        await orderService.getOrderInfo(order.user_id, message.orderId),
+        orderData,
         `order-${order.id}`
       );
+
+      orderData.items.forEach(async (item) => {
+        //handle del cart of them
+        cartService.removeFromCart(await cartService.getCartId(orderData.user_id), item.course_id.toString()).catch(err => {
+          console.error('Failed to remove order items from cart:', err);
+        });
+      });
 
     } catch (error) {
       console.error('Error completing order, rolling back:', error);

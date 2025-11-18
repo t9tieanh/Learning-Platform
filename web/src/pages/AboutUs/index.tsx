@@ -1,323 +1,286 @@
-import { useState } from "react";
-import { MapPin, Phone, Globe } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Card } from "@/components/ui/card";
-import { toast } from 'sonner';
-import { Mail, Users, Target, Award, BookOpen, TrendingUp } from "lucide-react";
-import heroImage from "@/assets/images/about.png";
-import missionImage from "@/assets/images/about1.jpg";
-import valuesImage from "@/assets/images/about4.png";
+import { useState } from 'react'
+import { MapPin, Phone, Globe, Mail, Users, Target, Award, BookOpen, TrendingUp } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { Card } from '@/components/ui/card'
+import { toast } from 'sonner'
+import heroImage from '@/assets/images/about.png'
+import missionImage from '@/assets/images/about1.jpg'
+import valuesImage from '@/assets/images/about4.png'
 
 const About = () => {
-    const [formData, setFormData] = useState({
-        name: "",
-        email: "",
-        message: "",
-    });
-    const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    message: ''
+  })
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
 
-        if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) {
-            toast.info("Vui lòng điền đầy đủ thông tin");
-            return;
-        }
+    if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) {
+      toast.info('Vui lòng điền đầy đủ thông tin')
+      return
+    }
 
-        setIsSubmitting(true);
+    setIsSubmitting(true)
 
-        try {
-            const response = await fetch("/api/send-contact-email", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(formData),
-            });
-
-            if (response.ok) {
-                toast("Chúng tôi sẽ liên hệ với bạn sớm nhất có thể.",);
-                setFormData({ name: "", email: "", message: "" });
-            } else {
-                throw new Error("Failed to send");
-            }
-        } catch (error) {
-            toast("Vui lòng thử lại sau",);
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
-
-    const stats = [
-        { icon: Users, label: "Học viên", value: "50,000+" },
-        { icon: BookOpen, label: "Khóa học", value: "500+" },
-        { icon: Award, label: "Giảng viên", value: "200+" },
-        { icon: TrendingUp, label: "Tỷ lệ hoàn thành", value: "92%" },
-    ];
-
-    const values = [
-        {
-            title: "Chất lượng giảng dạy",
-            description: "Đội ngũ giảng viên chuyên nghiệp, giàu kinh nghiệm từ các tập đoàn hàng đầu",
+    try {
+      const response = await fetch('/api/send-contact-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
         },
-        {
-            title: "Nội dung cập nhật",
-            description: "Chương trình học luôn được cập nhật theo xu hướng công nghệ mới nhất",
-        },
-        {
-            title: "Cộng đồng hỗ trợ",
-            description: "Kết nối với cộng đồng học viên năng động, chia sẻ kinh nghiệm",
-        },
-    ];
+        body: JSON.stringify(formData)
+      })
 
-    return (
-        <div className="min-h-screen bg-background">
-            {/* Hero Section */}
-            <section className="relative h-[60vh] min-h-[500px] overflow-hidden">
-                <div
-                    className="absolute inset-0 bg-cover bg-center"
-                    style={{ backgroundImage: `url(${heroImage})` }}
-                >
-                    <div className="absolute inset-0 bg-gradient-to-r from-primary/90 to-orange-400/70" />
-                </div>
-                <div className="container relative h-full flex items-center justify-center text-center px-4">
-                    <div className="max-w-3xl animate-in fade-in slide-in-from-bottom-4 duration-1000">
-                        <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
-                            Về Learnova
-                        </h1>
-                        <p className="text-xl md:text-2xl text-white/90">
-                            Nền tảng học trực tuyến hàng đầu, mang đến kiến thức chất lượng cho hàng chục ngàn học viên
-                        </p>
-                    </div>
-                </div>
-            </section>
+      if (response.ok) {
+        toast('Chúng tôi sẽ liên hệ với bạn sớm nhất có thể.')
+        setFormData({ name: '', email: '', message: '' })
+      } else {
+        throw new Error('Failed to send')
+      }
+    } catch (error) {
+      toast('Vui lòng thử lại sau')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
 
-            {/* Stats Section */}
-            <section className="py-12 bg-card border-b">
-                <div className="container px-4">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-                        {stats.map((stat, index) => {
-                            const Icon = stat.icon;
-                            return (
-                                <div
-                                    key={index}
-                                    className="text-center animate-in fade-in slide-in-from-bottom-4 duration-700"
-                                    style={{ animationDelay: `${index * 100}ms` }}
-                                >
-                                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 text-primary mb-4">
-                                        <Icon className="w-8 h-8" />
-                                    </div>
-                                    <div className="text-3xl font-bold text-foreground mb-1">{stat.value}</div>
-                                    <div className="text-muted-foreground">{stat.label}</div>
-                                </div>
-                            );
-                        })}
-                    </div>
-                </div>
-            </section>
+  const stats = [
+    { icon: Users, label: 'Học viên', value: '50,000+' },
+    { icon: BookOpen, label: 'Khóa học', value: '500+' },
+    { icon: Award, label: 'Giảng viên', value: '200+' },
+    { icon: TrendingUp, label: 'Tỷ lệ hoàn thành', value: '92%' }
+  ]
 
-            {/* Mission Section */}
-            <section className="py-20 px-4">
-                <div className="container">
-                    <div className="grid md:grid-cols-2 gap-12 items-center">
-                        <div className="animate-in fade-in slide-in-from-left-8 duration-1000 flex justify-center items-center">
-                            <img
-                                src={missionImage}
-                                alt="Mission"
-                                className="rounded-2xl shadow-elegant w-[450px] h-[450px]"
-                            />
-                        </div>
-                        <div className="animate-in fade-in slide-in-from-right-8 duration-1000">
-                            <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full mb-6">
-                                <Target className="w-5 h-5" />
-                                <span className="font-semibold">Sứ mệnh</span>
-                            </div>
-                            <h2 className="text-4xl font-bold text-foreground mb-6">
-                                Democratizing Education
-                            </h2>
-                            <p className="text-lg text-muted-foreground mb-4">
-                                Learnova được thành lập với sứ mệnh mang giáo dục chất lượng cao đến với mọi người,
-                                không phân biệt địa lý hay hoàn cảnh. Chúng tôi tin rằng học tập là chìa khóa mở ra
-                                những cơ hội mới trong cuộc sống.
-                            </p>
-                            <p className="text-lg text-muted-foreground">
-                                Với đội ngũ giảng viên dày dặn kinh nghiệm và nền tảng công nghệ hiện đại, chúng tôi
-                                cam kết cung cấp trải nghiệm học tập tối ưu, giúp học viên phát triển kỹ năng và
-                                đạt được mục tiêu nghề nghiệp.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </section>
+  const values = [
+    {
+      title: 'Chất lượng giảng dạy',
+      description: 'Đội ngũ giảng viên chuyên nghiệp, giàu kinh nghiệm từ các tập đoàn hàng đầu'
+    },
+    {
+      title: 'Nội dung cập nhật',
+      description: 'Chương trình học luôn được cập nhật theo xu hướng công nghệ mới nhất'
+    },
+    {
+      title: 'Cộng đồng hỗ trợ',
+      description: 'Kết nối với cộng đồng học viên năng động, chia sẻ kinh nghiệm'
+    }
+  ]
 
-            {/* Values Section */}
-            <section className="py-16 px-4 bg-blue-100">
-                <div className="container">
-
-                    <h2 className="text-3xl font-bold text-foreground mb-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
-                        Giá trị cốt lõi
-                    </h2>
-
-                    <div className="grid md:grid-cols-2 gap-12 items-center">
-
-                        <div className="animate-in fade-in slide-in-from-left-8 duration-1000">
-                            <div className="space-y-6">
-                                {values.map((value, index) => (
-                                    <Card
-                                        key={index}
-                                        className="p-6 hover:shadow-card transition-all duration-300 hover:scale-[1.02] bg-card"
-                                    >
-                                        <h3 className="text-lg font-semibold text-foreground">
-                                            {value.title}
-                                        </h3>
-                                        <p className="text-muted-foreground text-base">
-                                            {value.description}
-                                        </p>
-                                    </Card>
-                                ))}
-                            </div>
-                        </div>
-
-                        <div className="flex justify-center animate-in fade-in slide-in-from-right-8 duration-1000">
-                            <img
-                                src={valuesImage}
-                                alt="Values"
-                                className="rounded-2xl shadow-elegant max-w-[450px] h-auto"
-                            />
-                        </div>
-
-                    </div>
-                </div>
-            </section>
-
-
-            {/* Contact Section */}
-            <section className="py-20 px-4">
-                <div className="container max-w-5xl">
-                    <div className="text-center mb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
-                        <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full mb-6">
-                            <Mail className="w-5 h-5" />
-                            <span className="font-semibold">Liên hệ</span>
-                        </div>
-                        <h2 className="text-4xl font-bold text-foreground mb-4">
-                            Gửi tin nhắn cho chúng tôi
-                        </h2>
-                        <p className="text-lg text-muted-foreground">
-                            Bạn có câu hỏi? Hãy để lại thông tin, chúng tôi sẽ liên hệ ngay!
-                        </p>
-                    </div>
-
-                    {/* Chia 2 cột */}
-                    <div className="grid md:grid-cols-2 gap-12 items-start">
-
-                        {/* Cột trái - thông tin liên hệ */}
-                        <div className="space-y-6 animate-in fade-in slide-in-from-left-8 duration-1000">
-                            <Card className="p-6 shadow-elegant bg-card">
-                                <h3 className="text-lg font-semibold text-foreground">
-                                    Thông tin liên hệ
-                                </h3>
-                                <div className="space-y-4 text-muted-foreground">
-
-                                    <div className="flex items-start gap-3 text-base font-semibold">
-                                        <MapPin className="w-5 h-5 text-primary" />
-                                        <p>123 Nguyễn Văn Linh, Quận 7, TP. Hồ Chí Minh</p>
-                                    </div>
-
-                                    <div className="flex items-start gap-3 text-base font-semibold">
-                                        <MapPin className="w-5 h-5 text-primary" />
-                                        <p>Ngõ 275 Quan Nhân, Quận Thanh Xuân, Hà Nội</p>
-                                    </div>
-
-                                    <div className="flex items-center gap-3 text-base font-semibold">
-                                        <Phone className="w-5 h-5 text-primary" />
-                                        <p>0123 456 789</p>
-                                    </div>
-
-                                    <div className="flex items-center gap-3 text-base font-semibold">
-                                        <Mail className="w-5 h-5 text-primary" />
-                                        <p>learnova@geekitr.com</p>
-                                    </div>
-
-                                    <div className="flex items-center gap-3 text-base font-semibold">
-                                        <Globe className="w-5 h-5 text-primary" />
-                                        <p>www.learnova.com</p>
-                                    </div>
-
-                                </div>
-                            </Card>
-                        </div>
-
-                        {/* Cột phải - form liên hệ */}
-                        <Card className="p-8 shadow-elegant animate-in fade-in slide-in-from-right-8 duration-1000">
-                            <form onSubmit={handleSubmit} className="space-y-6 text-foreground">
-
-                                {/* Họ và tên */}
-                                <div className="space-y-2">
-                                    <label htmlFor="name" className="block text-base font-medium">
-                                        Họ và tên
-                                    </label>
-                                    <Input
-                                        id="name"
-                                        type="text"
-                                        placeholder="Nguyễn Văn A"
-                                        value={formData.name}
-                                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                        className="w-full text-base rounded-lg"
-                                        required
-                                    />
-                                </div>
-
-                                {/* Email */}
-                                <div className="space-y-2">
-                                    <label htmlFor="email" className="block text-base font-medium">
-                                        Email
-                                    </label>
-                                    <Input
-                                        id="email"
-                                        type="email"
-                                        placeholder="email@example.com"
-                                        value={formData.email}
-                                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                        className="w-full text-base rounded-lg"
-                                        required
-                                    />
-                                </div>
-
-                                {/* Tin nhắn */}
-                                <div className="space-y-2">
-                                    <label htmlFor="message" className="block text-base font-medium">
-                                        Tin nhắn
-                                    </label>
-                                    <Textarea
-                                        id="message"
-                                        placeholder="Nội dung tin nhắn của bạn..."
-                                        value={formData.message}
-                                        onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                                        className="w-full min-h-[150px] text-base rounded-lg"
-                                        required
-                                    />
-                                </div>
-
-                                {/* Submit Button */}
-                                <Button
-                                    type="submit"
-                                    className="w-full bg-primary hover:bg-primary/90 text-primary-foreground text-base py-3 rounded-lg font-medium transition-all"
-                                    disabled={isSubmitting}
-                                >
-                                    {isSubmitting ? "Đang gửi..." : "Gửi tin nhắn"}
-                                </Button>
-
-                            </form>
-                        </Card>
-
-                    </div>
-                </div>
-            </section>
-
+  return (
+    <div className='min-h-screen bg-background'>
+      {/* Hero Section */}
+      <section className='relative h-[60vh] min-h-[500px] overflow-hidden'>
+        <div className='absolute inset-0 bg-cover bg-center' style={{ backgroundImage: `url(${heroImage})` }}>
+          <div className='absolute inset-0 bg-gradient-to-r from-primary/90 to-orange-400/70' />
         </div>
-    );
-};
+        <div className='container relative h-full flex items-center justify-center text-center px-4'>
+          <div className='max-w-3xl animate-in fade-in slide-in-from-bottom-4 duration-1000'>
+            <h1 className='text-5xl md:text-6xl font-bold text-white mb-6'>Về Learnova</h1>
+            <p className='text-xl md:text-2xl text-white/90'>
+              Nền tảng học trực tuyến hàng đầu, mang đến kiến thức chất lượng cho hàng chục ngàn học viên
+            </p>
+          </div>
+        </div>
+      </section>
 
-export default About;
+      {/* Stats Section */}
+      <section className='py-12 bg-card border-b'>
+        <div className='container px-4'>
+          <div className='grid grid-cols-2 md:grid-cols-4 gap-8'>
+            {stats.map((stat, index) => {
+              const Icon = stat.icon
+              return (
+                <div
+                  key={index}
+                  className='text-center animate-in fade-in slide-in-from-bottom-4 duration-700'
+                  style={{ animationDelay: `${index * 100}ms` }}
+                >
+                  <div className='inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 text-primary mb-4'>
+                    <Icon className='w-8 h-8' />
+                  </div>
+                  <div className='text-3xl font-bold text-foreground mb-1'>{stat.value}</div>
+                  <div className='text-muted-foreground'>{stat.label}</div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* Mission Section */}
+      <section className='py-20 px-4'>
+        <div className='container'>
+          <div className='grid md:grid-cols-2 gap-12 items-center'>
+            <div className='animate-in fade-in slide-in-from-left-8 duration-1000 flex justify-center items-center'>
+              <img src={missionImage} alt='Mission' className='rounded-2xl shadow-elegant w-[450px] h-[450px]' />
+            </div>
+            <div className='animate-in fade-in slide-in-from-right-8 duration-1000'>
+              <div className='inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full mb-6'>
+                <Target className='w-5 h-5' />
+                <span className='font-semibold'>Sứ mệnh</span>
+              </div>
+              <h2 className='text-4xl font-bold text-foreground mb-6'>Democratizing Education</h2>
+              <p className='text-lg text-muted-foreground mb-4'>
+                Learnova được thành lập với sứ mệnh mang giáo dục chất lượng cao đến với mọi người, không phân biệt địa
+                lý hay hoàn cảnh. Chúng tôi tin rằng học tập là chìa khóa mở ra những cơ hội mới trong cuộc sống.
+              </p>
+              <p className='text-lg text-muted-foreground'>
+                Với đội ngũ giảng viên dày dặn kinh nghiệm và nền tảng công nghệ hiện đại, chúng tôi cam kết cung cấp
+                trải nghiệm học tập tối ưu, giúp học viên phát triển kỹ năng và đạt được mục tiêu nghề nghiệp.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Values Section */}
+      <section className='py-16 px-4 bg-blue-100'>
+        <div className='container'>
+          <h2 className='text-3xl font-bold text-foreground mb-10 animate-in fade-in slide-in-from-bottom-4 duration-700'>
+            Giá trị cốt lõi
+          </h2>
+
+          <div className='grid md:grid-cols-2 gap-12 items-center'>
+            <div className='animate-in fade-in slide-in-from-left-8 duration-1000'>
+              <div className='space-y-6'>
+                {values.map((value, index) => (
+                  <Card
+                    key={index}
+                    className='p-6 hover:shadow-card transition-all duration-300 hover:scale-[1.02] bg-card'
+                  >
+                    <h3 className='text-lg font-semibold text-foreground'>{value.title}</h3>
+                    <p className='text-muted-foreground text-base'>{value.description}</p>
+                  </Card>
+                ))}
+              </div>
+            </div>
+
+            <div className='flex justify-center animate-in fade-in slide-in-from-right-8 duration-1000'>
+              <img src={valuesImage} alt='Values' className='rounded-2xl shadow-elegant max-w-[450px] h-auto' />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Contact Section */}
+      <section className='py-20 px-4'>
+        <div className='container max-w-5xl'>
+          <div className='text-center mb-12 animate-in fade-in slide-in-from-bottom-4 duration-700'>
+            <div className='inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full mb-6'>
+              <Mail className='w-5 h-5' />
+              <span className='font-semibold'>Liên hệ</span>
+            </div>
+            <h2 className='text-4xl font-bold text-foreground mb-4'>Gửi tin nhắn cho chúng tôi</h2>
+            <p className='text-lg text-muted-foreground'>
+              Bạn có câu hỏi? Hãy để lại thông tin, chúng tôi sẽ liên hệ ngay!
+            </p>
+          </div>
+
+          {/* Chia 2 cột */}
+          <div className='grid md:grid-cols-2 gap-12 items-start'>
+            {/* Cột trái - thông tin liên hệ */}
+            <div className='space-y-6 animate-in fade-in slide-in-from-left-8 duration-1000'>
+              <Card className='p-6 shadow-elegant bg-card'>
+                <h3 className='text-lg font-semibold text-foreground'>Thông tin liên hệ</h3>
+                <div className='space-y-4 text-muted-foreground'>
+                  <div className='flex items-start gap-3 text-base font-semibold'>
+                    <MapPin className='w-5 h-5 text-primary' />
+                    <p>123 Nguyễn Văn Linh, Quận 7, TP. Hồ Chí Minh</p>
+                  </div>
+
+                  <div className='flex items-start gap-3 text-base font-semibold'>
+                    <MapPin className='w-5 h-5 text-primary' />
+                    <p>Ngõ 275 Quan Nhân, Quận Thanh Xuân, Hà Nội</p>
+                  </div>
+
+                  <div className='flex items-center gap-3 text-base font-semibold'>
+                    <Phone className='w-5 h-5 text-primary' />
+                    <p>0123 456 789</p>
+                  </div>
+
+                  <div className='flex items-center gap-3 text-base font-semibold'>
+                    <Mail className='w-5 h-5 text-primary' />
+                    <p>learnova@geekitr.com</p>
+                  </div>
+
+                  <div className='flex items-center gap-3 text-base font-semibold'>
+                    <Globe className='w-5 h-5 text-primary' />
+                    <p>www.learnova.com</p>
+                  </div>
+                </div>
+              </Card>
+            </div>
+
+            {/* Cột phải - form liên hệ */}
+            <Card className='p-8 shadow-elegant animate-in fade-in slide-in-from-right-8 duration-1000'>
+              <form onSubmit={handleSubmit} className='space-y-6 text-foreground'>
+                {/* Họ và tên */}
+                <div className='space-y-2'>
+                  <label htmlFor='name' className='block text-base font-medium'>
+                    Họ và tên
+                  </label>
+                  <Input
+                    id='name'
+                    type='text'
+                    placeholder='Nguyễn Văn A'
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    className='w-full text-base rounded-lg'
+                    required
+                  />
+                </div>
+
+                {/* Email */}
+                <div className='space-y-2'>
+                  <label htmlFor='email' className='block text-base font-medium'>
+                    Email
+                  </label>
+                  <Input
+                    id='email'
+                    type='email'
+                    placeholder='email@example.com'
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    className='w-full text-base rounded-lg'
+                    required
+                  />
+                </div>
+
+                {/* Tin nhắn */}
+                <div className='space-y-2'>
+                  <label htmlFor='message' className='block text-base font-medium'>
+                    Tin nhắn
+                  </label>
+                  <Textarea
+                    id='message'
+                    placeholder='Nội dung tin nhắn của bạn...'
+                    value={formData.message}
+                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                    className='w-full min-h-[150px] text-base rounded-lg'
+                    required
+                  />
+                </div>
+
+                {/* Submit Button */}
+                <Button
+                  type='submit'
+                  className='w-full bg-primary hover:bg-primary/90 text-primary-foreground text-base py-3 rounded-lg font-medium transition-all'
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? 'Đang gửi...' : 'Gửi tin nhắn'}
+                </Button>
+              </form>
+            </Card>
+          </div>
+        </div>
+      </section>
+    </div>
+  )
+}
+
+export default About

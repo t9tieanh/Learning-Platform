@@ -19,7 +19,7 @@ const CourseList = ({ title, fetcher }: CourseListProps) => {
       try {
         const data = await fetcher()
         const result = data?.result || []
-        console.log('RESULT', result);
+        console.log('RESULT', result)
         // Nếu không có dữ liệu, fallback sang best seller
         if (!result || result.length === 0) {
           const fallback = await courseService.getBestSellerCourses()

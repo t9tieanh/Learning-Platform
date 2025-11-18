@@ -1,14 +1,15 @@
-/* eslint-disable jsx-a11y/media-has-caption */
 import { Play } from 'lucide-react'
 import { Lesson } from '@/types/course-student'
 import VideoPlayer from './VideoPlayer'
 import PDFViewer from './PDFViewer'
-import { useCallback } from 'react'
+import { useCallback, useState } from 'react'
 import lessonStudentService from '@/services/course/lesson-student.service'
 import { toast } from 'sonner'
+import NoteSection from './NoteSection'
 
 export const LessonViewer = ({ lesson }: { lesson: Lesson }) => {
   const { id } = lesson
+  const [open, setOpen] = useState(false)
 
   const markDoneVideo = useCallback(async () => {
     if (lesson.completionStatus === 'COMPLETED') return
@@ -43,6 +44,7 @@ export const LessonViewer = ({ lesson }: { lesson: Lesson }) => {
           </button>
         </div>
       )}
+      <NoteSection lessonId={lesson.id} open={open} setOpen={setOpen} />
     </div>
   )
 }

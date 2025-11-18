@@ -70,7 +70,7 @@ const DashboardHeader = () => {
               </Avatar>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align='end' >
+          <DropdownMenuContent align='end'>
             <DropdownMenuItem className='!bg-transparent hover:!bg-white hover:!text-primary transition-colors'>
               <CustomButton
                 label='Tài khoản'

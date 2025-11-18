@@ -3,7 +3,6 @@ import { ApiResponse } from '@/types/response.type'
 import { Profile } from '@/types/profile'
 import { DataAdminHome } from '@/types/user'
 
-
 class UserService {
   async signUp(newUser: {
     name: string
@@ -96,15 +95,18 @@ class UserService {
   }
 
   // update user (multipart for image)
-  async updateUser(id: string, data: {
-    description?: string
-    email?: string
-    imageFile?: File | null
-    name?: string
-    phone?: string
-    position?: string
-    status?: string | number
-  }): Promise<ApiResponse<Profile>> {
+  async updateUser(
+    id: string,
+    data: {
+      description?: string
+      email?: string
+      imageFile?: File | null
+      name?: string
+      phone?: string
+      position?: string
+      status?: string | number
+    }
+  ): Promise<ApiResponse<Profile>> {
     const form = new FormData()
     if (data.description !== undefined) form.append('description', data.description)
     if (data.email !== undefined) form.append('email', data.email)

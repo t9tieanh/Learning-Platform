@@ -33,6 +33,22 @@ class OrderService {
             throw new ApiError(200,'Người dùng không tồn tại !');
         }
 
+        //check sale is bued by user
+        for (const item of orderData.items || []) {
+            const hasPurchased = await prismaService.order_Item.findFirst({
+                where: {
+                    course_id: item.courseId,
+                    order: {
+                        user_id: userId,
+                        status: OrderStatus.Completed
+                    }
+                }
+            });
+            if (hasPurchased) {
+                throw new ApiError(400, `Bạn đã mua khóa học ${hasPurchased.course_id} trước đó !`);
+            }
+        }
+
         // create order items
         const orderItems = await courseClientGrpc.getBulkCourses(
             orderData.items?.map(item => item.courseId as string) || []

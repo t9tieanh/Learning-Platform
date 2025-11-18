@@ -14,7 +14,14 @@ const PersonalInfo = () => {
   const [userInfo, setUserInfo] = useState<Profile | null>(null)
   const [editing, setEditing] = useState(false)
   const [saving, setSaving] = useState(false)
-  const [form, setForm] = useState<{ name?: string; email?: string; phone?: string | null; position?: string | null; description?: string; imageFile?: File | null }>({})
+  const [form, setForm] = useState<{
+    name?: string
+    email?: string
+    phone?: string | null
+    position?: string | null
+    description?: string
+    imageFile?: File | null
+  }>({})
   const { data, setData } = useAuthStore()
   const userId = (data as any)?.userId || (data as any)?.id
 
@@ -121,7 +128,11 @@ const PersonalInfo = () => {
                     aria-label='Chọn ảnh đại diện mới'
                   >
                     <Avatar className='h-28 w-28 shadow-lg cursor-pointer'>
-                      <AvatarImage src={form.imageFile ? URL.createObjectURL(form.imageFile) : userInfo?.image} alt={userInfo?.name} className='object-cover' />
+                      <AvatarImage
+                        src={form.imageFile ? URL.createObjectURL(form.imageFile) : userInfo?.image}
+                        alt={userInfo?.name}
+                        className='object-cover'
+                      />
                       <AvatarFallback className='text-lg font-semibold bg-primary text-primary-foreground'>
                         <User className='h-6 w-6' />
                       </AvatarFallback>
@@ -162,7 +173,9 @@ const PersonalInfo = () => {
             <div className='grid gap-4 md:grid-cols-2'>
               {/* Name */}
               <div className='flex items-center border-2 gap-3 p-4 rounded-lg bg-white hover:bg-blue-100 transition-colors'>
-                <div className='p-2 rounded-md bg-primary/10'><User className='w-4 h-4 text-primary' /></div>
+                <div className='p-2 rounded-md bg-primary/10'>
+                  <User className='w-4 h-4 text-primary' />
+                </div>
                 <div>
                   <div className='text-sm font-medium text-muted-foreground'>Họ và tên</div>
                   <div className='text-foreground text-sm font-sm'>{userInfo?.name || ''}</div>
@@ -170,7 +183,9 @@ const PersonalInfo = () => {
               </div>
               {/* Email */}
               <div className='flex items-center border-2 gap-3 p-4 rounded-lg bg-white hover:bg-blue-100 transition-colors'>
-                <div className='p-2 rounded-md bg-primary/10'><Mail className='w-4 h-4 text-primary' /></div>
+                <div className='p-2 rounded-md bg-primary/10'>
+                  <Mail className='w-4 h-4 text-primary' />
+                </div>
                 <div>
                   <div className='text-sm font-medium text-muted-foreground'>Email</div>
                   <div className='text-foreground text-sm font-sm'>{userInfo?.email || ''}</div>
@@ -178,7 +193,9 @@ const PersonalInfo = () => {
               </div>
               {/* Phone */}
               <div className='flex items-center border-2 gap-3 p-4 rounded-lg bg-white hover:bg-blue-100 transition-colors'>
-                <div className='p-2 rounded-md bg-primary/10'><Phone className='w-4 h-4 text-primary' /></div>
+                <div className='p-2 rounded-md bg-primary/10'>
+                  <Phone className='w-4 h-4 text-primary' />
+                </div>
                 <div>
                   <div className='text-sm font-medium text-muted-foreground'>Điện thoại</div>
                   <div className='text-foreground text-sm font-sm'>{userInfo?.phone || ''}</div>
@@ -186,7 +203,9 @@ const PersonalInfo = () => {
               </div>
               {/* Position */}
               <div className='flex items-center border-2 gap-3 p-4 rounded-lg bg-white hover:bg-blue-100 transition-colors'>
-                <div className='p-2 rounded-md bg-primary/10'><Calendar className='w-4 h-4 text-primary' /></div>
+                <div className='p-2 rounded-md bg-primary/10'>
+                  <Calendar className='w-4 h-4 text-primary' />
+                </div>
                 <div>
                   <div className='text-sm font-medium text-muted-foreground'>Vị trí</div>
                   <div className='text-foreground text-sm font-sm'>{userInfo?.position || ''}</div>
@@ -197,39 +216,65 @@ const PersonalInfo = () => {
             <div className='grid gap-4 md:grid-cols-2'>
               {/* Name editable */}
               <div className='flex items-center border-2 gap-3 p-4 rounded-lg bg-white'>
-                <div className='p-2 rounded-md bg-primary/10'><User className='w-4 h-4 text-primary' /></div>
+                <div className='p-2 rounded-md bg-primary/10'>
+                  <User className='w-4 h-4 text-primary' />
+                </div>
                 <div className='flex-1'>
                   <div className='text-sm font-medium text-muted-foreground'>Họ và tên</div>
-                  <input className='text-sm w-full px-3 py-2 rounded-md border' value={form.name || ''} onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))} />
+                  <input
+                    className='text-sm w-full px-3 py-2 rounded-md border'
+                    value={form.name || ''}
+                    onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
+                  />
                 </div>
               </div>
               {/* Email editable */}
               <div className='flex items-center border-2 gap-3 p-4 rounded-lg bg-white'>
-                <div className='p-2 rounded-md bg-primary/10'><Mail className='w-4 h-4 text-primary' /></div>
+                <div className='p-2 rounded-md bg-primary/10'>
+                  <Mail className='w-4 h-4 text-primary' />
+                </div>
                 <div className='flex-1'>
                   <div className='text-sm font-medium text-muted-foreground'>Email</div>
-                  <input className='text-sm w-full px-3 py-2 rounded-md border' value={form.email || ''} onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))} />
+                  <input
+                    className='text-sm w-full px-3 py-2 rounded-md border'
+                    value={form.email || ''}
+                    onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
+                  />
                 </div>
               </div>
               {/* Phone editable */}
               <div className='flex items-center border-2 gap-3 p-4 rounded-lg bg-white'>
-                <div className='p-2 rounded-md bg-primary/10'><Phone className='w-4 h-4 text-primary' /></div>
+                <div className='p-2 rounded-md bg-primary/10'>
+                  <Phone className='w-4 h-4 text-primary' />
+                </div>
                 <div className='flex-1'>
                   <div className='text-sm font-medium text-muted-foreground'>Điện thoại</div>
-                  <input className='text-sm w-full px-3 py-2 rounded-md border' value={form.phone || ''} onChange={(e) => setForm((p) => ({ ...p, phone: e.target.value }))} />
+                  <input
+                    className='text-sm w-full px-3 py-2 rounded-md border'
+                    value={form.phone || ''}
+                    onChange={(e) => setForm((p) => ({ ...p, phone: e.target.value }))}
+                  />
                 </div>
               </div>
               {/* Position editable */}
               <div className='flex items-center border-2 gap-3 p-4 rounded-lg bg-white'>
-                <div className='p-2 rounded-md bg-primary/10'><Calendar className='w-4 h-4 text-primary' /></div>
+                <div className='p-2 rounded-md bg-primary/10'>
+                  <Calendar className='w-4 h-4 text-primary' />
+                </div>
                 <div className='flex-1'>
                   <div className='text-sm font-medium text-muted-foreground'>Vị trí</div>
-                  <input className='text-sm w-full px-3 py-2 rounded-md border' value={form.position || ''} onChange={(e) => setForm((p) => ({ ...p, position: e.target.value }))} />
+                  <input
+                    className='text-sm w-full px-3 py-2 rounded-md border'
+                    value={form.position || ''}
+                    onChange={(e) => setForm((p) => ({ ...p, position: e.target.value }))}
+                  />
                 </div>
               </div>
               {/* Username read only */}
               <div className='flex items-center border-2 gap-3 p-4 rounded-lg bg-white opacity-60'>
-                <div className='p-2 rounded-md bg-primary/10'><User className='w-4 h-4 text-primary' /></div>
+                <div className='p-2 rounded-md bg-primary/10'>
+                  <User className='w-4 h-4 text-primary' />
+                </div>
                 <div className='flex-1'>
                   <div className='text-sm font-medium text-muted-foreground'>Tên đăng nhập</div>
                   <div className='text-foreground text-sm font-sm'>{userInfo?.username || ''}</div>
@@ -288,13 +333,9 @@ const PersonalInfo = () => {
           </div>
         </CardContent>
 
-        <Separator className="mx-10 bg-gray-300 h-[2px]" />
-        <div className='px-8'>
-          {userId && <CertificateList userId={String(userId)} />}
-        </div>
+        <Separator className='mx-10 bg-gray-300 h-[2px]' />
+        <div className='px-8'>{userId && <CertificateList userId={String(userId)} />}</div>
       </Card>
-
-
     </div>
   )
 }

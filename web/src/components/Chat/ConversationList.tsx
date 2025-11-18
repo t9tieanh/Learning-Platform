@@ -1,14 +1,14 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { useContext, useEffect, useMemo, useState } from "react";
-import chatService from "@/services/chat/chat.service";
-import { ConversationListItem } from "@/types/chat.type";
-import { SocketContext } from "@/api/socket/socket.context";
-import { useAuthStore } from "@/stores/useAuth.stores";
-import { useLocation } from "react-router-dom";
-import useDebounce from "@/hooks/useDebounce.hook";
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Input } from '@/components/ui/input'
+import { Search } from 'lucide-react'
+import { cn } from '@/lib/utils'
+import { useContext, useEffect, useMemo, useState } from 'react'
+import chatService from '@/services/chat/chat.service'
+import { ConversationListItem } from '@/types/chat.type'
+import { SocketContext } from '@/api/socket/socket.context'
+import { useAuthStore } from '@/stores/useAuth.stores'
+import { useLocation } from 'react-router-dom'
+import useDebounce from '@/hooks/useDebounce.hook'
 interface ConversationListProps {
   selected?: ConversationListItem | null
   onSelect: (item: ConversationListItem) => void
@@ -17,7 +17,7 @@ interface ConversationListProps {
 
 export const ConversationList = ({ selected, onSelect, desiredPeerId }: ConversationListProps) => {
   const [conversations, setConversations] = useState<ConversationListItem[]>([])
-  const [searchText, setSearchText] = useState("")
+  const [searchText, setSearchText] = useState('')
   const { socket } = useContext(SocketContext)
   const { data } = useAuthStore()
   const myId = data?.userId
@@ -111,10 +111,10 @@ export const ConversationList = ({ selected, onSelect, desiredPeerId }: Conversa
       messageId?: string
     }) => {
       const { conversationId, content } = data
-      setConversations(prev => {
-        const idx = prev.findIndex(c => c.conversationId === conversationId)
+      setConversations((prev) => {
+        const idx = prev.findIndex((c) => c.conversationId === conversationId)
         if (idx === -1) {
-          console.log("⚠️ Không tìm thấy hội thoại:", conversationId)
+          console.log('⚠️ Không tìm thấy hội thoại:', conversationId)
           return prev
         }
 
@@ -123,12 +123,12 @@ export const ConversationList = ({ selected, onSelect, desiredPeerId }: Conversa
         if (item.lastMessage && item.lastMessage.content && item.lastMessage._id) {
           const updatedLastMessage = {
             ...item.lastMessage,
-            content,
+            content
           }
 
           const updated: ConversationListItem = {
             ...item,
-            lastMessage: updatedLastMessage,
+            lastMessage: updatedLastMessage
           }
 
           const next = [...prev]
@@ -140,64 +140,60 @@ export const ConversationList = ({ selected, onSelect, desiredPeerId }: Conversa
       })
     }
 
-    socket.on("last_message_update", onMessageUpdate)
+    socket.on('last_message_update', onMessageUpdate)
     return () => {
-      socket.off("last_message_update", onMessageUpdate)
+      socket.off('last_message_update', onMessageUpdate)
     }
   }, [socket])
 
   useEffect(() => {
-    if (!socket) return;
+    if (!socket) return
 
     const onDeleteLast = (data: {
-      conversationId: string;
-      deletedMessageId: string;
+      conversationId: string
+      deletedMessageId: string
       newLastMessage?: {
-        _id: string;
-        content: string;
-        senderId: string;
-        createdAt: string;
-      };
+        _id: string
+        content: string
+        senderId: string
+        createdAt: string
+      }
     }) => {
-      const { conversationId, newLastMessage } = data;
-      console.log("🗑️ message_delete_last:", data);
+      const { conversationId, newLastMessage } = data
+      console.log('🗑️ message_delete_last:', data)
 
       setConversations((prev) => {
-        const idx = prev.findIndex((c) => c.conversationId === conversationId);
-        if (idx === -1) return prev;
-        const item = prev[idx];
+        const idx = prev.findIndex((c) => c.conversationId === conversationId)
+        if (idx === -1) return prev
+        const item = prev[idx]
 
         const updated: ConversationListItem = {
           ...item,
           lastMessage: newLastMessage
             ? {
-              _id: newLastMessage._id,
-              content: newLastMessage.content,
-              senderId: newLastMessage.senderId,
-              createdAt: newLastMessage.createdAt,
-              senderRole:
-                newLastMessage.senderId === myId
-                  ? myRole
-                  : myRole === "instructor"
-                    ? "student"
-                    : "instructor",
-            }
+                _id: newLastMessage._id,
+                content: newLastMessage.content,
+                senderId: newLastMessage.senderId,
+                createdAt: newLastMessage.createdAt,
+                senderRole:
+                  newLastMessage.senderId === myId ? myRole : myRole === 'instructor' ? 'student' : 'instructor'
+              }
             : undefined,
-          lastMessageAt: newLastMessage?.createdAt,
-        };
+          lastMessageAt: newLastMessage?.createdAt
+        }
 
-        const next = [...prev];
-        next[idx] = updated;
-        return next;
-      });
-    };
+        const next = [...prev]
+        next[idx] = updated
+        return next
+      })
+    }
 
-    socket.on("message_delete_last", onDeleteLast);
+    socket.on('message_delete_last', onDeleteLast)
 
     return () => {
-      socket.off("message_delete_last", onDeleteLast);
-    };
-  }, [socket, myId, myRole]);
+      socket.off('message_delete_last', onDeleteLast)
+    }
+  }, [socket, myId, myRole])
 
   // Khi người dùng chọn mở một cuộc trò chuyện, reset số lượng tin chưa đọc ở item đó về 0
   // Mục tiêu: đồng bộ UI với trạng thái đã đọc sau khi ChatArea gọi API markRead
@@ -247,8 +243,6 @@ export const ConversationList = ({ selected, onSelect, desiredPeerId }: Conversa
     return () => window.removeEventListener('chat:conversation-last-changed', onLastChanged as EventListener)
   }, [myId, myRole])
 
-
-
   const filtered = useMemo(() => {
     if (!searchText.trim()) return conversations
     const q = searchText.trim().toLowerCase()
@@ -258,9 +252,9 @@ export const ConversationList = ({ selected, onSelect, desiredPeerId }: Conversa
   return (
     <div className='flex h-full min-h-0 flex-col bg-white border-r border-slate-200'>
       {/* Header */}
-      <div className="p-4 border-b border-slate-200 bg-slate-50 shadow-sm">
-        <div className="flex justify-between items-center mb-2">
-          <h2 className="text-2xl font-bold mb-3 text-[#3c3c3c] tracking-wide pl-1">Đoạn chat</h2>
+      <div className='p-4 border-b border-slate-200 bg-slate-50 shadow-sm'>
+        <div className='flex justify-between items-center mb-2'>
+          <h2 className='text-2xl font-bold mb-3 text-[#3c3c3c] tracking-wide pl-1'>Đoạn chat</h2>
         </div>
         <div className='relative'>
           <Search className='absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-blue-400' />

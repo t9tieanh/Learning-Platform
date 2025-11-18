@@ -1,26 +1,17 @@
-"use client"
+'use client'
 
-import { useCallback, useEffect, useState } from "react"
-import { $isLinkNode, TOGGLE_LINK_COMMAND } from "@lexical/link"
-import {
-  $isRangeSelection,
-  BaseSelection,
-  COMMAND_PRIORITY_NORMAL,
-  KEY_MODIFIER_COMMAND,
-} from "lexical"
-import { LinkIcon } from "lucide-react"
+import { useCallback, useEffect, useState } from 'react'
+import { $isLinkNode, TOGGLE_LINK_COMMAND } from '@lexical/link'
+import { $isRangeSelection, BaseSelection, COMMAND_PRIORITY_NORMAL, KEY_MODIFIER_COMMAND } from 'lexical'
+import { LinkIcon } from 'lucide-react'
 
-import { useToolbarContext } from "@/components/editor/context/toolbar-context"
-import { useUpdateToolbarHandler } from "@/components/editor/editor-hooks/use-update-toolbar"
-import { getSelectedNode } from "@/components/editor/utils/get-selected-node"
-import { sanitizeUrl } from "@/components/editor/utils/url"
-import { Toggle } from "@/components/ui/toggle"
+import { useToolbarContext } from '@/components/editor/context/toolbar-context'
+import { useUpdateToolbarHandler } from '@/components/editor/editor-hooks/use-update-toolbar'
+import { getSelectedNode } from '@/components/editor/utils/get-selected-node'
+import { sanitizeUrl } from '@/components/editor/utils/url'
+import { Toggle } from '@/components/ui/toggle'
 
-export function LinkToolbarPlugin({
-  setIsLinkEditMode,
-}: {
-  setIsLinkEditMode: (isEditMode: boolean) => void
-}) {
+export function LinkToolbarPlugin({ setIsLinkEditMode }: { setIsLinkEditMode: (isEditMode: boolean) => void }) {
   const { activeEditor } = useToolbarContext()
   const [isLink, setIsLink] = useState(false)
 
@@ -45,12 +36,12 @@ export function LinkToolbarPlugin({
         const event: KeyboardEvent = payload
         const { code, ctrlKey, metaKey } = event
 
-        if (code === "KeyK" && (ctrlKey || metaKey)) {
+        if (code === 'KeyK' && (ctrlKey || metaKey)) {
           event.preventDefault()
           let url: string | null
           if (!isLink) {
             setIsLinkEditMode(true)
-            url = sanitizeUrl("https://")
+            url = sanitizeUrl('https://')
           } else {
             setIsLinkEditMode(false)
             url = null
@@ -66,7 +57,7 @@ export function LinkToolbarPlugin({
   const insertLink = useCallback(() => {
     if (!isLink) {
       setIsLinkEditMode(true)
-      activeEditor.dispatchCommand(TOGGLE_LINK_COMMAND, sanitizeUrl("https://"))
+      activeEditor.dispatchCommand(TOGGLE_LINK_COMMAND, sanitizeUrl('https://'))
     } else {
       setIsLinkEditMode(false)
       activeEditor.dispatchCommand(TOGGLE_LINK_COMMAND, null)
@@ -74,14 +65,8 @@ export function LinkToolbarPlugin({
   }, [activeEditor, isLink, setIsLinkEditMode])
 
   return (
-    <Toggle
-      variant={"outline"}
-      size="sm"
-      className="!h-8 !w-8"
-      aria-label="Toggle link"
-      onClick={insertLink}
-    >
-      <LinkIcon className="h-4 w-4" />
+    <Toggle variant={'outline'} size='sm' className='!h-8 !w-8' aria-label='Toggle link' onClick={insertLink}>
+      <LinkIcon className='h-4 w-4' />
     </Toggle>
   )
 }

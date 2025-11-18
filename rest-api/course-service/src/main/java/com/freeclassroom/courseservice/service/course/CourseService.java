@@ -64,6 +64,7 @@ public class CourseService implements ICourseService {
 
     CourseMapper courseMapper;
     LessonMapper lessonMapper;
+    UserGrpcClient userGrpcClient;
 
     IUploadFileService fileService;
     UserGrpcClient userGrpcClient;
