@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { MessageCircle, X, Send, BotMessageSquare, Bot, User } from "lucide-react";
+import { MessageCircle, X, Send, BotMessageSquare, Bot } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -11,6 +11,7 @@ import {
     TooltipContent,
     TooltipProvider,
 } from "@/components/ui/tooltip"
+import { askAi } from "@/services/ai.service";
 
 
 interface Message {
@@ -30,36 +31,34 @@ const ChatBubble = () => {
     const sendMessage = async () => {
         if (!input.trim() || isLoading) return;
 
-        const userMessage: Message = { role: "user", content: input };
+        const userText = input.trim();
+        const userMessage: Message = { role: "user", content: userText };
         setMessages((prev) => [...prev, userMessage]);
-
         setInput("");
         setIsLoading(true);
         setIsTyping(true);
 
-        // Mock AI response text (bạn có thể random hoặc tạo list)
-        const mockResponses = [
-            "Hmm… interesting câu hỏi đó!",
-            "Let me think…",
-            "Good question! Đây là câu trả lời nè.",
-            "Tôi hiểu rồi, để giải thích nhé…",
-        ];
-
-        const mockReply =
-            mockResponses[Math.floor(Math.random() * mockResponses.length)];
-
-        // Hiển thị tin "assistant đang gõ..."
+        // Show assistant typing placeholder
         setMessages((prev) => [...prev, { role: "assistant", content: "typing..." }]);
 
-        setTimeout(() => {
+        try {
+            const { reply } = await askAi({ message: userText });
             setMessages((prev) => {
                 const updated = [...prev];
-                updated[updated.length - 1].content = mockReply; // Replace "typing..." text
+                updated[updated.length - 1].content = reply;
                 return updated;
             });
+        } catch (err: any) {
+            const fallback = "Xin lỗi, hiện tại Nova chưa thể trả lời. Vui lòng thử lại sau.";
+            setMessages((prev) => {
+                const updated = [...prev];
+                updated[updated.length - 1].content = fallback;
+                return updated;
+            });
+        } finally {
             setIsTyping(false);
             setIsLoading(false);
-        }, 3000);
+        }
     };
 
 
@@ -148,7 +147,7 @@ const ChatBubble = () => {
                                                     <span className="inline-block h-1.5 w-1.5 rounded-full bg-current animate-bounce" />
                                                 </div>
                                             ) : (
-                                                <p className="whitespace-pre-wrap">{message.content}</p>
+                                                <div className="whitespace-pre-wrap">{renderWithLinks(message.content)}</div>
                                             )}
                                         </div>
                                     </div>
@@ -187,3 +186,26 @@ const ChatBubble = () => {
 };
 
 export default ChatBubble;
+
+// Turn URLs in text into clickable links
+function renderWithLinks(text: string) {
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    const parts = text.split(urlRegex);
+    return parts.map((part, idx) => {
+        const isUrl = part.startsWith("http://") || part.startsWith("https://");
+        if (isUrl) {
+            return (
+                <a
+                    key={idx}
+                    href={part}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline text-blue-600 hover:text-blue-700"
+                >
+                    {part}
+                </a>
+            );
+        }
+        return <span key={idx}>{part}</span>;
+    });
+}
