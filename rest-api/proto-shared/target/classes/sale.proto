@@ -10,7 +10,7 @@ message GetRevenueAndProfitRequest {
 }
 
 message GetRevenueAndProfitResponse {
-  GetRevenueAndProfitList dataList = 1;
+  repeated GetRevenueAndProfitList dataList = 1;
 }
 
 message GetRevenueAndProfitList {

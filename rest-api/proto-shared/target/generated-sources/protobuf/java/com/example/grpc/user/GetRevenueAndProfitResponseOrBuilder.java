@@ -9,17 +9,26 @@ public interface GetRevenueAndProfitResponseOrBuilder extends
     com.google.protobuf.MessageOrBuilder {
 
   /**
-   * <code>.GetRevenueAndProfitList dataList = 1;</code>
-   * @return Whether the dataList field is set.
+   * <code>repeated .GetRevenueAndProfitList dataList = 1;</code>
    */
-  boolean hasDataList();
+  java.util.List<com.example.grpc.user.GetRevenueAndProfitList> 
+      getDataListList();
   /**
-   * <code>.GetRevenueAndProfitList dataList = 1;</code>
-   * @return The dataList.
+   * <code>repeated .GetRevenueAndProfitList dataList = 1;</code>
    */
-  com.example.grpc.user.GetRevenueAndProfitList getDataList();
+  com.example.grpc.user.GetRevenueAndProfitList getDataList(int index);
   /**
-   * <code>.GetRevenueAndProfitList dataList = 1;</code>
+   * <code>repeated .GetRevenueAndProfitList dataList = 1;</code>
    */
-  com.example.grpc.user.GetRevenueAndProfitListOrBuilder getDataListOrBuilder();
+  int getDataListCount();
+  /**
+   * <code>repeated .GetRevenueAndProfitList dataList = 1;</code>
+   */
+  java.util.List<? extends com.example.grpc.user.GetRevenueAndProfitListOrBuilder> 
+      getDataListOrBuilderList();
+  /**
+   * <code>repeated .GetRevenueAndProfitList dataList = 1;</code>
+   */
+  com.example.grpc.user.GetRevenueAndProfitListOrBuilder getDataListOrBuilder(
+      int index);
 }

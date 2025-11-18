@@ -110,16 +110,25 @@ public interface CourseRepository extends JpaRepository<CourseEntity, String> {
     List<CourseEntity> findAllByInstructorIdWithEnrollments(@Param("instructorId") String instructorId);
 
     @Query("""
-       SELECT MONTH(c.createdAt) AS month,
-              COUNT(c.id) AS totalCourse
-       FROM CourseEntity c
-       WHERE c.instructorId = :userId
-         AND YEAR(c.createdAt) = :year
-       GROUP BY MONTH(c.createdAt)
-       ORDER BY MONTH(c.createdAt)
+       SELECT MONTH(e.createdAt) AS month,
+              COUNT(e.id) AS totalEnrollment
+       FROM EnrollmentsEntity e
+       WHERE e.course.instructorId = :userId
+         AND YEAR(e.createdAt) = :year
+       GROUP BY MONTH(e.createdAt)
+       ORDER BY MONTH(e.createdAt)
        """)
-    List<Object[]> countCoursesByMonth(@Param("userId") String userId,
-                                       @Param("year") long year);
+    List<Object[]> countEnrollmentsByMonth(@Param("userId") String userId,
+                                           @Param("year") long year);
+
     @Query("SELECT c FROM CourseEntity c LEFT JOIN FETCH c.enrollments WHERE c.id IN :ids")
     List<CourseEntity> findAllByIdWithEnrollments(@Param("ids") List<String> ids);
+
+    @Query("""
+        SELECT c.id 
+        FROM CourseEntity c
+        WHERE c.instructorId = :userId
+    """)
+    List<String> findAllIdsByInstructorId(@Param("userId") String userId);
+
 }

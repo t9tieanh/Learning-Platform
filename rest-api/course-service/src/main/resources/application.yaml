@@ -70,3 +70,7 @@ grpc:
     user-service:
       address: static://localhost:9090
       negotiation-type: plaintext
+
+    sale-service:
+      address: static://localhost:9093
+      negotiation-type: plaintext
