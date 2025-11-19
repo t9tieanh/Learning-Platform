@@ -46,8 +46,9 @@ const saleServiceImpl = {
             // Xây danh sách 12 tháng. Định nghĩa: revenue = tổng giá bán, profit = 10% revenue (tuỳ chỉnh nếu cần)
             const dataList = [];
             for (let month = 1; month <= 12; month++) {
-                const revenue = monthMap[month] || 0;
-                const profit = Math.round(revenue + (revenue * 0.1));
+                const profit = Number((monthMap[month] / 1000000).toFixed(2)) || 0;
+                const revenue = Number((profit + profit * 0.1).toFixed(2));
+
                 dataList.push({ month, revenue, profit });
             }
 

@@ -15,14 +15,14 @@ public interface GetRevenueAndProfitListOrBuilder extends
   long getMonth();
 
   /**
-   * <code>int64 revenue = 2;</code>
+   * <code>double revenue = 2;</code>
    * @return The revenue.
    */
-  long getRevenue();
+  double getRevenue();
 
   /**
-   * <code>int64 profit = 3;</code>
+   * <code>double profit = 3;</code>
    * @return The profit.
    */
-  long getProfit();
+  double getProfit();
 }

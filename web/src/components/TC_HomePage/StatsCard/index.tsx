@@ -6,14 +6,10 @@ interface StatsCardProps {
   value: string | number
   subtitle?: string
   icon: LucideIcon
-  trend?: {
-    value: string
-    isPositive: boolean
-  }
   variant?: 'default' | 'success' | 'warning' | 'primary'
 }
 
-export function StatsCard({ title, value, subtitle, icon: Icon, trend, variant = 'default' }: StatsCardProps) {
+export function StatsCard({ title, value, subtitle, icon: Icon, variant = 'default' }: StatsCardProps) {
   const getVariantStyles = () => {
     switch (variant) {
       case 'success':

@@ -273,8 +273,8 @@ public class CourseGrpcService extends CourseServiceImplBase {
                 long studentCount = monthToEnrollmentCount.getOrDefault(month, 0L);
 
                 GetRevenueAndProfitList saleItem = monthToRevenueProfit.get(month);
-                long revenue = saleItem != null ? saleItem.getRevenue() : 0L;
-                long profit  = saleItem != null ? saleItem.getProfit()  : 0L;
+                double revenue = saleItem != null ? saleItem.getRevenue() : 0L;
+                double profit  = saleItem != null ? saleItem.getProfit()  : 0L;
 
                 MonthlyChartData monthly = MonthlyChartData.newBuilder()
                         .setMonth(month)

@@ -140,7 +140,7 @@ export const QASection = () => {
   }
 
   return (
-    <div className='max-w-4xl mx-auto p-6 space-y-6'>
+    <div className='mx-auto p-6 space-y-6'>
       {/* New Comment Section */}
       <div className='bg-card rounded-lg border border-border p-6 space-y-4'>
         <h3 className='text-lg font-semibold text-foreground'>Bình luận</h3>
