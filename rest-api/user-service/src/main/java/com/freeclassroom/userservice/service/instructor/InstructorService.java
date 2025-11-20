@@ -1,10 +1,12 @@
 package com.freeclassroom.userservice.service.instructor;
 
+import com.example.grpc.course.GetChartDataResponse;
 import com.example.grpc.course.GetCourseAndStudentResponse;
 import com.example.grpc.course.TotalBlogResponse;
 import com.freeclassroom.userservice.dto.response.ApiResponse;
 import com.freeclassroom.userservice.dto.response.instructor.ChartDataResponse;
 import com.freeclassroom.userservice.dto.response.instructor.InstructorStatisticResponse;
+import com.freeclassroom.userservice.dto.response.instructor.MonthlyChartData;
 import com.freeclassroom.userservice.entity.user.UserEntity;
 import com.freeclassroom.userservice.grpc.client.BlogGrpcClient;
 import com.freeclassroom.userservice.grpc.client.CourseGrpcClient;
@@ -14,6 +16,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -47,10 +52,43 @@ public class InstructorService implements IInstructorService {
 
     @Override
     public ApiResponse<ChartDataResponse> getChartData(int year, String userId) {
-        // gRPC Course
+        try {
+            // gRPC Course
+            GetChartDataResponse data = courseGrpc.getChartData(year, userId);
 
+            ChartDataResponse res = new ChartDataResponse();
+            res.setYear(data.getYear());
 
-        //
-        return null;
+            // map monthlyData
+            List<MonthlyChartData> monthlyList = data.getMonthlyDataList().stream()
+                    .map(m -> {
+                        MonthlyChartData dto = new MonthlyChartData();
+                        dto.setMonth((int) m.getMonth());
+                        dto.setRevenue(m.getRevenue());
+                        dto.setProfit(m.getProfit());
+                        dto.setStudentCount(m.getStudentCount());
+                        return dto;
+                    })
+                    .collect(Collectors.toList());
+
+            res.setMonthlyData(monthlyList);
+
+            return ApiResponse.<ChartDataResponse>builder()
+                    .code(HttpStatus.OK.value())
+                    .message("Get chart data success")
+                    .result(res)
+                    .build();
+
+        } catch (Exception e) {
+            // Log lỗi
+            e.printStackTrace();
+
+            // Trả về ApiResponse lỗi
+            return ApiResponse.<ChartDataResponse>builder()
+                    .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                    .message("Failed to get chart data: " + e.getMessage())
+                    .result(null)
+                    .build();
+        }
     }
 }

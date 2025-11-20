@@ -41,12 +41,16 @@
     "typescript-eslint": "^8.34.0"
   },
   "dependencies": {
+    "@chroma-core/default-embed": "^0.1.9",
+    "@google/generative-ai": "^0.24.1",
     "@grpc/grpc-js": "^1.14.0",
     "@grpc/proto-loader": "^0.8.0",
+    "@supabase/supabase-js": "^2.81.1",
     "@types/qs": "^6.14.0",
     "amqplib": "^0.10.8",
     "axios": "^1.10.0",
     "bcrypt": "^6.0.0",
+    "chromadb": "^3.1.4",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.2",
     "cloudinary": "^2.6.1",

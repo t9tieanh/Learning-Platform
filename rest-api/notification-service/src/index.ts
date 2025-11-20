@@ -7,7 +7,10 @@ import http from 'http'
 import { initSagas } from '~/sagas/init/initSaga'
 import router from '~/routes/index'
 const { startGrpcServer } = require('../src/grpc/notifyServer')
-// import { startGrpcServer } from '../src/grpc/notifyServer'
+
+
+import AiChatService from './services/aiChat.service'
+import { seedCourses } from './utils/mockCourse'
 
 const START_SERVER = async () => {
   const app = express()
@@ -30,6 +33,15 @@ const START_SERVER = async () => {
     console.log(`Server đang chạy trên: ${hostname}:${port}/`)
   })
 }
+
+// const start = async () => {
+//   try {
+//     await AiChatService.testChat();
+//     console.log("Hoàn tất kiểm tra AI Chat Service ✅");
+//   } catch (error) {
+//     console.error("Đã xảy ra lỗi:", error);
+//   }
+// };
 
 CONNECT_DATABASES()
   .then(() => console.log('Database connected successfully'))

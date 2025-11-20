@@ -42,9 +42,9 @@ public final class SaleProto {
       "\n\nsale.proto\"=\n\032GetRevenueAndProfitReque" +
       "st\022\021\n\tcoursesId\030\001 \003(\t\022\014\n\004year\030\002 \001(\003\"I\n\033G" +
       "etRevenueAndProfitResponse\022*\n\010dataList\030\001" +
-      " \001(\0132\030.GetRevenueAndProfitList\"I\n\027GetRev" +
+      " \003(\0132\030.GetRevenueAndProfitList\"I\n\027GetRev" +
       "enueAndProfitList\022\r\n\005month\030\001 \001(\003\022\017\n\007reve" +
-      "nue\030\002 \001(\003\022\016\n\006profit\030\003 \001(\003B$\n\025com.example" +
+      "nue\030\002 \001(\001\022\016\n\006profit\030\003 \001(\001B$\n\025com.example" +
       ".grpc.userB\tSaleProtoP\001b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor

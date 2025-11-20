@@ -67,7 +67,6 @@ public class CourseService implements ICourseService {
     UserGrpcClient userGrpcClient;
 
     IUploadFileService fileService;
-    UserGrpcClient userGrpcClient;
 
     @NonFinal
     private Double PLATFORM_FEES = 0.1d;

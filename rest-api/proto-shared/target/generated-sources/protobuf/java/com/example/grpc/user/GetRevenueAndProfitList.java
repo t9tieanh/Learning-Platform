@@ -51,24 +51,24 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int REVENUE_FIELD_NUMBER = 2;
-  private long revenue_ = 0L;
+  private double revenue_ = 0D;
   /**
-   * <code>int64 revenue = 2;</code>
+   * <code>double revenue = 2;</code>
    * @return The revenue.
    */
   @java.lang.Override
-  public long getRevenue() {
+  public double getRevenue() {
     return revenue_;
   }
 
   public static final int PROFIT_FIELD_NUMBER = 3;
-  private long profit_ = 0L;
+  private double profit_ = 0D;
   /**
-   * <code>int64 profit = 3;</code>
+   * <code>double profit = 3;</code>
    * @return The profit.
    */
   @java.lang.Override
-  public long getProfit() {
+  public double getProfit() {
     return profit_;
   }
 
@@ -89,11 +89,11 @@ private static final long serialVersionUID = 0L;
     if (month_ != 0L) {
       output.writeInt64(1, month_);
     }
-    if (revenue_ != 0L) {
-      output.writeInt64(2, revenue_);
+    if (java.lang.Double.doubleToRawLongBits(revenue_) != 0) {
+      output.writeDouble(2, revenue_);
     }
-    if (profit_ != 0L) {
-      output.writeInt64(3, profit_);
+    if (java.lang.Double.doubleToRawLongBits(profit_) != 0) {
+      output.writeDouble(3, profit_);
     }
     getUnknownFields().writeTo(output);
   }
@@ -108,13 +108,13 @@ private static final long serialVersionUID = 0L;
       size += com.google.protobuf.CodedOutputStream
         .computeInt64Size(1, month_);
     }
-    if (revenue_ != 0L) {
+    if (java.lang.Double.doubleToRawLongBits(revenue_) != 0) {
       size += com.google.protobuf.CodedOutputStream
-        .computeInt64Size(2, revenue_);
+        .computeDoubleSize(2, revenue_);
     }
-    if (profit_ != 0L) {
+    if (java.lang.Double.doubleToRawLongBits(profit_) != 0) {
       size += com.google.protobuf.CodedOutputStream
-        .computeInt64Size(3, profit_);
+        .computeDoubleSize(3, profit_);
     }
     size += getUnknownFields().getSerializedSize();
     memoizedSize = size;
@@ -133,10 +133,12 @@ private static final long serialVersionUID = 0L;
 
     if (getMonth()
         != other.getMonth()) return false;
-    if (getRevenue()
-        != other.getRevenue()) return false;
-    if (getProfit()
-        != other.getProfit()) return false;
+    if (java.lang.Double.doubleToLongBits(getRevenue())
+        != java.lang.Double.doubleToLongBits(
+            other.getRevenue())) return false;
+    if (java.lang.Double.doubleToLongBits(getProfit())
+        != java.lang.Double.doubleToLongBits(
+            other.getProfit())) return false;
     if (!getUnknownFields().equals(other.getUnknownFields())) return false;
     return true;
   }
@@ -153,10 +155,10 @@ private static final long serialVersionUID = 0L;
         getMonth());
     hash = (37 * hash) + REVENUE_FIELD_NUMBER;
     hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-        getRevenue());
+        java.lang.Double.doubleToLongBits(getRevenue()));
     hash = (37 * hash) + PROFIT_FIELD_NUMBER;
     hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-        getProfit());
+        java.lang.Double.doubleToLongBits(getProfit()));
     hash = (29 * hash) + getUnknownFields().hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -289,8 +291,8 @@ private static final long serialVersionUID = 0L;
       super.clear();
       bitField0_ = 0;
       month_ = 0L;
-      revenue_ = 0L;
-      profit_ = 0L;
+      revenue_ = 0D;
+      profit_ = 0D;
       return this;
     }
 
@@ -382,10 +384,10 @@ private static final long serialVersionUID = 0L;
       if (other.getMonth() != 0L) {
         setMonth(other.getMonth());
       }
-      if (other.getRevenue() != 0L) {
+      if (other.getRevenue() != 0D) {
         setRevenue(other.getRevenue());
       }
-      if (other.getProfit() != 0L) {
+      if (other.getProfit() != 0D) {
         setProfit(other.getProfit());
       }
       this.mergeUnknownFields(other.getUnknownFields());
@@ -419,16 +421,16 @@ private static final long serialVersionUID = 0L;
               bitField0_ |= 0x00000001;
               break;
             } // case 8
-            case 16: {
-              revenue_ = input.readInt64();
+            case 17: {
+              revenue_ = input.readDouble();
               bitField0_ |= 0x00000002;
               break;
-            } // case 16
-            case 24: {
-              profit_ = input.readInt64();
+            } // case 17
+            case 25: {
+              profit_ = input.readDouble();
               bitField0_ |= 0x00000004;
               break;
-            } // case 24
+            } // case 25
             default: {
               if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                 done = true; // was an endgroup tag
@@ -478,21 +480,21 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    private long revenue_ ;
+    private double revenue_ ;
     /**
-     * <code>int64 revenue = 2;</code>
+     * <code>double revenue = 2;</code>
      * @return The revenue.
      */
     @java.lang.Override
-    public long getRevenue() {
+    public double getRevenue() {
       return revenue_;
     }
     /**
-     * <code>int64 revenue = 2;</code>
+     * <code>double revenue = 2;</code>
      * @param value The revenue to set.
      * @return This builder for chaining.
      */
-    public Builder setRevenue(long value) {
+    public Builder setRevenue(double value) {
 
       revenue_ = value;
       bitField0_ |= 0x00000002;
@@ -500,31 +502,31 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>int64 revenue = 2;</code>
+     * <code>double revenue = 2;</code>
      * @return This builder for chaining.
      */
     public Builder clearRevenue() {
       bitField0_ = (bitField0_ & ~0x00000002);
-      revenue_ = 0L;
+      revenue_ = 0D;
       onChanged();
       return this;
     }
 
-    private long profit_ ;
+    private double profit_ ;
     /**
-     * <code>int64 profit = 3;</code>
+     * <code>double profit = 3;</code>
      * @return The profit.
      */
     @java.lang.Override
-    public long getProfit() {
+    public double getProfit() {
       return profit_;
     }
     /**
-     * <code>int64 profit = 3;</code>
+     * <code>double profit = 3;</code>
      * @param value The profit to set.
      * @return This builder for chaining.
      */
-    public Builder setProfit(long value) {
+    public Builder setProfit(double value) {
 
       profit_ = value;
       bitField0_ |= 0x00000004;
@@ -532,12 +534,12 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>int64 profit = 3;</code>
+     * <code>double profit = 3;</code>
      * @return This builder for chaining.
      */
     public Builder clearProfit() {
       bitField0_ = (bitField0_ & ~0x00000004);
-      profit_ = 0L;
+      profit_ = 0D;
       onChanged();
       return this;
     }

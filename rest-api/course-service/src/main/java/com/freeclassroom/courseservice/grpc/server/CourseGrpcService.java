@@ -1,17 +1,15 @@
 package com.freeclassroom.courseservice.grpc.server;
 
 import com.example.grpc.course.*;
+import com.example.grpc.user.*;
 import com.example.grpc.user.CourseServiceGrpc.CourseServiceImplBase;
-import com.example.grpc.user.GetTeachersResponse;
-import com.example.grpc.user.GetUserRequest;
-import com.example.grpc.user.GetUserResponse;
-import com.example.grpc.user.Teacher;
 import com.freeclassroom.courseservice.entity.course.CourseEntity;
 import com.freeclassroom.courseservice.entity.member.EnrollmentsEntity;
 import com.freeclassroom.courseservice.enums.entity.EnumCourseProgressStep;
 import com.freeclassroom.courseservice.enums.entity.EnumCourseStatus;
 import com.freeclassroom.courseservice.exception.CustomExeption;
 import com.freeclassroom.courseservice.exception.ErrorCode;
+import com.freeclassroom.courseservice.grpc.client.SaleGrpcClient;
 import com.freeclassroom.courseservice.grpc.client.UserGrpcClient;
 import com.freeclassroom.courseservice.repository.entity.CourseRepository;
 import com.freeclassroom.courseservice.repository.entity.EnrollmentRepository;
@@ -30,6 +28,7 @@ public class CourseGrpcService extends CourseServiceImplBase {
     private final CourseRepository courseRepo;
     private final EnrollmentRepository enrollmentRepo;
     private final UserGrpcClient userGrpcClient;
+    private final SaleGrpcClient saleGrpcClient;
 
     @Override
     public void getCourse(GetCourseRequest request, StreamObserver<CourseResponse> responseObserver) {
@@ -244,33 +243,49 @@ public class CourseGrpcService extends CourseServiceImplBase {
         try {
             long year = request.getYear();
             String userId = request.getUserId();
-
-            List<Object[]> raw = courseRepo.countCoursesByMonth(userId, year);
-            Map<Integer, Long> monthToCourseCount = raw.stream()
+            System.out.println("1 ne");
+            List<Object[]> raw = courseRepo.countEnrollmentsByMonth(userId, year);
+            Map<Integer, Long> monthToEnrollmentCount = raw.stream()
                     .collect(Collectors.toMap(
                             row -> ((Integer) row[0]),   // month
                             row -> ((Long) row[1])       // count
                     ));
 
+            List<String> coursesId = courseRepo.findAllIdsByInstructorId(userId);
+
             GetChartDataResponse.Builder response = GetChartDataResponse.newBuilder();
             response.setYear(String.valueOf(year));
+            System.out.println("2 ne");
 
             // Gọi gRPC qua Sale (coursesId, year)
 
             // Response List(month, revenue, profit)
+            GetRevenueAndProfitResponse saleServiceRes = saleGrpcClient.getRevenueAndProfit(coursesId , year);
+            System.out.println("3 ne");
+
+            // Tạo map tháng → revenue/profit
+            Map<Integer, GetRevenueAndProfitList> monthToRevenueProfit = new HashMap<>();
+            for (GetRevenueAndProfitList item : saleServiceRes.getDataListList()) {
+                monthToRevenueProfit.put((int) item.getMonth(), item);
+            }
 
             for (int month = 1; month <= 12; month++) {
-                long courseCount = monthToCourseCount.getOrDefault(month, 0L);
+                long studentCount = monthToEnrollmentCount.getOrDefault(month, 0L);
+
+                GetRevenueAndProfitList saleItem = monthToRevenueProfit.get(month);
+                double revenue = saleItem != null ? saleItem.getRevenue() : 0L;
+                double profit  = saleItem != null ? saleItem.getProfit()  : 0L;
 
                 MonthlyChartData monthly = MonthlyChartData.newBuilder()
                         .setMonth(month)
-                        .setRevenue(0)
-                        .setProfit(0)
-                        .setStudentCount(courseCount)
+                        .setRevenue(revenue)
+                        .setProfit(profit)
+                        .setStudentCount(studentCount)
                         .build();
 
                 response.addMonthlyData(monthly);
             }
+            System.out.println("4 ne");
 
             responseObserver.onNext(response.build());
             responseObserver.onCompleted();
