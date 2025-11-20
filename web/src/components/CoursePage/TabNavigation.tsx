@@ -1,12 +1,12 @@
 import { useMemo, useState } from 'react'
 import { Search, Info, MessageCircleQuestionMark, NotebookPen } from 'lucide-react'
-import { QASection } from './QASection'
+import { QASection } from './QASection/QASection'
 import { LectureInfo } from '@/components/CoursePage/LectureInfo'
 import { Lesson } from '@/types/course-student'
 import CustomButton from '@/components/common/Button'
 import NoteSection from './NoteSection'
 
-export const TabNavigation = ({ currentLecture, thumbnailUri }: { currentLecture: Lesson; thumbnailUri: string }) => {
+export const TabNavigation = ({ currentLecture, thumbnailUri, currentLectureId }: { currentLecture: Lesson; thumbnailUri: string; currentLectureId: number }) => {
   const [activeTab, setActiveTab] = useState('Overview')
   const [open, setOpen] = useState(false)
   const tabs = useMemo(
@@ -40,9 +40,8 @@ export const TabNavigation = ({ currentLecture, thumbnailUri }: { currentLecture
           <CustomButton
             key={tab.label}
             onClick={() => (tab.onClick ? tab.onClick() : setActiveTab(tab.label))}
-            className={`py-4 text-sm font-medium bg-white transition-colors relative ${
-              activeTab === tab.label ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
-            }`}
+            className={`py-4 text-sm font-medium bg-white transition-colors relative ${activeTab === tab.label ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
+              }`}
             label={
               <>
                 {tab.label}
@@ -55,7 +54,7 @@ export const TabNavigation = ({ currentLecture, thumbnailUri }: { currentLecture
       </div>
 
       <div>
-        {activeTab === 'Q&A' && <QASection />}
+        {activeTab === 'Q&A' && <QASection lessonId={String(currentLectureId)} />}
         {activeTab === 'Overview' && (
           <div className='mt-6 px-6 mx-auto w-full'>
             <LectureInfo lesson={currentLecture} thumbnailUri={thumbnailUri} />
