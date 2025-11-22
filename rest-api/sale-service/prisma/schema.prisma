@@ -47,6 +47,7 @@ model Order_Item {
   order_id   String
   course_id  String
   price      Float
+  created_at DateTime @default(now())
 
   order      Order    @relation(fields: [order_id], references: [id])
 }

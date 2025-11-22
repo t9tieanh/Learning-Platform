@@ -17,6 +17,7 @@ private static final long serialVersionUID = 0L;
     super(builder);
   }
   private GetRevenueAndProfitResponse() {
+    dataList_ = java.util.Collections.emptyList();
   }
 
   @java.lang.Override
@@ -39,31 +40,45 @@ private static final long serialVersionUID = 0L;
             com.example.grpc.user.GetRevenueAndProfitResponse.class, com.example.grpc.user.GetRevenueAndProfitResponse.Builder.class);
   }
 
-  private int bitField0_;
   public static final int DATALIST_FIELD_NUMBER = 1;
-  private com.example.grpc.user.GetRevenueAndProfitList dataList_;
+  @SuppressWarnings("serial")
+  private java.util.List<com.example.grpc.user.GetRevenueAndProfitList> dataList_;
   /**
-   * <code>.GetRevenueAndProfitList dataList = 1;</code>
-   * @return Whether the dataList field is set.
+   * <code>repeated .GetRevenueAndProfitList dataList = 1;</code>
    */
   @java.lang.Override
-  public boolean hasDataList() {
-    return ((bitField0_ & 0x00000001) != 0);
+  public java.util.List<com.example.grpc.user.GetRevenueAndProfitList> getDataListList() {
+    return dataList_;
   }
   /**
-   * <code>.GetRevenueAndProfitList dataList = 1;</code>
-   * @return The dataList.
+   * <code>repeated .GetRevenueAndProfitList dataList = 1;</code>
    */
   @java.lang.Override
-  public com.example.grpc.user.GetRevenueAndProfitList getDataList() {
-    return dataList_ == null ? com.example.grpc.user.GetRevenueAndProfitList.getDefaultInstance() : dataList_;
+  public java.util.List<? extends com.example.grpc.user.GetRevenueAndProfitListOrBuilder> 
+      getDataListOrBuilderList() {
+    return dataList_;
   }
   /**
-   * <code>.GetRevenueAndProfitList dataList = 1;</code>
+   * <code>repeated .GetRevenueAndProfitList dataList = 1;</code>
    */
   @java.lang.Override
-  public com.example.grpc.user.GetRevenueAndProfitListOrBuilder getDataListOrBuilder() {
-    return dataList_ == null ? com.example.grpc.user.GetRevenueAndProfitList.getDefaultInstance() : dataList_;
+  public int getDataListCount() {
+    return dataList_.size();
+  }
+  /**
+   * <code>repeated .GetRevenueAndProfitList dataList = 1;</code>
+   */
+  @java.lang.Override
+  public com.example.grpc.user.GetRevenueAndProfitList getDataList(int index) {
+    return dataList_.get(index);
+  }
+  /**
+   * <code>repeated .GetRevenueAndProfitList dataList = 1;</code>
+   */
+  @java.lang.Override
+  public com.example.grpc.user.GetRevenueAndProfitListOrBuilder getDataListOrBuilder(
+      int index) {
+    return dataList_.get(index);
   }
 
   private byte memoizedIsInitialized = -1;
@@ -80,8 +95,8 @@ private static final long serialVersionUID = 0L;
   @java.lang.Override
   public void writeTo(com.google.protobuf.CodedOutputStream output)
                       throws java.io.IOException {
-    if (((bitField0_ & 0x00000001) != 0)) {
-      output.writeMessage(1, getDataList());
+    for (int i = 0; i < dataList_.size(); i++) {
+      output.writeMessage(1, dataList_.get(i));
     }
     getUnknownFields().writeTo(output);
   }
@@ -92,9 +107,9 @@ private static final long serialVersionUID = 0L;
     if (size != -1) return size;
 
     size = 0;
-    if (((bitField0_ & 0x00000001) != 0)) {
+    for (int i = 0; i < dataList_.size(); i++) {
       size += com.google.protobuf.CodedOutputStream
-        .computeMessageSize(1, getDataList());
+        .computeMessageSize(1, dataList_.get(i));
     }
     size += getUnknownFields().getSerializedSize();
     memoizedSize = size;
@@ -111,11 +126,8 @@ private static final long serialVersionUID = 0L;
     }
     com.example.grpc.user.GetRevenueAndProfitResponse other = (com.example.grpc.user.GetRevenueAndProfitResponse) obj;
 
-    if (hasDataList() != other.hasDataList()) return false;
-    if (hasDataList()) {
-      if (!getDataList()
-          .equals(other.getDataList())) return false;
-    }
+    if (!getDataListList()
+        .equals(other.getDataListList())) return false;
     if (!getUnknownFields().equals(other.getUnknownFields())) return false;
     return true;
   }
@@ -127,9 +139,9 @@ private static final long serialVersionUID = 0L;
     }
     int hash = 41;
     hash = (19 * hash) + getDescriptor().hashCode();
-    if (hasDataList()) {
+    if (getDataListCount() > 0) {
       hash = (37 * hash) + DATALIST_FIELD_NUMBER;
-      hash = (53 * hash) + getDataList().hashCode();
+      hash = (53 * hash) + getDataListList().hashCode();
     }
     hash = (29 * hash) + getUnknownFields().hashCode();
     memoizedHashCode = hash;
@@ -250,29 +262,25 @@ private static final long serialVersionUID = 0L;
 
     // Construct using com.example.grpc.user.GetRevenueAndProfitResponse.newBuilder()
     private Builder() {
-      maybeForceBuilderInitialization();
+
     }
 
     private Builder(
         com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
       super(parent);
-      maybeForceBuilderInitialization();
-    }
-    private void maybeForceBuilderInitialization() {
-      if (com.google.protobuf.GeneratedMessageV3
-              .alwaysUseFieldBuilders) {
-        getDataListFieldBuilder();
-      }
+
     }
     @java.lang.Override
     public Builder clear() {
       super.clear();
       bitField0_ = 0;
-      dataList_ = null;
-      if (dataListBuilder_ != null) {
-        dataListBuilder_.dispose();
-        dataListBuilder_ = null;
+      if (dataListBuilder_ == null) {
+        dataList_ = java.util.Collections.emptyList();
+      } else {
+        dataList_ = null;
+        dataListBuilder_.clear();
       }
+      bitField0_ = (bitField0_ & ~0x00000001);
       return this;
     }
 
@@ -299,21 +307,26 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public com.example.grpc.user.GetRevenueAndProfitResponse buildPartial() {
       com.example.grpc.user.GetRevenueAndProfitResponse result = new com.example.grpc.user.GetRevenueAndProfitResponse(this);
+      buildPartialRepeatedFields(result);
       if (bitField0_ != 0) { buildPartial0(result); }
       onBuilt();
       return result;
     }
 
+    private void buildPartialRepeatedFields(com.example.grpc.user.GetRevenueAndProfitResponse result) {
+      if (dataListBuilder_ == null) {
+        if (((bitField0_ & 0x00000001) != 0)) {
+          dataList_ = java.util.Collections.unmodifiableList(dataList_);
+          bitField0_ = (bitField0_ & ~0x00000001);
+        }
+        result.dataList_ = dataList_;
+      } else {
+        result.dataList_ = dataListBuilder_.build();
+      }
+    }
+
     private void buildPartial0(com.example.grpc.user.GetRevenueAndProfitResponse result) {
       int from_bitField0_ = bitField0_;
-      int to_bitField0_ = 0;
-      if (((from_bitField0_ & 0x00000001) != 0)) {
-        result.dataList_ = dataListBuilder_ == null
-            ? dataList_
-            : dataListBuilder_.build();
-        to_bitField0_ |= 0x00000001;
-      }
-      result.bitField0_ |= to_bitField0_;
     }
 
     @java.lang.Override
@@ -360,8 +373,31 @@ private static final long serialVersionUID = 0L;
 
     public Builder mergeFrom(com.example.grpc.user.GetRevenueAndProfitResponse other) {
       if (other == com.example.grpc.user.GetRevenueAndProfitResponse.getDefaultInstance()) return this;
-      if (other.hasDataList()) {
-        mergeDataList(other.getDataList());
+      if (dataListBuilder_ == null) {
+        if (!other.dataList_.isEmpty()) {
+          if (dataList_.isEmpty()) {
+            dataList_ = other.dataList_;
+            bitField0_ = (bitField0_ & ~0x00000001);
+          } else {
+            ensureDataListIsMutable();
+            dataList_.addAll(other.dataList_);
+          }
+          onChanged();
+        }
+      } else {
+        if (!other.dataList_.isEmpty()) {
+          if (dataListBuilder_.isEmpty()) {
+            dataListBuilder_.dispose();
+            dataListBuilder_ = null;
+            dataList_ = other.dataList_;
+            bitField0_ = (bitField0_ & ~0x00000001);
+            dataListBuilder_ = 
+              com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                 getDataListFieldBuilder() : null;
+          } else {
+            dataListBuilder_.addAllMessages(other.dataList_);
+          }
+        }
       }
       this.mergeUnknownFields(other.getUnknownFields());
       onChanged();
@@ -390,10 +426,16 @@ private static final long serialVersionUID = 0L;
               done = true;
               break;
             case 10: {
-              input.readMessage(
-                  getDataListFieldBuilder().getBuilder(),
-                  extensionRegistry);
-              bitField0_ |= 0x00000001;
+              com.example.grpc.user.GetRevenueAndProfitList m =
+                  input.readMessage(
+                      com.example.grpc.user.GetRevenueAndProfitList.parser(),
+                      extensionRegistry);
+              if (dataListBuilder_ == null) {
+                ensureDataListIsMutable();
+                dataList_.add(m);
+              } else {
+                dataListBuilder_.addMessage(m);
+              }
               break;
             } // case 10
             default: {
@@ -413,120 +455,239 @@ private static final long serialVersionUID = 0L;
     }
     private int bitField0_;
 
-    private com.example.grpc.user.GetRevenueAndProfitList dataList_;
-    private com.google.protobuf.SingleFieldBuilderV3<
-        com.example.grpc.user.GetRevenueAndProfitList, com.example.grpc.user.GetRevenueAndProfitList.Builder, com.example.grpc.user.GetRevenueAndProfitListOrBuilder> dataListBuilder_;
-    /**
-     * <code>.GetRevenueAndProfitList dataList = 1;</code>
-     * @return Whether the dataList field is set.
-     */
-    public boolean hasDataList() {
-      return ((bitField0_ & 0x00000001) != 0);
+    private java.util.List<com.example.grpc.user.GetRevenueAndProfitList> dataList_ =
+      java.util.Collections.emptyList();
+    private void ensureDataListIsMutable() {
+      if (!((bitField0_ & 0x00000001) != 0)) {
+        dataList_ = new java.util.ArrayList<com.example.grpc.user.GetRevenueAndProfitList>(dataList_);
+        bitField0_ |= 0x00000001;
+       }
     }
+
+    private com.google.protobuf.RepeatedFieldBuilderV3<
+        com.example.grpc.user.GetRevenueAndProfitList, com.example.grpc.user.GetRevenueAndProfitList.Builder, com.example.grpc.user.GetRevenueAndProfitListOrBuilder> dataListBuilder_;
+
     /**
-     * <code>.GetRevenueAndProfitList dataList = 1;</code>
-     * @return The dataList.
+     * <code>repeated .GetRevenueAndProfitList dataList = 1;</code>
      */
-    public com.example.grpc.user.GetRevenueAndProfitList getDataList() {
+    public java.util.List<com.example.grpc.user.GetRevenueAndProfitList> getDataListList() {
       if (dataListBuilder_ == null) {
-        return dataList_ == null ? com.example.grpc.user.GetRevenueAndProfitList.getDefaultInstance() : dataList_;
+        return java.util.Collections.unmodifiableList(dataList_);
       } else {
-        return dataListBuilder_.getMessage();
+        return dataListBuilder_.getMessageList();
       }
     }
     /**
-     * <code>.GetRevenueAndProfitList dataList = 1;</code>
+     * <code>repeated .GetRevenueAndProfitList dataList = 1;</code>
      */
-    public Builder setDataList(com.example.grpc.user.GetRevenueAndProfitList value) {
+    public int getDataListCount() {
+      if (dataListBuilder_ == null) {
+        return dataList_.size();
+      } else {
+        return dataListBuilder_.getCount();
+      }
+    }
+    /**
+     * <code>repeated .GetRevenueAndProfitList dataList = 1;</code>
+     */
+    public com.example.grpc.user.GetRevenueAndProfitList getDataList(int index) {
+      if (dataListBuilder_ == null) {
+        return dataList_.get(index);
+      } else {
+        return dataListBuilder_.getMessage(index);
+      }
+    }
+    /**
+     * <code>repeated .GetRevenueAndProfitList dataList = 1;</code>
+     */
+    public Builder setDataList(
+        int index, com.example.grpc.user.GetRevenueAndProfitList value) {
       if (dataListBuilder_ == null) {
         if (value == null) {
           throw new NullPointerException();
         }
-        dataList_ = value;
+        ensureDataListIsMutable();
+        dataList_.set(index, value);
+        onChanged();
       } else {
-        dataListBuilder_.setMessage(value);
+        dataListBuilder_.setMessage(index, value);
       }
-      bitField0_ |= 0x00000001;
-      onChanged();
       return this;
     }
     /**
-     * <code>.GetRevenueAndProfitList dataList = 1;</code>
+     * <code>repeated .GetRevenueAndProfitList dataList = 1;</code>
      */
     public Builder setDataList(
+        int index, com.example.grpc.user.GetRevenueAndProfitList.Builder builderForValue) {
+      if (dataListBuilder_ == null) {
+        ensureDataListIsMutable();
+        dataList_.set(index, builderForValue.build());
+        onChanged();
+      } else {
+        dataListBuilder_.setMessage(index, builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .GetRevenueAndProfitList dataList = 1;</code>
+     */
+    public Builder addDataList(com.example.grpc.user.GetRevenueAndProfitList value) {
+      if (dataListBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureDataListIsMutable();
+        dataList_.add(value);
+        onChanged();
+      } else {
+        dataListBuilder_.addMessage(value);
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .GetRevenueAndProfitList dataList = 1;</code>
+     */
+    public Builder addDataList(
+        int index, com.example.grpc.user.GetRevenueAndProfitList value) {
+      if (dataListBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureDataListIsMutable();
+        dataList_.add(index, value);
+        onChanged();
+      } else {
+        dataListBuilder_.addMessage(index, value);
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .GetRevenueAndProfitList dataList = 1;</code>
+     */
+    public Builder addDataList(
         com.example.grpc.user.GetRevenueAndProfitList.Builder builderForValue) {
       if (dataListBuilder_ == null) {
-        dataList_ = builderForValue.build();
-      } else {
-        dataListBuilder_.setMessage(builderForValue.build());
-      }
-      bitField0_ |= 0x00000001;
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>.GetRevenueAndProfitList dataList = 1;</code>
-     */
-    public Builder mergeDataList(com.example.grpc.user.GetRevenueAndProfitList value) {
-      if (dataListBuilder_ == null) {
-        if (((bitField0_ & 0x00000001) != 0) &&
-          dataList_ != null &&
-          dataList_ != com.example.grpc.user.GetRevenueAndProfitList.getDefaultInstance()) {
-          getDataListBuilder().mergeFrom(value);
-        } else {
-          dataList_ = value;
-        }
-      } else {
-        dataListBuilder_.mergeFrom(value);
-      }
-      if (dataList_ != null) {
-        bitField0_ |= 0x00000001;
+        ensureDataListIsMutable();
+        dataList_.add(builderForValue.build());
         onChanged();
+      } else {
+        dataListBuilder_.addMessage(builderForValue.build());
       }
       return this;
     }
     /**
-     * <code>.GetRevenueAndProfitList dataList = 1;</code>
+     * <code>repeated .GetRevenueAndProfitList dataList = 1;</code>
+     */
+    public Builder addDataList(
+        int index, com.example.grpc.user.GetRevenueAndProfitList.Builder builderForValue) {
+      if (dataListBuilder_ == null) {
+        ensureDataListIsMutable();
+        dataList_.add(index, builderForValue.build());
+        onChanged();
+      } else {
+        dataListBuilder_.addMessage(index, builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .GetRevenueAndProfitList dataList = 1;</code>
+     */
+    public Builder addAllDataList(
+        java.lang.Iterable<? extends com.example.grpc.user.GetRevenueAndProfitList> values) {
+      if (dataListBuilder_ == null) {
+        ensureDataListIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, dataList_);
+        onChanged();
+      } else {
+        dataListBuilder_.addAllMessages(values);
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .GetRevenueAndProfitList dataList = 1;</code>
      */
     public Builder clearDataList() {
-      bitField0_ = (bitField0_ & ~0x00000001);
-      dataList_ = null;
-      if (dataListBuilder_ != null) {
-        dataListBuilder_.dispose();
-        dataListBuilder_ = null;
+      if (dataListBuilder_ == null) {
+        dataList_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+      } else {
+        dataListBuilder_.clear();
       }
-      onChanged();
       return this;
     }
     /**
-     * <code>.GetRevenueAndProfitList dataList = 1;</code>
+     * <code>repeated .GetRevenueAndProfitList dataList = 1;</code>
      */
-    public com.example.grpc.user.GetRevenueAndProfitList.Builder getDataListBuilder() {
-      bitField0_ |= 0x00000001;
-      onChanged();
-      return getDataListFieldBuilder().getBuilder();
+    public Builder removeDataList(int index) {
+      if (dataListBuilder_ == null) {
+        ensureDataListIsMutable();
+        dataList_.remove(index);
+        onChanged();
+      } else {
+        dataListBuilder_.remove(index);
+      }
+      return this;
     }
     /**
-     * <code>.GetRevenueAndProfitList dataList = 1;</code>
+     * <code>repeated .GetRevenueAndProfitList dataList = 1;</code>
      */
-    public com.example.grpc.user.GetRevenueAndProfitListOrBuilder getDataListOrBuilder() {
-      if (dataListBuilder_ != null) {
-        return dataListBuilder_.getMessageOrBuilder();
-      } else {
-        return dataList_ == null ?
-            com.example.grpc.user.GetRevenueAndProfitList.getDefaultInstance() : dataList_;
+    public com.example.grpc.user.GetRevenueAndProfitList.Builder getDataListBuilder(
+        int index) {
+      return getDataListFieldBuilder().getBuilder(index);
+    }
+    /**
+     * <code>repeated .GetRevenueAndProfitList dataList = 1;</code>
+     */
+    public com.example.grpc.user.GetRevenueAndProfitListOrBuilder getDataListOrBuilder(
+        int index) {
+      if (dataListBuilder_ == null) {
+        return dataList_.get(index);  } else {
+        return dataListBuilder_.getMessageOrBuilder(index);
       }
     }
     /**
-     * <code>.GetRevenueAndProfitList dataList = 1;</code>
+     * <code>repeated .GetRevenueAndProfitList dataList = 1;</code>
      */
-    private com.google.protobuf.SingleFieldBuilderV3<
+    public java.util.List<? extends com.example.grpc.user.GetRevenueAndProfitListOrBuilder> 
+         getDataListOrBuilderList() {
+      if (dataListBuilder_ != null) {
+        return dataListBuilder_.getMessageOrBuilderList();
+      } else {
+        return java.util.Collections.unmodifiableList(dataList_);
+      }
+    }
+    /**
+     * <code>repeated .GetRevenueAndProfitList dataList = 1;</code>
+     */
+    public com.example.grpc.user.GetRevenueAndProfitList.Builder addDataListBuilder() {
+      return getDataListFieldBuilder().addBuilder(
+          com.example.grpc.user.GetRevenueAndProfitList.getDefaultInstance());
+    }
+    /**
+     * <code>repeated .GetRevenueAndProfitList dataList = 1;</code>
+     */
+    public com.example.grpc.user.GetRevenueAndProfitList.Builder addDataListBuilder(
+        int index) {
+      return getDataListFieldBuilder().addBuilder(
+          index, com.example.grpc.user.GetRevenueAndProfitList.getDefaultInstance());
+    }
+    /**
+     * <code>repeated .GetRevenueAndProfitList dataList = 1;</code>
+     */
+    public java.util.List<com.example.grpc.user.GetRevenueAndProfitList.Builder> 
+         getDataListBuilderList() {
+      return getDataListFieldBuilder().getBuilderList();
+    }
+    private com.google.protobuf.RepeatedFieldBuilderV3<
         com.example.grpc.user.GetRevenueAndProfitList, com.example.grpc.user.GetRevenueAndProfitList.Builder, com.example.grpc.user.GetRevenueAndProfitListOrBuilder> 
         getDataListFieldBuilder() {
       if (dataListBuilder_ == null) {
-        dataListBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+        dataListBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
             com.example.grpc.user.GetRevenueAndProfitList, com.example.grpc.user.GetRevenueAndProfitList.Builder, com.example.grpc.user.GetRevenueAndProfitListOrBuilder>(
-                getDataList(),
+                dataList_,
+                ((bitField0_ & 0x00000001) != 0),
                 getParentForChildren(),
                 isClean());
         dataList_ = null;

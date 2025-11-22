@@ -7,6 +7,8 @@ import session from 'express-session';
 import { env } from './config/env';
 import indexRoute from '~/routes';
 import { initSagas } from './sagas/init/initSaga';
+const { startGrpcServer } = require('../src/grpc/server/saleServer.grpc')
+
 
 const app = express();
 
@@ -15,12 +17,12 @@ app.use(session({
   resave: false,
   saveUninitialized: true,
   // cookie: { secure: true } -> production -> HTTPS
-  cookie: { 
+  cookie: {
     secure: false,
     httpOnly: true,
     // sameSite: 'none'
   }, // -> development -> HTTP
-  
+
 }));
 app.use(express.json());
 
@@ -30,6 +32,8 @@ app.get('/ping', (_req, res) => res.json({ message: 'pong' }));
 app.use(indexRoute);
 
 app.use(errorHandlingMiddleware);
+
+startGrpcServer();
 
 const PORT = env.PORT || 4000;
 

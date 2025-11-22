@@ -166,7 +166,11 @@ const CoursePage = () => {
             <>
               <LessonViewer lesson={currentLecture} />
               <div className='mt-2 mx-auto w-full'>
-                <TabNavigation currentLecture={currentLecture} thumbnailUri={courseData?.thumbnailUrl as string} />
+                <TabNavigation
+                  currentLecture={currentLecture}
+                  thumbnailUri={courseData?.thumbnailUrl as string}
+                  currentLectureId={currentLectureId}
+                />
               </div>
             </>
           )}

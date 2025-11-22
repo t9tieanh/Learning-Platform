@@ -1,6 +1,7 @@
 import { FC } from 'react'
 import { Outlet, useMatches } from 'react-router-dom'
 import Header from '@/components/Header'
+import BubbleChat from '@/components/BubbleChat'
 import { Footer } from '@/components/Footer/footer2'
 import AuthenticationGate from '@/components/auth-gate/AuthenticationGate'
 import ScrollToTop from '@/components/common/ScrollToTop'
@@ -15,6 +16,7 @@ const DefaultLayout: FC = () => {
       <Header />
       <ScrollToTop />
       <Outlet />
+      <BubbleChat />
       {!hideFooter && <Footer />}
     </AuthenticationGate>
   )

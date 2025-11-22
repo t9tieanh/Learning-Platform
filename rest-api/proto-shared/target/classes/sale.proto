@@ -10,11 +10,11 @@ message GetRevenueAndProfitRequest {
 }
 
 message GetRevenueAndProfitResponse {
-  GetRevenueAndProfitList dataList = 1;
+  repeated GetRevenueAndProfitList dataList = 1;
 }
 
 message GetRevenueAndProfitList {
   int64 month = 1;
-  int64 revenue = 2;
-  int64 profit = 3;
+  double revenue = 2;
+  double profit = 3;
 }
