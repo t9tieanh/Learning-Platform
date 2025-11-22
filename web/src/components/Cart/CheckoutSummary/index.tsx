@@ -114,7 +114,7 @@ const CheckoutSummary = ({
           <CustomButton
             icon={<MousePointer2 />}
             label='Nhập mã giảm giá'
-            className='bg-red-500 hover:bg-red-600 text-white w-full mt-1'
+            className='bg-orange-500 hover:bg-yellow- text-white w-full mt-1'
           />
         </div>
       </div>
