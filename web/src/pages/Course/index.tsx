@@ -106,9 +106,11 @@ const Course = () => {
           )}
         </div>
       </div>
-      <div className='feedback-container w-full py-10 bg-[#0C356A]'>
-        <Feedback />
-      </div>
+      {courseDetail?.feedbacks && courseDetail.feedbacks.length > 0 && (
+        <div className='feedback-container w-full py-10 bg-[#0C356A]'>
+          <Feedback feedbacks={courseDetail?.feedbacks || []} />
+        </div>
+      )}
     </div>
   )
 }

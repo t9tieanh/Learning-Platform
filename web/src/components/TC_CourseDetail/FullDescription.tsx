@@ -14,7 +14,7 @@ export function FullDescription({ description }: FullDescriptionProps) {
     >
       <h2 className='text-xl font-bold mb-6'>Mô tả chi tiết</h2>
       <div
-        className='prose prose-sm max-w-none prose-headings:font-bold prose-h2:text-xl prose-h2:mt-6 prose-h2:mb-4 prose-h3:text-lg prose-h3:mt-4 prose-h3:mb-3 prose-p:leading-relaxed prose-ul:list-disc prose-ul:pl-6 prose-li:my-1'
+        className='prose prose-sm max-w-none prose-headings:font-bold text-sm prose-h2:mt-6 prose-h2:mb-4 prose-h3:text-lg prose-h3:mt-4 prose-h3:mb-3 prose-p:leading-relaxed prose-ul:list-disc prose-ul:pl-6 prose-li:my-1'
         dangerouslySetInnerHTML={{ __html: description }}
       />
     </motion.div>

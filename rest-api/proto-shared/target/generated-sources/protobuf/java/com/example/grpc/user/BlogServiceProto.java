@@ -24,13 +24,15 @@ public final class BlogServiceProto {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\021blogService.proto\032\033google/protobuf/emp" +
-      "ty.proto\032\nblog.proto\032\nuser.proto2\210\001\n\013Blo" +
-      "gService\022:\n\014getTotalBlog\022\026.google.protob" +
-      "uf.Empty\032\022.TotalBlogResponse\022=\n\026getTotal" +
-      "InstructorBlog\022\017.GetUserRequest\032\022.TotalB" +
-      "logResponseB+\n\025com.example.grpc.userB\020Bl" +
-      "ogServiceProtoP\001b\006proto3"
+      "\n\021blogService.proto\022\004blog\032\033google/protob" +
+      "uf/empty.proto\032\nblog.proto\032\nuser.proto2\340" +
+      "\001\n\013BlogService\022:\n\014getTotalBlog\022\026.google." +
+      "protobuf.Empty\032\022.TotalBlogResponse\022=\n\026ge" +
+      "tTotalInstructorBlog\022\017.GetUserRequest\032\022." +
+      "TotalBlogResponse\022V\n\025getFeedbackByCourse" +
+      "Id\022\035.GetFeedbackByCourseIdRequest\032\036.GetF" +
+      "eedbackByCourseIdResponseB+\n\025com.example" +
+      ".grpc.userB\020BlogServiceProtoP\001b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,

@@ -4,8 +4,10 @@ import { CourseListResult } from '@/types/course-user'
 import { CourseDetail } from '@/types/course-student'
 
 class CourseStudentService {
-  async getMyCourse(): Promise<ApiResponse<CourseListResult>> {
-    const response = await axiosClient.axiosInstance.get(`learning/courses-student/self`)
+  async getMyCourse(page = 0, size = 10): Promise<ApiResponse<CourseListResult>> {
+    const response = await axiosClient.axiosInstance.get(`learning/courses-student/self`, {
+      params: { page, size }
+    })
     return response.data
   }
 

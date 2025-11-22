@@ -65,6 +65,26 @@ public final class CourseProto {
   static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_MonthlyChartData_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_HasPurchasedCourseRequest_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_HasPurchasedCourseRequest_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_HasPurchasedCourseResponse_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_HasPurchasedCourseResponse_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_UpdateCourseRatingRequest_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_UpdateCourseRatingRequest_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_UpdateCourseRatingResponse_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_UpdateCourseRatingResponse_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -95,9 +115,14 @@ public final class CourseProto {
       "aResponse\022\014\n\004year\030\001 \001(\t\022&\n\013monthlyData\030\002" +
       " \003(\0132\021.MonthlyChartData\"X\n\020MonthlyChartD" +
       "ata\022\r\n\005month\030\001 \001(\003\022\017\n\007revenue\030\002 \001(\001\022\016\n\006p" +
-      "rofit\030\003 \001(\001\022\024\n\014studentCount\030\004 \001(\003B(\n\027com" +
-      ".example.grpc.courseB\013CourseProtoP\001b\006pro" +
-      "to3"
+      "rofit\030\003 \001(\001\022\024\n\014studentCount\030\004 \001(\003\"=\n\031Has" +
+      "PurchasedCourseRequest\022\020\n\010courseId\030\001 \001(\t" +
+      "\022\016\n\006userId\030\002 \001(\t\"2\n\032HasPurchasedCourseRe" +
+      "sponse\022\024\n\014hasPurchased\030\001 \001(\010\"=\n\031UpdateCo" +
+      "urseRatingRequest\022\020\n\010courseId\030\001 \001(\t\022\016\n\006r" +
+      "ating\030\002 \001(\001\".\n\032UpdateCourseRatingRespons" +
+      "e\022\020\n\010isSucces\030\001 \001(\010B(\n\027com.example.grpc." +
+      "courseB\013CourseProtoP\001b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -164,6 +189,30 @@ public final class CourseProto {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_MonthlyChartData_descriptor,
         new java.lang.String[] { "Month", "Revenue", "Profit", "StudentCount", });
+    internal_static_HasPurchasedCourseRequest_descriptor =
+      getDescriptor().getMessageTypes().get(10);
+    internal_static_HasPurchasedCourseRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_HasPurchasedCourseRequest_descriptor,
+        new java.lang.String[] { "CourseId", "UserId", });
+    internal_static_HasPurchasedCourseResponse_descriptor =
+      getDescriptor().getMessageTypes().get(11);
+    internal_static_HasPurchasedCourseResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_HasPurchasedCourseResponse_descriptor,
+        new java.lang.String[] { "HasPurchased", });
+    internal_static_UpdateCourseRatingRequest_descriptor =
+      getDescriptor().getMessageTypes().get(12);
+    internal_static_UpdateCourseRatingRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_UpdateCourseRatingRequest_descriptor,
+        new java.lang.String[] { "CourseId", "Rating", });
+    internal_static_UpdateCourseRatingResponse_descriptor =
+      getDescriptor().getMessageTypes().get(13);
+    internal_static_UpdateCourseRatingResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_UpdateCourseRatingResponse_descriptor,
+        new java.lang.String[] { "IsSucces", });
     com.example.grpc.user.UserProto.getDescriptor();
   }
 

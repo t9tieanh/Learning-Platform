@@ -50,6 +50,15 @@ export interface CourseResponse {
   } | null
   outcomes: string[]
   requirements: string[]
+  feedbacks?: {
+    id: string
+    userId: string
+    courseId: string
+    rating: number
+    message: string
+    userName?: string
+    userAvatar?: string
+  }[]
 }
 
 type Paginated<T> = {

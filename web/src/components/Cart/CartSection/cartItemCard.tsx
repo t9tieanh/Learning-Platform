@@ -8,6 +8,7 @@ import cartService from '@/services/sale/cart.service'
 import { toast } from 'sonner'
 import { Dispatch, SetStateAction } from 'react'
 import { useCartStore } from '@/stores/useCart.stores'
+import formatPrice from '@/utils/common/formatPrice'
 
 const CartItemCard = ({
   cardItem,
@@ -76,10 +77,10 @@ const CartItemCard = ({
         <div className='flex md:flex-col items-center md:items-end justify-between md:justify-start gap-4 md:gap-2'>
           <div className='text-right'>
             <CardDescription className='text-red-500 font-semibold text-base'>
-              {cardItem.final_price} VNĐ
+              {formatPrice(cardItem.final_price)}
             </CardDescription>
             {cardItem.original_price && (
-              <CardDescription className='line-through text-sm'>{cardItem.original_price} VNĐ</CardDescription>
+              <CardDescription className='line-through text-sm'>{formatPrice(cardItem.original_price)}</CardDescription>
             )}
           </div>
           <div className='flex items-center gap-2'>

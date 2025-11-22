@@ -13,6 +13,21 @@ const formatCurrency = (v?: number) => (v ?? 0).toLocaleString('vi-VN') + ' VNĐ
 const OrderSuccess = ({ order, id }: { order: Order; id: string }) => {
   const navigate = useNavigate()
 
+  // Tính tạm tính từ tổng giá các khóa học
+  const subtotal = order?.items?.reduce((sum, item) => sum + (item.price || 0), 0) || 0
+  const calculateDiscountAmount = () => {
+    if (!order?.discount) return 0
+
+    if (order.discount.type === 'Percent') {
+      const discountPercent = (subtotal * order.discount.value) / 100
+      return order.discount.maxDiscount ? Math.min(discountPercent, order.discount.maxDiscount) : discountPercent
+    } else {
+      return order.discount.value
+    }
+  }
+
+  const discountAmount = calculateDiscountAmount()
+
   const statusBlock = (() => {
     if (order.status === OrderStatus.Completed) {
       return (
@@ -97,13 +112,28 @@ const OrderSuccess = ({ order, id }: { order: Order; id: string }) => {
                         <p className='font-normal text-gray-800'>@{item.instructor_name}</p>
                       </span>
                     </div>
-                    <span>{item.price} VNĐ</span>
+                    <span>{formatCurrency(item.price)} VNĐ</span>
                   </div>
                 ))}
               </div>
               <div className='mt-4 flex items-center justify-between'>
-                <div className='text-sm text-gray-600'>Total</div>
-                <div className='text-lg font-bold text-gray-800'>{formatCurrency(order?.total)}</div>
+                <div className='text-sm text-gray-600'>Tạm tính</div>
+                <div className='text-lg font-semibold text-gray-800'>{formatCurrency(subtotal)}</div>
+              </div>
+              {order?.discount && (
+                <div className='mt-3 flex items-center justify-between bg-green-50 p-3 rounded-md border border-green-200'>
+                  <div className='flex items-center gap-2'>
+                    <span className='text-sm font-medium text-green-700'>Mã giảm: {order.discount.code}</span>
+                    <span className='text-xs bg-green-100 text-green-700 px-2 py-1 rounded'>
+                      {order.discount.type === 'Percent' ? `${order.discount.value}%` : 'Cố định'}
+                    </span>
+                  </div>
+                  <div className='text-sm font-semibold text-green-700'>-{formatCurrency(discountAmount)}</div>
+                </div>
+              )}
+              <div className='mt-4 flex items-center justify-between border-t pt-4'>
+                <div className='text-sm font-semibold text-gray-700'>Tổng cộng</div>
+                <div className='text-xl font-bold text-blue-600'>{formatCurrency(order?.total)}</div>
               </div>
             </div>
           </CardContent>

@@ -5,258 +5,259 @@ import BlogService from '~/services/blog.service'
 import { getUser } from '~/grpc/userClient'
 
 const getAll = async (req: Request, res: Response) => {
-    try {
-        const page = (req.data as any)?.page ?? (req.query.page ? Math.max(1, Number(req.query.page)) : 1)
-        const limit = (req.data as any)?.limit ?? (req.query.limit ? Math.min(100, Math.max(1, Number(req.query.limit))) : 10)
-        const search = (req.data as any)?.search ?? (req.query.q as string) ?? (req.query.search as string) ?? ''
+  try {
+    const page = (req.data as any)?.page ?? (req.query.page ? Math.max(1, Number(req.query.page)) : 1)
+    const limit =
+      (req.data as any)?.limit ?? (req.query.limit ? Math.min(100, Math.max(1, Number(req.query.limit))) : 10)
+    const search = (req.data as any)?.search ?? (req.query.q as string) ?? (req.query.search as string) ?? ''
 
-        const blogs = await BlogService.getAll({ page, limit, search })
+    const blogs = await BlogService.getAll({ page, limit, search })
 
-        const data = await Promise.all(
-            blogs.items.map(async b => {
-                const user = await getUser(b.instructor_id);
-                return {
-                    ...b,
-                    userName: user?.name || '',
-                    userAvt: user?.image || '',
-                }
-            })
-        )
+    const data = await Promise.all(
+      blogs.items.map(async (b) => {
+        const user = await getUser(b.instructor_id)
+        return {
+          ...b,
+          userName: user?.name || '',
+          userAvt: user?.image || ''
+        }
+      })
+    )
 
-        sendResponse(res, {
-            code: StatusCodes.OK,
-            message: 'Lấy danh sách blog thành công',
-            result: {
-                ...blogs,
-                data,
-            }
-        })
-    } catch (e) {
-        const err = e as Error
-        sendResponse(res, {
-            code: StatusCodes.BAD_REQUEST,
-            message: err.message || 'Lỗi lấy danh sách blog',
-            result: null
-        })
-    }
+    sendResponse(res, {
+      code: StatusCodes.OK,
+      message: 'Lấy danh sách blog thành công',
+      result: {
+        ...blogs,
+        data
+      }
+    })
+  } catch (e) {
+    const err = e as Error
+    sendResponse(res, {
+      code: StatusCodes.BAD_REQUEST,
+      message: err.message || 'Lỗi lấy danh sách blog',
+      result: null
+    })
+  }
 }
 
 const getAllByInstructorId = async (req: Request, res: Response) => {
-    try {
-        const page = (req.data as any)?.page ?? (req.query.page ? Math.max(1, Number(req.query.page)) : 1)
-        const limit = (req.data as any)?.limit ?? (req.query.limit ? Math.min(100, Math.max(1, Number(req.query.limit))) : 10)
-        const search = (req.data as any)?.search ?? (req.query.q as string) ?? (req.query.search as string) ?? ''
-        const instructorId = req.data.instructorId;
-        const blogs = await BlogService.getAll({ page, limit, search, instructorId })
+  try {
+    const page = (req.data as any)?.page ?? (req.query.page ? Math.max(1, Number(req.query.page)) : 1)
+    const limit =
+      (req.data as any)?.limit ?? (req.query.limit ? Math.min(100, Math.max(1, Number(req.query.limit))) : 10)
+    const search = (req.data as any)?.search ?? (req.query.q as string) ?? (req.query.search as string) ?? ''
+    const instructorId = req.data.instructorId
+    const blogs = await BlogService.getAll({ page, limit, search, instructorId })
 
-        const data = await Promise.all(
-            blogs.items.map(async b => {
-                const user = await getUser(b.instructor_id);
-                return {
-                    ...b,
-                    userName: user?.name || '',
-                    userAvt: user?.image || '',
-                }
-            })
-        )
+    const data = await Promise.all(
+      blogs.items.map(async (b) => {
+        const user = await getUser(b.instructor_id)
+        return {
+          ...b,
+          userName: user?.name || '',
+          userAvt: user?.image || ''
+        }
+      })
+    )
 
-        sendResponse(res, {
-            code: StatusCodes.OK,
-            message: 'Lấy danh sách blog thành công',
-            result: {
-                ...blogs,
-                data,
-            }
-        })
-    } catch (e) {
-        const err = e as Error
-        sendResponse(res, {
-            code: StatusCodes.BAD_REQUEST,
-            message: err.message || 'Lỗi lấy danh sách blog',
-            result: null
-        })
-    }
+    sendResponse(res, {
+      code: StatusCodes.OK,
+      message: 'Lấy danh sách blog thành công',
+      result: {
+        ...blogs,
+        data
+      }
+    })
+  } catch (e) {
+    const err = e as Error
+    sendResponse(res, {
+      code: StatusCodes.BAD_REQUEST,
+      message: err.message || 'Lỗi lấy danh sách blog',
+      result: null
+    })
+  }
 }
 
 const getNew = async (_req: Request, res: Response) => {
-    try {
-        const items = await BlogService.getNew(3)
-        sendResponse(res, {
-            code: StatusCodes.OK,
-            message: 'Lấy blog mới nhất thành công',
-            result: items
-        })
-    } catch (e) {
-        const err = e as Error
-        sendResponse(res, {
-            code: StatusCodes.BAD_REQUEST,
-            message: err.message || 'Lỗi lấy blog mới',
-            result: null
-        })
-    }
+  try {
+    const items = await BlogService.getNew(3)
+    sendResponse(res, {
+      code: StatusCodes.OK,
+      message: 'Lấy blog mới nhất thành công',
+      result: items
+    })
+  } catch (e) {
+    const err = e as Error
+    sendResponse(res, {
+      code: StatusCodes.BAD_REQUEST,
+      message: err.message || 'Lỗi lấy blog mới',
+      result: null
+    })
+  }
 }
 
 const getTrending = async (_req: Request, res: Response) => {
-    try {
-        // Assumption: trending by updatedAt desc due to lack of view/like fields
-        const items = await BlogService.getTrending(3)
-        sendResponse(res, {
-            code: StatusCodes.OK,
-            message: 'Lấy blog thịnh hành thành công',
-            result: items
-        })
-    } catch (e) {
-        const err = e as Error
-        sendResponse(res, {
-            code: StatusCodes.BAD_REQUEST,
-            message: err.message || 'Lỗi lấy blog thịnh hành',
-            result: null
-        })
-    }
+  try {
+    // Assumption: trending by updatedAt desc due to lack of view/like fields
+    const items = await BlogService.getTrending(3)
+    sendResponse(res, {
+      code: StatusCodes.OK,
+      message: 'Lấy blog thịnh hành thành công',
+      result: items
+    })
+  } catch (e) {
+    const err = e as Error
+    sendResponse(res, {
+      code: StatusCodes.BAD_REQUEST,
+      message: err.message || 'Lỗi lấy blog thịnh hành',
+      result: null
+    })
+  }
 }
 
 const getDetails = async (req: Request, res: Response) => {
-    try {
-        const id = (req.data as any)?.id || (req.params?.id as string) || ''
-        if (!id) throw new Error('Thiếu tham số id')
+  try {
+    const id = (req.data as any)?.id || (req.params?.id as string) || ''
+    if (!id) throw new Error('Thiếu tham số id')
 
-        const item = await BlogService.getDetails(id)
-        if (!item) {
-            return sendResponse(res, {
-                code: StatusCodes.NOT_FOUND,
-                message: 'Không tìm thấy blog',
-                result: null
-            })
-        }
-
-        const user = await getUser(item.instructor_id);
-
-        sendResponse(res, {
-            code: StatusCodes.OK,
-            message: 'Lấy chi tiết blog thành công',
-            result: {
-                ...item,
-                userName: user?.name || '',
-                userAvt: user?.image || '',
-            }
-        })
-    } catch (e) {
-        const err = e as Error
-        sendResponse(res, {
-            code: StatusCodes.BAD_REQUEST,
-            message: err.message || 'Lỗi lấy chi tiết blog',
-            result: null
-        })
+    const item = await BlogService.getDetails(id)
+    if (!item) {
+      return sendResponse(res, {
+        code: StatusCodes.NOT_FOUND,
+        message: 'Không tìm thấy blog',
+        result: null
+      })
     }
+
+    const user = await getUser(item.instructor_id)
+
+    sendResponse(res, {
+      code: StatusCodes.OK,
+      message: 'Lấy chi tiết blog thành công',
+      result: {
+        ...item,
+        userName: user?.name || '',
+        userAvt: user?.image || ''
+      }
+    })
+  } catch (e) {
+    const err = e as Error
+    sendResponse(res, {
+      code: StatusCodes.BAD_REQUEST,
+      message: err.message || 'Lỗi lấy chi tiết blog',
+      result: null
+    })
+  }
 }
 
 const create = async (req: Request, res: Response) => {
-    try {
-        const { instructor_id, title, image_url, content, markdown_file_url } = (req.data as any) || (req.body as any)
+  try {
+    const { instructor_id, title, image_url, content, markdown_file_url } = (req.data as any) || (req.body as any)
 
-
-        if (!instructor_id || !title || !image_url || !content) {
-            throw new Error('Thiếu dữ liệu bắt buộc (instructor_id, title, image_url, content)')
-        }
-
-        const created = await BlogService.create({
-            instructor_id,
-            title,
-            image_url,
-            content,
-            markdown_file_url: markdown_file_url || []
-        })
-
-        sendResponse(res, {
-            code: StatusCodes.CREATED,
-            message: 'Tạo blog thành công',
-            result: created
-        })
-    } catch (e) {
-        const err = e as Error
-        sendResponse(res, {
-            code: StatusCodes.BAD_REQUEST,
-            message: err.message || 'Lỗi tạo blog',
-            result: null
-        })
+    if (!instructor_id || !title || !image_url || !content) {
+      throw new Error('Thiếu dữ liệu bắt buộc (instructor_id, title, image_url, content)')
     }
+
+    const created = await BlogService.create({
+      instructor_id,
+      title,
+      image_url,
+      content,
+      markdown_file_url: markdown_file_url || []
+    })
+
+    sendResponse(res, {
+      code: StatusCodes.CREATED,
+      message: 'Tạo blog thành công',
+      result: created
+    })
+  } catch (e) {
+    const err = e as Error
+    sendResponse(res, {
+      code: StatusCodes.BAD_REQUEST,
+      message: err.message || 'Lỗi tạo blog',
+      result: null
+    })
+  }
 }
 
 const update = async (req: Request, res: Response) => {
-    try {
-        const id = (req.data as any)?.id || (req.params?.id as string) || ''
-        if (!id) throw new Error('Thiếu tham số id')
+  try {
+    const id = (req.data as any)?.id || (req.params?.id as string) || ''
+    if (!id) throw new Error('Thiếu tham số id')
 
-        const { title, image_url, content, markdown_file_url } = (req.data as any) || (req.body as any)
+    const { title, image_url, content, markdown_file_url } = (req.data as any) || (req.body as any)
 
-        const hasAny =
-            typeof title === 'string' ||
-            typeof image_url === 'string' ||
-            typeof content === 'string' ||
-            (Array.isArray(markdown_file_url) && markdown_file_url.length >= 0)
+    const hasAny =
+      typeof title === 'string' ||
+      typeof image_url === 'string' ||
+      typeof content === 'string' ||
+      (Array.isArray(markdown_file_url) && markdown_file_url.length >= 0)
 
-        if (!hasAny) throw new Error('Thiếu dữ liệu cần cập nhật')
+    if (!hasAny) throw new Error('Thiếu dữ liệu cần cập nhật')
 
-        const updated = await BlogService.update(id, {
-            title,
-            image_url,
-            content,
-            markdown_file_url
-        })
+    const updated = await BlogService.update(id, {
+      title,
+      image_url,
+      content,
+      markdown_file_url
+    })
 
-        if (!updated) {
-            return sendResponse(res, {
-                code: StatusCodes.NOT_FOUND,
-                message: 'Không tìm thấy blog để cập nhật',
-                result: null
-            })
-        }
-
-        sendResponse(res, {
-            code: StatusCodes.OK,
-            message: 'Cập nhật blog thành công',
-            result: updated
-        })
-    } catch (e) {
-        const err = e as Error
-        sendResponse(res, {
-            code: StatusCodes.BAD_REQUEST,
-            message: err.message || 'Lỗi cập nhật blog',
-            result: null
-        })
+    if (!updated) {
+      return sendResponse(res, {
+        code: StatusCodes.NOT_FOUND,
+        message: 'Không tìm thấy blog để cập nhật',
+        result: null
+      })
     }
+
+    sendResponse(res, {
+      code: StatusCodes.OK,
+      message: 'Cập nhật blog thành công',
+      result: updated
+    })
+  } catch (e) {
+    const err = e as Error
+    sendResponse(res, {
+      code: StatusCodes.BAD_REQUEST,
+      message: err.message || 'Lỗi cập nhật blog',
+      result: null
+    })
+  }
 }
 
 const remove = async (req: Request, res: Response) => {
-    try {
-        const id = (req.data as any)?.id || (req.params?.id as string) || ''
-        if (!id) throw new Error('Thiếu tham số id')
+  try {
+    const id = (req.data as any)?.id || (req.params?.id as string) || ''
+    if (!id) throw new Error('Thiếu tham số id')
 
-        const result = await BlogService.remove(id)
-        sendResponse(res, {
-            code: StatusCodes.OK,
-            message: result.deleted ? 'Xóa blog thành công' : 'Không tìm thấy blog để xóa',
-            result
-        })
-    } catch (e) {
-        const err = e as Error
-        sendResponse(res, {
-            code: StatusCodes.BAD_REQUEST,
-            message: err.message || 'Lỗi xóa blog',
-            result: null
-        })
-    }
+    const result = await BlogService.remove(id)
+    sendResponse(res, {
+      code: StatusCodes.OK,
+      message: result.deleted ? 'Xóa blog thành công' : 'Không tìm thấy blog để xóa',
+      result
+    })
+  } catch (e) {
+    const err = e as Error
+    sendResponse(res, {
+      code: StatusCodes.BAD_REQUEST,
+      message: err.message || 'Lỗi xóa blog',
+      result: null
+    })
+  }
 }
 
 const BlogController = {
-    getAll,
-    getAllByInstructorId,
-    getNew,
-    getTrending,
-    getDetails,
-    create,
-    update,
-    remove
+  getAll,
+  getAllByInstructorId,
+  getNew,
+  getTrending,
+  getDetails,
+  create,
+  update,
+  remove
 }
 
 export default BlogController

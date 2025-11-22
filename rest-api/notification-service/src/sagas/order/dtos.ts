@@ -7,9 +7,11 @@ export interface Discount {
 
 export interface Item {
   course_id: string
+  course_name: string
   price: number
   title: string
   instructor_name: string
+  instructor_id: string
   image: string
 }
 

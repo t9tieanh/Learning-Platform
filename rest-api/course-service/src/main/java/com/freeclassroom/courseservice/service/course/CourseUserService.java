@@ -3,6 +3,7 @@ package com.freeclassroom.courseservice.service.course;
 import com.example.grpc.user.GetTeachersResponse;
 import com.example.grpc.user.GetUserResponse;
 import com.example.grpc.user.Teacher;
+import com.freeclassroom.courseservice.dto.grpc.FeedbackDto;
 import com.freeclassroom.courseservice.dto.response.ApiResponse;
 import com.freeclassroom.courseservice.dto.response.common.Pagination;
 import com.freeclassroom.courseservice.dto.response.common.PagingResponse;
@@ -14,6 +15,7 @@ import com.freeclassroom.courseservice.enums.entity.EnumCourseProgressStep;
 import com.freeclassroom.courseservice.enums.entity.EnumCourseStatus;
 import com.freeclassroom.courseservice.exception.CustomExeption;
 import com.freeclassroom.courseservice.exception.ErrorCode;
+import com.freeclassroom.courseservice.grpc.client.BlogGrpcClient;
 import com.freeclassroom.courseservice.grpc.client.UserGrpcClient;
 import com.freeclassroom.courseservice.mapper.CourseMapper;
 import com.freeclassroom.courseservice.repository.entity.ChapterRepository;
@@ -46,6 +48,7 @@ public class CourseUserService implements ICourseUserService{
     ChapterRepository chapterRepo;
     EnrollmentRepository enrollmentRepo;
     UserGrpcClient userGrpcClient;
+    BlogGrpcClient blogGrpcClient;
 
     CourseMapper courseMapper;
 
@@ -72,6 +75,8 @@ public class CourseUserService implements ICourseUserService{
                 course.getInstructorId().toString()
         );
 
+        List<FeedbackDto> feedbacks = blogGrpcClient.getFeedbackByCourseId(course.getId());
+
         response.setInstructor(InstructorCourseResponse.builder()
                 .phone(user.getPhone())
                 .name(user.getName())
@@ -97,6 +102,9 @@ public class CourseUserService implements ICourseUserService{
             chapter.setDuration(chapterRepo.getTotalVideoDurationByChapterId(chapter.getId()));
             chapter.setLessonNum(chapterRepo.countLessonsByChapterId(chapter.getId()));
         });
+
+        // get feedback of course
+        response.setFeedbacks(blogGrpcClient.getFeedbackByCourseId(course.getId()));
 
         return ApiResponse.<CourseUserDetailResponse>builder()
                 .code(200)

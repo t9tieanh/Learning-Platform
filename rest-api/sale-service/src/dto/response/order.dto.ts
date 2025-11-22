@@ -15,9 +15,11 @@ export interface OrderDto {
     };
     items: {
         course_id: string;
+        course_name: string;
         price: number;
         title: string;
         instructor_name: string;
+        instructor_id: string;
         image: string;
     }[];
     ttl?: number;

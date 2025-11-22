@@ -9,7 +9,7 @@ const socket: Socket = io(SOCKET_URL, {
 })
 
 socket.on('connect', () => {
-  console.log('✅ Backend connected to socket server:', socket.id)
+  console.log('Backend connected to socket server:', socket.id)
 })
 
 socket.on('disconnect', (reason) => {

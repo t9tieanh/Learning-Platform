@@ -172,10 +172,12 @@
       </div>
 
       <div class="summary">
+        {{#if discount.code}}
         <div>
           <div class="label">Discount</div>
-          <div class="value">{{#if discount}}{{discount.code}} — {{discount.value}}{{else}}—{{/if}}</div>
+          <div class="value">{{discount.code}} — {{discount.value}}</div>
         </div>
+        {{/if}}
 
         <div>
           <div class="label">Total</div>

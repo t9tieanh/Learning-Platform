@@ -7,3 +7,23 @@ option java_outer_classname = "BlogProto";
 message TotalBlogResponse {
   int64 total = 1;
 }
+
+// Request message used by getFeedbackByCourseId
+message GetFeedbackByCourseIdRequest {
+  string courseId = 1;
+}
+
+// Response wrapping repeated feedbacks
+message GetFeedbackByCourseIdResponse {
+  repeated Feedback feedbacks = 1;
+}
+
+message Feedback {
+  string id = 1;
+  string userId = 2;
+  string courseId = 3;
+  int32 rating = 4;
+  string message = 5;             
+  string userName = 8;
+  string userAvatar = 9;
+}

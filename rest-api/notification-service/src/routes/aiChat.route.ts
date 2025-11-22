@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import { ValidateDto } from '~/middleware'
-import AiChatController from '~/controllers/aiChat.controller';
+import AiChatController from '~/controllers/aiChat.controller'
 
 const router = Router()
 
