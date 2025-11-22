@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document, Model } from 'mongoose'
 
-interface IFeedback extends Document {
+export interface IFeedback extends Document {
   userId: string
   courseId: string
   rating: number

@@ -52,7 +52,11 @@ const DashboardStats: React.FC = () => {
         if (!mounted) return
         const byMonth: Record<number, { revenue: number; profit: number; studentCount: number }> = {}
         chart.monthlyData.forEach((m) => {
-          byMonth[m.month] = { revenue: Number(m.revenue) || 0, profit: Number(m.profit) || 0, studentCount: Number(m.studentCount) || 0 }
+          byMonth[m.month] = {
+            revenue: Number(m.revenue) || 0,
+            profit: Number(m.profit) || 0,
+            studentCount: Number(m.studentCount) || 0
+          }
         })
         const months = Array.from({ length: 12 }, (_, i) => i + 1)
         setRevenueData(months.map((m) => byMonth[m]?.revenue ?? 0))
@@ -94,11 +98,14 @@ const DashboardStats: React.FC = () => {
     }
   }
 
-  const series = useMemo(() => [
-    { name: 'Doanh thu', data: revenueData },
-    { name: 'Lợi nhuận', data: profitData },
-    { name: 'Học viên', data: studentData }
-  ], [revenueData, profitData, studentData])
+  const series = useMemo(
+    () => [
+      { name: 'Doanh thu', data: revenueData },
+      { name: 'Lợi nhuận', data: profitData },
+      { name: 'Học viên', data: studentData }
+    ],
+    [revenueData, profitData, studentData]
+  )
 
   return (
     <div className='flex flex-col md:flex-row gap-6 items-start mb-4'>
@@ -122,9 +129,7 @@ const DashboardStats: React.FC = () => {
           icon={Newspaper}
           variant='warning'
         />
-        {errorStats && (
-          <p className='text-xs text-red-600'>Lỗi: {errorStats}</p>
-        )}
+        {errorStats && <p className='text-xs text-red-600'>Lỗi: {errorStats}</p>}
       </div>
 
       {/* Chart với chọn năm */}

@@ -210,13 +210,15 @@ class OrderService {
         const courseMap = new Map<string, any>(courses.map(c => [c.id, c]))
 
         const items = (order.items || []).map(i => {
-            const c = courseMap.get(i.course_id) || {}
+            const course = courseMap.get(i.course_id) || {}
             return {
                 course_id: i.course_id,
                 price: i.price,
-                title: c.title || '',
-                instructor_name: c.instructor?.name || '',
-                image: c.thumbnail_url || ''
+                title: course.title || '',
+                instructor_name: course.instructor?.name || '',
+                instructor_id: course.instructor?.id || '',
+                course_name: course.title || '',
+                image: course.thumbnail_url || ''
             }
         })
 

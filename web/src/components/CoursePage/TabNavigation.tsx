@@ -6,7 +6,15 @@ import { Lesson } from '@/types/course-student'
 import CustomButton from '@/components/common/Button'
 import NoteSection from './NoteSection'
 
-export const TabNavigation = ({ currentLecture, thumbnailUri, currentLectureId }: { currentLecture: Lesson; thumbnailUri: string; currentLectureId: number }) => {
+export const TabNavigation = ({
+  currentLecture,
+  thumbnailUri,
+  currentLectureId
+}: {
+  currentLecture: Lesson
+  thumbnailUri: string
+  currentLectureId: number
+}) => {
   const [activeTab, setActiveTab] = useState('Overview')
   const [open, setOpen] = useState(false)
   const tabs = useMemo(
@@ -40,8 +48,9 @@ export const TabNavigation = ({ currentLecture, thumbnailUri, currentLectureId }
           <CustomButton
             key={tab.label}
             onClick={() => (tab.onClick ? tab.onClick() : setActiveTab(tab.label))}
-            className={`py-4 text-sm font-medium bg-white transition-colors relative ${activeTab === tab.label ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
-              }`}
+            className={`py-4 text-sm font-medium bg-white transition-colors relative ${
+              activeTab === tab.label ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
+            }`}
             label={
               <>
                 {tab.label}

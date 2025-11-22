@@ -22,7 +22,7 @@ export function CourseSummary({ shortDescription, category, tags = [] }: CourseS
       <div className='flex items-center justify-between'>
         <h2 className='text-xl font-bold'>Tổng quan</h2>
       </div>
-      <p className='text-base leading-relaxed text-foreground mb-6 mt-2'>{shortDescription}</p>
+      <p className='text-sm leading-relaxed text-foreground mb-6 mt-2'>{shortDescription}</p>
 
       <div className='flex flex-wrap items-center gap-6 mb-6'>
         {category && (

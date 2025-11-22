@@ -44,7 +44,6 @@ public class CourseController {
         return tagService.getTagsByCourseId(id);
     }
 
-    // GET
     @GetMapping("/details/{id}")
     @PreAuthorize("@courseService.isTeacherOfCourse(#id, authentication.name)")
     ApiResponse<CourseResponse> getCourse(@PathVariable String id) {

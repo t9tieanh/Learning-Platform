@@ -5,13 +5,13 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 
 interface FeedbackProps {
-  owner: {
-    name: string
-    avatar: string
-  }
-  content: string
+  id: string
+  userId: string
+  courseId: string
   rating: number
-  createdAt: string
+  message: string
+  userName?: string
+  userAvatar?: string
 }
 
 const Feedback = ({ feedback }: { feedback: FeedbackProps }) => {
@@ -20,36 +20,32 @@ const Feedback = ({ feedback }: { feedback: FeedbackProps }) => {
       <CardContent className='p-6'>
         <div className='flex items-start gap-4'>
           <Avatar className='w-12 h-12 ring-2 ring-primary/10'>
-            <AvatarImage src={feedback.owner.avatar} alt={feedback.owner.name} />
+            <AvatarImage src={feedback.userAvatar} alt={feedback.userName} />
             <AvatarFallback className='bg-gradient-primary text-primary-foreground font-semibold'>
-              {feedback.owner.name.charAt(0)}
+              {feedback?.userName?.charAt(0)}
             </AvatarFallback>
           </Avatar>
           <div className='flex-1 min-w-0'>
             <div className='flex items-center justify-between mb-2'>
-              <h3 className='font-semibold text-foreground'>{feedback.owner.name}</h3>
-              <div className='flex items-center gap-1'>
-                {[...Array(5)].map((_, i) => (
-                  <Star
-                    key={i}
-                    className={`w-4 h-4 ${
-                      i < feedback.rating ? 'fill-yellow-400 text-yellow-400' : 'fill-muted text-muted'
-                    }`}
-                  />
-                ))}
+              <h3 className='font-semibold text-foreground'>{feedback?.userName}</h3>
+              <div className='flex flex-col gap-1 text-sm'>
+                <div>Đã đánh giá:</div>
+                <div className='flex items-center gap-1'>
+                  {[...Array(5)].map((_, i) => (
+                    <Star
+                      key={i}
+                      className={`w-4 h-4 ${
+                        i < feedback.rating ? 'fill-yellow-400 text-yellow-400' : 'fill-muted text-muted'
+                      }`}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
             <Badge variant='secondary' className='mb-3 text-xs'>
               Sinh viên
             </Badge>
-            <p className='text-muted-foreground text-sm mb-4 leading-relaxed italic'>{feedback.content}</p>
-            <p className='text-xs text-muted-foreground'>
-              {new Date(feedback.createdAt).toLocaleDateString('vi-VN', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-              })}
-            </p>
+            <p className='text-muted-foreground text-sm mb-4 leading-relaxed italic'>{feedback.message}</p>
           </div>
         </div>
       </CardContent>
@@ -57,40 +53,7 @@ const Feedback = ({ feedback }: { feedback: FeedbackProps }) => {
   )
 }
 
-const Feedbacks = () => {
-  const feedbacks: FeedbackProps[] = [
-    {
-      owner: {
-        name: 'Phạm Tiến Anh',
-        avatar: 'https://i.pravatar.cc/150?img=3'
-      },
-      content:
-        'Khóa học này thực sự rất hữu ích, giúp mình hiểu rõ hơn về các khái niệm React và áp dụng được vào dự án thực tế. Giảng viên hướng dẫn rất chi tiết và dễ hiểu.',
-      rating: 5,
-      createdAt: '2023-03-15'
-    },
-    {
-      owner: {
-        name: 'Nguyễn Đức Sang',
-        avatar: 'https://i.pravatar.cc/150?img=4'
-      },
-      content:
-        'Nội dung khóa học rất đầy đủ và cập nhật, tuy nhiên tốc độ giảng hơi nhanh nên mình phải xem lại một số bài để nắm chắc kiến thức. Tổng thể thì rất hài lòng.',
-      rating: 4,
-      createdAt: '2023-03-16'
-    },
-    {
-      owner: {
-        name: 'Nguyễn Công Qúy',
-        avatar: 'https://i.pravatar.cc/150?img=5'
-      },
-      content:
-        'Mình đánh giá cao sự hỗ trợ của giảng viên trong suốt quá trình học. Các ví dụ thực hành rất sát với thực tế, giúp mình tự tin hơn khi làm việc với React.',
-      rating: 5,
-      createdAt: '2023-03-17'
-    }
-  ]
-
+const Feedbacks = ({ feedbacks }: { feedbacks: FeedbackProps[] }) => {
   return (
     <section className='py-4 bg-gradient-subtle'>
       <h4 className='font-bold bg-primary text-white p-2 rounded-r-3xl max-w-lg mx-auto md:mx-0 text-center flex items-center justify-center md:justify-start'>

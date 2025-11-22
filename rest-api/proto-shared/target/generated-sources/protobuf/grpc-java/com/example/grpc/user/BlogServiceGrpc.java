@@ -12,7 +12,7 @@ public final class BlogServiceGrpc {
 
   private BlogServiceGrpc() {}
 
-  public static final java.lang.String SERVICE_NAME = "BlogService";
+  public static final java.lang.String SERVICE_NAME = "blog.BlogService";
 
   // Static method descriptors that strictly reflect the proto.
   private static volatile io.grpc.MethodDescriptor<com.google.protobuf.Empty,
@@ -77,6 +77,37 @@ public final class BlogServiceGrpc {
     return getGetTotalInstructorBlogMethod;
   }
 
+  private static volatile io.grpc.MethodDescriptor<com.example.grpc.course.GetFeedbackByCourseIdRequest,
+      com.example.grpc.course.GetFeedbackByCourseIdResponse> getGetFeedbackByCourseIdMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "getFeedbackByCourseId",
+      requestType = com.example.grpc.course.GetFeedbackByCourseIdRequest.class,
+      responseType = com.example.grpc.course.GetFeedbackByCourseIdResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<com.example.grpc.course.GetFeedbackByCourseIdRequest,
+      com.example.grpc.course.GetFeedbackByCourseIdResponse> getGetFeedbackByCourseIdMethod() {
+    io.grpc.MethodDescriptor<com.example.grpc.course.GetFeedbackByCourseIdRequest, com.example.grpc.course.GetFeedbackByCourseIdResponse> getGetFeedbackByCourseIdMethod;
+    if ((getGetFeedbackByCourseIdMethod = BlogServiceGrpc.getGetFeedbackByCourseIdMethod) == null) {
+      synchronized (BlogServiceGrpc.class) {
+        if ((getGetFeedbackByCourseIdMethod = BlogServiceGrpc.getGetFeedbackByCourseIdMethod) == null) {
+          BlogServiceGrpc.getGetFeedbackByCourseIdMethod = getGetFeedbackByCourseIdMethod =
+              io.grpc.MethodDescriptor.<com.example.grpc.course.GetFeedbackByCourseIdRequest, com.example.grpc.course.GetFeedbackByCourseIdResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "getFeedbackByCourseId"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.example.grpc.course.GetFeedbackByCourseIdRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.example.grpc.course.GetFeedbackByCourseIdResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new BlogServiceMethodDescriptorSupplier("getFeedbackByCourseId"))
+              .build();
+        }
+      }
+    }
+    return getGetFeedbackByCourseIdMethod;
+  }
+
   /**
    * Creates a new async stub that supports all call types for the service
    */
@@ -138,6 +169,13 @@ public final class BlogServiceGrpc {
         io.grpc.stub.StreamObserver<com.example.grpc.course.TotalBlogResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetTotalInstructorBlogMethod(), responseObserver);
     }
+
+    /**
+     */
+    default void getFeedbackByCourseId(com.example.grpc.course.GetFeedbackByCourseIdRequest request,
+        io.grpc.stub.StreamObserver<com.example.grpc.course.GetFeedbackByCourseIdResponse> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetFeedbackByCourseIdMethod(), responseObserver);
+    }
   }
 
   /**
@@ -182,6 +220,14 @@ public final class BlogServiceGrpc {
       io.grpc.stub.ClientCalls.asyncUnaryCall(
           getChannel().newCall(getGetTotalInstructorBlogMethod(), getCallOptions()), request, responseObserver);
     }
+
+    /**
+     */
+    public void getFeedbackByCourseId(com.example.grpc.course.GetFeedbackByCourseIdRequest request,
+        io.grpc.stub.StreamObserver<com.example.grpc.course.GetFeedbackByCourseIdResponse> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getGetFeedbackByCourseIdMethod(), getCallOptions()), request, responseObserver);
+    }
   }
 
   /**
@@ -212,6 +258,13 @@ public final class BlogServiceGrpc {
     public com.example.grpc.course.TotalBlogResponse getTotalInstructorBlog(com.example.grpc.user.GetUserRequest request) {
       return io.grpc.stub.ClientCalls.blockingUnaryCall(
           getChannel(), getGetTotalInstructorBlogMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public com.example.grpc.course.GetFeedbackByCourseIdResponse getFeedbackByCourseId(com.example.grpc.course.GetFeedbackByCourseIdRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getGetFeedbackByCourseIdMethod(), getCallOptions(), request);
     }
   }
 
@@ -246,10 +299,19 @@ public final class BlogServiceGrpc {
       return io.grpc.stub.ClientCalls.futureUnaryCall(
           getChannel().newCall(getGetTotalInstructorBlogMethod(), getCallOptions()), request);
     }
+
+    /**
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.example.grpc.course.GetFeedbackByCourseIdResponse> getFeedbackByCourseId(
+        com.example.grpc.course.GetFeedbackByCourseIdRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getGetFeedbackByCourseIdMethod(), getCallOptions()), request);
+    }
   }
 
   private static final int METHODID_GET_TOTAL_BLOG = 0;
   private static final int METHODID_GET_TOTAL_INSTRUCTOR_BLOG = 1;
+  private static final int METHODID_GET_FEEDBACK_BY_COURSE_ID = 2;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -275,6 +337,10 @@ public final class BlogServiceGrpc {
         case METHODID_GET_TOTAL_INSTRUCTOR_BLOG:
           serviceImpl.getTotalInstructorBlog((com.example.grpc.user.GetUserRequest) request,
               (io.grpc.stub.StreamObserver<com.example.grpc.course.TotalBlogResponse>) responseObserver);
+          break;
+        case METHODID_GET_FEEDBACK_BY_COURSE_ID:
+          serviceImpl.getFeedbackByCourseId((com.example.grpc.course.GetFeedbackByCourseIdRequest) request,
+              (io.grpc.stub.StreamObserver<com.example.grpc.course.GetFeedbackByCourseIdResponse>) responseObserver);
           break;
         default:
           throw new AssertionError();
@@ -308,6 +374,13 @@ public final class BlogServiceGrpc {
               com.example.grpc.user.GetUserRequest,
               com.example.grpc.course.TotalBlogResponse>(
                 service, METHODID_GET_TOTAL_INSTRUCTOR_BLOG)))
+        .addMethod(
+          getGetFeedbackByCourseIdMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.example.grpc.course.GetFeedbackByCourseIdRequest,
+              com.example.grpc.course.GetFeedbackByCourseIdResponse>(
+                service, METHODID_GET_FEEDBACK_BY_COURSE_ID)))
         .build();
   }
 
@@ -358,6 +431,7 @@ public final class BlogServiceGrpc {
               .setSchemaDescriptor(new BlogServiceFileDescriptorSupplier())
               .addMethod(getGetTotalBlogMethod())
               .addMethod(getGetTotalInstructorBlogMethod())
+              .addMethod(getGetFeedbackByCourseIdMethod())
               .build();
         }
       }

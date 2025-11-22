@@ -12,6 +12,7 @@ export type CreateCertReq = {
 }
 
 export type CreateCertRes = {
+  status: string | undefined
   id?: string
   title: string
   organization: string

@@ -201,6 +201,68 @@ public final class CourseServiceGrpc {
     return getGetChartDataMethod;
   }
 
+  private static volatile io.grpc.MethodDescriptor<com.example.grpc.course.HasPurchasedCourseRequest,
+      com.example.grpc.course.HasPurchasedCourseResponse> getCheckHasPurchasedMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "checkHasPurchased",
+      requestType = com.example.grpc.course.HasPurchasedCourseRequest.class,
+      responseType = com.example.grpc.course.HasPurchasedCourseResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<com.example.grpc.course.HasPurchasedCourseRequest,
+      com.example.grpc.course.HasPurchasedCourseResponse> getCheckHasPurchasedMethod() {
+    io.grpc.MethodDescriptor<com.example.grpc.course.HasPurchasedCourseRequest, com.example.grpc.course.HasPurchasedCourseResponse> getCheckHasPurchasedMethod;
+    if ((getCheckHasPurchasedMethod = CourseServiceGrpc.getCheckHasPurchasedMethod) == null) {
+      synchronized (CourseServiceGrpc.class) {
+        if ((getCheckHasPurchasedMethod = CourseServiceGrpc.getCheckHasPurchasedMethod) == null) {
+          CourseServiceGrpc.getCheckHasPurchasedMethod = getCheckHasPurchasedMethod =
+              io.grpc.MethodDescriptor.<com.example.grpc.course.HasPurchasedCourseRequest, com.example.grpc.course.HasPurchasedCourseResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "checkHasPurchased"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.example.grpc.course.HasPurchasedCourseRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.example.grpc.course.HasPurchasedCourseResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new CourseServiceMethodDescriptorSupplier("checkHasPurchased"))
+              .build();
+        }
+      }
+    }
+    return getCheckHasPurchasedMethod;
+  }
+
+  private static volatile io.grpc.MethodDescriptor<com.example.grpc.course.UpdateCourseRatingRequest,
+      com.example.grpc.course.UpdateCourseRatingResponse> getUpdateCourseRatingMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "updateCourseRating",
+      requestType = com.example.grpc.course.UpdateCourseRatingRequest.class,
+      responseType = com.example.grpc.course.UpdateCourseRatingResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<com.example.grpc.course.UpdateCourseRatingRequest,
+      com.example.grpc.course.UpdateCourseRatingResponse> getUpdateCourseRatingMethod() {
+    io.grpc.MethodDescriptor<com.example.grpc.course.UpdateCourseRatingRequest, com.example.grpc.course.UpdateCourseRatingResponse> getUpdateCourseRatingMethod;
+    if ((getUpdateCourseRatingMethod = CourseServiceGrpc.getUpdateCourseRatingMethod) == null) {
+      synchronized (CourseServiceGrpc.class) {
+        if ((getUpdateCourseRatingMethod = CourseServiceGrpc.getUpdateCourseRatingMethod) == null) {
+          CourseServiceGrpc.getUpdateCourseRatingMethod = getUpdateCourseRatingMethod =
+              io.grpc.MethodDescriptor.<com.example.grpc.course.UpdateCourseRatingRequest, com.example.grpc.course.UpdateCourseRatingResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "updateCourseRating"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.example.grpc.course.UpdateCourseRatingRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.example.grpc.course.UpdateCourseRatingResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new CourseServiceMethodDescriptorSupplier("updateCourseRating"))
+              .build();
+        }
+      }
+    }
+    return getUpdateCourseRatingMethod;
+  }
+
   /**
    * Creates a new async stub that supports all call types for the service
    */
@@ -290,6 +352,20 @@ public final class CourseServiceGrpc {
         io.grpc.stub.StreamObserver<com.example.grpc.course.GetChartDataResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetChartDataMethod(), responseObserver);
     }
+
+    /**
+     */
+    default void checkHasPurchased(com.example.grpc.course.HasPurchasedCourseRequest request,
+        io.grpc.stub.StreamObserver<com.example.grpc.course.HasPurchasedCourseResponse> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getCheckHasPurchasedMethod(), responseObserver);
+    }
+
+    /**
+     */
+    default void updateCourseRating(com.example.grpc.course.UpdateCourseRatingRequest request,
+        io.grpc.stub.StreamObserver<com.example.grpc.course.UpdateCourseRatingResponse> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getUpdateCourseRatingMethod(), responseObserver);
+    }
   }
 
   /**
@@ -366,6 +442,22 @@ public final class CourseServiceGrpc {
       io.grpc.stub.ClientCalls.asyncUnaryCall(
           getChannel().newCall(getGetChartDataMethod(), getCallOptions()), request, responseObserver);
     }
+
+    /**
+     */
+    public void checkHasPurchased(com.example.grpc.course.HasPurchasedCourseRequest request,
+        io.grpc.stub.StreamObserver<com.example.grpc.course.HasPurchasedCourseResponse> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getCheckHasPurchasedMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     */
+    public void updateCourseRating(com.example.grpc.course.UpdateCourseRatingRequest request,
+        io.grpc.stub.StreamObserver<com.example.grpc.course.UpdateCourseRatingResponse> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getUpdateCourseRatingMethod(), getCallOptions()), request, responseObserver);
+    }
   }
 
   /**
@@ -424,6 +516,20 @@ public final class CourseServiceGrpc {
     public com.example.grpc.course.GetChartDataResponse getChartData(com.example.grpc.course.GetChartDataRequest request) {
       return io.grpc.stub.ClientCalls.blockingUnaryCall(
           getChannel(), getGetChartDataMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public com.example.grpc.course.HasPurchasedCourseResponse checkHasPurchased(com.example.grpc.course.HasPurchasedCourseRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getCheckHasPurchasedMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public com.example.grpc.course.UpdateCourseRatingResponse updateCourseRating(com.example.grpc.course.UpdateCourseRatingRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getUpdateCourseRatingMethod(), getCallOptions(), request);
     }
   }
 
@@ -490,6 +596,22 @@ public final class CourseServiceGrpc {
       return io.grpc.stub.ClientCalls.futureUnaryCall(
           getChannel().newCall(getGetChartDataMethod(), getCallOptions()), request);
     }
+
+    /**
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.example.grpc.course.HasPurchasedCourseResponse> checkHasPurchased(
+        com.example.grpc.course.HasPurchasedCourseRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getCheckHasPurchasedMethod(), getCallOptions()), request);
+    }
+
+    /**
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.example.grpc.course.UpdateCourseRatingResponse> updateCourseRating(
+        com.example.grpc.course.UpdateCourseRatingRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getUpdateCourseRatingMethod(), getCallOptions()), request);
+    }
   }
 
   private static final int METHODID_GET_COURSE = 0;
@@ -498,6 +620,8 @@ public final class CourseServiceGrpc {
   private static final int METHODID_GET_COURSE_ADMIN_DATA = 3;
   private static final int METHODID_GET_TOTAL_COURSES_AND_STUDENT = 4;
   private static final int METHODID_GET_CHART_DATA = 5;
+  private static final int METHODID_CHECK_HAS_PURCHASED = 6;
+  private static final int METHODID_UPDATE_COURSE_RATING = 7;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -539,6 +663,14 @@ public final class CourseServiceGrpc {
         case METHODID_GET_CHART_DATA:
           serviceImpl.getChartData((com.example.grpc.course.GetChartDataRequest) request,
               (io.grpc.stub.StreamObserver<com.example.grpc.course.GetChartDataResponse>) responseObserver);
+          break;
+        case METHODID_CHECK_HAS_PURCHASED:
+          serviceImpl.checkHasPurchased((com.example.grpc.course.HasPurchasedCourseRequest) request,
+              (io.grpc.stub.StreamObserver<com.example.grpc.course.HasPurchasedCourseResponse>) responseObserver);
+          break;
+        case METHODID_UPDATE_COURSE_RATING:
+          serviceImpl.updateCourseRating((com.example.grpc.course.UpdateCourseRatingRequest) request,
+              (io.grpc.stub.StreamObserver<com.example.grpc.course.UpdateCourseRatingResponse>) responseObserver);
           break;
         default:
           throw new AssertionError();
@@ -600,6 +732,20 @@ public final class CourseServiceGrpc {
               com.example.grpc.course.GetChartDataRequest,
               com.example.grpc.course.GetChartDataResponse>(
                 service, METHODID_GET_CHART_DATA)))
+        .addMethod(
+          getCheckHasPurchasedMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.example.grpc.course.HasPurchasedCourseRequest,
+              com.example.grpc.course.HasPurchasedCourseResponse>(
+                service, METHODID_CHECK_HAS_PURCHASED)))
+        .addMethod(
+          getUpdateCourseRatingMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.example.grpc.course.UpdateCourseRatingRequest,
+              com.example.grpc.course.UpdateCourseRatingResponse>(
+                service, METHODID_UPDATE_COURSE_RATING)))
         .build();
   }
 
@@ -654,6 +800,8 @@ public final class CourseServiceGrpc {
               .addMethod(getGetCourseAdminDataMethod())
               .addMethod(getGetTotalCoursesAndStudentMethod())
               .addMethod(getGetChartDataMethod())
+              .addMethod(getCheckHasPurchasedMethod())
+              .addMethod(getUpdateCourseRatingMethod())
               .build();
         }
       }

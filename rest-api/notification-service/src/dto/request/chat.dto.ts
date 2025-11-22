@@ -79,8 +79,8 @@ export class DeleteMessageDTO {
   @IsNotEmpty()
   conversationId!: string
 
-    // id tin nhắn cần xóa
-    @IsString()
-    @IsNotEmpty()
-    messageId!: string
+  // id tin nhắn cần xóa
+  @IsString()
+  @IsNotEmpty()
+  messageId!: string
 }
