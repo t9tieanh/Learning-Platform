@@ -25,12 +25,14 @@ public final class BlogServiceProto {
   static {
     java.lang.String[] descriptorData = {
       "\n\021blogService.proto\032\033google/protobuf/emp" +
-      "ty.proto\032\nblog.proto\032\nuser.proto2\210\001\n\013Blo" +
-      "gService\022:\n\014getTotalBlog\022\026.google.protob" +
-      "uf.Empty\032\022.TotalBlogResponse\022=\n\026getTotal" +
-      "InstructorBlog\022\017.GetUserRequest\032\022.TotalB" +
-      "logResponseB+\n\025com.example.grpc.userB\020Bl" +
-      "ogServiceProtoP\001b\006proto3"
+      "ty.proto\032\nblog.proto\032\nuser.proto\032\014course" +
+      ".proto2\313\001\n\013BlogService\022:\n\014getTotalBlog\022\026" +
+      ".google.protobuf.Empty\032\022.TotalBlogRespon" +
+      "se\022=\n\026getTotalInstructorBlog\022\017.GetUserRe" +
+      "quest\032\022.TotalBlogResponse\022A\n\022pushCourseS" +
+      "upabase\022\024.PushSupabaseRequest\032\025.PushSupa" +
+      "baseResponseB+\n\025com.example.grpc.userB\020B" +
+      "logServiceProtoP\001b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -38,10 +40,12 @@ public final class BlogServiceProto {
           com.google.protobuf.EmptyProto.getDescriptor(),
           com.example.grpc.course.BlogProto.getDescriptor(),
           com.example.grpc.user.UserProto.getDescriptor(),
+          com.example.grpc.course.CourseProto.getDescriptor(),
         });
     com.google.protobuf.EmptyProto.getDescriptor();
     com.example.grpc.course.BlogProto.getDescriptor();
     com.example.grpc.user.UserProto.getDescriptor();
+    com.example.grpc.course.CourseProto.getDescriptor();
   }
 
   // @@protoc_insertion_point(outer_class_scope)

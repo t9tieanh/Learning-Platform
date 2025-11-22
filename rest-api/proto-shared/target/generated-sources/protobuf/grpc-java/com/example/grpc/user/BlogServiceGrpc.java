@@ -77,6 +77,37 @@ public final class BlogServiceGrpc {
     return getGetTotalInstructorBlogMethod;
   }
 
+  private static volatile io.grpc.MethodDescriptor<com.example.grpc.course.PushSupabaseRequest,
+      com.example.grpc.course.PushSupabaseResponse> getPushCourseSupabaseMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "pushCourseSupabase",
+      requestType = com.example.grpc.course.PushSupabaseRequest.class,
+      responseType = com.example.grpc.course.PushSupabaseResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<com.example.grpc.course.PushSupabaseRequest,
+      com.example.grpc.course.PushSupabaseResponse> getPushCourseSupabaseMethod() {
+    io.grpc.MethodDescriptor<com.example.grpc.course.PushSupabaseRequest, com.example.grpc.course.PushSupabaseResponse> getPushCourseSupabaseMethod;
+    if ((getPushCourseSupabaseMethod = BlogServiceGrpc.getPushCourseSupabaseMethod) == null) {
+      synchronized (BlogServiceGrpc.class) {
+        if ((getPushCourseSupabaseMethod = BlogServiceGrpc.getPushCourseSupabaseMethod) == null) {
+          BlogServiceGrpc.getPushCourseSupabaseMethod = getPushCourseSupabaseMethod =
+              io.grpc.MethodDescriptor.<com.example.grpc.course.PushSupabaseRequest, com.example.grpc.course.PushSupabaseResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "pushCourseSupabase"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.example.grpc.course.PushSupabaseRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.example.grpc.course.PushSupabaseResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new BlogServiceMethodDescriptorSupplier("pushCourseSupabase"))
+              .build();
+        }
+      }
+    }
+    return getPushCourseSupabaseMethod;
+  }
+
   /**
    * Creates a new async stub that supports all call types for the service
    */
@@ -138,6 +169,13 @@ public final class BlogServiceGrpc {
         io.grpc.stub.StreamObserver<com.example.grpc.course.TotalBlogResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetTotalInstructorBlogMethod(), responseObserver);
     }
+
+    /**
+     */
+    default void pushCourseSupabase(com.example.grpc.course.PushSupabaseRequest request,
+        io.grpc.stub.StreamObserver<com.example.grpc.course.PushSupabaseResponse> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getPushCourseSupabaseMethod(), responseObserver);
+    }
   }
 
   /**
@@ -182,6 +220,14 @@ public final class BlogServiceGrpc {
       io.grpc.stub.ClientCalls.asyncUnaryCall(
           getChannel().newCall(getGetTotalInstructorBlogMethod(), getCallOptions()), request, responseObserver);
     }
+
+    /**
+     */
+    public void pushCourseSupabase(com.example.grpc.course.PushSupabaseRequest request,
+        io.grpc.stub.StreamObserver<com.example.grpc.course.PushSupabaseResponse> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getPushCourseSupabaseMethod(), getCallOptions()), request, responseObserver);
+    }
   }
 
   /**
@@ -212,6 +258,13 @@ public final class BlogServiceGrpc {
     public com.example.grpc.course.TotalBlogResponse getTotalInstructorBlog(com.example.grpc.user.GetUserRequest request) {
       return io.grpc.stub.ClientCalls.blockingUnaryCall(
           getChannel(), getGetTotalInstructorBlogMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public com.example.grpc.course.PushSupabaseResponse pushCourseSupabase(com.example.grpc.course.PushSupabaseRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getPushCourseSupabaseMethod(), getCallOptions(), request);
     }
   }
 
@@ -246,10 +299,19 @@ public final class BlogServiceGrpc {
       return io.grpc.stub.ClientCalls.futureUnaryCall(
           getChannel().newCall(getGetTotalInstructorBlogMethod(), getCallOptions()), request);
     }
+
+    /**
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.example.grpc.course.PushSupabaseResponse> pushCourseSupabase(
+        com.example.grpc.course.PushSupabaseRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getPushCourseSupabaseMethod(), getCallOptions()), request);
+    }
   }
 
   private static final int METHODID_GET_TOTAL_BLOG = 0;
   private static final int METHODID_GET_TOTAL_INSTRUCTOR_BLOG = 1;
+  private static final int METHODID_PUSH_COURSE_SUPABASE = 2;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -275,6 +337,10 @@ public final class BlogServiceGrpc {
         case METHODID_GET_TOTAL_INSTRUCTOR_BLOG:
           serviceImpl.getTotalInstructorBlog((com.example.grpc.user.GetUserRequest) request,
               (io.grpc.stub.StreamObserver<com.example.grpc.course.TotalBlogResponse>) responseObserver);
+          break;
+        case METHODID_PUSH_COURSE_SUPABASE:
+          serviceImpl.pushCourseSupabase((com.example.grpc.course.PushSupabaseRequest) request,
+              (io.grpc.stub.StreamObserver<com.example.grpc.course.PushSupabaseResponse>) responseObserver);
           break;
         default:
           throw new AssertionError();
@@ -308,6 +374,13 @@ public final class BlogServiceGrpc {
               com.example.grpc.user.GetUserRequest,
               com.example.grpc.course.TotalBlogResponse>(
                 service, METHODID_GET_TOTAL_INSTRUCTOR_BLOG)))
+        .addMethod(
+          getPushCourseSupabaseMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.example.grpc.course.PushSupabaseRequest,
+              com.example.grpc.course.PushSupabaseResponse>(
+                service, METHODID_PUSH_COURSE_SUPABASE)))
         .build();
   }
 
@@ -358,6 +431,7 @@ public final class BlogServiceGrpc {
               .setSchemaDescriptor(new BlogServiceFileDescriptorSupplier())
               .addMethod(getGetTotalBlogMethod())
               .addMethod(getGetTotalInstructorBlogMethod())
+              .addMethod(getPushCourseSupabaseMethod())
               .build();
         }
       }

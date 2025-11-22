@@ -6,6 +6,7 @@ D:\Project_DaiHoc\Learning-Platform\rest-api\proto-shared\target\generated-sourc
 D:\Project_DaiHoc\Learning-Platform\rest-api\proto-shared\target\generated-sources\protobuf\java\com\example\grpc\user\GetUserResponseOrBuilder.java
 D:\Project_DaiHoc\Learning-Platform\rest-api\proto-shared\target\generated-sources\protobuf\java\com\example\grpc\user\GetUserResponse.java
 D:\Project_DaiHoc\Learning-Platform\rest-api\proto-shared\target\generated-sources\protobuf\java\com\example\grpc\course\GetCourseAndStudentResponse.java
+D:\Project_DaiHoc\Learning-Platform\rest-api\proto-shared\target\generated-sources\protobuf\java\com\example\grpc\course\PushSupabaseRequest.java
 D:\Project_DaiHoc\Learning-Platform\rest-api\proto-shared\target\generated-sources\protobuf\java\com\example\grpc\user\SaleServiceProto.java
 D:\Project_DaiHoc\Learning-Platform\rest-api\proto-shared\target\generated-sources\protobuf\java\com\example\grpc\user\Teacher.java
 D:\Project_DaiHoc\Learning-Platform\rest-api\proto-shared\target\generated-sources\protobuf\java\com\example\grpc\course\EnrolledCoursesRequestOrBuilder.java
@@ -19,6 +20,7 @@ D:\Project_DaiHoc\Learning-Platform\rest-api\proto-shared\target\generated-sourc
 D:\Project_DaiHoc\Learning-Platform\rest-api\proto-shared\target\generated-sources\protobuf\java\com\example\grpc\course\CourseProto.java
 D:\Project_DaiHoc\Learning-Platform\rest-api\proto-shared\target\generated-sources\protobuf\java\com\example\grpc\user\UserProto.java
 D:\Project_DaiHoc\Learning-Platform\rest-api\proto-shared\target\generated-sources\protobuf\java\com\example\grpc\course\MonthlyChartData.java
+D:\Project_DaiHoc\Learning-Platform\rest-api\proto-shared\target\generated-sources\protobuf\java\com\example\grpc\course\PushSupabaseResponseOrBuilder.java
 D:\Project_DaiHoc\Learning-Platform\rest-api\proto-shared\target\generated-sources\protobuf\java\com\example\grpc\course\GetCoursesResponse.java
 D:\Project_DaiHoc\Learning-Platform\rest-api\proto-shared\target\generated-sources\protobuf\java\com\example\grpc\hello\HelloReplyOrBuilder.java
 D:\Project_DaiHoc\Learning-Platform\rest-api\proto-shared\target\generated-sources\protobuf\java\com\example\grpc\user\GetTeachersResponse.java
@@ -47,9 +49,11 @@ D:\Project_DaiHoc\Learning-Platform\rest-api\proto-shared\target\generated-sourc
 D:\Project_DaiHoc\Learning-Platform\rest-api\proto-shared\target\generated-sources\protobuf\java\com\example\grpc\user\GetRevenueAndProfitRequestOrBuilder.java
 D:\Project_DaiHoc\Learning-Platform\rest-api\proto-shared\target\generated-sources\protobuf\java\com\example\grpc\user\GetRevenueAndProfitResponse.java
 D:\Project_DaiHoc\Learning-Platform\rest-api\proto-shared\target\generated-sources\protobuf\java\com\example\grpc\course\CourseResponseOrBuilder.java
+D:\Project_DaiHoc\Learning-Platform\rest-api\proto-shared\target\generated-sources\protobuf\java\com\example\grpc\course\PushSupabaseRequestOrBuilder.java
 D:\Project_DaiHoc\Learning-Platform\rest-api\proto-shared\target\generated-sources\protobuf\java\com\example\grpc\user\TeacherOrBuilder.java
 D:\Project_DaiHoc\Learning-Platform\rest-api\proto-shared\target\generated-sources\protobuf\grpc-java\com\example\grpc\user\BlogServiceGrpc.java
 D:\Project_DaiHoc\Learning-Platform\rest-api\proto-shared\target\generated-sources\protobuf\java\com\example\grpc\course\GetChartDataResponseOrBuilder.java
+D:\Project_DaiHoc\Learning-Platform\rest-api\proto-shared\target\generated-sources\protobuf\java\com\example\grpc\course\PushSupabaseResponse.java
 D:\Project_DaiHoc\Learning-Platform\rest-api\proto-shared\target\generated-sources\protobuf\java\com\example\grpc\user\SaleProto.java
 D:\Project_DaiHoc\Learning-Platform\rest-api\proto-shared\target\generated-sources\protobuf\grpc-java\com\example\grpc\user\UserServiceGrpc.java
 D:\Project_DaiHoc\Learning-Platform\rest-api\proto-shared\target\generated-sources\protobuf\java\com\example\grpc\course\GetCourseAdminDataResponse.java
