@@ -121,20 +121,22 @@ const OrderSuccess = ({ order, id }: { order: Order; id: string }) => {
                 <div className='text-lg font-semibold text-gray-800'>{formatCurrency(subtotal)}</div>
               </div>
               {order?.discount && (
-                <div className='mt-3 flex items-center justify-between bg-green-50 p-3 rounded-md border border-green-200'>
-                  <div className='flex items-center gap-2'>
-                    <span className='text-sm font-medium text-green-700'>Mã giảm: {order.discount.code}</span>
-                    <span className='text-xs bg-green-100 text-green-700 px-2 py-1 rounded'>
-                      {order.discount.type === 'Percent' ? `${order.discount.value}%` : 'Cố định'}
-                    </span>
+                <>
+                  <div className='mt-3 flex items-center justify-between bg-green-50 p-3 rounded-md border border-green-200'>
+                    <div className='flex items-center gap-2'>
+                      <span className='text-sm font-medium text-green-700'>Mã giảm: {order.discount.code}</span>
+                      <span className='text-xs bg-green-100 text-green-700 px-2 py-1 rounded'>
+                        {order.discount.type === 'Percent' ? `${order.discount.value}%` : 'Cố định'}
+                      </span>
+                    </div>
+                    <div className='text-sm font-semibold text-green-700'>-{formatCurrency(discountAmount)}</div>
                   </div>
-                  <div className='text-sm font-semibold text-green-700'>-{formatCurrency(discountAmount)}</div>
-                </div>
+                  <div className='mt-4 flex items-center justify-between border-t pt-4'>
+                    <div className='text-sm font-semibold text-gray-700'>Tổng cộng</div>
+                    <div className='text-xl font-bold text-blue-600'>{formatCurrency(order?.total)}</div>
+                  </div>
+                </>
               )}
-              <div className='mt-4 flex items-center justify-between border-t pt-4'>
-                <div className='text-sm font-semibold text-gray-700'>Tổng cộng</div>
-                <div className='text-xl font-bold text-blue-600'>{formatCurrency(order?.total)}</div>
-              </div>
             </div>
           </CardContent>
         </Card>

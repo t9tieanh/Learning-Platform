@@ -20,7 +20,7 @@ const OrderDetail = ({ orderId }: { orderId: string }) => {
   }, [orderId])
 
   if (!order) {
-    return <p>Đang tải chi tiết đơn hàng...</p>
+    return <p className='text-sm'>Đang tải chi tiết đơn hàng...</p>
   }
 
   const subtotal = order?.items?.reduce((sum, item) => sum + (item.price || 0), 0) || 0
@@ -67,16 +67,17 @@ const OrderDetail = ({ orderId }: { orderId: string }) => {
       <Card className='border-none p-0 m-0'>
         <CardContent className='p-0'>
           <div className='rounded-lg'>
-            {/* Customer info */}
-            <div className='text-sm font-medium flex items-center'>
-              <User className='mr-1 w-4 h-4' />
-              <span>Thông tin khách hàng</span>
-            </div>
-            <div className='mb-4 pb-4 border-b flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3'>
-              <div>
-                <div className='text-sm font-medium'>{order.customer_name}</div>
-                <div className='text-xs text-muted-foreground'>{order.customer_email}</div>
-                <div className='text-xs text-muted-foreground'>User ID: {order.user_id}</div>
+            {/* Customer info - boxed with overlapping label */}
+            <div className='relative my-4'>
+              <div className='absolute -top-3 left-4 bg-gray-200 px-2 rounded text-sm font-medium flex items-center shadow-sm'>
+                <User className='mr-1 w-4 h-4' />
+                <span>Thông tin khách hàng</span>
+              </div>
+              <div className='border rounded-lg p-4 pt-6 bg-white'>
+                <div>
+                  <div className='text-sm font-medium'>{order.customer_name}</div>
+                  <div className='text-xs text-muted-foreground'>Email đã nhận hóa đơn: {order.customer_email}</div>
+                </div>
               </div>
             </div>
             <div className='items order-items'>

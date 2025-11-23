@@ -22,4 +22,5 @@ public class InstructorCourseResponse {
 
     Long numCourse;
     List<ExpertiseResponse> expertise;
+    List <CertificateResponse> certificates;
 }

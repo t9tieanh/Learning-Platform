@@ -21,6 +21,11 @@ class CartService {
             };
         }
 
+        // check useId is intructor of the course
+        if (userId && await courseGrpcClient.isInstructor(courseId, userId)) {
+            throw new ApiError(403, 'Giảng viên không thể thêm khóa học của mình vào giỏ hàng !');
+        }
+
         // DB work inside a transaction
         const createdItem = await prismaService.$transaction(async (tx) => {
 

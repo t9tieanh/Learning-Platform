@@ -59,6 +59,26 @@ class CourseGrpcClient {
         })
     }
 
+    // check is Instructor
+    async isInstructor(courseId: string, userId: string): Promise<boolean> {
+        return new Promise<boolean>((resolve, reject) => {
+            const req = { courseId: courseId, userId: userId }
+            this.courseClient.isInstructor(req, (err: any, response: any) => {
+                if (err) {
+                    console.error('grpc isInstructor error:', err)
+                    return reject(err)
+                }
+
+                if (!response || typeof response.isInstructor !== 'boolean') {
+                    console.warn('grpc isInstructor: invalid response, returning false', response)
+                    return resolve(false)
+                }
+
+                resolve(response.isInstructor)
+            })
+        })
+    }
+
     // optional helper to await readiness from elsewhere
     async isReady(timeoutMs = 5000): Promise<boolean> {
         return new Promise((resolve) => {

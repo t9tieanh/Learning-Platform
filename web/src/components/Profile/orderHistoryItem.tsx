@@ -3,7 +3,7 @@ import { Item, ItemActions, ItemContent, ItemDescription, ItemMedia, ItemTitle }
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import formatPrice from '@/utils/common/formatPrice'
 import CustomButton from '@/components/common/Button'
-import { Send } from 'lucide-react'
+import { Send, ClipboardClock } from 'lucide-react'
 import OrderDetail from './order-detail'
 import CustomDialog from '@/components/common/Dialog'
 import { useState } from 'react'
@@ -13,10 +13,6 @@ const OrderHistoryItem = ({ item }: { item: HistoryOrder }) => {
 
   const handleOpenDialog = () => {
     setIsDialogOpen(true)
-  }
-
-  const handleCloseDialog = () => {
-    setIsDialogOpen(false)
   }
 
   return (
@@ -78,7 +74,7 @@ const OrderHistoryItem = ({ item }: { item: HistoryOrder }) => {
         }
         title={
           <>
-            <Send className='w-5 h-5' /> Chi tiết đơn hàng
+            <ClipboardClock className='w-5 h-5' /> Chi tiết đơn hàng
           </>
         }
       />

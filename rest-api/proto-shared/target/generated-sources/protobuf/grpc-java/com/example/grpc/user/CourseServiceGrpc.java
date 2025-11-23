@@ -263,6 +263,37 @@ public final class CourseServiceGrpc {
     return getUpdateCourseRatingMethod;
   }
 
+  private static volatile io.grpc.MethodDescriptor<com.example.grpc.course.IsInstructorRequest,
+      com.example.grpc.course.IsInstructorResponse> getIsInstructorMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "isInstructor",
+      requestType = com.example.grpc.course.IsInstructorRequest.class,
+      responseType = com.example.grpc.course.IsInstructorResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<com.example.grpc.course.IsInstructorRequest,
+      com.example.grpc.course.IsInstructorResponse> getIsInstructorMethod() {
+    io.grpc.MethodDescriptor<com.example.grpc.course.IsInstructorRequest, com.example.grpc.course.IsInstructorResponse> getIsInstructorMethod;
+    if ((getIsInstructorMethod = CourseServiceGrpc.getIsInstructorMethod) == null) {
+      synchronized (CourseServiceGrpc.class) {
+        if ((getIsInstructorMethod = CourseServiceGrpc.getIsInstructorMethod) == null) {
+          CourseServiceGrpc.getIsInstructorMethod = getIsInstructorMethod =
+              io.grpc.MethodDescriptor.<com.example.grpc.course.IsInstructorRequest, com.example.grpc.course.IsInstructorResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "isInstructor"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.example.grpc.course.IsInstructorRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.example.grpc.course.IsInstructorResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new CourseServiceMethodDescriptorSupplier("isInstructor"))
+              .build();
+        }
+      }
+    }
+    return getIsInstructorMethod;
+  }
+
   /**
    * Creates a new async stub that supports all call types for the service
    */
@@ -366,6 +397,13 @@ public final class CourseServiceGrpc {
         io.grpc.stub.StreamObserver<com.example.grpc.course.UpdateCourseRatingResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getUpdateCourseRatingMethod(), responseObserver);
     }
+
+    /**
+     */
+    default void isInstructor(com.example.grpc.course.IsInstructorRequest request,
+        io.grpc.stub.StreamObserver<com.example.grpc.course.IsInstructorResponse> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getIsInstructorMethod(), responseObserver);
+    }
   }
 
   /**
@@ -458,6 +496,14 @@ public final class CourseServiceGrpc {
       io.grpc.stub.ClientCalls.asyncUnaryCall(
           getChannel().newCall(getUpdateCourseRatingMethod(), getCallOptions()), request, responseObserver);
     }
+
+    /**
+     */
+    public void isInstructor(com.example.grpc.course.IsInstructorRequest request,
+        io.grpc.stub.StreamObserver<com.example.grpc.course.IsInstructorResponse> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getIsInstructorMethod(), getCallOptions()), request, responseObserver);
+    }
   }
 
   /**
@@ -530,6 +576,13 @@ public final class CourseServiceGrpc {
     public com.example.grpc.course.UpdateCourseRatingResponse updateCourseRating(com.example.grpc.course.UpdateCourseRatingRequest request) {
       return io.grpc.stub.ClientCalls.blockingUnaryCall(
           getChannel(), getUpdateCourseRatingMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public com.example.grpc.course.IsInstructorResponse isInstructor(com.example.grpc.course.IsInstructorRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getIsInstructorMethod(), getCallOptions(), request);
     }
   }
 
@@ -612,6 +665,14 @@ public final class CourseServiceGrpc {
       return io.grpc.stub.ClientCalls.futureUnaryCall(
           getChannel().newCall(getUpdateCourseRatingMethod(), getCallOptions()), request);
     }
+
+    /**
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.example.grpc.course.IsInstructorResponse> isInstructor(
+        com.example.grpc.course.IsInstructorRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getIsInstructorMethod(), getCallOptions()), request);
+    }
   }
 
   private static final int METHODID_GET_COURSE = 0;
@@ -622,6 +683,7 @@ public final class CourseServiceGrpc {
   private static final int METHODID_GET_CHART_DATA = 5;
   private static final int METHODID_CHECK_HAS_PURCHASED = 6;
   private static final int METHODID_UPDATE_COURSE_RATING = 7;
+  private static final int METHODID_IS_INSTRUCTOR = 8;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -671,6 +733,10 @@ public final class CourseServiceGrpc {
         case METHODID_UPDATE_COURSE_RATING:
           serviceImpl.updateCourseRating((com.example.grpc.course.UpdateCourseRatingRequest) request,
               (io.grpc.stub.StreamObserver<com.example.grpc.course.UpdateCourseRatingResponse>) responseObserver);
+          break;
+        case METHODID_IS_INSTRUCTOR:
+          serviceImpl.isInstructor((com.example.grpc.course.IsInstructorRequest) request,
+              (io.grpc.stub.StreamObserver<com.example.grpc.course.IsInstructorResponse>) responseObserver);
           break;
         default:
           throw new AssertionError();
@@ -746,6 +812,13 @@ public final class CourseServiceGrpc {
               com.example.grpc.course.UpdateCourseRatingRequest,
               com.example.grpc.course.UpdateCourseRatingResponse>(
                 service, METHODID_UPDATE_COURSE_RATING)))
+        .addMethod(
+          getIsInstructorMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.example.grpc.course.IsInstructorRequest,
+              com.example.grpc.course.IsInstructorResponse>(
+                service, METHODID_IS_INSTRUCTOR)))
         .build();
   }
 
@@ -802,6 +875,7 @@ public final class CourseServiceGrpc {
               .addMethod(getGetChartDataMethod())
               .addMethod(getCheckHasPurchasedMethod())
               .addMethod(getUpdateCourseRatingMethod())
+              .addMethod(getIsInstructorMethod())
               .build();
         }
       }

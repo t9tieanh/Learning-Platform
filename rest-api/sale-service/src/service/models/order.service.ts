@@ -54,6 +54,13 @@ class OrderService {
             throw new ApiError(400, 'Một hoặc nhiều khóa học không tồn tại !');
         }
 
+        // check userId is instructor of any course
+        for (const item of orderItems) {
+            if (item.instructor.id === userId) {
+                throw new ApiError(403, 'Giảng viên không thể mua khóa học của mình !');
+            }
+        }
+
         const newOrder = {
             ...orderData,
             items: orderItems.map(item => ({

@@ -12,4 +12,5 @@ import org.mapstruct.Mapper;
 public interface CertificateMapper {
     Certificate toEntity(CreateCertReq req);
     CertificateResponse toDto(Certificate entity);
+    com.example.grpc.user.Certificate toGrpc(Certificate entity);
 }

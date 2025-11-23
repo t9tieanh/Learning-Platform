@@ -85,6 +85,16 @@ public final class CourseProto {
   static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_UpdateCourseRatingResponse_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_IsInstructorRequest_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_IsInstructorRequest_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_IsInstructorResponse_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_IsInstructorResponse_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -121,8 +131,11 @@ public final class CourseProto {
       "sponse\022\024\n\014hasPurchased\030\001 \001(\010\"=\n\031UpdateCo" +
       "urseRatingRequest\022\020\n\010courseId\030\001 \001(\t\022\016\n\006r" +
       "ating\030\002 \001(\001\".\n\032UpdateCourseRatingRespons" +
-      "e\022\020\n\010isSucces\030\001 \001(\010B(\n\027com.example.grpc." +
-      "courseB\013CourseProtoP\001b\006proto3"
+      "e\022\020\n\010isSucces\030\001 \001(\010\"7\n\023IsInstructorReque" +
+      "st\022\016\n\006userId\030\001 \001(\t\022\020\n\010courseId\030\002 \001(\t\",\n\024" +
+      "IsInstructorResponse\022\024\n\014isInstructor\030\001 \001" +
+      "(\010B(\n\027com.example.grpc.courseB\013CoursePro" +
+      "toP\001b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -213,6 +226,18 @@ public final class CourseProto {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_UpdateCourseRatingResponse_descriptor,
         new java.lang.String[] { "IsSucces", });
+    internal_static_IsInstructorRequest_descriptor =
+      getDescriptor().getMessageTypes().get(14);
+    internal_static_IsInstructorRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_IsInstructorRequest_descriptor,
+        new java.lang.String[] { "UserId", "CourseId", });
+    internal_static_IsInstructorResponse_descriptor =
+      getDescriptor().getMessageTypes().get(15);
+    internal_static_IsInstructorResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_IsInstructorResponse_descriptor,
+        new java.lang.String[] { "IsInstructor", });
     com.example.grpc.user.UserProto.getDescriptor();
   }
 
