@@ -3,6 +3,13 @@ import { BiSolidDetail } from 'react-icons/bi'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from '@/components/ui/carousel'
 
 interface FeedbackProps {
   id: string
@@ -61,13 +68,23 @@ const Feedbacks = ({ feedbacks }: { feedbacks: FeedbackProps[] }) => {
         Phản hồi từ học viên khóa học này
       </h4>
 
-      {/* Container responsive */}
-      <div className='w-full px-4 sm:px-6 lg:px-12 py-8'>
-        <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6'>
-          {feedbacks.map((feedback, index) => (
-            <Feedback key={index} feedback={feedback} />
-          ))}
-        </div>
+      {/* Carousel showing 3 items at once on large screens (responsive) */}
+      <div className='w-full px-6 sm:px-6 lg:px-12 py-8'>
+        <Carousel opts={{ align: 'start' }} autoplayDelay={2000} className='w-full'>
+          <CarouselContent>
+            {feedbacks.map((feedback, index) => (
+              // responsive basis: 1 per row on mobile, 2 on sm, 3 on lg
+              <CarouselItem key={index} className='basis-1/1 sm:basis-1/2 lg:basis-1/3'>
+                <div className='p-1'>
+                  <Feedback feedback={feedback} />
+                </div>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+
+          <CarouselPrevious />
+          <CarouselNext />
+        </Carousel>
       </div>
     </section>
   )
