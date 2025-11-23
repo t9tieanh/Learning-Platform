@@ -77,7 +77,7 @@ const TeacherInfo = ({ teacher }: { teacher: Teacher }) => {
             <div>
               <h4 className='font-semibold text-foreground mb-3'>Chuyên môn</h4>
               <div className='flex flex-wrap gap-2'>
-                {teacher?.expertise.map((skill, index) => (
+                {teacher?.expertise?.map((skill, index) => (
                   <Badge
                     key={index}
                     variant='secondary'
@@ -100,7 +100,7 @@ const TeacherInfo = ({ teacher }: { teacher: Teacher }) => {
             <div>
               <h4 className='font-semibold text-foreground mb-3'>Chứng chỉ</h4>
               <div className='flex flex-wrap gap-2'>
-                {teacher?.certificates.map((certificate, index) => (
+                {teacher?.certificates?.map((certificate, index) => (
                   <a key={index} href={certificate?.credentialUrl} target='_blank' rel='noopener noreferrer'>
                     <Badge variant='secondary' className='bg-white shadow-lg text-black p-1 px-2 hover:bg-primary/20'>
                       <Avatar className='w-20 h-20 w-6 h-6 mr-2'>

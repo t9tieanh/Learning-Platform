@@ -21,7 +21,7 @@ const OrderList = () => {
     <div className='cart-section pb-5 px-5 bg-white rounded-lg'>
       <div className='total-cart-item'>
         <p className='text-sm font-semibold mb-1 flex items-center'>
-          Bạn đã thanh toán &nbsp;<span className='text-primary'>{0}</span>&nbsp; đơn hàng !
+          Bạn đã thanh toán &nbsp;<span className='text-primary'>{orders?.length || 0}</span>&nbsp; đơn hàng !
         </p>
         <hr />
       </div>

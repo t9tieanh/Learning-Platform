@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { ArrowLeft, Plus, Loader2 } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import { Lesson } from '@/types/course.type'
 import { CourseHero } from '@/components/TC_CourseDetail/CourseHero'
 import { CourseSummary } from '@/components/TC_CourseDetail/CourseSummary'
@@ -12,11 +12,11 @@ import { StatsSidebar } from '@/components/TC_CourseDetail/StatsSidebar'
 import { VideoModal } from '@/components/TC_CourseDetail/VideoModal'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
-import { Separator } from '@/components/ui/separator'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useLocation, useParams, useNavigate } from 'react-router-dom'
 import courseService from '@/services/course/course.service'
 import { ApiResponse } from '@/types/response.type'
 import { Loader } from '@/components/ui/loader'
+import courseAdminService from '@/services/course/course-admin.service'
 
 interface CourseResponseDTO {
   id: string
@@ -60,8 +60,8 @@ interface CourseResponseDTO {
 export default function CourseDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-
-  console.log('[CourseDetailPage] param id =', id)
+  const location = useLocation()
+  const isAdminPage = location.pathname.startsWith('/admin')
 
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -87,14 +87,6 @@ export default function CourseDetailPage() {
     navigate('/teacher/course/' + id)
   }
 
-  const handleAddSection = () => {
-    toast.success('Thêm phần mới')
-  }
-
-  const handleAddLesson = () => {
-    toast.success('Thêm bài học mới')
-  }
-
   // Fetch data
   useEffect(() => {
     let mounted = true
@@ -106,10 +98,14 @@ export default function CourseDetailPage() {
       }
       try {
         setLoading(true)
-        const res: ApiResponse<any> = await courseService.getCourseDetail(id)
+        let res: ApiResponse<any>
+        if (isAdminPage) {
+          res = await courseAdminService.getCourseDetailAdmin(id)
+        } else {
+          res = await courseService.getCourseDetail(id)
+        }
         if (!mounted) return
         const data = res.result
-        console.log('data', data)
         if (!data) throw new Error('Không có dữ liệu trả về')
         const mapped: CourseResponseDTO = {
           id: data.id,
@@ -162,22 +158,26 @@ export default function CourseDetailPage() {
     return () => {
       mounted = false
     }
-  }, [id])
+  }, [id, isAdminPage])
 
   const goBack = () => navigate(-1)
 
   return (
     <div className='min-h-screen bg-white-200'>
       {/* Header */}
-      <header className='sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60'>
-        <div className='container mx-auto px-4 py-4'>
-          <div className='flex items-center justify-between'>
-            <Button variant='ghost' size='sm' className='gap-2' onClick={goBack}>
-              <ArrowLeft className='h-4 w-4' /> Quay lại
-            </Button>
-          </div>
-        </div>
-      </header>
+      {!isAdminPage && (
+        <>
+          <header className='sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60'>
+            <div className='container mx-auto px-4 py-4'>
+              <div className='flex items-center justify-between'>
+                <Button variant='ghost' size='sm' className='gap-2' onClick={goBack}>
+                  <ArrowLeft className='h-4 w-4' /> Quay lại
+                </Button>
+              </div>
+            </div>
+          </header>
+        </>
+      )}
 
       {/* Main Content */}
       <main className='container mx-auto px-4 py-8'>
@@ -191,7 +191,7 @@ export default function CourseDetailPage() {
           </div>
         )}
         {!loading && !error && course && (
-          <div className='grid gap-8 lg:grid-cols-[1fr_320px]'>
+          <div className={isAdminPage ? 'grid gap-8 lg:grid-cols-1' : 'grid gap-8 lg:grid-cols-[1fr_320px]'}>
             {/* Left Column - Main Content */}
             <div className='space-y-8'>
               <CourseHero
@@ -251,14 +251,16 @@ export default function CourseDetailPage() {
             </div>
 
             {/* Right Column - Sidebar */}
-            <aside className='hidden lg:block'>
-              <StatsSidebar
-                revenue={(course.price || 0) * (course.students || 0)}
-                studentsCount={course.students || 0}
-                rating={course.rating || 5}
-                status={course.status === 'published' ? 'published' : 'draft'}
-              />
-            </aside>
+            {!isAdminPage && (
+              <aside className='hidden lg:block'>
+                <StatsSidebar
+                  revenue={(course.price || 0) * (course.students || 0)}
+                  studentsCount={course.students || 0}
+                  rating={course.rating || 5}
+                  status={course.status === 'published' ? 'published' : 'draft'}
+                />
+              </aside>
+            )}
           </div>
         )}
       </main>
