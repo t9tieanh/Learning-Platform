@@ -26,7 +26,7 @@ const generateReply = async (req: Request, res: Response) => {
 
     try {
         const trimmed = message.trim();
-        const reply = await AiChatService.generateReply(trimmed);
+        const reply = await AiChatService.generateReply(trimmed, userId);
         const conversation = await AiChatService.saveChat({
             userId,
             userMessage: trimmed,
@@ -80,36 +80,10 @@ const loadConversation = async (req: Request, res: Response) => {
     }
 };
 
-const deleteConversation = async (req: Request, res: Response) => {
-    const userId: string | undefined = (req as any).user?.id || (req.query?.userId as string | undefined) || (req.body?.userId as string | undefined);
-    const conversationId: string | undefined = (req.query?.conversationId as string | undefined) || (req.body?.conversationId as string | undefined);
-
-    if (!userId || typeof userId !== 'string') {
-        return res.status(StatusCodes.UNAUTHORIZED).json({ error: 'Missing user context' });
-    }
-
-    let convId: string | undefined = undefined;
-    if (conversationId) {
-        if (typeof conversationId === 'string' && Types.ObjectId.isValid(conversationId)) {
-            convId = conversationId;
-        } else {
-            return res.status(StatusCodes.BAD_REQUEST).json({ error: 'Invalid conversationId' });
-        }
-    }
-
-    try {
-        const result = await AiChatService.deleteConversation(userId, convId);
-        return res.json(result);
-    } catch (err: any) {
-        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: err.message || 'Internal Server Error' });
-    }
-};
-
 const AiChatController = {
     generateReply,
     createConversation,
     loadConversation,
-    deleteConversation
 }
 
 export default AiChatController

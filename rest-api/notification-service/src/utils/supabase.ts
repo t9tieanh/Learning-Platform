@@ -51,7 +51,46 @@ async function saveToSupabase(
     return true;
 }
 
+async function insertPurchasedCourse(
+    id?: number,
+    userId?: string,
+    courseId?: string
+): Promise<boolean> {
+    const { error } = await supabase
+        .from('user_purchased_courses')
+        .insert([
+            {
+                id: id,
+                user_id: userId,
+                course_id: courseId,
+            }
+        ])
+
+    if (error) {
+        console.error('Lưu purchased course lỗi:', error)
+        return false
+    }
+    return true
+}
+
+// Lấy danh sách course_id mà user đã mua
+async function getPurchasedCourseIds(userId: string): Promise<string[]> {
+    if (!userId) return []
+    const { data, error } = await supabase
+        .from('user_purchased_courses')
+        .select('course_id')
+        .eq('user_id', userId)
+
+    if (error) {
+        console.error('Lấy purchased courses lỗi:', error)
+        return []
+    }
+    return (data || []).map((row: any) => String(row.course_id)).filter(Boolean)
+}
 
 export {
     saveToSupabase,
+    insertPurchasedCourse,
+    getPurchasedCourseIds,
 }
+
