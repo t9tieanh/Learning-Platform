@@ -26,13 +26,15 @@ public final class BlogServiceProto {
     java.lang.String[] descriptorData = {
       "\n\021blogService.proto\032\033google/protobuf/emp" +
       "ty.proto\032\nblog.proto\032\nuser.proto\032\014course" +
-      ".proto2\313\001\n\013BlogService\022:\n\014getTotalBlog\022\026" +
+      ".proto2\240\002\n\013BlogService\022:\n\014getTotalBlog\022\026" +
       ".google.protobuf.Empty\032\022.TotalBlogRespon" +
       "se\022=\n\026getTotalInstructorBlog\022\017.GetUserRe" +
       "quest\032\022.TotalBlogResponse\022A\n\022pushCourseS" +
       "upabase\022\024.PushSupabaseRequest\032\025.PushSupa" +
-      "baseResponseB+\n\025com.example.grpc.userB\020B" +
-      "logServiceProtoP\001b\006proto3"
+      "baseResponse\022S\n\024createConversationAI\022\034.C" +
+      "reateConversationAIRequest\032\035.CreateConve" +
+      "rsationAIResponseB+\n\025com.example.grpc.us" +
+      "erB\020BlogServiceProtoP\001b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,

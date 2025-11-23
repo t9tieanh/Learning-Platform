@@ -20,6 +20,16 @@ public final class BlogProto {
   static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_TotalBlogResponse_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_CreateConversationAIRequest_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_CreateConversationAIRequest_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_CreateConversationAIResponse_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_CreateConversationAIResponse_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -30,8 +40,11 @@ public final class BlogProto {
   static {
     java.lang.String[] descriptorData = {
       "\n\nblog.proto\"\"\n\021TotalBlogResponse\022\r\n\005tot" +
-      "al\030\001 \001(\003B&\n\027com.example.grpc.courseB\tBlo" +
-      "gProtoP\001b\006proto3"
+      "al\030\001 \001(\003\"-\n\033CreateConversationAIRequest\022" +
+      "\016\n\006userId\030\001 \001(\t\"I\n\034CreateConversationAIR" +
+      "esponse\022\021\n\tisSuccess\030\001 \001(\010\022\026\n\016conversati" +
+      "onId\030\002 \001(\tB&\n\027com.example.grpc.courseB\tB" +
+      "logProtoP\001b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -43,6 +56,18 @@ public final class BlogProto {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_TotalBlogResponse_descriptor,
         new java.lang.String[] { "Total", });
+    internal_static_CreateConversationAIRequest_descriptor =
+      getDescriptor().getMessageTypes().get(1);
+    internal_static_CreateConversationAIRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_CreateConversationAIRequest_descriptor,
+        new java.lang.String[] { "UserId", });
+    internal_static_CreateConversationAIResponse_descriptor =
+      getDescriptor().getMessageTypes().get(2);
+    internal_static_CreateConversationAIResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_CreateConversationAIResponse_descriptor,
+        new java.lang.String[] { "IsSuccess", "ConversationId", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

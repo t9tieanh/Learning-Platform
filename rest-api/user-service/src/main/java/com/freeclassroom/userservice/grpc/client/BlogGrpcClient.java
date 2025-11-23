@@ -1,5 +1,7 @@
 package com.freeclassroom.userservice.grpc.client;
 
+import com.example.grpc.course.CreateConversationAIRequest;
+import com.example.grpc.course.CreateConversationAIResponse;
 import com.example.grpc.course.GetCourseAdminDataResponse;
 import com.example.grpc.course.TotalBlogResponse;
 import com.example.grpc.user.BlogServiceGrpc;
@@ -23,5 +25,13 @@ public class BlogGrpcClient {
                 .setId(userId)
                 .build();
         return blogStub.getTotalInstructorBlog(request);
+    }
+
+    public CreateConversationAIResponse createConversationAI (String userId) {
+        CreateConversationAIRequest request = CreateConversationAIRequest.newBuilder()
+                .setUserId(userId)
+                .build();
+
+        return blogStub.createConversationAI(request);
     }
 }

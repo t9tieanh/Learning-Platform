@@ -108,6 +108,37 @@ public final class BlogServiceGrpc {
     return getPushCourseSupabaseMethod;
   }
 
+  private static volatile io.grpc.MethodDescriptor<com.example.grpc.course.CreateConversationAIRequest,
+      com.example.grpc.course.CreateConversationAIResponse> getCreateConversationAIMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "createConversationAI",
+      requestType = com.example.grpc.course.CreateConversationAIRequest.class,
+      responseType = com.example.grpc.course.CreateConversationAIResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<com.example.grpc.course.CreateConversationAIRequest,
+      com.example.grpc.course.CreateConversationAIResponse> getCreateConversationAIMethod() {
+    io.grpc.MethodDescriptor<com.example.grpc.course.CreateConversationAIRequest, com.example.grpc.course.CreateConversationAIResponse> getCreateConversationAIMethod;
+    if ((getCreateConversationAIMethod = BlogServiceGrpc.getCreateConversationAIMethod) == null) {
+      synchronized (BlogServiceGrpc.class) {
+        if ((getCreateConversationAIMethod = BlogServiceGrpc.getCreateConversationAIMethod) == null) {
+          BlogServiceGrpc.getCreateConversationAIMethod = getCreateConversationAIMethod =
+              io.grpc.MethodDescriptor.<com.example.grpc.course.CreateConversationAIRequest, com.example.grpc.course.CreateConversationAIResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "createConversationAI"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.example.grpc.course.CreateConversationAIRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.example.grpc.course.CreateConversationAIResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new BlogServiceMethodDescriptorSupplier("createConversationAI"))
+              .build();
+        }
+      }
+    }
+    return getCreateConversationAIMethod;
+  }
+
   /**
    * Creates a new async stub that supports all call types for the service
    */
@@ -176,6 +207,13 @@ public final class BlogServiceGrpc {
         io.grpc.stub.StreamObserver<com.example.grpc.course.PushSupabaseResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getPushCourseSupabaseMethod(), responseObserver);
     }
+
+    /**
+     */
+    default void createConversationAI(com.example.grpc.course.CreateConversationAIRequest request,
+        io.grpc.stub.StreamObserver<com.example.grpc.course.CreateConversationAIResponse> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getCreateConversationAIMethod(), responseObserver);
+    }
   }
 
   /**
@@ -228,6 +266,14 @@ public final class BlogServiceGrpc {
       io.grpc.stub.ClientCalls.asyncUnaryCall(
           getChannel().newCall(getPushCourseSupabaseMethod(), getCallOptions()), request, responseObserver);
     }
+
+    /**
+     */
+    public void createConversationAI(com.example.grpc.course.CreateConversationAIRequest request,
+        io.grpc.stub.StreamObserver<com.example.grpc.course.CreateConversationAIResponse> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getCreateConversationAIMethod(), getCallOptions()), request, responseObserver);
+    }
   }
 
   /**
@@ -265,6 +311,13 @@ public final class BlogServiceGrpc {
     public com.example.grpc.course.PushSupabaseResponse pushCourseSupabase(com.example.grpc.course.PushSupabaseRequest request) {
       return io.grpc.stub.ClientCalls.blockingUnaryCall(
           getChannel(), getPushCourseSupabaseMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public com.example.grpc.course.CreateConversationAIResponse createConversationAI(com.example.grpc.course.CreateConversationAIRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getCreateConversationAIMethod(), getCallOptions(), request);
     }
   }
 
@@ -307,11 +360,20 @@ public final class BlogServiceGrpc {
       return io.grpc.stub.ClientCalls.futureUnaryCall(
           getChannel().newCall(getPushCourseSupabaseMethod(), getCallOptions()), request);
     }
+
+    /**
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.example.grpc.course.CreateConversationAIResponse> createConversationAI(
+        com.example.grpc.course.CreateConversationAIRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getCreateConversationAIMethod(), getCallOptions()), request);
+    }
   }
 
   private static final int METHODID_GET_TOTAL_BLOG = 0;
   private static final int METHODID_GET_TOTAL_INSTRUCTOR_BLOG = 1;
   private static final int METHODID_PUSH_COURSE_SUPABASE = 2;
+  private static final int METHODID_CREATE_CONVERSATION_AI = 3;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -341,6 +403,10 @@ public final class BlogServiceGrpc {
         case METHODID_PUSH_COURSE_SUPABASE:
           serviceImpl.pushCourseSupabase((com.example.grpc.course.PushSupabaseRequest) request,
               (io.grpc.stub.StreamObserver<com.example.grpc.course.PushSupabaseResponse>) responseObserver);
+          break;
+        case METHODID_CREATE_CONVERSATION_AI:
+          serviceImpl.createConversationAI((com.example.grpc.course.CreateConversationAIRequest) request,
+              (io.grpc.stub.StreamObserver<com.example.grpc.course.CreateConversationAIResponse>) responseObserver);
           break;
         default:
           throw new AssertionError();
@@ -381,6 +447,13 @@ public final class BlogServiceGrpc {
               com.example.grpc.course.PushSupabaseRequest,
               com.example.grpc.course.PushSupabaseResponse>(
                 service, METHODID_PUSH_COURSE_SUPABASE)))
+        .addMethod(
+          getCreateConversationAIMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.example.grpc.course.CreateConversationAIRequest,
+              com.example.grpc.course.CreateConversationAIResponse>(
+                service, METHODID_CREATE_CONVERSATION_AI)))
         .build();
   }
 
@@ -432,6 +505,7 @@ public final class BlogServiceGrpc {
               .addMethod(getGetTotalBlogMethod())
               .addMethod(getGetTotalInstructorBlogMethod())
               .addMethod(getPushCourseSupabaseMethod())
+              .addMethod(getCreateConversationAIMethod())
               .build();
         }
       }

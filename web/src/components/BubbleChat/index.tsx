@@ -12,10 +12,12 @@ import {
     TooltipProvider,
 } from "@/components/ui/tooltip"
 import { askAi } from "@/services/ai.service";
+import aiChatService from '@/services/aiChat.service'
+import { useAuthStore } from '@/stores/useAuth.stores'
 
 
 interface Message {
-    role: "user" | "assistant";
+    role: "user" | "ai";
     content: string;
 }
 
@@ -28,6 +30,18 @@ const ChatBubble = () => {
     const [welcomed, setWelcomed] = useState(false);
     const bottomRef = useRef<HTMLDivElement | null>(null);
 
+    const { data: authData } = useAuthStore()
+    const userId = authData?.userId
+    const conversationId = (authData as any)?.conversationId
+
+    // Reset local messages when user logs out
+    useEffect(() => {
+        if (!userId) {
+            setMessages([])
+            setWelcomed(false)
+        }
+    }, [userId])
+
     const sendMessage = async () => {
         if (!input.trim() || isLoading) return;
 
@@ -39,10 +53,10 @@ const ChatBubble = () => {
         setIsTyping(true);
 
         // Show assistant typing placeholder
-        setMessages((prev) => [...prev, { role: "assistant", content: "typing..." }]);
+        setMessages((prev) => [...prev, { role: "ai", content: "typing..." }]);
 
         try {
-            const { reply } = await askAi({ message: userText });
+            const { reply } = await askAi({ message: userText, userId, conversationId });
             setMessages((prev) => {
                 const updated = [...prev];
                 updated[updated.length - 1].content = reply;
@@ -74,12 +88,30 @@ const ChatBubble = () => {
         bottomRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages, isOpen]);
 
+    // Load existing conversation history when opening the chat
+    useEffect(() => {
+        const loadHistory = async () => {
+            if (!isOpen || !userId || messages.length > 0) return;
+            try {
+                const data = await aiChatService.loadConversation(userId, conversationId);
+                if (data && data.messages && data.messages.length) {
+                    setMessages(data.messages.map(m => ({ role: m.role, content: m.content })));
+                    setWelcomed(true); // prevent greeting if history exists
+                }
+            } catch (e) {
+                // Silent fail; will show greeting instead
+                console.warn('Cannot load conversation history', e);
+            }
+        };
+        loadHistory();
+    }, [isOpen, userId, conversationId, messages.length]);
+
     // Auto-send a welcome message from AI on first open when empty (no delay)
     useEffect(() => {
         if (!isOpen || welcomed || messages.length > 0) return;
         setWelcomed(true);
         const greeting =
-            "Xin chào! 😊 Mình là Nova Compilot. Mình có thể giúp bạn tìm khóa học, giải đáp thắc mắc và gợi ý lộ trình học. Bạn muốn bắt đầu với điều gì?"; setMessages((prev) => [...prev, { role: "assistant", content: greeting }]);
+            "Xin chào! 😊 Mình là Nova Compilot. Mình có thể giúp bạn tìm khóa học, giải đáp thắc mắc và gợi ý lộ trình học. Bạn muốn bắt đầu với điều gì?"; setMessages((prev) => [...prev, { role: "ai", content: greeting }]);
     }, [isOpen, welcomed, messages.length]);
 
     return (

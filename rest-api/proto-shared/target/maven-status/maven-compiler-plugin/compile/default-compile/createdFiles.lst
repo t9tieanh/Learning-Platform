@@ -5,6 +5,7 @@ com\example\grpc\hello\HelloServiceGrpc$3.class
 com\example\grpc\user\SaleServiceGrpc$SaleServiceMethodDescriptorSupplier.class
 com\example\grpc\hello\HelloReply$1.class
 com\example\grpc\user\BlogServiceGrpc$BlogServiceMethodDescriptorSupplier.class
+com\example\grpc\course\CreateConversationAIResponseOrBuilder.class
 com\example\grpc\hello\HelloServiceGrpc$HelloServiceStub.class
 com\example\grpc\user\CourseServiceGrpc$AsyncService.class
 com\example\grpc\course\MonthlyChartDataOrBuilder.class
@@ -45,6 +46,7 @@ com\example\grpc\hello\HelloRequest$Builder.class
 com\example\grpc\course\PushSupabaseRequestOrBuilder.class
 com\example\grpc\user\GetRevenueAndProfitRequest$1.class
 com\example\grpc\user\CourseServiceGrpc$CourseServiceBlockingStub.class
+com\example\grpc\course\CreateConversationAIRequest.class
 com\example\grpc\course\PushSupabaseRequest$1.class
 com\example\grpc\user\GetRevenueAndProfitRequest.class
 com\example\grpc\course\GetCoursesRequest.class
@@ -58,6 +60,7 @@ com\example\grpc\hello\HelloRequest.class
 com\example\grpc\course\EnrolledCoursesRequestOrBuilder.class
 com\example\grpc\course\GetChartDataResponseOrBuilder.class
 com\example\grpc\course\CourseResponse$1.class
+com\example\grpc\course\CreateConversationAIResponse$Builder.class
 com\example\grpc\course\GetChartDataRequestOrBuilder.class
 com\example\grpc\hello\HelloReply.class
 com\example\grpc\user\GetTeachersResponseOrBuilder.class
@@ -102,9 +105,11 @@ com\example\grpc\course\MonthlyChartData.class
 com\example\grpc\user\GetRevenueAndProfitList.class
 com\example\grpc\user\Teacher.class
 com\example\grpc\course\TotalBlogResponse$Builder.class
+com\example\grpc\course\CreateConversationAIRequest$1.class
 com\example\grpc\course\GetCoursesRequestOrBuilder.class
 com\example\grpc\course\EnrolledCoursesRequest.class
 com\example\grpc\course\PushSupabaseResponseOrBuilder.class
+com\example\grpc\course\CreateConversationAIResponse$1.class
 com\example\grpc\course\EnrolledCoursesRequest$Builder.class
 com\example\grpc\course\GetCourseAdminDataResponseOrBuilder.class
 com\example\grpc\hello\HelloServiceGrpc$HelloServiceFutureStub.class
@@ -120,6 +125,7 @@ com\example\grpc\user\UserServiceGrpc$UserServiceMethodDescriptorSupplier.class
 com\example\grpc\hello\HelloServiceGrpc$2.class
 com\example\grpc\user\UserServiceGrpc$2.class
 com\example\grpc\user\UserServiceGrpc$UserServiceBaseDescriptorSupplier.class
+com\example\grpc\course\CreateConversationAIRequestOrBuilder.class
 com\example\grpc\course\TotalBlogResponse$1.class
 com\example\grpc\user\GetTeachersRequest$Builder.class
 com\example\grpc\hello\HelloServiceGrpc$HelloServiceBaseDescriptorSupplier.class
@@ -137,9 +143,11 @@ com\example\grpc\course\GetCourseAdminDataResponse$Builder.class
 com\example\grpc\course\TotalBlogResponse.class
 com\example\grpc\user\BlogServiceProto.class
 com\example\grpc\user\GetUserRequest$Builder.class
+com\example\grpc\course\CreateConversationAIResponse.class
 com\example\grpc\course\GetChartDataResponse$Builder.class
 com\example\grpc\user\UserServiceGrpc$3.class
 com\example\grpc\user\CourseServiceGrpc$CourseServiceFileDescriptorSupplier.class
+com\example\grpc\course\CreateConversationAIRequest$Builder.class
 com\example\grpc\course\GetCoursesResponse.class
 com\example\grpc\user\UserServiceGrpc$MethodHandlers.class
 com\example\grpc\user\UserServiceGrpc.class

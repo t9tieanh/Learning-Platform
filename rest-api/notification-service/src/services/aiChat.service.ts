@@ -1,6 +1,7 @@
 import { ChromaClient } from "chromadb";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import supabase from "~/config/supabase";
+import Conversation from "~/models/ai/ai-conversation.model";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
@@ -138,15 +139,82 @@ async function generateReply(userMessage: string) {
     return result.response.text();
 }
 
-async function testChat() {
-    const userMessage = "Tôi muốn học backend Java";
+interface SaveChatOptions {
+    userId: string;
+    userMessage: string;
+    aiReply: string;
+    conversationId?: string;
+}
 
+async function saveChat({ userId, userMessage, aiReply, conversationId }: SaveChatOptions) {
+    // If conversationId provided, append; else create new conversation
+    let conversation;
+    if (conversationId) {
+        conversation = await Conversation.findOne({ _id: conversationId, userId });
+    }
+    if (!conversation) {
+        conversation = await Conversation.create({
+            userId,
+            messages: [
+                { role: 'user', content: userMessage },
+                { role: 'ai', content: aiReply }
+            ]
+        });
+    } else {
+        conversation.messages.push({ role: 'user', content: userMessage });
+        conversation.messages.push({ role: 'ai', content: aiReply });
+        await conversation.save();
+    }
+    return conversation;
+}
+
+async function createConversation(userId: string) {
     try {
-        const reply = await generateReply(userMessage);
-        console.log("User:", userMessage);
-        console.log("Nova:", reply);
-    } catch (error: any) {
-        console.error("Lỗi khi test chat:", error.message);
+        // Tìm conversation đã tồn tại cho user
+        let conversation = await Conversation.findOne({ userId });
+
+        if (conversation) {
+            // Nếu đã có, trả về luôn
+            return conversation;
+        }
+
+        // Nếu chưa có, tạo mới
+        conversation = await Conversation.create({ userId, messages: [] });
+        return conversation;
+    } catch (error) {
+        console.error('Failed to create conversation:', error);
+        throw new Error('Không thể tạo conversation. Vui lòng thử lại.');
+    }
+}
+
+async function getConversation(userId: string, conversationId?: string) {
+    try {
+        if (conversationId) {
+            const existing = await Conversation.findOne({ _id: conversationId, userId });
+            if (existing) return existing;
+            return null;
+        }
+        // fallback: first conversation for user
+        const anyConv = await Conversation.findOne({ userId });
+        return anyConv || null;
+    } catch (error) {
+        console.error('Failed to load conversation:', error);
+        throw new Error('Không thể tải conversation. Vui lòng thử lại.');
+    }
+}
+
+async function deleteConversation(userId: string, conversationId?: string) {
+    try {
+        if (conversationId) {
+            await Conversation.deleteOne({ _id: conversationId, userId });
+            return { deleted: true, scope: 'single' };
+        }
+        // delete all conversations for user (in case multi in future)
+        await Conversation.deleteMany({ userId });
+        return { deleted: true, scope: 'all' };
+    } catch (error) {
+        console.error('Failed to delete conversation:', error);
+        throw new Error('Không thể xoá conversation. Vui lòng thử lại.');
     }
 }
 
@@ -154,7 +222,12 @@ const AiChatService = {
     generateReply,
     generateEmbedding,
     searchSimilarCourses,
-    testChat,
+    saveChat,
+    createConversation,
+    getConversation,
+    deleteConversation,
 };
+
+export type { SaveChatOptions };
 
 export default AiChatService;

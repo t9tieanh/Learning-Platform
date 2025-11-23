@@ -42,6 +42,19 @@ const blogServiceImpl = {
         const embedding = await AiChatService.generateEmbedding(text);
         const res = await saveToSupabase(id, name, description, tags, link, embedding);
         callback(null, { isSuccess: res })
+    },
+
+    createConversationAI: async (call: any, callback: any) => {
+        const { userId } = call.request;
+        if (!userId) {
+            return callback({ code: grpc.status.INVALID_ARGUMENT, message: 'Missing userId' });
+        }
+        try {
+            const conv = await AiChatService.createConversation(userId);
+            callback(null, { isSuccess: true, conversationId: conv.id });
+        } catch (e: any) {
+            callback({ code: grpc.status.INTERNAL, message: e?.message || 'Failed to create conversation' });
+        }
     }
 };
 

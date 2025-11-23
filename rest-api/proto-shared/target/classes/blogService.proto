@@ -12,4 +12,5 @@ service BlogService {
   rpc getTotalBlog (google.protobuf.Empty) returns (TotalBlogResponse);
   rpc getTotalInstructorBlog (GetUserRequest) returns (TotalBlogResponse);
   rpc pushCourseSupabase (PushSupabaseRequest) returns (PushSupabaseResponse);
+  rpc createConversationAI (CreateConversationAIRequest) returns (CreateConversationAIResponse);
 }
