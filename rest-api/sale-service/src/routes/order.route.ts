@@ -14,5 +14,6 @@ orderRouter.get('/', orderController.getOrder);
 orderRouter.get('/:orderId/info', orderController.getOrderInfo);
 orderRouter.post('/payment/:method',  validateDto(CreatePaymentUrlDto), orderController.processPayment);
 orderRouter.post('/apply-discount', validateDto(ApplyDiscountDto), orderController.applyDiscount);
+orderRouter.get('/history', orderController.getOrderHistory);
 
 export default orderRouter;
