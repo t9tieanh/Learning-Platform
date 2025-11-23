@@ -6,9 +6,9 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { useQASection, getInitials, CommentUI, ReplyUI } from './helper'
 
-interface QASectionProps { lessonId: string }
+interface QASectionProps { lessonId: string, instructorId: string }
 
-export const QASection = ({ lessonId }: QASectionProps) => {
+export const QASection = ({ lessonId, instructorId }: QASectionProps) => {
   const {
     comments,
     newComment,
@@ -79,6 +79,11 @@ export const QASection = ({ lessonId }: QASectionProps) => {
               <div className='flex-1 space-y-2'>
                 <div className='flex items-center gap-2'>
                   <span className='font-semibold text-foreground text-sm'>{comment.author}</span>
+                  {comment.userId === instructorId && (
+                    <span className='ml-1 text-[10px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 border border-amber-200'>
+                      Giảng viên
+                    </span>
+                  )}
                   <span className='text-sm text-muted-foreground'>{comment.timestamp}</span>
                   {userId && userId === comment.userId && (
                     <div className='ml-auto opacity-0 group-hover:opacity-100 transition-opacity'>
@@ -157,6 +162,11 @@ export const QASection = ({ lessonId }: QASectionProps) => {
                     <div className='flex-1 space-y-2'>
                       <div className='flex items-center gap-2'>
                         <span className='font-semibold text-sm text-foreground'>{reply.author}</span>
+                        {reply.userId === instructorId && (
+                          <span className='ml-1 text-[10px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 border border-amber-200'>
+                            Giảng viên
+                          </span>
+                        )}
                         <span className='text-xs text-muted-foreground'>{reply.timestamp}</span>
                         {userId && userId === reply.userId && (
                           <div className='ml-auto opacity-0 group-hover:opacity-100 transition-opacity'>
@@ -210,13 +220,6 @@ export const QASection = ({ lessonId }: QASectionProps) => {
                       ) : (
                         <p className='text-sm text-foreground leading-relaxed'>{reply.content}</p>
                       )}
-                      <button
-                        onClick={() => handleLike(comment.id, reply.id)}
-                        className='flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors'
-                      >
-                        <ThumbsUp className='w-3 h-3' />
-                        <span>{reply.likes}</span>
-                      </button>
                     </div>
                   </div>
                 ))}

@@ -1,13 +1,16 @@
 package com.freeclassroom.courseservice.service.course;
 
+import com.example.grpc.user.GetUserResponse;
 import com.freeclassroom.courseservice.dto.response.ApiResponse;
 import com.freeclassroom.courseservice.dto.response.course.student.CourseDetailResponse;
+import com.freeclassroom.courseservice.dto.response.user.InstructorResponse;
 import com.freeclassroom.courseservice.entity.course.CourseEntity;
 import com.freeclassroom.courseservice.entity.member.EnrollmentsEntity;
 import com.freeclassroom.courseservice.enums.entity.EnumCourseProgressStep;
 import com.freeclassroom.courseservice.enums.entity.EnumCourseStatus;
 import com.freeclassroom.courseservice.exception.CustomExeption;
 import com.freeclassroom.courseservice.exception.ErrorCode;
+import com.freeclassroom.courseservice.grpc.client.UserGrpcClient;
 import com.freeclassroom.courseservice.mapper.CourseStudentMapper;
 import com.freeclassroom.courseservice.repository.entity.CourseRepository;
 import com.freeclassroom.courseservice.repository.entity.EnrollmentRepository;
@@ -27,6 +30,7 @@ public class CourseStudentService implements ICourseStudentService{
     CourseRepository courseRepo;
     CourseStudentMapper courseStudentMapper;
     LessonRepository lessonRepo;
+    UserGrpcClient userGrpcClient;
 
     @Override
     public ApiResponse<CourseDetailResponse> getCourseChapter(String courseId, String userId) {
@@ -43,6 +47,10 @@ public class CourseStudentService implements ICourseStudentService{
 
         CourseDetailResponse result = courseStudentMapper.toCourseDetailDto(course);
 
+        InstructorResponse instructor = new InstructorResponse();
+        instructor.setId(userId);
+
+        result.setInstructor(instructor);
         //get data of lesson (include progress)
         result.getChapters().stream().forEach(chapter -> {
             chapter.setLessons(lessonRepo.findLessonOverviewWithProgressByChapter(chapter.getId(), enrollment.getId()));
