@@ -170,6 +170,7 @@ const CoursePage = () => {
                   currentLecture={currentLecture}
                   thumbnailUri={courseData?.thumbnailUrl as string}
                   currentLectureId={currentLectureId}
+                  instructorId={courseData?.instructor?.id}
                 />
               </div>
             </>

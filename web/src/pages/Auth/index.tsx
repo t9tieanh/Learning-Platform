@@ -4,6 +4,7 @@ import SignUpForm from '@/components/Auth/SignUpForm'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import useLoading from '@/hooks/useLoading.hook'
 import userService from '@/services/user/user.service'
+import aiChatService from '@/services/aiChat.service'
 import { useAuthStore } from '@/stores/useAuth.stores'
 import { toast } from 'sonner'
 
@@ -21,7 +22,7 @@ const AuthPage: React.FC<SlidingLoginSignupProps> = ({ isSignUpMode, setIsSignUp
   const code = searchParams.get('code')
 
   // Get state and actions
-  const { data, setData } = useAuthStore()
+  const { data, setData, setConversationId } = useAuthStore()
 
   useEffect(() => {
     if (data) {
@@ -40,8 +41,28 @@ const AuthPage: React.FC<SlidingLoginSignupProps> = ({ isSignUpMode, setIsSignUp
       const response = await userService.loginWithGoogle(authorizationCode)
 
       if (response && response.result && response.code === 200) {
-        // save to localstorage
-        setData(response.result as any)
+        const r: any = response.result
+        const userId = r.userId || r.id || r._id || ''
+        // normalize & persist auth data
+        setData({
+          accessToken: r.accessToken,
+          refreshToken: r.refreshToken,
+          userId,
+          name: r.name || r.userName || r.username,
+          username: r.username || r.userName,
+          email: r.email,
+          avatarUrl: r.avatarUrl,
+          role: r.role
+        } as any)
+        // init/create AI conversation
+        if (userId) {
+          try {
+            const convRes = await aiChatService.createConversation(userId)
+            if (convRes?.conversationId) setConversationId(convRes.conversationId)
+          } catch (e) {
+            console.warn('Cannot init AI conversation (Google OAuth)', e)
+          }
+        }
         toast.success('Đăng nhập thành công!')
         navigator('/')
       } else {

@@ -38,6 +38,15 @@ const AD_Blogs = () => {
 
   return (
     <div className='flex-1 space-y-8 p-6'>
+
+      <BlogSearchBar
+        hideCreateButton
+        onSearch={(v) => {
+          setSearch(v)
+          setPage(1)
+        }}
+      />
+
       {loading ? (
         <div className='text-center py-10'>Loading...</div>
       ) : error ? (
@@ -49,7 +58,9 @@ const AD_Blogs = () => {
             title: b.title,
             image: b.image_url,
             shortDescription: (b.content || '').slice(0, 80) + '...',
-            createdAt: (b as any).created_at || b.createdAt
+            createdAt: (b as any).created_at || b.createdAt,
+            userName: b.userName,
+            userAvt: b.userAvt
           }))}
           onDeleted={(id) => setBlogs((prev) => prev.filter((b) => b._id !== id))}
         />
