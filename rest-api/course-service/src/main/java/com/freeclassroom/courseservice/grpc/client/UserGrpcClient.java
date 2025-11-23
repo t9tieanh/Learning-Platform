@@ -30,4 +30,11 @@ public class UserGrpcClient {
         GetUserResponse response = getUser(id);
         return response.getName();
     }
+
+    public TeacherDetail getTeacherDetail(String id) {
+        GetUserRequest request = GetUserRequest.newBuilder()
+                .setId(id)
+                .build();
+        return userStub.getTeacherDetail(request);
+    }
 }

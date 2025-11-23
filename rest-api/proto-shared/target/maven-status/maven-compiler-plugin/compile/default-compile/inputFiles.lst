@@ -16,6 +16,7 @@
 /home/t9tieanh/learn/Learning-Platform/rest-api/proto-shared/target/generated-sources/protobuf/java/com/example/grpc/course/TotalBlogResponseOrBuilder.java
 /home/t9tieanh/learn/Learning-Platform/rest-api/proto-shared/target/generated-sources/protobuf/java/com/example/grpc/course/HasPurchasedCourseRequestOrBuilder.java
 /home/t9tieanh/learn/Learning-Platform/rest-api/proto-shared/target/generated-sources/protobuf/java/com/example/grpc/user/SaleServiceProto.java
+/home/t9tieanh/learn/Learning-Platform/rest-api/proto-shared/target/generated-sources/protobuf/java/com/example/grpc/course/IsInstructorRequestOrBuilder.java
 /home/t9tieanh/learn/Learning-Platform/rest-api/proto-shared/target/generated-sources/protobuf/java/com/example/grpc/course/FeedbackOrBuilder.java
 /home/t9tieanh/learn/Learning-Platform/rest-api/proto-shared/target/generated-sources/protobuf/java/com/example/grpc/course/UpdateCourseRatingResponse.java
 /home/t9tieanh/learn/Learning-Platform/rest-api/proto-shared/target/generated-sources/protobuf/java/com/example/grpc/course/CourseResponse.java
@@ -24,6 +25,7 @@
 /home/t9tieanh/learn/Learning-Platform/rest-api/proto-shared/target/generated-sources/protobuf/grpc-java/com/example/grpc/user/CourseServiceGrpc.java
 /home/t9tieanh/learn/Learning-Platform/rest-api/proto-shared/target/generated-sources/protobuf/java/com/example/grpc/user/GetRevenueAndProfitResponseOrBuilder.java
 /home/t9tieanh/learn/Learning-Platform/rest-api/proto-shared/target/generated-sources/protobuf/java/com/example/grpc/course/GetFeedbackByCourseIdRequest.java
+/home/t9tieanh/learn/Learning-Platform/rest-api/proto-shared/target/generated-sources/protobuf/java/com/example/grpc/course/IsInstructorResponseOrBuilder.java
 /home/t9tieanh/learn/Learning-Platform/rest-api/proto-shared/target/generated-sources/protobuf/java/com/example/grpc/course/MonthlyChartData.java
 /home/t9tieanh/learn/Learning-Platform/rest-api/proto-shared/target/generated-sources/protobuf/java/com/example/grpc/user/GetRevenueAndProfitList.java
 /home/t9tieanh/learn/Learning-Platform/rest-api/proto-shared/target/generated-sources/protobuf/java/com/example/grpc/course/GetCourseAndStudentResponse.java
@@ -34,6 +36,7 @@
 /home/t9tieanh/learn/Learning-Platform/rest-api/proto-shared/target/generated-sources/protobuf/java/com/example/grpc/course/EnrolledCoursesRequestOrBuilder.java
 /home/t9tieanh/learn/Learning-Platform/rest-api/proto-shared/target/generated-sources/protobuf/java/com/example/grpc/course/HasPurchasedCourseResponse.java
 /home/t9tieanh/learn/Learning-Platform/rest-api/proto-shared/target/generated-sources/protobuf/java/com/example/grpc/course/GetCourseAdminDataResponseOrBuilder.java
+/home/t9tieanh/learn/Learning-Platform/rest-api/proto-shared/target/generated-sources/protobuf/java/com/example/grpc/course/IsInstructorRequest.java
 /home/t9tieanh/learn/Learning-Platform/rest-api/proto-shared/target/generated-sources/protobuf/java/com/example/grpc/user/GetTeachersRequestOrBuilder.java
 /home/t9tieanh/learn/Learning-Platform/rest-api/proto-shared/target/generated-sources/protobuf/java/com/example/grpc/course/GetChartDataResponse.java
 /home/t9tieanh/learn/Learning-Platform/rest-api/proto-shared/target/generated-sources/protobuf/java/com/example/grpc/user/ExpertiseOrBuilder.java
@@ -51,17 +54,22 @@
 /home/t9tieanh/learn/Learning-Platform/rest-api/proto-shared/target/generated-sources/protobuf/java/com/example/grpc/course/GetCourseAndStudentResponseOrBuilder.java
 /home/t9tieanh/learn/Learning-Platform/rest-api/proto-shared/target/generated-sources/protobuf/java/com/example/grpc/hello/HelloRequestOrBuilder.java
 /home/t9tieanh/learn/Learning-Platform/rest-api/proto-shared/target/generated-sources/protobuf/java/com/example/grpc/user/GetRevenueAndProfitRequestOrBuilder.java
+/home/t9tieanh/learn/Learning-Platform/rest-api/proto-shared/target/generated-sources/protobuf/java/com/example/grpc/user/CertificateOrBuilder.java
 /home/t9tieanh/learn/Learning-Platform/rest-api/proto-shared/target/generated-sources/protobuf/java/com/example/grpc/user/GetTeachersResponseOrBuilder.java
 /home/t9tieanh/learn/Learning-Platform/rest-api/proto-shared/target/generated-sources/protobuf/java/com/example/grpc/course/GetChartDataRequest.java
 /home/t9tieanh/learn/Learning-Platform/rest-api/proto-shared/target/generated-sources/protobuf/java/com/example/grpc/user/Expertise.java
 /home/t9tieanh/learn/Learning-Platform/rest-api/proto-shared/target/generated-sources/protobuf/java/com/example/grpc/course/GetFeedbackByCourseIdRequestOrBuilder.java
 /home/t9tieanh/learn/Learning-Platform/rest-api/proto-shared/target/generated-sources/protobuf/java/com/example/grpc/course/UpdateCourseRatingResponseOrBuilder.java
 /home/t9tieanh/learn/Learning-Platform/rest-api/proto-shared/target/generated-sources/protobuf/java/com/example/grpc/hello/HelloReplyOrBuilder.java
+/home/t9tieanh/learn/Learning-Platform/rest-api/proto-shared/target/generated-sources/protobuf/java/com/example/grpc/user/TeacherDetailOrBuilder.java
 /home/t9tieanh/learn/Learning-Platform/rest-api/proto-shared/target/generated-sources/protobuf/java/com/example/grpc/user/GetUserRequestOrBuilder.java
 /home/t9tieanh/learn/Learning-Platform/rest-api/proto-shared/target/generated-sources/protobuf/grpc-java/com/example/grpc/user/UserServiceGrpc.java
+/home/t9tieanh/learn/Learning-Platform/rest-api/proto-shared/target/generated-sources/protobuf/java/com/example/grpc/user/TeacherDetail.java
 /home/t9tieanh/learn/Learning-Platform/rest-api/proto-shared/target/generated-sources/protobuf/java/com/example/grpc/course/GetCourseAdminDataResponse.java
+/home/t9tieanh/learn/Learning-Platform/rest-api/proto-shared/target/generated-sources/protobuf/java/com/example/grpc/user/Certificate.java
 /home/t9tieanh/learn/Learning-Platform/rest-api/proto-shared/target/generated-sources/protobuf/java/com/example/grpc/user/Teacher.java
 /home/t9tieanh/learn/Learning-Platform/rest-api/proto-shared/target/generated-sources/protobuf/java/com/example/grpc/course/GetCoursesRequest.java
+/home/t9tieanh/learn/Learning-Platform/rest-api/proto-shared/target/generated-sources/protobuf/java/com/example/grpc/course/IsInstructorResponse.java
 /home/t9tieanh/learn/Learning-Platform/rest-api/proto-shared/target/generated-sources/protobuf/java/com/example/grpc/course/GetFeedbackByCourseIdResponseOrBuilder.java
 /home/t9tieanh/learn/Learning-Platform/rest-api/proto-shared/target/generated-sources/protobuf/java/com/example/grpc/user/AccountStatus.java
 /home/t9tieanh/learn/Learning-Platform/rest-api/proto-shared/target/generated-sources/protobuf/java/com/example/grpc/user/GetUserResponse.java

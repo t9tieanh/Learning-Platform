@@ -17,4 +17,5 @@ service CourseService {
   rpc getChartData (GetChartDataRequest) returns (GetChartDataResponse);
   rpc checkHasPurchased(HasPurchasedCourseRequest) returns (HasPurchasedCourseResponse);
   rpc updateCourseRating(UpdateCourseRatingRequest) returns (UpdateCourseRatingResponse);
+  rpc isInstructor(IsInstructorRequest) returns (IsInstructorResponse);
 }

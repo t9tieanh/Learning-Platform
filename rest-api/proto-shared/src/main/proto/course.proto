@@ -82,3 +82,12 @@ message UpdateCourseRatingRequest {
 message UpdateCourseRatingResponse {
   bool isSucces = 1;
 }
+
+message IsInstructorRequest {
+  string userId = 1;
+  string courseId = 2;
+}
+
+message IsInstructorResponse {
+  bool isInstructor = 1;
+}

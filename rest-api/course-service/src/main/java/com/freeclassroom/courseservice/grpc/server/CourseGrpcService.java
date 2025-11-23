@@ -14,6 +14,7 @@ import com.freeclassroom.courseservice.grpc.client.UserGrpcClient;
 import com.freeclassroom.courseservice.repository.entity.CourseRepository;
 import com.freeclassroom.courseservice.repository.entity.EnrollmentRepository;
 import com.freeclassroom.courseservice.service.course.CourseStudentService;
+import com.freeclassroom.courseservice.service.course.CourseUserService;
 import com.google.protobuf.Empty;
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
@@ -330,4 +331,17 @@ public class CourseGrpcService extends CourseServiceImplBase {
         resObs.onCompleted();
     }
 
+    @Override
+    public void isInstructor(IsInstructorRequest request, StreamObserver<IsInstructorResponse> resObs) {
+        boolean result = courseRepo
+                .findByIdAndInstructorId(request.getCourseId(), request.getUserId())
+                .isPresent();
+
+        IsInstructorResponse response = IsInstructorResponse.newBuilder()
+                .setIsInstructor(result)
+                .build();
+
+        resObs.onNext(response);
+        resObs.onCompleted();
+    }
 }

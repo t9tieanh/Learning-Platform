@@ -4,15 +4,10 @@ import userClientGrpc from '~/grpc/userClient.grpc';
 import courseClientGrpc from '~/grpc/courseClient.grpc';
 import ApiError from '~/middleware/ApiError';
 import { OrderStatus, Order } from '@prisma/client';
-import { StatusCodes } from 'http-status-codes';
 import redisService from '../utils/redis.service';
 import discountService from './discount.service';
 import vnpayService from '../../service/utils/vnpay.service'
 import { OrderDto } from '~/dto/response/order.dto';
-import rabbitMQService from '~/service/utils/rabbitmq.service';
-import { OrderCreatedPayload } from '~/sagas/order/dtos';
-import { createEnvelope } from '~/sagas/events/envelope';
-import { MessageType } from '~/sagas/order/events';
 import momoService from '../utils/momo.service';
 
 class OrderService {
@@ -57,6 +52,13 @@ class OrderService {
         // validate all courses exist
         if (orderItems.length !== (orderData.items || []).length || orderItems.length === 0) {
             throw new ApiError(400, 'Một hoặc nhiều khóa học không tồn tại !');
+        }
+
+        // check userId is instructor of any course
+        for (const item of orderItems) {
+            if (item.instructor.id === userId) {
+                throw new ApiError(403, 'Giảng viên không thể mua khóa học của mình !');
+            }
         }
 
         const newOrder = {

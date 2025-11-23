@@ -27,7 +27,13 @@ export interface CourseResponse {
       id: string
       name: string
       image: string
-    }
+    }[]
+    certificates: {
+      id: string
+      title: string
+      organization: string
+      imageUrl: string
+    }[]
   }
   chapters: {
     id: string

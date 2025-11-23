@@ -10,7 +10,9 @@ com/example/grpc/user/GetUserRequest$Builder.class
 com/example/grpc/hello/HelloServiceGrpc$HelloServiceBaseDescriptorSupplier.class
 com/example/grpc/user/SaleServiceGrpc$SaleServiceMethodDescriptorSupplier.class
 com/example/grpc/user/SaleServiceGrpc$2.class
+com/example/grpc/user/Certificate$1.class
 com/example/grpc/user/CourseServiceGrpc$MethodHandlers.class
+com/example/grpc/course/IsInstructorRequestOrBuilder.class
 com/example/grpc/course/FeedbackOrBuilder.class
 com/example/grpc/course/GetCourseAndStudentResponseOrBuilder.class
 com/example/grpc/user/CourseServiceGrpc$CourseServiceImplBase.class
@@ -21,6 +23,7 @@ com/example/grpc/course/HasPurchasedCourseResponse$Builder.class
 com/example/grpc/course/MonthlyChartData.class
 com/example/grpc/course/GetCourseRequest$1.class
 com/example/grpc/hello/HelloServiceGrpc$HelloServiceMethodDescriptorSupplier.class
+com/example/grpc/user/Certificate$Builder.class
 com/example/grpc/course/GetChartDataResponse.class
 com/example/grpc/course/GetCourseRequest$Builder.class
 com/example/grpc/hello/HelloServiceGrpc$HelloServiceFutureStub.class
@@ -57,12 +60,14 @@ com/example/grpc/user/BlogServiceGrpc$2.class
 com/example/grpc/user/GetRevenueAndProfitListOrBuilder.class
 com/example/grpc/course/HasPurchasedCourseResponse$1.class
 com/example/grpc/user/UserServiceGrpc$UserServiceMethodDescriptorSupplier.class
+com/example/grpc/user/TeacherDetail$Builder.class
 com/example/grpc/user/GetRevenueAndProfitRequest$1.class
 com/example/grpc/user/GetUserResponseOrBuilder.class
 com/example/grpc/course/GetFeedbackByCourseIdResponse$Builder.class
 com/example/grpc/course/UpdateCourseRatingResponseOrBuilder.class
 com/example/grpc/hello/HelloServiceGrpc$AsyncService.class
 com/example/grpc/user/AccountStatus$1.class
+com/example/grpc/course/IsInstructorResponse.class
 com/example/grpc/course/UpdateCourseRatingRequest.class
 com/example/grpc/user/GetTeachersResponseOrBuilder.class
 com/example/grpc/course/Feedback.class
@@ -90,6 +95,7 @@ com/example/grpc/user/UserServiceGrpc$UserServiceImplBase.class
 com/example/grpc/course/CourseResponse$Builder.class
 com/example/grpc/hello/HelloRequestOrBuilder.class
 com/example/grpc/user/GetUserResponse$1.class
+com/example/grpc/user/TeacherDetail.class
 com/example/grpc/user/UserServiceGrpc$AsyncService.class
 com/example/grpc/user/Teacher.class
 com/example/grpc/user/CourseServiceProto.class
@@ -99,6 +105,7 @@ com/example/grpc/course/GetChartDataResponse$1.class
 com/example/grpc/hello/HelloReply.class
 com/example/grpc/hello/HelloRequest.class
 com/example/grpc/course/GetCoursesRequest$1.class
+com/example/grpc/user/TeacherDetailOrBuilder.class
 com/example/grpc/course/MonthlyChartData$Builder.class
 com/example/grpc/user/ExpertiseOrBuilder.class
 com/example/grpc/user/Expertise.class
@@ -109,6 +116,8 @@ com/example/grpc/hello/HelloServiceGrpc$3.class
 com/example/grpc/user/GetTeachersRequestOrBuilder.class
 com/example/grpc/user/GetTeachersRequest$Builder.class
 com/example/grpc/course/TotalBlogResponse.class
+com/example/grpc/course/IsInstructorResponse$1.class
+com/example/grpc/course/IsInstructorRequest$Builder.class
 com/example/grpc/course/GetChartDataRequest$Builder.class
 com/example/grpc/user/Teacher$1.class
 com/example/grpc/user/SaleServiceGrpc$SaleServiceFutureStub.class
@@ -119,6 +128,7 @@ com/example/grpc/user/BlogServiceProto.class
 com/example/grpc/course/HasPurchasedCourseResponseOrBuilder.class
 com/example/grpc/user/GetUserRequestOrBuilder.class
 com/example/grpc/course/GetCourseAdminDataResponse$Builder.class
+com/example/grpc/course/IsInstructorRequest$1.class
 com/example/grpc/course/GetCourseRequestOrBuilder.class
 com/example/grpc/user/UserServiceGrpc$UserServiceStub.class
 com/example/grpc/course/UpdateCourseRatingRequestOrBuilder.class
@@ -141,6 +151,7 @@ com/example/grpc/hello/HelloRequest$Builder.class
 com/example/grpc/user/CourseServiceGrpc$CourseServiceBaseDescriptorSupplier.class
 com/example/grpc/user/UserServiceGrpc$UserServiceBlockingStub.class
 com/example/grpc/user/BlogServiceGrpc$1.class
+com/example/grpc/course/IsInstructorResponse$Builder.class
 com/example/grpc/user/GetUserResponse.class
 com/example/grpc/user/SaleServiceGrpc$SaleServiceBaseDescriptorSupplier.class
 com/example/grpc/course/GetCoursesResponse$1.class
@@ -149,11 +160,13 @@ com/example/grpc/course/GetFeedbackByCourseIdRequest.class
 com/example/grpc/course/Feedback$Builder.class
 com/example/grpc/course/Feedback$1.class
 com/example/grpc/user/GetTeachersResponse$Builder.class
+com/example/grpc/course/IsInstructorResponseOrBuilder.class
 com/example/grpc/user/BlogServiceGrpc$AsyncService.class
 com/example/grpc/course/GetChartDataResponseOrBuilder.class
 com/example/grpc/user/GetUserRequest$1.class
 com/example/grpc/course/GetCoursesRequestOrBuilder.class
 com/example/grpc/user/UserServiceGrpc$UserServiceFutureStub.class
+com/example/grpc/user/Certificate.class
 com/example/grpc/user/UserServiceProto.class
 com/example/grpc/hello/HelloServiceGrpc.class
 com/example/grpc/user/Expertise$1.class
@@ -164,6 +177,8 @@ com/example/grpc/course/HasPurchasedCourseResponse.class
 com/example/grpc/course/HasPurchasedCourseRequest.class
 com/example/grpc/course/GetFeedbackByCourseIdRequestOrBuilder.class
 com/example/grpc/user/UserServiceGrpc$MethodHandlers.class
+com/example/grpc/user/TeacherDetail$1.class
+com/example/grpc/course/IsInstructorRequest.class
 com/example/grpc/user/GetRevenueAndProfitResponseOrBuilder.class
 com/example/grpc/user/SaleServiceGrpc$1.class
 com/example/grpc/hello/HelloServiceGrpc$2.class
@@ -173,6 +188,7 @@ com/example/grpc/course/GetChartDataRequestOrBuilder.class
 com/example/grpc/hello/HelloServiceGrpc$HelloServiceImplBase.class
 com/example/grpc/user/GetTeachersResponse$1.class
 com/example/grpc/user/SaleServiceGrpc$SaleServiceBlockingStub.class
+com/example/grpc/user/CertificateOrBuilder.class
 com/example/grpc/user/GetRevenueAndProfitRequest$Builder.class
 com/example/grpc/course/CourseProto.class
 com/example/grpc/course/GetFeedbackByCourseIdResponse$1.class
