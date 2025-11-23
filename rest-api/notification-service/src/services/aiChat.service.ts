@@ -4,77 +4,76 @@ import supabase from "~/config/supabase";
 import Conversation from "~/models/ai/ai-conversation.model";
 import { getPurchasedCourseIds } from "~/utils/supabase";
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '')
 
 // Embedding model (không đổi, vẫn dùng text-embedding-004 vì nó ổn định)
 async function generateEmbedding(text: string | string[]) {
-    const model = genAI.getGenerativeModel({ model: "text-embedding-004" });
+    const model = genAI.getGenerativeModel({ model: 'text-embedding-004' })
 
-    const result = await model.embedContent(text);
-    return result.embedding.values;
+    const result = await model.embedContent(text)
+    return result.embedding.values
 }
 
 const chroma = new ChromaClient({
-    path: "http://localhost:8000"
-});
+    path: 'http://localhost:8000'
+})
 
 async function searchSimilarCourses(query: string) {
-    const embedding = await generateEmbedding(query);
+    const embedding = await generateEmbedding(query)
 
     try {
-        const { data, error } = await supabase.rpc("match_course_embeddings", {
+        const { data, error } = await supabase.rpc('match_course_embeddings', {
             query_embedding: embedding,
             match_count: 5,
-            similarity_threshold: 0.3,
-        });
+            similarity_threshold: 0.3
+        })
 
-        if (error) throw error;
+        if (error) throw error
         if (data && data.length) {
             // If RPC does not include link, fetch details
-            const ids = data.map((r: any) => r.id).filter((v: any) => v != null);
-            let linkMap: Record<number, string> = {};
+            const ids = data.map((r: any) => r.id).filter((v: any) => v != null)
+            const linkMap: Record<number, string> = {}
             if (ids.length) {
-                const { data: detail } = await supabase
-                    .from("course_embeddings")
-                    .select("id, link")
-                    .in("id", ids);
-                (detail || []).forEach((d: any) => { linkMap[d.id] = d.link; });
+                const { data: detail } = await supabase.from('course_embeddings').select('id, link').in('id', ids)
+                    ; (detail || []).forEach((d: any) => {
+                        linkMap[d.id] = d.link
+                    })
             }
             return data.map((row: any) => {
-                const tags = Array.isArray(row.tags) ? row.tags.join(", ") : String(row.tags ?? "");
-                const link = row.link || linkMap[row.id] || "";
-                return `${row.name} - ${tags}\n${row.description}${link ? `\nLink: ${link}` : ""}`;
-            });
+                const tags = Array.isArray(row.tags) ? row.tags.join(', ') : String(row.tags ?? '')
+                const link = row.link || linkMap[row.id] || ''
+                return `${row.name} - ${tags}\n${row.description}${link ? `\nLink: ${link}` : ''}`
+            })
         }
     } catch (e: any) {
-        console.warn("Supabase RPC match_course_embeddings failed or missing. Falling back.", e?.message || e);
+        console.warn('Supabase RPC match_course_embeddings failed or missing. Falling back.', e?.message || e)
     }
 
     try {
         const { data, error } = await supabase
-            .from("course_embeddings")
-            .select("name, description, tags, link")
+            .from('course_embeddings')
+            .select('name, description, tags, link')
             .or(`name.ilike.%${query}%,description.ilike.%${query}%`)
-            .limit(5);
+            .limit(5)
 
         if (!error && data && data.length) {
             return data.map((row: any) => {
-                const tags = Array.isArray(row.tags) ? row.tags.join(", ") : String(row.tags ?? "");
-                return `${row.name} - ${tags}\n${row.description}${row.link ? `\nLink: ${row.link}` : ""}`;
-            });
+                const tags = Array.isArray(row.tags) ? row.tags.join(', ') : String(row.tags ?? '')
+                return `${row.name} - ${tags}\n${row.description}${row.link ? `\nLink: ${row.link}` : ''}`
+            })
         }
     } catch (e) {
         // ignore and try chroma
     }
 
     try {
-        const collection = await chroma.getOrCreateCollection({ name: "courses" });
-        const results = await collection.query({ queryEmbeddings: [embedding], nResults: 5 });
-        const docs = results.documents[0] || [];
-        return docs.map((doc: string | null) => doc || "");
+        const collection = await chroma.getOrCreateCollection({ name: 'courses' })
+        const results = await collection.query({ queryEmbeddings: [embedding], nResults: 5 })
+        const docs = results.documents[0] || []
+        return docs.map((doc: string | null) => doc || '')
     } catch (e: any) {
-        console.warn("Chroma query failed:", e?.message || e);
-        return [];
+        console.warn('Chroma query failed:', e?.message || e)
+        return []
     }
 }
 
@@ -160,11 +159,10 @@ async function generateReply(userMessage: string, userId?: string) {
             `\n❤️ Nova luôn sẵn sàng giúp bạn!`
     }
 
-    const contextText = relatedCourses.length > 0
-        ? relatedCourses
-            .map((c: string, i: number) => `(${i + 1}) ${c}`)
-            .join("\n\n")
-        : "Không có dữ liệu khóa học liên quan.";
+    const contextText =
+        relatedCourses.length > 0
+            ? relatedCourses.map((c: string, i: number) => `(${i + 1}) ${c}`).join('\n\n')
+            : 'Không có dữ liệu khóa học liên quan.'
 
     const scopeNote = purchasedContext
         ? 'CHỈ sử dụng danh sách khóa học mà người dùng đã mua để trả lời.'
@@ -214,7 +212,7 @@ async function generateReply(userMessage: string, userId?: string) {
         Lưu ý quan trọng:
         - Không dùng dạng in đậm (** **) trong câu trả lời thay vào đó dùng dấu : để phân tách ý nếu cần.
         - Viết tự nhiên, đơn giản, không quá máy móc.
-    `;
+    `
 
     const prompt2 = `
     Bạn là Nova – trợ lý AI tư vấn khóa học thông minh của nền tảng học trực tuyến.
@@ -252,7 +250,7 @@ async function generateReply(userMessage: string, userId?: string) {
 
         3) Format hiển thị (Human-friendly)
         - Nếu nhiều khóa liên quan, liệt kê dạng số thứ tự:
-        1. <Tiêu đề khóa> : <mô tả ngắn 1 dòng>. Lợi ích: <1 câu>.
+        1. <Tiêu đề khóa> : <mô tả ngắn 1 dòng>. Lợi ích: <1 câu>. Link tới khóa học.
         - Mỗi khóa tối đa **2 dòng**.
         - Nếu > 5 kết quả: chỉ hiển thị 5 đầu tiên và thêm:
         "😄 Và còn nhiều khóa học nữa phù hợp với bạn, bạn có thể tìm hiểu thêm nhé!"

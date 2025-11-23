@@ -16,3 +16,22 @@ message CreateConversationAIResponse {
   bool isSuccess = 1;
   string conversationId = 2;
 }
+// Request message used by getFeedbackByCourseId
+message GetFeedbackByCourseIdRequest {
+  string courseId = 1;
+}
+
+// Response wrapping repeated feedbacks
+message GetFeedbackByCourseIdResponse {
+  repeated Feedback feedbacks = 1;
+}
+
+message Feedback {
+  string id = 1;
+  string userId = 2;
+  string courseId = 3;
+  int32 rating = 4;
+  string message = 5;             
+  string userName = 8;
+  string userAvatar = 9;
+}

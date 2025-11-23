@@ -2,7 +2,15 @@ import { Router } from 'express'
 import BlogController from '~/controllers/blogcontroller'
 import { ValidateDto } from '~/middleware'
 import authen from '~/middleware/authen.middleware'
-import { CreateBlogDTO, GetBlogDetailsDTO, GetBlogsDTO, GetNewBlogsDTO, GetTrendingBlogsDTO, UpdateBlogDTO, DeleteBlogDTO } from '~/dto/request/blog.dto'
+import {
+  CreateBlogDTO,
+  GetBlogDetailsDTO,
+  GetBlogsDTO,
+  GetNewBlogsDTO,
+  GetTrendingBlogsDTO,
+  UpdateBlogDTO,
+  DeleteBlogDTO
+} from '~/dto/request/blog.dto'
 
 const router = Router()
 

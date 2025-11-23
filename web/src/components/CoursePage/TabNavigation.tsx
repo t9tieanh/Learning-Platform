@@ -40,8 +40,9 @@ export const TabNavigation = ({ currentLecture, thumbnailUri, currentLectureId, 
           <CustomButton
             key={tab.label}
             onClick={() => (tab.onClick ? tab.onClick() : setActiveTab(tab.label))}
-            className={`py-4 text-sm font-medium bg-white transition-colors relative ${activeTab === tab.label ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
-              }`}
+            className={`py-4 text-sm font-medium bg-white transition-colors relative ${
+              activeTab === tab.label ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
+            }`}
             label={
               <>
                 {tab.label}

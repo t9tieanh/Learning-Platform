@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@grpc/reflection": "^1.0.4",
     "quill": "^2.0.3"
   }
 }

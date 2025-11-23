@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+package blog;
+
 import "google/protobuf/empty.proto";
 import "blog.proto";
 import "user.proto";
@@ -13,4 +15,5 @@ service BlogService {
   rpc getTotalInstructorBlog (GetUserRequest) returns (TotalBlogResponse);
   rpc pushCourseSupabase (PushSupabaseRequest) returns (PushSupabaseResponse);
   rpc createConversationAI (CreateConversationAIRequest) returns (CreateConversationAIResponse);
+  rpc getFeedbackByCourseId (GetFeedbackByCourseIdRequest) returns (GetFeedbackByCourseIdResponse);
 }

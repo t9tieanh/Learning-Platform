@@ -15,3 +15,27 @@ export class GetFeedBackDTO {
   @IsString()
   cursor?: string
 }
+
+export class AddFeedBackDTO {
+  @IsNotEmpty()
+  courseId: string
+
+  @IsNotEmpty()
+  @Type(() => Number)
+  @Min(1, { message: 'rating must be a positive number' })
+  rating: number
+
+  @IsOptional()
+  @IsString()
+  comment?: string
+}
+
+export interface FeedbackDto {
+  id: string
+  userId: string
+  courseId: string
+  rating: number
+  message: string
+  userName?: string
+  userAvatar?: string
+}

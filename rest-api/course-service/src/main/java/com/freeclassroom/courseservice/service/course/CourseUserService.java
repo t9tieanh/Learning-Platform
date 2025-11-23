@@ -3,6 +3,8 @@ package com.freeclassroom.courseservice.service.course;
 import com.example.grpc.user.GetTeachersResponse;
 import com.example.grpc.user.GetUserResponse;
 import com.example.grpc.user.Teacher;
+import com.example.grpc.user.TeacherDetail;
+import com.freeclassroom.courseservice.dto.grpc.FeedbackDto;
 import com.freeclassroom.courseservice.dto.response.ApiResponse;
 import com.freeclassroom.courseservice.dto.response.common.Pagination;
 import com.freeclassroom.courseservice.dto.response.common.PagingResponse;
@@ -14,8 +16,10 @@ import com.freeclassroom.courseservice.enums.entity.EnumCourseProgressStep;
 import com.freeclassroom.courseservice.enums.entity.EnumCourseStatus;
 import com.freeclassroom.courseservice.exception.CustomExeption;
 import com.freeclassroom.courseservice.exception.ErrorCode;
+import com.freeclassroom.courseservice.grpc.client.BlogGrpcClient;
 import com.freeclassroom.courseservice.grpc.client.UserGrpcClient;
 import com.freeclassroom.courseservice.mapper.CourseMapper;
+import com.freeclassroom.courseservice.mapper.InstructorMapper;
 import com.freeclassroom.courseservice.repository.entity.ChapterRepository;
 import com.freeclassroom.courseservice.repository.entity.CourseRepository;
 import com.freeclassroom.courseservice.repository.entity.EnrollmentRepository;
@@ -46,8 +50,10 @@ public class CourseUserService implements ICourseUserService{
     ChapterRepository chapterRepo;
     EnrollmentRepository enrollmentRepo;
     UserGrpcClient userGrpcClient;
+    BlogGrpcClient blogGrpcClient;
 
     CourseMapper courseMapper;
+    InstructorMapper instructorMapper;
 
     @Override
     public ApiResponse<CourseUserDetailResponse> getCourseDetail(String id, String userId) {
@@ -68,35 +74,20 @@ public class CourseUserService implements ICourseUserService{
         }
 
         //get info of instructor
-        GetUserResponse user = userGrpcClient.getUser(
-                course.getInstructorId().toString()
-        );
-
-        response.setInstructor(InstructorCourseResponse.builder()
-                .phone(user.getPhone())
-                .name(user.getName())
-                .email(user.getEmail())
-                .image(user.getImage())
-                .username(user.getUsername())
-                .description(user.getDescription())
-                .expertise(
-                        user.getExpertisesList().stream()
-                                .map(expertise -> ExpertiseResponse.builder()
-                                        .id(expertise.getId())
-                                        .name(expertise.getName())
-                                        .image(expertise.getImage())
-                                        .build())
-                                .toList()
+        response.setInstructor(instructorMapper.toResponse(
+                userGrpcClient.getTeacherDetail(
+                        course.getInstructorId().toString()
                 )
-                .id(user.getId())
-                .numCourse(courseRepo.countByInstructorIdAndNotDeleted(user.getId()))
-                .build());
+        ));
 
         // get add infomation of chapter
         response.getChapters().forEach(chapter -> {
             chapter.setDuration(chapterRepo.getTotalVideoDurationByChapterId(chapter.getId()));
             chapter.setLessonNum(chapterRepo.countLessonsByChapterId(chapter.getId()));
         });
+
+        // get feedback of course
+        response.setFeedbacks(blogGrpcClient.getFeedbackByCourseId(course.getId()));
 
         return ApiResponse.<CourseUserDetailResponse>builder()
                 .code(200)

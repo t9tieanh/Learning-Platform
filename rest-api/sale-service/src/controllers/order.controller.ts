@@ -3,8 +3,8 @@ import orderService from '~/service/models/order.service';
 import sendResposne from '~/dto/response/send-response';
 import { env } from '~/config/env'
 import ApiError from '~/middleware/ApiError';
-import orderPaymentSevice from '~/service/models/order-payment.service';
 import orderPaymentService from '~/service/models/order-payment.service';
+import orderHistoryService from '~/service/models/order-history.service';
 
 class OrderController {
     async createOrder(req: Request, res: Response, next: NextFunction) {
@@ -125,6 +125,24 @@ class OrderController {
                 code: 200,
                 message: 'Lấy thông tin đơn hàng thành công !',
                 result: data
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async getOrderHistory(req: Request, res: Response, next: NextFunction) {
+        try {
+            const userId = req.user?.sub;
+            if (!userId) {
+                throw new ApiError(401, 'Bạn không có quyền truy cập !');
+            }
+
+            const history = await orderHistoryService.getOrderHistoryByUserId(userId as string);
+            sendResposne(res, {
+                code: 200,
+                message: 'Lấy lịch sử đơn hàng thành công !',
+                result: history
             });
         } catch (error) {
             next(error);

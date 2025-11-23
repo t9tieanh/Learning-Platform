@@ -25,7 +25,7 @@ public final class CourseServiceProto {
   static {
     java.lang.String[] descriptorData = {
       "\n\023courseService.proto\032\033google/protobuf/e" +
-      "mpty.proto\032\014course.proto\032\nuser.proto2\224\003\n" +
+      "mpty.proto\032\014course.proto\032\nuser.proto2\356\004\n" +
       "\rCourseService\022/\n\tgetCourse\022\021.GetCourseR" +
       "equest\032\017.CourseResponse\0229\n\016getBulkCourse" +
       "s\022\022.GetCoursesRequest\032\023.GetCoursesRespon" +
@@ -36,8 +36,13 @@ public final class CourseServiceProto {
       "ursesAndStudent\022\017.GetUserRequest\032\034.GetCo" +
       "urseAndStudentResponse\022;\n\014getChartData\022\024" +
       ".GetChartDataRequest\032\025.GetChartDataRespo" +
-      "nseB-\n\025com.example.grpc.userB\022CourseServ" +
-      "iceProtoP\001b\006proto3"
+      "nse\022L\n\021checkHasPurchased\022\032.HasPurchasedC" +
+      "ourseRequest\032\033.HasPurchasedCourseRespons" +
+      "e\022M\n\022updateCourseRating\022\032.UpdateCourseRa" +
+      "tingRequest\032\033.UpdateCourseRatingResponse" +
+      "\022;\n\014isInstructor\022\024.IsInstructorRequest\032\025" +
+      ".IsInstructorResponseB-\n\025com.example.grp" +
+      "c.userB\022CourseServiceProtoP\001b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,

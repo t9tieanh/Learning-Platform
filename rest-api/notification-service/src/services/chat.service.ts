@@ -1,7 +1,8 @@
 import { Types } from 'mongoose'
 import Conversation, { IConversation } from '~/models/message/conversation.model'
 import Message, { IMessage } from '~/models/message/message.model'
-import socketClient from '~/socket';
+import { Feedback } from '~/models/review/feedback.model'
+import socketClient from '~/socket'
 interface DirectConversationResult {
   conversation: IConversation
   isNew: boolean
@@ -21,11 +22,15 @@ const buildDirectKey = (a: string, b: string) => {
 }
 
 // Tạo hoặc lấy cuộc trò chuyện 1-1
-const createOrGetDirect = async (currentUserId: string, peerId: string, currentRole: string): Promise<DirectConversationResult> => {
-  const me = (currentUserId)
-  const peer = (peerId)
+const createOrGetDirect = async (
+  currentUserId: string,
+  peerId: string,
+  currentRole: string
+): Promise<DirectConversationResult> => {
+  const me = currentUserId
+  const peer = peerId
 
-  const peerRole: 'student' | 'instructor' = currentRole === 'student' ? 'instructor' : 'student';
+  const peerRole: 'student' | 'instructor' = currentRole === 'student' ? 'instructor' : 'student'
 
   const key = buildDirectKey(String(me), String(peer))
 
@@ -37,8 +42,8 @@ const createOrGetDirect = async (currentUserId: string, peerId: string, currentR
       type: 'direct',
       participants: [
         { userId: me, role: currentRole },
-        { userId: peer, role: peerRole },
-      ],
+        { userId: peer, role: peerRole }
+      ]
     })
     return { conversation: conv, isNew: true }
   }
@@ -50,61 +55,60 @@ const createOrGetDirect = async (currentUserId: string, peerId: string, currentR
 
 const listConversations = async (currentUserId: string, currentRole: 'student' | 'instructor') => {
   const conversations = await Conversation.find({
-    'participants.userId': currentUserId,
+    'participants.userId': currentUserId
   })
     .sort({ lastMessageAt: -1 })
-    .lean();
+    .lean()
 
-  const filtered = conversations.filter(conv => {
-    const me = conv.participants.find(p => p.userId === currentUserId);
-    const other = conv.participants.find(p => p.userId !== currentUserId);
-    if (!me || !other) return false;
+  const filtered = conversations.filter((conv) => {
+    const me = conv.participants.find((p) => p.userId === currentUserId)
+    const other = conv.participants.find((p) => p.userId !== currentUserId)
+    if (!me || !other) return false
 
-    if (currentRole === 'student') return other.role === 'instructor';
-    if (currentRole === 'instructor') return other.role === 'student';
-    return false;
-  });
+    if (currentRole === 'student') return other.role === 'instructor'
+    if (currentRole === 'instructor') return other.role === 'student'
+    return false
+  })
 
-  return filtered;
+  return filtered
 }
-
 
 // Lấy danh sách tin nhắn theo conversationId (cursor-based)
 const getMessages = async (conversationId: string, cursor?: string, limit = 20) => {
   try {
-    const convId = String(conversationId);
+    const convId = String(conversationId)
 
     // Validate conversationId
     if (!convId) {
-      throw new Error('Thiếu conversationId');
+      throw new Error('Thiếu conversationId')
     }
 
-    const query: any = { conversationId: convId };
+    const query: any = { conversationId: convId }
 
     // Phân trang nếu có cursor
     if (cursor) {
       if (Types.ObjectId.isValid(cursor)) {
-        query._id = { $lt: new Types.ObjectId(cursor) };
+        query._id = { $lt: new Types.ObjectId(cursor) }
       } else {
-        console.warn('[getMessages] ⚠️ Cursor không hợp lệ:', cursor);
+        console.warn('[getMessages] ⚠️ Cursor không hợp lệ:', cursor)
       }
     }
 
     const docs = await Message.find(query)
       .sort({ _id: -1 })
       .limit(limit + 1)
-      .lean();
+      .lean()
 
-    const hasMore = docs.length > limit;
-    const items = hasMore ? docs.slice(0, limit) : docs;
-    const nextCursor = hasMore ? String(items[items.length - 1]._id) : null;
+    const hasMore = docs.length > limit
+    const items = hasMore ? docs.slice(0, limit) : docs
+    const nextCursor = hasMore ? String(items[items.length - 1]._id) : null
 
-    return { items, hasMore, nextCursor };
+    return { items, hasMore, nextCursor }
   } catch (error) {
-    console.error('[getMessages] ❌ Lỗi khi lấy tin nhắn:', error);
-    return { items: [], hasMore: false, nextCursor: null, error: (error as Error).message };
+    console.error('[getMessages] ❌ Lỗi khi lấy tin nhắn:', error)
+    return { items: [], hasMore: false, nextCursor: null, error: (error as Error).message }
   }
-};
+}
 
 // Gửi tin nhắn trong hội thoại
 const sendMessage = async (
@@ -115,7 +119,7 @@ const sendMessage = async (
   peerId: string
 ): Promise<IMessage> => {
   try {
-    console.log({ conversationId, senderId, senderRole, content });
+    console.log({ conversationId, senderId, senderRole, content })
 
     const message = await Message.create({
       conversationId: conversationId,
@@ -123,16 +127,16 @@ const sendMessage = async (
       senderRole,
       content,
       type: 'text',
-      status: 'sent',
-    });
+      status: 'sent'
+    })
 
     // cập nhật last message của conversation
     await Conversation.findByIdAndUpdate(conversationId, {
       lastMessageId: message._id,
-      lastMessageAt: message.createdAt,
-    });
+      lastMessageAt: message.createdAt
+    })
 
-    const messageId = message.id;
+    const messageId = message.id
     console.log('messageId', messageId)
     socketClient.emit('server_message_send', {
       conversationId,
@@ -140,42 +144,47 @@ const sendMessage = async (
       content,
       senderId,
       peerId,
-      senderRole,
+      senderRole
     })
 
-    return message;
+    return message
   } catch (error) {
-    console.error('Error in sendMessage:', error);
-    throw new Error(`Không thể gửi tin nhắn: ${error instanceof Error ? error.message : String(error)}`);
+    console.error('Error in sendMessage:', error)
+    throw new Error(`Không thể gửi tin nhắn: ${error instanceof Error ? error.message : String(error)}`)
   }
-};
-
+}
 
 // Đánh dấu đã đọc tin nhắn (toàn bộ hoặc đến một messageId)
 const markRead = async (conversationId: string, senderId: string, peerId: string, messageId?: string) => {
   try {
-    console.log('READER ID', peerId);
+    console.log('READER ID', peerId)
     if (peerId) {
       const filter: any = { conversationId: conversationId, status: { $ne: 'read' } }
       // if (messageId && Types.ObjectId.isValid(messageId)) {
       //     filter._id = { $lte: new Types.ObjectId(messageId) }
       // }
       const result = await Message.updateMany(filter, { $set: { status: 'read' } })
-      socketClient.emit("server_message_read", {
+      socketClient.emit('server_message_read', {
         conversationId,
         senderId,
         peerId
-      });
+      })
       return { updated: result.modifiedCount }
     }
-    return null;
+    return null
   } catch (error) {
-    console.error('❌ Error in markRead:', error);
-    return null;
+    console.error('❌ Error in markRead:', error)
+    return null
   }
 }
 
-const updateMessage = async (conversationId: string, messageId: string, senderId: string, content: string, peerId: string) => {
+const updateMessage = async (
+  conversationId: string,
+  messageId: string,
+  senderId: string,
+  content: string,
+  peerId: string
+) => {
   try {
     console.log('conversationId', conversationId)
     console.log('messageId', messageId)
@@ -211,7 +220,7 @@ const updateMessage = async (conversationId: string, messageId: string, senderId
         content,
         senderId,
         peerId,
-        senderRole,
+        senderRole
       })
     }
 
@@ -221,13 +230,13 @@ const updateMessage = async (conversationId: string, messageId: string, senderId
       content,
       senderId,
       peerId,
-      senderRole,
+      senderRole
     })
 
     return updated
   } catch (err) {
-    console.error('Lỗi khi cập nhật tin nhắn:', err);
-    return null;
+    console.error('Lỗi khi cập nhật tin nhắn:', err)
+    return null
   }
 }
 
@@ -236,88 +245,76 @@ const deleteMessage = async (conversationId: string, messageId: string, requeste
     const msg = await Message.findOne({
       _id: messageId,
       conversationId,
-      senderId: requesterId,
-    });
+      senderId: requesterId
+    })
     if (!msg) {
-      throw new Error("Không tìm thấy tin nhắn hoặc bạn không có quyền xóa");
+      throw new Error('Không tìm thấy tin nhắn hoặc bạn không có quyền xóa')
     }
 
-    await Message.deleteOne({ _id: messageId });
+    await Message.deleteOne({ _id: messageId })
 
-    const conv = await Conversation.findById(conversationId);
+    const conv = await Conversation.findById(conversationId)
 
-    const instructorId = conv?.participants?.find(
-      (p) => p.role === "instructor"
-    )?.userId;
-    const studentId = conv?.participants?.find(
-      (p) => p.role === "student"
-    )?.userId;
+    const instructorId = conv?.participants?.find((p) => p.role === 'instructor')?.userId
+    const studentId = conv?.participants?.find((p) => p.role === 'student')?.userId
 
-    const isLast =
-      conv && String(conv.lastMessageId) === String(messageId);
+    const isLast = conv && String(conv.lastMessageId) === String(messageId)
 
     if (isLast) {
-      const last = await Message.find({ conversationId })
-        .sort({ _id: -1 })
-        .limit(1)
-        .lean();
+      const last = await Message.find({ conversationId }).sort({ _id: -1 }).limit(1).lean()
 
-      const nextLast = last[0];
+      const nextLast = last[0]
 
-      const updateData: any = {};
+      const updateData: any = {}
 
       if (nextLast) {
         updateData.$set = {
           lastMessageId: nextLast._id,
-          lastMessageAt: nextLast.createdAt,
-        };
+          lastMessageAt: nextLast.createdAt
+        }
       } else {
         updateData.$unset = {
           lastMessageId: 1,
-          lastMessageAt: 1,
-        };
+          lastMessageAt: 1
+        }
       }
 
-      await Conversation.findByIdAndUpdate(conversationId, updateData);
+      await Conversation.findByIdAndUpdate(conversationId, updateData)
 
-      socketClient.emit("server_message_delete_last", {
+      socketClient.emit('server_message_delete_last', {
         conversationId,
         deletedMessageId: messageId,
         newLastMessage: nextLast
           ? {
-            id: nextLast._id,
-            content: nextLast.content,
-            createdAt: nextLast.createdAt,
-          }
+              id: nextLast._id,
+              content: nextLast.content,
+              createdAt: nextLast.createdAt
+            }
           : null,
         instructorId,
-        studentId,
-      });
+        studentId
+      })
     }
 
-    socketClient.emit("server_message_delete", {
+    socketClient.emit('server_message_delete', {
       conversationId,
       messageId,
       instructorId,
-      studentId,
-    });
+      studentId
+    })
 
-    return { deleted: true };
+    return { deleted: true }
   } catch (err) {
-    console.error("Lỗi khi xóa tin nhắn:", err);
-    return { deleted: false };
+    console.error('Lỗi khi xóa tin nhắn:', err)
+    return { deleted: false }
   }
-};
+}
 
-const sendFirstMesssage = async (courseName: string, instructorId: string, studentId: string) => {
+const sendFirstMessage = async (courseName: string, instructorId: string, studentId: string) => {
   try {
-    const { conversation } = await createOrGetDirect(
-      studentId,
-      instructorId,
-      'student'
-    )
+    const { conversation } = await createOrGetDirect(studentId, instructorId, 'student')
 
-    const welcomeMessage = `Xin chào! 👋 Chào mừng bạn đến với khóa học "${courseName}" 🎓 — chúc bạn có một hành trình học tập thật tuyệt vời! 🚀 Nếu có bất kỳ thắc mắc nào, đừng ngần ngại đặt câu hỏi nhé 💬`;
+    const welcomeMessage = `Xin chào! 👋 Chào mừng bạn đến với khóa học "${courseName}" 🎓 — chúc bạn có một hành trình học tập thật tuyệt vời! 🚀 Nếu có bất kỳ thắc mắc nào, đừng ngần ngại đặt câu hỏi nhé 💬`
 
     const message = await Message.create({
       conversationId: conversation._id,
@@ -325,7 +322,7 @@ const sendFirstMesssage = async (courseName: string, instructorId: string, stude
       senderRole: 'instructor',
       content: welcomeMessage,
       type: 'text',
-      status: 'send'
+      status: 'sent'
     })
 
     await Conversation.findByIdAndUpdate(conversation._id, {
@@ -342,10 +339,18 @@ const sendFirstMesssage = async (courseName: string, instructorId: string, stude
       senderRole: 'instructor'
     })
   } catch (error) {
-    console.error('❌ Lỗi khi gửi tin nhắn chào mừng:', error);
+    console.error('❌ Lỗi khi gửi tin nhắn chào mừng:', error)
   }
 }
 
+const getFeedbackByCourseId = async (id: string[]) => {
+  try {
+    const feedback = await Feedback.find({ courseId: { $in: id } })
+    return feedback
+  } catch (error) {
+    throw new Error('Lỗi khi lấy feedback')
+  }
+}
 
 const ChatService = {
   createOrGetDirect,
@@ -354,7 +359,9 @@ const ChatService = {
   sendMessage,
   markRead,
   updateMessage,
-  deleteMessage
+  deleteMessage,
+  sendFirstMessage,
+  getFeedbackByCourseId
 }
 
 export default ChatService

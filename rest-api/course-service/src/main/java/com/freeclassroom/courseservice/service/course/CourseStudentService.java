@@ -1,6 +1,5 @@
 package com.freeclassroom.courseservice.service.course;
 
-import com.example.grpc.user.GetUserResponse;
 import com.freeclassroom.courseservice.dto.response.ApiResponse;
 import com.freeclassroom.courseservice.dto.response.course.student.CourseDetailResponse;
 import com.freeclassroom.courseservice.dto.response.user.InstructorResponse;

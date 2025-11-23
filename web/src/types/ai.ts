@@ -5,7 +5,7 @@ export interface AiChatRequest {
 }
 
 export interface AiChatResponse {
-    reply: string;
+  reply: string
 }
 
 export interface ConversationMessage {

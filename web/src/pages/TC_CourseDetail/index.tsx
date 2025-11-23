@@ -261,24 +261,6 @@ export default function CourseDetailPage() {
             </aside>
           </div>
         )}
-
-        {/* Footer Actions */}
-        <div className='mt-12 mb-8'>
-          <Separator className='mb-8' />
-          <div className='flex flex-wrap gap-3 justify-center'>
-            <Button variant='outline' onClick={handleAddSection} className='gap-2'>
-              <Plus className='h-4 w-4' />
-              Thêm phần mới
-            </Button>
-            <Button variant='outline' onClick={handleAddLesson} className='gap-2'>
-              <Plus className='h-4 w-4' />
-              Thêm bài học
-            </Button>
-            <Button variant='outline' onClick={handleEdit} className='gap-2'>
-              Chỉnh sửa khóa học
-            </Button>
-          </div>
-        </div>
       </main>
 
       {/* Video Modal */}

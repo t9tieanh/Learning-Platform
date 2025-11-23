@@ -10,6 +10,7 @@ import './style.scss'
 import { Course } from '@/types/course.type'
 import { useNavigate } from 'react-router-dom'
 import ImageNotFound from '@/assets/images/image-not-found.png'
+import formatPrice from '@/utils/common/formatPrice'
 
 const CourseCard = ({ course, className }: { course: Course; className?: string }) => {
   const navigate = useNavigate()
@@ -58,8 +59,8 @@ const CourseCard = ({ course, className }: { course: Course; className?: string 
         <CardContent className='p-4 pt-1'>
           <CardTitle className='text-lg font-bold'>{course.title}</CardTitle>
           <CardDescription className='flex text-sm text-muted-foreground gap-2'>
-            <p className='line-through'>{course.originalPrice} VND</p>
-            <p className='text-red-500 font-bold'>{course.finalPrice} VND</p>
+            <p className='line-through'>{formatPrice(course.originalPrice)}</p>
+            <p className='text-red-500 font-bold'>{formatPrice(course.finalPrice)}</p>
           </CardDescription>
           <CardDescription className='flex justify-between gap-2 mt-2'>
             <div className='flex items-center gap-2'>

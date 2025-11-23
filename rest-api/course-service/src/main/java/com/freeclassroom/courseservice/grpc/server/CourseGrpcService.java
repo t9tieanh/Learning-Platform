@@ -13,12 +13,16 @@ import com.freeclassroom.courseservice.grpc.client.SaleGrpcClient;
 import com.freeclassroom.courseservice.grpc.client.UserGrpcClient;
 import com.freeclassroom.courseservice.repository.entity.CourseRepository;
 import com.freeclassroom.courseservice.repository.entity.EnrollmentRepository;
+import com.freeclassroom.courseservice.service.course.CourseStudentService;
+import com.freeclassroom.courseservice.service.course.CourseUserService;
 import com.google.protobuf.Empty;
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import net.devh.boot.grpc.server.service.GrpcService;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -285,7 +289,6 @@ public class CourseGrpcService extends CourseServiceImplBase {
 
                 response.addMonthlyData(monthly);
             }
-            System.out.println("4 ne");
 
             responseObserver.onNext(response.build());
             responseObserver.onCompleted();
@@ -293,5 +296,52 @@ public class CourseGrpcService extends CourseServiceImplBase {
         } catch (Exception e) {
             responseObserver.onError(e);
         }
+    }
+
+    @Override
+    public void checkHasPurchased(HasPurchasedCourseRequest request, StreamObserver<HasPurchasedCourseResponse> responseObserver) {
+        boolean result = enrollmentRepo.existsByUserIdAndCourse_Id(request.getUserId(), request.getCourseId());
+        HasPurchasedCourseResponse response = HasPurchasedCourseResponse.newBuilder()
+                .setHasPurchased(result)
+                .build();
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void updateCourseRating(UpdateCourseRatingRequest req,
+                                   StreamObserver<UpdateCourseRatingResponse> resObs) {
+
+        double roundedRating = BigDecimal.valueOf(req.getRating())
+                .setScale(2, RoundingMode.HALF_UP)
+                .doubleValue();
+
+        boolean success = courseRepo.findById(req.getCourseId())
+                .map(course -> {
+                    course.setRating(roundedRating);
+                    courseRepo.save(course);
+                    return true;
+                })
+                .orElse(false);
+
+        resObs.onNext(UpdateCourseRatingResponse.newBuilder()
+                .setIsSucces(success)
+                .build());
+        resObs.onCompleted();
+    }
+
+    @Override
+    public void isInstructor(IsInstructorRequest request, StreamObserver<IsInstructorResponse> resObs) {
+        boolean result = courseRepo
+                .findByIdAndInstructorId(request.getCourseId(), request.getUserId())
+                .isPresent();
+
+        IsInstructorResponse response = IsInstructorResponse.newBuilder()
+                .setIsInstructor(result)
+                .build();
+
+        resObs.onNext(response);
+        resObs.onCompleted();
     }
 }

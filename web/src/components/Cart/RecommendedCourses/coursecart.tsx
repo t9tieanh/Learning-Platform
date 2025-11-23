@@ -5,6 +5,7 @@ import { IoPaperPlane } from 'react-icons/io5'
 import { Course } from '@/types/course.type'
 import { useNavigate } from 'react-router-dom'
 import ImageNotFound from '@/assets/images/image-not-found.png'
+import formatPrice from '@/utils/common/formatPrice'
 
 const CourseCard = ({ course, className }: { course: Course; className?: string }) => {
   const navigate = useNavigate()
@@ -28,8 +29,8 @@ const CourseCard = ({ course, className }: { course: Course; className?: string 
             {course.title}
           </CardTitle>
           <CardDescription className='flex items-center text-sm gap-2 mb-3'>
-            <p className='line-through text-gray-500 text-xs sm:text-sm'>{course.originalPrice} VND</p>
-            <p className='text-red-500 font-bold text-sm sm:text-base'>{course.finalPrice} VND</p>
+            <p className='line-through text-gray-500 text-xs sm:text-sm'>{formatPrice(course.originalPrice)}</p>
+            <p className='text-red-500 font-bold text-sm sm:text-base'>{formatPrice(course.finalPrice)}</p>
           </CardDescription>
           <CardDescription className='flex flex-col sm:flex-row justify-between gap-3 mt-2'>
             <div className='flex items-center gap-2 min-w-0'>

@@ -18,6 +18,13 @@ interface Teacher {
     name: string
     image: string
   }[]
+  certificates: {
+    id: string
+    title: string
+    organization: string
+    imageUrl: string
+    credentialUrl: string
+  }[]
 }
 
 const TeacherInfo = ({ teacher }: { teacher: Teacher }) => {
@@ -87,6 +94,27 @@ const TeacherInfo = ({ teacher }: { teacher: Teacher }) => {
                     </Avatar>
                     <div>{skill.name}</div>
                   </Badge>
+                ))}
+              </div>
+            </div>
+            <div>
+              <h4 className='font-semibold text-foreground mb-3'>Chứng chỉ</h4>
+              <div className='flex flex-wrap gap-2'>
+                {teacher?.certificates.map((certificate, index) => (
+                  <a key={index} href={certificate?.credentialUrl} target='_blank' rel='noopener noreferrer'>
+                    <Badge variant='secondary' className='bg-white shadow-lg text-black p-1 px-2 hover:bg-primary/20'>
+                      <Avatar className='w-20 h-20 w-6 h-6 mr-2'>
+                        <AvatarImage src={certificate?.imageUrl} alt={certificate?.title} />
+                        <AvatarFallback className='text-2xl font-semibold bg-gradient-primary text-primary-foreground'>
+                          {certificate?.title
+                            .split(' ')
+                            .map((n) => n[0])
+                            .join('')}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>{certificate.title}</div>
+                    </Badge>
+                  </a>
                 ))}
               </div>
             </div>

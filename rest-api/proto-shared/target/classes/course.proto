@@ -76,3 +76,30 @@ message PushSupabaseRequest {
 message PushSupabaseResponse {
   bool isSuccess = 1;
 }
+
+message HasPurchasedCourseRequest {
+  string courseId = 1;
+  string userId = 2;
+}
+
+message HasPurchasedCourseResponse {
+  bool hasPurchased = 1;
+}
+
+message UpdateCourseRatingRequest {
+  string courseId = 1;
+  double rating = 2;
+}
+
+message UpdateCourseRatingResponse {
+  bool isSucces = 1;
+}
+
+message IsInstructorRequest {
+  string userId = 1;
+  string courseId = 2;
+}
+
+message IsInstructorResponse {
+  bool isInstructor = 1;
+}

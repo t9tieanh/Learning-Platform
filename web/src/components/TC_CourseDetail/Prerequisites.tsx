@@ -16,7 +16,7 @@ export function Prerequisites({ prerequisites }: PrerequisitesProps) {
       <h2 className='text-xl font-bold mb-6'>Yêu cầu trước khi học</h2>
       <ul className='pl-2 space-y-2'>
         {prerequisites.map((prerequisite, index) => (
-          <li key={index} className='text-base flex items-center gap-2'>
+          <li key={index} className='text-sm flex items-center gap-2'>
             <BadgeCheck size={18} className='text-blue-500' />
             {prerequisite}
           </li>

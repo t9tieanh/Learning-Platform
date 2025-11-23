@@ -27,7 +27,13 @@ export interface CourseResponse {
       id: string
       name: string
       image: string
-    }
+    }[]
+    certificates: {
+      id: string
+      title: string
+      organization: string
+      imageUrl: string
+    }[]
   }
   chapters: {
     id: string
@@ -50,6 +56,15 @@ export interface CourseResponse {
   } | null
   outcomes: string[]
   requirements: string[]
+  feedbacks?: {
+    id: string
+    userId: string
+    courseId: string
+    rating: number
+    message: string
+    userName?: string
+    userAvatar?: string
+  }[]
 }
 
 type Paginated<T> = {

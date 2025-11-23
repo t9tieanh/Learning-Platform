@@ -4,15 +4,10 @@ import userClientGrpc from '~/grpc/userClient.grpc';
 import courseClientGrpc from '~/grpc/courseClient.grpc';
 import ApiError from '~/middleware/ApiError';
 import { OrderStatus, Order } from '@prisma/client';
-import { StatusCodes } from 'http-status-codes';
 import redisService from '../utils/redis.service';
 import discountService from './discount.service';
 import vnpayService from '../../service/utils/vnpay.service'
 import { OrderDto } from '~/dto/response/order.dto';
-import rabbitMQService from '~/service/utils/rabbitmq.service';
-import { OrderCreatedPayload } from '~/sagas/order/dtos';
-import { createEnvelope } from '~/sagas/events/envelope';
-import { MessageType } from '~/sagas/order/events';
 import momoService from '../utils/momo.service';
 
 class OrderService {
@@ -57,6 +52,13 @@ class OrderService {
         // validate all courses exist
         if (orderItems.length !== (orderData.items || []).length || orderItems.length === 0) {
             throw new ApiError(400, 'Một hoặc nhiều khóa học không tồn tại !');
+        }
+
+        // check userId is instructor of any course
+        for (const item of orderItems) {
+            if (item.instructor.id === userId) {
+                throw new ApiError(403, 'Giảng viên không thể mua khóa học của mình !');
+            }
         }
 
         const newOrder = {
@@ -210,13 +212,15 @@ class OrderService {
         const courseMap = new Map<string, any>(courses.map(c => [c.id, c]))
 
         const items = (order.items || []).map(i => {
-            const c = courseMap.get(i.course_id) || {}
+            const course = courseMap.get(i.course_id) || {}
             return {
                 course_id: i.course_id,
                 price: i.price,
-                title: c.title || '',
-                instructor_name: c.instructor?.name || '',
-                image: c.thumbnail_url || ''
+                title: course.title || '',
+                instructor_name: course.instructor?.name || '',
+                instructor_id: course.instructor?.id || '',
+                course_name: course.title || '',
+                image: course.thumbnail_url || ''
             }
         })
 

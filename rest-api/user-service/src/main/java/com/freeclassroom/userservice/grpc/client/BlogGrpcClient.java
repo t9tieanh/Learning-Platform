@@ -5,7 +5,6 @@ import com.example.grpc.course.CreateConversationAIResponse;
 import com.example.grpc.course.GetCourseAdminDataResponse;
 import com.example.grpc.course.TotalBlogResponse;
 import com.example.grpc.user.BlogServiceGrpc;
-import com.example.grpc.user.CourseServiceGrpc;
 import com.example.grpc.user.GetUserRequest;
 import com.google.protobuf.Empty;
 import net.devh.boot.grpc.client.inject.GrpcClient;

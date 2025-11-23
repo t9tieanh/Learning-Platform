@@ -9,6 +9,7 @@ import { useCartStore } from '@/stores/useCart.stores'
 import orderService from '@/services/sale/order.service'
 import { useAuthStore } from '@/stores/useAuth.stores'
 import { useNavigate } from 'react-router-dom'
+import formatPrice from '@/utils/common/formatPrice'
 
 const CoursePurchaseBox = ({
   originalPrice,
@@ -71,8 +72,8 @@ const CoursePurchaseBox = ({
             {/* Price Section */}
             <div className='text-center space-y-3'>
               <div className='flex items-center justify-center gap-3'>
-                <span className='text-3xl font-bold text-course-price text-blue-800'>₫{finalPrice}</span>
-                <span className='text-lg text-gray-400 line-through'>₫{originalPrice}</span>
+                <span className='text-3xl font-bold text-course-price text-blue-800'>₫{formatPrice(finalPrice)}</span>
+                <span className='text-lg text-gray-400 line-through'>₫{formatPrice(originalPrice)}</span>
               </div>
             </div>
 

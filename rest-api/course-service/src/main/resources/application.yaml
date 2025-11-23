@@ -74,3 +74,7 @@ grpc:
     sale-service:
       address: static://localhost:9093
       negotiation-type: plaintext
+
+    blog-service:
+      address: static://localhost:9092
+      negotiation-type: plaintext

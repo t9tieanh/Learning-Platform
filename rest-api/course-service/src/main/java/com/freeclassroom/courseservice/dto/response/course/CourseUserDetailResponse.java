@@ -1,5 +1,6 @@
 package com.freeclassroom.courseservice.dto.response.course;
 
+import com.freeclassroom.courseservice.dto.grpc.FeedbackDto;
 import com.freeclassroom.courseservice.dto.response.category.CategoryResponse;
 import com.freeclassroom.courseservice.dto.response.category.TagResponse;
 import com.freeclassroom.courseservice.dto.response.chapter.ChapterUserDto;
@@ -41,4 +42,6 @@ public class CourseUserDetailResponse {
 
     Set<String> outcomes;
     Set<String> requirements;
+
+    List<FeedbackDto> feedbacks;
 }

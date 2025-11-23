@@ -1,6 +1,7 @@
 import axiosClient from '@/lib/axiosClient.lib'
 import { ApiResponse } from '@/types/response.type'
 import { Order, OrderItem, OrderResponse } from '@/types/order.type'
+import { HistoryOrder } from '@/types/order-history'
 
 class OrderService {
   async createOrder(courseIds: string[]): Promise<
@@ -42,6 +43,11 @@ class OrderService {
 
   async getOrderInfo(orderId: string): Promise<ApiResponse<Order>> {
     const response = await axiosClient.axiosInstance.get(`/sale/orders/${orderId}/info`)
+    return response.data
+  }
+
+  async getOrderHistory(): Promise<ApiResponse<HistoryOrder[]>> {
+    const response = await axiosClient.axiosInstance.get('/sale/orders/history')
     return response.data
   }
 }

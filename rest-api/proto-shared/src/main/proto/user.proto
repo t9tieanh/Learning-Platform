@@ -48,3 +48,26 @@ message Teacher {
 message GetTeachersResponse {
   repeated Teacher teachers = 1;
 }
+
+message TeacherDetail {
+  string id = 1;
+  string name = 2;
+  string image = 3;
+  string phone = 4;
+  string description = 5;
+  string email = 6;
+  string username = 7;
+  AccountStatus status = 8;
+  repeated string roles = 9;
+
+  repeated Expertise expertises = 10;
+  repeated Certificate certificates = 11;
+}
+
+
+message Certificate {
+  string title = 2;
+  string organization = 3;
+  string imageUrl = 4;
+  string credentialUrl = 5;
+}

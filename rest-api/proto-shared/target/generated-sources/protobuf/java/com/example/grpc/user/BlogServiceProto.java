@@ -24,17 +24,20 @@ public final class BlogServiceProto {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\021blogService.proto\032\033google/protobuf/emp" +
-      "ty.proto\032\nblog.proto\032\nuser.proto\032\014course" +
-      ".proto2\240\002\n\013BlogService\022:\n\014getTotalBlog\022\026" +
-      ".google.protobuf.Empty\032\022.TotalBlogRespon" +
-      "se\022=\n\026getTotalInstructorBlog\022\017.GetUserRe" +
-      "quest\032\022.TotalBlogResponse\022A\n\022pushCourseS" +
-      "upabase\022\024.PushSupabaseRequest\032\025.PushSupa" +
-      "baseResponse\022S\n\024createConversationAI\022\034.C" +
-      "reateConversationAIRequest\032\035.CreateConve" +
-      "rsationAIResponseB+\n\025com.example.grpc.us" +
-      "erB\020BlogServiceProtoP\001b\006proto3"
+      "\n\021blogService.proto\022\004blog\032\033google/protob" +
+      "uf/empty.proto\032\nblog.proto\032\nuser.proto\032\014" +
+      "course.proto2\370\002\n\013BlogService\022:\n\014getTotal" +
+      "Blog\022\026.google.protobuf.Empty\032\022.TotalBlog" +
+      "Response\022=\n\026getTotalInstructorBlog\022\017.Get" +
+      "UserRequest\032\022.TotalBlogResponse\022A\n\022pushC" +
+      "ourseSupabase\022\024.PushSupabaseRequest\032\025.Pu" +
+      "shSupabaseResponse\022S\n\024createConversation" +
+      "AI\022\034.CreateConversationAIRequest\032\035.Creat" +
+      "eConversationAIResponse\022V\n\025getFeedbackBy" +
+      "CourseId\022\035.GetFeedbackByCourseIdRequest\032" +
+      "\036.GetFeedbackByCourseIdResponseB+\n\025com.e" +
+      "xample.grpc.userB\020BlogServiceProtoP\001b\006pr" +
+      "oto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
