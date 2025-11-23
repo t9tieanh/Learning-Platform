@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { User, BookOpen } from 'lucide-react'
+import { User, BookOpen, FileClock } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import PersonalInfo from '@/components/Profile/personal-info'
 import CourseStudied from '@/components/Profile/my-course'
+import OrderHistory from '@/components/Profile/orderHistory'
 
 const Profile = () => {
   const params = new URLSearchParams(location.search)
@@ -20,6 +21,12 @@ const Profile = () => {
       title: 'Khóa học đã học',
       icon: BookOpen,
       description: 'Lịch sử học tập'
+    },
+    {
+      id: 'order-history',
+      title: 'Lịch sử đơn hàng',
+      icon: FileClock,
+      description: 'Xem lịch sử đơn hàng của bạn'
     }
   ]
 
@@ -29,6 +36,8 @@ const Profile = () => {
         return <PersonalInfo />
       case 'courses':
         return <CourseStudied />
+      case 'order-history':
+        return <OrderHistory />
       default:
         return <PersonalInfo />
     }

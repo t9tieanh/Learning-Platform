@@ -2,7 +2,6 @@ import CourseCard from '@/components/Profile/course-cart'
 import {
   Pagination,
   PaginationContent,
-  PaginationEllipsis,
   PaginationItem,
   PaginationLink,
   PaginationNext,
@@ -54,7 +53,7 @@ const CourseList = () => {
   }
 
   return (
-    <div className='cart-section p-5 bg-white rounded-lg'>
+    <div className='cart-section pb-5 px-5 bg-white rounded-lg'>
       <div className='total-cart-item'>
         <p className='text-sm font-semibold mb-1 flex items-center'>
           Bạn đang sỡ hữu &nbsp;<span className='text-primary'>{courses.length || 0}</span>&nbsp; khóa học !
