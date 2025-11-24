@@ -38,7 +38,10 @@ public enum ErrorCode {
 
     UPLOAD_NOT_COMPLETED(12345, "Upload file thất bại !", HttpStatus.OK),
     FILE_NOT_FOUND(400, "Không tìm thấy file trong hệ thống !", HttpStatus.OK),
-    FILE_TYPE_INVALID(12346, "Loại file không hợp lệ !", HttpStatus.OK);
+    FILE_TYPE_INVALID(12346, "Loại file không hợp lệ !", HttpStatus.OK),
+
+    // admin
+    COURSE_NOT_DONE(1234561231, "Khóa học chưa được khởi tạo xong !", HttpStatus.OK);
     ;
 
     private final int code;

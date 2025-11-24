@@ -22,6 +22,7 @@ public class CourseResponse {
     String shortDescription;
     String longDescription;
     String thumbnailUrl;
+    String introductoryVideo;
     String language;
     Double originalPrice;
     Double finalPrice;

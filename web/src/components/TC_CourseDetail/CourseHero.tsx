@@ -1,7 +1,12 @@
 import { motion } from 'framer-motion'
-import { Play, Calendar, Edit, BarChart3 } from 'lucide-react'
+import { useState } from 'react'
+import { Play, Calendar, Edit, Check } from 'lucide-react'
+import { useLocation, useParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
+import CustomDialog from '@/components/common/Dialog'
 import { Badge } from '@/components/ui/badge'
+import courseAdminService from '@/services/course/course-admin.service'
+import { toast } from 'sonner'
 
 interface CourseHeroProps {
   title: string
@@ -11,6 +16,9 @@ interface CourseHeroProps {
   price?: number
   onPlayIntro: () => void
   onEdit: () => void
+  // onApprove handled internally via admin API
+  courseId?: string
+  introductoryVideo: string
 }
 
 enum EnumCourseStatus {
@@ -55,7 +63,25 @@ function getStatusLabel(status: string | EnumCourseStatus) {
   }
 }
 
-export function CourseHero({ title, coverImage, status, publishedAt, price, onPlayIntro, onEdit }: CourseHeroProps) {
+export function CourseHero({
+  introductoryVideo,
+  title,
+  coverImage,
+  status,
+  publishedAt,
+  price,
+  onPlayIntro,
+  onEdit,
+  courseId
+}: CourseHeroProps) {
+  const [openPreview, setOpenPreview] = useState(false)
+  const [openApproveModal, setOpenApproveModal] = useState(false)
+  const [approving, setApproving] = useState(false)
+  const [rejecting, setRejecting] = useState(false)
+  const [rejectReason, setRejectReason] = useState('')
+  const location = useLocation()
+  const isAdminRoute = location.pathname.startsWith('/admin/course')
+  const { id } = useParams<{ id: string }>()
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -86,10 +112,103 @@ export function CourseHero({ title, coverImage, status, publishedAt, price, onPl
           <h1 className='text-3xl font-bold tracking-tight lg:text-4xl xl:text-4xl text-white'>{title}</h1>
 
           <div className='flex gap-3 flex-wrap'>
-            <Button onClick={onEdit} size='lg' className='shadow-primary'>
-              <Edit className='mr-2 h-4 w-4' />
-              Chỉnh sửa
-            </Button>
+            {isAdminRoute ? (
+              <>
+                <Button
+                  onClick={() => setOpenApproveModal(true)}
+                  size='lg'
+                  className='shadow-primary bg-blue-600 text-white hover:bg-blue-700'
+                >
+                  <Check className='mr-2 h-4 w-4' />
+                  Duyệt khóa học
+                </Button>
+
+                <CustomDialog
+                  open={openApproveModal}
+                  setOpen={setOpenApproveModal}
+                  title={<span>Phê duyệt / Từ chối khoá học</span>}
+                  size='md'
+                >
+                  <div className='space-y-4'>
+                    <p className='text-sm text-muted-foreground'>
+                      Bạn có muốn phê duyệt khoá học này hay từ chối? Chọn hành động bên dưới.
+                    </p>
+                    <div className='flex flex-col gap-2'>
+                      <textarea
+                        placeholder='Nếu từ chối, ghi lý do ở đây (tùy chọn)'
+                        value={rejectReason}
+                        onChange={(e) => setRejectReason(e.target.value)}
+                        className='w-full min-h-[80px] p-2 border rounded-md text-sm'
+                      />
+                    </div>
+                    <div className='flex items-center justify-end gap-2'>
+                      <Button
+                        size='sm'
+                        className='bg-red-500 text-white hover:bg-red-600'
+                        onClick={async () => {
+                          if (!id) {
+                            toast.error('Missing course id')
+                            return
+                          }
+                          if (!rejectReason) {
+                            // require reason? we allow empty
+                          }
+                          setRejecting(true)
+                          try {
+                            const res = await courseAdminService.rejectCourse(id, rejectReason)
+                            if (res && res.code === 200) {
+                              toast.success('Từ chối khoá học thành công')
+                              setOpenApproveModal(false)
+                            } else {
+                              toast.error(res.message || 'Không thể từ chối khoá học')
+                            }
+                          } catch (err) {
+                            console.error(err)
+                            toast.error('Lỗi khi gọi API từ chối')
+                          } finally {
+                            setRejecting(false)
+                          }
+                        }}
+                      >
+                        {rejecting ? 'Đang...' : 'Từ chối'}
+                      </Button>
+                      <Button
+                        size='sm'
+                        className='bg-green-600 text-white hover:bg-green-700'
+                        onClick={async () => {
+                          if (!id) {
+                            toast.error('Missing course id')
+                            return
+                          }
+                          setApproving(true)
+                          try {
+                            const res = await courseAdminService.aprovalCourse(id)
+                            if (res && res.code === 200) {
+                              toast.success('Phê duyệt khoá học thành công')
+                              setOpenApproveModal(false)
+                            } else {
+                              toast.error(res.message || 'Không thể phê duyệt khoá học')
+                            }
+                          } catch (err) {
+                            console.error(err)
+                            toast.error('Lỗi khi gọi API phê duyệt')
+                          } finally {
+                            setApproving(false)
+                          }
+                        }}
+                      >
+                        {approving ? 'Đang...' : 'Phê duyệt'}
+                      </Button>
+                    </div>
+                  </div>
+                </CustomDialog>
+              </>
+            ) : (
+              <Button onClick={onEdit} size='lg' className='shadow-primary'>
+                <Edit className='mr-2 h-4 w-4' />
+                Chỉnh sửa
+              </Button>
+            )}
           </div>
         </div>
 
@@ -102,14 +221,51 @@ export function CourseHero({ title, coverImage, status, publishedAt, price, onPl
             <img src={coverImage} alt={title} className='h-full w-full object-cover' />
             <div className='absolute inset-0 bg-gradient-to-t from-black/60 to-transparent' />
 
-            <Button
-              onClick={onPlayIntro}
-              size='lg'
-              className='absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full h-16 w-16 p-0 shadow-lg group-hover:scale-110 transition-transform'
-              aria-label='Phát video giới thiệu'
-            >
-              <Play className='h-6 w-6 ml-1' />
-            </Button>
+            {introductoryVideo && (
+              <>
+                <Button
+                  onClick={() => {
+                    setOpenPreview(true)
+                    try {
+                      onPlayIntro()
+                    } catch (e) {
+                      // ignore
+                    }
+                  }}
+                  size='lg'
+                  className='absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full h-16 w-16 p-0 shadow-lg group-hover:scale-110 transition-transform'
+                  aria-label='Phát video giới thiệu'
+                >
+                  <Play className='h-6 w-6 ml-1' />
+                </Button>
+
+                <CustomDialog
+                  open={openPreview}
+                  setOpen={setOpenPreview}
+                  title={
+                    <>
+                      <Play className='w-4 h-4 mr-1' /> Giới thiệu khóa học
+                    </>
+                  }
+                  size='lg'
+                >
+                  {introductoryVideo ? (
+                    <div className='w-full'>
+                      <video
+                        src={`http://${introductoryVideo}`}
+                        controls
+                        autoPlay
+                        className='w-full h-[480px] rounded-md bg-black'
+                      >
+                        <track kind='captions' srcLang='en' label='English captions' src={`${introductoryVideo}.vtt`} />
+                      </video>
+                    </div>
+                  ) : (
+                    <div className='text-sm text-muted-foreground'>Không có video để xem trước</div>
+                  )}
+                </CustomDialog>
+              </>
+            )}
           </motion.div>
         </div>
       </div>

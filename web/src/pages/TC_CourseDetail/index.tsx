@@ -26,6 +26,7 @@ interface CourseResponseDTO {
   description?: string
   status: string
   price?: number
+  introductoryVideo?: string
   createdAt?: string
   tagNames?: string[]
   categories?: string[]
@@ -38,7 +39,7 @@ interface CourseResponseDTO {
       title: string
       type?: string
       duration?: string
-      videoUrl?: string
+      url?: string
     }>
   }>
   reviews?: Array<{
@@ -119,6 +120,7 @@ export default function CourseDetailPage() {
           createdAt: data.createdAt,
           tagNames: data.tagNames || data.tags || [],
           categories: data.categories || (data.category ? [data.category] : []),
+          introductoryVideo: data.introductoryVideo || data.videoIntro || '',
           learningOutcomes: data.outcomes || [],
           requirements: data.requirements || [],
           chapters: (data.chapters || []).map((s: any, idx: number) => ({
@@ -130,7 +132,7 @@ export default function CourseDetailPage() {
               title: l.title || l.name || `Bài học ${lidx + 1}`,
               type: (l.type || 'video').toLowerCase(),
               duration: l.duration || '0:00',
-              videoUrl: l.videoUrl || l.video || undefined
+              url: l.url || l.url || undefined
             }))
           })),
           reviews: (data.reviews || []).map((r: any, ridx: number) => ({
@@ -197,6 +199,7 @@ export default function CourseDetailPage() {
               <CourseHero
                 title={course.title}
                 coverImage={course.thumbnailUrl || '/placeholder.png'}
+                introductoryVideo={course?.introductoryVideo || ''}
                 status={course.status.toLowerCase()}
                 publishedAt={course.publishedAt || course.createdAt || new Date().toISOString()}
                 price={course.price}
@@ -227,7 +230,7 @@ export default function CourseDetailPage() {
                     title: l.title,
                     type: (l.type as any) || 'video',
                     duration: l.duration || '0:00',
-                    videoUrl: l.videoUrl
+                    videoUrl: l.url || undefined
                   }))
                 }))}
                 courseId={course.id}

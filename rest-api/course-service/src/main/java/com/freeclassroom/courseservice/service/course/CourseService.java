@@ -235,7 +235,7 @@ public class CourseService implements ICourseService {
                 chapterDTO.setLessons(
                         chapter.getLessons()
                                 .stream()
-                                .map(lessonMapper::toResponse)
+                                .map(lessonMapper::toTeacherAdminResponse)
                                 .collect(Collectors.toList())
                 );
             });

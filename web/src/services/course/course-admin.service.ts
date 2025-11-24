@@ -52,6 +52,29 @@ class CourseAdminService {
 
     return response.data
   }
+
+  async aprovalCourse(courseId: string): Promise<
+    ApiResponse<{
+      id: string
+    }>
+  > {
+    const response = await axiosClient.axiosInstance.post(`learning/admin/courses/${courseId}/approve`)
+    return response.data
+  }
+
+  async rejectCourse(
+    courseId: string,
+    reason: string
+  ): Promise<
+    ApiResponse<{
+      id: string
+    }>
+  > {
+    const response = await axiosClient.axiosInstance.post(`learning/admin/courses/${courseId}/reject`, {
+      reason
+    })
+    return response.data
+  }
 }
 
 export default new CourseAdminService()
