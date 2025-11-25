@@ -17,7 +17,8 @@ const menuItems = [
   { title: 'Khóa học', url: '/admin/courses', icon: BookOpen },
   { title: 'Giảng viên', url: '/admin/instructors', icon: Users },
   { title: 'Chứng chỉ', url: '/admin/certificates', icon: Award },
-  { title: 'Blog', url: '/admin/blogs', icon: FileText }
+  { title: 'Blog', url: '/admin/blogs', icon: FileText },
+  { title: 'Mã giảm giá', url: '/admin/discounts', icon: FileText }
 ]
 
 export function AdminSidebar() {

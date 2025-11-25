@@ -37,6 +37,7 @@ import AD_Certificates from './pages/AD_Certificates'
 import AD_Blogs from './pages/AD_Blogs'
 import Home2 from './pages/Home2'
 import { SocketProvider } from '@/api/socket/socket.context'
+import DiscountsAdmin from './pages/AD_Discounts'
 
 const router = createBrowserRouter([
   {
@@ -94,6 +95,7 @@ const router = createBrowserRouter([
           { path: 'course/:id', element: <AD_CourseDetails /> },
           { path: 'instructors', element: <AD_Instructor /> },
           { path: 'certificates', element: <AD_Certificates /> },
+          { path: 'discounts', element: <DiscountsAdmin /> },
           { path: 'blogs', element: <AD_Blogs /> }
         ]
       },
