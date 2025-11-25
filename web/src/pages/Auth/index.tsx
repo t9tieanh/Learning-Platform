@@ -61,7 +61,25 @@ const AuthPage: React.FC<SlidingLoginSignupProps> = ({ isSignUpMode, setIsSignUp
     }
   }, [code])
 
-  // ✅ Đã escape các class gây warning
+  //handle login with google
+  const handleLoginWithGoogle = () => {
+    try {
+      const authUri = import.meta.env.VITE_GOOGLE_AUTH_URI as string
+      const callbackUri = import.meta.env.VITE_GOOGLE_REDIRECT_URI as string
+      const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID as string
+
+      const targetUrl = `${authUri}?redirect_uri=${encodeURIComponent(
+        callbackUri
+      )}&response_type=code&client_id=${googleClientId}&scope=openid%20email%20profile`
+
+      window.location.href = targetUrl
+    } catch (error: any) {
+      console.log(error)
+      toast.error('Đã có lỗi trong quá trình xử lý !')
+    }
+  }
+
+  //Đã escape các class gây warning
   const containerBase =
     'absolute grid grid-cols-1 z-[5] left-1/2 w-full lg:w-1/2 top-[95%] lg:top-1/2 -translate-x-1/2 -translate-y-full lg:-translate-y-1/2 transition-[1s] duration-\\[1.6s\\] lg:duration-\\[1.4s\\] ease-\\[ease-in-out\\] max-lg:static max-lg:flex max-lg:items-center max-lg:justify-center max-lg:h-full max-lg:translate-x-0 max-lg:translate-y-0'
 
@@ -76,10 +94,10 @@ const AuthPage: React.FC<SlidingLoginSignupProps> = ({ isSignUpMode, setIsSignUp
   return (
     <div className={`${containerBase} ${containerMode}`}>
       <div style={{ transition: 'all 1500ms ease-in-out' }} className={`${formBase} ${signInMode}`}>
-        <SignInForm />
+        <SignInForm handleLoginWithGoogle={handleLoginWithGoogle} />
       </div>
       <div style={{ transition: 'all 1500ms ease-in-out' }} className={`${formBase} ${signUpMode}`}>
-        <SignUpForm setIsSignUpMode={setIsSignUpMode} />
+        <SignUpForm setIsSignUpMode={setIsSignUpMode} handleLoginWithGoogle={handleLoginWithGoogle} />
       </div>
     </div>
   )

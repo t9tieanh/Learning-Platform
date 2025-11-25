@@ -14,7 +14,10 @@ import { toast } from 'sonner'
 import { SignUpFormInputs, signUpSchema } from '@/utils/auth'
 import useLoading from '@/hooks/useLoading.hook'
 
-const SignUpForm: FC<{ setIsSignUpMode: (value: boolean) => void }> = ({ setIsSignUpMode }) => {
+const SignUpForm: FC<{ setIsSignUpMode: (value: boolean) => void; handleLoginWithGoogle: () => void }> = ({
+  setIsSignUpMode,
+  handleLoginWithGoogle
+}) => {
   const {
     register,
     handleSubmit,
@@ -106,7 +109,11 @@ const SignUpForm: FC<{ setIsSignUpMode: (value: boolean) => void }> = ({ setIsSi
               </div>
               {/* login with other providers */}
               <div className='mt-5 flex items-center justify-center gap-3 w-full'>
-                <CustomButton icon={<FcGoogle />} className='bg-inherit w-1/2 border-2 border-solid hover:bg-red-600' />
+                <CustomButton
+                  icon={<FcGoogle />}
+                  className='bg-inherit w-1/2 border-2 border-solid hover:bg-red-600'
+                  onClick={handleLoginWithGoogle}
+                />
                 <CustomButton
                   icon={<FaSquareFacebook className='text-white' />}
                   className='bg-blue-600 w-1/2 border-2 border-solid hover:bg-blue-700'

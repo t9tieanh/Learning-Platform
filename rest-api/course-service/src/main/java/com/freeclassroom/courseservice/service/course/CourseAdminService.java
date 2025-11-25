@@ -67,8 +67,7 @@ public class CourseAdminService implements ICourseAdminService {
         );
 
         // check status
-        if (!(course.getProgressStep().equals(EnumCourseProgressStep.COMPLETED))
-                || !(course.getStatus().equals(EnumCourseStatus.REJECTED)) ) {
+        if (!(course.getProgressStep().equals(EnumCourseProgressStep.COMPLETED))) {
             throw new CustomExeption(ErrorCode.COURSE_NOT_DONE);
         }
 

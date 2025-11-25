@@ -205,6 +205,7 @@ export default function CourseDetailPage() {
                 price={course.price}
                 onPlayIntro={handlePlayIntro}
                 onEdit={handleEdit}
+                courseStatus={course.status.toLowerCase()}
               />
 
               <CourseSummary

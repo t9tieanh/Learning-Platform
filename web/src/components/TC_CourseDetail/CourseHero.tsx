@@ -7,6 +7,7 @@ import CustomDialog from '@/components/common/Dialog'
 import { Badge } from '@/components/ui/badge'
 import courseAdminService from '@/services/course/course-admin.service'
 import { toast } from 'sonner'
+import { AiFillDislike } from "react-icons/ai";
 
 interface CourseHeroProps {
   title: string
@@ -14,6 +15,7 @@ interface CourseHeroProps {
   status: string
   publishedAt: string
   price?: number
+  courseStatus: string
   onPlayIntro: () => void
   onEdit: () => void
   // onApprove handled internally via admin API
@@ -67,6 +69,7 @@ export function CourseHero({
   introductoryVideo,
   title,
   coverImage,
+  courseStatus,
   status,
   publishedAt,
   price,
@@ -120,7 +123,7 @@ export function CourseHero({
                   className='shadow-primary bg-blue-600 text-white hover:bg-blue-700'
                 >
                   <Check className='mr-2 h-4 w-4' />
-                  Duyệt khóa học
+                  {courseStatus === 'published' ? 'Từ chối' : 'Phê duyệt'}
                 </Button>
 
                 <CustomDialog
@@ -170,11 +173,11 @@ export function CourseHero({
                           }
                         }}
                       >
-                        {rejecting ? 'Đang...' : 'Từ chối'}
+                        <AiFillDislike /> {rejecting ? 'Đang...' : 'Từ chối'}
                       </Button>
                       <Button
                         size='sm'
-                        className='bg-green-600 text-white hover:bg-green-700'
+                        className='bg-blue-600 text-white hover:bg-green-700'
                         onClick={async () => {
                           if (!id) {
                             toast.error('Missing course id')
@@ -197,7 +200,7 @@ export function CourseHero({
                           }
                         }}
                       >
-                        {approving ? 'Đang...' : 'Phê duyệt'}
+                        <Check /> {approving ? 'Đang...' : 'Phê duyệt'}
                       </Button>
                     </div>
                   </div>
