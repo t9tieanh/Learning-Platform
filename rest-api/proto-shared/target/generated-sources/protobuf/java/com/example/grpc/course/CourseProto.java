@@ -66,6 +66,16 @@ public final class CourseProto {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_MonthlyChartData_fieldAccessorTable;
   static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_PushSupabaseRequest_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_PushSupabaseRequest_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_PushSupabaseResponse_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_PushSupabaseResponse_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
     internal_static_HasPurchasedCourseRequest_descriptor;
   static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
@@ -125,17 +135,20 @@ public final class CourseProto {
       "aResponse\022\014\n\004year\030\001 \001(\t\022&\n\013monthlyData\030\002" +
       " \003(\0132\021.MonthlyChartData\"X\n\020MonthlyChartD" +
       "ata\022\r\n\005month\030\001 \001(\003\022\017\n\007revenue\030\002 \001(\001\022\016\n\006p" +
-      "rofit\030\003 \001(\001\022\024\n\014studentCount\030\004 \001(\003\"=\n\031Has" +
-      "PurchasedCourseRequest\022\020\n\010courseId\030\001 \001(\t" +
-      "\022\016\n\006userId\030\002 \001(\t\"2\n\032HasPurchasedCourseRe" +
-      "sponse\022\024\n\014hasPurchased\030\001 \001(\010\"=\n\031UpdateCo" +
-      "urseRatingRequest\022\020\n\010courseId\030\001 \001(\t\022\016\n\006r" +
-      "ating\030\002 \001(\001\".\n\032UpdateCourseRatingRespons" +
-      "e\022\020\n\010isSucces\030\001 \001(\010\"7\n\023IsInstructorReque" +
-      "st\022\016\n\006userId\030\001 \001(\t\022\020\n\010courseId\030\002 \001(\t\",\n\024" +
-      "IsInstructorResponse\022\024\n\014isInstructor\030\001 \001" +
-      "(\010B(\n\027com.example.grpc.courseB\013CoursePro" +
-      "toP\001b\006proto3"
+      "rofit\030\003 \001(\001\022\024\n\014studentCount\030\004 \001(\003\"`\n\023Pus" +
+      "hSupabaseRequest\022\n\n\002id\030\001 \001(\t\022\014\n\004name\030\002 \001" +
+      "(\t\022\023\n\013description\030\003 \001(\t\022\014\n\004tags\030\004 \003(\t\022\014\n" +
+      "\004link\030\005 \001(\t\")\n\024PushSupabaseResponse\022\021\n\ti" +
+      "sSuccess\030\001 \001(\010\"=\n\031HasPurchasedCourseRequ" +
+      "est\022\020\n\010courseId\030\001 \001(\t\022\016\n\006userId\030\002 \001(\t\"2\n" +
+      "\032HasPurchasedCourseResponse\022\024\n\014hasPurcha" +
+      "sed\030\001 \001(\010\"=\n\031UpdateCourseRatingRequest\022\020" +
+      "\n\010courseId\030\001 \001(\t\022\016\n\006rating\030\002 \001(\001\".\n\032Upda" +
+      "teCourseRatingResponse\022\020\n\010isSucces\030\001 \001(\010" +
+      "\"7\n\023IsInstructorRequest\022\016\n\006userId\030\001 \001(\t\022" +
+      "\020\n\010courseId\030\002 \001(\t\",\n\024IsInstructorRespons" +
+      "e\022\024\n\014isInstructor\030\001 \001(\010B(\n\027com.example.g" +
+      "rpc.courseB\013CourseProtoP\001b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -202,38 +215,50 @@ public final class CourseProto {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_MonthlyChartData_descriptor,
         new java.lang.String[] { "Month", "Revenue", "Profit", "StudentCount", });
-    internal_static_HasPurchasedCourseRequest_descriptor =
+    internal_static_PushSupabaseRequest_descriptor =
       getDescriptor().getMessageTypes().get(10);
+    internal_static_PushSupabaseRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_PushSupabaseRequest_descriptor,
+        new java.lang.String[] { "Id", "Name", "Description", "Tags", "Link", });
+    internal_static_PushSupabaseResponse_descriptor =
+      getDescriptor().getMessageTypes().get(11);
+    internal_static_PushSupabaseResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_PushSupabaseResponse_descriptor,
+        new java.lang.String[] { "IsSuccess", });
+    internal_static_HasPurchasedCourseRequest_descriptor =
+      getDescriptor().getMessageTypes().get(12);
     internal_static_HasPurchasedCourseRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_HasPurchasedCourseRequest_descriptor,
         new java.lang.String[] { "CourseId", "UserId", });
     internal_static_HasPurchasedCourseResponse_descriptor =
-      getDescriptor().getMessageTypes().get(11);
+      getDescriptor().getMessageTypes().get(13);
     internal_static_HasPurchasedCourseResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_HasPurchasedCourseResponse_descriptor,
         new java.lang.String[] { "HasPurchased", });
     internal_static_UpdateCourseRatingRequest_descriptor =
-      getDescriptor().getMessageTypes().get(12);
+      getDescriptor().getMessageTypes().get(14);
     internal_static_UpdateCourseRatingRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_UpdateCourseRatingRequest_descriptor,
         new java.lang.String[] { "CourseId", "Rating", });
     internal_static_UpdateCourseRatingResponse_descriptor =
-      getDescriptor().getMessageTypes().get(13);
+      getDescriptor().getMessageTypes().get(15);
     internal_static_UpdateCourseRatingResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_UpdateCourseRatingResponse_descriptor,
         new java.lang.String[] { "IsSucces", });
     internal_static_IsInstructorRequest_descriptor =
-      getDescriptor().getMessageTypes().get(14);
+      getDescriptor().getMessageTypes().get(16);
     internal_static_IsInstructorRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_IsInstructorRequest_descriptor,
         new java.lang.String[] { "UserId", "CourseId", });
     internal_static_IsInstructorResponse_descriptor =
-      getDescriptor().getMessageTypes().get(15);
+      getDescriptor().getMessageTypes().get(17);
     internal_static_IsInstructorResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_IsInstructorResponse_descriptor,

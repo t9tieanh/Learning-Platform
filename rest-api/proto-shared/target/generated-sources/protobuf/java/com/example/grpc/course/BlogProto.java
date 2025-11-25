@@ -21,6 +21,16 @@ public final class BlogProto {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_TotalBlogResponse_fieldAccessorTable;
   static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_CreateConversationAIRequest_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_CreateConversationAIRequest_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_CreateConversationAIResponse_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_CreateConversationAIResponse_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
     internal_static_GetFeedbackByCourseIdRequest_descriptor;
   static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
@@ -45,14 +55,17 @@ public final class BlogProto {
   static {
     java.lang.String[] descriptorData = {
       "\n\nblog.proto\"\"\n\021TotalBlogResponse\022\r\n\005tot" +
-      "al\030\001 \001(\003\"0\n\034GetFeedbackByCourseIdRequest" +
-      "\022\020\n\010courseId\030\001 \001(\t\"=\n\035GetFeedbackByCours" +
-      "eIdResponse\022\034\n\tfeedbacks\030\001 \003(\0132\t.Feedbac" +
-      "k\"\177\n\010Feedback\022\n\n\002id\030\001 \001(\t\022\016\n\006userId\030\002 \001(" +
-      "\t\022\020\n\010courseId\030\003 \001(\t\022\016\n\006rating\030\004 \001(\005\022\017\n\007m" +
-      "essage\030\005 \001(\t\022\020\n\010userName\030\010 \001(\t\022\022\n\nuserAv" +
-      "atar\030\t \001(\tB&\n\027com.example.grpc.courseB\tB" +
-      "logProtoP\001b\006proto3"
+      "al\030\001 \001(\003\"-\n\033CreateConversationAIRequest\022" +
+      "\016\n\006userId\030\001 \001(\t\"I\n\034CreateConversationAIR" +
+      "esponse\022\021\n\tisSuccess\030\001 \001(\010\022\026\n\016conversati" +
+      "onId\030\002 \001(\t\"0\n\034GetFeedbackByCourseIdReque" +
+      "st\022\020\n\010courseId\030\001 \001(\t\"=\n\035GetFeedbackByCou" +
+      "rseIdResponse\022\034\n\tfeedbacks\030\001 \003(\0132\t.Feedb" +
+      "ack\"\177\n\010Feedback\022\n\n\002id\030\001 \001(\t\022\016\n\006userId\030\002 " +
+      "\001(\t\022\020\n\010courseId\030\003 \001(\t\022\016\n\006rating\030\004 \001(\005\022\017\n" +
+      "\007message\030\005 \001(\t\022\020\n\010userName\030\010 \001(\t\022\022\n\nuser" +
+      "Avatar\030\t \001(\tB&\n\027com.example.grpc.courseB" +
+      "\tBlogProtoP\001b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -64,20 +77,32 @@ public final class BlogProto {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_TotalBlogResponse_descriptor,
         new java.lang.String[] { "Total", });
-    internal_static_GetFeedbackByCourseIdRequest_descriptor =
+    internal_static_CreateConversationAIRequest_descriptor =
       getDescriptor().getMessageTypes().get(1);
+    internal_static_CreateConversationAIRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_CreateConversationAIRequest_descriptor,
+        new java.lang.String[] { "UserId", });
+    internal_static_CreateConversationAIResponse_descriptor =
+      getDescriptor().getMessageTypes().get(2);
+    internal_static_CreateConversationAIResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_CreateConversationAIResponse_descriptor,
+        new java.lang.String[] { "IsSuccess", "ConversationId", });
+    internal_static_GetFeedbackByCourseIdRequest_descriptor =
+      getDescriptor().getMessageTypes().get(3);
     internal_static_GetFeedbackByCourseIdRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_GetFeedbackByCourseIdRequest_descriptor,
         new java.lang.String[] { "CourseId", });
     internal_static_GetFeedbackByCourseIdResponse_descriptor =
-      getDescriptor().getMessageTypes().get(2);
+      getDescriptor().getMessageTypes().get(4);
     internal_static_GetFeedbackByCourseIdResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_GetFeedbackByCourseIdResponse_descriptor,
         new java.lang.String[] { "Feedbacks", });
     internal_static_Feedback_descriptor =
-      getDescriptor().getMessageTypes().get(3);
+      getDescriptor().getMessageTypes().get(5);
     internal_static_Feedback_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_Feedback_descriptor,

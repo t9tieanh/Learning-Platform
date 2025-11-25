@@ -30,30 +30,30 @@ const TC_Blog: React.FC = () => {
 
   useEffect(() => {
     let mounted = true
-    ;(async () => {
-      try {
-        setLoading(true)
-        setError(null)
-        const res = await blogService.getAllByInstructorId({ page, limit: size, search, instructorId: myId })
-        if (!mounted) return
-        const mapped: Blog[] = (res.items || []).map((b: BlogItem) => ({
-          _id: b._id,
-          instructor_id: b.instructor_id,
-          title: b.title,
-          image_url: b.image_url,
-          content: b.content,
-          markdown_file_url: b.markdown_file_url,
-          created_at: b.createdAt
-        }))
-        setBlogs(mapped)
-        setTotalPages(res.totalPages || 1)
-      } catch (e) {
-        console.error(e)
-        if (mounted) setError('Không thể tải danh sách bài viết')
-      } finally {
-        if (mounted) setLoading(false)
-      }
-    })()
+      ; (async () => {
+        try {
+          setLoading(true)
+          setError(null)
+          const res = await blogService.getAllByInstructorId({ page, limit: size, search, instructorId: myId })
+          if (!mounted) return
+          const mapped: Blog[] = (res.items || []).map((b: BlogItem) => ({
+            _id: b._id,
+            instructor_id: b.instructor_id,
+            title: b.title,
+            image_url: b.image_url,
+            content: b.content,
+            markdown_file_url: b.markdown_file_url,
+            created_at: b.createdAt
+          }))
+          setBlogs(mapped)
+          setTotalPages(res.totalPages || 1)
+        } catch (e) {
+          console.error(e)
+          if (mounted) setError('Không thể tải danh sách bài viết')
+        } finally {
+          if (mounted) setLoading(false)
+        }
+      })()
     return () => {
       mounted = false
     }

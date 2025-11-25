@@ -65,6 +65,18 @@ message MonthlyChartData {
   int64 studentCount = 4;
 }
 
+message PushSupabaseRequest {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  repeated string tags = 4;
+  string link = 5;
+}
+
+message PushSupabaseResponse {
+  bool isSuccess = 1;
+}
+
 message HasPurchasedCourseRequest {
   string courseId = 1;
   string userId = 2;

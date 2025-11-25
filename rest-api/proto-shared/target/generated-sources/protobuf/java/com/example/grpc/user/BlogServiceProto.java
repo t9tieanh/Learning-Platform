@@ -25,14 +25,19 @@ public final class BlogServiceProto {
   static {
     java.lang.String[] descriptorData = {
       "\n\021blogService.proto\022\004blog\032\033google/protob" +
-      "uf/empty.proto\032\nblog.proto\032\nuser.proto2\340" +
-      "\001\n\013BlogService\022:\n\014getTotalBlog\022\026.google." +
-      "protobuf.Empty\032\022.TotalBlogResponse\022=\n\026ge" +
-      "tTotalInstructorBlog\022\017.GetUserRequest\032\022." +
-      "TotalBlogResponse\022V\n\025getFeedbackByCourse" +
-      "Id\022\035.GetFeedbackByCourseIdRequest\032\036.GetF" +
-      "eedbackByCourseIdResponseB+\n\025com.example" +
-      ".grpc.userB\020BlogServiceProtoP\001b\006proto3"
+      "uf/empty.proto\032\nblog.proto\032\nuser.proto\032\014" +
+      "course.proto2\370\002\n\013BlogService\022:\n\014getTotal" +
+      "Blog\022\026.google.protobuf.Empty\032\022.TotalBlog" +
+      "Response\022=\n\026getTotalInstructorBlog\022\017.Get" +
+      "UserRequest\032\022.TotalBlogResponse\022A\n\022pushC" +
+      "ourseSupabase\022\024.PushSupabaseRequest\032\025.Pu" +
+      "shSupabaseResponse\022S\n\024createConversation" +
+      "AI\022\034.CreateConversationAIRequest\032\035.Creat" +
+      "eConversationAIResponse\022V\n\025getFeedbackBy" +
+      "CourseId\022\035.GetFeedbackByCourseIdRequest\032" +
+      "\036.GetFeedbackByCourseIdResponseB+\n\025com.e" +
+      "xample.grpc.userB\020BlogServiceProtoP\001b\006pr" +
+      "oto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -40,10 +45,12 @@ public final class BlogServiceProto {
           com.google.protobuf.EmptyProto.getDescriptor(),
           com.example.grpc.course.BlogProto.getDescriptor(),
           com.example.grpc.user.UserProto.getDescriptor(),
+          com.example.grpc.course.CourseProto.getDescriptor(),
         });
     com.google.protobuf.EmptyProto.getDescriptor();
     com.example.grpc.course.BlogProto.getDescriptor();
     com.example.grpc.user.UserProto.getDescriptor();
+    com.example.grpc.course.CourseProto.getDescriptor();
   }
 
   // @@protoc_insertion_point(outer_class_scope)

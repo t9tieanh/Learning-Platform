@@ -8,6 +8,14 @@ message TotalBlogResponse {
   int64 total = 1;
 }
 
+message CreateConversationAIRequest {
+  string userId = 1;
+}
+
+message CreateConversationAIResponse {
+  bool isSuccess = 1;
+  string conversationId = 2;
+}
 // Request message used by getFeedbackByCourseId
 message GetFeedbackByCourseIdRequest {
   string courseId = 1;

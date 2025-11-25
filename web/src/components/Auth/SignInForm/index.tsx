@@ -11,6 +11,7 @@ import { SignInFormInputs, signInSchema } from '@/utils/auth'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import userService from '@/services/user/user.service'
+import aiChatService from '@/services/aiChat.service'
 import { toast } from 'sonner'
 import useLoading from '@/hooks/useLoading.hook'
 import { useAuthStore } from '@/stores/useAuth.stores'
@@ -28,7 +29,7 @@ const SignInForm = ({ handleLoginWithGoogle }: { handleLoginWithGoogle: () => vo
   const navigate = useNavigate()
 
   // Get state and actions
-  const { data, setData } = useAuthStore()
+  const { data, setData, setConversationId } = useAuthStore()
 
   const { loading, startLoading, stopLoading } = useLoading()
 
@@ -38,8 +39,28 @@ const SignInForm = ({ handleLoginWithGoogle }: { handleLoginWithGoogle: () => vo
       startLoading()
       const response = await userService.login(data.username, data.password)
       if (response && response.result && response.code === 200) {
-        // save to localstorage
-        setData(response.result)
+        const r: any = response.result
+        const userId = r.userId || r.id || r._id || ''
+        setData({
+          accessToken: r.accessToken,
+          refreshToken: r.refreshToken,
+          userId,
+          name: r.name || r.userName || r.username,
+          username: r.username || r.userName,
+          email: r.email,
+          avatarUrl: r.avatarUrl
+        })
+        console.log('USERID', userId)
+        // create/fetch AI conversation
+        if (userId) {
+          console.log('Co vo')
+          try {
+            const convRes = await aiChatService.createConversation(userId)
+            if (convRes?.conversationId) setConversationId(convRes.conversationId)
+          } catch (e) {
+            console.warn('Cannot init AI conversation', e)
+          }
+        }
         toast.success('Đăng nhập thành công!')
         if (response.result.role === 'admin') {
           console.log('ADMIN')
@@ -52,6 +73,8 @@ const SignInForm = ({ handleLoginWithGoogle }: { handleLoginWithGoogle: () => vo
       toast.error('Đã có lỗi trong quá trình xử lý !')
     } finally {
       stopLoading()
+
+      // Fetch conversation
     }
   }
 
