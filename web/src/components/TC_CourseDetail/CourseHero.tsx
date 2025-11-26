@@ -7,7 +7,7 @@ import CustomDialog from '@/components/common/Dialog'
 import { Badge } from '@/components/ui/badge'
 import courseAdminService from '@/services/course/course-admin.service'
 import { toast } from 'sonner'
-import { AiFillDislike } from "react-icons/ai";
+import { AiFillDislike } from 'react-icons/ai'
 
 interface CourseHeroProps {
   title: string

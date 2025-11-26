@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { FcGoogle } from 'react-icons/fc'
 import CustomCheckbox from '../../common/CustomCheckbox'
 import { FaSquareFacebook } from 'react-icons/fa6'
-import { BookOpen } from 'lucide-react'
+import { BookOpen, Send } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import userService from '@/services/user/user.service'
@@ -78,7 +78,7 @@ const SignUpForm: FC<{ setIsSignUpMode: (value: boolean) => void; handleLoginWit
                   <span className='text-red-500 text-xs text-left'>{errors.confirmPassword.message}</span>
                 )}
               </div>
-              <div className='remember-me mt-5'>
+              <div className='remember-me mt-5 flex flex-col gap-2'>
                 <CustomCheckbox
                   id='agree'
                   label='Tôi đồng ý với điều khoản'
@@ -87,7 +87,7 @@ const SignUpForm: FC<{ setIsSignUpMode: (value: boolean) => void; handleLoginWit
                   className='text-gray-700'
                 />
                 {errors.confirmRules && (
-                  <span className='text-red-500 text-xs text-left'>{errors.confirmRules.message}</span>
+                  <span className='text-red-500 text-xs text-start'>{errors.confirmRules.message}</span>
                 )}
               </div>
               <div className='signin-button w-full mt-5'>
@@ -95,7 +95,8 @@ const SignUpForm: FC<{ setIsSignUpMode: (value: boolean) => void; handleLoginWit
                   isLoader={loading}
                   label='Tạo tài khoản'
                   type='submit'
-                  className='w-full rounded-md border border-gray-300 bg-blue-500 py-3 text-white hover:bg-blue-600'
+                  className='w-full shadow-lg rounded-md border border-gray-300 bg-blue-500 py-3 text-white hover:bg-blue-600'
+                  icon={<Send size={16} />}
                 />
               </div>
               {/* Divider */}

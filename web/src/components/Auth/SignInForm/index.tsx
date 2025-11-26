@@ -17,6 +17,7 @@ import useLoading from '@/hooks/useLoading.hook'
 import { useAuthStore } from '@/stores/useAuth.stores'
 import { useNavigate } from 'react-router-dom'
 import logo from '@/assets/images/logo1.png'
+import { LogIn } from 'lucide-react'
 
 const SignInForm = ({ handleLoginWithGoogle }: { handleLoginWithGoogle: () => void }) => {
   const {
@@ -113,7 +114,8 @@ const SignInForm = ({ handleLoginWithGoogle }: { handleLoginWithGoogle: () => vo
                   label='Đăng nhập'
                   isLoader={loading}
                   type='submit'
-                  className='w-full rounded-md border border-gray-300 bg-blue-500 py-3 text-white hover:bg-blue-600'
+                  icon={<LogIn size={16} />}
+                  className='w-full rounded-md shadow-lg border border-gray-300 bg-blue-500 py-3 text-white hover:bg-blue-600'
                 />
               </div>
             </form>

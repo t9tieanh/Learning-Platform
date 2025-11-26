@@ -20,20 +20,20 @@ const BlogSearchBar: FC<BlogSearchBarProps> = ({ onSearch, hideCreateButton }) =
 
   useEffect(() => {
     let mounted = true
-      ; (async () => {
-        if (!instructorId) return
-        try {
-          setLoading(true)
-          const res = await courseUserService.countInstructorCourseValid({ instructorId })
-          // expect res.result to have count or direct numeric value
-          const count = typeof res?.result === 'number' ? res.result : res?.result?.count ?? 0
-          if (mounted) setCourseCount(count)
-        } catch (e) {
-          if (mounted) setCourseCount(0)
-        } finally {
-          if (mounted) setLoading(false)
-        }
-      })()
+    ;(async () => {
+      if (!instructorId) return
+      try {
+        setLoading(true)
+        const res = await courseUserService.countInstructorCourseValid({ instructorId })
+        // expect res.result to have count or direct numeric value
+        const count = typeof res?.result === 'number' ? res.result : res?.result?.count ?? 0
+        if (mounted) setCourseCount(count)
+      } catch (e) {
+        if (mounted) setCourseCount(0)
+      } finally {
+        if (mounted) setLoading(false)
+      }
+    })()
     return () => {
       mounted = false
     }
@@ -56,8 +56,9 @@ const BlogSearchBar: FC<BlogSearchBarProps> = ({ onSearch, hideCreateButton }) =
       {!hideCreateButton && (
         <div className='relative group'>
           <CustomButton
-            className={`bg-gradient-to-r from-indigo-500 to-blue-500 text-white px-6 py-2.5 rounded-xl shadow-md transition ${!canCreate ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-lg hover:scale-105'
-              }`}
+            className={`bg-gradient-to-r from-indigo-500 to-blue-500 text-white px-6 py-2.5 rounded-xl shadow-md transition ${
+              !canCreate ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-lg hover:scale-105'
+            }`}
             label={loading ? 'Đang kiểm tra...' : 'Tạo bài viết mới'}
             icon={<IoAddCircle className='h-6 w-6 mr-2' />}
             onClick={() => {

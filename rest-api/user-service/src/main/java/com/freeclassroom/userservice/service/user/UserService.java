@@ -7,6 +7,7 @@ import com.freeclassroom.userservice.dto.request.user.CreationUserRequest;
 import com.freeclassroom.userservice.dto.request.user.UpdateUserRequest;
 import com.freeclassroom.userservice.dto.response.ApiResponse;
 import com.freeclassroom.userservice.dto.response.admin.DataAdminHome;
+import com.freeclassroom.userservice.dto.response.auth.CheckForgotPasswordResponse;
 import com.freeclassroom.userservice.dto.response.user.GetUserResponse;
 import com.freeclassroom.userservice.dto.response.user.MyProfileResponse;
 import com.freeclassroom.userservice.dto.response.user.UserResponse;
@@ -31,13 +32,16 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -54,6 +58,8 @@ public class UserService implements IUserService {
     // template rabbitmq
     RabbitTemplate rabbitTemplate;
     RabbitMQConfig rabbitMQConfig;
+
+    RedisOperations<String, OTPForgetPassword> redisOps;
 
     //password encoder
     PasswordEncoder passwordEncoder;
@@ -131,7 +137,7 @@ public class UserService implements IUserService {
 
         return ApiResponse.<UserResponse>builder()
                 .code(200)
-                .message("Xác thực thành công, chào mứng bạn đến với Learning Platform!")
+                .message("Xác thực thành công, chào mứng bạn đến với Learnova!")
                 .result(response)
                 .build();
     }
@@ -161,13 +167,24 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public ApiResponse<Void> checkForgotPassword(String code) {
+    public ApiResponse<CheckForgotPasswordResponse> checkForgotPassword(String code) {
         // get token in redis
         OTPForgetPassword forgetPassword = otpForgetPasswordRepo.findById(code)
                 .orElseThrow(() -> new CustomExeption(ErrorCode.WRONG_VERFY_TOKEN));
 
-        return ApiResponse.<Void>builder()
+        Long ttl = redisOps.getExpire("pending-forget-password:" + code, TimeUnit.SECONDS);
+
+        if (ttl == null || ttl < 0) {
+            throw new CustomExeption(ErrorCode.OTP_EXPIRED);
+        }
+
+        return ApiResponse.<CheckForgotPasswordResponse>builder()
                 .code(forgetPassword != null ? 200 : 0)
+                .result(
+                        CheckForgotPasswordResponse.builder()
+                                .timeToLive(ttl)
+                                .build()
+                )
                 .message(forgetPassword != null ? "Yêu cầu hợp lệ, bạn có thể đặt lại mật khẩu."
                         : "Yêu cầu đã hết hạn, vui lòng thử lại sau.")
                 .build();
