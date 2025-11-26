@@ -3,19 +3,18 @@ package com.freeclassroom.courseservice.dto.response.course;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.util.List;
-
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ChapterResponse {
+public class LessonCourseAdminTeacherResponse {
     String id;
     String title;
-    String description;
+    String content;
+    Long duration;
+    String url;
     Long position;
-
-    List<LessonCourseAdminTeacherResponse> lessons;
+    Boolean isPublic;
 }

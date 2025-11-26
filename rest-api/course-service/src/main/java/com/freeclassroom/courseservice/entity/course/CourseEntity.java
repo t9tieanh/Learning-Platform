@@ -77,4 +77,7 @@ public class CourseEntity extends AbstractEntity {
     @Column(name = "requirement")
     //requiment
     Set<String> requirements;
+
+    // optinal -> reason of reject course
+    String reason;
 }

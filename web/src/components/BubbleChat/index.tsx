@@ -1,46 +1,40 @@
-import { useEffect, useRef, useState } from "react";
-import { MessageCircle, X, Send, BotMessageSquare, Bot } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { toast } from "sonner";
-import { Card } from "@/components/ui/card";
-import {
-    Tooltip,
-    TooltipTrigger,
-    TooltipContent,
-    TooltipProvider,
-} from "@/components/ui/tooltip"
-import { askAi } from "@/services/ai.service";
+import { useEffect, useRef, useState } from 'react'
+import { MessageCircle, X, Send, BotMessageSquare, Bot } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { toast } from 'sonner'
+import { Card } from '@/components/ui/card'
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/components/ui/tooltip'
+import { askAi } from '@/services/ai.service'
 import aiChatService from '@/services/aiChat.service'
 import { useAuthStore } from '@/stores/useAuth.stores'
 
-
 interface Message {
-    role: "user" | "ai";
-    content: string;
+  role: 'user' | 'ai'
+  content: string
 }
 
 const ChatBubble = () => {
-    const [isOpen, setIsOpen] = useState(false);
-    const [messages, setMessages] = useState<Message[]>([]);
-    const [input, setInput] = useState("");
-    const [isLoading, setIsLoading] = useState(false);
-    const [isTyping, setIsTyping] = useState(false);
-    const [welcomed, setWelcomed] = useState(false);
-    const bottomRef = useRef<HTMLDivElement | null>(null);
+  const [isOpen, setIsOpen] = useState(false)
+  const [messages, setMessages] = useState<Message[]>([])
+  const [input, setInput] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const [isTyping, setIsTyping] = useState(false)
+  const [welcomed, setWelcomed] = useState(false)
+  const bottomRef = useRef<HTMLDivElement | null>(null)
 
-    const { data: authData } = useAuthStore()
-    const userId = authData?.userId
-    const conversationId = (authData as any)?.conversationId
+  const { data: authData } = useAuthStore()
+  const userId = authData?.userId
+  const conversationId = (authData as any)?.conversationId
 
-    // Reset local messages when user logs out
-    useEffect(() => {
-        if (!userId) {
-            setMessages([])
-            setWelcomed(false)
-        }
-    }, [userId])
+  // Reset local messages when user logs out
+  useEffect(() => {
+    if (!userId) {
+      setMessages([])
+      setWelcomed(false)
+    }
+  }, [userId])
 
   const sendMessage = async () => {
     if (!input.trim() || isLoading) return
@@ -52,29 +46,28 @@ const ChatBubble = () => {
     setIsLoading(true)
     setIsTyping(true)
 
-        // Show assistant typing placeholder
-        setMessages((prev) => [...prev, { role: "ai", content: "typing..." }]);
+    // Show assistant typing placeholder
+    setMessages((prev) => [...prev, { role: 'ai', content: 'typing...' }])
 
-        try {
-            const { reply } = await askAi({ message: userText, userId, conversationId });
-            setMessages((prev) => {
-                const updated = [...prev];
-                updated[updated.length - 1].content = reply;
-                return updated;
-            });
-        } catch (err: any) {
-            const fallback = "Xin lỗi, hiện tại Nova chưa thể trả lời. Vui lòng thử lại sau.";
-            setMessages((prev) => {
-                const updated = [...prev];
-                updated[updated.length - 1].content = fallback;
-                return updated;
-            });
-        } finally {
-            setIsTyping(false);
-            setIsLoading(false);
-        }
-    };
-
+    try {
+      const { reply } = await askAi({ message: userText, userId, conversationId })
+      setMessages((prev) => {
+        const updated = [...prev]
+        updated[updated.length - 1].content = reply
+        return updated
+      })
+    } catch (err: any) {
+      const fallback = 'Xin lỗi, hiện tại Nova chưa thể trả lời. Vui lòng thử lại sau.'
+      setMessages((prev) => {
+        const updated = [...prev]
+        updated[updated.length - 1].content = fallback
+        return updated
+      })
+    } finally {
+      setIsTyping(false)
+      setIsLoading(false)
+    }
+  }
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -83,36 +76,37 @@ const ChatBubble = () => {
     }
   }
 
-    useEffect(() => {
-        if (!isOpen) return;
-        bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, [messages, isOpen]);
+  useEffect(() => {
+    if (!isOpen) return
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages, isOpen])
 
-    // Load existing conversation history when opening the chat
-    useEffect(() => {
-        const loadHistory = async () => {
-            if (!isOpen || !userId || messages.length > 0) return;
-            try {
-                const data = await aiChatService.loadConversation(userId, conversationId);
-                if (data && data.messages && data.messages.length) {
-                    setMessages(data.messages.map(m => ({ role: m.role, content: m.content })));
-                    setWelcomed(true); // prevent greeting if history exists
-                }
-            } catch (e) {
-                // Silent fail; will show greeting instead
-                console.warn('Cannot load conversation history', e);
-            }
-        };
-        loadHistory();
-    }, [isOpen, userId, conversationId, messages.length]);
+  // Load existing conversation history when opening the chat
+  useEffect(() => {
+    const loadHistory = async () => {
+      if (!isOpen || !userId || messages.length > 0) return
+      try {
+        const data = await aiChatService.loadConversation(userId, conversationId)
+        if (data && data.messages && data.messages.length) {
+          setMessages(data.messages.map((m) => ({ role: m.role, content: m.content })))
+          setWelcomed(true) // prevent greeting if history exists
+        }
+      } catch (e) {
+        // Silent fail; will show greeting instead
+        console.warn('Cannot load conversation history', e)
+      }
+    }
+    loadHistory()
+  }, [isOpen, userId, conversationId, messages.length])
 
-    // Auto-send a welcome message from AI on first open when empty (no delay)
-    useEffect(() => {
-        if (!isOpen || welcomed || messages.length > 0) return;
-        setWelcomed(true);
-        const greeting =
-            "Xin chào! 😊 Mình là Nova Compilot. Mình có thể giúp bạn tìm khóa học, giải đáp thắc mắc và gợi ý lộ trình học. Bạn muốn bắt đầu với điều gì?"; setMessages((prev) => [...prev, { role: "ai", content: greeting }]);
-    }, [isOpen, welcomed, messages.length]);
+  // Auto-send a welcome message from AI on first open when empty (no delay)
+  useEffect(() => {
+    if (!isOpen || welcomed || messages.length > 0) return
+    setWelcomed(true)
+    const greeting =
+      'Xin chào! 😊 Mình là Nova Compilot. Mình có thể giúp bạn tìm khóa học, giải đáp thắc mắc và gợi ý lộ trình học. Bạn muốn bắt đầu với điều gì?'
+    setMessages((prev) => [...prev, { role: 'ai', content: greeting }])
+  }, [isOpen, welcomed, messages.length])
 
   return (
     <div className='fixed bottom-6 right-6 z-50'>

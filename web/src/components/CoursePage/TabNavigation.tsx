@@ -6,7 +6,17 @@ import { Lesson } from '@/types/course-student'
 import CustomButton from '@/components/common/Button'
 import NoteSection from './NoteSection'
 
-export const TabNavigation = ({ currentLecture, thumbnailUri, currentLectureId, instructorId }: { currentLecture: Lesson; thumbnailUri: string; currentLectureId: number, instructorId: string }) => {
+export const TabNavigation = ({
+  currentLecture,
+  thumbnailUri,
+  currentLectureId,
+  instructorId
+}: {
+  currentLecture: Lesson
+  thumbnailUri: string
+  currentLectureId: number
+  instructorId: string
+}) => {
   const [activeTab, setActiveTab] = useState('Overview')
   const [open, setOpen] = useState(false)
   const tabs = useMemo(
