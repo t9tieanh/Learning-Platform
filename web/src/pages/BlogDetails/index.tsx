@@ -40,7 +40,7 @@ const BlogDetails = () => {
 
   return (
     <div className='min-h-screen bg-white'>
-      <article className='container px-16 py-12 space-y-6'>
+      <article className='container px-16 py-6 space-y-6'>
 
         <Button onClick={() => navigate(-1)}>
           ← Quay lại

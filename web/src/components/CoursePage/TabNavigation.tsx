@@ -22,15 +22,15 @@ export const TabNavigation = ({
   const tabs = useMemo(
     () => [
       {
-        label: 'Overview',
+        label: 'Tổng quan',
         icon: <Info className='w-5 h-5' />
       },
       {
-        label: 'Q&A',
+        label: 'Hỏi đáp',
         icon: <MessageCircleQuestionMark className='w-5 h-5' />
       },
       {
-        label: 'Notes',
+        label: 'Ghi chú',
         icon: <NotebookPen className='w-5 h-5' />,
         onClick: () => {
           setOpen(true)
@@ -50,9 +50,8 @@ export const TabNavigation = ({
           <CustomButton
             key={tab.label}
             onClick={() => (tab.onClick ? tab.onClick() : setActiveTab(tab.label))}
-            className={`py-4 text-sm font-medium bg-white transition-colors relative ${
-              activeTab === tab.label ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
-            }`}
+            className={`py-4 text-sm font-medium bg-white transition-colors relative ${activeTab === tab.label ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
+              }`}
             label={
               <>
                 {tab.label}
@@ -65,8 +64,8 @@ export const TabNavigation = ({
       </div>
 
       <div>
-        {activeTab === 'Q&A' && <QASection lessonId={String(currentLectureId)} instructorId={instructorId} />}
-        {activeTab === 'Overview' && (
+        {activeTab === 'Hỏi đáp' && <QASection lessonId={String(currentLectureId)} instructorId={instructorId} />}
+        {activeTab === 'Tổng quan' && (
           <div className='mt-6 px-6 mx-auto w-full'>
             <LectureInfo lesson={currentLecture} thumbnailUri={thumbnailUri} />
           </div>

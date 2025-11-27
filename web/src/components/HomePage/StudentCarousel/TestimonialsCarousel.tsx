@@ -76,12 +76,13 @@ export const TestimonialsCarousel = () => {
     };
 
     return (
-        <section className="py-20 px-4 bg-gradient-to-b from-background to-accent/30">
+        <section className="py-6 bg-gradient-to-b from-background to-blue-500/30">
+            <h4 className='font-bold bg-blue-500 text-white p-2 max-w-80 pl-12 rounded-r-3xl'>
+                Học viên nói gì
+            </h4>
             <div className="max-w-7xl mx-auto">
                 <div className="text-center mb-12 animate-fade-in">
-                    <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-primary bg-clip-text text-transparent">
-                        Học viên nói gì về chúng tôi
-                    </h2>
+
                     <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
                         Hàng nghìn học viên đã tin tưởng và đạt được mục tiêu của mình cùng nền tảng của chúng tôi
                     </p>

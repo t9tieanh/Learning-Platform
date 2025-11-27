@@ -21,6 +21,7 @@ import Chat from './pages/Chat'
 import Blog from './pages/Blog'
 import BlogList from './pages/BlogList'
 import BlogDetails from './pages/BlogDetails'
+import Terms from './pages/GeneralTerms'
 import TC_Course from './pages/TC_Courses'
 import TC_CreateCourse from './pages/TC_CreateCourse'
 import TC_CourseDetail from './pages/TC_CourseDetail'
@@ -34,6 +35,7 @@ import AD_CourseDetails from './pages/AD_CourseDetails'
 import AD_Instructor from './pages/AD_Instructor'
 import AD_Certificates from './pages/AD_Certificates'
 import AD_Blogs from './pages/AD_Blogs'
+import AD_BlogDetails from './pages/AD_BlogDetails'
 import Home2 from './pages/Home2'
 import { SocketProvider } from '@/api/socket/socket.context'
 import DiscountsAdmin from './pages/AD_Discounts'
@@ -67,6 +69,7 @@ const router = createBrowserRouter([
       { path: '*', element: <NotFound /> },
       { path: 'forgot', element: <ForgotPass /> },
       { path: 'course-page/:courseId', element: <CoursePage /> },
+      { path: 'term', element: <Terms /> },
       {
         path: 'teacher',
         element: <TC_Layout />,
@@ -94,7 +97,8 @@ const router = createBrowserRouter([
           { path: 'instructors', element: <AD_Instructor /> },
           { path: 'certificates', element: <AD_Certificates /> },
           { path: 'discounts', element: <DiscountsAdmin /> },
-          { path: 'blogs', element: <AD_Blogs /> }
+          { path: 'blogs', element: <AD_Blogs /> },
+          { path: 'blog/:id', element: <AD_BlogDetails /> },
         ]
       },
       { path: 'user/verify', element: <User /> },

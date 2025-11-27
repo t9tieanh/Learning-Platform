@@ -78,31 +78,6 @@ const CoursePage = () => {
     }))
   }, [courseData])
 
-  // Load completed lectures from localStorage
-  // useEffect(() => {
-  //   const saved = localStorage.getItem('completedLectures')
-  //   if (saved) {
-  //     setCompletedLectures(new Set(JSON.parse(saved)))
-  //   }
-  // }, [])
-
-  // Save completed lectures to localStorage
-  // useEffect(() => {
-  //   localStorage.setItem('completedLectures', JSON.stringify(Array.from(completedLectures)))
-  // }, [completedLectures])
-
-  // const handleToggleComplete = (lectureId: number) => {
-  //   setCompletedLectures((prev) => {
-  //     const next = new Set(prev)
-  //     if (next.has(lectureId)) {
-  //       next.delete(lectureId)
-  //     } else {
-  //       next.add(lectureId)
-  //     }
-  //     return next
-  //   })
-  // }
-
   const handleSelectLecture = (lecture: UILecture) => {
     // Convert UILecture (sidebar item) to domain Lesson type
     setCurrentLecture({
@@ -141,14 +116,19 @@ const CoursePage = () => {
       <header className='bg-[#0C356A] shadow-lg text-white border-b border-border px-6 py-3 flex items-center justify-between '>
         <div className='flex items-center gap-4'>
           <button
-            className='ml-2 flex items-center gap-2 text-white hover:text-foreground transition-colors'
+            className='ml-2 flex items-center gap-2 text-white hover:text-foreground transition-colors hover:text-primary'
             onClick={() => navigate('/')}
           >
             <ChevronLeft className='w-5 h-5' />
-            <span className='text-sm'>Home</span>
+            <span
+              className='text-sm cursor-pointer hover:underline'
+              onClick={() => navigate(-1)}
+            >
+              Trở lại
+            </span>
           </button>
           <div className='hidden sm:block w-px h-6 bg-border' />
-          <div className='text-sm font-medium hidden sm:block !flex gap-2 items-center'>
+          <div className='text-sm font-medium sm:block !flex gap-2 items-center'>
             <Avatar>
               <AvatarImage src={courseData?.thumbnailUrl} />
               <AvatarFallback>CN</AvatarFallback>

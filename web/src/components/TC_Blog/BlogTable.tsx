@@ -21,9 +21,10 @@ interface BlogItem {
 interface BlogTableProps {
   courses: BlogItem[]
   onDeleted?: (id: string) => void
+  base?: 'teacher' | 'admin'
 }
 
-const BlogTable: FC<BlogTableProps> = ({ courses, onDeleted }) => {
+const BlogTable: FC<BlogTableProps> = ({ courses, onDeleted, base = 'teacher' }) => {
   const navigate = useNavigate()
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [targetId, setTargetId] = useState<string | null>(null)
@@ -68,7 +69,7 @@ const BlogTable: FC<BlogTableProps> = ({ courses, onDeleted }) => {
             <TableRow
               key={blog.id}
               className='hover:bg-white dark:hover:bg-slate-800 hover:shadow-md transition-all cursor-pointer'
-              onClick={() => navigate(`/teacher/blog/${blog.id}`)}
+              onClick={() => navigate(`/${base}/blog/${blog.id}`)}
             >
               <TableCell className='p-3 sm:p-4 flex items-center gap-3 sm:gap-4'>
                 <img
@@ -112,26 +113,30 @@ const BlogTable: FC<BlogTableProps> = ({ courses, onDeleted }) => {
                       className='rounded-md px-3 py-2 text-sm transition-colors data-[highlighted]:bg-blue-500 data-[highlighted]:text-white'
                       onClick={(e) => {
                         e.stopPropagation()
-                        navigate(`/teacher/blog/${blog.id}`)
+                        navigate(`/${base}/blog/${blog.id}`)
                       }}
                     >
                       Xem chi tiết
                     </DropdownMenuItem>
-                    <DropdownMenuItem
-                      className='rounded-md px-3 py-2 text-sm transition-colors data-[highlighted]:bg-blue-500 data-[highlighted]:text-white'
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        navigate(`/teacher/update-blog/${blog.id}`)
-                      }}
-                    >
-                      Chỉnh sửa
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      className='rounded-md px-3 py-2 text-sm text-red-600 transition-colors data-[highlighted]:bg-red-500 data-[highlighted]:text-white'
-                      onClick={(e) => askDelete(e, blog.id)}
-                    >
-                      Xóa
-                    </DropdownMenuItem>
+                    {base === 'teacher' && (
+                      <>
+                        <DropdownMenuItem
+                          className='rounded-md px-3 py-2 text-sm transition-colors data-[highlighted]:bg-blue-500 data-[highlighted]:text-white'
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            navigate(`/teacher/update-blog/${blog.id}`)
+                          }}
+                        >
+                          Chỉnh sửa
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          className='rounded-md px-3 py-2 text-sm text-red-600 transition-colors data-[highlighted]:bg-red-500 data-[highlighted]:text-white'
+                          onClick={(e) => askDelete(e, blog.id)}
+                        >
+                          Xóa
+                        </DropdownMenuItem>
+                      </>
+                    )}
                   </DropdownMenuContent>
                 </DropdownMenu>
               </TableCell>

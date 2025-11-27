@@ -19,7 +19,13 @@ import { useNavigate } from 'react-router-dom'
 import logo from '@/assets/images/logo1.png'
 import { LogIn } from 'lucide-react'
 
-const SignInForm = ({ handleLoginWithGoogle }: { handleLoginWithGoogle: () => void }) => {
+const SignInForm = ({
+  handleLoginWithGoogle,
+  setIsSignUpMode
+}: {
+  handleLoginWithGoogle: () => void
+  setIsSignUpMode: (value: boolean) => void
+}) => {
   const {
     register,
     handleSubmit,
@@ -49,7 +55,8 @@ const SignInForm = ({ handleLoginWithGoogle }: { handleLoginWithGoogle: () => vo
           name: r.name || r.userName || r.username,
           username: r.username || r.userName,
           email: r.email,
-          avatarUrl: r.avatarUrl
+          avatarUrl: r.avatarUrl,
+          role: r.role
         })
         console.log('USERID', userId)
         // create/fetch AI conversation
@@ -63,12 +70,9 @@ const SignInForm = ({ handleLoginWithGoogle }: { handleLoginWithGoogle: () => vo
           }
         }
         toast.success('Đăng nhập thành công!')
-        if (response.result.role === 'admin') {
-          console.log('ADMIN')
-          navigate('/admin')
-        } else {
-          navigate('/')
-        }
+        const role = response.result.role
+        const path = role === 'admin' ? '/admin' : '/'
+        navigate(path)
       } else toast.error(response.message)
     } catch (error: any) {
       toast.error('Đã có lỗi trong quá trình xử lý !')
@@ -99,9 +103,9 @@ const SignInForm = ({ handleLoginWithGoogle }: { handleLoginWithGoogle: () => vo
                 {errors.password && <span className='text-red-500 text-xs text-left'>{errors.password.message}</span>}
               </div>
               <div className='remember-me flex justify-between items-center mt-5'>
-                <CustomCheckbox id='remember-me' label='Ghi nhớ tôi' className='text-gray-700' />
+                <p></p>
                 <p
-                  className='text-gray-700 text-sm font-bold'
+                  className='text-blue-700 text-sm font-bold underline hover:cursor-pointer'
                   onClick={() => {
                     navigate('/forgot')
                   }}
@@ -142,9 +146,13 @@ const SignInForm = ({ handleLoginWithGoogle }: { handleLoginWithGoogle: () => vo
             </div>
             <p className='text-center text-sm text-gray-500 mt-5'>
               Bạn chưa có tài khoản?{' '}
-              <a href='/login' className='text-blue-500 hover:underline'>
+              <button
+                type='button'
+                onClick={() => setIsSignUpMode(true)}
+                className='text-blue-500 hover:underline'
+              >
                 Đăng ký
-              </a>
+              </button>
             </p>
           </CardContent>
         </CardHeader>
