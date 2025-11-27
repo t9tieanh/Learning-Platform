@@ -23,7 +23,7 @@ const Header: FC = () => {
 
   useEffect(() => {
     // refresh cart count on header mount
-    refresh().catch(() => {})
+    refresh().catch(() => { })
   }, [refresh])
 
   // publish header height as a CSS variable so pages can position elements under it
@@ -47,7 +47,7 @@ const Header: FC = () => {
     { icon: <House className='w-5 h-5' />, label: 'Trang chủ', value: 'home', path: '/' },
     { icon: <BookOpen className='w-5 h-5' />, label: 'Khóa học', value: 'course', path: '/courses' },
     { icon: <Building2 className='w-5 h-5' />, label: 'Về chúng tôi', value: 'about', path: '/about' },
-    { icon: <StickyNote className='w-5 h-5' />, label: 'Blog', value: 'blog', path: '/blog' }
+    { icon: <StickyNote className='w-5 h-5' />, label: 'Bài viết', value: 'blog', path: '/blog' }
   ]
 
   return (
@@ -115,7 +115,7 @@ const Header: FC = () => {
                       username={data.username as string}
                       name={data.name as string}
                       avatarUrl={data.avatarUrl as string}
-                      closeMenu={() => {}}
+                      closeMenu={() => { }}
                     />
                   </PopoverContent>
                 </Popover>
