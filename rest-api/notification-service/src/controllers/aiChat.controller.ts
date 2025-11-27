@@ -6,10 +6,6 @@ import { Types } from 'mongoose';
 const generateReply = async (req: Request, res: Response) => {
     const { message, conversationId, userId } = req.body || {};
 
-    if (!userId || typeof userId !== 'string') {
-        return res.status(StatusCodes.UNAUTHORIZED).json({ error: 'Missing user context' });
-    }
-
     if (typeof message !== 'string' || !message.trim()) {
         return res.status(StatusCodes.BAD_REQUEST).json({ error: 'Missing or invalid "message" in body' });
     }
@@ -26,14 +22,24 @@ const generateReply = async (req: Request, res: Response) => {
 
     try {
         const trimmed = message.trim();
-        const reply = await AiChatService.generateReply(trimmed, userId);
-        const conversation = await AiChatService.saveChat({
-            userId,
-            userMessage: trimmed,
-            aiReply: reply,
-            conversationId: convId
-        });
-        res.json({ reply, conversationId: conversation.id });
+        const safeUserId = typeof userId === 'string' ? userId : undefined;
+        const reply = await AiChatService.generateReply(trimmed, safeUserId);
+
+        // Only persist when BOTH userId and conversationId are provided
+        if (safeUserId && convId) {
+            const conversation = await AiChatService.saveChat({
+                userId: safeUserId,
+                userMessage: trimmed,
+                aiReply: reply,
+                conversationId: convId
+            });
+            return res.json({ reply, conversationId: conversation.id });
+        }
+
+        // If not saving, still return reply (and echo conversationId if provided)
+        const payload: any = { reply };
+        if (convId) payload.conversationId = convId;
+        return res.json(payload);
     } catch (err: any) {
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: err.message || 'Internal Server Error' });
     }
