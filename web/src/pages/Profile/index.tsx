@@ -6,8 +6,7 @@ import CourseStudied from '@/components/Profile/my-course'
 import OrderHistory from '@/components/Profile/orderHistory'
 
 const Profile = () => {
-  const params = new URLSearchParams(location.search)
-  const [activeSection, setActiveSection] = useState<string>(params.get('mode') || 'info')
+  const [activeSection, setActiveSection] = useState<string>('info')
 
   const navigationItems = [
     {
@@ -65,11 +64,10 @@ const Profile = () => {
                       <button
                         key={item.id}
                         onClick={() => setActiveSection(item.id)}
-                        className={`w-full shadow-sm flex items-center gap-3 px-4 py-3 text-left transition-colors rounded-lg mx-2 ${
-                          isActive
-                            ? 'bg-primary text-primary-foreground shadow-sm'
-                            : 'text-muted-foreground hover:text-foreground hover:bg-muted'
-                        }`}
+                        className={`w-full shadow-sm flex items-center gap-3 px-4 py-3 text-left transition-colors rounded-lg mx-2 ${isActive
+                          ? 'bg-primary text-primary-foreground shadow-sm'
+                          : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                          }`}
                       >
                         <Icon className='h-5 w-5' />
                         <div>

@@ -56,12 +56,6 @@ const Banner = () => {
         <motion.blockquote className='mt-6 border-l-2 pl-6 italic text-lg' variants={item}>
           &quot;Cùng công nghệ, học tập trở nên dễ dàng hơn.&quot;
         </motion.blockquote>
-        <motion.div variants={item}>
-          <Button className='btn-primary mt-6 w-48 bg-blue-600 hover:bg-blue-700 flex gap-2'>
-            <FaPaperPlane />
-            Bắt đầu ngay
-          </Button>
-        </motion.div>
       </motion.div>
     </div>
   )

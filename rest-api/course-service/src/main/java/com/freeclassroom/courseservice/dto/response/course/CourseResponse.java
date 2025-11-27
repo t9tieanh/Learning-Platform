@@ -7,6 +7,8 @@ import com.freeclassroom.courseservice.enums.entity.EnumCourseStatus;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -41,4 +43,5 @@ public class CourseResponse {
 
     Set<String> outcomes;
     Set<String> requirements;
+    LocalDateTime createdAt;
 }

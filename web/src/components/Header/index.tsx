@@ -20,6 +20,7 @@ const Header: FC = () => {
   const count = useCartStore((s) => s.count)
   const refresh = useCartStore((s) => s.refresh)
   const [isOpen, setIsOpen] = useState(false)
+  const [isProfileOpen, setIsProfileOpen] = useState(false)
 
   useEffect(() => {
     // refresh cart count on header mount
@@ -100,7 +101,7 @@ const Header: FC = () => {
             {/* User Menu / Auth Buttons */}
             {data ? (
               <div className='profile flex gap-2 text-sm font-bold items-center'>
-                <Popover>
+                <Popover open={isProfileOpen} onOpenChange={setIsProfileOpen}>
                   <PopoverTrigger className='flex gap-2 items-center'>
                     <p className='hidden md:block'>
                       <span className='text-red-500 italic font-base'>Xin chào</span> {data.name}
@@ -115,7 +116,7 @@ const Header: FC = () => {
                       username={data.username as string}
                       name={data.name as string}
                       avatarUrl={data.avatarUrl as string}
-                      closeMenu={() => { }}
+                      closeMenu={() => setIsProfileOpen(false)}
                     />
                   </PopoverContent>
                 </Popover>
