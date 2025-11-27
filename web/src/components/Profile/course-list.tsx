@@ -10,16 +10,19 @@ import {
 import courseService from '@/services/course/course-student.service'
 import { CourseListItem, CourseListResult } from '@/types/course-user'
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import CustomButton from '@/components/common/Button'
+import { Sparkles } from 'lucide-react'
 
 const CourseList = () => {
   // Store an array of items from the API
   const [courses, setCourses] = useState<CourseListItem[]>([])
+  const navigator = useNavigate()
   // page size configurable through MAX_SIZE constant
   const MAX_SIZE = 4
   const [page, setPage] = useState<number>(0)
   const [size] = useState<number>(MAX_SIZE)
   const [totalPages, setTotalPages] = useState<number>(0)
-  const [totalItems, setTotalItems] = useState<number>(0)
   const [hasNext, setHasNext] = useState<boolean>(false)
   const [hasPrevious, setHasPrevious] = useState<boolean>(false)
 
@@ -31,7 +34,6 @@ const CourseList = () => {
         setCourses(result.items || [])
         setPage(result.pagination?.page ?? p)
         setTotalPages(result.pagination?.totalPages ?? 0)
-        setTotalItems(result.pagination?.totalItems ?? 0)
         setHasNext(Boolean(result.pagination?.hasNext))
         setHasPrevious(Boolean(result.pagination?.hasPrevious))
       }
@@ -64,6 +66,17 @@ const CourseList = () => {
         {(courses.length > 0 ? courses : []).map((item) => (
           <CourseCard key={item.id} courseItem={item} />
         ))}
+        {courses.length === 0 && (
+          <div className='flex flex-col items-center justify-center py-8'>
+            <p className='text-center text-muted-foreground text-sm mb-4'>Bạn chưa có khóa học nào.</p>
+            <CustomButton
+              label='Khám phá ngay'
+              onClick={() => navigator('/')}
+              className='gap-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors'
+              icon={<Sparkles size={18} />}
+            />
+          </div>
+        )}
       </div>
       <Pagination className='flex justify-center mt-4'>
         <PaginationContent>

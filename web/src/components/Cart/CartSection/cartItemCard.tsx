@@ -9,6 +9,7 @@ import { toast } from 'sonner'
 import { Dispatch, SetStateAction } from 'react'
 import { useCartStore } from '@/stores/useCart.stores'
 import formatPrice from '@/utils/common/formatPrice'
+import { showConfirmToast } from '@/components/common/ShowConfirmToast'
 
 const CartItemCard = ({
   cardItem,
@@ -21,6 +22,17 @@ const CartItemCard = ({
 }) => {
   const refresh = useCartStore((s) => s.refresh)
   const handleRemoveFromCart = async () => {
+    // Show confirmation toast
+    const confirmed = await showConfirmToast({
+      title: 'Xóa khóa học khỏi giỏ hàng?',
+      description: `Bạn có chắc muốn xóa "${cardItem.title}" khỏi giỏ hàng?`,
+      confirmLabel: 'Có, xóa',
+      cancelLabel: 'Hủy'
+    })
+
+    // If user cancels, return early
+    if (!confirmed) return
+
     try {
       const response = await cartService.removeFromCart(cardItem.id)
       if (response.code === 200 && response.message) {
