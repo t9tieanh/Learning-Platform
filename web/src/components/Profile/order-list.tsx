@@ -27,7 +27,7 @@ const OrderList = () => {
       </div>
       <div className='cart-item flex flex-col p-4 gap-4 min-h-[750px]'>
         {orders.length === 0 ? (
-          <p className='text-center text-muted-foreground'>Bạn chưa có đơn hàng nào.</p>
+          <p className='text-center text-muted-foreground text-sm'>Bạn chưa có đơn hàng nào.</p>
         ) : (
           orders.map((order) => (
             <>

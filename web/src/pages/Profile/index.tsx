@@ -18,7 +18,7 @@ const Profile = () => {
     },
     {
       id: 'courses',
-      title: 'Khóa học đã học',
+      title: 'Khóa học của tôi',
       icon: BookOpen,
       description: 'Lịch sử học tập'
     },
@@ -73,7 +73,7 @@ const Profile = () => {
                       >
                         <Icon className='h-5 w-5' />
                         <div>
-                          <div className='font-sm text-base'>{item.title}</div>
+                          <div className='font-sm text-base font-medium'>{item.title}</div>
                           <div
                             className={`text-xs ${isActive ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}
                           >
