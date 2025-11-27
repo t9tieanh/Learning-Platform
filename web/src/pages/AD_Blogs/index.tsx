@@ -38,7 +38,6 @@ const AD_Blogs = () => {
 
   return (
     <div className='flex-1 space-y-8 p-6'>
-
       <BlogSearchBar
         hideCreateButton
         onSearch={(v) => {

@@ -66,7 +66,11 @@ class UserService {
   }
 
   //check async token exists
-  async checkForgotPasswordToken(code: string): Promise<ApiResponse<any>> {
+  async checkForgotPasswordToken(code: string): Promise<
+    ApiResponse<{
+      timeToLive: number
+    }>
+  > {
     const response = await axiosClient.axiosInstance.get(`auth/forgot-password/${code}`)
     return response.data
   }

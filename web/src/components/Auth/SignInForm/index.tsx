@@ -17,8 +17,9 @@ import useLoading from '@/hooks/useLoading.hook'
 import { useAuthStore } from '@/stores/useAuth.stores'
 import { useNavigate } from 'react-router-dom'
 import logo from '@/assets/images/logo1.png'
+import { LogIn } from 'lucide-react'
 
-const SignInForm: FC = () => {
+const SignInForm = ({ handleLoginWithGoogle }: { handleLoginWithGoogle: () => void }) => {
   const {
     register,
     handleSubmit,
@@ -78,24 +79,6 @@ const SignInForm: FC = () => {
     }
   }
 
-  //handle login with google
-  const handleLoginWithGoogle = () => {
-    try {
-      const authUri = import.meta.env.VITE_GOOGLE_AUTH_URI as string
-      const callbackUri = import.meta.env.VITE_GOOGLE_REDIRECT_URI as string
-      const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID as string
-
-      const targetUrl = `${authUri}?redirect_uri=${encodeURIComponent(
-        callbackUri
-      )}&response_type=code&client_id=${googleClientId}&scope=openid%20email%20profile`
-
-      window.location.href = targetUrl
-    } catch (error: any) {
-      console.log(error)
-      toast.error('Đã có lỗi trong quá trình xử lý !')
-    }
-  }
-
   return (
     <div className='w-full bg-white rounded-lg md:mt-0 sm:max-w-md xl:py-0'>
       <Card className='shadow-xl py-12 border-none'>
@@ -131,7 +114,8 @@ const SignInForm: FC = () => {
                   label='Đăng nhập'
                   isLoader={loading}
                   type='submit'
-                  className='w-full rounded-md border border-gray-300 bg-blue-500 py-3 text-white hover:bg-blue-600'
+                  icon={<LogIn size={16} />}
+                  className='w-full rounded-md shadow-lg border border-gray-300 bg-blue-500 py-3 text-white hover:bg-blue-600'
                 />
               </div>
             </form>

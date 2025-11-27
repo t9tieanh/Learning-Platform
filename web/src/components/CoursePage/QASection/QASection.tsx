@@ -13,7 +13,10 @@ import {
 } from '@/components/ui/dialog'
 import { useQASection, getInitials, CommentUI, ReplyUI } from './helper'
 
-interface QASectionProps { lessonId: string, instructorId: string }
+interface QASectionProps {
+  lessonId: string
+  instructorId: string
+}
 
 export const QASection = ({ lessonId, instructorId }: QASectionProps) => {
   const {

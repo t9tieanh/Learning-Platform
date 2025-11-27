@@ -108,7 +108,7 @@ public class AuthenticationService implements IAuthenticationService {
                     .build();
         }
 
-        throw new CustomExeption(ErrorCode.UNAUTHENTICATED);
+        throw new CustomExeption(ErrorCode.WRONG_USERNAME_PASSWORD);
     }
 
     public void logout(LogoutRequest request) {
