@@ -2,6 +2,7 @@ import axiosClient from '@/lib/axiosClient.lib'
 import { ApiResponse } from '@/types/response.type'
 import { useAuthStore } from '@/stores/useAuth.stores'
 import { Course } from '@/types/course.type'
+import { boolean } from 'yup'
 
 function decodeJwtPayload(token: string): any | null {
   try {
@@ -96,7 +97,7 @@ class CourseService {
 
   async getTeacherCourses(
     instructorId?: string,
-    options?: { page?: number; limit?: number }
+    options?: { page?: number; limit?: number; isPublic?: boolean }
   ): Promise<ApiResponse<Paginated<any>>> {
     const id = instructorId ?? getCurrentInstructorId()
     if (!id) {
@@ -105,7 +106,8 @@ class CourseService {
     const body = {
       instructorId: id,
       page: options?.page ?? 1,
-      limit: options?.limit ?? 10
+      limit: options?.limit ?? 10,
+      isPublic: options?.isPublic ?? false,
     }
     const response = await axiosClient.axiosInstance.post('learning/instructor/courses/', body)
     return response.data

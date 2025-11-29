@@ -1,4 +1,5 @@
 import React from 'react'
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Star, BookOpen } from 'lucide-react'
@@ -28,12 +29,16 @@ interface Teacher {
 }
 
 const TeacherInfo = ({ teacher }: { teacher: Teacher }) => {
+  const navigate = useNavigate();
   return (
     <Card className='ml-12 border-none'>
       <CardContent className='p-6'>
         <div className='flex flex-col md:flex-row gap-6'>
           {/* Teacher Avatar and Basic Info */}
-          <div className='flex flex-col items-center md:items-start gap-4 md:w-1/3'>
+          <div
+            className='flex flex-col items-center md:items-start gap-4 md:w-1/3 cursor-pointer'
+            onClick={() => navigate(`/instructor/${teacher.id}`)}
+          >
             <Avatar className='w-20 h-20 shadow-lg'>
               <AvatarImage src={teacher?.image} alt={teacher?.name} />
               <AvatarFallback className='text-2xl font-semibold bg-gradient-primary text-primary-foreground'>

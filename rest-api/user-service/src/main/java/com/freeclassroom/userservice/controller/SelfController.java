@@ -28,6 +28,12 @@ public class SelfController {
         return userService.geyMyProfile(userId);
     }
 
+    @GetMapping("/instructor")
+    public ApiResponse<MyProfileResponse> getInstructorProfile(
+            @RequestParam String userId) {
+        return userService.geyMyProfile(userId);
+    }
+
     @PostMapping("/expertises")
     public ApiResponse<Set<CreationResponse>> addExpertiseToCurrentUser(@RequestBody AddExpertiseRequest request) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();

@@ -21,7 +21,7 @@ import java.util.List;
 public interface ICourseService {
     ApiResponse<CreationResponse> createCourse(CreationCourseRequest request, String userId);
     ApiResponse<CreationResponse> updateTags(String courseId, UpdateTagsRequest tags, String username);
-    ApiResponse<PageResponse<CourseResponse>> getCoursesByTeacherId(String instructorId, int page, int size);
+    ApiResponse<PageResponse<CourseResponse>> getCoursesByTeacherId(String instructorId, int page, int size, Boolean isPublic);
     boolean isTeacherOfCourse(String courseId, String userId);
     ApiResponse<FileUploadResponse> updateAvatar(FileUploadRequest request, String courseId);
     ApiResponse<CourseInfoResponse> getCourseInfo(String id);

@@ -1,6 +1,8 @@
 package com.freeclassroom.courseservice.repository.entity;
 
 import com.freeclassroom.courseservice.entity.course.CourseEntity;
+import com.freeclassroom.courseservice.enums.entity.EnumCourseProgressStep;
+import com.freeclassroom.courseservice.enums.entity.EnumCourseStatus;
 import feign.Param;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -131,4 +133,10 @@ public interface CourseRepository extends JpaRepository<CourseEntity, String> {
     """)
     List<String> findAllIdsByInstructorId(@Param("userId") String userId);
 
+    Page<CourseEntity> findByInstructorIdAndStatusAndProgressStep(
+            String instructorId,
+            EnumCourseStatus status,
+            EnumCourseProgressStep progressStep,
+            Pageable pageable
+    );
 }

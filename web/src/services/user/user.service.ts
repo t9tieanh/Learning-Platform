@@ -98,6 +98,14 @@ class UserService {
     return response.data
   }
 
+  async getInstructorProfile(userId: string): Promise<ApiResponse<Profile>> {
+    console.log('userId', userId)
+    const response = await axiosClient.axiosInstance.get('self/instructor', {
+      params: { userId },
+    })
+    return response.data
+  }
+
   // update user (multipart for image)
   async updateUser(
     id: string,
