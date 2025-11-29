@@ -147,7 +147,7 @@ public class ChapterService implements IChapterService {
         }
         return ApiResponse.<CreationResponse>builder()
                 .code(200)
-                .message("Xóa chapter thành công !")
+                .message("Xóa chương thành công !")
                 .result(
                         CreationResponse.builder()
                                 .id(chapterId)

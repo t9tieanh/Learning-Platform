@@ -117,14 +117,16 @@ export function CourseHero({
           <div className='flex gap-3 flex-wrap'>
             {isAdminRoute ? (
               <>
+                {courseStatus === 'pending' && (
                 <Button
                   onClick={() => setOpenApproveModal(true)}
                   size='lg'
                   className='shadow-primary bg-blue-600 text-white hover:bg-blue-700'
                 >
                   <Check className='mr-2 h-4 w-4' />
-                  {courseStatus === 'published' ? 'Từ chối' : 'Phê duyệt'}
+                  {courseStatus === 'pending' && 'Phê duyệt khóa học'}
                 </Button>
+                )}
 
                 <CustomDialog
                   open={openApproveModal}

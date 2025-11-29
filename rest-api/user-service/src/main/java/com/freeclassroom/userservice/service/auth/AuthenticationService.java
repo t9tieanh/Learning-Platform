@@ -75,7 +75,7 @@ public class AuthenticationService implements IAuthenticationService {
 
     // login with username password
     public ApiResponse<AuthResponse> authentication (AuthRequest request) throws JOSEException {
-        UserEntity account = userRepository.findByEmailOrUsername(request.getUsername()).orElseThrow(
+        UserEntity account = userRepository.findFirstByEmailOrUsername(request.getUsername()).orElseThrow(
                 () -> new CustomExeption(ErrorCode.USER_NOT_FOUND)
         );
 

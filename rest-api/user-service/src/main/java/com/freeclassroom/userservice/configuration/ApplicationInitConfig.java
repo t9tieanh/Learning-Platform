@@ -32,16 +32,10 @@ public class ApplicationInitConfig {
     static final String ADMIN_ROLE = "admin";
 
     @NonFinal
-    static final String TEACHER_ROLE = "teacher";
+    static final String ADMIN_USER_NAME = "admin123";
 
     @NonFinal
-    static final String STUDENT_ROLE = "student";
-
-    @NonFinal
-    static final String ADMIN_USER_NAME = "admin";
-
-    @NonFinal
-    static final String ADMIN_PASSWORD = "admin";
+    static final String ADMIN_PASSWORD = "admin123";
 
     @Bean
     @ConditionalOnProperty(
@@ -75,19 +69,6 @@ public class ApplicationInitConfig {
 
                 userRepository.save(user);
                 log.warn("admin user has been created with default password: admin, please change it");
-            }
-
-            if (roleRepository.findByName(TEACHER_ROLE) == null) {
-                //add role teacher
-                roleRepository.save(
-                        RoleEntity.builder().name(TEACHER_ROLE).description("Teacher Role").build()
-                );
-            }
-
-            if (roleRepository.findByName(STUDENT_ROLE) == null) {
-                roleRepository.save(
-                        RoleEntity.builder().name(STUDENT_ROLE).description("Student Role").build()
-                );
             }
             log.info("Application initialization completed .....");
         };

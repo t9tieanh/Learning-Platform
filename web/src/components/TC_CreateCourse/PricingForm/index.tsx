@@ -71,18 +71,10 @@ const PricingForm = ({ id }: { id: string }) => {
             courseId={id}
             handleSubmit={handleSubmit}
           />
-          <SuggestedPrice
-            suggestedPrices={suggestedPrices}
-            coursePrice={getValues('finalPrice')}
-            setCoursePrice={(price: number) => {
-              setValue('finalPrice', price)
-            }}
-          />
         </div>
 
         <div className='space-y-6'>
           <PreviewPrice coursePrice={getValues('finalPrice')} yourIncome={yourIncome} platformFee={platformFee} />
-          <Orientation />
         </div>
       </div>
     </div>

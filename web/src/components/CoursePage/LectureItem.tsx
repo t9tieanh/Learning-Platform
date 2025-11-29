@@ -3,7 +3,7 @@ import { IoCheckmarkDoneCircle } from 'react-icons/io5'
 
 interface LectureItemProps {
   lecture: {
-    id: number
+    id: string
     title: string
     duration: string
     videoUrl?: string

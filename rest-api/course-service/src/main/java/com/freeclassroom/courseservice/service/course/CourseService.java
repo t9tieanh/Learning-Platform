@@ -375,8 +375,7 @@ public class CourseService implements ICourseService {
         if (courseRepo.countLessonsByCourseId(id) == 0)
             throw new CustomExeption(ErrorCode.COURSE_WITHOUT_VIDEO);
 
-        if (!course.getProgressStep().equals(EnumCourseProgressStep.PRICING)
-                || course.getFinalPrice() == 0 || course.getOriginalPrice() == 0 )
+        if (course.getFinalPrice() == 0 || course.getOriginalPrice() == 0 )
             throw new CustomExeption(ErrorCode.COURSE_WITHOUT_PRICE);
 
         // -> maybe approval

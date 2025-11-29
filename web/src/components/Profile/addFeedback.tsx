@@ -10,6 +10,7 @@ const AddFeedback = ({ courseItem, onClose }: { courseItem: CourseListItem; onCl
   const [rating, setRating] = useState<number>(0)
   const [message, setMessage] = useState<string>('')
   const { loading, startLoading, stopLoading } = useLoading()
+  const [isUpdate, setIsUpdate] = useState(false)
 
   useEffect(() => {
     // reset state when courseItem changes
@@ -21,6 +22,9 @@ const AddFeedback = ({ courseItem, onClose }: { courseItem: CourseListItem; onCl
       if (response && response.code === 200) {
         setRating(response.result?.rating as number)
         setMessage(response.result?.message || '')
+        if (response.result?.message?.trim() !== '') {
+          setIsUpdate(true)
+        }
       }
     }
 
@@ -91,7 +95,7 @@ const AddFeedback = ({ courseItem, onClose }: { courseItem: CourseListItem; onCl
 
       <div className='flex justify-end gap-2'>
         <CustomButton onClick={onClose} className='bg-gray-100 hover:bg-gray-200 text-black' label='Hủy' />
-        <CustomButton onClick={submitFeedback} label='Gửi đánh giá' icon={<Send size={16} />} isLoader={loading} />
+        <CustomButton onClick={submitFeedback} label={isUpdate ? `Cập nhật đánh giá` : `Gửi đánh giá`} icon={<Send size={16} />} isLoader={loading} />
       </div>
     </div>
   )

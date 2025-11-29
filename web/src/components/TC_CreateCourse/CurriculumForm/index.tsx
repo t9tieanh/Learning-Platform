@@ -194,7 +194,7 @@ const CurriculumForm: React.FC<{ id: string }> = ({ id }: { id: string }) => {
         </>
       )}
 
-      <Card className='border border-blue-200/60 shadow-sm bg-white'>
+      <Card className='border border-blue-200/60 shadow-lg bg-white'>
         <CardHeader className='flex items-center justify-between pb-0'>
           <CardTitle className='text-lg font-semibold text-gray-800'>
             <span>Nội dung khóa học</span>
