@@ -4,8 +4,10 @@ import { Lesson } from '@/utils/create-course/curriculum'
 import { useState } from 'react'
 import CustomInput from '@/components/common/Input'
 import CustomButton from '@/components/common/Button'
+import CustomCheckbox from '@/components/common/CustomCheckbox'
 import lessonService from '@/services/course/lesson.service'
 import { toast } from 'sonner'
+import formatDuration from '@/utils/time/formatDuration.utils'
 
 const PreviewTeacherLesson = ({
   preview,
@@ -185,7 +187,9 @@ const PreviewTeacherLesson = ({
                 {lesson.duration && (
                   <div>
                     <p className='text-xs font-medium text-gray-300 uppercase'>Thời lượng</p>
-                    <p className='text-white text-sm font-medium mt-1'>{lesson.duration}</p>
+                    <p className='text-white text-sm font-medium mt-1'>
+                      {formatDuration(Number(lesson.duration)) || 0}
+                    </p>
                   </div>
                 )}
               </div>
@@ -254,18 +258,13 @@ const PreviewTeacherLesson = ({
                 </div>
 
                 {/* Edit isPublic */}
-                <div className='flex items-center gap-2 p-3 bg-gray-800 rounded-md'>
-                  <input
-                    id='edit-is-public'
-                    type='checkbox'
-                    checked={editIsPublic}
-                    onChange={(e) => setEditIsPublic(e.target.checked)}
-                    className='w-4 h-4 rounded cursor-pointer'
-                  />
-                  <label htmlFor='edit-is-public' className='text-sm text-gray-200 cursor-pointer'>
-                    Công khai bài học này
-                  </label>
-                </div>
+                <CustomCheckbox
+                  id='edit-is-public'
+                  label='Công khai bài học này'
+                  checked={editIsPublic}
+                  onChange={(e) => setEditIsPublic(e.target.checked)}
+                  className='mt-2 text-white-100'
+                />
 
                 {/* Action Buttons */}
                 <div className='flex gap-2'>
