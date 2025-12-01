@@ -6,8 +6,7 @@ import CourseStudied from '@/components/Profile/my-course'
 import OrderHistory from '@/components/Profile/orderHistory'
 
 const Profile = () => {
-  const params = new URLSearchParams(location.search)
-  const [activeSection, setActiveSection] = useState<string>(params.get('mode') || 'info')
+  const [activeSection, setActiveSection] = useState<string>('info')
 
   const navigationItems = [
     {

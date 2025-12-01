@@ -2,11 +2,12 @@
 import { useEffect, useState } from 'react'
 import './style.scss'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Play, BookOpenCheck } from 'lucide-react'
+import { Play, BookOpenCheck, ArrowLeft } from 'lucide-react'
 import CustomButton from '@/components/common/Button'
 import { Badge } from '@/components/ui/badge'
 import PreviewPublicLesson from '../CourseContent/detail/Sections/previewPublicLesson'
 import AvatarNotFound from '@/assets/images/avatar-not-found.png'
+import { useNavigate } from 'react-router-dom'
 
 interface CoverProps {
   showSmallHeader: boolean
@@ -22,6 +23,7 @@ interface CoverProps {
 }
 
 const Cover = ({ video, image, title, shortDescription, teacher, tags, showSmallHeader }: CoverProps) => {
+  const navigate = useNavigate()
   const [preview, setPreview] = useState<{
     openPreview: boolean
     previewUrl: string | null
@@ -66,7 +68,19 @@ const Cover = ({ video, image, title, shortDescription, teacher, tags, showSmall
           </div>
         </div>
       )}
-      <div className='cover-container min-h-96 bg-[#0C356A] flex flex-col md:flex-row items-center justify-center mx-auto w-full py-16'>
+      <div className='relative group cover-container min-h-96 bg-[#0C356A] flex flex-col md:flex-row items-center justify-center mx-auto w-full py-16'>
+        <div
+          className='absolute left-4 z-50 invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-opacity duration-200'
+          style={{ top: showSmallHeader ? 'calc(var(--main-header-height, 100px) + 1rem)' : '1rem' }}
+        >
+          <CustomButton
+            type='button'
+            onClick={() => navigate(-1)}
+            className='flex items-center gap-2 bg-white text-slate-700 px-4 py-2 rounded-full font-semibold shadow-md hover:bg-white/90'
+            icon={<ArrowLeft className='h-5 w-5' />}
+            label='Quay lại'
+          />
+        </div>
         <div
           className='video-introduction relative p-0 md:p-10 mb-6 md:mb-0 cursor-pointer'
           role='button'

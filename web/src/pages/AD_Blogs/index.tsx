@@ -62,6 +62,7 @@ const AD_Blogs = () => {
             userAvt: b.userAvt
           }))}
           onDeleted={(id) => setBlogs((prev) => prev.filter((b) => b._id !== id))}
+          base='admin'
         />
       )}
 

@@ -79,7 +79,6 @@ const CoursesTable: FC<CoursesTableProps> = ({ courses, statusFilter = '', onCha
                 </DropdownMenu>
               </div>
             </TableHead>
-            <TableHead className='p-3 sm:p-6 text-blue-600 dark:text-gray-300'>Học viên</TableHead>
             <TableHead className='p-3 sm:p-6 text-blue-600 dark:text-gray-300'>Thời lượng</TableHead>
             <TableHead className='p-3 sm:p-6 text-blue-600 dark:text-gray-300'>Ngày tạo</TableHead>
             <TableHead />
@@ -120,10 +119,9 @@ const CoursesTable: FC<CoursesTableProps> = ({ courses, statusFilter = '', onCha
                 </div>
               </TableCell>
               <TableCell className='px-4'>{getStatusBadge(course.status)}</TableCell>
-              <TableCell className='text-gray-700 dark:text-gray-300 px-10'>{course.students ?? 0}</TableCell>
-              <TableCell className='text-gray-700 dark:text-gray-300'>{course.duration ?? '-'}</TableCell>
+              <TableCell className='text-gray-700 dark:text-gray-300'>{course.duration ?? ''}</TableCell>
               <TableCell className='text-gray-500 dark:text-gray-400 text-xs sm:text-sm px-5'>
-                {course.createdAt ?? ''}
+                {course.createdAt ?? 'hi'}
               </TableCell>
               <TableCell className='text-right'>
                 <DropdownMenu>

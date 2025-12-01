@@ -10,6 +10,7 @@ import java.util.Set;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class MyProfileResponse {
+    String id;
     String image;
     String name;
     String phone;

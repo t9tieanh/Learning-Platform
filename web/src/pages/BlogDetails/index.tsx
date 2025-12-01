@@ -1,14 +1,16 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import { blogService, type BlogItem } from '@/services/blog.service'
 // Apply the same Quill and preview styles used in the editor preview
 import 'quill/dist/quill.snow.css'
 import '@/components/TC_CreateBlog/blog-preview.css'
 
 const BlogDetails = () => {
+  const navigate = useNavigate()
   const { id } = useParams<{ id: string }>()
   const [blog, setBlog] = useState<BlogItem | null>(null)
   const [loading, setLoading] = useState(true)
@@ -38,7 +40,9 @@ const BlogDetails = () => {
 
   return (
     <div className='min-h-screen bg-white'>
-      <article className='container px-16 py-12 space-y-6'>
+      <article className='container px-16 py-6 space-y-6'>
+        <Button className='bg-gray-100 text-black hover:bg-gray-200 shadow-lg' onClick={() => navigate(-1)}>← Quay lại</Button>
+
         {loading ? (
           <div className='text-center text-muted-foreground py-16'>Đang tải bài viết...</div>
         ) : error ? (
@@ -111,7 +115,7 @@ const BlogDetails = () => {
 
             {/* Nội dung bài viết — full width (render Quill HTML with same styles as preview) */}
             <div className='prose prose-slate max-w-none blog-preview'>
-              <div className='ql-editor !px-0 !py-0' dangerouslySetInnerHTML={{ __html: blog.content }} />
+              <div className='ql-editor !px-0 !py-0 !text-sm' dangerouslySetInnerHTML={{ __html: blog.content }} />
             </div>
           </>
         )}

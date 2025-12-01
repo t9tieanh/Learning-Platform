@@ -44,7 +44,7 @@ const CourseList = ({ title, fetcher }: CourseListProps) => {
   }
 
   return (
-    <div className='course-list-container mt-12'>
+    <div className='course-list-container pt-10'>
       <div className='flex items-center mt-6'>
         <div className='shrink-0' style={{ width: '320px' }}>
           <h4 className='font-bold bg-blue-500 text-white p-2 rounded-r-3xl pl-12'>{title}</h4>

@@ -11,6 +11,7 @@ type authState = {
     email?: string
     avatarUrl?: string
     conversationId?: string
+    role?: string
   } | null
 }
 

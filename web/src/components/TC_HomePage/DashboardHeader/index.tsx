@@ -73,10 +73,10 @@ const DashboardHeader = () => {
           <DropdownMenuContent align='end'>
             <DropdownMenuItem className='!bg-transparent hover:!bg-white hover:!text-primary transition-colors'>
               <CustomButton
-                label='Tài khoản'
+                label='Tài khoản học viên'
                 className='w-full text-white rounded-md hover:bg-blue-700'
                 type='button'
-                onClick={() => navigate('/teacher/profile')}
+                onClick={() => navigate('/')}
                 icon={<User className='h-4 w-4 ml-1 text-white' />}
               />
             </DropdownMenuItem>

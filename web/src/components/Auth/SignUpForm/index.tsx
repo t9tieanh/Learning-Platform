@@ -79,13 +79,22 @@ const SignUpForm: FC<{ setIsSignUpMode: (value: boolean) => void; handleLoginWit
                 )}
               </div>
               <div className='remember-me mt-5 flex flex-col gap-2'>
-                <CustomCheckbox
-                  id='agree'
-                  label='Tôi đồng ý với điều khoản'
-                  checked={!!watch('confirmRules')}
-                  onChange={(e) => setValue('confirmRules', e.target.checked)}
-                  className='text-gray-700'
-                />
+                <div className='flex gap-1'>
+                  <CustomCheckbox
+                    id='agree'
+                    label='Tôi đồng ý với'
+                    checked={!!watch('confirmRules')}
+                    onChange={(e) => setValue('confirmRules', e.target.checked)}
+                    className='text-gray-700'
+                  />
+                  <a
+                    href='/term'
+                    target='_blank'
+                    className='text-blue-600 text-base underline underline-offset-2 cursor-pointer hover:text-blue-700'
+                  >
+                    Điều khoản
+                  </a>
+                </div>
                 {errors.confirmRules && (
                   <span className='text-red-500 text-xs text-start'>{errors.confirmRules.message}</span>
                 )}
@@ -122,9 +131,9 @@ const SignUpForm: FC<{ setIsSignUpMode: (value: boolean) => void; handleLoginWit
               </div>
               <p className='text-center text-sm text-gray-500 mt-5'>
                 Bạn đã có tài khoản?{' '}
-                <a href='/login' className='text-blue-500 hover:underline'>
+                <button type='button' onClick={() => setIsSignUpMode(false)} className='text-blue-500 hover:underline'>
                   Đăng nhập
-                </a>
+                </button>
               </p>
             </form>
           </CardContent>
