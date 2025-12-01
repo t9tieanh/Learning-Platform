@@ -11,7 +11,7 @@ class CartController {
             const cart = await cartService.addToCart(req.session.cartId as string, courseId, req.user?.sub as string);
             sendResponse(res, {
                 code: 200,
-                message: 'Thêm vào giỏ hàng thành công',
+                message: 'Thêm khóa học vào giỏ hàng thành công',
                 result: cart
             });
         } catch (error) {
@@ -58,7 +58,7 @@ class CartController {
             await cartService.removeFromCart(req.session.cartId as string, courseId as string, !req.user);
             sendResponse(res, {
                 code: 200,
-                message: 'Xoá khỏi giỏ hàng thành công'
+                message: 'Xoá khóa học khỏi giỏ hàng thành công'
             });
         } catch (error) {
             next(error);

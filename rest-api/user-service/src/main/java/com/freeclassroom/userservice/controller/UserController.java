@@ -16,6 +16,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -56,12 +57,12 @@ public class UserController {
         return userService.verifySignUp(token);
     }
 
-    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PutMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     ApiResponse<GetUserResponse> updateUser(
-            @PathVariable String id,
             @ModelAttribute UpdateUserRequest request
     ) {
-        return userService.updateUser(id, request);
+        String userId = SecurityContextHolder.getContext().getAuthentication().getName();
+        return userService.updateUser(userId, request);
     }
 
     @PostMapping("/certificates")

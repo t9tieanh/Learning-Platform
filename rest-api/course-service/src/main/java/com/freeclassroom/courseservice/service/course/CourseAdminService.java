@@ -66,11 +66,6 @@ public class CourseAdminService implements ICourseAdminService {
                 () -> new CustomExeption(ErrorCode.COURSE_NOT_FOUND)
         );
 
-        // check status
-        if (!(course.getProgressStep().equals(EnumCourseProgressStep.COMPLETED))) {
-            throw new CustomExeption(ErrorCode.COURSE_NOT_DONE);
-        }
-
         // puplic course
         course.setStatus(EnumCourseStatus.PUBLISHED);
 

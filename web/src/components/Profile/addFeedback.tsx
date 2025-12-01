@@ -95,7 +95,12 @@ const AddFeedback = ({ courseItem, onClose }: { courseItem: CourseListItem; onCl
 
       <div className='flex justify-end gap-2'>
         <CustomButton onClick={onClose} className='bg-gray-100 hover:bg-gray-200 text-black' label='Hủy' />
-        <CustomButton onClick={submitFeedback} label={isUpdate ? `Cập nhật đánh giá` : `Gửi đánh giá`} icon={<Send size={16} />} isLoader={loading} />
+        <CustomButton
+          onClick={submitFeedback}
+          label={isUpdate ? `Cập nhật đánh giá` : `Gửi đánh giá`}
+          icon={<Send size={16} />}
+          isLoader={loading}
+        />
       </div>
     </div>
   )

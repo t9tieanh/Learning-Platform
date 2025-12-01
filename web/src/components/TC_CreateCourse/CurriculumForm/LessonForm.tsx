@@ -95,18 +95,18 @@ const LessonForm = ({
     }
   }
 
-  const getLectureIcon = useCallback((type: string) => {
+  const getLectureIcon = useCallback((type: string, lesson: Lesson) => {
     switch (type) {
       case 'video':
         return (
-          <span className='flex items-center justify-center w-7 h-7 rounded-md bg-blue-100 text-blue-600'>
-            <Play className='h-4 w-4' />
+          <span className='flex items-center justify-center w-7 h-7 rounded-md bg-blue-100 text-blue-600 hover:cursor-pointer hover:shadow-lg hover:bg-blue-800'>
+            <Play className='h-4 w-4' onClick={() => setPreview({ openPreview: true, lesson })} />
           </span>
         )
       case 'article':
         return (
-          <span className='flex items-center justify-center w-7 h-7 rounded-md bg-amber-100 text-amber-600'>
-            <FileText className='h-4 w-4' />
+          <span className='flex items-center justify-center w-7 h-7 rounded-md bg-amber-100 text-amber-600 hover:cursor-pointer hover:shadow-lg hover:bg-amber-800'>
+            <FileText className='h-4 w-4' onClick={() => setPreview({ openPreview: true, lesson })} />
           </span>
         )
       case 'quiz':
@@ -128,7 +128,7 @@ const LessonForm = ({
     <>
       <div key={key} className='flex shadow-sm items-center space-x-3 p-3 rounded-lg border border-blue-200'>
         <GripVertical className='h-4 w-4 text-blue-400' />
-        {getLectureIcon(lesson.type)}
+        {getLectureIcon(lesson.type, lesson)}
         <div className='flex-1'>
           {updateTitle ? (
             <form className='space-y-2' onSubmit={handleSubmit(updateLesson)}>
@@ -169,17 +169,6 @@ const LessonForm = ({
           <Badge variant='secondary' className='capitalize bg-blue-100 text-blue-700'>
             {lesson.type === 'video' ? 'Video' : lesson.type === 'article' ? 'Bài viết' : 'Quiz'}
           </Badge>
-          <Button
-            variant='ghost'
-            size='icon'
-            className='text-blue-500 hover:bg-blue-50'
-            title='Xem chi tiết'
-            onClick={() => {
-              setPreview({ openPreview: true, lesson })
-            }}
-          >
-            <Eye className='h-4 w-4' />
-          </Button>
           <Button
             variant='ghost'
             size='icon'

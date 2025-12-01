@@ -72,7 +72,9 @@ const SetupForm = ({ id }: { id: string }) => {
                 </div>
 
                 <div className='text-center p-3 bg-blue-100 rounded-lg'>
-                  <div className='text-lg font-bold text-blue-900'>{formatDuration(overviewCourse?.videoDuration || 0)}</div>
+                  <div className='text-lg font-bold text-blue-900'>
+                    {formatDuration(overviewCourse?.videoDuration || 0)}
+                  </div>
                   <div className='text-xs text-blue-700'>Thời lượng</div>
                 </div>
 

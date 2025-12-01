@@ -1,8 +1,11 @@
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
 import CustomButton from '../common/Button'
-import { LogOut, GraduationCap, BookOpen, MessageCircle, User } from 'lucide-react'
+import { LogOut, GraduationCap, MessageCircle, User } from 'lucide-react'
 import { useAuthStore } from '@/stores/useAuth.stores'
 import { useNavigate } from 'react-router-dom'
+import { showConfirmToast } from '../common/ShowConfirmToast'
+import userService from '@/services/user/user.service'
+import { toast } from 'sonner'
 
 const Menu = ({
   username,
@@ -18,9 +21,24 @@ const Menu = ({
   const { data, setData } = useAuthStore()
   const navigate = useNavigate()
 
-  const handleLogout = () => {
-    setData(null)
-    navigate('/')
+  const handleLogout = async () => {
+    const confirmed = await showConfirmToast({
+      title: 'Đăng xuất',
+      description: 'Bạn có chắc chắn muốn đăng xuất?',
+      confirmLabel: 'Đăng xuất'
+    })
+    if (confirmed) {
+      // Call logout API
+      try {
+        await userService.logout()
+      } catch (error) {
+        console.error('Error during logout:', error)
+      }
+      // Clear user data from store
+      setData(null)
+      toast.success('Đăng xuất thành công!')
+      navigate('/auth')
+    }
   }
 
   const handleChat = () => {

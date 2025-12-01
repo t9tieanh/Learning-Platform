@@ -74,8 +74,7 @@ export function CourseHero({
   publishedAt,
   price,
   onPlayIntro,
-  onEdit,
-  courseId
+  onEdit
 }: CourseHeroProps) {
   const [openPreview, setOpenPreview] = useState(false)
   const [openApproveModal, setOpenApproveModal] = useState(false)
@@ -85,6 +84,56 @@ export function CourseHero({
   const location = useLocation()
   const isAdminRoute = location.pathname.startsWith('/admin/course')
   const { id } = useParams<{ id: string }>()
+
+  // Handle approve course
+  const handleApproveCourse = async () => {
+    if (!id) {
+      toast.error('Missing course id')
+      return
+    }
+    setApproving(true)
+    try {
+      const res = await courseAdminService.aprovalCourse(id)
+      if (res && res.code === 200) {
+        toast.success('Phê duyệt khoá học thành công')
+        setOpenApproveModal(false)
+      } else {
+        toast.error(res.message || 'Không thể phê duyệt khoá học')
+      }
+    } catch (err) {
+      console.error(err)
+      toast.error('Lỗi khi gọi API phê duyệt')
+    } finally {
+      setApproving(false)
+    }
+  }
+
+  // Handle reject course
+  const handleRejectCourse = async () => {
+    if (!id) {
+      toast.error('Missing course id')
+      return
+    }
+    if (!rejectReason) {
+      // require reason? we allow empty
+    }
+    setRejecting(true)
+    try {
+      const res = await courseAdminService.rejectCourse(id, rejectReason)
+      if (res && res.code === 200) {
+        toast.success('Từ chối khoá học thành công')
+        setOpenApproveModal(false)
+      } else {
+        toast.error(res.message || 'Không thể từ chối khoá học')
+      }
+    } catch (err) {
+      console.error(err)
+      toast.error('Lỗi khi gọi API từ chối')
+    } finally {
+      setRejecting(false)
+    }
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -94,7 +143,7 @@ export function CourseHero({
       <div className='absolute inset-0 bg-[#0C356A]' />
 
       <div className='relative grid gap-6 p-8 lg:grid-cols-2 lg:gap-8'>
-        <div className='flex flex-col justify-center space-y-6'>
+        <div className='flex flex-col space-y-6'>
           <div className='flex items-center gap-3 flex-wrap'>
             <Badge className={`${getStatusColor(status)} text-sm p-1`}>{getStatusLabel(status)}</Badge>
 
@@ -117,15 +166,15 @@ export function CourseHero({
           <div className='flex gap-3 flex-wrap'>
             {isAdminRoute ? (
               <>
-                {courseStatus === 'pending' && (
-                <Button
-                  onClick={() => setOpenApproveModal(true)}
-                  size='lg'
-                  className='shadow-primary bg-blue-600 text-white hover:bg-blue-700'
-                >
-                  <Check className='mr-2 h-4 w-4' />
-                  {courseStatus === 'pending' && 'Phê duyệt khóa học'}
-                </Button>
+                {courseStatus === 'pending_review' && (
+                  <Button
+                    onClick={() => setOpenApproveModal(true)}
+                    size='lg'
+                    className='shadow-primary bg-blue-600 text-white hover:bg-blue-700'
+                  >
+                    <Check className='mr-2 h-4 w-4' />
+                    {courseStatus === 'pending_review' && 'Phê duyệt khóa học'}
+                  </Button>
                 )}
 
                 <CustomDialog
@@ -133,11 +182,9 @@ export function CourseHero({
                   setOpen={setOpenApproveModal}
                   title={<span>Phê duyệt / Từ chối khoá học</span>}
                   size='md'
+                  description='Bạn có thể phê duyệt khoá học này để nó được xuất bản trên nền tảng hoặc từ chối với lý do cụ thể.'
                 >
                   <div className='space-y-4'>
-                    <p className='text-sm text-muted-foreground'>
-                      Bạn có muốn phê duyệt khoá học này hay từ chối? Chọn hành động bên dưới.
-                    </p>
                     <div className='flex flex-col gap-2'>
                       <textarea
                         placeholder='Nếu từ chối, ghi lý do ở đây (tùy chọn)'
@@ -147,60 +194,13 @@ export function CourseHero({
                       />
                     </div>
                     <div className='flex items-center justify-end gap-2'>
-                      <Button
-                        size='sm'
-                        className='bg-red-500 text-white hover:bg-red-600'
-                        onClick={async () => {
-                          if (!id) {
-                            toast.error('Missing course id')
-                            return
-                          }
-                          if (!rejectReason) {
-                            // require reason? we allow empty
-                          }
-                          setRejecting(true)
-                          try {
-                            const res = await courseAdminService.rejectCourse(id, rejectReason)
-                            if (res && res.code === 200) {
-                              toast.success('Từ chối khoá học thành công')
-                              setOpenApproveModal(false)
-                            } else {
-                              toast.error(res.message || 'Không thể từ chối khoá học')
-                            }
-                          } catch (err) {
-                            console.error(err)
-                            toast.error('Lỗi khi gọi API từ chối')
-                          } finally {
-                            setRejecting(false)
-                          }
-                        }}
-                      >
+                      <Button size='sm' className='bg-red-500 text-white hover:bg-red-600' onClick={handleRejectCourse}>
                         <AiFillDislike /> {rejecting ? 'Đang...' : 'Từ chối'}
                       </Button>
                       <Button
                         size='sm'
                         className='bg-blue-600 text-white hover:bg-green-700'
-                        onClick={async () => {
-                          if (!id) {
-                            toast.error('Missing course id')
-                            return
-                          }
-                          setApproving(true)
-                          try {
-                            const res = await courseAdminService.aprovalCourse(id)
-                            if (res && res.code === 200) {
-                              toast.success('Phê duyệt khoá học thành công')
-                              setOpenApproveModal(false)
-                            } else {
-                              toast.error(res.message || 'Không thể phê duyệt khoá học')
-                            }
-                          } catch (err) {
-                            console.error(err)
-                            toast.error('Lỗi khi gọi API phê duyệt')
-                          } finally {
-                            setApproving(false)
-                          }
-                        }}
+                        onClick={handleApproveCourse}
                       >
                         <Check /> {approving ? 'Đang...' : 'Phê duyệt'}
                       </Button>

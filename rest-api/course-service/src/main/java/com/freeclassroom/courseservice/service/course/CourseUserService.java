@@ -298,9 +298,7 @@ public class CourseUserService implements ICourseUserService{
             System.out.println("COURSES: " + courses);
             long validCount = courses.stream()
                     .filter(c -> EnumCourseStatus.PUBLISHED.name().equalsIgnoreCase(String.valueOf(c.getStatus())))
-                    .filter(c -> EnumCourseProgressStep.COMPLETED.name().equalsIgnoreCase(String.valueOf(c.getProgressStep())))
                     .count();
-            System.out.println("validCount: " + validCount);
 
             return ApiResponse.<Integer>builder()
                     .code(HttpStatus.OK.value())

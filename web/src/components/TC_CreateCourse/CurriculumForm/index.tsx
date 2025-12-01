@@ -49,7 +49,7 @@ const CurriculumForm: React.FC<{ id: string }> = ({ id }: { id: string }) => {
     fetchChapters()
   }, [id])
 
-  const addChapter = async () => {
+  const handleAddChapter = async () => {
     const data = await chapterService.addChapter({
       courseId: id,
       title: 'Phần mới',
@@ -212,11 +212,11 @@ const CurriculumForm: React.FC<{ id: string }> = ({ id }: { id: string }) => {
 
           <Button
             variant='outline'
-            onClick={addChapter}
+            onClick={handleAddChapter}
             className='w-full border-dashed border-2 border-blue-300 py-8 rounded-xl text-blue-600 hover:bg-blue-50'
           >
             <Plus className='h-4 w-4 mr-2' />
-            Thêm phần
+            Thêm chương
           </Button>
         </CardContent>
       </Card>

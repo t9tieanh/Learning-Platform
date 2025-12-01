@@ -9,10 +9,11 @@ type DynamicListInputProps = {
   placeholder: string
   items: string[]
   icon?: React.ReactNode
+  description?: string
   onChange: (newItems: string[]) => void
 }
 
-function DynamicListInput({ title, placeholder, items = [], icon, onChange }: DynamicListInputProps) {
+function DynamicListInput({ title, placeholder, items = [], description, icon, onChange }: DynamicListInputProps) {
   const [newItem, setNewItem] = useState('')
 
   const addItem = () => {
@@ -28,9 +29,12 @@ function DynamicListInput({ title, placeholder, items = [], icon, onChange }: Dy
   return (
     <Card className='border border-blue-200 shadow-sm bg-blue-50'>
       <CardHeader className='bg-blue-200/40 rounded-t-lg'>
-        <CardTitle className='text-lg font-medium text-blue-900 flex items-center'>
-          {icon && <span className='mr-2'>{icon}</span>}
-          {title}
+        <CardTitle className='text-lg font-medium text-blue-900 flex flex-row items-center gap-2'>
+          {icon && <span>{icon}</span>}
+          <div className='flex flex-col text-md'>
+            {title}
+            <p className='text-sm text-blue-600'>{description}</p>
+          </div>
         </CardTitle>
       </CardHeader>
       <CardContent className='space-y-4'>
@@ -42,7 +46,7 @@ function DynamicListInput({ title, placeholder, items = [], icon, onChange }: Dy
               className='flex items-center gap-2 justify-between bg-blue-200 p-2 rounded-lg text-blue-950 text-base'
             >
               <BadgeCheck className='h-5 w-5 text-blue-700' />
-              <span className='flex-1 pr-2 break-words'>{item}</span>
+              <span className='flex-1 pr-2 break-words text-sm'>{item}</span>
               <X
                 className='h-6 w-6 flex-shrink-0 text-blue-500 hover:text-red-500 cursor-pointer'
                 onClick={() => removeItem(index)}

@@ -261,20 +261,18 @@ public class UserService implements IUserService {
 
             return ApiResponse.<GetUserResponse>builder()
                     .code(HttpStatus.OK.value())
-                    .message("Sửa thông tin profile thành công !")
+                    .message("Chỉnh sửa thông tin profile thành công !")
                     .result(response)
                     .build();
         } catch (CustomExeption e) {
             return ApiResponse.<GetUserResponse>builder()
                     .code(HttpStatus.OK.value())
-                    .message("Sửa thông tin profile thất bại !")
+                    .message("Chỉnh sửa thông tin profile thất bại !")
                     .result(null)
                     .build();
         } catch (Exception e) {
             throw new CustomExeption(ErrorCode.UNCATEGORIZED_EXEPTION);
         }
-
-
     }
 
     @Override

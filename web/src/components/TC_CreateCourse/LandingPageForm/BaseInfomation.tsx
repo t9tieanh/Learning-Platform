@@ -192,11 +192,12 @@ const BaseInfomation = ({
         name='learnItems'
         render={({ field }) => (
           <DynamicListInput
-            title='Bạn sẽ học được gì từ khóa học này?'
+            title='Học viên của bạn sẽ học được gì từ khóa học này?'
             placeholder='Nhập nội dung bạn sẽ học'
             items={field.value || []}
             onChange={field.onChange}
             icon={<BookOpen className='h-5 w-5 text-blue-700' />}
+            description='Nhập nội dung học viên của bạn sẽ được học (ít nhất 1 mục).'
           />
         )}
       />
@@ -211,6 +212,7 @@ const BaseInfomation = ({
             items={field.value || []}
             onChange={field.onChange}
             icon={<Info className='h-5 w-5 text-blue-700' />}
+            description='Nhập nội dung yêu cầu trước của bạn (ít nhất 1 mục).'
           />
         )}
       />

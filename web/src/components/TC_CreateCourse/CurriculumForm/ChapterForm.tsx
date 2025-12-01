@@ -42,7 +42,7 @@ const ChapterForm = ({
   const [open, setOpen] = useState(false)
   const [dialogType, setDialogType] = useState<'video' | 'document'>('video')
 
-  const updateChapter = async (data: UpdateChapterFormValues) => {
+  const handleUpdateChapter = async (data: UpdateChapterFormValues) => {
     const result = await chapterService.updateChapter({
       id: chapter.id,
       title: data.title,
@@ -62,7 +62,7 @@ const ChapterForm = ({
     }
   }
 
-  const addLecture = (type: 'video' | 'quiz' | 'article') => {
+  const handleAddLecture = (type: 'video' | 'quiz' | 'article') => {
     setDialogType(type === 'video' ? 'video' : 'document')
     setOpen(true)
   }
@@ -114,7 +114,7 @@ const ChapterForm = ({
                 <span className='font-medium text-gray-800'>Phần {chapter.position}:</span>
 
                 {updateTitle ? (
-                  <form className='space-y-2 w-full' onSubmit={handleSubmit(updateChapter)}>
+                  <form className='space-y-2 w-full' onSubmit={handleSubmit(handleUpdateChapter)}>
                     <CustomInput placeholder='Nhập tiêu đề mới' type='text' {...register('title')} />
                     {errors.title && <span className='text-red-500 text-xs'>{errors.title.message}</span>}
 
@@ -186,8 +186,8 @@ const ChapterForm = ({
               <Button
                 variant='outline'
                 size='sm'
-                onClick={() => addLecture('video')}
-                className='flex items-center space-x-1 border-blue-300 text-blue-600'
+                onClick={() => handleAddLecture('video')}
+                className='flex items-center space-x-1 border-blue-300 text-blue-600 shadow-lg'
               >
                 <Plus className='h-4 w-4' />
                 <span>Bài giảng (Video)</span>
@@ -196,18 +196,8 @@ const ChapterForm = ({
               <Button
                 variant='outline'
                 size='sm'
-                onClick={() => addLecture('quiz')}
-                className='flex items-center space-x-1 border-blue-300 text-blue-600'
-              >
-                <Plus className='h-4 w-4' />
-                <span>Quiz</span>
-              </Button>
-
-              <Button
-                variant='outline'
-                size='sm'
-                onClick={() => addLecture('article')}
-                className='flex items-center space-x-1 border-blue-300 text-blue-600'
+                onClick={() => handleAddLecture('article')}
+                className='flex items-center space-x-1 border-blue-300 text-blue-600 shadow-lg'
               >
                 <Plus className='h-4 w-4' />
                 <span>Bài viết</span>

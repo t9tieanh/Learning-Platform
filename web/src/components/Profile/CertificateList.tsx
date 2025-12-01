@@ -89,11 +89,11 @@ const CertificateList: FC<Props> = ({ userId }) => {
     }
   }, [currentUserId])
 
-  const handleAdd = () => {
+  const handleAddCertificate = () => {
     setOpenModal(true)
   }
 
-  const handleSubmit = async () => {
+  const handleSubmitCertificate = async () => {
     const { credentialUrl, issueDate } = newCert
     if (!credentialUrl || !issueDate) {
       toast.error('Vui lòng điền đầy đủ thông tin!')
@@ -139,7 +139,7 @@ const CertificateList: FC<Props> = ({ userId }) => {
     <div className='space-y-4'>
       <div className='flex justify-between items-center'>
         <h2 className='font-semibold text-base'>Chứng chỉ</h2>
-        <CustomButton label='Thêm chứng chỉ' icon={<Plus className='w-4 h-4' />} onClick={handleAdd} />
+        <CustomButton label='Thêm chứng chỉ' icon={<Plus className='w-4 h-4' />} onClick={handleAddCertificate} />
       </div>
 
       <div className='space-y-2'>
@@ -194,7 +194,7 @@ const CertificateList: FC<Props> = ({ userId }) => {
             <Button variant='outline' onClick={() => setOpenModal(false)} disabled={isSubmitting}>
               Hủy
             </Button>
-            <Button onClick={handleSubmit} disabled={isSubmitting}>
+            <Button onClick={handleSubmitCertificate} disabled={isSubmitting}>
               {isSubmitting && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
               {isSubmitting ? 'Đang lưu...' : 'Lưu'}
             </Button>

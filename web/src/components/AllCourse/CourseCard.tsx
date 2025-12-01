@@ -37,14 +37,14 @@ export const CourseCard = ({
 }: CourseCardProps) => {
   const navigate = useNavigate()
 
-  const handleClick = () => {
+  const handleClickCourse = () => {
     navigate(`/course/${id}`)
   }
 
   return (
     <Card
       className='overflow-hidden group border border-border/60 bg-card/60 backdrop-blur-sm cursor-pointer p-0'
-      onClick={handleClick}
+      onClick={handleClickCourse}
     >
       <div className='flex flex-row items-stretch h-40'>
         <div className='w-72 h-full flex-shrink-0 overflow-hidden'>
