@@ -83,14 +83,15 @@ public class ChapterService implements IChapterService {
         course.getChapters().add(chapter);
 
         // set status for add chapter
-        if (course.getStatus().equals(EnumCourseProgressStep.INTRO)) {}
+        if (course.getStatus().equals(EnumCourseProgressStep.INTRO)) {
             course.setProgressStep(EnumCourseProgressStep.CURRICULUM);
+        }
 
         courseRepo.save(course);
 
         return ApiResponse.<CreationResponse>builder()
                 .code(200)
-                .message("Thêm chapter thành công !")
+                .message("Thêm chương thành công !")
                 .result(
                         CreationResponse.builder()
                                 .id(chapter.getId())
@@ -147,7 +148,7 @@ public class ChapterService implements IChapterService {
         }
         return ApiResponse.<CreationResponse>builder()
                 .code(200)
-                .message("Xóa chapter thành công !")
+                .message("Xóa chương thành công !")
                 .result(
                         CreationResponse.builder()
                                 .id(chapterId)

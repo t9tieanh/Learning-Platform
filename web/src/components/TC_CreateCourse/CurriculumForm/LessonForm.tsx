@@ -1,11 +1,24 @@
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { FileText, GripVertical, HelpCircle, Play, Trash2 } from 'lucide-react'
+import { FileText, GripVertical, HelpCircle, Play, Trash2, Send, X, Eye } from 'lucide-react'
 import { Chapter, Lesson } from '@/utils/create-course/curriculum'
-import { useCallback } from 'react'
+import { useCallback, useState } from 'react'
 import lessonService from '@/services/course/lesson.service'
 import { toast } from 'sonner'
 import showConfirmToast from '@/components/common/ShowConfirmToast'
+import { useForm } from 'react-hook-form'
+import { yupResolver } from '@hookform/resolvers/yup'
+import * as yup from 'yup'
+import CustomInput from '@/components/common/Input'
+import CustomButton from '@/components/common/Button'
+import { MdEdit } from 'react-icons/md'
+import PreviewTeacherLesson from './PreviewTeacherLesson'
+
+const UpdateLessonSchema = yup.object({
+  title: yup.string().required('Tiêu đề không được để trống').min(3, 'Tiêu đề phải có ít nhất 3 ký tự')
+})
+
+type UpdateLessonFormValues = yup.InferType<typeof UpdateLessonSchema>
 
 const LessonForm = ({
   key,
@@ -16,6 +29,43 @@ const LessonForm = ({
   lesson: Lesson
   setChapters?: React.Dispatch<React.SetStateAction<Chapter[]>>
 }) => {
+  const [updateTitle, setUpdateTitle] = useState(false)
+  const [preview, setPreview] = useState({
+    openPreview: false,
+    lesson: null as Lesson | null
+  })
+  const {
+    register,
+    handleSubmit,
+    formState: { errors }
+  } = useForm<UpdateLessonFormValues>({
+    resolver: yupResolver(UpdateLessonSchema) as any,
+    defaultValues: {
+      title: lesson.title
+    }
+  })
+
+  const updateLesson = async (data: UpdateLessonFormValues) => {
+    const result = await lessonService.updateNameLesson({
+      id: lesson.id,
+      title: data.title
+    })
+
+    if (result && result.code === 200 && result.result) {
+      if (setChapters) {
+        setChapters((prevChapters) =>
+          prevChapters.map((ch) => ({
+            ...ch,
+            lessons: ch.lessons.map((les: any) => (les.id === lesson.id ? { ...les, title: data.title } : les))
+          }))
+        )
+      }
+      setUpdateTitle(false)
+      toast.success('Cập nhật tiêu đề bài giảng thành công')
+    } else {
+      toast.error(result?.message || 'Cập nhật tiêu đề bài giảng thất bại. Vui lòng thử lại.')
+    }
+  }
   const handleDelLesson = async (lessonId: string) => {
     const confirmed = await showConfirmToast({
       title: 'Xóa bài học',
@@ -45,18 +95,18 @@ const LessonForm = ({
     }
   }
 
-  const getLectureIcon = useCallback((type: string) => {
+  const getLectureIcon = useCallback((type: string, lesson: Lesson) => {
     switch (type) {
       case 'video':
         return (
-          <span className='flex items-center justify-center w-7 h-7 rounded-md bg-blue-100 text-blue-600'>
-            <Play className='h-4 w-4' />
+          <span className='flex items-center justify-center w-7 h-7 rounded-md bg-blue-100 text-blue-600 hover:cursor-pointer hover:shadow-lg hover:bg-blue-800'>
+            <Play className='h-4 w-4' onClick={() => setPreview({ openPreview: true, lesson })} />
           </span>
         )
       case 'article':
         return (
-          <span className='flex items-center justify-center w-7 h-7 rounded-md bg-amber-100 text-amber-600'>
-            <FileText className='h-4 w-4' />
+          <span className='flex items-center justify-center w-7 h-7 rounded-md bg-amber-100 text-amber-600 hover:cursor-pointer hover:shadow-lg hover:bg-amber-800'>
+            <FileText className='h-4 w-4' onClick={() => setPreview({ openPreview: true, lesson })} />
           </span>
         )
       case 'quiz':
@@ -76,11 +126,44 @@ const LessonForm = ({
 
   return (
     <>
-      <div key={key} className='flex items-center space-x-3 p-2 bg-blue-50 rounded-lg border border-blue-200'>
+      <div key={key} className='flex shadow-sm items-center space-x-3 p-3 rounded-lg border border-blue-200'>
         <GripVertical className='h-4 w-4 text-blue-400' />
-        {getLectureIcon(lesson.type)}
+        {getLectureIcon(lesson.type, lesson)}
         <div className='flex-1'>
-          <span className='font-medium text-sm'>{lesson.title || 'Bài giảng chưa có tiêu đề'}</span>
+          {updateTitle ? (
+            <form className='space-y-2' onSubmit={handleSubmit(updateLesson)}>
+              <CustomInput placeholder='Nhập tiêu đề mới' type='text' {...register('title')} />
+              {errors.title && <span className='text-red-500 text-xs'>{errors.title.message}</span>}
+              <div className='flex gap-2'>
+                <CustomButton
+                  className='bg-blue-500 text-white hover:bg-blue-600 h-7'
+                  label='Lưu'
+                  type='submit'
+                  icon={<Send className='h-3 w-3 ml-1' />}
+                />
+                <CustomButton
+                  className='bg-gray-200 text-dark hover:bg-gray-300 h-7'
+                  label='Hủy'
+                  onClick={(e) => {
+                    e.preventDefault()
+                    setUpdateTitle(false)
+                  }}
+                  icon={<X className='h-3 w-3 ml-1' />}
+                />
+              </div>
+            </form>
+          ) : (
+            <div className='group flex items-center'>
+              <span className='font-medium text-sm'>{lesson.title || 'Bài giảng chưa có tiêu đề'}</span>
+              <CustomButton
+                className='opacity-0 transition-opacity duration-300 group-hover:opacity-100 bg-gray-200 text-dark p-1 rounded-md shadow hover:bg-gray-100 flex items-center justify-center ml-2'
+                icon={<MdEdit />}
+                onClick={() => {
+                  setUpdateTitle(true)
+                }}
+              />
+            </div>
+          )}
         </div>
         <div className='flex items-center space-x-2'>
           <Badge variant='secondary' className='capitalize bg-blue-100 text-blue-700'>
@@ -96,6 +179,7 @@ const LessonForm = ({
           </Button>
         </div>
       </div>
+      <PreviewTeacherLesson preview={preview} setPreview={setPreview} />
     </>
   )
 }

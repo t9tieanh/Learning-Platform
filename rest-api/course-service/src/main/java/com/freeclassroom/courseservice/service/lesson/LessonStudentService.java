@@ -188,7 +188,7 @@ public class LessonStudentService implements ILessonStudentService {
                                 .build()
                 )
                 .code(200)
-                .message("Lưu not cho lesson thành công !")
+                .message("Lưu ghi chú thành công !")
                 .build();
     }
 }

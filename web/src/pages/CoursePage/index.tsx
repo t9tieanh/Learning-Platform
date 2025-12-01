@@ -10,7 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
 const CoursePage = () => {
   type UILecture = {
-    id: number
+    id: string
     title: string
     duration: string
     type: 'video' | 'article'
@@ -22,7 +22,7 @@ const CoursePage = () => {
   const [courseData, setCourseData] = useState<CourseDetail | null>(null)
 
   const [currentLecture, setCurrentLecture] = useState<Lesson>()
-  const [currentLectureId, setCurrentLectureId] = useState<number>(-1)
+  const [currentLectureId, setCurrentLectureId] = useState<string>()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const navigate = useNavigate()
 
@@ -77,31 +77,6 @@ const CoursePage = () => {
       }))
     }))
   }, [courseData])
-
-  // Load completed lectures from localStorage
-  // useEffect(() => {
-  //   const saved = localStorage.getItem('completedLectures')
-  //   if (saved) {
-  //     setCompletedLectures(new Set(JSON.parse(saved)))
-  //   }
-  // }, [])
-
-  // Save completed lectures to localStorage
-  // useEffect(() => {
-  //   localStorage.setItem('completedLectures', JSON.stringify(Array.from(completedLectures)))
-  // }, [completedLectures])
-
-  // const handleToggleComplete = (lectureId: number) => {
-  //   setCompletedLectures((prev) => {
-  //     const next = new Set(prev)
-  //     if (next.has(lectureId)) {
-  //       next.delete(lectureId)
-  //     } else {
-  //       next.add(lectureId)
-  //     }
-  //     return next
-  //   })
-  // }
 
   const handleSelectLecture = (lecture: UILecture) => {
     // Convert UILecture (sidebar item) to domain Lesson type
@@ -169,7 +144,7 @@ const CoursePage = () => {
                 <TabNavigation
                   currentLecture={currentLecture}
                   thumbnailUri={courseData?.thumbnailUrl as string}
-                  currentLectureId={currentLectureId}
+                  currentLectureId={currentLectureId as string}
                   instructorId={courseData?.instructor?.id}
                 />
               </div>
@@ -181,7 +156,7 @@ const CoursePage = () => {
         <div className='hidden lg:flex lg:flex-col lg:w-96 flex-shrink-0 border-l border-border overflow-y-auto'>
           <CourseSidebar
             sections={uiSections}
-            currentLectureId={currentLectureId}
+            currentLectureId={currentLectureId as string}
             onSelectLecture={handleSelectLecture}
             onClose={() => setSidebarOpen(false)}
           />
@@ -205,7 +180,7 @@ const CoursePage = () => {
             <div className='fixed right-0 top-0 bottom-0 z-50 lg:hidden'>
               <CourseSidebar
                 sections={uiSections}
-                currentLectureId={currentLectureId}
+                currentLectureId={currentLectureId as string}
                 onSelectLecture={handleSelectLecture}
                 onClose={() => setSidebarOpen(false)}
               />

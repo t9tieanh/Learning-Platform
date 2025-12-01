@@ -3,7 +3,7 @@ import { LectureItem } from './LectureItem'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 
 interface Lecture {
-  id: number
+  id: string
   title: string
   duration: string
   type: 'video' | 'article'
@@ -20,7 +20,7 @@ interface Section {
 
 interface SectionListProps {
   sections: Section[]
-  currentLectureId: number
+  currentLectureId: string
   onSelectLecture: (lecture: Lecture) => void
 }
 

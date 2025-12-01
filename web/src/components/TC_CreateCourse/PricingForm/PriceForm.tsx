@@ -35,49 +35,29 @@ const PriceInput = ({
         </Label>
         <p className='text-sm text-gray-500'>*{subLabel}</p>
       </div>
-      <div className='flex items-center'>
-        <div className='mr-4 w-1/3 flex-1'>
-          <select
-            id='currency'
-            className=' h-10 w-full rounded-md border border-blue-300 bg-white px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400'
-            value={currency}
-            onChange={(e) => setCurrency(e.target.value)}
-          >
-            <option value='VND'>VND - Việt Nam Đồng</option>
-          </select>
-        </div>
-        <div className='relative'>
-          <CustomInput
-            id='price'
-            type='number'
-            step={1000}
-            min={50000}
-            max={20000000}
-            {...(register && name ? register(name) : {})}
-            onChange={(e) => {
-              const raw = e.target.value
-              if (raw === '') {
-                toast.error('Giá không không hợp lệ (trống)')
-                return
-              }
-              const v = Number(raw)
-              if (isNaN(v)) return
-              const min = 50000,
-                max = 20000000
-              setCoursePrice(Math.max(min, Math.min(max, v)))
-            }}
-            // onBlur={() => {
-            //   const min = 50000,
-            //     max = 20000000
-            //   setCoursePrice((prev: number) => {
-            //     if (isNaN(prev)) return min
-            //     return Math.max(min, Math.min(max, prev))
-            //   })
-            // }}
-            className='pl-8 h-10 border-blue-300 focus:ring-2 focus:ring-blue-400'
-          />
-          <span className='absolute left-3 top-1/2 -translate-y-1/2 text-blue-500'>₫</span>
-        </div>
+      <div className='relative'>
+        <CustomInput
+          id='price'
+          type='number'
+          step={1}
+          min={1}
+          max={10000}
+          placeholder='Ví dụ: 200 (tương đương 200.000 VNĐ)'
+          {...(register && name ? register(name) : {})}
+          onChange={(e) => {
+            const raw = e.target.value
+            if (raw === '') {
+              toast.error('Giá không hợp lệ (trống)')
+              return
+            }
+            const value = Number(raw)
+            if (isNaN(value)) return
+            setCoursePrice(value)
+          }}
+          className='pl-8 pr-20 h-10 border-blue-300 focus:ring-2 focus:ring-blue-400'
+        />
+        <span className='absolute left-3 top-1/2 -translate-y-1/2 text-blue-500'>₫</span>
+        <span className='absolute right-3 text-sm top-1/2 -translate-y-1/2 text-gray-500 font-medium'>.000 VND</span>
       </div>
     </>
   )
@@ -122,7 +102,7 @@ const PriceForm = ({
 
   return (
     <form onSubmit={handleSubmit(handleUpdatePrice)}>
-      <Card className='border border-blue-200 shadow-sm bg-blue-50'>
+      <Card className='bg-white shadow-lg'>
         <CardHeader className='bg-blue-200/40 rounded-t-lg'>
           <CardTitle className='text-lg font-medium text-blue-900'>Giá khóa học</CardTitle>
         </CardHeader>
@@ -143,7 +123,7 @@ const PriceForm = ({
           <PriceInput
             currency={currency}
             setCurrency={setCurrency}
-            label='Giá khuyến mãi của khóa học'
+            label='Giá khuyến mãi (Giá thực tế) của khóa học'
             subLabel='*Giá bán ra thực tế của khóa học'
             name='finalPrice'
             register={register}
@@ -153,7 +133,9 @@ const PriceForm = ({
             }}
           />
 
-          <div className='text-sm text-blue-700'>Giá phải nằm trong khoảng 50.000 VNĐ đến 20.000.000 VNĐ</div>
+          <div className='text-sm text-blue-700'>
+            Giá phải nằm trong khoảng 50.000 VNĐ đến 20.000.000 VNĐ (nhập 50 - 20000)
+          </div>
           <div className='flex justify-end'>
             <CustomButton label='Lưu thay đổi' icon={<FaPaperPlane />} isLoader={loading} />
           </div>

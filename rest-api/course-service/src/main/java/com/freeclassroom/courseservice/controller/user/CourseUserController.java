@@ -66,5 +66,4 @@ public class CourseUserController {
     ApiResponse<Integer> countInstructorCourseValid (@RequestParam String instructorId) {
         return courseUserService.countInstructorCourseValid(instructorId);
     }
-
 }

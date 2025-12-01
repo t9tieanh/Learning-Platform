@@ -8,6 +8,7 @@ import { Order } from '@/types/order.type'
 import { toast } from 'sonner'
 import orderService from '@/services/sale/order.service'
 import { useEffect, useState } from 'react'
+import { showConfirmToast } from '@/components/common/ShowConfirmToast'
 
 const PaymentForm = ({ order }: { order: Order | null }) => {
   const [receiveEmail, setReceiveEmail] = useState(order?.customer_email || '')
@@ -17,9 +18,26 @@ const PaymentForm = ({ order }: { order: Order | null }) => {
   }, [order])
 
   const handlePayWithVnPay = async () => {
+    // Show confirmation toast
+    const confirmed = await showConfirmToast({
+      title: (
+        <div className='flex items-center gap-2'>
+          Xác nhận thanh toán
+          <img src={VnPayLogo} alt='VnPay Logo' className='h-5 w-auto' />
+        </div>
+      ),
+      description: 'Bạn sắp thanh toán qua VnPay. Bạn có chắc chắn muốn tiếp tục?',
+      confirmLabel: 'Có, tiếp tục',
+      cancelLabel: 'Hủy'
+    })
+
+    // If user cancels, return early
+    if (!confirmed) return
+
     try {
       const response = await orderService.processPayment('VNPAY', receiveEmail)
       if (response && response.code === 200 && response.result) {
+        toast.success('Đang chuyển đến trang thanh toán VnPay...')
         window.location.href = response.result.payment.payUrl
       } else {
         toast.error(response.message || 'Không thể khởi tạo thanh toán VnPay. Vui lòng thử lại.')
@@ -30,9 +48,26 @@ const PaymentForm = ({ order }: { order: Order | null }) => {
   }
 
   const handlePayWithMomo = async () => {
+    // Show confirmation toast
+    const confirmed = await showConfirmToast({
+      title: (
+        <div className='flex items-center gap-2'>
+          Xác nhận thanh toán
+          <img src={momoLogo} alt='Momo Logo' className='h-5 w-auto' />
+        </div>
+      ),
+      description: 'Bạn sắp thanh toán qua Momo. Bạn có chắc chắn muốn tiếp tục?',
+      confirmLabel: 'Có, tiếp tục',
+      cancelLabel: 'Hủy'
+    })
+
+    // If user cancels, return early
+    if (!confirmed) return
+
     try {
       const response = await orderService.processPayment('MOMO', receiveEmail)
       if (response && response.code === 200 && response.result) {
+        toast.success('Đang chuyển đến trang thanh toán Momo...')
         window.location.href = response.result.payment.payUrl
       } else {
         toast.error(response.message || 'Không thể khởi tạo thanh toán Momo. Vui lòng thử lại.')

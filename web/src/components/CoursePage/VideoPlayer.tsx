@@ -5,7 +5,6 @@ import { useRef, useCallback, useState } from 'react'
 import { Lesson } from '@/types/course-student'
 import { useAuthStore } from '@/stores/useAuth.stores'
 import { toast } from 'sonner'
-import lessonStudentService from '@/services/course/lesson-student.service'
 
 const VideoPlayer = ({ lesson, markDoneVideo }: { lesson: Lesson; markDoneVideo: () => Promise<void> }) => {
   const backEndUri = import.meta.env.VITE_BACKEND_URI as string

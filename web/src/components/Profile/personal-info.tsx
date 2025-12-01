@@ -71,15 +71,11 @@ const PersonalInfo = () => {
     )
   }, [form, userInfo])
 
-  const handleSave = async () => {
-    if (!userId) {
-      toast.error('Không xác định được người dùng')
-      return
-    }
+  const handleSaveProfile = async () => {
     if (!hasChanges) return
     try {
       setSaving(true)
-      const res = await userService.updateUser(String(userId), {
+      const res = await userService.updateUser({
         name: form.name,
         email: form.email,
         phone: form.phone ?? undefined,
@@ -310,7 +306,7 @@ const PersonalInfo = () => {
                 <CustomButton
                   className='shadow hover:opacity-90'
                   label={saving ? 'Đang lưu...' : 'Lưu'}
-                  onClick={handleSave}
+                  onClick={handleSaveProfile}
                   disabled={!hasChanges || saving}
                 />
                 <CustomButton

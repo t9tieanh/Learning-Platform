@@ -37,7 +37,11 @@ class UserService {
     }>
   > {
     const response = await axiosClient.axiosInstance.post('auth', { username, password })
-    console.log('RESPONSE DATA', response)
+    return response.data
+  }
+
+  async logout(): Promise<ApiResponse<any>> {
+    const response = await axiosClient.axiosInstance.post('auth/logout')
     return response.data
   }
 
@@ -99,18 +103,15 @@ class UserService {
   }
 
   // update user (multipart for image)
-  async updateUser(
-    id: string,
-    data: {
-      description?: string
-      email?: string
-      imageFile?: File | null
-      name?: string
-      phone?: string
-      position?: string
-      status?: string | number
-    }
-  ): Promise<ApiResponse<Profile>> {
+  async updateUser(data: {
+    description?: string
+    email?: string
+    imageFile?: File | null
+    name?: string
+    phone?: string
+    position?: string
+    status?: string | number
+  }): Promise<ApiResponse<Profile>> {
     const form = new FormData()
     if (data.description !== undefined) form.append('description', data.description)
     if (data.email !== undefined) form.append('email', data.email)
@@ -120,7 +121,7 @@ class UserService {
     if (data.status !== undefined) form.append('status', String(data.status))
     if (data.imageFile) form.append('image', data.imageFile)
 
-    const response = await axiosClient.axiosInstance.put(`user/${id}`, form, {
+    const response = await axiosClient.axiosInstance.put(`user`, form, {
       headers: { 'Content-Type': 'multipart/form-data' }
     })
     return response.data

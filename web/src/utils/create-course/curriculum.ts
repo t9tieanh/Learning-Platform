@@ -21,8 +21,7 @@ export interface Lesson {
 }
 
 export const UpdateChapterSchema = yup.object({
-  title: yup.string().required('Vui lòng nhập tiêu đề').max(60, 'Tối đa 60 ký tự'),
-  description: yup.string().required('Vui lòng nhập mô tả ngắn').max(120, 'Tối đa 120 ký tự')
+  title: yup.string().required('Vui lòng nhập tiêu đề').max(60, 'Tối đa 60 ký tự')
 })
 
 export type UpdateChapterFormValues = {
@@ -32,9 +31,7 @@ export type UpdateChapterFormValues = {
 
 export const CreationLessonSchema = yup.object({
   title: yup.string().required('Vui lòng nhập tiêu đề').max(60, 'Tối đa 60 ký tự'),
-  content: yup.string().required('Vui lòng nhập nội dung video').max(120, 'Tối đa 120 ký tự'),
   isPublic: yup.boolean().default(false),
-  // duration in seconds (optional)
   duration: yup.number().nullable()
 })
 

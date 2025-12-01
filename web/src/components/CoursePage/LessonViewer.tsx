@@ -11,7 +11,7 @@ export const LessonViewer = ({ lesson }: { lesson: Lesson }) => {
   const { id } = lesson
   const [open, setOpen] = useState(false)
 
-  const markDoneVideo = useCallback(async () => {
+  const markDoneLesson = useCallback(async () => {
     if (lesson.completionStatus === 'COMPLETED') return
     try {
       const response = await lessonStudentService.markDone(lesson.id)
@@ -34,9 +34,9 @@ export const LessonViewer = ({ lesson }: { lesson: Lesson }) => {
   return (
     <div className='w-full px-3 aspect-video bg-video-bg rounded-lg overflow-hidden relative group'>
       {lesson.type === 'video' ? (
-        <VideoPlayer lesson={lesson} markDoneVideo={markDoneVideo} />
+        <VideoPlayer lesson={lesson} markDoneVideo={markDoneLesson} />
       ) : lesson.type === 'article' ? (
-        <PDFViewer lesson={lesson} markDoneVideo={markDoneVideo} />
+        <PDFViewer lesson={lesson} markDoneVideo={markDoneLesson} />
       ) : (
         <div className='w-full h-full flex items-center justify-center bg-gradient-to-br from-muted/30 to-background'>
           <button className='w-24 h-24 rounded-full bg-primary/20 hover:bg-primary/30 transition-all duration-300 flex items-center justify-center group-hover:scale-110 backdrop-blur-sm border border-primary/20'>

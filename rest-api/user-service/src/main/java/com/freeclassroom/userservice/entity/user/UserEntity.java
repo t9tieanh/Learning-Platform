@@ -25,7 +25,11 @@ public class UserEntity extends AbstractEntity {
     String phone;
     String description;
     String position;
+
+    @Column(unique = true)
     String email;
+
+    @Column(unique = true)
     String username;
     String password;
 

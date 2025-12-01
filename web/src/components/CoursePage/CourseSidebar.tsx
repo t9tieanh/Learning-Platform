@@ -2,7 +2,7 @@ import { X, TableOfContents } from 'lucide-react'
 import { SectionList } from './SectionList'
 
 interface Lecture {
-  id: number
+  id: string
   title: string
   duration: string
   type: 'video' | 'article'
@@ -19,7 +19,7 @@ interface Section {
 
 interface CourseSidebarProps {
   sections: Section[]
-  currentLectureId: number
+  currentLectureId: string
   onSelectLecture: (lecture: Lecture) => void
   onClose?: () => void
 }

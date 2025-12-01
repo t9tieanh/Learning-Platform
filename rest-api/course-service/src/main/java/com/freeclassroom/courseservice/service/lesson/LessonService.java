@@ -2,6 +2,7 @@ package com.freeclassroom.courseservice.service.lesson;
 
 import com.freeclassroom.courseservice.dto.request.lesson.CreationDocumentRequest;
 import com.freeclassroom.courseservice.dto.request.lesson.CreationVideoRequest;
+import com.freeclassroom.courseservice.dto.request.lesson.UpdateLessonRequest;
 import com.freeclassroom.courseservice.dto.response.ApiResponse;
 import com.freeclassroom.courseservice.dto.response.common.CreationResponse;
 import com.freeclassroom.courseservice.entity.course.ChapterEntity;
@@ -149,6 +150,46 @@ public class LessonService implements ILessonService{
 
         lesson.setDeleted(true);
         lessonRepo.save(lesson);
+        return ApiResponse.<CreationResponse>builder()
+                .code(200)
+                .message("Xóa bài học thành công !")
+                .result(CreationResponse.builder()
+                        .id(lesson.getId())
+                        .name(lesson.getTitle())
+                        .build())
+                .build();
+    }
+
+    @Override
+    public ApiResponse<CreationResponse> updateNameOfLesson(String lessonId, String content) {
+        LessonEntity lesson = lessonRepo.findById(lessonId).orElseThrow(
+                () -> new CustomExeption(ErrorCode.LESSON_NOT_FOUND)
+        );
+
+        lesson.setTitle(lesson.getTitle());
+        lessonRepo.save(lesson);
+
+        return ApiResponse.<CreationResponse>builder()
+                .code(200)
+                .message("Xóa bài học thành công !")
+                .result(CreationResponse.builder()
+                        .id(lesson.getId())
+                        .name(lesson.getTitle())
+                        .build())
+                .build();
+    }
+
+    @Override
+    public ApiResponse<CreationResponse> updateMetaLesson(String lessonId, UpdateLessonRequest request) {
+        LessonEntity lesson = lessonRepo.findById(lessonId).orElseThrow(
+                () -> new CustomExeption(ErrorCode.LESSON_NOT_FOUND)
+        );
+
+        lesson.setTitle(lesson.getTitle());
+        lesson.setContent(request.getContent());
+        lesson.setIsPublic(request.getIsPublic());
+        lessonRepo.save(lesson);
+
         return ApiResponse.<CreationResponse>builder()
                 .code(200)
                 .message("Xóa bài học thành công !")

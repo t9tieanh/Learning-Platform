@@ -18,13 +18,15 @@ import { Send, NotebookPen } from 'lucide-react'
 const NoteSection = ({
   lessonId,
   open,
-  setOpen
+  setOpen,
+  note
 }: {
   lessonId: string
   open: boolean
   setOpen: (open: boolean) => void
+  note: string
 }) => {
-  const [noteContent, setNoteContent] = React.useState('')
+  const [noteContent, setNoteContent] = React.useState(note || '')
 
   const handleSaveNote = async () => {
     try {
@@ -39,23 +41,6 @@ const NoteSection = ({
       console.error('Failed to save note', error)
     }
   }
-
-  useEffect(() => {
-    if (!open) return
-
-    const fetchNoteContent = async () => {
-      try {
-        const response = await lessonStudentService.getLessonInfo(lessonId)
-        if (response && response.code === 200 && response.result) {
-          setNoteContent(response.result.note)
-        }
-      } catch (error) {
-        console.error('Failed to fetch note content', error)
-      }
-    }
-
-    fetchNoteContent()
-  }, [open, lessonId])
 
   return (
     <Drawer open={open} onOpenChange={setOpen}>

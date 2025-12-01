@@ -372,11 +372,16 @@ public class CourseService implements ICourseService {
         CourseEntity course = courseRepo.findById(id)
                 .orElseThrow(() -> new CustomExeption(ErrorCode.COURSE_NOT_FOUND));
 
+        // check avatar, title
+        if (course.getTitle().equals(null) || course.getTitle().equals("") || course.getThumbnailUrl().equals(null) || course.getThumbnailUrl().equals("")
+            || course.getRequirements().stream().count() == 0 || course.getOutcomes().stream().count() == 0
+        )
+            throw new CustomExeption(ErrorCode.INFO_COURSE_NOT_OKE);
+
         if (courseRepo.countLessonsByCourseId(id) == 0)
             throw new CustomExeption(ErrorCode.COURSE_WITHOUT_VIDEO);
 
-        if (!course.getProgressStep().equals(EnumCourseProgressStep.PRICING)
-                || course.getFinalPrice() == 0 || course.getOriginalPrice() == 0 )
+        if (course.getFinalPrice() == 0 || course.getOriginalPrice() == 0 )
             throw new CustomExeption(ErrorCode.COURSE_WITHOUT_PRICE);
 
         // -> maybe approval

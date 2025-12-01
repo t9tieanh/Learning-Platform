@@ -6,7 +6,7 @@ import orderService from '@/services/sale/order.service'
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'sonner'
-import { Order, OrderStatus } from '@/types/order.type'
+import { Order } from '@/types/order.type'
 import OrderSuccess from '@/components/Checkout/order-success'
 
 const CheckoutPage = () => {

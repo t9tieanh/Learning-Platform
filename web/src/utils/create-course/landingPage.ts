@@ -2,8 +2,6 @@ import * as yup from 'yup'
 
 export const landingPageSchema = yup.object({
   courseTitle: yup.string().required('Vui lòng nhập tiêu đề').max(60, 'Tối đa 60 ký tự'),
-  subtitle: yup.string().required('Vui lòng nhập mô tả ngắn').max(120, 'Tối đa 120 ký tự'),
-  description: yup.string().required('Vui lòng nhập mô tả chi tiết'),
   category: yup.string().required('Chọn danh mục'),
   tags: yup
     .array()

@@ -12,6 +12,7 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class LessonDto {
+    String id;
     String title;
     String content;
     Long duration;

@@ -2,6 +2,7 @@ package com.freeclassroom.courseservice.controller.instructor;
 
 import com.freeclassroom.courseservice.dto.request.lesson.CreationDocumentRequest;
 import com.freeclassroom.courseservice.dto.request.lesson.CreationVideoRequest;
+import com.freeclassroom.courseservice.dto.request.lesson.UpdateLessonRequest;
 import com.freeclassroom.courseservice.dto.response.ApiResponse;
 import com.freeclassroom.courseservice.dto.response.common.CreationResponse;
 import com.freeclassroom.courseservice.exception.CustomExeption;
@@ -48,5 +49,17 @@ public class LessonController {
     @PreAuthorize("@lessonService.canEditLesson(#id, authentication.name)")
     ApiResponse<CreationResponse> addDocumentWithProgress(@PathVariable("id") String id) {
         return lessonService.deleteLesson(id);
+    }
+
+    @PatchMapping("/{id}/name")
+    @PreAuthorize("@lessonService.canEditLesson(#id, authentication.name)")
+    ApiResponse<CreationResponse> updateNameOfLesson(@PathVariable("id") String id, @RequestBody UpdateLessonRequest request) {
+        return lessonService.updateNameOfLesson(id, request.getTitle());
+    }
+
+    @PatchMapping("/{id}")
+    @PreAuthorize("@lessonService.canEditLesson(#id, authentication.name)")
+    ApiResponse<CreationResponse> updateMetaLesson(@PathVariable("id") String id, @RequestBody UpdateLessonRequest request) {
+        return lessonService.updateMetaLesson(id, request);
     }
 }

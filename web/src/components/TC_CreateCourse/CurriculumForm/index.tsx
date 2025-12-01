@@ -49,7 +49,7 @@ const CurriculumForm: React.FC<{ id: string }> = ({ id }: { id: string }) => {
     fetchChapters()
   }, [id])
 
-  const addChapter = async () => {
+  const handleAddChapter = async () => {
     const data = await chapterService.addChapter({
       courseId: id,
       title: 'Phần mới',
@@ -194,7 +194,7 @@ const CurriculumForm: React.FC<{ id: string }> = ({ id }: { id: string }) => {
         </>
       )}
 
-      <Card className='border border-blue-200/60 shadow-sm bg-white'>
+      <Card className='border border-blue-200/60 shadow-lg bg-white'>
         <CardHeader className='flex items-center justify-between pb-0'>
           <CardTitle className='text-lg font-semibold text-gray-800'>
             <span>Nội dung khóa học</span>
@@ -212,11 +212,11 @@ const CurriculumForm: React.FC<{ id: string }> = ({ id }: { id: string }) => {
 
           <Button
             variant='outline'
-            onClick={addChapter}
+            onClick={handleAddChapter}
             className='w-full border-dashed border-2 border-blue-300 py-8 rounded-xl text-blue-600 hover:bg-blue-50'
           >
             <Plus className='h-4 w-4 mr-2' />
-            Thêm phần
+            Thêm chương
           </Button>
         </CardContent>
       </Card>
