@@ -385,7 +385,7 @@ public class CourseService implements ICourseService {
             throw new CustomExeption(ErrorCode.COURSE_WITHOUT_PRICE);
 
         // -> maybe approval
-        course.setProgressStep(EnumCourseProgressStep.SETTINGS);
+        course.setProgressStep(EnumCourseProgressStep.COMPLETED);
         course.setStatus(EnumCourseStatus.PENDING_REVIEW);
         courseRepo.save(course);
 
