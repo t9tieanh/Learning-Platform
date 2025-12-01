@@ -52,7 +52,7 @@ public class CourseController {
 
     @PostMapping("/")
     ApiResponse<PageResponse<CourseResponse>> getCoursesByTeacherId(@RequestBody InstructorRequest request) {
-        return courseService.getCoursesByTeacherId(request.getInstructorId(), request.getPage(), request.getLimit());
+        return courseService.getCoursesByTeacherId(request.getInstructorId(), request.getPage(), request.getLimit(), request.getIsPublic());
     }
 
     @PostMapping

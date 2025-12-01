@@ -21,9 +21,10 @@ import Chat from './pages/Chat'
 import Blog from './pages/Blog'
 import BlogList from './pages/BlogList'
 import BlogDetails from './pages/BlogDetails'
+import Terms from './pages/GeneralTerms'
+import CourseOfTeacher from './pages/CourseOfTeacher'
 import TC_Course from './pages/TC_Courses'
 import TC_CreateCourse from './pages/TC_CreateCourse'
-import TC_Profile from './pages/TC_Profile'
 import TC_CourseDetail from './pages/TC_CourseDetail'
 import TC_Blog from './pages/TC_Blog'
 import TC_CreateBlog from './pages/TC_CreateBlog'
@@ -35,6 +36,7 @@ import AD_CourseDetails from './pages/AD_CourseDetails'
 import AD_Instructor from './pages/AD_Instructor'
 import AD_Certificates from './pages/AD_Certificates'
 import AD_Blogs from './pages/AD_Blogs'
+import AD_BlogDetails from './pages/AD_BlogDetails'
 import Home2 from './pages/Home2'
 import { SocketProvider } from '@/api/socket/socket.context'
 import DiscountsAdmin from './pages/AD_Discounts'
@@ -60,7 +62,8 @@ const router = createBrowserRouter([
           { path: 'home2', element: <Home2 /> },
           { path: 'about', element: <About /> },
           { path: 'check-out', element: <CheckoutPage /> },
-          { path: 'check-out/:id', element: <CheckoutPage /> }
+          { path: 'check-out/:id', element: <CheckoutPage /> },
+          { path: 'instructor/:id', element: <CourseOfTeacher /> }
         ]
       },
       { path: 'auth', element: <AuthLayout /> },
@@ -68,6 +71,7 @@ const router = createBrowserRouter([
       { path: '*', element: <NotFound /> },
       { path: 'forgot', element: <ForgotPass /> },
       { path: 'course-page/:courseId', element: <CoursePage /> },
+      { path: 'term', element: <Terms /> },
       {
         path: 'teacher',
         element: <TC_Layout />,
@@ -75,7 +79,6 @@ const router = createBrowserRouter([
           { path: '', element: <TCHomePage /> },
           { path: 'course', element: <TC_Course /> },
           { path: 'course/:id', element: <TC_CreateCourse /> },
-          { path: 'profile', element: <TC_Profile /> },
           { path: 'course-details/:id', element: <TC_CourseDetail /> },
           // Alias cũ (nếu ai truy cập không có id sẽ 404 hoặc có thể điều hướng)
           { path: 'chat/:id', element: <Chat /> },
@@ -96,7 +99,8 @@ const router = createBrowserRouter([
           { path: 'instructors', element: <AD_Instructor /> },
           { path: 'certificates', element: <AD_Certificates /> },
           { path: 'discounts', element: <DiscountsAdmin /> },
-          { path: 'blogs', element: <AD_Blogs /> }
+          { path: 'blogs', element: <AD_Blogs /> },
+          { path: 'blog/:id', element: <AD_BlogDetails /> }
         ]
       },
       { path: 'user/verify', element: <User /> },

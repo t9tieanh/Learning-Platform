@@ -164,11 +164,24 @@ public class CourseService implements ICourseService {
     }
 
     @Override
-    public ApiResponse<PageResponse<CourseResponse>> getCoursesByTeacherId(String instructorId, int page, int size) {
+    public ApiResponse<PageResponse<CourseResponse>> getCoursesByTeacherId(String instructorId, int page, int size, Boolean isPublic) {
         try {
             Pageable pageable = PageRequest.of(Math.max(0, page - 1), size, Sort.by("createdAt").descending());
-            Page<CourseEntity> coursePage = courseRepo.findByInstructorId(instructorId, pageable);
+
+            Page<CourseEntity> coursePage;
+            if (Boolean.TRUE.equals(isPublic)) {
+                coursePage = courseRepo.findByInstructorIdAndStatusAndProgressStep(
+                        instructorId,
+                        EnumCourseStatus.PUBLISHED,
+                        EnumCourseProgressStep.COMPLETED,
+                        pageable
+                );
+            } else {
+                coursePage = courseRepo.findByInstructorId(instructorId, pageable);
+            }
+
             List<CourseResponse> items = courseMapper.toDtoList(coursePage.getContent());
+
             PageResponse<CourseResponse> pageResponse = PageResponse.<CourseResponse>builder()
                     .items(items)
                     .page(coursePage.getNumber() + 1)
@@ -385,7 +398,7 @@ public class CourseService implements ICourseService {
             throw new CustomExeption(ErrorCode.COURSE_WITHOUT_PRICE);
 
         // -> maybe approval
-        course.setProgressStep(EnumCourseProgressStep.SETTINGS);
+        course.setProgressStep(EnumCourseProgressStep.COMPLETED);
         course.setStatus(EnumCourseStatus.PENDING_REVIEW);
         courseRepo.save(course);
 

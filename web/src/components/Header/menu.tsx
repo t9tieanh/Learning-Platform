@@ -48,10 +48,17 @@ const Menu = ({
 
   const handleMyCoursesClick = () => {
     navigate('/me?mode=courses')
+    closeMenu()
   }
 
   const handleProfileClick = () => {
     navigate(`/me?mode=info`)
+    closeMenu()
+  }
+
+  const handleTeacherClick = () => {
+    navigate('/teacher', { state: { user: data } })
+    closeMenu()
   }
 
   return (
@@ -82,7 +89,7 @@ const Menu = ({
             className='border-2 border-slate-300 bg-white hover:bg-blue-500 hover:text-white text-gray-800 rounded-lg px-3'
             label='Trang giảng viên'
             icon={<GraduationCap className='w-4 h-4 mr-2' />}
-            onClick={() => navigate('/teacher', { state: { user: data } })}
+            onClick={handleTeacherClick}
           />
           <CustomButton
             className='border-2 border-slate-300 bg-white hover:bg-blue-500 hover:text-white text-gray-800 rounded-lg px-3'

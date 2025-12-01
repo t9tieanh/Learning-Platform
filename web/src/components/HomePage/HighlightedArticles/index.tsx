@@ -3,7 +3,7 @@ import ArticlesCard from '@/components/common/ArticlesCard'
 import { blogService } from '@/services/blog.service'
 
 type HighlightArticle = {
-  id: number
+  id: string
   title: string
   shortDescription: string
   thumbnail: string
@@ -23,8 +23,8 @@ const HighlightedArticles = () => {
         const res = await blogService.getAll({ page: 1, limit: 8 })
         if (!mounted) return
         const items = res.items || []
-        const mapped: HighlightArticle[] = items.map((b: any, idx: number) => ({
-          id: idx,
+        const mapped: HighlightArticle[] = items.map((b: any, idx: any) => ({
+          id: b._id,
           title: b.title ?? '—',
           shortDescription: extractSummary(b.content) || '—',
           thumbnail: b.image_url || b.thumbnail || ''

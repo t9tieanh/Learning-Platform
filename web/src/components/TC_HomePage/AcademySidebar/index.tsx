@@ -1,32 +1,29 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@radix-ui/react-avatar'
-import { BookOpen, Calendar, Home, MessageSquare, BarChart3, HelpCircle, Settings, FileText } from 'lucide-react'
+import { BookOpen, Home, MessageSquare, Settings, FileText, LogOut } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useAuthStore } from '@/stores/useAuth.stores'
 import { useNavigate } from 'react-router-dom'
 import logo from '@/assets/images/logo1.png'
+import { toast } from 'sonner'
 
 const sidebarItems = [
   {
     category: 'TỔNG QUAN',
-    items: [
-      { name: 'Trang chủ', icon: Home, active: true },
-      { name: 'Lịch', icon: Calendar, active: true }
-    ]
+    items: [{ name: 'Trang chủ', icon: Home, active: true }]
   },
   {
     category: 'DANH MỤC',
     items: [
       { name: 'Khóa học', icon: BookOpen, active: true },
       { name: 'Tin nhắn', icon: MessageSquare, active: true },
-      { name: 'Thống kê', icon: BarChart3, active: true },
       { name: 'Bài viết', icon: FileText, active: true },
-      { name: 'Cài đặt', icon: Settings, active: true }
+      { name: 'Đăng xuất', icon: LogOut, active: true }
     ]
   }
 ]
 
 const AcademySidebar = () => {
-  const { data } = useAuthStore()
+  const { data, setData } = useAuthStore()
   const navigate = useNavigate()
   const displayName = data?.name || 'Giảng viên'
   const initials = (data?.name || 'GV')
@@ -34,6 +31,12 @@ const AcademySidebar = () => {
     .map((n) => n[0])
     .join('')
     .toUpperCase()
+
+  const handleLogout = () => {
+    setData(null)
+    toast.success('Đăng xuất thành công!')
+    navigate('/auth')
+  }
   return (
     <div
       className='w-64 h-screen bg-[#1D1D2A] text-sidebar-foreground flex flex-col
@@ -61,6 +64,7 @@ const AcademySidebar = () => {
                 if (item.name === 'Khóa học') onClick = () => navigate('/teacher/course')
                 if (item.name === 'Tin nhắn') onClick = () => navigate('/teacher/chat/:id')
                 if (item.name === 'Bài viết') onClick = () => navigate('/teacher/blogs')
+                if (item.name === 'Đăng xuất') onClick = () => handleLogout()
                 return (
                   <Button
                     key={itemIndex}

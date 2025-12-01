@@ -24,16 +24,16 @@ const AuthPage: React.FC<SlidingLoginSignupProps> = ({ isSignUpMode, setIsSignUp
   // Get state and actions
   const { data, setData, setConversationId } = useAuthStore()
 
+  // Redirect away from Auth if already logged in (run once)
   useEffect(() => {
-    if (data) {
-      const role = (data as any)?.role
-      if (role === 'admin') {
-        navigator('/admin', { replace: true })
-      } else {
-        navigator('/', { replace: true })
-      }
+    const current = useAuthStore.getState().data
+    if (current) {
+      const role = current?.role
+      const path = role === 'admin' ? '/admin' : '/'
+      navigator(path, { replace: true })
     }
-  }, [data, navigator])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const exchangeTokenForOauth2 = async (authorizationCode: string) => {
     try {
@@ -64,7 +64,9 @@ const AuthPage: React.FC<SlidingLoginSignupProps> = ({ isSignUpMode, setIsSignUp
           }
         }
         toast.success('Đăng nhập thành công!')
-        navigator('/')
+        const role = r.role
+        const path = role === 'admin' ? '/admin' : '/'
+        navigator(path)
       } else {
         toast.error(response.message)
       }
@@ -115,7 +117,7 @@ const AuthPage: React.FC<SlidingLoginSignupProps> = ({ isSignUpMode, setIsSignUp
   return (
     <div className={`${containerBase} ${containerMode}`}>
       <div style={{ transition: 'all 1500ms ease-in-out' }} className={`${formBase} ${signInMode}`}>
-        <SignInForm handleLoginWithGoogle={handleLoginWithGoogle} />
+        <SignInForm handleLoginWithGoogle={handleLoginWithGoogle} setIsSignUpMode={setIsSignUpMode} />
       </div>
       <div style={{ transition: 'all 1500ms ease-in-out' }} className={`${formBase} ${signUpMode}`}>
         <SignUpForm setIsSignUpMode={setIsSignUpMode} handleLoginWithGoogle={handleLoginWithGoogle} />

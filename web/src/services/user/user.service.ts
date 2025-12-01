@@ -102,6 +102,14 @@ class UserService {
     return response.data
   }
 
+  async getInstructorProfile(userId: string): Promise<ApiResponse<Profile>> {
+    console.log('userId', userId)
+    const response = await axiosClient.axiosInstance.get('self/instructor', {
+      params: { userId }
+    })
+    return response.data
+  }
+
   // update user (multipart for image)
   async updateUser(data: {
     description?: string
@@ -129,6 +137,11 @@ class UserService {
 
   async getAdminHome(): Promise<ApiResponse<DataAdminHome>> {
     const response = await axiosClient.axiosInstance.get('user/home-admin')
+    return response.data
+  }
+
+  async logout(token: string): Promise<ApiResponse<void>> {
+    const response = await axiosClient.axiosInstance.post('auth/logout', { token })
     return response.data
   }
 }

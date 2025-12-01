@@ -63,7 +63,7 @@ class TC_Course extends Component<Record<string, never>, State> {
         tags: c.tagNames ?? undefined,
         duration: undefined,
         students: undefined,
-        createdAt: undefined
+        createdAt: new Date(c.createdAt).toLocaleDateString() ?? undefined
       }))
       this.setState({
         courses: mapped,

@@ -13,7 +13,7 @@ const toVietnameseStatus = (status?: string | null) => {
     case 'PUBLISHED':
       return 'Hoạt động'
     case 'DRAFT':
-      return 'Tạm dừng'
+      return 'Bản nháp'
     case 'PENDING_REVIEW':
       return 'Chờ xử lý'
     default:
@@ -26,7 +26,7 @@ const getStatusColor = (status: string) => {
   switch (status) {
     case 'Hoạt động':
       return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
-    case 'Tạm dừng':
+    case 'Bản nháp':
       return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
     case 'Chờ xử lý':
       return 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
