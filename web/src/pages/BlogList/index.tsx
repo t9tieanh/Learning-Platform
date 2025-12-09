@@ -3,28 +3,17 @@ import { SearchBar } from '@/components/BlogList/SearchBar'
 import { ArticleCard, type Article } from '@/components/BlogList/ArticleCard'
 import { PaginationControls } from '@/components/BlogList/PaginationControls'
 import { blogService } from '@/services/blog.service'
+import { formatDate } from '@/utils/common/formattDate'
 
 const ITEMS_PER_PAGE = 6
 
-const Index = () => {
+const BlogPage = () => {
   const [searchQuery, setSearchQuery] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
   const [articles, setArticles] = useState<Article[]>([])
   const [totalPages, setTotalPages] = useState(1)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-
-  function formatDate(iso: string): string {
-    try {
-      const d = new Date(iso)
-      const dd = String(d.getDate()).padStart(2, '0')
-      const mm = String(d.getMonth() + 1).padStart(2, '0')
-      const yyyy = d.getFullYear()
-      return `${dd}/${mm}/${yyyy}`
-    } catch {
-      return iso
-    }
-  }
 
   useEffect(() => {
     let mounted = true
@@ -45,7 +34,7 @@ const Index = () => {
 
         console.log('MAPPPED', mapped)
         setArticles(mapped)
-        setTotalPages(res.totalPages || 1)
+        setTotalPages(res?.totalPages || 1)
       } catch (e) {
         console.error(e)
         if (mounted) setError('Không thể tải danh sách bài viết')
@@ -108,4 +97,4 @@ const Index = () => {
   )
 }
 
-export default Index
+export default BlogPage

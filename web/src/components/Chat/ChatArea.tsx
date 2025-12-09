@@ -415,9 +415,17 @@ export const ChatArea = ({
     }
   }
 
+  const tooltipTitle = myRole === 'instructor' ? 'Khóa học đã tham gia' : 'Khóa học đang mở bán'
+
   const courseList = (
     <div className='flex flex-col gap-2 p-2 w-64 max-h-[300px] overflow-y-auto'>
       {enrolledCourses.length === 0 && <div className='text-xs text-gray-400 px-1 py-2'>Không có khóa học</div>}
+
+      {enrolledCourses.length > 0 && (
+        <p className='text-base pl-1 font-semibold bg-gradient-to-r from-cyan-500 to-blue-500 bg-clip-text text-transparent'>
+          {tooltipTitle}
+        </p>
+      )}
 
       {enrolledCourses.map((course) => (
         <div
@@ -468,18 +476,6 @@ export const ChatArea = ({
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
-        </div>
-
-        <div className='flex items-center gap-2'>
-          <Button variant='ghost' size='icon' className='text-gray-600 hover:bg-gray-100'>
-            <Phone className='h-5 w-5' />
-          </Button>
-          <Button variant='ghost' size='icon' className='text-gray-600 hover:bg-gray-100'>
-            <Video className='h-5 w-5' />
-          </Button>
-          <Button variant='ghost' size='icon' className='text-gray-600 hover:bg-gray-100'>
-            <MoreVertical className='h-5 w-5' />
-          </Button>
         </div>
       </div>
 
@@ -583,13 +579,6 @@ export const ChatArea = ({
       {/* Input */}
       <div className='p-4 bg-white border-t shadow-sm'>
         <div className='flex items-center gap-3'>
-          <Button variant='ghost' size='icon' className='text-gray-500 hover:bg-gray-100'>
-            <Image className='h-5 w-5' />
-          </Button>
-          <Button variant='ghost' size='icon' className='text-gray-500 hover:bg-gray-100'>
-            <Paperclip className='h-5 w-5' />
-          </Button>
-
           <Input
             placeholder='Nhập tin nhắn...'
             value={message}

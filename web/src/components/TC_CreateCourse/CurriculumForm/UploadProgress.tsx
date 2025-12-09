@@ -1,31 +1,32 @@
 import { MultiUploadItem } from '@/hooks/useMultiUpload'
 import { Progress as ProgressShadcn } from '@/components/ui/progress'
 import { Spinner } from '@/components/ui/spinner'
-import { CircleCheckBig } from 'lucide-react'
+import { CheckCircle2 } from 'lucide-react'
+import { Item, ItemMedia, ItemContent, ItemTitle, ItemDescription } from '@/components/ui/item'
 
 const UploadProgress = ({ progressLst }: { progressLst: MultiUploadItem[] }) => {
   return (
     <>
-      {progressLst?.map((item) => (
-        <>
-          <div key={item.id} className='flex items-center gap-3 py-4 px-4 bg-blue-50 rounded-lg border border-blue-200'>
-            <div className='flex items-center gap-1 min-w-48'>
+      {progressLst && progressLst.length > 0 ? (
+        progressLst.map((item) => (
+          <Item key={item.id} variant='outline' size='sm' className='shadow-sm text-sm'>
+            <ItemMedia variant='icon' className='w-8 bg-white border-none'>
               {item.progress !== 100 ? (
                 <Spinner className='size-4 text-red-500' />
               ) : (
-                <CircleCheckBig className='h-4 w-4 text-green-500' />
+                <CheckCircle2 className='h-5 w-5 text-green-500' />
               )}
-              <div className=''>
-                <span className='font-medium text-sm'>{item.title || 'Bài giảng chưa có tiêu đề'}</span>
-              </div>
-            </div>
-            <div className='flex-1'>
-              <span className='text-sm text-gray-600'>{item.message}</span>
-              <ProgressShadcn className='progressIndicator' value={item.progress} />
-            </div>
-          </div>
-        </>
-      ))}
+            </ItemMedia>
+            <ItemContent>
+              <ItemTitle>{item.title || 'Bài giảng chưa có tiêu đề'}</ItemTitle>
+              <ItemDescription>{item.message}</ItemDescription>
+              <ProgressShadcn className='progressIndicator mt-1' value={item.progress} />
+            </ItemContent>
+          </Item>
+        ))
+      ) : (
+        <div className='text-center text-sm text-gray-500'>Không có tiến độ tải lên nào.</div>
+      )}
     </>
   )
 }

@@ -58,10 +58,8 @@ const SignInForm = ({
           avatarUrl: r.avatarUrl,
           role: r.role
         })
-        console.log('USERID', userId)
         // create/fetch AI conversation
         if (userId) {
-          console.log('Co vo')
           try {
             const convRes = await aiChatService.createConversation(userId)
             if (convRes?.conversationId) setConversationId(convRes.conversationId)

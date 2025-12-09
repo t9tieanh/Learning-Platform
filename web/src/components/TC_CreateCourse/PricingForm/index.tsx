@@ -40,10 +40,10 @@ const PricingForm = ({ id }: { id: string }) => {
     const response = await courseService.getPrice(id)
     if (response && response.code === 200 && response.result) {
       const { originalPrice, finalPrice, yourIncome, platformFee } = response.result
-      setValue('originalPrice', originalPrice)
-      setValue('finalPrice', finalPrice)
-      setYourIncome(yourIncome)
-      setPlatformFee(platformFee)
+      setValue('originalPrice', originalPrice / 1000)
+      setValue('finalPrice', finalPrice / 1000)
+      setYourIncome(yourIncome / 1000)
+      setPlatformFee(platformFee / 1000)
     }
   }
 

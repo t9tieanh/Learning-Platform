@@ -12,6 +12,7 @@ import UploadProgress from './UploadProgress'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import useMultiUpload from '@/hooks/useMultiUpload'
 import { useAuthStore } from '@/stores/useAuth.stores'
+import CustomButton from '@/components/common/Button'
 
 export type HandleAddLesson = (
   selectedFile: File,
@@ -44,6 +45,7 @@ const CurriculumForm: React.FC<{ id: string }> = ({ id }: { id: string }) => {
     accessToken: token,
     callback: fetchChapters
   })
+  const [showUpload, setShowUpload] = useState(false)
 
   useEffect(() => {
     fetchChapters()
@@ -172,25 +174,45 @@ const CurriculumForm: React.FC<{ id: string }> = ({ id }: { id: string }) => {
         }
       />
 
-      {uploads && uploads.length > 0 && (
+      {/* Floating Upload Button */}
+      {uploads && (
         <>
-          <Accordion
-            type='single'
-            collapsible
-            className='w-full p-4 border border-blue-200/60 shadow-sm rounded-2xl bg-white'
-            defaultValue='item-1'
-          >
-            <AccordionItem value='item-1'>
-              <AccordionTrigger>
-                <span className='flex items-center gap-1 text-base px-3'>
-                  <Upload className='h-5 w-5' /> Tiến độ tải lên
+          <CustomButton
+            className='fixed z-50 bottom-8 right-8 shadow-lg bg-gradient-to-br from-cyan-400 to-blue-400 rounded-full w-14 h-14 flex items-center justify-center hover:scale-105 transition-all group'
+            onClick={() => setShowUpload(true)}
+            style={{ boxShadow: '0 4px 24px 0 rgba(0,0,0,0.10)' }}
+            title='Xem tiến độ tải lên'
+            label={
+              <>
+                <Upload className='w-7 h-7 text-white' />
+                <span className='absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full px-2 py-0.5 border-2 border-white'>
+                  {uploads.length}
                 </span>
-              </AccordionTrigger>
-              <AccordionContent className='flex flex-col gap-3 text-balance p-4'>
-                <UploadProgress progressLst={uploads} />
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
+              </>
+            }
+          />
+
+          {showUpload && (
+            <>
+              {/* <div className='' onClick={() => setShowUpload(false)}></div> */}
+              <div className='fixed z-50 bottom-24 right-8 bg-white rounded-2xl shadow-2xl border border-blue-200/60 p-4 animate-fadeIn flex flex-col gap-3'>
+                <div className='flex items-center justify-between mb-2'>
+                  <span className='flex items-center gap-2 text-base font-semibold text-blue-700 text-sm'>
+                    <Upload className='h-4 w-4' /> Tiến độ tải lên
+                  </span>
+                  <CustomButton
+                    className='text-gray-400 hover:text-red-500 text-xl font-bold px-2 bg-white'
+                    onClick={() => setShowUpload(false)}
+                    title='Đóng'
+                    label='×'
+                  />
+                </div>
+                <div className='flex flex-col gap-3 text-balance'>
+                  <UploadProgress progressLst={uploads} />
+                </div>
+              </div>
+            </>
+          )}
         </>
       )}
 

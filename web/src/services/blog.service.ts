@@ -1,4 +1,5 @@
 import axiosClient from '@/lib/axiosClient.lib'
+import { ApiResponse } from '@/types/response.type'
 
 export interface BlogItem {
   _id: string
@@ -51,7 +52,11 @@ async function getDetails(id: string): Promise<BlogItem> {
   return res.data?.result as BlogItem
 }
 
-async function getAll(params: { page?: number; limit?: number; search?: string }): Promise<BlogListResponse> {
+async function getAll(params: {
+  page?: number
+  limit?: number
+  search?: string
+}): Promise<ApiResponse<BlogListResponse>> {
   const { page = 1, limit = 6, search = '' } = params || {}
   const qs = new URLSearchParams()
   qs.set('page', String(page))

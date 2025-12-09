@@ -30,7 +30,8 @@ const CardSection: FC<{ setCourseSelected?: Dispatch<SetStateAction<CourseCart[]
         <p className='text-sm font-semibold mb-1 flex'>
           <Sigma className='w-5 h-5' />
           Có
-          <span className='text-red-400'>&nbsp;{cartItems?.length || 0}&nbsp;</span>khóa học trong giỏ hàng !
+          <span className='text-orange-500 font-bold'>&nbsp;{cartItems?.length || 0}&nbsp;</span>khóa học trong giỏ hàng
+          !
         </p>
         <hr />
       </div>

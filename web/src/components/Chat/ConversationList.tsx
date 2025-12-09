@@ -252,17 +252,31 @@ export const ConversationList = ({ selected, onSelect, desiredPeerId }: Conversa
   return (
     <div className='flex h-full min-h-0 flex-col bg-white border-r border-slate-200'>
       {/* Header */}
-      <div className='p-4 border-b border-slate-200 bg-slate-50 shadow-sm'>
-        <div className='flex justify-between items-center mb-2'>
-          <h2 className='text-2xl font-bold mb-3 text-[#3c3c3c] tracking-wide pl-1'>Đoạn chat</h2>
+      <div className='p-5 border-b bg-white shadow-[0_2px_6px_rgba(0,0,0,0.05)]'>
+        <div className='flex justify-between items-center mb-3'>
+          <h2 className='text-2xl font-bold tracking-wide pl-1 bg-gradient-to-r from-[#17EAD9] to-[#1FA2FF] text-transparent bg-clip-text'>
+            Đoạn chat
+          </h2>
         </div>
+
         <div className='relative'>
-          <Search className='absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-blue-400' />
+          <Search
+            className='absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 
+                 text-slate-400 group-focus-within:text-[#1FA2FF] transition-colors'
+          />
+
           <Input
             placeholder='Tìm kiếm...'
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
-            className='pl-9 !rounded-lg !border !border-slate-300 focus:!border-blue-500 focus:!ring-1 focus:!ring-blue-200 bg-white shadow-sm'
+            className='
+        pl-10 rounded-xl border border-slate-300 bg-white 
+        shadow-sm transition-all
+        focus:border-transparent
+        focus:ring-2 
+        focus:ring-[#17EAD9]/40 
+        focus:ring-offset-1
+      '
           />
         </div>
       </div>

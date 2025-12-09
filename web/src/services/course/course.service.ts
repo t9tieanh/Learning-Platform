@@ -162,8 +162,8 @@ class CourseService {
     }>
   > {
     const response = await axiosClient.axiosInstance.patch(`learning/instructor/courses/${courseId}/price`, {
-      originalPrice,
-      finalPrice
+      originalPrice: originalPrice * 1000,
+      finalPrice: finalPrice * 1000
     })
     return response.data
   }

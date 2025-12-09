@@ -34,7 +34,7 @@ public class ChapterService implements IChapterService {
 
     @Override
     public ApiResponse<List<ChapterDto>> getChaptersByCourseId(String courseId){
-        List<ChapterEntity> chapters = chapterRepo.findAllByCourseId(courseId);
+        List<ChapterEntity> chapters = chapterRepo.findByCourseIdOrderByPositionAsc(courseId);
 
         return ApiResponse.<List<ChapterDto>>builder()
                 .code(200)
@@ -79,6 +79,7 @@ public class ChapterService implements IChapterService {
 
         ChapterEntity chapter = chapterMapper.toEntity(newChapter);
         chapter.setCourse(course);
+        chapter.setPosition((long) (course.getChapters().size() + 1));
 
         course.getChapters().add(chapter);
 

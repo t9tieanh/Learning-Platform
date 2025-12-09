@@ -172,7 +172,7 @@ const getTrending = async (_req: Request, res: Response) => {
   }
 }
 
-const getDetails = async (req: Request, res: Response) => {
+const getBlogDetails = async (req: Request, res: Response) => {
   try {
     const id = (req.data as any)?.id || (req.params?.id as string) || ''
     if (!id) throw new Error('Thiếu tham số id')
@@ -207,7 +207,7 @@ const getDetails = async (req: Request, res: Response) => {
   }
 }
 
-const create = async (req: Request, res: Response) => {
+const createBlog = async (req: Request, res: Response) => {
   try {
     const { instructor_id, title, image_url, content, markdown_file_url } = (req.data as any) || (req.body as any)
 
@@ -283,7 +283,7 @@ const update = async (req: Request, res: Response) => {
   }
 }
 
-const remove = async (req: Request, res: Response) => {
+const removeBlog = async (req: Request, res: Response) => {
   try {
     const id = (req.data as any)?.id || (req.params?.id as string) || ''
     if (!id) throw new Error('Thiếu tham số id')
@@ -309,10 +309,10 @@ const BlogController = {
   getAllByInstructorId,
   getNew,
   getTrending,
-  getDetails,
-  create,
+  getDetails: getBlogDetails,
+  create: createBlog,
   update,
-  remove
+  remove: removeBlog
 }
 
 export default BlogController

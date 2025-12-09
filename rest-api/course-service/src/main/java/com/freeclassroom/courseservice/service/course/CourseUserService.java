@@ -61,7 +61,7 @@ public class CourseUserService implements ICourseUserService{
                 .orElseThrow(() -> new CustomExeption(ErrorCode.COURSE_NOT_FOUND));
 
         // check status of course
-        if (!course.getStatus().equals(EnumCourseStatus.PUBLISHED) || !course.getProgressStep().equals(EnumCourseProgressStep.COMPLETED))
+        if (!course.getStatus().equals(EnumCourseStatus.PUBLISHED))
             throw new CustomExeption(ErrorCode.COURSE_NOT_PUBLISHED);
 
         CourseUserDetailResponse response = courseMapper.toResponseDto(course);

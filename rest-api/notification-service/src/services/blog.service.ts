@@ -23,7 +23,7 @@ interface UpdateBlogParams {
   markdown_file_url?: string[]
 }
 
-const getAll = async ({ page, limit, search = '', instructorId }: GetAllParams) => {
+const getAllBlogs = async ({ page, limit, search = '', instructorId }: GetAllParams) => {
   const skip = (page - 1) * limit
 
   const query: FilterQuery<IBlog> = {}
@@ -152,7 +152,7 @@ const remove = async (id: string) => {
 }
 
 const BlogService = {
-  getAll,
+  getAll: getAllBlogs,
   getNew,
   getTrending,
   getDetails,

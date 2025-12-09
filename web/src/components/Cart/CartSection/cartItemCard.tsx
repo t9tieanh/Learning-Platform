@@ -88,7 +88,7 @@ const CartItemCard = ({
         </div>
         <div className='flex md:flex-col items-center md:items-end justify-between md:justify-start gap-4 md:gap-2'>
           <div className='text-right'>
-            <CardDescription className='text-red-500 font-semibold text-base'>
+            <CardDescription className='text-orange-500 font-semibold text-base'>
               {formatPrice(cardItem.final_price)}
             </CardDescription>
             {cardItem.original_price && (
@@ -98,12 +98,12 @@ const CartItemCard = ({
           <div className='flex items-center gap-2'>
             <CustomButton
               icon={<MousePointer2 size={18} />}
-              className='hover:bg-slate-50 hover:text-blue-500 p-2'
+              className='hover:bg-blue-800 p-2 w-10 h-10'
               onClick={handleSelectCourse}
             />
             <CustomButton
               icon={<Trash2 size={18} />}
-              className='bg-red-500 hover:bg-slate-50 hover:text-red-500 p-2'
+              className='bg-red-500 hover:bg-red-800 p-2 w-10 h-10'
               onClick={handleRemoveFromCart}
             />
           </div>

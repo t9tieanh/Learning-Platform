@@ -18,7 +18,7 @@ const BlogDetails = () => {
 
   useEffect(() => {
     let mounted = true
-    ;(async () => {
+    const fetchBlogDetail = async () => {
       try {
         setLoading(true)
         setError(null)
@@ -32,7 +32,10 @@ const BlogDetails = () => {
       } finally {
         if (mounted) setLoading(false)
       }
-    })()
+    }
+
+    fetchBlogDetail()
+
     return () => {
       mounted = false
     }
@@ -41,7 +44,9 @@ const BlogDetails = () => {
   return (
     <div className='min-h-screen bg-white'>
       <article className='container px-16 py-6 space-y-6'>
-        <Button className='bg-gray-100 text-black hover:bg-gray-200 shadow-lg' onClick={() => navigate(-1)}>← Quay lại</Button>
+        <Button className='bg-gray-100 text-black hover:bg-gray-200 shadow-lg' onClick={() => navigate(-1)}>
+          ← Quay lại
+        </Button>
 
         {loading ? (
           <div className='text-center text-muted-foreground py-16'>Đang tải bài viết...</div>
