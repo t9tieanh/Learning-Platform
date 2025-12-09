@@ -35,7 +35,7 @@ public interface CourseRepository extends JpaRepository<CourseEntity, String> {
         SELECT c 
         FROM CourseEntity c 
         LEFT JOIN c.enrollments e
-        WHERE c.status = 'PUBLISHED' AND c.progressStep = 'COMPLETED'
+        WHERE c.status = 'PUBLISHED'
         GROUP BY c 
         ORDER BY COUNT(e) DESC
     """)
@@ -46,7 +46,6 @@ public interface CourseRepository extends JpaRepository<CourseEntity, String> {
         FROM CourseEntity c
         LEFT JOIN c.enrollments e
         WHERE c.status = 'PUBLISHED'
-          AND c.progressStep = 'COMPLETED'
           AND FUNCTION('MONTH', e.enrollmentDate) = :month
           AND FUNCTION('YEAR', e.enrollmentDate) = :year
         GROUP BY c
@@ -57,7 +56,6 @@ public interface CourseRepository extends JpaRepository<CourseEntity, String> {
     @Query("""
         SELECT c FROM CourseEntity c
         WHERE c.status = 'PUBLISHED'
-        AND c.progressStep = 'COMPLETED'
         AND (:search IS NULL OR LOWER(c.title) LIKE LOWER(CONCAT('%', :search, '%')))
         AND (:category IS NULL OR c.category.name = :category)
         AND (:minPrice IS NULL OR c.finalPrice >= :minPrice)
@@ -104,7 +102,6 @@ public interface CourseRepository extends JpaRepository<CourseEntity, String> {
     WHERE e.userId = :userId
       AND c.deleted = false
       AND c.status = com.freeclassroom.courseservice.enums.entity.EnumCourseStatus.PUBLISHED
-      AND c.progressStep = com.freeclassroom.courseservice.enums.entity.EnumCourseProgressStep.COMPLETED
 """)
     Page<CourseEntity> findAllByUserId(@Param("userId") String userId, Pageable pageable);
 

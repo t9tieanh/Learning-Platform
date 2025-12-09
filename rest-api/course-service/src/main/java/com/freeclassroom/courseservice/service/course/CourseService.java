@@ -433,7 +433,7 @@ public class CourseService implements ICourseService {
                                 user.getId(),
                                 user.getName(),
                                 user.getEmail(),
-                                "",
+                                user.getImage(),
                                 totalCourses
                         );
                     })

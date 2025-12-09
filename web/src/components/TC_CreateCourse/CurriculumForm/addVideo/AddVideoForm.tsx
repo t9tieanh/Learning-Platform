@@ -1,9 +1,10 @@
+/* eslint-disable jsx-a11y/media-has-caption */
 /* eslint-disable prettier/prettier */
 import CustomInput from '@/components/common/Input'
 import { Label } from '@/components/ui/label'
 import CustomButton from '@/components/common/Button'
 import { Upload, Video as VideoIcon, MousePointer2 } from 'lucide-react'
-import CustomTextarea from '@/components/common/Textarea'
+import QuillEditor from '@/components/common/Input/QuillEditor'
 import CustomCheckbox from '@/components/common/CustomCheckbox'
 import { useEffect, useRef, useState } from 'react'
 import { MdCancel } from 'react-icons/md'
@@ -89,19 +90,22 @@ const AddVideoForm = ({
   return (
     <div className='add-video-form'>
       <form
-        className='flex items-stretch space-x-4 h-96'
+        className='flex flex-col gap-5'
         onSubmit={handleSubmit(handleAddLesson(selectedFile as File, chapterId, setOpen, 'learning/lessons/video'))}
       >
-        <div className='file-upload flex flex-col justify-center items-center gap-3 p-4 border-2 border-blue-600 h-full flex-1 rounded-2xl'>
+        <div className='file-upload flex flex-col justify-center items-center gap-3 p-4 border-2 border-blue-600 h-full min-h-[280px] rounded-2xl bg-white'>
           {videoSrc ? (
             /* eslint-disable-next-line jsx-a11y/media-has-caption */
-            <video
-              ref={videoRef}
-              src={videoSrc}
-              controls
-              onLoadedMetadata={handleLoadedMetadata}
-              className='w-full h-full max-h-[80%] object-contain rounded-lg bg-black'
-            />
+            <div className='w-full flex justify-center items-center'>
+              <video
+                ref={videoRef}
+                src={videoSrc}
+                controls
+                onLoadedMetadata={handleLoadedMetadata}
+                className='w-full max-h-[240px] object-contain rounded-lg bg-black mb-2'
+                style={{ minHeight: 300 }}
+              />
+            </div>
           ) : (
             <>
               <div className='mx-auto p-3 border-2 border-blue-600 rounded-full'>
@@ -125,7 +129,7 @@ const AddVideoForm = ({
 
           <CustomInput type='file' id='video-file' accept='video/*' className='hidden' onChange={handleSelectFile} />
           {selectedFile && (
-            <div className='flex justify-between items-center gap-3 mt-2 w-full px-3'>
+            <div className='flex justify-between items-center gap-3 w-full px-3'>
               <div className='text-xs text-gray-600'>
                 <div>{selectedFile.name}</div>
                 <div>{(selectedFile.size / (1024 * 1024)).toFixed(2)} MB</div>
@@ -153,7 +157,7 @@ const AddVideoForm = ({
           )}
         </div>
 
-        <div className='px-4 h-full flex flex-col gap-2'>
+        <div className='flex-1 flex flex-col gap-2 px-0 md:px-2'>
           <CustomInput
             placeholder='Nhập tiêu đề video'
             className='w-full'
@@ -162,13 +166,19 @@ const AddVideoForm = ({
             {...register('title')}
           />
           <p>{errors.title && <span className='text-red-500 text-xs'>{errors.title.message}</span>}</p>
-          <CustomTextarea
-            placeholder='Nhập mô tả video'
-            className='h-full'
-            id='video-description'
-            {...register('content')}
-          />
-          <p>{errors.content && <span className='text-red-500 text-xs'>{errors.content.message}</span>}</p>
+
+          <div>
+            <label htmlFor='video-description' className='font-medium mb-1 block text-sm'>Mô tả video</label>
+            <div className='bg-white rounded-lg border border-gray-200'>
+              <QuillEditor
+                initialHtml={watch('content')}
+                onChange={(html) => setValue('content', html)}
+                className='min-h-[180px]'
+              />
+            </div>
+            <p>{errors.content && <span className='text-red-500 text-xs'>{errors.content.message}</span>}</p>
+          </div>
+
           <CustomCheckbox
             id='free-preview'
             label='Đặt video này làm bài giảng xem trước miễn phí'
@@ -177,12 +187,14 @@ const AddVideoForm = ({
             onChange={(e) => setValue('isPublic', e.target.checked)}
           />
           <p>{errors.isPublic && <span className='text-red-500 text-xs'>{errors.isPublic.message}</span>}</p>
-          <CustomButton
-            label='Lưu bài giảng'
-            icon={<Upload className='h-4 w-4 ml-1' />}
-            className='bg-primary text-white hover:bg-primary/90 rounded-2xl mt-2'
-            type='submit'
-          />
+          <div className='flex justify-end'>
+            <CustomButton
+              label='Lưu bài giảng'
+              icon={<Upload className='h-4 w-4 ml-1' />}
+              className='bg-primary text-white hover:bg-primary/90 rounded-2xl px-6'
+              type='submit'
+            />
+          </div>
         </div>
       </form>
     </div>

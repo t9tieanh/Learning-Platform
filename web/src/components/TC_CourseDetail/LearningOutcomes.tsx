@@ -13,7 +13,7 @@ export function LearningOutcomes({ outcomes }: LearningOutcomesProps) {
       transition={{ delay: 0.3 }}
       className='rounded-xl bg-card p-6 shadow-md'
     >
-      <h2 className='text-xl font-bold mb-6'>Bạn sẽ học được gì</h2>
+      <h2 className='text-lg font-bold mb-6'>Bạn sẽ học được gì</h2>
       <ul className='flex text-sm flex-col gap-4'>
         {outcomes.map((outcome, index) => (
           <motion.li

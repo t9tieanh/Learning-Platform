@@ -61,7 +61,7 @@ public class CourseUserService implements ICourseUserService{
                 .orElseThrow(() -> new CustomExeption(ErrorCode.COURSE_NOT_FOUND));
 
         // check status of course
-        if (!course.getStatus().equals(EnumCourseStatus.PUBLISHED) || !course.getProgressStep().equals(EnumCourseProgressStep.COMPLETED))
+        if (!course.getStatus().equals(EnumCourseStatus.PUBLISHED))
             throw new CustomExeption(ErrorCode.COURSE_NOT_PUBLISHED);
 
         CourseUserDetailResponse response = courseMapper.toResponseDto(course);
@@ -116,10 +116,12 @@ public class CourseUserService implements ICourseUserService{
 
         List<MyCourseResponse> courseResponses = myCourses.stream().map(course -> {
             Teacher teacher = teacherMap.get(course.getInstructorId());
+            Double progress = enrollmentRepo.findByUserIdAndCourse_Id(userId, course.getId()).get().getProgress();
 
             return MyCourseResponse.builder()
                     .id(course.getId().toString())
                     .title(course.getTitle())
+                    .progress(progress)
                     .shortDescription(course.getShortDescription())
                     .thumbnailUrl(course.getThumbnailUrl())
                     .instructor(InstructorCourseResponse.builder()

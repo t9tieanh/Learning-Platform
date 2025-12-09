@@ -2,8 +2,10 @@ import { useNavigate } from 'react-router-dom'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import CustomButton from '@/components/common/Button'
 import { Play, Send } from 'lucide-react'
+import { useAuthStore } from '@/stores/useAuth.stores'
 
-const LearnNow = ({ courseId }: { courseId: string }) => {
+const LearnNow = ({ courseId, instructorId }: { courseId: string; instructorId: string }) => {
+  const { data } = useAuthStore()
   const navigate = useNavigate()
 
   const handleStart = () => {
@@ -33,7 +35,7 @@ const LearnNow = ({ courseId }: { courseId: string }) => {
               <CustomButton
                 className='w-full h-12 bg-[#0C356A] text-base'
                 icon={<Play className='w-4 h-4' />}
-                label='Bắt đầu học ngay'
+                label={data && data.userId === instructorId ? 'Quản lý khóa học' : 'Bắt đầu học ngay'}
                 onClick={handleStart}
               />
             </div>

@@ -22,4 +22,5 @@ public interface EnrollmentRepository extends JpaRepository<EnrollmentsEntity, S
     @Modifying
     @Query("DELETE FROM EnrollmentsEntity e WHERE e.userId = :userId AND e.course.id IN :courseIds")
     int deleteAllByUserIdAndCourseIds(String userId, List<String> courseIds);
+
 }

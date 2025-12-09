@@ -3,6 +3,7 @@ import { Play, BookOpenCheck, FileText, HelpCircle, Edit2, X, Save } from 'lucid
 import { Lesson } from '@/utils/create-course/curriculum'
 import { useState } from 'react'
 import CustomInput from '@/components/common/Input'
+import QuillEditor from '@/components/common/Input/QuillEditor'
 import CustomButton from '@/components/common/Button'
 import CustomCheckbox from '@/components/common/CustomCheckbox'
 import lessonService from '@/services/course/lesson.service'
@@ -152,7 +153,7 @@ const PreviewTeacherLesson = ({
         </div>
 
         {/* Right Side - Information */}
-        <div className='w-64 space-y-4 flex-shrink-0'>
+        <div className='w-96 space-y-4 flex-shrink-0'>
           {!isEditing ? (
             <>
               {/* View Mode */}
@@ -215,7 +216,7 @@ const PreviewTeacherLesson = ({
                 <div>
                   <p className='text-xs font-medium text-gray-300 uppercase mb-2'>Mô tả</p>
                   <div className='bg-gray-800 p-3 rounded-md max-h-48 overflow-y-auto text-xs'>
-                    <p className='text-gray-200 whitespace-pre-wrap'>{lesson.content}</p>
+                    <div className='text-gray-200' dangerouslySetInnerHTML={{ __html: lesson.content }} />
                   </div>
                 </div>
               )}
@@ -247,14 +248,13 @@ const PreviewTeacherLesson = ({
                   <label htmlFor='edit-content' className='text-xs font-medium text-gray-300 uppercase'>
                     Mô tả
                   </label>
-                  <textarea
-                    id='edit-content'
-                    placeholder='Nhập mô tả bài giảng'
-                    value={editContent}
-                    onChange={(e) => setEditContent(e.target.value)}
-                    className='w-full mt-1 p-2 bg-gray-800 text-white text-sm rounded-md border border-gray-700 focus:border-blue-500 focus:outline-none resize-none'
-                    rows={6}
-                  />
+                  <div className='bg-white rounded-lg border border-gray-200 mt-1'>
+                    <QuillEditor
+                      initialHtml={editContent}
+                      onChange={setEditContent}
+                      className='text-black min-h-[260px]'
+                    />
+                  </div>
                 </div>
 
                 {/* Edit isPublic */}

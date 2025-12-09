@@ -16,6 +16,7 @@ public class MyCourseResponse {
     String longDescription;
     String thumbnailUrl;
     Double rating;
+    Double progress;
 
     String introductoryVideo;
     String language;

@@ -1,9 +1,21 @@
-import { ReactNode } from 'react'
-import { Outlet } from 'react-router-dom'
+import { ReactNode, useEffect } from 'react'
+import { Outlet, useNavigate } from 'react-router-dom'
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
 import { AdminSidebar } from './AdminSidebar'
+import { useAuthStore } from '@/stores/useAuth.stores'
+import { toast } from 'sonner'
 
 const AdminLayout: React.FC = () => {
+  const { data } = useAuthStore()
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    if (!data || data.role !== 'admin') {
+      toast.error('Bạn không có quyền truy cập trang này.')
+      navigate('/auth')
+    }
+  }, [])
+
   return (
     <SidebarProvider>
       <div className='flex h-screen w-full bg-gradient-to-br from-background via-muted/20 to-background'>

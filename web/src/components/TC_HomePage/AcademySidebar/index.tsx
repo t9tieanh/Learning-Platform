@@ -1,10 +1,11 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@radix-ui/react-avatar'
-import { BookOpen, Home, MessageSquare, Settings, FileText, LogOut } from 'lucide-react'
+import { BookOpen, Home, MessageSquare, FileText, LogOut } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useAuthStore } from '@/stores/useAuth.stores'
 import { useNavigate } from 'react-router-dom'
 import logo from '@/assets/images/logo1.png'
 import { toast } from 'sonner'
+import { showConfirmToast } from '@/components/common/ShowConfirmToast'
 
 const sidebarItems = [
   {
@@ -16,8 +17,7 @@ const sidebarItems = [
     items: [
       { name: 'Khóa học', icon: BookOpen, active: true },
       { name: 'Tin nhắn', icon: MessageSquare, active: true },
-      { name: 'Bài viết', icon: FileText, active: true },
-      { name: 'Đăng xuất', icon: LogOut, active: true }
+      { name: 'Bài viết', icon: FileText, active: true }
     ]
   }
 ]
@@ -32,10 +32,16 @@ const AcademySidebar = () => {
     .join('')
     .toUpperCase()
 
-  const handleLogout = () => {
-    setData(null)
-    toast.success('Đăng xuất thành công!')
-    navigate('/auth')
+  const handleLogout = async () => {
+    const confirmed = await showConfirmToast({
+      title: 'Đăng xuất',
+      description: 'Bạn có chắc chắn muốn đăng xuất?'
+    })
+    if (confirmed) {
+      setData(null)
+      toast.success('Đăng xuất thành công!')
+      navigate('/auth')
+    }
   }
   return (
     <div
@@ -64,7 +70,6 @@ const AcademySidebar = () => {
                 if (item.name === 'Khóa học') onClick = () => navigate('/teacher/course')
                 if (item.name === 'Tin nhắn') onClick = () => navigate('/teacher/chat/:id')
                 if (item.name === 'Bài viết') onClick = () => navigate('/teacher/blogs')
-                if (item.name === 'Đăng xuất') onClick = () => handleLogout()
                 return (
                   <Button
                     key={itemIndex}
@@ -90,13 +95,23 @@ const AcademySidebar = () => {
         <div className='flex items-center gap-2 md:gap-3'>
           <Avatar>
             <AvatarImage className='rounded-full h-10 w-10 md:h-12 md:w-12' src={data?.avatarUrl} />
-            <AvatarFallback className='bg-primary text-white'>{initials}</AvatarFallback>
+            <AvatarFallback className='text-white'>{initials}</AvatarFallback>
           </Avatar>
 
           <div className='flex-1'>
             <p className='text-base font-semibold truncate'>{displayName}</p>
             <p className='text-xs md:text-sm text-sidebar-foreground/60'>Giảng viên</p>
           </div>
+
+          <Button
+            variant='ghost'
+            size='icon'
+            onClick={handleLogout}
+            className='text-red-400 hover:bg-red-500/10 hover:text-red-500'
+            title='Đăng xuất'
+          >
+            <LogOut className='w-5 h-5' />
+          </Button>
         </div>
       </div>
     </div>

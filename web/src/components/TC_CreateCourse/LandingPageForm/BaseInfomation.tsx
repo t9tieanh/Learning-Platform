@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
+import QuillEditor from '@/components/common/Input/QuillEditor'
 import { Label } from '@/components/ui/label'
 import DynamicListInput from '../common/DynamicListInput'
 import { Props as CommonProps } from '@/utils/common/reactHookFormProps'
@@ -135,12 +136,16 @@ const BaseInfomation = ({
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <Textarea
-            id='description'
-            {...register('description')}
-            placeholder='Nhập mô tả khóa học'
-            className='mt-2 border-blue-300 focus:ring-blue-300 min-h-32'
-            rows={8}
+          <Controller
+            control={control}
+            name='description'
+            render={({ field }) => (
+              <QuillEditor
+                initialHtml={field.value || ''}
+                onChange={field.onChange}
+                className='mt-2 min-h-32 min-h-[32rem]'
+              />
+            )}
           />
           {errors.description && <p className='text-red-500 text-xs'>{errors.description.message}</p>}
         </CardContent>

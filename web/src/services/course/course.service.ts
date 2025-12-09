@@ -127,6 +127,7 @@ class CourseService {
       category: string
       introductoryVideo: string
       progressStep: string
+      status?: string
     }>
   > {
     const response = await axiosClient.axiosInstance.get(`learning/instructor/courses/${courseId}/info`)
@@ -162,8 +163,8 @@ class CourseService {
     }>
   > {
     const response = await axiosClient.axiosInstance.patch(`learning/instructor/courses/${courseId}/price`, {
-      originalPrice,
-      finalPrice
+      originalPrice: originalPrice * 1000,
+      finalPrice: finalPrice * 1000
     })
     return response.data
   }

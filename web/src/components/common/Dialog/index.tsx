@@ -24,7 +24,7 @@ export default function CustomDialog({
     md: 'max-w-lg sm:max-w-lg',
     lg: 'max-w-3xl sm:max-w-3xl',
     xl: 'max-w-5xl sm:max-w-5xl',
-    full: 'w-full max-w-none sm:w-full sm:max-w-none'
+    full: 'w-[70vw] max-w-[70vw] sm:w-[70vw] sm:max-w-[70vw]'
   }
 
   const sizeClass = sizeClassMap[size]

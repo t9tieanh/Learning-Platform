@@ -1,7 +1,9 @@
 import nodemailer from 'nodemailer'
 import { env } from '~/config/env'
 import { NotificationDto, VerifyEmail } from '~/dto/request/notification.dto'
+import { CourseApprovalEvent } from '~/dto/event/course-approval-event.dto'
 import { QueueNameEnum } from '~/enums/rabbitQueue.enum'
+import { getUser } from '~/grpc/userClient'
 import { renderTemplate } from '~/utils/templateUtil'
 
 // Interface cho options gửi mail
@@ -85,6 +87,41 @@ class NodeMailService {
         to = orderNotification.email || orderNotification.to || []
         templateName = 'order-confirmation.html'
         templateData = orderNotification.payload || orderNotification
+        break
+      }
+      case QueueNameEnum.COURSE_APPROVAL: {
+        const event = notification as unknown as CourseApprovalEvent
+        // Lấy email instructor qua userGrpc
+        let instructorEmail = ''
+        try {
+          const user = await getUser(event.instructorId)
+          instructorEmail = user?.email || ''
+        } catch (err) {
+          console.error('Lỗi lấy email instructor:', err)
+          return
+        }
+        to = instructorEmail
+        if (event.action === 'APPROVED') {
+          subject = 'Khóa học của bạn đã được duyệt!'
+          templateName = 'course-approved.html'
+          templateData = {
+            title: event.title,
+            shortDescription: event.shortDescription,
+            finalPrice: event.finalPrice,
+            thumbnailUrl: event.thumbnailUrl
+          }
+        } else if (event.action === 'REJECTED') {
+          subject = 'Khóa học của bạn bị từ chối'
+          templateName = 'course-rejected.html'
+          templateData = {
+            title: event.title,
+            reason: event.reason,
+            thumbnailUrl: event.thumbnailUrl
+          }
+        } else {
+          console.log('Không xác định action cho course approval:', event)
+          return
+        }
         break
       }
       // Thêm các loại khác nếu cần

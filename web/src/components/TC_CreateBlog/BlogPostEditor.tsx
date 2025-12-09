@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
+import CustomInput from '@/components/common/Input'
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
 import { useBlogPostStore } from '@/stores/blogPostStore'
@@ -78,10 +78,10 @@ const BlogPostEditor = ({ initialTitle = '', initialImage = '' }: BlogPostEditor
                 <CardDescription>Nhập tiêu đề và tải ảnh đại diện cho bài viết của bạn</CardDescription>
               </CardHeader>
               <div className='space-y-2'>
-                <Label htmlFor='title' className='text-base font-medium'>
+                <Label htmlFor='title' className='text-sm font-medium'>
                   Tiêu đề <span className='text-destructive'>*</span>
                 </Label>
-                <Input
+                <CustomInput
                   id='title'
                   placeholder='Nhập tiêu đề bài viết...'
                   value={post.title}
@@ -92,15 +92,15 @@ const BlogPostEditor = ({ initialTitle = '', initialImage = '' }: BlogPostEditor
 
               {/* Ảnh tiêu đề */}
               <div className='space-y-2'>
-                <Label htmlFor='image' className='text-base font-medium'>
+                <Label htmlFor='image' className='text-sm font-medium'>
                   Ảnh tiêu đề
                 </Label>
-                <Input
+                <CustomInput
                   id='image'
                   type='file'
                   accept='image/*'
                   onChange={handleImageUpload}
-                  className='h-12 cursor-pointer file:cursor-pointer file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-secondary file:text-secondary-foreground hover:file:bg-secondary/80'
+                  // className='h-12 cursor-pointer file:cursor-pointer file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-secondary file:text-secondary-foreground hover:file:bg-secondary/80'
                 />
               </div>
             </div>

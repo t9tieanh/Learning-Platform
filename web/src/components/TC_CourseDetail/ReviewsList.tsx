@@ -98,7 +98,7 @@ export function ReviewsList({ reviews, reviewsPerPage = 5, courseId }: ReviewsLi
       transition={{ delay: 0.45 }}
       className='space-y-6 bg-white p-5 rounded-lg shadow-md'
     >
-      <h2 className='text-2xl font-bold'>Đánh giá từ học viên</h2>
+      <h2 className='text-lg font-bold'>Đánh giá từ học viên</h2>
 
       <div className='space-y-4'>
         {error && <div className='text-sm text-destructive bg-destructive/10 px-3 py-2 rounded-md'>{error}</div>}

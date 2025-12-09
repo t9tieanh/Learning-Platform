@@ -27,6 +27,7 @@ export interface CourseListItem {
   rating: number | null
   introductoryVideo: string | null
   language: string | null
+  progress: number
   instructor: {
     id: string | null
     name: string

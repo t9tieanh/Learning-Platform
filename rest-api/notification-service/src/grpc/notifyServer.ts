@@ -1,9 +1,9 @@
-const grpc = require('@grpc/grpc-js');
-const protoLoader = require('@grpc/proto-loader');
-const path = require('path');
-const { BlogModel } = require('../models/blog/blog.model');
-import { saveToSupabase } from "~/utils/supabase";
-import AiChatService from "~/services/aiChat.service";
+const grpc = require('@grpc/grpc-js')
+const protoLoader = require('@grpc/proto-loader')
+const path = require('path')
+const { BlogModel } = require('../models/blog/blog.model')
+import { saveToSupabase } from '~/utils/supabase'
+import AiChatService from '~/services/aiChat.service'
 const feedbackServiceModule = require('../services/feedback.service')
 const feedbackService = (feedbackServiceModule && feedbackServiceModule.default) || feedbackServiceModule
 
@@ -20,40 +20,39 @@ const proto = grpc.loadPackageDefinition(packageDef)
 
 const blogServiceImpl = {
   getTotalBlog: async (call: any, callback: any) => {
-    console.log('Received request for total blogs');
-    const totalBlog = await BlogModel.countDocuments();
-    callback(null, { total: totalBlog.toString() });
+    console.log('Received request for total blogs')
+    const totalBlog = await BlogModel.countDocuments()
+    callback(null, { total: totalBlog.toString() })
   },
 
   getTotalInstructorBlog: async (call: any, callback: any) => {
-    console.log('Received request for total INSTRUCTOR blogs');
-    console.log('call', call.request);
-    const userId = call.request.id;
+    console.log('Received request for total INSTRUCTOR blogs')
+    console.log('call', call.request)
+    const userId = call.request.id
     const totalInstructorBlog = await BlogModel.countDocuments({ instructor_id: userId })
     callback(null, { total: totalInstructorBlog.toString() })
   },
 
   pushCourseSupabase: async (call: any, callback: any) => {
-    const { id, name, description, tags = [], link } = call.request;
-    const text = `${name} - ${tags}\n${description}`;
-    const embedding = await AiChatService.generateEmbedding(text);
-    const res = await saveToSupabase(id, name, description, tags, link, embedding);
+    const { id, name, description, tags = [], link } = call.request
+    const text = `${name} - ${tags}\n${description}`
+    const embedding = await AiChatService.generateEmbedding(text)
+    const res = await saveToSupabase(id, name, description, tags, link, embedding)
     callback(null, { isSuccess: res })
   },
 
   createConversationAI: async (call: any, callback: any) => {
-    const { userId } = call.request;
+    const { userId } = call.request
     if (!userId) {
-      return callback({ code: grpc.status.INVALID_ARGUMENT, message: 'Missing userId' });
+      return callback({ code: grpc.status.INVALID_ARGUMENT, message: 'Missing userId' })
     }
     try {
-      const conv = await AiChatService.createConversation(userId);
-      callback(null, { isSuccess: true, conversationId: conv.id });
+      const conv = await AiChatService.createConversation(userId)
+      callback(null, { isSuccess: true, conversationId: conv.id })
     } catch (e: any) {
-      callback({ code: grpc.status.INTERNAL, message: e?.message || 'Failed to create conversation' });
+      callback({ code: grpc.status.INTERNAL, message: e?.message || 'Failed to create conversation' })
     }
   },
-
 
   getFeedbackByCourseId: async (call: any, callback: any) => {
     const courseId = call.request.courseId
@@ -68,8 +67,7 @@ const blogServiceImpl = {
       })
     }
   }
-};
-
+}
 
 // function startGrpcServer() {
 //   const server = new grpc.Server();

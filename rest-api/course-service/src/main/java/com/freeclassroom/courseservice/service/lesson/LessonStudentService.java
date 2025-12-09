@@ -142,10 +142,26 @@ public class LessonStudentService implements ILessonStudentService {
                     .enrollment(enrollment)
                     .progress(EnumLessonProgress.COMPLETED)
                     .build();
-        } else
+        } else {
             lessonProgress.setProgress(EnumLessonProgress.COMPLETED);
+        }
 
         lessonProgressRepo.save(lessonProgress);
+
+        // recalculate progress for enrollment
+        int totalLessons = enrollment.getCourse().getChapters().stream()
+                .flatMap(chapter -> chapter.getLessons().stream())
+                .map(lesson -> lesson.getId())
+                .toList().size();
+                
+        // number of completed lessons
+        long completedLessons = lessonProgressRepo.findByEnrollment_Id(enrollment.getId()).stream()
+                .filter(lp -> lp.getProgress() == EnumLessonProgress.COMPLETED)
+                .count();
+
+        double progress = totalLessons > 0 ? (double) completedLessons / totalLessons : 0.0;
+        enrollment.setProgress(progress);
+        enrollmentRepo.save(enrollment);
 
         return ApiResponse.<CreationResponse>builder()
                 .result(

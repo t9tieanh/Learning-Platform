@@ -4,11 +4,12 @@ import CurriculumForm from '@/components/TC_CreateCourse/CurriculumForm'
 import LandingPageForm from '@/components/TC_CreateCourse/LandingPageForm'
 import PricingForm from '@/components/TC_CreateCourse/PricingForm'
 import SetupForm from '@/components/TC_CreateCourse/SetupForm/SetupForm'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import CourseProgressStep from '@/types/courseProgressStep'
 import courseService from '@/services/course/course.service'
 import CustomButton from '@/components/common/Button'
 import { ArrowLeftToLine, SendHorizontal } from 'lucide-react'
+import { toast } from 'sonner'
 
 const TC_CreateCourse = () => {
   const [activeSection, setActiveSection] = useState<CourseProgressStep>(CourseProgressStep.INTRO)
@@ -34,6 +35,8 @@ const TC_CreateCourse = () => {
     introductoryVideo: ''
   })
 
+  const navigate = useNavigate()
+
   const { id } = useParams<{ id: string }>()
 
   useEffect(() => {
@@ -42,6 +45,11 @@ const TC_CreateCourse = () => {
       const response = await courseService.getCourseInfo(id)
       if (response && response.code === 200 && response.result) {
         const course = response.result
+        if (course.status === 'PUBLISHED') {
+          toast.error('Khóa học đã được xuất bản, không thể chỉnh sửa nữa.')
+          navigate(`/course/${id}`)
+          return
+        }
         if (course.progressStep) {
           setActiveSection(course.progressStep as CourseProgressStep)
           setCourseInfo({

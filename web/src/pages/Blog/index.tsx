@@ -6,7 +6,7 @@ import { ImageCard } from '@/components/Blog/ImageCard'
 import { useEffect, useState } from 'react'
 import { blogService, type BlogItem } from '@/services/blog.service'
 
-const Index = () => {
+const BlogPage = () => {
   const [trending, setTrending] = useState<BlogItem[]>([])
   const [latest, setLatest] = useState<BlogItem[]>([])
   const [loading, setLoading] = useState(true)
@@ -99,4 +99,4 @@ const Index = () => {
   )
 }
 
-export default Index
+export default BlogPage

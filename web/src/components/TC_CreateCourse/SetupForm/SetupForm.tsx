@@ -4,6 +4,7 @@ import TitleComponent from '@/components/TC_CreateCourse/common/Title'
 import { useEffect, useState } from 'react'
 import courseService from '@/services/course/course.service'
 import { toast } from 'sonner'
+import showConfirmToast from '@/components/common/ShowConfirmToast'
 import CustomButton from '@/components/common/Button'
 import { BsSendCheckFill } from 'react-icons/bs'
 import useLoading from '@/hooks/useLoading.hook'
@@ -32,8 +33,15 @@ const SetupForm = ({ id }: { id: string }) => {
   }, [id])
 
   const handleRequestApproval = async () => {
+    const confirmed = await showConfirmToast({
+      title: 'Xác nhận gửi yêu cầu kiểm duyệt?',
+      description: 'Bạn sẽ gửi yêu cầu kiểm duyệt khóa học này đến quản trị viên.',
+      confirmLabel: 'Xác nhận',
+      cancelLabel: 'Hủy'
+    })
+    if (!confirmed) return
+    startLoading()
     try {
-      startLoading()
       const response = await courseService.requestApproval(id)
       if (response && response.code === 200) {
         toast.success(response.message || 'Yêu cầu kiểm duyệt khóa học đã được gửi thành công!')

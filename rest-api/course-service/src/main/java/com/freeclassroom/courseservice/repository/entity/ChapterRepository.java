@@ -40,4 +40,6 @@ public interface ChapterRepository extends JpaRepository<ChapterEntity, String> 
       AND l.deleted = false
 """)
     Long countLessonsByChapterId(@Param("chapterId") String chapterId);
+
+    List<ChapterEntity> findByCourseIdOrderByPositionAsc(String courseId);
 }

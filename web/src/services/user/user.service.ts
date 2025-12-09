@@ -139,11 +139,6 @@ class UserService {
     const response = await axiosClient.axiosInstance.get('user/home-admin')
     return response.data
   }
-
-  async logout(token: string): Promise<ApiResponse<void>> {
-    const response = await axiosClient.axiosInstance.post('auth/logout', { token })
-    return response.data
-  }
 }
 
 export default new UserService()

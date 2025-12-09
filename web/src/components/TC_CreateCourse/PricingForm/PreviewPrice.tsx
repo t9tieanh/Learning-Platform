@@ -26,7 +26,7 @@ const PreviewPrice = ({
           <div className='space-y-3'>
             <div className='flex justify-between items-center p-3 bg-blue-200/30 rounded-lg border shadow-md'>
               <span className='text-base text-blue-900'>Học viên trả</span>
-              <span className='text-base font-semibold text-blue-800'>{formatPrice(coursePrice)}</span>
+              <span className='text-base font-semibold text-blue-800'>{formatPrice(coursePrice * 1000)}</span>
             </div>
             <div className='flex justify-between items-center p-3 bg-yellow-50 rounded-lg shadow-md'>
               <span className='text-base text-yellow-600'>Phí nền tảng</span>
@@ -38,7 +38,7 @@ const PreviewPrice = ({
 
           <div className='flex justify-between items-center p-3 bg-green-50 rounded-lg shadow-md'>
             <span className='text-base text-green-900'>Thu nhập của bạn</span>
-            <span className='text-base font-semibold text-green-700'>{yourIncome?.toLocaleString()} VNĐ</span>
+            <span className='text-base font-semibold text-green-700'>{(yourIncome * 1000)?.toLocaleString()} VNĐ</span>
           </div>
 
           <div className='pt-4 border-t border-blue-200'>

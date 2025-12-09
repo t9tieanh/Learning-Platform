@@ -5,96 +5,98 @@ import BlogService from '~/services/blog.service'
 import { getUser } from '~/grpc/userClient'
 
 const getAll = async (req: Request, res: Response) => {
-    try {
-        const page = (req.data as any)?.page ?? (req.query.page ? Math.max(1, Number(req.query.page)) : 1)
-        const limit = (req.data as any)?.limit ?? (req.query.limit ? Math.min(100, Math.max(1, Number(req.query.limit))) : 10)
-        const search = (req.data as any)?.search ?? (req.query.q as string) ?? (req.query.search as string) ?? ''
-        // If no search term: keep original paginated query (title/content only)
-        if (!search.trim()) {
-            const blogs = await BlogService.getAll({ page, limit, search: '' })
-            const data = await Promise.all(
-                blogs.items.map(async b => {
-                    const user = await getUser(b.instructor_id);
-                    return {
-                        ...b,
-                        userName: user?.name || '',
-                        userAvt: user?.image || '',
-                    }
-                })
-            )
-            return sendResponse(res, {
-                code: StatusCodes.OK,
-                message: 'Lấy danh sách blog thành công',
-                result: { ...blogs, data }
-            })
-        }
-
-        // With search: include instructor name matching (diacritic-insensitive).
-        // Fetch a large set then filter manually (optimize later if needed).
-        const allBlogs = await BlogService.getAll({ page: 1, limit: 10000, search: '' })
-
-        const normalize = (v: string) => v
-            .toLowerCase()
-            .normalize('NFD')
-            .replace(/\p{Diacritic}/gu, '')
-            .trim()
-
-        const searchNorm = normalize(search)
-
-        // Cache instructor info to avoid repeated gRPC calls
-        const instructorCache: Record<string, { name: string; image: string }> = {}
-        const getInstructorInfo = async (instructorId: string) => {
-            if (instructorCache[instructorId]) return instructorCache[instructorId]
-            const user = await getUser(instructorId)
-            instructorCache[instructorId] = { name: user?.name || '', image: user?.image || '' }
-            return instructorCache[instructorId]
-        }
-
-        // Preload instructor info for all blogs (can be optimized later)
-        await Promise.all(
-            allBlogs.items.map(async b => {
-                await getInstructorInfo(b.instructor_id)
-            })
-        )
-
-        const filtered = allBlogs.items.filter(b => {
-            const titleNorm = normalize(b.title || '')
-            const contentNorm = normalize(b.content || '')
-            const instrNorm = normalize(instructorCache[b.instructor_id]?.name || '')
-            return titleNorm.includes(searchNorm) || contentNorm.includes(searchNorm) || instrNorm.includes(searchNorm)
-        })
-
-        const total = filtered.length
-        const totalPages = Math.ceil(total / limit) || 1
-        const start = (page - 1) * limit
-        const paginated = filtered.slice(start, start + limit)
-
-        const data = paginated.map(b => ({
+  try {
+    const page = (req.data as any)?.page ?? (req.query.page ? Math.max(1, Number(req.query.page)) : 1)
+    const limit =
+      (req.data as any)?.limit ?? (req.query.limit ? Math.min(100, Math.max(1, Number(req.query.limit))) : 10)
+    const search = (req.data as any)?.search ?? (req.query.q as string) ?? (req.query.search as string) ?? ''
+    // If no search term: keep original paginated query (title/content only)
+    if (!search.trim()) {
+      const blogs = await BlogService.getAll({ page, limit, search: '' })
+      const data = await Promise.all(
+        blogs.items.map(async (b) => {
+          const user = await getUser(b.instructor_id)
+          return {
             ...b,
-            userName: instructorCache[b.instructor_id]?.name || '',
-            userAvt: instructorCache[b.instructor_id]?.image || '',
-        }))
-
-        return sendResponse(res, {
-            code: StatusCodes.OK,
-            message: 'Lấy danh sách blog thành công',
-            result: {
-                items: paginated,
-                page,
-                limit,
-                total,
-                totalPages,
-                data
-            }
+            userName: user?.name || '',
+            userAvt: user?.image || ''
+          }
         })
-    } catch (e) {
-        const err = e as Error
-        sendResponse(res, {
-            code: StatusCodes.BAD_REQUEST,
-            message: err.message || 'Lỗi lấy danh sách blog',
-            result: null
-        })
+      )
+      return sendResponse(res, {
+        code: StatusCodes.OK,
+        message: 'Lấy danh sách blog thành công',
+        result: { ...blogs, data }
+      })
     }
+
+    // With search: include instructor name matching (diacritic-insensitive).
+    // Fetch a large set then filter manually (optimize later if needed).
+    const allBlogs = await BlogService.getAll({ page: 1, limit: 10000, search: '' })
+
+    const normalize = (v: string) =>
+      v
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/\p{Diacritic}/gu, '')
+        .trim()
+
+    const searchNorm = normalize(search)
+
+    // Cache instructor info to avoid repeated gRPC calls
+    const instructorCache: Record<string, { name: string; image: string }> = {}
+    const getInstructorInfo = async (instructorId: string) => {
+      if (instructorCache[instructorId]) return instructorCache[instructorId]
+      const user = await getUser(instructorId)
+      instructorCache[instructorId] = { name: user?.name || '', image: user?.image || '' }
+      return instructorCache[instructorId]
+    }
+
+    // Preload instructor info for all blogs (can be optimized later)
+    await Promise.all(
+      allBlogs.items.map(async (b) => {
+        await getInstructorInfo(b.instructor_id)
+      })
+    )
+
+    const filtered = allBlogs.items.filter((b) => {
+      const titleNorm = normalize(b.title || '')
+      const contentNorm = normalize(b.content || '')
+      const instrNorm = normalize(instructorCache[b.instructor_id]?.name || '')
+      return titleNorm.includes(searchNorm) || contentNorm.includes(searchNorm) || instrNorm.includes(searchNorm)
+    })
+
+    const total = filtered.length
+    const totalPages = Math.ceil(total / limit) || 1
+    const start = (page - 1) * limit
+    const paginated = filtered.slice(start, start + limit)
+
+    const data = paginated.map((b) => ({
+      ...b,
+      userName: instructorCache[b.instructor_id]?.name || '',
+      userAvt: instructorCache[b.instructor_id]?.image || ''
+    }))
+
+    return sendResponse(res, {
+      code: StatusCodes.OK,
+      message: 'Lấy danh sách blog thành công',
+      result: {
+        items: paginated,
+        page,
+        limit,
+        total,
+        totalPages,
+        data
+      }
+    })
+  } catch (e) {
+    const err = e as Error
+    sendResponse(res, {
+      code: StatusCodes.BAD_REQUEST,
+      message: err.message || 'Lỗi lấy danh sách blog',
+      result: null
+    })
+  }
 }
 
 const getAllByInstructorId = async (req: Request, res: Response) => {
@@ -172,7 +174,7 @@ const getTrending = async (_req: Request, res: Response) => {
   }
 }
 
-const getDetails = async (req: Request, res: Response) => {
+const getBlogDetails = async (req: Request, res: Response) => {
   try {
     const id = (req.data as any)?.id || (req.params?.id as string) || ''
     if (!id) throw new Error('Thiếu tham số id')
@@ -207,7 +209,7 @@ const getDetails = async (req: Request, res: Response) => {
   }
 }
 
-const create = async (req: Request, res: Response) => {
+const createBlog = async (req: Request, res: Response) => {
   try {
     const { instructor_id, title, image_url, content, markdown_file_url } = (req.data as any) || (req.body as any)
 
@@ -283,7 +285,7 @@ const update = async (req: Request, res: Response) => {
   }
 }
 
-const remove = async (req: Request, res: Response) => {
+const removeBlog = async (req: Request, res: Response) => {
   try {
     const id = (req.data as any)?.id || (req.params?.id as string) || ''
     if (!id) throw new Error('Thiếu tham số id')
@@ -309,10 +311,10 @@ const BlogController = {
   getAllByInstructorId,
   getNew,
   getTrending,
-  getDetails,
-  create,
+  getDetails: getBlogDetails,
+  create: createBlog,
   update,
-  remove
+  remove: removeBlog
 }
 
 export default BlogController

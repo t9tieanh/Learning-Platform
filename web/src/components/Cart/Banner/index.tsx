@@ -3,9 +3,9 @@ import './style.scss'
 
 const Banner = () => {
   return (
-    <div className='cart-banner px-4 py-6 rounded-xl bg-[#0C356A]'>
-      <p className='text-3xl font-bold flex text-blue-500 items-center'>
-        <ShoppingCart className='cart-icon text-blue-400 w-8 h-8' />
+    <div className='cart-banner px-4 py-6 rounded-xl bg-primary'>
+      <p className='text-3xl font-bold flex text-white items-center'>
+        <ShoppingCart className='cart-icon text-white w-8 h-8' />
         &nbsp;Giỏ hàng của bạn.
       </p>
       <p className='text-base flex items-center text-white mt-2'>
