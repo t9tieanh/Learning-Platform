@@ -58,7 +58,7 @@ export function VideoModal({ isOpen, onClose, videoUrl, title }: VideoModalProps
                 <Button
                   onClick={onClose}
                   size='icon'
-                  variant='secondary'
+                  variant='default'
                   className='rounded-full shadow-lg'
                   aria-label='Đóng video'
                 >

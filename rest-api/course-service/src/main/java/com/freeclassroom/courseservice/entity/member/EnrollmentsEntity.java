@@ -25,7 +25,6 @@ import java.util.List;
 @SuperBuilder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class EnrollmentsEntity extends AbstractEntity {
-
     @Column(name = "user_id", nullable = false)
     String userId;
 

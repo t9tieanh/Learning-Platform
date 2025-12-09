@@ -4,6 +4,7 @@ import { Card } from '@/components/ui/card'
 import { useNavigate } from 'react-router-dom'
 import { CourseListItem } from '@/types/course-user'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Item, ItemMedia, ItemContent, ItemTitle, ItemDescription, ItemActions } from '@/components/ui/item'
 import CustomButton from '@/components/common/Button'
 import { useState } from 'react'
 import type { MouseEvent } from 'react'
@@ -29,7 +30,7 @@ const CourseCard = ({ courseItem }: { courseItem: CourseListItem }) => {
   return (
     <>
       <Card
-        className='group border border-border/60 bg-card/60 backdrop-blur-sm cursor-pointer hover:shadow-lg transition-all duration-300 p-0'
+        className='group border border-border/60 bg-card/60 backdrop-blur-sm cursor-pointer hover:shadow-md transition-all duration-300 p-0'
         onClick={handleClick}
       >
         <div className='flex flex-col sm:flex-row items-stretch sm:h-[180px]'>
@@ -40,38 +41,40 @@ const CourseCard = ({ courseItem }: { courseItem: CourseListItem }) => {
               className='absolute inset-0 w-full h-full object-cover object-center transition-transform duration-300 group-hover:scale-105'
             />
           </div>
-          {/* Content */}
+          {/* Content dùng Item UI */}
           <div className='flex-1 flex flex-col justify-between p-5'>
-            <div className='flex-1 space-y-3'>
-              <h3 className='text-base sm:text-lg font-semibold line-clamp-2 text-foreground group-hover:text-primary transition-colors duration-200'>
-                {courseItem.title}
-              </h3>
-
-              <p className='text-sm text-muted-foreground/80 line-clamp-2'>{courseItem.shortDescription}</p>
-              <div className='flex items-center gap-1'>
-                <Avatar>
-                  <AvatarImage src={courseItem.instructor.image} />
-                  <AvatarFallback>{courseItem.instructor.name}</AvatarFallback>
-                </Avatar>
-                <p className='text-xs text-muted-foreground italic'>{courseItem.instructor.name}</p>
-              </div>
-
-              <div className='flex items-center gap-2'>
-                <span className='text-sm font-semibold text-yellow-500'>{courseItem?.rating}</span>
-                <div className='flex items-center gap-0.5'>
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className={`w-3.5 h-3.5 ${
-                        i < Math.floor(courseItem?.rating || 0)
-                          ? 'fill-yellow-400 text-yellow-400 drop-shadow-sm'
-                          : 'text-muted-foreground/20'
-                      }`}
-                    />
-                  ))}
-                </div>
-              </div>
-            </div>
+            <Item variant='default' size='default' className='p-0'>
+              <ItemContent>
+                <ItemTitle className='text-base sm:text-lg font-semibold line-clamp-2 text-foreground group-hover:text-primary transition-colors duration-200'>
+                  {courseItem.title}
+                </ItemTitle>
+                <ItemDescription className='text-sm text-muted-foreground/80 line-clamp-2'>
+                  {courseItem.shortDescription}
+                </ItemDescription>
+                <ItemActions className='flex items-center gap-1 mt-2'>
+                  <Avatar>
+                    <AvatarImage src={courseItem.instructor.image} />
+                    <AvatarFallback>{courseItem.instructor.name}</AvatarFallback>
+                  </Avatar>
+                  <span className='text-xs text-muted-foreground italic'>{courseItem.instructor.name}</span>
+                </ItemActions>
+                <ItemActions className='flex items-center gap-2 mt-2'>
+                  <span className='text-sm font-semibold text-yellow-500'>{courseItem?.rating}</span>
+                  <div className='flex items-center gap-0.5'>
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        className={`w-3.5 h-3.5 ${
+                          i < Math.floor(courseItem?.rating || 0)
+                            ? 'fill-yellow-400 text-yellow-400 drop-shadow-sm'
+                            : 'text-muted-foreground/20'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </ItemActions>
+              </ItemContent>
+            </Item>
           </div>
           <div className='p-5 pt-0 sm:pt-5'>
             <CustomButton

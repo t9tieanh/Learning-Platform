@@ -1,16 +1,16 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document } from 'mongoose'
 
 export interface IMessage {
-  role: 'user' | 'ai'; // ai gửi
-  content: string;
-  createdAt?: Date;
+  role: 'user' | 'ai' // ai gửi
+  content: string
+  createdAt?: Date
 }
 
 export interface IConversation extends Document {
-  userId: string; // owner của conversation
-  messages: IMessage[]; // danh sách message
-  createdAt: Date;
-  updatedAt: Date;
+  userId: string // owner của conversation
+  messages: IMessage[] // danh sách message
+  createdAt: Date
+  updatedAt: Date
 }
 
 const messageSchema = new Schema<IMessage>(
@@ -20,7 +20,7 @@ const messageSchema = new Schema<IMessage>(
     createdAt: { type: Date, default: Date.now }
   },
   { _id: true }
-);
+)
 
 const conversationSchema = new Schema<IConversation>(
   {
@@ -28,6 +28,6 @@ const conversationSchema = new Schema<IConversation>(
     messages: { type: [messageSchema], default: [] }
   },
   { timestamps: true, collection: 'ai_conversations' }
-);
+)
 
-export default mongoose.model<IConversation>('AIConversation', conversationSchema);
+export default mongoose.model<IConversation>('AIConversation', conversationSchema)

@@ -1,6 +1,7 @@
 package com.freeclassroom.courseservice.dto.response.course;
 
 import com.freeclassroom.courseservice.enums.entity.EnumCourseProgressStep;
+import com.freeclassroom.courseservice.enums.entity.EnumCourseStatus;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import lombok.*;
@@ -29,4 +30,7 @@ public class CourseInfoResponse {
 
     @Enumerated(EnumType.STRING)
     EnumCourseProgressStep progressStep;
+
+    @Enumerated(EnumType.STRING)
+    EnumCourseStatus status;
 }

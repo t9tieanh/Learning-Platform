@@ -14,9 +14,9 @@ export const LectureInfo = ({ lesson, thumbnailUri }: { lesson: Lesson; thumbnai
       </h2>
 
       {lesson?.content && (
-        <div className='flex items-start text-muted-foreground text-base mb-3'>
+        <div className='flex items-start text-muted-foreground text-sm mb-3'>
           <Info size={18} className='mt-1 mr-2' />
-          <p>{lesson.content}</p>
+          <div dangerouslySetInnerHTML={{ __html: lesson.content }} />
         </div>
       )}
     </div>

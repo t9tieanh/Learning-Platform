@@ -20,6 +20,11 @@ public class RabbitMQConfig {
     //routingkey for order.serivce.queue
     public static final String ORDER_SERVICE_QUEUE_ROUTING_KEY = "register.updated.v1";
 
+    // --- config course approval/reject ---
+    public static final String COURSE_APPROVAL_QUEUE = "course.approval.queue";
+    public static final String COURSE_APPROVAL_EXCHANGE = "course.approval.exchange";
+    public static final String COURSE_APPROVAL_ROUTING_KEY = "course.approval.#";
+
     @Bean
     public Queue registerCourseQueue () {
         return new Queue(REGISTER_SERVICE_QUEUE, true);
@@ -36,6 +41,25 @@ public class RabbitMQConfig {
                 .bind(registerCourseQueue)
                 .to(sagaExchange)
                 .with(REGISTER_SERVICE_QUEUE_ROUTING_KEY);
+    }
+
+    // --- course approval queue/exchange/binding ---
+    @Bean
+    public Queue courseApprovalQueue() {
+        return new Queue(COURSE_APPROVAL_QUEUE, true);
+    }
+
+    @Bean
+    public TopicExchange courseApprovalExchange() {
+        return new TopicExchange(COURSE_APPROVAL_EXCHANGE, true, false);
+    }
+
+    @Bean
+    public Binding bindingCourseApproval(Queue courseApprovalQueue, TopicExchange courseApprovalExchange) {
+        return BindingBuilder
+                .bind(courseApprovalQueue)
+                .to(courseApprovalExchange)
+                .with(COURSE_APPROVAL_ROUTING_KEY);
     }
     // --- config rabbit mq ----
 

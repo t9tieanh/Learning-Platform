@@ -94,7 +94,7 @@ const Course = () => {
         </div>
         <div className='col-span-1'>
           {courseDetail && courseDetail.purchased !== undefined && courseDetail.purchased ? (
-            <LearnNow courseId={courseDetail.id} />
+            <LearnNow courseId={courseDetail.id} instructorId={courseDetail?.instructor?.id} />
           ) : (
             <>
               <CoursePurchaseBox

@@ -1,174 +1,179 @@
-import { ChromaClient } from "chromadb";
-import { GoogleGenerativeAI } from "@google/generative-ai";
-import supabase from "~/config/supabase";
-import Conversation from "~/models/ai/ai-conversation.model";
-import { getPurchasedCourseIds } from "~/utils/supabase";
+import { ChromaClient } from 'chromadb'
+import { GoogleGenerativeAI } from '@google/generative-ai'
+import supabase from '~/config/supabase'
+import Conversation from '~/models/ai/ai-conversation.model'
+import { getPurchasedCourseIds } from '~/utils/supabase'
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '')
 
 // Embedding model (không đổi, vẫn dùng text-embedding-004 vì nó ổn định)
 async function generateEmbedding(text: string | string[]) {
-    const model = genAI.getGenerativeModel({ model: 'text-embedding-004' })
+  const model = genAI.getGenerativeModel({ model: 'text-embedding-004' })
 
-    const result = await model.embedContent(text)
-    return result.embedding.values
+  const result = await model.embedContent(text)
+  return result.embedding.values
 }
 
 const chroma = new ChromaClient({
-    path: 'http://localhost:8000'
+  path: 'http://localhost:8000'
 })
 
 async function searchSimilarCourses(query: string) {
-    const embedding = await generateEmbedding(query)
+  const embedding = await generateEmbedding(query)
 
-    try {
-        const { data, error } = await supabase.rpc('match_course_embeddings', {
-            query_embedding: embedding,
-            match_count: 5,
-            similarity_threshold: 0.3
+  try {
+    const { data, error } = await supabase.rpc('match_course_embeddings', {
+      query_embedding: embedding,
+      match_count: 5,
+      similarity_threshold: 0.3
+    })
+
+    if (error) throw error
+    if (data && data.length) {
+      // If RPC does not include link, fetch details
+      const ids = data.map((r: any) => r.id).filter((v: any) => v != null)
+      const linkMap: Record<number, string> = {}
+      if (ids.length) {
+        const { data: detail } = await supabase.from('course_embeddings').select('id, link').in('id', ids)
+        ;(detail || []).forEach((d: any) => {
+          linkMap[d.id] = d.link
         })
-
-        if (error) throw error
-        if (data && data.length) {
-            // If RPC does not include link, fetch details
-            const ids = data.map((r: any) => r.id).filter((v: any) => v != null)
-            const linkMap: Record<number, string> = {}
-            if (ids.length) {
-                const { data: detail } = await supabase.from('course_embeddings').select('id, link').in('id', ids)
-                    ; (detail || []).forEach((d: any) => {
-                        linkMap[d.id] = d.link
-                    })
-            }
-            return data.map((row: any) => {
-                const tags = Array.isArray(row.tags) ? row.tags.join(', ') : String(row.tags ?? '')
-                const link = row.link || linkMap[row.id] || ''
-                return `${row.name} - ${tags}\n${row.description}${link ? `\nLink: ${link}` : ''}`
-            })
-        }
-    } catch (e: any) {
-        console.warn('Supabase RPC match_course_embeddings failed or missing. Falling back.', e?.message || e)
+      }
+      return data.map((row: any) => {
+        const tags = Array.isArray(row.tags) ? row.tags.join(', ') : String(row.tags ?? '')
+        const link = row.link || linkMap[row.id] || ''
+        return `${row.name} - ${tags}\n${row.description}${link ? `\nLink: ${link}` : ''}`
+      })
     }
+  } catch (e: any) {
+    console.warn('Supabase RPC match_course_embeddings failed or missing. Falling back.', e?.message || e)
+  }
 
-    try {
-        const { data, error } = await supabase
-            .from('course_embeddings')
-            .select('name, description, tags, link')
-            .or(`name.ilike.%${query}%,description.ilike.%${query}%`)
-            .limit(5)
+  try {
+    const { data, error } = await supabase
+      .from('course_embeddings')
+      .select('name, description, tags, link')
+      .or(`name.ilike.%${query}%,description.ilike.%${query}%`)
+      .limit(5)
 
-        if (!error && data && data.length) {
-            return data.map((row: any) => {
-                const tags = Array.isArray(row.tags) ? row.tags.join(', ') : String(row.tags ?? '')
-                return `${row.name} - ${tags}\n${row.description}${row.link ? `\nLink: ${row.link}` : ''}`
-            })
-        }
-    } catch (e) {
-        // ignore and try chroma
+    if (!error && data && data.length) {
+      return data.map((row: any) => {
+        const tags = Array.isArray(row.tags) ? row.tags.join(', ') : String(row.tags ?? '')
+        return `${row.name} - ${tags}\n${row.description}${row.link ? `\nLink: ${row.link}` : ''}`
+      })
     }
+  } catch (e) {
+    // ignore and try chroma
+  }
 
-    try {
-        const collection = await chroma.getOrCreateCollection({ name: 'courses' })
-        const results = await collection.query({ queryEmbeddings: [embedding], nResults: 5 })
-        const docs = results.documents[0] || []
-        return docs.map((doc: string | null) => doc || '')
-    } catch (e: any) {
-        console.warn('Chroma query failed:', e?.message || e)
-        return []
-    }
+  try {
+    const collection = await chroma.getOrCreateCollection({ name: 'courses' })
+    const results = await collection.query({ queryEmbeddings: [embedding], nResults: 5 })
+    const docs = results.documents[0] || []
+    return docs.map((doc: string | null) => doc || '')
+  } catch (e: any) {
+    console.warn('Chroma query failed:', e?.message || e)
+    return []
+  }
 }
 
 // Phát hiện user đang hỏi về các khóa họ đã mua
 function isPurchasedContextQuestion(message: string): boolean {
-    const lowered = message.toLowerCase()
-    return [
-        'khóa đã mua',
-        'khoa da mua',
-        'đã mua của tôi',
-        'da mua cua toi',
-        'khóa tôi đã mua',
-        'khoa toi da mua',
-        'khóa học tôi đã mua',
-        'khoa hoc toi da mua',
-        'các khóa tôi đã mua',
-        'cac khoa toi da mua'
-    ].some(pattern => lowered.includes(pattern))
+  const lowered = message.toLowerCase()
+  return [
+    'khóa đã mua',
+    'khoa da mua',
+    'đã mua của tôi',
+    'da mua cua toi',
+    'khóa tôi đã mua',
+    'khoa toi da mua',
+    'khóa học tôi đã mua',
+    'khoa hoc toi da mua',
+    'các khóa tôi đã mua',
+    'cac khoa toi da mua'
+  ].some((pattern) => lowered.includes(pattern))
 }
 
 // Tìm khóa tương tự nhưng chỉ giữ khóa user đã mua
 async function searchSimilarPurchasedCourses(userId: string, query: string) {
-    const purchasedIds = await getPurchasedCourseIds(userId)
-    if (!purchasedIds.length) return { emptyPurchased: true, courses: [] as string[] }
+  const purchasedIds = await getPurchasedCourseIds(userId)
+  if (!purchasedIds.length) return { emptyPurchased: true, courses: [] as string[] }
 
-    const embedding = await generateEmbedding(query)
-    let results: any[] = []
-    try {
-        const { data, error } = await supabase.rpc("match_course_embeddings", {
-            query_embedding: embedding,
-            match_count: 20, // lấy nhiều hơn rồi filter
-            similarity_threshold: 0.3,
-        })
-        if (!error && data) {
-            results = data.filter((row: any) => purchasedIds.includes(String(row.id)))
-        }
-    } catch (e: any) {
-        console.warn('RPC match_course_embeddings lỗi:', e?.message || e)
-    }
-
-    // Fallback nếu RPC không trả kết quả phù hợp
-    if (!results.length) {
-        try {
-            const { data, error } = await supabase
-                .from('course_embeddings')
-                .select('id, name, description, tags, link')
-                .in('id', purchasedIds.map(id => Number(id)).filter(n => !isNaN(n)))
-                .limit(10)
-            if (!error && data) {
-                results = data
-            }
-        } catch (e: any) {
-            console.warn('Fallback select course_embeddings lỗi:', e?.message || e)
-        }
-    }
-
-    const formatted = results.slice(0, 5).map((row: any) => {
-        const tags = Array.isArray(row.tags) ? row.tags.join(', ') : String(row.tags ?? '')
-        const link = row.link ? `\nLink: ${row.link}` : ''
-        return `${row.name} - ${tags}\n${row.description}${link}`
+  const embedding = await generateEmbedding(query)
+  let results: any[] = []
+  try {
+    const { data, error } = await supabase.rpc('match_course_embeddings', {
+      query_embedding: embedding,
+      match_count: 20, // lấy nhiều hơn rồi filter
+      similarity_threshold: 0.3
     })
-    return { emptyPurchased: false, courses: formatted }
+    if (!error && data) {
+      results = data.filter((row: any) => purchasedIds.includes(String(row.id)))
+    }
+  } catch (e: any) {
+    console.warn('RPC match_course_embeddings lỗi:', e?.message || e)
+  }
+
+  // Fallback nếu RPC không trả kết quả phù hợp
+  if (!results.length) {
+    try {
+      const { data, error } = await supabase
+        .from('course_embeddings')
+        .select('id, name, description, tags, link')
+        .in(
+          'id',
+          purchasedIds.map((id) => Number(id)).filter((n) => !isNaN(n))
+        )
+        .limit(10)
+      if (!error && data) {
+        results = data
+      }
+    } catch (e: any) {
+      console.warn('Fallback select course_embeddings lỗi:', e?.message || e)
+    }
+  }
+
+  const formatted = results.slice(0, 5).map((row: any) => {
+    const tags = Array.isArray(row.tags) ? row.tags.join(', ') : String(row.tags ?? '')
+    const link = row.link ? `\nLink: ${row.link}` : ''
+    return `${row.name} - ${tags}\n${row.description}${link}`
+  })
+  return { emptyPurchased: false, courses: formatted }
 }
 
 async function generateReply(userMessage: string, userId?: string) {
-    const purchasedContext = userId ? isPurchasedContextQuestion(userMessage) : false
-    let relatedCourses: string[] = []
-    let emptyPurchased = false
+  const purchasedContext = userId ? isPurchasedContextQuestion(userMessage) : false
+  let relatedCourses: string[] = []
+  let emptyPurchased = false
 
-    console.log('purchasedContext', purchasedContext)
-    console.log('userId', userId)
+  console.log('purchasedContext', purchasedContext)
+  console.log('userId', userId)
 
-    if (purchasedContext && userId) {
-        const { emptyPurchased: ep, courses } = await searchSimilarPurchasedCourses(userId, userMessage)
-        emptyPurchased = ep
-        relatedCourses = courses
-    } else {
-        relatedCourses = await searchSimilarCourses(userMessage)
-    }
+  if (purchasedContext && userId) {
+    const { emptyPurchased: ep, courses } = await searchSimilarPurchasedCourses(userId, userMessage)
+    emptyPurchased = ep
+    relatedCourses = courses
+  } else {
+    relatedCourses = await searchSimilarCourses(userMessage)
+  }
 
-    if (purchasedContext && emptyPurchased) {
-        return `😅 Bạn chưa mua khóa học nào nên Nova chưa thể tư vấn dựa trên danh sách cá nhân của bạn. Hãy xem các khóa học phù hợp và mua để nhận tư vấn cá nhân hóa nhé! ✨` +
-            `\n❤️ Nova luôn sẵn sàng giúp bạn!`
-    }
+  if (purchasedContext && emptyPurchased) {
+    return (
+      `😅 Bạn chưa mua khóa học nào nên Nova chưa thể tư vấn dựa trên danh sách cá nhân của bạn. Hãy xem các khóa học phù hợp và mua để nhận tư vấn cá nhân hóa nhé! ✨` +
+      `\n❤️ Nova luôn sẵn sàng giúp bạn!`
+    )
+  }
 
-    const contextText =
-        relatedCourses.length > 0
-            ? relatedCourses.map((c: string, i: number) => `(${i + 1}) ${c}`).join('\n\n')
-            : 'Không có dữ liệu khóa học liên quan.'
+  const contextText =
+    relatedCourses.length > 0
+      ? relatedCourses.map((c: string, i: number) => `(${i + 1}) ${c}`).join('\n\n')
+      : 'Không có dữ liệu khóa học liên quan.'
 
-    const scopeNote = purchasedContext
-        ? 'CHỈ sử dụng danh sách khóa học mà người dùng đã mua để trả lời.'
-        : 'Chỉ sử dụng thông tin được cung cấp, không bịa.'
+  const scopeNote = purchasedContext
+    ? 'CHỈ sử dụng danh sách khóa học mà người dùng đã mua để trả lời.'
+    : 'Chỉ sử dụng thông tin được cung cấp, không bịa.'
 
-    const prompt = `
+  const prompt = `
         Bạn là Nova - AI tư vấn khóa học cho nền tảng học trực tuyến.
 
         ${scopeNote}
@@ -214,7 +219,7 @@ async function generateReply(userMessage: string, userId?: string) {
         - Viết tự nhiên, đơn giản, không quá máy móc.
     `
 
-    const prompt2 = `
+  const prompt2 = `
     Bạn là Nova – trợ lý AI tư vấn khóa học thông minh của nền tảng học trực tuyến.
         Mục tiêu: dựa vào dữ liệu context được cung cấp, trả lời chính xác, thân thiện, ngắn gọn và không bịa thông tin ngoài context.
 
@@ -326,88 +331,88 @@ async function generateReply(userMessage: string, userId?: string) {
         - Nếu có bất kỳ trường thông tin thiếu quan trọng cho câu trả lời, thực hiện 1 câu hỏi clarification (xem mục 5).
 
         Luôn thực thi mọi quy tắc bên trên.
-    `;
+    `
 
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+  const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
 
-    const result = await model.generateContent(prompt2);
-    return result.response.text();
+  const result = await model.generateContent(prompt2)
+  return result.response.text()
 }
 
 interface SaveChatOptions {
-    userId: string;
-    userMessage: string;
-    aiReply: string;
-    conversationId?: string;
+  userId: string
+  userMessage: string
+  aiReply: string
+  conversationId?: string
 }
 
 async function saveChat({ userId, userMessage, aiReply, conversationId }: SaveChatOptions) {
-    // If conversationId provided, append; else create new conversation
-    let conversation;
-    if (conversationId) {
-        conversation = await Conversation.findOne({ _id: conversationId, userId });
-    }
-    if (!conversation) {
-        conversation = await Conversation.create({
-            userId,
-            messages: [
-                { role: 'user', content: userMessage },
-                { role: 'ai', content: aiReply }
-            ]
-        });
-    } else {
-        conversation.messages.push({ role: 'user', content: userMessage });
-        conversation.messages.push({ role: 'ai', content: aiReply });
-        await conversation.save();
-    }
-    return conversation;
+  // If conversationId provided, append; else create new conversation
+  let conversation
+  if (conversationId) {
+    conversation = await Conversation.findOne({ _id: conversationId, userId })
+  }
+  if (!conversation) {
+    conversation = await Conversation.create({
+      userId,
+      messages: [
+        { role: 'user', content: userMessage },
+        { role: 'ai', content: aiReply }
+      ]
+    })
+  } else {
+    conversation.messages.push({ role: 'user', content: userMessage })
+    conversation.messages.push({ role: 'ai', content: aiReply })
+    await conversation.save()
+  }
+  return conversation
 }
 
 async function createConversation(userId: string) {
-    try {
-        // Tìm conversation đã tồn tại cho user
-        let conversation = await Conversation.findOne({ userId });
+  try {
+    // Tìm conversation đã tồn tại cho user
+    let conversation = await Conversation.findOne({ userId })
 
-        if (conversation) {
-            // Nếu đã có, trả về luôn
-            return conversation;
-        }
-
-        // Nếu chưa có, tạo mới
-        conversation = await Conversation.create({ userId, messages: [] });
-        return conversation;
-    } catch (error) {
-        console.error('Failed to create conversation:', error);
-        throw new Error('Không thể tạo conversation. Vui lòng thử lại.');
+    if (conversation) {
+      // Nếu đã có, trả về luôn
+      return conversation
     }
+
+    // Nếu chưa có, tạo mới
+    conversation = await Conversation.create({ userId, messages: [] })
+    return conversation
+  } catch (error) {
+    console.error('Failed to create conversation:', error)
+    throw new Error('Không thể tạo conversation. Vui lòng thử lại.')
+  }
 }
 
 async function getConversation(userId: string, conversationId?: string) {
-    try {
-        if (conversationId) {
-            const existing = await Conversation.findOne({ _id: conversationId, userId });
-            if (existing) return existing;
-            return null;
-        }
-        // fallback: first conversation for user
-        const anyConv = await Conversation.findOne({ userId });
-        return anyConv || null;
-    } catch (error) {
-        console.error('Failed to load conversation:', error);
-        throw new Error('Không thể tải conversation. Vui lòng thử lại.');
+  try {
+    if (conversationId) {
+      const existing = await Conversation.findOne({ _id: conversationId, userId })
+      if (existing) return existing
+      return null
     }
+    // fallback: first conversation for user
+    const anyConv = await Conversation.findOne({ userId })
+    return anyConv || null
+  } catch (error) {
+    console.error('Failed to load conversation:', error)
+    throw new Error('Không thể tải conversation. Vui lòng thử lại.')
+  }
 }
 
 const AiChatService = {
-    generateReply, // vẫn giữ hàm với interface mới (thêm userId tùy chọn)
-    generateEmbedding,
-    searchSimilarCourses,
-    searchSimilarPurchasedCourses,
-    saveChat,
-    createConversation,
-    getConversation,
-};
+  generateReply, // vẫn giữ hàm với interface mới (thêm userId tùy chọn)
+  generateEmbedding,
+  searchSimilarCourses,
+  searchSimilarPurchasedCourses,
+  saveChat,
+  createConversation,
+  getConversation
+}
 
-export type { SaveChatOptions };
+export type { SaveChatOptions }
 
-export default AiChatService;
+export default AiChatService

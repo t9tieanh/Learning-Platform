@@ -76,6 +76,7 @@
 
       .item .info {
         flex: 1;
+        margin-left: 12px;
       }
 
       .item .info .name {
@@ -98,20 +99,20 @@
 
       .summary {
         margin-top: 20px;
-        display: flex;
-        justify-content: flex-end;
-        gap: 16px;
+        display: block;
       }
 
       .summary .label {
         color: #6b7280;
         font-size: 13px;
+        margin-bottom: 2px;
       }
 
       .summary .value {
         font-weight: 700;
         color: #111827;
         font-size: 14px;
+        margin-bottom: 12px;
       }
 
       .cta {
@@ -165,7 +166,7 @@
             <div class="instructor">Mã khóa học: {{this.course_id}}</div>
           </div>
 
-          <div class="price">{{this.price}} VND</div>
+          <div class="price">{{formatCurrency this.price}} VND</div>
         </div>
         {{/each}}
         <!-- end item block -->
@@ -175,13 +176,12 @@
         {{#if discount.code}}
         <div>
           <div class="label">Discount</div>
-          <div class="value">{{discount.code}} — {{discount.value}}</div>
+          <div class="value">{{discount.code}} — {{formatCurrency discount.value}}</div>
         </div>
         {{/if}}
-
         <div>
           <div class="label">Total</div>
-          <div class="value">{{total}} VND</div>
+          <div class="value">{{formatCurrency total}} VND</div>
         </div>
       </div>
 

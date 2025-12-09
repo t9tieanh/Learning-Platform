@@ -50,7 +50,7 @@ const CourseContent = ({
       </div>
       <div className='text-base max-w-3xl ml-12 text-justify leading-relaxed font-normal text-gray-700'>
         {/* content of course */}
-        {content}
+        <div dangerouslySetInnerHTML={{ __html: content }} />
       </div>
       <div className='py-6'>
         <h4 className='font-bold bg-primary text-white p-2 rounded-r-3xl max-w-80 pl-12'>Thông tin giáo viên</h4>

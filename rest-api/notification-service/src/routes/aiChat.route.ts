@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import AiChatController from '~/controllers/aiChat.controller';
+import AiChatController from '~/controllers/aiChat.controller'
 import authen from '~/middleware/authen.middleware'
 
 const router = Router()

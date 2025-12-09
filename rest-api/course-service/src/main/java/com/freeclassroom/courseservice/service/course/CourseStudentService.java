@@ -41,7 +41,7 @@ public class CourseStudentService implements ICourseStudentService{
         );
 
         // check status of course
-        if (!course.getStatus().equals(EnumCourseStatus.PUBLISHED) || !course.getProgressStep().equals(EnumCourseProgressStep.COMPLETED))
+        if (!course.getStatus().equals(EnumCourseStatus.PUBLISHED))
             throw new CustomExeption(ErrorCode.COURSE_NOT_PUBLISHED);
 
         CourseDetailResponse result = courseStudentMapper.toCourseDetailDto(course);

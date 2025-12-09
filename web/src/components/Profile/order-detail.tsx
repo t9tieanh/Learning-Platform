@@ -90,7 +90,7 @@ const OrderDetail = ({ orderId }: { orderId: string }) => {
                       <p className='font-normal text-gray-800'>@{item.instructor_name}</p>
                     </span>
                   </div>
-                  <span>{formatPrice(item.price)} VNĐ</span>
+                  <span>{formatPrice(item.price)}</span>
                 </div>
               ))}
             </div>

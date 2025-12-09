@@ -74,8 +74,7 @@ public class CourseGrpcService extends CourseServiceImplBase {
 
             boolean hasInvalidCourse = myCourses.stream()
                     .anyMatch(course ->
-                            !EnumCourseStatus.PUBLISHED.equals(course.getStatus()) ||
-                                    !EnumCourseProgressStep.COMPLETED.equals(course.getProgressStep())
+                            !EnumCourseStatus.PUBLISHED.equals(course.getStatus())
                     );
 
             if (hasInvalidCourse) {

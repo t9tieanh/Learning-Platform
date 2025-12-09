@@ -127,6 +127,7 @@ class CourseService {
       category: string
       introductoryVideo: string
       progressStep: string
+      status?: string
     }>
   > {
     const response = await axiosClient.axiosInstance.get(`learning/instructor/courses/${courseId}/info`)

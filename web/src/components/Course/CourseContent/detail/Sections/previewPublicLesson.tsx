@@ -29,7 +29,7 @@ const PreviewPublicLesson = ({
           Xem trước video
         </>
       }
-      size='lg'
+      size='full'
     >
       <div className='preview-content p-3 flex flex-col gap-4'>
         <span className='text-white text-base font-medium font-sans'>

@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion'
 import { useState } from 'react'
-import { Play, Calendar, Edit, Check } from 'lucide-react'
-import { useLocation, useParams } from 'react-router-dom'
+import { Play, Calendar, Edit, Check, BadgeCheck, PlayCircle } from 'lucide-react'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import CustomDialog from '@/components/common/Dialog'
 import { Badge } from '@/components/ui/badge'
@@ -38,7 +38,7 @@ function getStatusColor(status: EnumCourseStatus | string) {
     case 'pending_review':
       return 'bg-yellow-400 text-black' // Chờ duyệt
     case 'published':
-      return 'bg-green-500 text-white' // Đang mở
+      return 'bg-blue-500 text-white' // Đang mở
     case 'rejected':
       return 'bg-red-500 text-white' // Bị từ chối
     case 'archived':
@@ -55,9 +55,9 @@ function getStatusLabel(status: string | EnumCourseStatus) {
     case 'pending_review':
       return 'Chờ duyệt'
     case 'published':
-      return 'Đang mở'
+      return 'Đang hoạt động'
     case 'rejected':
-      return 'Bị từ chối'
+      return 'Đã bị quản trị viên từ chối'
     case 'archived':
       return 'Đã lưu trữ'
     default:
@@ -84,6 +84,7 @@ export function CourseHero({
   const location = useLocation()
   const isAdminRoute = location.pathname.startsWith('/admin/course')
   const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate()
 
   // Handle approve course
   const handleApproveCourse = async () => {
@@ -102,7 +103,7 @@ export function CourseHero({
       }
     } catch (err) {
       console.error(err)
-      toast.error('Lỗi khi gọi API phê duyệt')
+      toast.error('Phê duyệt thất bại. Vui lòng thử lại.')
     } finally {
       setApproving(false)
     }
@@ -144,8 +145,10 @@ export function CourseHero({
 
       <div className='relative grid gap-6 p-8 lg:grid-cols-2 lg:gap-8'>
         <div className='flex flex-col space-y-6'>
+          <h1 className='text-3xl font-bold tracking-tight lg:text-4xl xl:text-4xl text-white'>{title}</h1>
+
           <div className='flex items-center gap-3 flex-wrap'>
-            <Badge className={`${getStatusColor(status)} text-sm p-1`}>{getStatusLabel(status)}</Badge>
+            <Badge className={`${getStatusColor(status)} text-sm p-1 px-2`}>{getStatusLabel(status)}</Badge>
 
             {/* Ngày: trung tính, không cần màu đậm */}
             <div className='flex items-center gap-2 text-sm text-muted-foreground bg-gray-100 p-1 rounded-md'>
@@ -160,8 +163,6 @@ export function CourseHero({
               </Badge>
             )}
           </div>
-
-          <h1 className='text-3xl font-bold tracking-tight lg:text-4xl xl:text-4xl text-white'>{title}</h1>
 
           <div className='flex gap-3 flex-wrap'>
             {isAdminRoute ? (
@@ -180,7 +181,12 @@ export function CourseHero({
                 <CustomDialog
                   open={openApproveModal}
                   setOpen={setOpenApproveModal}
-                  title={<span>Phê duyệt / Từ chối khoá học</span>}
+                  title={
+                    <span className='flex items-center gap-1'>
+                      <BadgeCheck />
+                      Phê duyệt / Từ chối khoá học
+                    </span>
+                  }
                   size='md'
                   description='Bạn có thể phê duyệt khoá học này để nó được xuất bản trên nền tảng hoặc từ chối với lý do cụ thể.'
                 >
@@ -199,7 +205,7 @@ export function CourseHero({
                       </Button>
                       <Button
                         size='sm'
-                        className='bg-blue-600 text-white hover:bg-green-700'
+                        className='bg-blue-600 text-white hover:bg-blue-700'
                         onClick={handleApproveCourse}
                       >
                         <Check /> {approving ? 'Đang...' : 'Phê duyệt'}
@@ -208,10 +214,19 @@ export function CourseHero({
                   </div>
                 </CustomDialog>
               </>
-            ) : (
+            ) : courseStatus !== 'published' ? (
               <Button onClick={onEdit} size='lg' className='shadow-primary'>
                 <Edit className='mr-2 h-4 w-4' />
                 Chỉnh sửa
+              </Button>
+            ) : (
+              <Button
+                className='text-sm px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors flex items-center gap-1 shadow-sm'
+                onClick={() => navigate(`/course-page/${id}`)}
+                aria-label={`Xem chi tiết`}
+              >
+                <PlayCircle className='w-4 h-4 mr-1' />
+                Xem chi tiết
               </Button>
             )}
           </div>
@@ -253,6 +268,7 @@ export function CourseHero({
                     </>
                   }
                   size='lg'
+                  className='bg-[#0C356A] border-none text-white'
                 >
                   {introductoryVideo ? (
                     <div className='w-full'>
@@ -260,7 +276,7 @@ export function CourseHero({
                         src={`http://${introductoryVideo}`}
                         controls
                         autoPlay
-                        className='w-full h-[480px] rounded-md bg-black'
+                        className='w-full h-[480px] rounded-md'
                       >
                         <track kind='captions' srcLang='en' label='English captions' src={`${introductoryVideo}.vtt`} />
                       </video>
