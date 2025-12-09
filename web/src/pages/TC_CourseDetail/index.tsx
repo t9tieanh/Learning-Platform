@@ -138,13 +138,13 @@ export default function CourseDetailPage() {
           reviews: (data.reviews || []).map((r: any, ridx: number) => ({
             id: r.id || `rv-${ridx}`,
             reviewerName: r.reviewerName || r.userName || 'Học viên',
-            rating: r.rating || 5,
+            rating: r.rating || 0,
             comment: r.comment || r.content || '',
             createdAt: r.createdAt || r.date || new Date().toISOString(),
             avatar: r.avatar || r.reviewerAvatar
           })),
           students: data.enrollments.length || data.students || 0,
-          rating: data.rating || 5,
+          rating: data.rating || 0,
           revenue: data.revenue || data.stats?.revenue || 0,
           publishedAt: data.publishedAt || data.stats?.publishedAt || data.createdAt
         }
@@ -260,7 +260,7 @@ export default function CourseDetailPage() {
                 <StatsSidebar
                   revenue={(course.price || 0) * (course.students || 0)}
                   studentsCount={course.students || 0}
-                  rating={course.rating || 5}
+                  rating={course.rating || 0}
                   status={course.status === 'published' ? 'published' : 'draft'}
                 />
               </aside>

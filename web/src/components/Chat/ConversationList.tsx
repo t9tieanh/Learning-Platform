@@ -26,26 +26,26 @@ export const ConversationList = ({ selected, onSelect, desiredPeerId }: Conversa
 
   useEffect(() => {
     let mounted = true
-    ;(async () => {
-      try {
-        const res = await chatService.getConversations(myRole)
-        if (mounted) {
-          const list = res.result || []
-          setConversations(list)
-          // Tự động chọn hội thoại đầu tiên khi lần đầu vào trang nếu chưa chọn
-          if (!selected && list.length > 0) {
-            if (desiredPeerId) {
-              const found = list.find((c) => c.peerId === desiredPeerId)
-              onSelect(found || list[0])
-            } else {
-              onSelect(list[0])
+      ; (async () => {
+        try {
+          const res = await chatService.getConversations(myRole)
+          if (mounted) {
+            const list = res.result || []
+            setConversations(list)
+            // Tự động chọn hội thoại đầu tiên khi lần đầu vào trang nếu chưa chọn
+            if (!selected && list.length > 0) {
+              if (desiredPeerId) {
+                const found = list.find((c) => c.peerId === desiredPeerId)
+                onSelect(found || list[0])
+              } else {
+                onSelect(list[0])
+              }
             }
           }
+        } catch (e) {
+          console.error('Load conversations error', e)
         }
-      } catch (e) {
-        console.error('Load conversations error', e)
-      }
-    })()
+      })()
     return () => {
       mounted = false
     }
@@ -171,13 +171,13 @@ export const ConversationList = ({ selected, onSelect, desiredPeerId }: Conversa
           ...item,
           lastMessage: newLastMessage
             ? {
-                _id: newLastMessage._id,
-                content: newLastMessage.content,
-                senderId: newLastMessage.senderId,
-                createdAt: newLastMessage.createdAt,
-                senderRole:
-                  newLastMessage.senderId === myId ? myRole : myRole === 'instructor' ? 'student' : 'instructor'
-              }
+              _id: newLastMessage._id,
+              content: newLastMessage.content,
+              senderId: newLastMessage.senderId,
+              createdAt: newLastMessage.createdAt,
+              senderRole:
+                newLastMessage.senderId === myId ? myRole : myRole === 'instructor' ? 'student' : 'instructor'
+            }
             : undefined,
           lastMessageAt: newLastMessage?.createdAt
         }
@@ -221,12 +221,12 @@ export const ConversationList = ({ selected, onSelect, desiredPeerId }: Conversa
         const item = prev[idx]
         const computedLast = lastMessage
           ? {
-              _id: lastMessage._id,
-              content: lastMessage.content,
-              senderId: lastMessage.senderId,
-              createdAt: lastMessage.createdAt,
-              senderRole: lastMessage.senderId === myId ? myRole : myRole === 'instructor' ? 'student' : 'instructor'
-            }
+            _id: lastMessage._id,
+            content: lastMessage.content,
+            senderId: lastMessage.senderId,
+            createdAt: lastMessage.createdAt,
+            senderRole: lastMessage.senderId === myId ? myRole : myRole === 'instructor' ? 'student' : 'instructor'
+          }
           : undefined
 
         const updated: ConversationListItem = {
@@ -266,20 +266,21 @@ export const ConversationList = ({ selected, onSelect, desiredPeerId }: Conversa
           />
 
           <Input
-            placeholder='Tìm kiếm...'
+            placeholder="Tìm kiếm..."
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
             className='
-        pl-10 rounded-xl border border-slate-300 bg-white 
-        shadow-sm transition-all
-        focus:border-transparent
-        focus:ring-2 
-        focus:ring-[#17EAD9]/40 
-        focus:ring-offset-1
-      '
+              pl-10 rounded-xl border border-slate-300 bg-white 
+              shadow-sm transition-all
+              focus:border-transparent
+              focus:ring-2 
+              focus:ring-[#17EAD9]/40 
+              focus:ring-offset-1
+            '
           />
         </div>
       </div>
+
 
       {/* Conversation list */}
       <div className='flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent'>

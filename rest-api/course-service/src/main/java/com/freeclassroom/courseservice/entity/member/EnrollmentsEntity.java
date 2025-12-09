@@ -44,4 +44,3 @@ public class EnrollmentsEntity extends AbstractEntity {
     @OneToMany(mappedBy = "enrollment")
     List<LessonProgressEntity> progresses;
 }
-
