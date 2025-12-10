@@ -1,4 +1,5 @@
 import supabase from '~/config/supabase'
+import AiChatService from '~/services/aiChat.service'
 
 async function saveToSupabase(
   courseId: number,
@@ -27,6 +28,36 @@ async function saveToSupabase(
   return true
 }
 
+// use while new course is approved
+async function saveCourseToSupabase(
+  courseId: number,
+  courseName: string,
+  courseDescription: string,
+  courseTags: string[],
+  courseLink: string
+): Promise<boolean> {
+  const text = `${courseName} - ${courseTags}\n${courseDescription}`
+  const embedding = await AiChatService.generateEmbedding(text)
+  const { error } = await supabase.from('course_embeddings').insert([
+    {
+      id: courseId,
+      name: courseName,
+      description: courseDescription,
+      tags: courseTags,
+      link: courseLink,
+      embedding
+    }
+  ])
+
+  if (error) {
+    console.error('Lưu embedding lỗi:', error)
+    return false
+  }
+
+  return true
+}
+
+// save while user purchase a course
 async function insertPurchasedCourse(id?: number, userId?: string, courseId?: string): Promise<boolean> {
   const { error } = await supabase.from('user_purchased_courses').insert([
     {
