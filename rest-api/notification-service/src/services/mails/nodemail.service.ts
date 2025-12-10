@@ -134,7 +134,7 @@ class NodeMailService {
     const html = await renderTemplate(templateName, templateData)
 
     const mailPayload: SendEmailOptions = {
-      to,
+      to: to || [notification.email],
       subject,
       text: html.replace(/<[^>]+>/g, ''), // Convert HTML to plain text thô sơ
       html

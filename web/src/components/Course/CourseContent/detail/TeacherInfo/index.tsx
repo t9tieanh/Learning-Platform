@@ -1,3 +1,5 @@
+/* eslint-disable jsx-a11y/no-static-element-interactions */
+/* eslint-disable jsx-a11y/click-events-have-key-events */
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Card, CardContent } from '@/components/ui/card'
@@ -31,7 +33,7 @@ interface Teacher {
 const TeacherInfo = ({ teacher }: { teacher: Teacher }) => {
   const navigate = useNavigate()
   return (
-    <Card className='ml-12 border-none'>
+    <Card className='ml-20 border-none'>
       <CardContent className='p-6'>
         <div className='flex flex-col md:flex-row gap-6'>
           {/* Teacher Avatar and Basic Info */}
@@ -77,7 +79,9 @@ const TeacherInfo = ({ teacher }: { teacher: Teacher }) => {
             {/* Bio */}
             <div>
               <h4 className='font-semibold text-foreground mb-3'>Giới thiệu</h4>
-              <p className='text-muted-foreground leading-relaxed text-base text-justify'>{teacher?.description}</p>
+              <p className='text-muted-foreground leading-relaxed text-base'>
+                <span dangerouslySetInnerHTML={{ __html: teacher?.description }} />
+              </p>
             </div>
             <div>
               <h4 className='font-semibold text-foreground mb-3'>Chuyên môn</h4>

@@ -83,28 +83,28 @@ export const ChatArea = ({
   // Load enrolled courses (tooltip list) when have both roles identified
   useEffect(() => {
     let mounted = true
-      ; (async () => {
-        if (!myId) return
-        // Determine query params based on role: if I'm student -> studentId=myId & instructorId=peerId (if known)
-        // If I'm instructor -> instructorId=myId & studentId=peerId (if known)
-        const userRole = myRole === 'student' ? 'student' : 'instructor'
-        const studentId = myRole === 'student' ? myId : peerId
-        const instructorId = myRole === 'instructor' ? myId : peerId
-        if (!studentId || !instructorId) return // need both to list shared enrolled courses
-        try {
-          const res = await courseUserService.getEnrolledCourses({ userRole, studentId, instructorId })
-          const items = Array.isArray(res?.result) ? res.result : []
-          const mapped: EnrolledCourseItem[] = items.map((c: any) => ({
-            id: c.id || c._id || c.courseId || Math.random().toString(36).slice(2),
-            title: c.title || 'Không có tiêu đề',
-            thumbnailUrl: c.thumbnailUrl || 'https://placehold.co/60x60'
-          }))
-          if (mounted) setEnrolledCourses(mapped)
-        } catch (e) {
-          console.error('Fetch enrolled courses error', e)
-          if (mounted) setEnrolledCourses([])
-        }
-      })()
+    ;(async () => {
+      if (!myId) return
+      // Determine query params based on role: if I'm student -> studentId=myId & instructorId=peerId (if known)
+      // If I'm instructor -> instructorId=myId & studentId=peerId (if known)
+      const userRole = myRole === 'student' ? 'student' : 'instructor'
+      const studentId = myRole === 'student' ? myId : peerId
+      const instructorId = myRole === 'instructor' ? myId : peerId
+      if (!studentId || !instructorId) return // need both to list shared enrolled courses
+      try {
+        const res = await courseUserService.getEnrolledCourses({ userRole, studentId, instructorId })
+        const items = Array.isArray(res?.result) ? res.result : []
+        const mapped: EnrolledCourseItem[] = items.map((c: any) => ({
+          id: c.id || c._id || c.courseId || Math.random().toString(36).slice(2),
+          title: c.title || 'Không có tiêu đề',
+          thumbnailUrl: c.thumbnailUrl || 'https://placehold.co/60x60'
+        }))
+        if (mounted) setEnrolledCourses(mapped)
+      } catch (e) {
+        console.error('Fetch enrolled courses error', e)
+        if (mounted) setEnrolledCourses([])
+      }
+    })()
     return () => {
       mounted = false
     }
@@ -113,36 +113,36 @@ export const ChatArea = ({
   // Load messages when switching conversation
   useEffect(() => {
     let mounted = true
-      ; (async () => {
-        if (!conversationId) return
-        try {
-          const res = await chatService.getMessages({ conversationId, limit: 20 })
-          const items = res.result?.items || []
-          const mapped = items
-            .slice()
-            .reverse()
-            .map((m) => ({
-              id: m._id,
-              content: m.content,
-              senderId: m.senderId,
-              timestamp: new Date(m.createdAt).getTime(),
-              status: m.status
-            }))
-          if (mounted) setMessages(mapped)
+    ;(async () => {
+      if (!conversationId) return
+      try {
+        const res = await chatService.getMessages({ conversationId, limit: 20 })
+        const items = res.result?.items || []
+        const mapped = items
+          .slice()
+          .reverse()
+          .map((m) => ({
+            id: m._id,
+            content: m.content,
+            senderId: m.senderId,
+            timestamp: new Date(m.createdAt).getTime(),
+            status: m.status
+          }))
+        if (mounted) setMessages(mapped)
 
-          try {
-            const lastMessage = items[0]
-            if (lastMessage && lastMessage.senderId !== myId) {
-              await chatService.markRead(conversationId, peerId)
-            }
-          } catch (e) {
-            console.error('markRead on open error', e)
+        try {
+          const lastMessage = items[0]
+          if (lastMessage && lastMessage.senderId !== myId) {
+            await chatService.markRead(conversationId, peerId)
           }
         } catch (e) {
-          console.error('Load messages error', e)
-          if (mounted) setMessages([])
+          console.error('markRead on open error', e)
         }
-      })()
+      } catch (e) {
+        console.error('Load messages error', e)
+        if (mounted) setMessages([])
+      }
+    })()
     return () => {
       mounted = false
     }
@@ -357,11 +357,11 @@ export const ChatArea = ({
                 conversationId,
                 lastMessage: newLast
                   ? {
-                    _id: newLast.id,
-                    content: newLast.content,
-                    senderId: newLast.senderId,
-                    createdAt: new Date(newLast.timestamp).toISOString()
-                  }
+                      _id: newLast.id,
+                      content: newLast.content,
+                      senderId: newLast.senderId,
+                      createdAt: new Date(newLast.timestamp).toISOString()
+                    }
                   : undefined
               }
             })
@@ -399,10 +399,10 @@ export const ChatArea = ({
         prev.map((m) =>
           m.id === editingId
             ? {
-              ...m,
-              content: updated?.content ?? newText,
-              timestamp: updated?.createdAt ? new Date(updated.createdAt).getTime() : m.timestamp
-            }
+                ...m,
+                content: updated?.content ?? newText,
+                timestamp: updated?.createdAt ? new Date(updated.createdAt).getTime() : m.timestamp
+              }
             : m
         )
       )
@@ -419,14 +419,10 @@ export const ChatArea = ({
 
   const courseList = (
     <div className='flex flex-col gap-2 p-2 w-64 max-h-[300px] overflow-y-auto'>
-      {enrolledCourses.length === 0 && (
-        <div className="text-xs text-gray-400 px-1 py-2">
-          Không có khóa học
-        </div>
-      )}
+      {enrolledCourses.length === 0 && <div className='text-xs text-gray-400 px-1 py-2'>Không có khóa học</div>}
 
       {enrolledCourses.length > 0 && (
-        <p className="text-base pl-1 font-semibold bg-gradient-to-r from-cyan-500 to-blue-500 bg-clip-text text-transparent">
+        <p className='text-base pl-1 font-semibold bg-gradient-to-r from-cyan-500 to-blue-500 bg-clip-text text-transparent'>
           {tooltipTitle}
         </p>
       )}

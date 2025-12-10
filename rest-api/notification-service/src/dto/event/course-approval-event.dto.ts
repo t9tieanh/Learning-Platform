@@ -12,4 +12,9 @@ export interface CourseApprovalEvent {
   language?: string | null
   originalPrice?: number
   finalPrice?: number
+  tags?: {
+    id: string
+    name: string
+    imageUrl: string
+  }[]
 }

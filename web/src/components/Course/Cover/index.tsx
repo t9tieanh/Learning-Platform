@@ -36,6 +36,9 @@ const Cover = ({ video, image, title, shortDescription, teacher, tags, showSmall
     subTitle: `🚀${shortDescription}`
   })
 
+  // State to control showing image or video
+  const [showVideo, setShowVideo] = useState(false)
+
   useEffect(() => {
     setPreview((prev) => ({
       ...prev,
@@ -43,6 +46,15 @@ const Cover = ({ video, image, title, shortDescription, teacher, tags, showSmall
       previewTitle: title,
       subTitle: `🚀${shortDescription}`
     }))
+    // Reset showVideo when video changes
+    setShowVideo(false)
+    let timer: NodeJS.Timeout | undefined
+    if (video) {
+      timer = setTimeout(() => setShowVideo(true), 2000)
+    }
+    return () => {
+      if (timer) clearTimeout(timer)
+    }
   }, [video, title, shortDescription])
 
   return (
@@ -81,6 +93,7 @@ const Cover = ({ video, image, title, shortDescription, teacher, tags, showSmall
             label='Quay lại'
           />
         </div>
+
         <div
           className='video-introduction relative p-0 md:p-10 mb-6 md:mb-0 cursor-pointer'
           role='button'
@@ -95,13 +108,28 @@ const Cover = ({ video, image, title, shortDescription, teacher, tags, showSmall
             }
           }}
         >
-          <img src={image} alt='Video Thumbnail' className='h-64 w-96 object-cover rounded-xl' />
-          <div className='absolute inset-0 flex items-center justify-center'>
-            <CustomButton
-              type='button'
-              className='flex items-center gap-2 bg-white text-slate-700 px-4 py-2 rounded-full font-semibold shadow-md hover:bg-white transition transition-transform duration-300 hover:scale-105'
-              icon={<Play className='h-5 w-5' />}
+          {video && !showVideo ? (
+            <img src={image} alt='Video Thumbnail' className='h-[320px] w-[580px] object-cover rounded-2xl shadow-xl' />
+          ) : video && showVideo ? (
+            <video
+              src={`http://${video}`}
+              controls
+              autoPlay
+              muted
+              className='h-[340px] w-[600px] object-cover rounded-2xl shadow-xl'
+              poster={image}
             />
+          ) : (
+            <img src={image} alt='Video Thumbnail' className='h-[340px] w-[600px] object-cover rounded-2xl shadow-xl' />
+          )}
+          <div className='absolute inset-0 flex items-center justify-center'>
+            {!showVideo && (
+              <CustomButton
+                type='button'
+                className='flex items-center gap-2 bg-white text-slate-700 px-4 py-2 rounded-full font-semibold shadow-md hover:bg-white transition transition-transform duration-300 hover:scale-105'
+                icon={<Play className='h-5 w-5' />}
+              />
+            )}
           </div>
         </div>
 
@@ -117,7 +145,7 @@ const Cover = ({ video, image, title, shortDescription, teacher, tags, showSmall
             <div className='text-lg text-white-200'>{teacher.name}</div>
           </div>
           <p className='text-sm md:text-base max-w-xl text-justify text-gray-200'>{shortDescription}</p>
-          <div className='flex flex-wrap gap-2 mt-2'>
+          <div className='flex flex-wrap gap-2 mt-2 w-full max-w-[640px] break-words'>
             {tags?.map((tag) => (
               <Badge
                 key={tag.id}

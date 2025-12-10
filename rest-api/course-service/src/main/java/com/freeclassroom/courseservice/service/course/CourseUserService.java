@@ -57,7 +57,7 @@ public class CourseUserService implements ICourseUserService{
 
     @Override
     public ApiResponse<CourseUserDetailResponse> getCourseDetail(String id, String userId) {
-        CourseEntity course = courseRepo.findById(id)
+        CourseEntity course = courseRepo.findByIdWithChaptersSorted(id)
                 .orElseThrow(() -> new CustomExeption(ErrorCode.COURSE_NOT_FOUND));
 
         // check status of course
@@ -128,6 +128,7 @@ public class CourseUserService implements ICourseUserService{
                             .image(teacher != null ? teacher.getImage() : "")
                             .name(teacher != null ? teacher.getName() : "")
                             .phone(teacher != null ? teacher.getEmail() : "")
+                            .id(teacher.getId().toString())
                             .build())
                     .rating(course.getRating())
                     .build();

@@ -1,5 +1,6 @@
 import supabase from '~/config/supabase'
 import AiChatService from '~/services/aiChat.service'
+import { env } from '~/config/env'
 
 async function saveToSupabase(
   courseId: number,
@@ -30,21 +31,20 @@ async function saveToSupabase(
 
 // use while new course is approved
 async function saveCourseToSupabase(
-  courseId: number,
+  courseId: string,
   courseName: string,
   courseDescription: string,
-  courseTags: string[],
-  courseLink: string
+  courseTags: string[]
 ): Promise<boolean> {
   const text = `${courseName} - ${courseTags}\n${courseDescription}`
   const embedding = await AiChatService.generateEmbedding(text)
   const { error } = await supabase.from('course_embeddings').insert([
     {
-      id: courseId,
+      id: Math.floor(10000 + Math.random() * 90000),
       name: courseName,
       description: courseDescription,
       tags: courseTags,
-      link: courseLink,
+      link: env.FRONTEND_ORIGIN + '/course/' + courseId,
       embedding
     }
   ])
@@ -58,10 +58,10 @@ async function saveCourseToSupabase(
 }
 
 // save while user purchase a course
-async function insertPurchasedCourse(id?: number, userId?: string, courseId?: string): Promise<boolean> {
+async function insertPurchasedCourse(userId?: string, courseId?: string): Promise<boolean> {
   const { error } = await supabase.from('user_purchased_courses').insert([
     {
-      id: id,
+      id: Math.floor(10000 + Math.random() * 90000),
       user_id: userId,
       course_id: courseId
     }
@@ -86,4 +86,4 @@ async function getPurchasedCourseIds(userId: string): Promise<string[]> {
   return (data || []).map((row: any) => String(row.course_id)).filter(Boolean)
 }
 
-export { saveToSupabase, insertPurchasedCourse, getPurchasedCourseIds }
+export { saveToSupabase, insertPurchasedCourse, getPurchasedCourseIds, saveCourseToSupabase }

@@ -11,9 +11,11 @@ import { useState } from 'react'
 import type { MouseEvent } from 'react'
 import CustomDialog from '@/components/common/Dialog'
 import AddFeedback from '@/components/Profile/addFeedback'
+import { useAuthStore } from '@/stores/useAuth.stores'
 
 const CourseCard = ({ courseItem }: { courseItem: CourseListItem }) => {
   const navigate = useNavigate()
+  const { data } = useAuthStore()
 
   const handleClick = () => {
     navigate(`/course-page/${courseItem.id}`)
@@ -52,20 +54,28 @@ const CourseCard = ({ courseItem }: { courseItem: CourseListItem }) => {
                 <ItemDescription className='text-sm text-muted-foreground/80 line-clamp-2 mb-2'>
                   {courseItem.shortDescription}
                 </ItemDescription>
-                <div className='flex items-center gap-2 mt-1'>
-                  <span className='text-xs text-muted-foreground'>Hoàn thành</span>
-                  <span className='text-xs font-semibold text-primary'>
-                    {Math.round((courseItem.progress || 0) * 100)}%
-                  </span>
-                </div>
-                <Progress value={Math.round((courseItem.progress || 0) * 100)} className='h-2 bg-gray-200 my-1' />
+                {data && data.userId !== courseItem.instructor.id && (
+                  <>
+                    <div className='flex items-center gap-2 mt-1'>
+                      <span className='text-xs text-muted-foreground'>Hoàn thành</span>
+                      <span className='text-xs font-semibold text-primary'>
+                        {Math.round((courseItem.progress || 0) * 100)}%
+                      </span>
+                    </div>
+                    <Progress value={Math.round((courseItem.progress || 0) * 100)} className='h-2 bg-gray-200 my-1' />
+                  </>
+                )}
                 <div className='flex items-center justify-between mt-2'>
                   <div className='flex items-center gap-2'>
                     <Avatar>
                       <AvatarImage src={courseItem.instructor.image} />
-                      <AvatarFallback>{courseItem.instructor.name}</AvatarFallback>
+                      <AvatarFallback>
+                        {data && data.userId === courseItem.instructor.id ? 'Bạn' : courseItem.instructor.name}
+                      </AvatarFallback>
                     </Avatar>
-                    <span className='text-xs text-muted-foreground italic'>{courseItem.instructor.name}</span>
+                    <span className='text-xs text-muted-foreground italic'>
+                      {data && data.userId === courseItem.instructor.id ? 'Bạn' : courseItem.instructor.name}
+                    </span>
                   </div>
                   <div className='flex items-center gap-1'>
                     <span className='text-sm font-semibold text-yellow-500'>{courseItem?.rating}</span>
@@ -86,23 +96,25 @@ const CourseCard = ({ courseItem }: { courseItem: CourseListItem }) => {
               </ItemContent>
             </Item>
           </div>
-          <div className='p-5 pt-0 sm:pt-5'>
-            {((courseItem.progress || 0) > 0.3) ? (
-              <CustomButton
-                onClick={handleAddFeedback}
-                icon={<MessageCircle size={16} />}
-                label='Thêm đánh giá'
-                className='w-full mt-2 bg-gray-100 text-black hover:bg-gray-200'
-              />
-            ) : (
-              <CustomButton
-                onClick={handleClick}
-                icon={<Send size={16} />}
-                label='Học ngay'
-                className='w-full mt-2 bg-blue-500 text-white hover:bg-blue-600'
-              />
-            )}
-          </div>
+          {data && data.userId != courseItem.instructor.id && (
+            <div className='p-5 pt-0 sm:pt-5'>
+              {(courseItem.progress || 0) > 0.3 ? (
+                <CustomButton
+                  onClick={handleAddFeedback}
+                  icon={<MessageCircle size={16} />}
+                  label='Thêm đánh giá'
+                  className='w-full mt-2 bg-gray-100 text-black hover:bg-gray-200'
+                />
+              ) : (
+                <CustomButton
+                  onClick={handleClick}
+                  icon={<Send size={16} />}
+                  label='Học ngay'
+                  className='w-full mt-2 bg-blue-500 text-white hover:bg-blue-600'
+                />
+              )}
+            </div>
+          )}
         </div>
       </Card>
 

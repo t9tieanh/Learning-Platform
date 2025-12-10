@@ -44,7 +44,6 @@ export const LessonViewer = ({ lesson }: { lesson: Lesson }) => {
           </button>
         </div>
       )}
-      <NoteSection lessonId={lesson.id} open={open} setOpen={setOpen} />
     </div>
   )
 }

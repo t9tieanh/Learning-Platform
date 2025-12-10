@@ -1,7 +1,5 @@
 import { useState } from 'react'
-import {
-  MapPin, Phone, Globe, Mail, Users, Target, Award, BookOpen, TrendingUp, Twitter,
-} from 'lucide-react'
+import { MapPin, Phone, Globe, Mail, Users, Target, Award, BookOpen, TrendingUp, Twitter } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { toast } from 'sonner'
 import heroImage from '@/assets/images/about.png'
@@ -224,53 +222,32 @@ const About = () => {
             <Card className='p-6 shadow-elegant bg-card'>
               <h3 className='text-lg font-semibold text-foreground'>Mạng xã hội</h3>
               <div className='space-y-4 text-muted-foreground'>
-                <div className='flex items-center gap-3 text-base font-semibold'>
-                  <img
-                    src={twitterIcon}
-                    alt="Twitter"
-                    className='w-8 h-8'
-                  />
+                <a href='https://x.com/learnnova' className='flex items-center gap-3 text-base font-semibold'>
+                  <img src={twitterIcon} alt='Twitter' className='w-8 h-8' />
                   <p>@learnova_official</p>
-                </div>
+                </a>
 
-                <div className='flex items-center gap-3 text-base font-semibold'>
-                  <img
-                    src={facebookIcon}
-                    alt="Facebook"
-                    className='w-8 h-8 rounded-sm'
-                  />
+                <a href='https://www.facebook.com/profile.php?id=61569020296267' className='flex items-center gap-3 text-base font-semibold'>
+                  <img src={facebookIcon} alt='Facebook' className='w-8 h-8 rounded-sm' />
                   <p>/learnova</p>
-                </div>
+                </a>
 
-                <div className='flex items-center gap-3 text-base font-semibold'>
-                  <img
-                    src={igIcon}
-                    alt="Instagram"
-                    className='w-8 h-8'
-                  />
+                <a href='https://www.instagram.com/learnova/' className='flex items-center gap-3 text-base font-semibold'>
+                  <img src={igIcon} alt='Instagram' className='w-8 h-8' />
                   <p>@learnova</p>
-                </div>
+                </a>
 
-                <div className='flex items-center gap-3 text-base font-semibold'>
-                  <img
-                    src={linkedIcon}
-                    alt="LinkedIn"
-                    className='w-8 h-8'
-                  />
+                <a href='https://www.linkedin.com/in/learnova-vn-222981393/' className='flex items-center gap-3 text-base font-semibold'>
+                  <img src={linkedIcon} alt='LinkedIn' className='w-8 h-8' />
                   <p>/company/learnova</p>
-                </div>
+                </a>
 
-                <div className='flex items-center gap-3 text-base font-semibold'>
-                  <img
-                    src={ytbIcon}
-                    alt="YouTube"
-                    className='w-8 h-8'
-                  />
+                <a href='https://www.youtube.com/@LearnovaAcademy' className='flex items-center gap-3 text-base font-semibold'>
+                  <img src={ytbIcon} alt='YouTube' className='w-8 h-8' />
                   <p>/learnovachannel</p>
-                </div>
+                </a>
               </div>
             </Card>
-
           </div>
         </div>
       </section>

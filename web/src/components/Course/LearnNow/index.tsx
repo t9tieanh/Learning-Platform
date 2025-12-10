@@ -19,7 +19,7 @@ const LearnNow = ({ courseId, instructorId }: { courseId: string; instructorId: 
       <div className='w-full max-w-md'>
         <Card
           className='sticky bg-gradient-card shadow-lg border-0 rounded-2xl overflow-hidden backdrop-blur-sm'
-          style={{ top: 'calc(var(--main-header-height, 64px) + 100px)' }}
+          style={{ top: 'calc(var(--main-header-height, 64px) + 200px)' }}
         >
           <CardHeader className=''>
             <div className='text-start space-y-2'>

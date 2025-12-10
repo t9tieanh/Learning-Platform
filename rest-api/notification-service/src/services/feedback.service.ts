@@ -114,6 +114,7 @@ const addFeedBack = async (request: {
 }): Promise<{
   message: string
 }> => {
+
   const { userId, courseId, rating, message } = request
 
   //check course exists and user has purchased the course
@@ -122,47 +123,31 @@ const addFeedBack = async (request: {
     throw new ApiError(StatusCodes.OK, 'Bạn chỉ có thể đánh giá khóa học đã mua !')
   }
 
-  const session = await mongoose.startSession()
-  let avgRating: number | null = null
+  // check existing feedback by the same user for the course
+  const existing = await Feedback.findOne({ userId, courseId })
 
-  try {
-    await session.withTransaction(async () => {
-      // check existing feedback by the same user for the course
-      const existing = await Feedback.findOne({ userId, courseId }).session(session)
-
-      if (existing) {
-        // update existing feedback
-        await Feedback.updateOne(
-          { _id: existing._id },
-          { $set: { rating, message, updatedAt: new Date() } },
-          { session }
-        )
-      } else {
-        // insert new feedback
-        await Feedback.create(
-          [
-            {
-              userId,
-              courseId,
-              rating,
-              message
-            }
-          ],
-          { session }
-        )
-      }
-
-      // compute average inside the same session so the inserted/updated doc is visible
-      const agg = await Feedback.aggregate([
-        { $match: { courseId } },
-        { $group: { _id: null, avgRating: { $avg: '$rating' }, count: { $sum: 1 } } }
-      ]).session(session)
-
-      avgRating = agg.length ? agg[0].avgRating : rating
+  if (existing) {
+    // update existing feedback
+    await Feedback.updateOne(
+      { _id: existing._id },
+      { $set: { rating, message, updatedAt: new Date() } }
+    )
+  } else {
+    // insert new feedback
+    await Feedback.create({
+      userId,
+      courseId,
+      rating,
+      message
     })
-  } finally {
-    session.endSession()
   }
+
+  // compute average rating for the course
+  const agg = await Feedback.aggregate([
+    { $match: { courseId } },
+    { $group: { _id: null, avgRating: { $avg: '$rating' }, count: { $sum: 1 } } }
+  ])
+  const avgRating = agg.length ? agg[0].avgRating : rating
 
   // call external gRPC after DB transaction committed
   if (avgRating !== null) {

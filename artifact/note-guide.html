@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Hướng dẫn ghi chú bài học - Learnova</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      body {
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        background-color: #f7f9fc;
+        margin: 0;
+        padding: 40px 20px;
+        color: #333;
+      }
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        background-color: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        padding: 40px;
+      }
+      .header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 30px;
+        border-bottom: 2px solid #f2f6f9;
+        padding-bottom: 20px;
+      }
+      .brand {
+        font-size: 24px;
+        font-weight: 800;
+        color: #1d4e8f;
+        text-transform: uppercase;
+      }
+      .guide-title {
+        font-size: 26px;
+        color: #111827;
+        margin-bottom: 10px;
+        font-weight: 700;
+      }
+      .intro-text {
+        font-size: 15px;
+        color: #6b7280;
+        margin-bottom: 30px;
+        line-height: 1.6;
+      }
+      .step-item {
+        margin-bottom: 30px;
+        padding-bottom: 30px;
+        border-bottom: 1px dashed #e5e7eb;
+      }
+      .step-item:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+      }
+      .step-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+      }
+      .step-number {
+        background-color: #1d4e8f;
+        color: white;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        margin-right: 12px;
+        flex-shrink: 0;
+      }
+      .step-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #111827;
+      }
+      .step-content {
+        padding-left: 44px;
+        font-size: 15px;
+        color: #4b5563;
+        line-height: 1.6;
+      }
+      .image-placeholder {
+        margin-top: 15px;
+        background-color: #f3f4f6;
+        border: 2px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 20px;
+        text-align: center;
+        color: #9ca3af;
+        font-size: 13px;
+        min-height: 150px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+      }
+      .highlight {
+        color: #1d4e8f;
+        font-weight: 600;
+        background-color: #eef7ff;
+        padding: 2px 6px;
+        border-radius: 4px;
+      }
+      .btn {
+        display: inline-block;
+        padding: 10px 20px;
+        background-color: #1d4e8f;
+        color: #fff;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 14px;
+      }
+      .note-box {
+        background-color: #fffbeb;
+        border: 1px solid #fcd34d;
+        color: #92400e;
+        padding: 15px;
+        border-radius: 6px;
+        margin-top: 10px;
+        font-size: 14px;
+      }
+      .footer {
+        font-size: 12px;
+        color: #9ca3af;
+        margin-top: 40px;
+        text-align: center;
+        border-top: 1px solid #f2f6f9;
+        padding-top: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <div class="brand">Learnova</div>
+        <a href="#" class="btn">Về trang chủ</a>
+      </div>
+      <h1 class="guide-title">Hướng Dẫn Ghi Chú Bài Học</h1>
+      <p class="intro-text">
+        Tính năng ghi chú giúp bạn lưu lại những điểm quan trọng hoặc ý tưởng cá nhân trong quá trình học. Dưới đây là các bước để sử dụng chức năng ghi chú cho từng bài học trên Learnova.
+      </p>
+      <div class="step-item">
+        <div class="step-header">
+          <div class="step-number">1</div>
+          <div class="step-title">Mở giao diện bài học</div>
+        </div>
+        <div class="step-content">
+          <p>Chọn một bài học bất kỳ trong phần <span class="highlight">Nội dung khóa học</span> ở cột bên phải.</p>
+          <div style="margin-top:15px;text-align:center;">
+            <img src="./lessson.png" alt="Giao diện bài học" style="max-width:100%;border-radius:8px;border:2px solid #e5e7eb;box-shadow:0 2px 8px rgba(0,0,0,0.04);" />
+            <div style="color:#6b7280;font-size:13px;margin-top:8px;">Minh họa: Giao diện bài học</div>
+          </div>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-header">
+          <div class="step-number">2</div>
+          <div class="step-title">Nhập ghi chú cho bài học</div>
+        </div>
+        <div class="step-content">
+          <p>Kéo xuống dưới video, bạn sẽ thấy khung <span class="highlight">Nhập ghi chú cho bài học này!</span>. Hãy viết những điểm bạn muốn ghi nhớ hoặc tổng kết lại nội dung vừa học.</p>
+          <div style="margin-top:15px;text-align:center;">
+            <img src="./note.png" alt="Giao diện ghi chú" style="max-width:100%;border-radius:8px;border:2px solid #e5e7eb;box-shadow:0 2px 8px rgba(0,0,0,0.04);" />
+            <div style="color:#6b7280;font-size:13px;margin-top:8px;">Minh họa: Giao diện ghi chú cho bài học</div>
+          </div>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-header">
+          <div class="step-number">3</div>
+          <div class="step-title">Lưu và xem lại ghi chú</div>
+        </div>
+        <div class="step-content">
+          <p>Sau khi nhập xong, nhấn nút <span class="highlight">Lưu</span> để lưu lại ghi chú. Bạn có thể xem lại ghi chú bất cứ lúc nào khi mở lại bài học đó.</p>
+          <div class="note-box">
+            <strong>Mẹo:</strong> Hãy sử dụng ghi chú để tổng hợp kiến thức, đặt câu hỏi hoặc lưu lại những ý tưởng cá nhân trong quá trình học.
+          </div>
+        </div>
+      </div>
+      <div class="footer">
+        © 2025 Learnova Vietnam. Hướng dẫn sử dụng hệ thống.<br>
+        Cần hỗ trợ? Liên hệ support@learnova.vn
+      </div>
+    </div>
+  </body>
+</html>

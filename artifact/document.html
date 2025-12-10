@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Hướng dẫn vào học - Learnova</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      /* --- STYLE DỰA TRÊN TEMPLATE ĐÃ CUNG CẤP --- */
+      body {
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        background-color: #f7f9fc;
+        margin: 0;
+        padding: 40px 20px;
+        color: #333;
+      }
+
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        background-color: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        padding: 40px;
+      }
+
+      .header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 30px;
+        border-bottom: 2px solid #f2f6f9;
+        padding-bottom: 20px;
+      }
+
+      .brand {
+        font-size: 24px;
+        font-weight: 800;
+        color: #1d4e8f; /* Màu xanh Learnova */
+        text-transform: uppercase;
+      }
+
+      .guide-title {
+        font-size: 26px;
+        color: #111827;
+        margin-bottom: 10px;
+        font-weight: 700;
+      }
+
+      .intro-text {
+        font-size: 15px;
+        color: #6b7280;
+        margin-bottom: 30px;
+        line-height: 1.6;
+      }
+
+      /* Style cho các bước hướng dẫn */
+      .step-item {
+        margin-bottom: 30px;
+        padding-bottom: 30px;
+        border-bottom: 1px dashed #e5e7eb;
+      }
+
+      .step-item:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+      }
+
+      .step-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+      }
+
+      .step-number {
+        background-color: #1d4e8f;
+        color: white;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        margin-right: 12px;
+        flex-shrink: 0;
+      }
+
+      .step-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #111827;
+      }
+
+      .step-content {
+        padding-left: 44px; /* Thụt lề thẳng hàng với text */
+        font-size: 15px;
+        color: #4b5563;
+        line-height: 1.6;
+      }
+
+      /* Khung mô phỏng hình ảnh để bạn dễ hình dung */
+      .image-placeholder {
+        margin-top: 15px;
+        background-color: #f3f4f6;
+        border: 2px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 20px;
+        text-align: center;
+        color: #9ca3af;
+        font-size: 13px;
+        min-height: 150px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+      }
+
+      .image-placeholder i {
+        font-style: normal;
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 600;
+        color: #6b7280;
+      }
+
+      .highlight {
+        color: #1d4e8f;
+        font-weight: 600;
+        background-color: #eef7ff;
+        padding: 2px 6px;
+        border-radius: 4px;
+      }
+
+      .btn {
+        display: inline-block;
+        padding: 10px 20px;
+        background-color: #1d4e8f;
+        color: #fff;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 14px;
+      }
+      
+      .note-box {
+        background-color: #fffbeb;
+        border: 1px solid #fcd34d;
+        color: #92400e;
+        padding: 15px;
+        border-radius: 6px;
+        margin-top: 10px;
+        font-size: 14px;
+      }
+
+      .footer {
+        font-size: 12px;
+        color: #9ca3af;
+        margin-top: 40px;
+        text-align: center;
+        border-top: 1px solid #f2f6f9;
+        padding-top: 20px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <div class="header">
+        <div class="brand">Learnova</div>
+        <a href="#" class="btn">Về trang chủ</a>
+      </div>
+
+      <h1 class="guide-title">Hướng Dẫn Truy Cập Bài Học (Lesson)</h1>
+      <p class="intro-text">
+        Chào mừng bạn quay trở lại! Dưới đây là 3 bước đơn giản để truy cập vào nội dung video khóa học mà bạn đã sở hữu trên hệ thống Learnova.
+      </p>
+
+      <div class="step-item">
+        <div class="step-header">
+          <div class="step-number">1</div>
+          <div class="step-title">Truy cập trang "Khóa học của tôi"</div>
+        </div>
+        <div class="step-content">
+          <p>
+            Sau khi đăng nhập thành công, tại thanh menu bên trái (Sidebar), hãy nhấp vào mục <span class="highlight">Khóa học của tôi</span>.
+          </p>
+          <p>
+            Tại đây, bạn sẽ thấy danh sách tất cả các khóa học bạn đang sở hữu (Ví dụ: <em>Docker cơ bản</em>, <em>Photoshop cùng Tiến Anh</em>...).
+          </p>
+          
+          <div style="margin-top:15px;text-align:center;">
+            <img src="./my-course.png" alt="Giao diện Dashboard - Khóa học của tôi" style="max-width:100%;border-radius:8px;border:2px solid #e5e7eb;box-shadow:0 2px 8px rgba(0,0,0,0.04);" />
+            <div style="color:#6b7280;font-size:13px;margin-top:8px;">Minh họa: Giao diện Dashboard - Khóa học của tôi</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-item">
+        <div class="step-header">
+          <div class="step-number">2</div>
+          <div class="step-title">Chọn khóa học và nhấn "Học ngay"</div>
+        </div>
+        <div class="step-content">
+          <p>
+            Tìm đến thẻ khóa học bạn muốn học tiếp. Bên cạnh tên khóa học sẽ có một nút màu xanh dương ghi chữ <span class="highlight">Học ngay</span>.
+          </p>
+          <p>Hãy nhấn vào nút đó để mở trình phát video.</p>
+        </div>
+      </div>
+
+      <div class="step-item">
+        <div class="step-header">
+          <div class="step-number">3</div>
+          <div class="step-title">Giao diện xem bài giảng</div>
+        </div>
+        <div class="step-content">
+          <p>
+            Bạn sẽ được chuyển đến giao diện học tập tập trung:
+          </p>
+          <ul>
+            <li><strong>Bên trái:</strong> Màn hình Video bài giảng chính.</li>
+            <li><strong>Bên phải (Sidebar):</strong> Danh sách "Nội dung khóa học", bao gồm các phần (Phần 1, Phần 2...) và các bài học nhỏ bên trong.</li>
+          </ul>
+          
+          <div class="note-box">
+            <strong>Mẹo:</strong> Bạn có thể nhấn vào các mục ở cột bên phải để chuyển đổi giữa các bài học hoặc xem lại bài cũ. Nhấn nút <strong>Trở lại</strong> ở góc trên cùng bên trái để quay về Dashboard.
+          </div>
+
+          <div style="margin-top:15px;text-align:center;">
+            <img src="./lessson.png" alt="Giao diện Player - Xem bài giảng" style="max-width:100%;border-radius:8px;border:2px solid #e5e7eb;box-shadow:0 2px 8px rgba(0,0,0,0.04);" />
+            <div style="color:#6b7280;font-size:13px;margin-top:8px;">Minh họa: Giao diện Player - Xem bài giảng</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer">
+        © 2025 Learnova Vietnam. Hướng dẫn sử dụng hệ thống.<br>
+        Cần hỗ trợ? Liên hệ support@learnova.vn
+      </div>
+    </div>
+  </body>
+</html>
