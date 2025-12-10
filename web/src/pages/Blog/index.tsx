@@ -77,7 +77,7 @@ const BlogPage = () => {
             <h2 className='text-2xl font-bold'>Bài viết mới nhất</h2>
 
             <button
-              className='text-blue-600 font-medium hover:underline underline-offset-4 decoration-2 decoration-blue-600'
+              className='text-blue-600 text-sm font-medium hover:underline underline-offset-4 decoration-2 decoration-blue-600'
               onClick={() => navigate('/blogs')}
             >
               Xem tất cả

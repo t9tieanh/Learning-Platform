@@ -50,7 +50,7 @@ const CourseList = ({ title, fetcher }: CourseListProps) => {
           <h4 className='font-bold bg-blue-500 text-white p-2 rounded-r-3xl pl-12'>{title}</h4>
         </div>
         <div className='flex-1 flex justify-end'>
-          <a href='/courses' className='text-blue-500 hover:underline text-lg mt-2 mr-12'>
+          <a href='/courses' className='text-blue-500 hover:underline text-sm mt-2 mr-12'>
             Xem tất cả
           </a>
         </div>
