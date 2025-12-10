@@ -1,4 +1,5 @@
 import { Logo, LogoImage, LogoText } from '@/components/Footer/logo'
+import logo_sm from '@/assets/images/LEARNOVA_sm.png'
 
 interface MenuItem {
   title: string
@@ -26,12 +27,12 @@ interface Footer2Props {
 
 const Footer = ({
   logo = {
-    src: 'https://deifkwefumgah.cloudfront.net/shadcnblocks/block/block-1.svg',
+    src: logo_sm,
     alt: 'blocks for shadcn/ui',
-    title: 'freeclassroom.com',
+    title: 'LEARNOVA',
     url: 'https://www.freeclassroom.com'
   },
-  tagline = 'Cộng đồng giáo dục toàn Việt Nam.',
+  tagline = 'Nền tảng bán khóa học trực tuyến',
   menuItems = [
     {
       title: 'Liên hệ',
@@ -80,7 +81,7 @@ const Footer = ({
           <div className='grid grid-cols-2 gap-8 lg:grid-cols-6'>
             <div className='col-span-2 mb-8 lg:mb-0'>
               <div className='flex items-center gap-2 lg:justify-start'>
-                <Logo url='https://shadcnblocks.com'>
+                <Logo url={logo_sm}>
                   <LogoImage src={logo.src} alt={logo.alt} title={logo.title} className='h-10' />
                   <LogoText className='text-xl'>{logo.title}</LogoText>
                 </Logo>

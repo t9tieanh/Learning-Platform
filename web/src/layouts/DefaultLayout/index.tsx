@@ -10,13 +10,14 @@ const DefaultLayout: FC = () => {
   const matches = useMatches()
   const current = matches[matches.length - 1]
   const hideFooter = current?.handle?.hideFooter
+  const hideBubble = current?.handle?.hideBubble
 
   return (
     <AuthenticationGate>
       <Header />
       <ScrollToTop />
       <Outlet />
-      <BubbleChat />
+      {!hideBubble && <BubbleChat />}
       {!hideFooter && <Footer />}
     </AuthenticationGate>
   )
