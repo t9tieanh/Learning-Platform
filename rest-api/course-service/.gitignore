@@ -39,3 +39,6 @@ build/
 /target
 /uploads
 
+/src/main/resources/cloudfront-private-key.pem
+/src/main/resources/pk-APKAW2XWSOSQGINIPEFQ.pem
+/src/main/resources/private-key.pem
