@@ -28,7 +28,7 @@ export const CourseSidebar = ({ sections, currentLectureId, onSelectLecture, onC
   return (
     <aside className='w-full lg:w-[400px] h-full bg-sidebar-background border-l border-sidebar-border flex flex-col'>
       <div className='flex items-center justify-between p-4 border-b border-sidebar-border'>
-        <h2 className='flex items-center gap-2 text-sm font-semibold'>
+        <h2 className='flex items-center gap-2 text-base font-semibold'>
           <TableOfContents className='w-5 h-5 mr-2' /> Nội dung khóa học
         </h2>
         {onClose && (

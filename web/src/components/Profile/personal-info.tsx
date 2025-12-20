@@ -1,7 +1,8 @@
+import QuillEditor from '@/components/common/Input/QuillEditor'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import CustomButton from '@/components/common/Button'
-import { Mail, Phone, Calendar, User, Camera } from 'lucide-react'
+import { Mail, Phone, Calendar, User, Camera, Send } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { FaUserEdit } from 'react-icons/fa'
 import userService from '@/services/user/user.service'
@@ -283,13 +284,17 @@ const PersonalInfo = () => {
           <h2 className='font-semibold text-base my-4'>Mô tả</h2>
           {!editing ? (
             <div className='text-sm pb-4 text-foreground/90 leading-relaxed border-2 p-4 rounded-lg bg-white'>
-              {userInfo?.description || 'Chưa có mô tả cá nhân.'}
+              {userInfo?.description ? (
+                <span dangerouslySetInnerHTML={{ __html: userInfo.description }} />
+              ) : (
+                'Chưa có mô tả cá nhân.'
+              )}
             </div>
           ) : (
-            <textarea
-              className='w-full min-h-[120px] text-sm pb-4 text-foreground/90 leading-relaxed border-2 p-4 rounded-lg bg-white'
-              value={form.description || ''}
-              onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))}
+            <QuillEditor
+              initialHtml={form.description || ''}
+              onChange={(html) => setForm((p) => ({ ...p, description: html }))}
+              className='min-h-[300px] bg-white rounded-lg border-2 p-2'
             />
           )}
 
@@ -308,6 +313,7 @@ const PersonalInfo = () => {
                   label={saving ? 'Đang lưu...' : 'Lưu'}
                   onClick={handleSaveProfile}
                   disabled={!hasChanges || saving}
+                  icon={<Send className='w-4 h-4' />}
                 />
                 <CustomButton
                   className='shadow'

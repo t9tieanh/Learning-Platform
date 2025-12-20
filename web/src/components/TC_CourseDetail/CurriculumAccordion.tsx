@@ -87,7 +87,7 @@ export function CurriculumAccordion({ sections, courseId, onPlayLesson }: Curric
               </div>
             </AccordionTrigger>
             <AccordionContent className='px-6 pb-6'>
-              <div className='ml-14 space-y-3'>
+              <div className='ml-20 space-y-3'>
                 {section.lessons.map((lesson) => {
                   const canPlay = lesson.type === 'video' && lesson.videoUrl
                   return (

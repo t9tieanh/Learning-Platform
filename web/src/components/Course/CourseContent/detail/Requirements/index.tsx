@@ -7,7 +7,7 @@ interface RequirementsProps {
 
 const Requirements: React.FC<RequirementsProps> = ({ requirements }) => {
   return (
-    <ul className='space-y-4 max-w-3xl ml-14 my-3'>
+    <ul className='space-y-2 max-w-3xl ml-20 my-3'>
       {requirements &&
         requirements?.map((title, index) => (
           <li key={index} className='flex items-center space-x-4 group'>

@@ -55,7 +55,7 @@ const router = createBrowserRouter([
           { path: 'my-cart', element: <CartPage /> },
           { path: 'me', element: <Profile /> },
           { path: 'courses', element: <AllCourse /> },
-          { path: 'chat/:id', element: <Chat />, handle: { hideFooter: true } },
+          { path: 'chat/:id', element: <Chat />, handle: { hideFooter: true, hideBubble: true } },
           { path: 'blog', element: <Blog /> },
           { path: 'blogs', element: <BlogList /> },
           { path: 'blog-details/:id', element: <BlogDetails /> },

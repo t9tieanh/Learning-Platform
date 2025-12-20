@@ -43,7 +43,7 @@ const ScheduleSection = () => {
         <div className='mt-4 md:mt-6 text-center'>
           <Button
             variant='outline'
-            className='border-dashboard-primary text-dashboard-primary hover:bg-dashboard-primary hover:text-white transition-all px-3 py-1 text-xs md:text-base'
+            className='border-dashboard-primary text-dashboard-primary hover:bg-dashboard-primary hover:text-white transition-all px-3 py-1 text-sm md:text-base'
           >
             Xem tất cả
           </Button>

@@ -32,7 +32,7 @@ const CourseContent = ({
   return (
     <div className='course-content-container min-h-24 pt-0 pb-12'>
       <h4 className='font-bold bg-primary text-white p-2 rounded-r-3xl max-w-80 pl-12'>Nội dung của khóa học</h4>
-      <div className='content-accordion-container text-left ml-12 mt-6'>
+      <div className='content-accordion-container text-left ml-20 mt-6'>
         <Accordion type='single' collapsible className='w-full space-y-4'>
           {sections?.map((section, index) => (
             <CourseSection key={index} section={section} index={index} />
@@ -48,7 +48,7 @@ const CourseContent = ({
       <div className='py-6'>
         <h4 className='font-bold bg-primary text-white p-2 rounded-r-3xl max-w-80 pl-12'>Mô tả chi tiết</h4>
       </div>
-      <div className='text-base max-w-3xl ml-12 text-justify leading-relaxed font-normal text-gray-700'>
+      <div className='text-base max-w-3xl ml-20 text-justify leading-relaxed font-normal text-gray-700'>
         {/* content of course */}
         <div dangerouslySetInnerHTML={{ __html: content }} />
       </div>

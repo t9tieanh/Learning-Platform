@@ -1,3 +1,5 @@
+/* eslint-disable jsx-a11y/no-static-element-interactions */
+/* eslint-disable jsx-a11y/click-events-have-key-events */
 import { useState, useEffect, useMemo } from 'react'
 import { ChevronLeft } from 'lucide-react'
 import { LessonViewer } from '@/components/CoursePage/LessonViewer'
@@ -7,6 +9,7 @@ import { CourseDetail, Lesson } from '@/types/course-student'
 import courseService from '@/services/course/course-student.service'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import Button from '@/components/common/Button'
 
 const CoursePage = () => {
   type UILecture = {
@@ -117,21 +120,24 @@ const CoursePage = () => {
         <div className='flex items-center gap-4'>
           <button
             className='ml-2 flex items-center gap-2 text-white hover:text-foreground transition-colors hover:text-primary'
-            onClick={() => navigate('/')}
+            onClick={() => navigate(-1)}
           >
             <ChevronLeft className='w-5 h-5' />
-            <span className='text-sm cursor-pointer hover:underline' onClick={() => navigate(-1)}>
-              Trở lại
-            </span>
+            <span className='text-sm cursor-pointer hover:underline'>Trở lại</span>
           </button>
           <div className='hidden sm:block w-px h-6 bg-border' />
-          <div className='text-sm font-medium sm:block !flex gap-2 items-center'>
-            <Avatar>
-              <AvatarImage src={courseData?.thumbnailUrl} />
-              <AvatarFallback>CN</AvatarFallback>
-            </Avatar>
-            {courseData?.title}
-          </div>
+          <Button
+            className='!bg-transparent !hover:bg-transparent !shadow-none !p-0 !hover:bg-blue-800'
+            onClick={() => navigate('/course/' + courseId)}
+          >
+            <div className='text-sm font-medium sm:block !flex gap-2 items-center'>
+              <Avatar>
+                <AvatarImage src={courseData?.thumbnailUrl} />
+                <AvatarFallback>CN</AvatarFallback>
+              </Avatar>
+              {courseData?.title}
+            </div>
+          </Button>
         </div>
       </header>
 

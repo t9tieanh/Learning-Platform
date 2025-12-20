@@ -1,9 +1,12 @@
 package com.freeclassroom.courseservice.dto.event;
 
+import com.freeclassroom.courseservice.dto.response.category.TagResponse;
 import com.freeclassroom.courseservice.enums.dto.CourseApprovalAction;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -22,4 +25,5 @@ public class CourseApprovalEvent {
     private String language;
     private Double originalPrice;
     private Double finalPrice;
+    private List<TagResponse> tags;
 }

@@ -63,7 +63,7 @@ const Feedbacks = ({ feedbacks }: { feedbacks: FeedbackProps[] }) => {
       </h4>
 
       {/* Carousel showing 3 items at once on large screens (responsive) */}
-      <div className='w-full px-6 sm:px-6 lg:px-12 py-8'>
+      <div className='w-full px-6 sm:px-6 lg:px-24 py-8'>
         <Carousel opts={{ align: 'start' }} autoplayDelay={2000} className='w-full'>
           <CarouselContent>
             {feedbacks.map((feedback, index) => (

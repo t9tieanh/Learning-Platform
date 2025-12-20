@@ -23,6 +23,8 @@ public class UserEntity extends AbstractEntity {
     String image;
     String name;
     String phone;
+
+    @Column(columnDefinition = "TEXT")
     String description;
     String position;
 

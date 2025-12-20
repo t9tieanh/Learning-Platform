@@ -136,4 +136,10 @@ public interface CourseRepository extends JpaRepository<CourseEntity, String> {
             EnumCourseProgressStep progressStep,
             Pageable pageable
     );
+
+    @EntityGraph(attributePaths = {"chapters"})
+    @Query("""
+        SELECT c FROM CourseEntity c LEFT JOIN FETCH c.chapters ch WHERE c.id = :id ORDER BY ch.position ASC
+    """)
+    Optional<CourseEntity> findByIdWithChaptersSorted(@Param("id") String id);
 }

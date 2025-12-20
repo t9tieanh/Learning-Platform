@@ -3,6 +3,7 @@ import nodeMailService from '~/services/mails/nodemail.service'
 import { OrderConfirm } from '~/dto/request/notification.dto'
 import { QueueNameEnum } from '~/enums/rabbitQueue.enum'
 import chatService from '~/services/chat.service'
+import { insertPurchasedCourse } from '~/utils/supabase'
 
 class NotificationHandler {
   // Process when receiving event register.created.v1 -> save order with status Completed
@@ -19,7 +20,8 @@ class NotificationHandler {
         nodeMailService.sendMail(notification),
         ...message.items.map((item) =>
           chatService.sendFirstMessage(item.course_name, item.instructor_id, message.user_id)
-        )
+        ),
+        ...message.items.map((item) => insertPurchasedCourse(message.user_id, item.course_id))
       ])
     } catch (error) {
       console.error('Error handling order created notification:', error)

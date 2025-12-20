@@ -3,7 +3,8 @@ import { env } from '~/config/env'
 import { QueueNameEnum } from '~/enums/rabbitQueue.enum'
 import nodemailService from '~/services/mails/nodemail.service'
 import { VerifyEmail } from '~/dto/request/notification.dto'
-import { CourseApprovalEvent } from '~/dto/event/course-approval.event'
+import { CourseApprovalEvent } from '~/dto/event/course-approval-event.dto'
+import { handleCourseApprovalEvent } from '~/services/course.service'
 
 const RabbitMQConf = {
   protocol: 'amqp',
@@ -76,15 +77,8 @@ class RabbitClient {
 
       // Đăng ký consumer cho queue COURSE_APPROVAL
       await RabbitClient.channel.assertQueue(QueueNameEnum.COURSE_APPROVAL, { durable: true })
+      // Import handler from course.service
       this.consumeQueue<CourseApprovalEvent>(QueueNameEnum.COURSE_APPROVAL, handleCourseApprovalEvent)
-      // Handler cho event course approval (đặt ngoài class cho đúng cấu trúc)
-      async function handleCourseApprovalEvent(event: CourseApprovalEvent): Promise<void> {
-        try {
-          await nodemailService.sendMail({ ...event, type: QueueNameEnum.COURSE_APPROVAL })
-        } catch (err) {
-          console.error('Lỗi gửi email course approval:', err)
-        }
-      }
 
       console.log('Connection to RabbitMQ established')
     } catch (error) {

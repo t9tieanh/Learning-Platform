@@ -1,13 +1,15 @@
 import { useState } from 'react'
-import { MapPin, Phone, Globe, Mail, Users, Target, Award, BookOpen, TrendingUp } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
+import { MapPin, Phone, Globe, Mail, Users, Target, Award, BookOpen, TrendingUp, Twitter } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { toast } from 'sonner'
 import heroImage from '@/assets/images/about.png'
 import missionImage from '@/assets/images/about1.jpg'
 import valuesImage from '@/assets/images/about4.png'
+import twitterIcon from '@/assets/images/twitter.png'
+import facebookIcon from '@/assets/images/fb.png'
+import ytbIcon from '@/assets/images/ytb.png'
+import igIcon from '@/assets/images/ig.png'
+import linkedIcon from '@/assets/images/linked.png'
 
 const About = () => {
   const [formData, setFormData] = useState({
@@ -124,12 +126,12 @@ const About = () => {
                 <Target className='w-5 h-5' />
                 <span className='font-semibold'>Sứ mệnh</span>
               </div>
-              <h2 className='text-4xl font-bold text-foreground mb-6'>Democratizing Education</h2>
-              <p className='text-lg text-muted-foreground mb-4'>
+              <h2 className='text-4xl font-bold text-foreground mb-6'>Cách mạng giáo dục</h2>
+              <p className='text-lg text-muted-foreground mb-4 text-justify'>
                 Learnova được thành lập với sứ mệnh mang giáo dục chất lượng cao đến với mọi người, không phân biệt địa
                 lý hay hoàn cảnh. Chúng tôi tin rằng học tập là chìa khóa mở ra những cơ hội mới trong cuộc sống.
               </p>
-              <p className='text-lg text-muted-foreground'>
+              <p className='text-lg text-muted-foreground text-justify'>
                 Với đội ngũ giảng viên dày dặn kinh nghiệm và nền tảng công nghệ hiện đại, chúng tôi cam kết cung cấp
                 trải nghiệm học tập tối ưu, giúp học viên phát triển kỹ năng và đạt được mục tiêu nghề nghiệp.
               </p>
@@ -139,7 +141,7 @@ const About = () => {
       </section>
 
       {/* Values Section */}
-      <section className='py-16 px-4 bg-blue-100'>
+      <section className='py-16 px-4 bg-gradient-to-r from-primary/70 white'>
         <div className='container'>
           <h2 className='text-3xl font-bold text-foreground mb-10 animate-in fade-in slide-in-from-bottom-4 duration-700'>
             Giá trị cốt lõi
@@ -189,27 +191,27 @@ const About = () => {
                 <h3 className='text-lg font-semibold text-foreground'>Thông tin liên hệ</h3>
                 <div className='space-y-4 text-muted-foreground'>
                   <div className='flex items-start gap-3 text-base font-semibold'>
-                    <MapPin className='w-5 h-5 text-primary' />
-                    <p>123 Nguyễn Văn Linh, Quận 7, TP. Hồ Chí Minh</p>
+                    <MapPin className='w-8 h-8 text-blue-500' />
+                    <p>16 Nguyễn Văn Linh, Quận 7, TP. Hồ Chí Minh</p>
                   </div>
 
                   <div className='flex items-start gap-3 text-base font-semibold'>
-                    <MapPin className='w-5 h-5 text-primary' />
+                    <MapPin className='w-8 h-8 text-blue-500' />
                     <p>Ngõ 275 Quan Nhân, Quận Thanh Xuân, Hà Nội</p>
                   </div>
 
                   <div className='flex items-center gap-3 text-base font-semibold'>
-                    <Phone className='w-5 h-5 text-primary' />
-                    <p>0123 456 789</p>
+                    <Phone className='w-8 h-8 text-blue-500' />
+                    <p>0943 293 012</p>
                   </div>
 
                   <div className='flex items-center gap-3 text-base font-semibold'>
-                    <Mail className='w-5 h-5 text-primary' />
-                    <p>learnova@geekitr.com</p>
+                    <Mail className='w-8 h-8 text-blue-500' />
+                    <p>geekitr@learnova.com</p>
                   </div>
 
                   <div className='flex items-center gap-3 text-base font-semibold'>
-                    <Globe className='w-5 h-5 text-primary' />
+                    <Globe className='w-8 h-8 text-blue-500' />
                     <p>www.learnova.com</p>
                   </div>
                 </div>
@@ -217,64 +219,34 @@ const About = () => {
             </div>
 
             {/* Cột phải - form liên hệ */}
-            <Card className='p-8 shadow-elegant animate-in fade-in slide-in-from-right-8 duration-1000'>
-              <form onSubmit={handleSubmit} className='space-y-6 text-foreground'>
-                {/* Họ và tên */}
-                <div className='space-y-2'>
-                  <label htmlFor='name' className='block text-base font-medium'>
-                    Họ và tên
-                  </label>
-                  <Input
-                    id='name'
-                    type='text'
-                    placeholder='Nguyễn Văn A'
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className='w-full text-base rounded-lg'
-                    required
-                  />
-                </div>
+            <Card className='p-6 shadow-elegant bg-card'>
+              <h3 className='text-lg font-semibold text-foreground'>Mạng xã hội</h3>
+              <div className='space-y-4 text-muted-foreground'>
+                <a href='https://x.com/learnnova' className='flex items-center gap-3 text-base font-semibold'>
+                  <img src={twitterIcon} alt='Twitter' className='w-8 h-8' />
+                  <p>@learnova_official</p>
+                </a>
 
-                {/* Email */}
-                <div className='space-y-2'>
-                  <label htmlFor='email' className='block text-base font-medium'>
-                    Email
-                  </label>
-                  <Input
-                    id='email'
-                    type='email'
-                    placeholder='email@example.com'
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className='w-full text-base rounded-lg'
-                    required
-                  />
-                </div>
+                <a href='https://www.facebook.com/profile.php?id=61569020296267' className='flex items-center gap-3 text-base font-semibold'>
+                  <img src={facebookIcon} alt='Facebook' className='w-8 h-8 rounded-sm' />
+                  <p>/learnova</p>
+                </a>
 
-                {/* Tin nhắn */}
-                <div className='space-y-2'>
-                  <label htmlFor='message' className='block text-base font-medium'>
-                    Tin nhắn
-                  </label>
-                  <Textarea
-                    id='message'
-                    placeholder='Nội dung tin nhắn của bạn...'
-                    value={formData.message}
-                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                    className='w-full min-h-[150px] text-base rounded-lg'
-                    required
-                  />
-                </div>
+                <a href='https://www.instagram.com/learnova/' className='flex items-center gap-3 text-base font-semibold'>
+                  <img src={igIcon} alt='Instagram' className='w-8 h-8' />
+                  <p>@learnova</p>
+                </a>
 
-                {/* Submit Button */}
-                <Button
-                  type='submit'
-                  className='w-full bg-primary hover:bg-primary/90 text-primary-foreground text-base py-3 rounded-lg font-medium transition-all'
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? 'Đang gửi...' : 'Gửi tin nhắn'}
-                </Button>
-              </form>
+                <a href='https://www.linkedin.com/in/learnova-vn-222981393/' className='flex items-center gap-3 text-base font-semibold'>
+                  <img src={linkedIcon} alt='LinkedIn' className='w-8 h-8' />
+                  <p>/company/learnova</p>
+                </a>
+
+                <a href='https://www.youtube.com/@LearnovaAcademy' className='flex items-center gap-3 text-base font-semibold'>
+                  <img src={ytbIcon} alt='YouTube' className='w-8 h-8' />
+                  <p>/learnovachannel</p>
+                </a>
+              </div>
             </Card>
           </div>
         </div>

@@ -3,7 +3,7 @@ import { NotificationPayload } from '~/sagas/order/dtos'
 
 export interface NotificationDto {
   type: QueueNameEnum
-  email: string[] | string
+  email?: string[] | string
   title: string
 }
 
