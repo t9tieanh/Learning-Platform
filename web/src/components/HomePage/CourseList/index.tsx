@@ -21,10 +21,10 @@ const CourseList = ({ title, fetcher }: CourseListProps) => {
         const result = data?.result || []
         if (!result || result.length === 0) {
           const fallback = await courseService.getBestSellerCourses()
-          setCourses(fallback?.result || [])
+          setCourses((fallback?.result as unknown as Course[]) || [])
           setFinalTitle('Khóa học bán chạy nhất')
         } else {
-          setCourses(result)
+          setCourses(result as unknown as Course[])
           setFinalTitle(title)
         }
       } catch (err) {

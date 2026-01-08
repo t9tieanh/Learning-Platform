@@ -68,7 +68,9 @@ const CheckoutPage = () => {
             {order?.ttl && <TimeToLive ttl={order.ttl} />}
             <div className='py-5 grid grid-cols-1 md:grid-cols-5 items-start min-h-[60vh] gap-6'>
               <div className='md:col-span-3'>{loading ? <PaymentFormSkeleton /> : <PaymentForm order={order} />}</div>
-              <div className='md:col-span-2'>{loading ? <OrderSummarySkeleton /> : <OrderSummary order={order} setOrder={setOrder} />}</div>
+              <div className='md:col-span-2'>
+                {loading ? <OrderSummarySkeleton /> : <OrderSummary order={order} setOrder={setOrder} />}
+              </div>
             </div>
           </div>
         </>
