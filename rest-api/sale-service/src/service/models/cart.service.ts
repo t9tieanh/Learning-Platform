@@ -5,6 +5,8 @@ import courseGrpcClient from '~/grpc/courseClient.grpc';
 import courseService from './course.service';
 
 class CartService {
+    private readonly TTL_GUEST_CART = 2 * 24 * 60 * 60; // 24 hours in seconds
+
     async addToCart(cartId: string, courseId: string, userId: string): Promise<{
         id: string;
         cart_id: string;
@@ -12,8 +14,11 @@ class CartService {
     }> {
         // handle guest user
         if (!userId) {
-            // save cart for guest user in redis
-            await redisService.sadd(`cart:${cartId}`, courseId);
+            // save cart for guest user in redis with 48 hours TTL
+            await Promise.all([
+                redisService.sadd(`cart:${cartId}`, courseId),
+                redisService.expire(`cart:${cartId}`, this.TTL_GUEST_CART)
+            ])
             return {
                 id: cartId,
                 cart_id: cartId,

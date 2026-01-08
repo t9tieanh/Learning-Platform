@@ -18,6 +18,7 @@ export const env = {
     RABBIT_MQ_USER_NAME: process.env.RABBIT_MQ_USER_NAME || 'guest',
     RABBIT_MQ_PASSWORD: process.env.RABBIT_MQ_PASSWORD || 'guest',
     REDIS_DB_HOST: process.env.REDIS_DB_HOST,
+    REDIS_DB_USER: process.env.REDIS_DB_USER || 'default',
     REDIS_DB_PORT: parseInt(process.env.REDIS_DB_PORT || '6379', 10),
     REDIS_DB_PASSWORD: process.env.REDIS_DB_PASSWORD,
     REDIS_DB_NAME: parseInt(process.env.REDIS_DB_NAME || '0', 10),
