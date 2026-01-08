@@ -599,7 +599,12 @@ export const ChatArea = ({
             className='flex-1 rounded-full bg-gray-100 border-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-0 px-4 py-2 text-sm placeholder-gray-500'
           />
 
-          <Button size='icon' onClick={handleSend} disabled={sendingMessage} className='rounded-full bg-blue-500 hover:bg-blue-600 transition'>
+          <Button
+            size='icon'
+            onClick={handleSend}
+            disabled={sendingMessage}
+            className='rounded-full bg-blue-500 hover:bg-blue-600 transition'
+          >
             <Send className='h-5 w-5 text-white' />
           </Button>
         </div>
