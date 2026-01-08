@@ -102,7 +102,6 @@ class CourseUserService {
         sort
       }
     })
-    console.log('RESPONSE', response.data)
     return response.data
   }
 

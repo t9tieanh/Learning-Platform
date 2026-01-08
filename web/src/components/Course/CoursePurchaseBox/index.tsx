@@ -10,6 +10,7 @@ import orderService from '@/services/sale/order.service'
 import { useAuthStore } from '@/stores/useAuth.stores'
 import { useNavigate } from 'react-router-dom'
 import formatPrice from '@/utils/common/formatPrice'
+import useLoading from '@/hooks/useLoading.hook'
 
 const CoursePurchaseBox = ({
   originalPrice,
@@ -24,9 +25,13 @@ const CoursePurchaseBox = ({
   const refresh = useCartStore((s) => s.refresh)
   const { data } = useAuthStore()
   const navigator = useNavigate()
+  const { loading: addingToCart, startLoading: startAddingToCart, stopLoading: stopAddingToCart } = useLoading()
+  const { loading: processing, startLoading: startProcessing, stopLoading: stopProcessing } = useLoading()
+  const { loading: applyingDiscount, startLoading: startApplyingDiscount, stopLoading: stopApplyingDiscount } = useLoading()
 
   const handleAddToCart = async () => {
     try {
+      startAddingToCart()
       const response = await cartService.addToCart(courseId)
       if (response && response.code === 200) {
         toast.success(response.message || 'Thêm vào giỏ hàng thành công!')
@@ -37,12 +42,15 @@ const CoursePurchaseBox = ({
     } catch (error) {
       toast.error('Không thể thêm vào giỏ hàng')
       console.error('Error adding to cart:', error)
+    } finally {
+      stopAddingToCart()
     }
   }
 
   // handle payment process
   const handlePayment = async () => {
     try {
+      startProcessing()
       if (!data?.accessToken) {
         toast.error('Vui lòng đăng nhập để tiếp tục thanh toán.')
         return
@@ -58,6 +66,28 @@ const CoursePurchaseBox = ({
     } catch (error) {
       toast.error('Không thể khởi tạo đơn hàng. Vui lòng thử lại.')
       console.error('Error processing payment:', error)
+    } finally {
+      stopProcessing()
+    }
+  }
+
+  const handleApplyDiscount = async () => {
+    if (!discountCode.trim()) {
+      toast.error('Vui lòng nhập mã giảm giá')
+      return
+    }
+    try {
+      startApplyingDiscount()
+      // TODO: Call discount service API when available
+      toast.info('Chức năng áp dụng mã giảm giá sẽ được cập nhật sớm')
+      // const response = await discountService.validateCode(discountCode)
+      // if (response.code === 200) {
+      //   toast.success('Áp dụng mã giảm giá thành công!')
+      // }
+    } catch (error) {
+      toast.error('Mã giảm giá không hợp lệ')
+    } finally {
+      stopApplyingDiscount()
     }
   }
 
@@ -84,6 +114,7 @@ const CoursePurchaseBox = ({
                 icon={<FaPaperPlane className='w-4 h-4' />}
                 label='Mua ngay'
                 onClick={handlePayment}
+                isLoader={processing}
               />
 
               <CustomButton
@@ -91,6 +122,7 @@ const CoursePurchaseBox = ({
                 icon={<FaShoppingCart className='w-4 h-4' />}
                 label='Thêm vào giỏ hàng'
                 onClick={handleAddToCart}
+                isLoader={addingToCart}
               />
             </div>
           </CardHeader>
@@ -112,7 +144,12 @@ const CoursePurchaseBox = ({
                   onChange={(e) => setDiscountCode(e.target.value)}
                   className='flex-1 border-primary/20 focus:border-primary'
                 />
-                <CustomButton className='px-4 bg-blue-500 hover:bg-blue-600 text-white' label='Áp dụng' />
+                <CustomButton 
+                  className='px-4 bg-blue-500 hover:bg-blue-600 text-white' 
+                  label='Áp dụng' 
+                  onClick={handleApplyDiscount}
+                  isLoader={applyingDiscount}
+                />
               </div>
             </div>
           </CardContent>

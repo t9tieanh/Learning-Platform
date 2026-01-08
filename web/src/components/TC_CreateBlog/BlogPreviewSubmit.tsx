@@ -12,6 +12,7 @@ import './blog-preview.css'
 import blogService from '@/services/blog.service'
 import { useAuthStore } from '@/stores/useAuth.stores'
 import userService from '@/services/user/user.service'
+import useLoading from '@/hooks/useLoading.hook'
 import type { Profile } from '@/types/profile'
 
 type BlogPreviewSubmitProps = {
@@ -23,7 +24,7 @@ export default function BlogPreviewSubmit({ contentHtml, blogId }: BlogPreviewSu
   const navigate = useNavigate()
   const { title, image } = useBlogPostStore()
   const { data } = useAuthStore()
-  const [submitting, setSubmitting] = useState(false)
+  const { loading: submitting, startLoading, stopLoading } = useLoading()
   const [profile, setProfile] = useState<Profile | null>(null)
 
   const hasContent = useMemo(() => Boolean(contentHtml && contentHtml.trim().length > 0), [contentHtml])
@@ -73,7 +74,7 @@ export default function BlogPreviewSubmit({ contentHtml, blogId }: BlogPreviewSu
     }
 
     try {
-      setSubmitting(true)
+      startLoading()
       if (blogId) {
         const updated = await blogService.update(blogId, {
           title: title.trim(),
@@ -99,7 +100,7 @@ export default function BlogPreviewSubmit({ contentHtml, blogId }: BlogPreviewSu
       console.error(err)
       toast.error(err?.response?.data?.message || (blogId ? 'Cập nhật blog thất bại' : 'Tạo blog thất bại'))
     } finally {
-      setSubmitting(false)
+      stopLoading()
     }
   }
 
@@ -130,7 +131,6 @@ export default function BlogPreviewSubmit({ contentHtml, blogId }: BlogPreviewSu
             <section className='grid grid-cols-1 lg:grid-cols-12 gap-6 items-start !mb-0'>
               <div className='lg:col-span-7'>
                 <div className='rounded-lg overflow-hidden border border-border bg-muted/10'>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={
                       image ||

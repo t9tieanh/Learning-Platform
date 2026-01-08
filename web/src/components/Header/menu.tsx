@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom'
 import { showConfirmToast } from '../common/ShowConfirmToast'
 import userService from '@/services/user/user.service'
 import { toast } from 'sonner'
+import useLoading from '@/hooks/useLoading.hook'
 
 const Menu = ({
   username,
@@ -20,6 +21,7 @@ const Menu = ({
 }) => {
   const { data, setData } = useAuthStore()
   const navigate = useNavigate()
+  const { loading: loggingOut, startLoading, stopLoading } = useLoading()
 
   const handleLogout = async () => {
     const confirmed = await showConfirmToast({
@@ -30,9 +32,12 @@ const Menu = ({
     if (confirmed) {
       // Call logout API
       try {
+        startLoading()
         await userService.logout()
       } catch (error) {
         console.error('Error during logout:', error)
+      } finally {
+        stopLoading()
       }
       // Clear user data from store
       setData(null)
@@ -102,6 +107,7 @@ const Menu = ({
             label='Đăng xuất'
             icon={<LogOut className='w-4 h-4 mr-2' />}
             onClick={handleLogout}
+            isLoader={loggingOut}
           />
         </div>
       </div>

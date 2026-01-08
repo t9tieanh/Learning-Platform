@@ -1,7 +1,7 @@
 import CourseCard from '@/components/common/CourseCard'
+import CourseCardSkeleton from '@/components/HomePage/CourseCardSkeleton'
 import { Course } from '@/types/course.type'
 import { useEffect, useState } from 'react'
-import { Loader } from '@/components/ui/loader'
 import courseService from '@/services/course/course-user.service'
 
 interface CourseListProps {
@@ -19,14 +19,12 @@ const CourseList = ({ title, fetcher }: CourseListProps) => {
       try {
         const data = await fetcher()
         const result = data?.result || []
-        console.log('RESULT', result)
-        // Nếu không có dữ liệu, fallback sang best seller
         if (!result || result.length === 0) {
           const fallback = await courseService.getBestSellerCourses()
-          setCourses(fallback?.result || [])
+          setCourses((fallback?.result as unknown as Course[]) || [])
           setFinalTitle('Khóa học bán chạy nhất')
         } else {
-          setCourses(result)
+          setCourses(result as unknown as Course[])
           setFinalTitle(title)
         }
       } catch (err) {
@@ -40,7 +38,20 @@ const CourseList = ({ title, fetcher }: CourseListProps) => {
   }, [fetcher, title])
 
   if (loading) {
-    return <Loader />
+    return (
+      <div className='course-list-container pt-10'>
+        <div className='flex items-center mt-6'>
+          <div className='shrink-0' style={{ width: '320px' }}>
+            <h4 className='font-bold bg-blue-500 text-white p-2 rounded-r-3xl pl-12'>{title}</h4>
+          </div>
+        </div>
+        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-6 mx-auto max-w-7xl px-4'>
+          {[...Array(4)].map((_, idx) => (
+            <CourseCardSkeleton key={idx} />
+          ))}
+        </div>
+      </div>
+    )
   }
 
   return (

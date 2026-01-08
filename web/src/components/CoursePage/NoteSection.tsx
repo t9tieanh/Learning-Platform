@@ -3,6 +3,7 @@ import { Textarea } from '@/components/ui/textarea'
 import CustomButton from '@/components/common/Button'
 import lessonStudentService from '@/services/course/lesson-student.service'
 import { toast } from 'sonner'
+import useLoading from '@/hooks/useLoading.hook'
 import {
   Drawer,
   DrawerClose,
@@ -27,9 +28,11 @@ const NoteSection = ({
   note: string
   setNote: (note: string) => void
 }) => {
+  const { loading, startLoading, stopLoading } = useLoading()
 
   const handleSaveNote = async () => {
     try {
+      startLoading()
       const response = await lessonStudentService.makeNote(lessonId, note)
       if (response && response.code === 200) {
         toast.success(response.message)
@@ -39,6 +42,8 @@ const NoteSection = ({
     } catch (error) {
       toast.error('Ghi chú không được lưu. Vui lòng thử lại!')
       console.error('Failed to save note', error)
+    } finally {
+      stopLoading()
     }
   }
 
@@ -63,7 +68,7 @@ const NoteSection = ({
             />
           </div>
           <DrawerFooter className='flex flex-row gap-2 justify-end'>
-            <CustomButton icon={<Send />} onClick={() => handleSaveNote()}>
+            <CustomButton icon={<Send />} isLoader={loading} onClick={() => handleSaveNote()}>
               Lưu
             </CustomButton>
             <DrawerClose asChild>

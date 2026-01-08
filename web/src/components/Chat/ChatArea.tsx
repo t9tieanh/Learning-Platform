@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '
 import { toast } from 'sonner'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import courseUserService, { EnrolledCourseItem } from '@/services/course/course-user.service'
+import useLoading from '@/hooks/useLoading.hook'
 
 // Loại vai trò của người dùng trong phòng chat
 type Role = 'instructor' | 'student'
@@ -46,7 +47,7 @@ export const ChatArea = ({
   forcedRole
 }: ChatAreaProps) => {
   // console.log('PERR OIIIIII', peerFromProps);
-  const { socket, isConnected, connectSocket, disconnectSocket } = useContext(SocketContext)
+  const { socket, isConnected, connectSocket } = useContext(SocketContext)
   const [message, setMessage] = useState('')
   const [messages, setMessages] = useState<Message[]>([])
   const [myRole, setMyRole] = useState<'instructor' | 'student'>('student')
@@ -64,6 +65,7 @@ export const ChatArea = ({
   const [enrolledCourses, setEnrolledCourses] = useState<EnrolledCourseItem[]>([])
   const location = useLocation()
   const navigate = useNavigate()
+  const { loading: sendingMessage, startLoading: startSending, stopLoading: stopSending } = useLoading()
 
   useEffect(() => {
     if (peerFromProps && peerFromProps !== peerId) {
@@ -299,6 +301,7 @@ export const ChatArea = ({
     if (!text) return
 
     try {
+      startSending()
       // Gọi API — backend sẽ lưu DB và emit socket
       const res = await chatService.sendMessage({
         conversationId: conversationId ?? '',
@@ -326,6 +329,8 @@ export const ChatArea = ({
       setMessage('')
     } catch (e) {
       console.error('sendMessage error', e)
+    } finally {
+      stopSending()
     }
   }
 
@@ -594,7 +599,12 @@ export const ChatArea = ({
             className='flex-1 rounded-full bg-gray-100 border-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-0 px-4 py-2 text-sm placeholder-gray-500'
           />
 
-          <Button size='icon' onClick={handleSend} className='rounded-full bg-blue-500 hover:bg-blue-600 transition'>
+          <Button
+            size='icon'
+            onClick={handleSend}
+            disabled={sendingMessage}
+            className='rounded-full bg-blue-500 hover:bg-blue-600 transition'
+          >
             <Send className='h-5 w-5 text-white' />
           </Button>
         </div>

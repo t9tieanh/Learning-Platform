@@ -6,6 +6,7 @@ import { toast } from 'sonner'
 import { CertificateResponse } from '@/types/certificate'
 import certificateService, { CreateCertReq, CreateCertRes } from '@/services/certificate/certificate.service'
 import { useAuthStore } from '@/stores/useAuth.stores'
+import useLoading from '@/hooks/useLoading.hook'
 import {
   Dialog,
   DialogContent,
@@ -24,7 +25,7 @@ interface Props {
 
 // Removed mock; will use API results (if a list endpoint is added later)
 
-const CertificateList: FC<Props> = ({ userId }) => {
+const CertificateList: FC<Props> = () => {
   const [certificates, setCertificates] = useState<CertificateResponse[]>([])
   const [loading, setLoading] = useState(true)
   const [openModal, setOpenModal] = useState(false)
@@ -34,7 +35,7 @@ const CertificateList: FC<Props> = ({ userId }) => {
   })
   const { data } = useAuthStore()
   const currentUserId = (data as any)?.userId || (data as any)?.id
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const { loading: isSubmitting, startLoading, stopLoading } = useLoading()
 
   const handleDelete = async (id: string) => {
     try {
@@ -104,7 +105,7 @@ const CertificateList: FC<Props> = ({ userId }) => {
       return
     }
     try {
-      setIsSubmitting(true)
+      startLoading()
       const payload: CreateCertReq = { credentialUrl, issueDate }
       const res = await certificateService.createCertificate(String(currentUserId), payload)
       if (res?.result) {
@@ -131,7 +132,7 @@ const CertificateList: FC<Props> = ({ userId }) => {
       console.error(e)
       toast.error('Tạo chứng chỉ thất bại')
     } finally {
-      setIsSubmitting(false)
+      stopLoading()
     }
   }
 
