@@ -9,7 +9,8 @@ const RabbitMQConf = {
   username: process.env.RABBIT_MQ_USER_NAME,
   password: process.env.RABBIT_MQ_PASSWORD,
   authMechanism: 'AMQPLAIN',
-  vhost: '/'
+  vhost: '/',
+  uri: process.env.RABBIT_MQ_URI || null
 }
 
 class RabbitClient {
@@ -50,7 +51,7 @@ class RabbitClient {
   // Tạo kết nối và channel -> đăng ký consumer để lắng nghe data trên queue
   private static async createConnection(): Promise<void> {
     try {
-      const uri = `${RabbitMQConf.protocol}://${RabbitMQConf.username}:${RabbitMQConf.password}@${RabbitMQConf.hostname}:${RabbitMQConf.port}${RabbitMQConf.vhost}`
+      const uri = RabbitMQConf.uri || `${RabbitMQConf.protocol}://${RabbitMQConf.username}:${RabbitMQConf.password}@${RabbitMQConf.hostname}:${RabbitMQConf.port}${RabbitMQConf.vhost}`
       RabbitClient.connection = await amqp.connect(uri)
       RabbitClient.channel = await RabbitClient.connection.createChannel()
 

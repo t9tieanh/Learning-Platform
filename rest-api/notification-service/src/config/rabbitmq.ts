@@ -7,13 +7,14 @@ import { CourseApprovalEvent } from '~/dto/event/course-approval-event.dto'
 import { handleCourseApprovalEvent } from '~/services/course.service'
 
 const RabbitMQConf = {
-  protocol: 'amqp',
+  protocol: 'amqps',
   hostname: env.RABBIT_MQ_HOST,
   port: env.RABBIT_MQ_PORT,
   username: env.RABBIT_MQ_USER_NAME,
   password: env.RABBIT_MQ_PASSWORD,
   authMechanism: 'AMQPLAIN',
-  vhost: '/'
+  vhost: env.RABBIT_MQ_VHOST || '/',
+  uri: env.RABBIT_MQ_URI || null
 }
 
 class RabbitClient {
@@ -54,7 +55,7 @@ class RabbitClient {
   // Tạo kết nối và channel -> đăng ký consumer để lắng nghe data trên queue
   private static async createConnection(): Promise<void> {
     try {
-      const uri = `${RabbitMQConf.protocol}://${RabbitMQConf.username}:${RabbitMQConf.password}@${RabbitMQConf.hostname}:${RabbitMQConf.port}${RabbitMQConf.vhost}`
+      const uri = RabbitMQConf.uri || `${RabbitMQConf.protocol}://${RabbitMQConf.username}:${RabbitMQConf.password}@${RabbitMQConf.hostname}:${RabbitMQConf.port}${RabbitMQConf.vhost}`
       RabbitClient.connection = await amqp.connect(uri)
       RabbitClient.channel = await RabbitClient.connection.createChannel()
 

@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.connection.RedisPassword;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -20,11 +21,25 @@ public class RedisConfig {
     @Value("${redis.port}")
     private int redisPort;
 
+    @Value("${redis.username}")
+    private String redisUsername;
+
+    @Value("${redis.password}")
+    private String redisPassword;
+
 
     @Bean
     public LettuceConnectionFactory redisConnectionFactory() {
-        // Tạo Standalone Connection tới Redis
-        return new LettuceConnectionFactory(new RedisStandaloneConfiguration(redisHost, redisPort));
+        RedisStandaloneConfiguration config =
+                new RedisStandaloneConfiguration(redisHost, redisPort);
+
+        // chỉ set khi có giá trị
+        if (redisUsername != null && !redisUsername.isBlank() && redisPassword != null && !redisPassword.isBlank()) {
+            config.setUsername(redisUsername);
+            config.setPassword(RedisPassword.of(redisPassword));
+        }
+
+        return new LettuceConnectionFactory(config);
     }
 
     @Bean

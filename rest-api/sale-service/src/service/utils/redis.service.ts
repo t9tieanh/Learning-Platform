@@ -5,11 +5,12 @@ class RedisService {
   private redis: Redis
 
   constructor() {
-    // Khoi tao ket noi Redis
+    // init redis connection
     this.redis = new Redis({
       host: env.REDIS_DB_HOST,
       port: env.REDIS_DB_PORT,
       password: env.REDIS_DB_PASSWORD,
+      username: env.REDIS_DB_USER,
       db: env.REDIS_DB_NAME
     })
 
