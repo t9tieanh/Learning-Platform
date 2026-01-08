@@ -2,10 +2,7 @@ package com.freeclassroom.courseservice.controller.user;
 
 import com.freeclassroom.courseservice.dto.response.ApiResponse;
 import com.freeclassroom.courseservice.dto.response.common.PagingResponse;
-import com.freeclassroom.courseservice.dto.response.course.CourseResponse;
-import com.freeclassroom.courseservice.dto.response.course.CourseUserDetailResponse;
-import com.freeclassroom.courseservice.dto.response.course.MyCourseResponse;
-import com.freeclassroom.courseservice.dto.response.course.PageResponse;
+import com.freeclassroom.courseservice.dto.response.course.*;
 import com.freeclassroom.courseservice.service.course.ICourseService;
 import com.freeclassroom.courseservice.service.course.ICourseUserService;
 import lombok.AccessLevel;
@@ -40,17 +37,17 @@ public class CourseUserController {
     }
 
     @GetMapping("/best-seller")
-    ApiResponse<List<CourseResponse>> getBestSellerCourse(@RequestParam(defaultValue = "4") int limit) {
+    ApiResponse<List<CourseUserResponse>> getBestSellerCourse(@RequestParam(defaultValue = "4") int limit) {
         return courseUserService.getBestSellerCourse(limit);
     }
 
     @GetMapping("/trend")
-    ApiResponse<List<CourseResponse>> getTrendCourse(@RequestParam(defaultValue = "4") int limit) {
+    ApiResponse<List<CourseUserResponse>> getTrendCourse(@RequestParam(defaultValue = "4") int limit) {
         return courseUserService.getTrendyCourse(limit);
     }
 
     @GetMapping
-    ApiResponse<PageResponse<CourseResponse>> getAllCourse(
+    ApiResponse<PageResponse<CourseUserResponse>> getAllCourse(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int limit,
             @RequestParam(required = false) String search,

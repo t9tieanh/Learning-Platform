@@ -27,6 +27,7 @@ const CoursePurchaseBox = ({
   const navigator = useNavigate()
   const { loading: addingToCart, startLoading: startAddingToCart, stopLoading: stopAddingToCart } = useLoading()
   const { loading: processing, startLoading: startProcessing, stopLoading: stopProcessing } = useLoading()
+  const { loading: applyingDiscount, startLoading: startApplyingDiscount, stopLoading: stopApplyingDiscount } = useLoading()
 
   const handleAddToCart = async () => {
     try {
@@ -67,6 +68,26 @@ const CoursePurchaseBox = ({
       console.error('Error processing payment:', error)
     } finally {
       stopProcessing()
+    }
+  }
+
+  const handleApplyDiscount = async () => {
+    if (!discountCode.trim()) {
+      toast.error('Vui lòng nhập mã giảm giá')
+      return
+    }
+    try {
+      startApplyingDiscount()
+      // TODO: Call discount service API when available
+      toast.info('Chức năng áp dụng mã giảm giá sẽ được cập nhật sớm')
+      // const response = await discountService.validateCode(discountCode)
+      // if (response.code === 200) {
+      //   toast.success('Áp dụng mã giảm giá thành công!')
+      // }
+    } catch (error) {
+      toast.error('Mã giảm giá không hợp lệ')
+    } finally {
+      stopApplyingDiscount()
     }
   }
 
@@ -123,7 +144,12 @@ const CoursePurchaseBox = ({
                   onChange={(e) => setDiscountCode(e.target.value)}
                   className='flex-1 border-primary/20 focus:border-primary'
                 />
-                <CustomButton className='px-4 bg-blue-500 hover:bg-blue-600 text-white' label='Áp dụng' />
+                <CustomButton 
+                  className='px-4 bg-blue-500 hover:bg-blue-600 text-white' 
+                  label='Áp dụng' 
+                  onClick={handleApplyDiscount}
+                  isLoader={applyingDiscount}
+                />
               </div>
             </div>
           </CardContent>

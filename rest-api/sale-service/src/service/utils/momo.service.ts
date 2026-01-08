@@ -115,7 +115,6 @@ export class MomoService {
     }
 
     const response = await this.axiosInstance.post('/v2/gateway/api/create', requestBody)
-    // console.log(response.data);
 
     if (response.data.resultCode === 0) {
       return {
