@@ -26,5 +26,7 @@ export const env = {
   RABBIT_MQ_HOST: process.env.RABBIT_MQ_HOST,
   RABBIT_MQ_PORT: process.env.RABBIT_MQ_PORT,
   RABBIT_MQ_USER_NAME: process.env.RABBIT_MQ_USER_NAME,
-  RABBIT_MQ_PASSWORD: process.env.RABBIT_MQ_PASSWORD
+  RABBIT_MQ_PASSWORD: process.env.RABBIT_MQ_PASSWORD,
+  RABBIT_MQ_VHOST: process.env.RABBIT_MQ_VHOST,
+  RABBIT_MQ_URI: process.env.RABBIT_MQ_URI || ''
 }

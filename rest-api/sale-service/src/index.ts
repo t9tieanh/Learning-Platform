@@ -9,7 +9,6 @@ import indexRoute from '~/routes';
 import { initSagas } from './sagas/init/initSaga';
 const { startGrpcServer } = require('../src/grpc/server/saleServer.grpc')
 
-
 const app = express();
 
 app.use(session({
@@ -20,6 +19,7 @@ app.use(session({
   cookie: {
     secure: false,
     httpOnly: true,
+    maxAge: 2 * 24 * 60 * 60 * 1000, // 2 days in milliseconds
     // sameSite: 'none'
   }, // -> development -> HTTP
 
