@@ -10,6 +10,7 @@ import facebookIcon from '@/assets/images/fb.png'
 import ytbIcon from '@/assets/images/ytb.png'
 import igIcon from '@/assets/images/ig.png'
 import linkedIcon from '@/assets/images/linked.png'
+import useLoading from '@/hooks/useLoading.hook'
 
 const About = () => {
   const [formData, setFormData] = useState({
@@ -17,7 +18,7 @@ const About = () => {
     email: '',
     message: ''
   })
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const { loading: isSubmitting, startLoading, stopLoading } = useLoading()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -27,9 +28,8 @@ const About = () => {
       return
     }
 
-    setIsSubmitting(true)
-
     try {
+      startLoading()
       const response = await fetch('/api/send-contact-email', {
         method: 'POST',
         headers: {
@@ -47,7 +47,7 @@ const About = () => {
     } catch (error) {
       toast('Vui lòng thử lại sau')
     } finally {
-      setIsSubmitting(false)
+      stopLoading()
     }
   }
 
