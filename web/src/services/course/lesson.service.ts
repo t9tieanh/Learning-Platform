@@ -46,6 +46,7 @@ class LessonService {
       isPublic: boolean
     }>
   > {
+    console.log('Updating lesson metadata:', data)
     const response = await axiosClient.axiosInstance.patch(`learning/lessons/${data.id}`, {
       title: data.title,
       content: data.content,

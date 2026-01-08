@@ -40,7 +40,7 @@ async function saveCourseToSupabase(
   const embedding = await AiChatService.generateEmbedding(text)
   const { error } = await supabase.from('course_embeddings').insert([
     {
-      id: Math.floor(10000 + Math.random() * 90000),
+      id: courseId,
       name: courseName,
       description: courseDescription,
       tags: courseTags,

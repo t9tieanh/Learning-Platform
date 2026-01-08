@@ -185,7 +185,7 @@ public class LessonService implements ILessonService{
                 () -> new CustomExeption(ErrorCode.LESSON_NOT_FOUND)
         );
 
-        lesson.setTitle(lesson.getTitle());
+        lesson.setTitle(request.getTitle());
         lesson.setContent(request.getContent());
         lesson.setIsPublic(request.getIsPublic());
         lessonRepo.save(lesson);

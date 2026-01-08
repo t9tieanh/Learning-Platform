@@ -116,4 +116,10 @@ public class CourseController {
     ApiResponse<CreationResponse> requestApproval(@PathVariable("id") String id) {
         return courseService.requestApproval(id);
     }
+
+    @PreAuthorize("@courseService.isTeacherOfCourse(#id, authentication.name)")
+    @DeleteMapping("{id}")
+    ApiResponse<CreationResponse> delCourse(@PathVariable("id") String id) {
+        return courseService.delCourse(id);
+    }
 }

@@ -17,8 +17,8 @@ interface FeedbackProps {
 
 const Feedback = ({ feedback }: { feedback: FeedbackProps }) => {
   return (
-    <Card className='h-full shadow-card hover:shadow-soft transition-all duration-300 hover:-translate-y-1 border-0 bg-gradient-to-br bg-white'>
-      <CardContent className='p-6'>
+    <Card className='h-full min-h-[280px] shadow-card hover:shadow-soft transition-all duration-300 hover:-translate-y-1 border-0 bg-gradient-to-br bg-white flex flex-col'>
+      <CardContent className='p-6 flex-1 flex flex-col'>
         <div className='flex items-start gap-4'>
           <Avatar className='w-12 h-12 ring-2 ring-primary/10'>
             <AvatarImage src={feedback.userAvatar} alt={feedback.userName} />
@@ -46,7 +46,7 @@ const Feedback = ({ feedback }: { feedback: FeedbackProps }) => {
             <Badge variant='secondary' className='mb-3 text-xs'>
               Sinh viên
             </Badge>
-            <p className='text-muted-foreground text-sm mb-4 leading-relaxed italic'>{feedback.message}</p>
+            <p className='text-muted-foreground text-sm mb-4 leading-relaxed italic line-clamp-3'>{feedback.message}</p>
           </div>
         </div>
       </CardContent>

@@ -192,18 +192,14 @@ class CartService {
     }
 
     async getCartId(userId: string): Promise<string> {
-      let userCart = await prismaService.cart.findUnique({
-        where: { user_id: userId },
-        select: { id: true }
-      });
-
-      if (!userCart) {
-        userCart = await prismaService.cart.create({
-          data: { user_id: userId },
-          select: { id: true }
+        const userCart = await prismaService.cart.upsert({
+            where: { user_id: userId },
+            update: {},
+            create: { user_id: userId },
+            select: { id: true },
         });
-      }
-      return userCart.id;
+
+        return userCart.id;
     }
 }
 

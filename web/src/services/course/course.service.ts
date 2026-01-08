@@ -218,6 +218,16 @@ class CourseService {
     })
     return response.data
   }
+
+  async delCourse(courseId: string): Promise<
+    ApiResponse<{
+      id: string
+      name: string
+    }>
+  > {
+    const response = await axiosClient.axiosInstance.delete(`learning/instructor/courses/${courseId}`)
+    return response.data
+  }
 }
 
 export default new CourseService()

@@ -32,9 +32,9 @@ const OrderDetail = ({
       </h4>
       <div className='flex align-center justify-between mt-1 py-2'>
         <div>
-          {/* <span className='text-sm text-gray-500'>₫{order?.original_price.toLocaleString()}</span>
+          <span className='text-sm text-gray-500'>₫{order?.final_price.toLocaleString()}</span>
           &nbsp;
-          <span className='text-sm text-gray-500 line-through'>₫{order?.final_price.toLocaleString()}</span> */}
+          <span className='text-sm text-gray-500 line-through'>₫{order?.original_price.toLocaleString()}</span>
         </div>
         <CustomButton
           icon={<Trash />}

@@ -92,7 +92,13 @@ export const TabNavigation = ({
           </div>
         )}
       </div>
-      <NoteSection lessonId={currentLecture.id} open={open} setOpen={setOpen} note={noteContent} />
+      <NoteSection
+        lessonId={currentLecture.id}
+        open={open}
+        setOpen={setOpen}
+        note={noteContent}
+        setNote={setNoteContent}
+      />
     </div>
   )
 }

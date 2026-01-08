@@ -29,7 +29,6 @@ public class CourseStudentService implements ICourseStudentService{
     CourseRepository courseRepo;
     CourseStudentMapper courseStudentMapper;
     LessonRepository lessonRepo;
-    UserGrpcClient userGrpcClient;
 
     @Override
     public ApiResponse<CourseDetailResponse> getCourseChapter(String courseId, String userId) {
