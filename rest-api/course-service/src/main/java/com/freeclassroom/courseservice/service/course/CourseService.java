@@ -48,7 +48,6 @@ import reactor.core.publisher.Mono;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -464,5 +463,22 @@ public class CourseService implements ICourseService {
                     .result(Collections.emptyList())
                     .build();
         }
+    }
+
+    @Override
+    public ApiResponse<CreationResponse> delCourse(String id) {
+        CourseEntity course = courseRepo.findById(id)
+                .orElseThrow(() -> new CustomExeption(ErrorCode.COURSE_NOT_FOUND));
+
+        if (course.getStatus().equals(EnumCourseStatus.PUBLISHED))
+            throw new CustomExeption(ErrorCode.COURSE_IS_PUBLISH);
+
+        course.setDeleted(true);
+        courseRepo.save(course);
+        return ApiResponse.<CreationResponse>builder()
+                .code(200)
+                .message("Xóa khóa học thành công")
+                .result(CreationResponse.builder().id(course.getId()).build())
+                .build();
     }
 }

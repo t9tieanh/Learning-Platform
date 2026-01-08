@@ -6,6 +6,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { MoreHorizontal, Filter, Check } from 'lucide-react'
 import { Course, CourseStatus } from './CourseTypes'
 import { useNavigate } from 'react-router-dom'
+import courseService from '@/services/course/course.service'
+import { toast } from 'sonner'
+import { showConfirmToast } from '../common/ShowConfirmToast'
 
 const getStatusBadge = (status: CourseStatus) => {
   switch (status) {
@@ -36,13 +39,32 @@ const getStatusBadge = (status: CourseStatus) => {
 interface CoursesTableProps {
   courses: Course[]
   statusFilter?: '' | 'PUBLISHED' | 'DRAFT' | 'PENDING_REVIEW'
-  onChangeStatusFilter?: (status: '' | 'PUBLISHED' | 'DRAFT' | 'PENDING_REVIEW') => void
+  onChangeStatusFilter?: (status: '' | 'PUBLISHED' | 'DRAFT' | 'PENDING_REVIEW') => void,
+  fetchCourses: (nextPage?: number) => Promise<void>
 }
 
 const statusOptions: Array<'' | 'PUBLISHED' | 'DRAFT' | 'PENDING_REVIEW'> = ['', 'PUBLISHED', 'DRAFT', 'PENDING_REVIEW']
 
-const CoursesTable: FC<CoursesTableProps> = ({ courses, statusFilter = '', onChangeStatusFilter }) => {
+const CoursesTable: FC<CoursesTableProps> = ({ courses, statusFilter = '', onChangeStatusFilter, fetchCourses }) => {
   const navigate = useNavigate()
+
+  // Handle course deletion
+  const handleDelete = async (courseId: string) => {
+    const confirmed = await showConfirmToast({ 
+      title: 'Bạn có chắc chắn muốn xóa khóa học này?',
+      confirmLabel: 'Xóa',
+      cancelLabel: 'Hủy'
+    })
+    if (confirmed) {
+      const response = await courseService.delCourse(courseId)
+      if (response && response.code === 200 && response.message) {
+        toast.success(response.message)
+        await fetchCourses()
+      } else {
+        toast.error(response.message || 'Xóa khóa học thất bại')
+      }
+    }
+  }
 
   return (
     <div className='overflow-x-auto rounded-xl border border-gray-200 dark:border-slate-700 shadow-sm'>
@@ -141,7 +163,12 @@ const CoursesTable: FC<CoursesTableProps> = ({ courses, statusFilter = '', onCha
                     <DropdownMenuItem className='rounded-md px-3 py-2 text-sm transition-colors data-[highlighted]:bg-blue-500 data-[highlighted]:text-white'>
                       Chỉnh sửa
                     </DropdownMenuItem>
-                    <DropdownMenuItem className='rounded-md px-3 py-2 text-sm text-red-600 transition-colors data-[highlighted]:bg-red-500 data-[highlighted]:text-white'>
+                    <DropdownMenuItem className='rounded-md px-3 py-2 text-sm text-red-600 transition-colors data-[highlighted]:bg-red-500 data-[highlighted]:text-white'
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleDelete(course.id)
+                      }}
+                    >
                       Xóa
                     </DropdownMenuItem>
                   </DropdownMenuContent>

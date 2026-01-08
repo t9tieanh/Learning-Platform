@@ -33,4 +33,6 @@ public interface ICourseService {
     ApiResponse<CourseOverviewResponse> getOverview(String courseId);
     ApiResponse<CreationResponse> requestApproval(String id);
     ApiResponse<List<GetDataInstructorResponse>> getDataInstructorPage();
+
+    ApiResponse<CreationResponse> delCourse(String id);
 }
