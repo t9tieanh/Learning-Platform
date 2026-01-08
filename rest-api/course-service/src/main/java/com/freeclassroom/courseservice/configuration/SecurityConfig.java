@@ -39,22 +39,27 @@ public class SecurityConfig {
 
     private final CustomJwtDecoder jwtDecoder;
 
-    private final String[] PUBLIC_ENDPOINTS = {"/categories/**", "/tags/**", "/test/**", "/storage/**"};
+    private final String[] PUBLIC_ENDPOINTS = {"/categories/**", "/tags/**", "/test/**", "/storage/**", "/courses/**"};
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
                 .csrf(csrf -> csrf.disable())
+                .headers(headers ->
+                        headers.frameOptions(frame -> frame.disable())
+                )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html"
                         ).permitAll()
-                        .requestMatchers(HttpMethod.GET, "/courses/*/info").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/courses/*/tags").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/chapters-user/*/public").permitAll()
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS).permitAll()
                         .requestMatchers(HttpMethod.GET, PUBLIC_ENDPOINTS).permitAll()
+                        .requestMatchers(HttpMethod.GET, "/lesson-student/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
@@ -73,13 +78,14 @@ public class SecurityConfig {
     private AbstractAuthenticationToken jwtAuthenticationConverter(Jwt jwt) {
         Collection<GrantedAuthority> authorities = new ArrayList<>();
 
-        Object claim = jwt.getClaims().get("authorities"); // hoặc "roles"
-        if (claim instanceof List<?>) {
-            for (Object item : (List<?>) claim) {
-                if (item instanceof String str) {
-                    authorities.add(new SimpleGrantedAuthority(str));
-                } else if (item instanceof Map<?, ?> map && map.get("authority") != null) {
-                    authorities.add(new SimpleGrantedAuthority(map.get("authority").toString()));
+        Object scopeClaim = jwt.getClaims().get("scope");
+        if (scopeClaim instanceof List<?> list) {
+            for (Object item : list) {
+                if (item instanceof Map<?, ?> map) {
+                    Object name = map.get("name");
+                    if (name != null) {
+                        authorities.add(new SimpleGrantedAuthority("ROLE_" + name.toString().toUpperCase()));
+                    }
                 }
             }
         }

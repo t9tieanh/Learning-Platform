@@ -1,5 +1,7 @@
 import axiosClient from '../../lib/axiosClient.lib'
 import { ApiResponse } from '@/types/response.type'
+import { Profile } from '@/types/profile'
+import { DataAdminHome } from '@/types/user'
 
 class UserService {
   async signUp(newUser: {
@@ -31,9 +33,15 @@ class UserService {
       email: string
       userName: string
       avatarUrl?: string
+      role?: string
     }>
   > {
     const response = await axiosClient.axiosInstance.post('auth', { username, password })
+    return response.data
+  }
+
+  async logout(): Promise<ApiResponse<any>> {
+    const response = await axiosClient.axiosInstance.post('auth/logout')
     return response.data
   }
 
@@ -46,6 +54,7 @@ class UserService {
       email: string
       userName: string
       avatarUrl?: string
+      userId?: string
     }>
   > {
     const response = await axiosClient.axiosInstance.post(`auth/oauth2/google`, null, {
@@ -61,7 +70,11 @@ class UserService {
   }
 
   //check async token exists
-  async checkForgotPasswordToken(code: string): Promise<ApiResponse<any>> {
+  async checkForgotPasswordToken(code: string): Promise<
+    ApiResponse<{
+      timeToLive: number
+    }>
+  > {
     const response = await axiosClient.axiosInstance.get(`auth/forgot-password/${code}`)
     return response.data
   }
@@ -80,6 +93,50 @@ class UserService {
       code,
       newPassword
     })
+    return response.data
+  }
+
+  //get user profile
+  async getProfile(): Promise<ApiResponse<Profile>> {
+    const response = await axiosClient.axiosInstance.get('self')
+    return response.data
+  }
+
+  async getInstructorProfile(userId: string): Promise<ApiResponse<Profile>> {
+    console.log('userId', userId)
+    const response = await axiosClient.axiosInstance.get('self/instructor', {
+      params: { userId }
+    })
+    return response.data
+  }
+
+  // update user (multipart for image)
+  async updateUser(data: {
+    description?: string
+    email?: string
+    imageFile?: File | null
+    name?: string
+    phone?: string
+    position?: string
+    status?: string | number
+  }): Promise<ApiResponse<Profile>> {
+    const form = new FormData()
+    if (data.description !== undefined) form.append('description', data.description)
+    if (data.email !== undefined) form.append('email', data.email)
+    if (data.name !== undefined) form.append('name', data.name)
+    if (data.phone !== undefined) form.append('phone', data.phone)
+    if (data.position !== undefined) form.append('position', data.position)
+    if (data.status !== undefined) form.append('status', String(data.status))
+    if (data.imageFile) form.append('image', data.imageFile)
+
+    const response = await axiosClient.axiosInstance.put(`user`, form, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    })
+    return response.data
+  }
+
+  async getAdminHome(): Promise<ApiResponse<DataAdminHome>> {
+    const response = await axiosClient.axiosInstance.get('user/home-admin')
     return response.data
   }
 }

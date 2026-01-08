@@ -1,20 +1,23 @@
 package com.freeclassroom.courseservice.service.course;
 
+import com.example.grpc.user.GetUserResponse;
 import com.freeclassroom.courseservice.dto.request.common.FileUploadRequest;
 import com.freeclassroom.courseservice.dto.request.course.CreationCourseRequest;
-import com.freeclassroom.courseservice.dto.request.course.GetCourseRequest;
+import com.freeclassroom.courseservice.dto.request.course.UpdatePriceRequest;
 import com.freeclassroom.courseservice.dto.request.course.UpdateTagsRequest;
 import com.freeclassroom.courseservice.dto.response.ApiResponse;
+import com.freeclassroom.courseservice.dto.response.admin.GetDataInstructorResponse;
 import com.freeclassroom.courseservice.dto.response.common.CreationResponse;
 import com.freeclassroom.courseservice.dto.response.common.FileUploadResponse;
-import com.freeclassroom.courseservice.dto.response.course.CourseInfoResponse;
-import com.freeclassroom.courseservice.dto.response.course.CourseResponse;
-import com.freeclassroom.courseservice.dto.response.course.PageResponse;
+import com.freeclassroom.courseservice.dto.response.course.*;
+
+import com.freeclassroom.courseservice.dto.response.user.InstructorResponse;
 import com.freeclassroom.courseservice.entity.category.CategoryEntity;
 import com.freeclassroom.courseservice.entity.category.TagEntity;
 import com.freeclassroom.courseservice.entity.course.CourseEntity;
 import com.freeclassroom.courseservice.enums.entity.EnumCourseProgressStep;
 import com.freeclassroom.courseservice.enums.entity.EnumCourseStatus;
+
 import com.freeclassroom.courseservice.exception.CustomExeption;
 import com.freeclassroom.courseservice.exception.ErrorCode;
 import com.freeclassroom.courseservice.grpc.client.UserGrpcClient;
@@ -28,6 +31,7 @@ import com.freeclassroom.courseservice.service.utils.file.IUploadFileService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -36,8 +40,16 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import org.springframework.http.codec.ServerSentEvent;
+import org.springframework.web.multipart.MultipartFile;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -52,10 +64,13 @@ public class CourseService implements ICourseService {
 
     CourseMapper courseMapper;
     LessonMapper lessonMapper;
+    UserGrpcClient userGrpcClient;
 
     IUploadFileService fileService;
 
-    UserGrpcClient userGrpcClient;
+    @NonFinal
+    private Double PLATFORM_FEES = 0.1d;
+
     @Override
     public ApiResponse<CreationResponse> createCourse(CreationCourseRequest request, String userId) {
         CourseEntity newCourse = null;
@@ -149,11 +164,24 @@ public class CourseService implements ICourseService {
     }
 
     @Override
-    public ApiResponse<PageResponse<CourseResponse>> getCoursesByTeacherId(String instructorId, int page, int size) {
+    public ApiResponse<PageResponse<CourseResponse>> getCoursesByTeacherId(String instructorId, int page, int size, Boolean isPublic) {
         try {
             Pageable pageable = PageRequest.of(Math.max(0, page - 1), size, Sort.by("createdAt").descending());
-            Page<CourseEntity> coursePage = courseRepo.findByInstructorId(instructorId, pageable);
+
+            Page<CourseEntity> coursePage;
+            if (Boolean.TRUE.equals(isPublic)) {
+                coursePage = courseRepo.findByInstructorIdAndStatusAndProgressStep(
+                        instructorId,
+                        EnumCourseStatus.PUBLISHED,
+                        EnumCourseProgressStep.COMPLETED,
+                        pageable
+                );
+            } else {
+                coursePage = courseRepo.findByInstructorId(instructorId, pageable);
+            }
+
             List<CourseResponse> items = courseMapper.toDtoList(coursePage.getContent());
+
             PageResponse<CourseResponse> pageResponse = PageResponse.<CourseResponse>builder()
                     .items(items)
                     .page(coursePage.getNumber() + 1)
@@ -200,12 +228,11 @@ public class CourseService implements ICourseService {
     public boolean isTeacherOfCourse(String courseId, String userId) {
         return courseRepo.existsByIdAndInstructorId(courseId, userId);
     }
+
     public ApiResponse<CourseResponse> getCourse(String id) {
         try {
             CourseEntity entity = courseRepo.findByIdWithTags(id)
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy khóa học"));
-
-            System.out.println("cate" + entity.getCategory().getName());
 
             courseRepo.findByIdWithChapters(id)
                     .ifPresent(e -> entity.setChapters(e.getChapters()));
@@ -221,7 +248,7 @@ public class CourseService implements ICourseService {
                 chapterDTO.setLessons(
                         chapter.getLessons()
                                 .stream()
-                                .map(lessonMapper::toDto)
+                                .map(lessonMapper::toTeacherAdminResponse)
                                 .collect(Collectors.toList())
                 );
             });
@@ -240,4 +267,202 @@ public class CourseService implements ICourseService {
         }
     }
 
+    @Override
+    public Flux<ServerSentEvent<String>> updateVideoIntroduce(MultipartFile avatar, String courseId) throws IOException {
+        CourseEntity course = courseRepo.findById(courseId)
+                .orElseThrow(() -> new CustomExeption(ErrorCode.COURSE_NOT_FOUND));
+
+        return fileService.uploadFileWithProgress(avatar)
+                .flatMap(event -> {
+                    // ongoing upload
+                    if (event.getFileUrl() == null) {
+                        return Mono.just(ServerSentEvent.<String>builder()
+                                .event("uploading")
+                                .data("{\"progress\": " + event.getProgress() + "}")
+                                .build());
+                    }
+
+                    // when finish upload
+                    String fileUrl = event.getFileUrl();
+
+                    // send event "saving_db"
+                    ServerSentEvent<String> savingEvent = ServerSentEvent.<String>builder()
+                            .event("saving_db")
+                            .data("{\"message\": \"Upload file thành công, đang lưu những dữ liệu còn lại !...\"}")
+                            .build();
+
+                    // save to db
+                    course.setIntroductoryVideo(fileUrl);
+                    courseRepo.save(course);
+
+                    ServerSentEvent<String> completedEvent = ServerSentEvent.<String>builder()
+                            .event("completed")
+                            .data("{\"lessonId\": \"" + course.getId() + "\", \"message\": \"Video giới thiệu đã được tải lên thành công !\"}")
+                            .build();
+
+                    return Flux.just(savingEvent, completedEvent);
+                });
+    }
+
+    @Override
+    public ApiResponse<CreationResponse> updatePrice(UpdatePriceRequest newPrice, String courseId) {
+        if (newPrice.getOriginalPrice() < newPrice.getFinalPrice())
+            throw new CustomExeption(ErrorCode.PRICE_NOT_RIGHT);
+
+        CourseEntity course = courseRepo.findById(courseId)
+                .orElseThrow(() -> new CustomExeption(ErrorCode.COURSE_NOT_FOUND));
+
+        //set price for course
+        course.setOriginalPrice(newPrice.getOriginalPrice());
+        course.setFinalPrice(newPrice.getFinalPrice());
+        if (!course.getProgressStep().equals(EnumCourseProgressStep.COMPLETED))
+            course.setProgressStep(EnumCourseProgressStep.PRICING);
+        //save entity
+        courseRepo.save(course);
+
+        return ApiResponse.<CreationResponse>builder()
+                .code(200)
+                .message("Chỉnh sửa giá cho khóa học thành công !")
+                .result(
+                        CreationResponse.builder()
+                                .id(course.getId())
+                                .build()
+                )
+                .build();
+    }
+
+    @Override
+    public ApiResponse<PriceCourseResponse> getPrice(String courseId) {
+        CourseEntity course = courseRepo.findById(courseId)
+                .orElseThrow(() -> new CustomExeption(ErrorCode.COURSE_NOT_FOUND));
+
+        Double originalPrice = 0d;
+        Double finalPrice = 0d;
+
+        if (course.getFinalPrice() != null && course.getOriginalPrice() != null) {
+            originalPrice = course.getOriginalPrice();
+            finalPrice = course.getFinalPrice();
+        }
+
+
+        return ApiResponse.<PriceCourseResponse>builder()
+                .code(200)
+                .message("Lấy thông tin giá khóa học thành công !")
+                .result(
+                        PriceCourseResponse.builder()
+                                .id(course.getId())
+                                .originalPrice(originalPrice)
+                                .finalPrice(finalPrice)
+                                .platformFee(PLATFORM_FEES)
+                                // ammount instructor receive
+                                .yourIncome(finalPrice * (1 - PLATFORM_FEES))
+                                .build()
+                )
+                .build();
+    }
+
+    @Override
+    public ApiResponse<CourseOverviewResponse> getOverview(String courseId) {
+        CourseEntity course = courseRepo.findById(courseId)
+                .orElseThrow(() -> new CustomExeption(ErrorCode.COURSE_NOT_FOUND));
+
+        return ApiResponse.<CourseOverviewResponse>builder()
+                .code(200)
+                .message("Lấy thông tin tổng quan của khóa học thành công !")
+                .result(
+                        CourseOverviewResponse.builder()
+                                .videoDuration(courseRepo.getTotalVideoDurationByCourseId(courseId))
+                                .lessonNum(courseRepo.countLessonsByCourseId(courseId))
+                                .finalPrice(course.getFinalPrice())
+                                .courseId(course.getId())
+                                .build()
+                )
+                .build();
+    }
+
+    @Override
+    public ApiResponse<CreationResponse> requestApproval(String id) {
+        CourseEntity course = courseRepo.findById(id)
+                .orElseThrow(() -> new CustomExeption(ErrorCode.COURSE_NOT_FOUND));
+
+        // check avatar, title
+        if (course.getTitle().equals(null) || course.getTitle().equals("") || course.getThumbnailUrl().equals(null) || course.getThumbnailUrl().equals("")
+            || course.getRequirements().stream().count() == 0 || course.getOutcomes().stream().count() == 0
+        )
+            throw new CustomExeption(ErrorCode.INFO_COURSE_NOT_OKE);
+
+        if (courseRepo.countLessonsByCourseId(id) == 0)
+            throw new CustomExeption(ErrorCode.COURSE_WITHOUT_VIDEO);
+
+        if (course.getFinalPrice() == 0 || course.getOriginalPrice() == 0 )
+            throw new CustomExeption(ErrorCode.COURSE_WITHOUT_PRICE);
+
+        // -> maybe approval
+        course.setProgressStep(EnumCourseProgressStep.COMPLETED);
+        course.setStatus(EnumCourseStatus.PENDING_REVIEW);
+        courseRepo.save(course);
+
+        return ApiResponse.<CreationResponse>builder()
+                .code(200)
+                .message("Gửi yêu cầu duyệt thành công !, chúng tôi sẽ liên hệ với bạn trong khoảng thời gian sớm nhất !")
+                .result(
+                        CreationResponse.builder()
+                                .id(course.getId())
+                                .name(course.getTitle())
+                                .build()
+                )
+                .build();
+    }
+
+    @Override
+    public ApiResponse<List<GetDataInstructorResponse>> getDataInstructorPage() {
+        try {
+            List<CourseEntity> courses = courseRepo.findAll();
+
+            Set<String> instructorIds = courses.stream()
+                    .map(CourseEntity::getInstructorId)
+                    .collect(Collectors.toSet());
+
+            List<InstructorResponse> instructors = instructorIds.stream()
+                    .map(id -> {
+                        GetUserResponse user = userGrpcClient.getUser(id.toString());
+                        long totalCourses = courses.stream()
+                                .filter(c -> c.getInstructorId().equals(id))
+                                .count();
+                        return new InstructorResponse(
+                                user.getId(),
+                                user.getName(),
+                                user.getEmail(),
+                                user.getImage(),
+                                totalCourses
+                        );
+                    })
+                    .toList();
+
+            List<GetDataInstructorResponse> responseList = instructors.stream()
+                    .map(i -> {
+                        GetDataInstructorResponse dto = new GetDataInstructorResponse();
+                        dto.setInstructorQuantity((long) instructors.size());
+                        dto.setInstructorName(i.getName());
+                        dto.setInstructorEmail(i.getEmail());
+                        dto.setTotalCourse(i.getTotalCourse());
+                        return dto;
+                    })
+                    .toList();
+
+            return ApiResponse.<List<GetDataInstructorResponse>>builder()
+                    .code(200)
+                    .message("Lấy data thành công")
+                    .result(responseList)
+                    .build();
+        }
+        catch (Exception e) {
+            e.printStackTrace(); // log lỗi để debug
+            return ApiResponse.<List<GetDataInstructorResponse>>builder()
+                    .code(500)
+                    .message("Có lỗi xảy ra khi lấy dữ liệu instructor: " + e.getMessage())
+                    .result(Collections.emptyList())
+                    .build();
+        }
+    }
 }

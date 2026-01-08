@@ -1,15 +1,17 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Bell, User } from 'lucide-react'
+import { Bell, User, LogOut } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { useAuthStore } from '@/stores/useAuth.stores'
 import { useNavigate } from 'react-router-dom'
+import { toast } from 'sonner'
+import CustomButton from '@/components/common/Button'
 
 const DashboardHeader = () => {
-  const { data } = useAuthStore()
+  const { data, setData } = useAuthStore()
   const navigate = useNavigate()
   const displayName = data?.name || 'Giảng viên'
   const initials = (data?.name || 'GV')
@@ -17,6 +19,13 @@ const DashboardHeader = () => {
     .map((n) => n[0])
     .join('')
     .toUpperCase()
+
+  const handleLogout = () => {
+    setData(null)
+    toast.success('Đăng xuất thành công!')
+    navigate('/auth')
+  }
+
   return (
     <div className='flex flex-col md:flex-row items-start md:items-center justify-between mb-6 gap-4 md:gap-0'>
       <div>
@@ -48,17 +57,6 @@ const DashboardHeader = () => {
       </div>
 
       <div className='flex items-center gap-2 md:gap-4 self-end md:self-auto'>
-        {/* Nút thông báo nổi bật */}
-        <Button
-          variant='ghost'
-          size='icon'
-          className='relative transition-all duration-200 hover:bg-primary/10 hover:shadow-lg border border-primary/30'
-        >
-          <Bell className='w-5 h-5 text-primary' />
-          <span className='absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full ring-2 ring-white animate-pulse'></span>
-        </Button>
-
-        {/* Avatar dropdown nổi bật */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
@@ -68,15 +66,29 @@ const DashboardHeader = () => {
             >
               <Avatar className='w-8 h-8 md:w-10 md:h-10 ring-2 ring-primary/50'>
                 <AvatarImage src={data?.avatarUrl} alt='Avatar' />
-                <AvatarFallback className='bg-primary text-white font-bold'>{initials}</AvatarFallback>
+                <AvatarFallback className='text-white font-bold'>{initials}</AvatarFallback>
               </Avatar>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align='end'>
-            <DropdownMenuItem className='flex items-center gap-2' onClick={() => navigate('/teacher/profile')}>
-              <User size={16} /> Tài khoản
+            <DropdownMenuItem className='!bg-transparent hover:!bg-white hover:!text-primary transition-colors'>
+              <CustomButton
+                label='Tài khoản học viên'
+                className='w-full text-white rounded-md hover:bg-blue-700'
+                type='button'
+                onClick={() => navigate('/')}
+                icon={<User className='h-4 w-4 ml-1 text-white' />}
+              />
             </DropdownMenuItem>
-            <DropdownMenuItem>Đăng xuất</DropdownMenuItem>
+            <DropdownMenuItem className='!bg-transparent hover:!bg-white hover:!text-primary transition-colors'>
+              <CustomButton
+                label='Đăng xuất'
+                className='w-full bg-red-600 text-white hover:bg-red-700 rounded-md'
+                type='button'
+                onClick={handleLogout}
+                icon={<LogOut className='h-4 w-4 ml-1 text-white' />}
+              />
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

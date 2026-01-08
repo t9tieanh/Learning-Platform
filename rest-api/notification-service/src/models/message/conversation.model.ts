@@ -1,28 +1,39 @@
-import mongoose, { Schema, Document, Model, Types } from 'mongoose'
+import mongoose, { Schema, Document, Types } from 'mongoose'
 
+export interface IParticipant {
+  userId: string // ID của user
+  role: 'student' | 'instructor'
+}
 export interface IConversation extends Document {
-  id: Types.ObjectId
-  members: string[]
-  avatarUrl: string
-  name: string
+  key: string
+  type: 'direct'
+  participants: IParticipant[]
+  lastMessageId?: string
+  lastMessageAt?: Date
   createdAt: Date
   updatedAt: Date
 }
 
-const ConversationSchema: Schema = new Schema({
-  members: [{ type: String }],
-  avatarUrl: { type: String, required: true },
-  name: { type: String, required: true },
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now }
-}).set('toJSON', {
-  transform: function (doc, ret) {
-    //delete ret.__v
+const participantSchema = new Schema<IParticipant>(
+  {
+    userId: { type: String, ref: 'User', required: true },
+    role: { type: String, enum: ['student', 'instructor'], required: true }
+  },
+  { _id: false }
+)
 
-    return ret
-  }
-})
+const conversationSchema = new Schema<IConversation>(
+  {
+    key: { type: String, required: true, unique: true },
+    type: { type: String, enum: ['direct'], default: 'direct' },
+    participants: { type: [participantSchema], required: true },
+    lastMessageId: {
+      type: String,
+      ref: 'Message'
+    },
+    lastMessageAt: { type: Date }
+  },
+  { timestamps: true }
+)
 
-const ConversationModel: Model<IConversation> = mongoose.model<IConversation>('Conversation', ConversationSchema)
-
-export { ConversationModel }
+export default mongoose.model<IConversation>('Conversation', conversationSchema)

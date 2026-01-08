@@ -3,6 +3,7 @@ package com.freeclassroom.userservice.controller;
 import com.freeclassroom.userservice.dto.request.auth.*;
 import com.freeclassroom.userservice.dto.request.common.EmailRequest;
 import com.freeclassroom.userservice.dto.response.*;
+import com.freeclassroom.userservice.dto.response.auth.CheckForgotPasswordResponse;
 import com.freeclassroom.userservice.dto.response.auth.IntrospectResponse;
 import com.freeclassroom.userservice.dto.response.user.AuthResponse;
 import com.freeclassroom.userservice.dto.response.user.UserResponse;
@@ -25,7 +26,6 @@ public class AuthenticationController {
 
     @PostMapping
     ApiResponse<AuthResponse> login (@RequestBody AuthRequest request) throws JOSEException {
-        System.out.println("vo roi");
         return authenticationService.authentication(request);
     }
 
@@ -51,7 +51,7 @@ public class AuthenticationController {
     }
 
     @GetMapping("forgot-password/{code}")
-    public ApiResponse<Void> checkForgotPassword(@PathVariable String code) {
+    public ApiResponse<CheckForgotPasswordResponse> checkForgotPassword(@PathVariable String code) {
         return userService.checkForgotPassword(code);
     }
 

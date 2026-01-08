@@ -58,7 +58,7 @@ export function VideoModal({ isOpen, onClose, videoUrl, title }: VideoModalProps
                 <Button
                   onClick={onClose}
                   size='icon'
-                  variant='secondary'
+                  variant='default'
                   className='rounded-full shadow-lg'
                   aria-label='Đóng video'
                 >
@@ -71,7 +71,7 @@ export function VideoModal({ isOpen, onClose, videoUrl, title }: VideoModalProps
               </div>
 
               <div className='aspect-video'>
-                <video ref={videoRef} src={videoUrl} controls className='w-full h-full' aria-label={title}>
+                <video ref={videoRef} src={`http://${videoUrl}`} controls className='w-full h-full' aria-label={title}>
                   <track kind='captions' />
                   Trình duyệt của bạn không hỗ trợ phát video.
                 </video>

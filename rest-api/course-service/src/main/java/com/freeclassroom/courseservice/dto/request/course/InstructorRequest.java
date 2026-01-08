@@ -12,4 +12,5 @@ public class InstructorRequest {
     String instructorId;
     Integer page;
     Integer limit;
+    Boolean isPublic;
 }

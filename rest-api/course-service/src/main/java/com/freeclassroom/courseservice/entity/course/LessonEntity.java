@@ -1,12 +1,13 @@
 package com.freeclassroom.courseservice.entity.course;
 
 import com.freeclassroom.courseservice.entity.AbstractEntity;
-import com.freeclassroom.courseservice.entity.member.LessonProgress;
+import com.freeclassroom.courseservice.entity.member.LessonProgressEntity;
 import com.freeclassroom.courseservice.enums.entity.EnumLessonType;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.Where;
 
 import java.util.List;
 
@@ -18,8 +19,11 @@ import java.util.List;
 @NoArgsConstructor(force = true)
 @SuperBuilder
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@Where(clause = "deleted = false")
 public class LessonEntity extends AbstractEntity {
     String title;
+
+    @Column(columnDefinition = "TEXT")
     String content;
     Long duration;
     Long position;
@@ -35,5 +39,5 @@ public class LessonEntity extends AbstractEntity {
 
     // Lesson Progress
     @OneToMany(mappedBy = "lesson")
-    List<LessonProgress> progresses;
+    List<LessonProgressEntity> progresses;
 }

@@ -1,9 +1,10 @@
 'use client'
 
 import './style.scss'
-import { Button } from '@/components/ui/button'
-import { FaPaperPlane } from 'react-icons/fa'
+import CustomButton from '@/components/common/Button'
 import { motion, easeOut } from 'framer-motion'
+import { useNavigate } from 'react-router-dom'
+import { Send } from 'lucide-react'
 
 const container = {
   hidden: { opacity: 0, y: 50 },
@@ -31,6 +32,7 @@ const item = {
 }
 
 const Banner = () => {
+  const navigate = useNavigate()
   return (
     <div className='banner-container p-32'>
       <motion.div variants={container} initial='hidden' animate='show'>
@@ -56,13 +58,13 @@ const Banner = () => {
         <motion.blockquote className='mt-6 border-l-2 pl-6 italic text-lg' variants={item}>
           &quot;Cùng công nghệ, học tập trở nên dễ dàng hơn.&quot;
         </motion.blockquote>
-        <motion.div variants={item}>
-          <Button className='btn-primary mt-6 w-48 bg-blue-600 hover:bg-blue-700 flex gap-2'>
-            <FaPaperPlane />
-            Bắt đầu ngay
-          </Button>
-        </motion.div>
       </motion.div>
+      <CustomButton
+        className='mt-10'
+        label='Khám phá ngay'
+        onClick={() => navigate('/course/f4018410-e6eb-4687-bb94-61ceb1ed4493')}
+        icon={<Send size={16} />}
+      />
     </div>
   )
 }

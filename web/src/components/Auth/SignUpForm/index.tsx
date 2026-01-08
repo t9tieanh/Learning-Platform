@@ -6,15 +6,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { FcGoogle } from 'react-icons/fc'
 import CustomCheckbox from '../../common/CustomCheckbox'
 import { FaSquareFacebook } from 'react-icons/fa6'
-import { BookOpen } from 'lucide-react'
+import { BookOpen, Send } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import userService from '@/services/user/user.service'
-import { toast } from 'react-toastify'
+import { toast } from 'sonner'
 import { SignUpFormInputs, signUpSchema } from '@/utils/auth'
 import useLoading from '@/hooks/useLoading.hook'
 
-const SignUpForm: FC<{ setIsSignUpMode: (value: boolean) => void }> = ({ setIsSignUpMode }) => {
+const SignUpForm: FC<{ setIsSignUpMode: (value: boolean) => void; handleLoginWithGoogle: () => void }> = ({
+  setIsSignUpMode,
+  handleLoginWithGoogle
+}) => {
   const {
     register,
     handleSubmit,
@@ -75,16 +78,25 @@ const SignUpForm: FC<{ setIsSignUpMode: (value: boolean) => void }> = ({ setIsSi
                   <span className='text-red-500 text-xs text-left'>{errors.confirmPassword.message}</span>
                 )}
               </div>
-              <div className='remember-me mt-5'>
-                <CustomCheckbox
-                  id='agree'
-                  label='Tôi đồng ý với điều khoản'
-                  checked={!!watch('confirmRules')}
-                  onChange={(e) => setValue('confirmRules', e.target.checked)}
-                  className='text-gray-700'
-                />
+              <div className='remember-me mt-5 flex flex-col gap-2'>
+                <div className='flex gap-1'>
+                  <CustomCheckbox
+                    id='agree'
+                    label='Tôi đồng ý với'
+                    checked={!!watch('confirmRules')}
+                    onChange={(e) => setValue('confirmRules', e.target.checked)}
+                    className='text-gray-700'
+                  />
+                  <a
+                    href='/term'
+                    target='_blank'
+                    className='text-blue-600 text-base underline underline-offset-2 cursor-pointer hover:text-blue-700'
+                  >
+                    Điều khoản
+                  </a>
+                </div>
                 {errors.confirmRules && (
-                  <span className='text-red-500 text-xs text-left'>{errors.confirmRules.message}</span>
+                  <span className='text-red-500 text-xs text-start'>{errors.confirmRules.message}</span>
                 )}
               </div>
               <div className='signin-button w-full mt-5'>
@@ -92,7 +104,8 @@ const SignUpForm: FC<{ setIsSignUpMode: (value: boolean) => void }> = ({ setIsSi
                   isLoader={loading}
                   label='Tạo tài khoản'
                   type='submit'
-                  className='w-full rounded-md border border-gray-300 bg-blue-500 py-3 text-white hover:bg-blue-600'
+                  className='w-full shadow-lg rounded-md border border-gray-300 bg-blue-500 py-3 text-white hover:bg-blue-600'
+                  icon={<Send size={16} />}
                 />
               </div>
               {/* Divider */}
@@ -106,7 +119,11 @@ const SignUpForm: FC<{ setIsSignUpMode: (value: boolean) => void }> = ({ setIsSi
               </div>
               {/* login with other providers */}
               <div className='mt-5 flex items-center justify-center gap-3 w-full'>
-                <CustomButton icon={<FcGoogle />} className='bg-inherit w-1/2 border-2 border-solid hover:bg-red-600' />
+                <CustomButton
+                  icon={<FcGoogle />}
+                  className='bg-inherit w-1/2 border-2 border-solid hover:bg-red-600'
+                  onClick={handleLoginWithGoogle}
+                />
                 <CustomButton
                   icon={<FaSquareFacebook className='text-white' />}
                   className='bg-blue-600 w-1/2 border-2 border-solid hover:bg-blue-700'
@@ -114,9 +131,9 @@ const SignUpForm: FC<{ setIsSignUpMode: (value: boolean) => void }> = ({ setIsSi
               </div>
               <p className='text-center text-sm text-gray-500 mt-5'>
                 Bạn đã có tài khoản?{' '}
-                <a href='/login' className='text-blue-500 hover:underline'>
+                <button type='button' onClick={() => setIsSignUpMode(false)} className='text-blue-500 hover:underline'>
                   Đăng nhập
-                </a>
+                </button>
               </p>
             </form>
           </CardContent>

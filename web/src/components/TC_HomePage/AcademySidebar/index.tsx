@@ -1,32 +1,29 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@radix-ui/react-avatar'
-import { BookOpen, Calendar, Home, MessageSquare, BarChart3, HelpCircle, Settings } from 'lucide-react'
+import { BookOpen, Home, MessageSquare, FileText, LogOut } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useAuthStore } from '@/stores/useAuth.stores'
 import { useNavigate } from 'react-router-dom'
 import logo from '@/assets/images/logo1.png'
+import { toast } from 'sonner'
+import { showConfirmToast } from '@/components/common/ShowConfirmToast'
 
 const sidebarItems = [
   {
     category: 'TỔNG QUAN',
-    items: [
-      { name: 'Trang chủ', icon: Home, active: true },
-      { name: 'Lịch', icon: Calendar, active: true }
-    ]
+    items: [{ name: 'Trang chủ', icon: Home, active: true }]
   },
   {
     category: 'DANH MỤC',
     items: [
       { name: 'Khóa học', icon: BookOpen, active: true },
       { name: 'Tin nhắn', icon: MessageSquare, active: true },
-      { name: 'Thống kê', icon: BarChart3, active: true },
-      { name: 'Hỗ trợ', icon: HelpCircle, active: true },
-      { name: 'Cài đặt', icon: Settings, active: true }
+      { name: 'Bài viết', icon: FileText, active: true }
     ]
   }
 ]
 
 const AcademySidebar = () => {
-  const { data } = useAuthStore()
+  const { data, setData } = useAuthStore()
   const navigate = useNavigate()
   const displayName = data?.name || 'Giảng viên'
   const initials = (data?.name || 'GV')
@@ -34,6 +31,18 @@ const AcademySidebar = () => {
     .map((n) => n[0])
     .join('')
     .toUpperCase()
+
+  const handleLogout = async () => {
+    const confirmed = await showConfirmToast({
+      title: 'Đăng xuất',
+      description: 'Bạn có chắc chắn muốn đăng xuất?'
+    })
+    if (confirmed) {
+      setData(null)
+      toast.success('Đăng xuất thành công!')
+      navigate('/auth')
+    }
+  }
   return (
     <div
       className='w-64 h-screen bg-[#1D1D2A] text-sidebar-foreground flex flex-col
@@ -59,6 +68,8 @@ const AcademySidebar = () => {
                 let onClick = undefined
                 if (item.name === 'Trang chủ') onClick = () => navigate('/teacher')
                 if (item.name === 'Khóa học') onClick = () => navigate('/teacher/course')
+                if (item.name === 'Tin nhắn') onClick = () => navigate('/teacher/chat/:id')
+                if (item.name === 'Bài viết') onClick = () => navigate('/teacher/blogs')
                 return (
                   <Button
                     key={itemIndex}
@@ -84,13 +95,23 @@ const AcademySidebar = () => {
         <div className='flex items-center gap-2 md:gap-3'>
           <Avatar>
             <AvatarImage className='rounded-full h-10 w-10 md:h-12 md:w-12' src={data?.avatarUrl} />
-            <AvatarFallback className='bg-primary text-white'>{initials}</AvatarFallback>
+            <AvatarFallback className='text-white'>{initials}</AvatarFallback>
           </Avatar>
 
           <div className='flex-1'>
             <p className='text-base font-semibold truncate'>{displayName}</p>
             <p className='text-xs md:text-sm text-sidebar-foreground/60'>Giảng viên</p>
           </div>
+
+          <Button
+            variant='ghost'
+            size='icon'
+            onClick={handleLogout}
+            className='text-red-400 hover:bg-red-500/10 hover:text-red-500'
+            title='Đăng xuất'
+          >
+            <LogOut className='w-5 h-5' />
+          </Button>
         </div>
       </div>
     </div>

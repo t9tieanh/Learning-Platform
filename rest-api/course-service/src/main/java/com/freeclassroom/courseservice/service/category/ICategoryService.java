@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface ICategoryService {
     ApiResponse<List<CategoryResponse>> getAllCategory();
+    ApiResponse<List<CategoryResponse>> getValidCategory();
 }

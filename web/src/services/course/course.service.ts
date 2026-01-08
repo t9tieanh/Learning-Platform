@@ -1,6 +1,8 @@
 import axiosClient from '@/lib/axiosClient.lib'
 import { ApiResponse } from '@/types/response.type'
 import { useAuthStore } from '@/stores/useAuth.stores'
+import { Course } from '@/types/course.type'
+import { boolean } from 'yup'
 
 function decodeJwtPayload(token: string): any | null {
   try {
@@ -44,6 +46,40 @@ type Paginated<T> = {
 }
 
 class CourseService {
+  // Admin: get instructor summaries
+  async getAdminInstructors(): Promise<ApiResponse<AdminInstructorSummary[]>> {
+    const response = await axiosClient.axiosInstance.get('learning/admin/instructor')
+    return response.data
+  }
+
+  async getAllCourses(params?: {
+    page?: number
+    limit?: number
+    search?: string
+    category?: string
+    minPrice?: number
+    minRating?: number
+  }): Promise<ApiResponse<Paginated<any>>> {
+    const { page = 1, limit = 10, search, category, minPrice, minRating } = params || {}
+    const response = await axiosClient.axiosInstance.get('learning/courses-user', {
+      params: {
+        page,
+        limit,
+        search,
+        category,
+        minPrice,
+        minRating
+      }
+    })
+    return response.data
+  }
+
+  async getCourseDetail(courseId: string): Promise<ApiResponse<any>> {
+    if (!courseId) throw new Error('Thiếu courseId')
+    const response = await axiosClient.axiosInstance.get(`learning/instructor/courses/details/${courseId}`)
+    return response.data
+  }
+
   async createCourse(request: {
     id?: string
     title: string
@@ -55,13 +91,13 @@ class CourseService {
     requirements?: string[]
     categoryIds: string
   }): Promise<ApiResponse<{ id: string; name: string }> | null> {
-    const response = await axiosClient.axiosInstance.post('learning/courses', request)
+    const response = await axiosClient.axiosInstance.post('learning/instructor/courses', request)
     return response.data
   }
 
   async getTeacherCourses(
     instructorId?: string,
-    options?: { page?: number; limit?: number }
+    options?: { page?: number; limit?: number; isPublic?: boolean }
   ): Promise<ApiResponse<Paginated<any>>> {
     const id = instructorId ?? getCurrentInstructorId()
     if (!id) {
@@ -70,9 +106,10 @@ class CourseService {
     const body = {
       instructorId: id,
       page: options?.page ?? 1,
-      limit: options?.limit ?? 10
+      limit: options?.limit ?? 10,
+      isPublic: options?.isPublic ?? false
     }
-    const response = await axiosClient.axiosInstance.post('learning/courses/teacher', body)
+    const response = await axiosClient.axiosInstance.post('learning/instructor/courses/', body)
     return response.data
   }
 
@@ -88,9 +125,12 @@ class CourseService {
       outcomes: string[]
       requirements: string[]
       category: string
+      introductoryVideo: string
+      progressStep: string
+      status?: string
     }>
   > {
-    const response = await axiosClient.axiosInstance.get(`learning/courses/${courseId}/info`)
+    const response = await axiosClient.axiosInstance.get(`learning/instructor/courses/${courseId}/info`)
     return response.data
   }
 
@@ -105,13 +145,87 @@ class CourseService {
     const formData = new FormData()
     formData.append('file', file)
 
-    const response = await axiosClient.axiosInstance.patch(`learning/courses/${courseId}/avatar`, formData, {
+    const response = await axiosClient.axiosInstance.patch(`learning/instructor/courses/${courseId}/avatar`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
     })
     return response.data
   }
+
+  async updatePrice(
+    courseId: string,
+    originalPrice: number,
+    finalPrice: number
+  ): Promise<
+    ApiResponse<{
+      id: string
+    }>
+  > {
+    const response = await axiosClient.axiosInstance.patch(`learning/instructor/courses/${courseId}/price`, {
+      originalPrice: originalPrice * 1000,
+      finalPrice: finalPrice * 1000
+    })
+    return response.data
+  }
+
+  async getPrice(courseId: string): Promise<
+    ApiResponse<{
+      originalPrice: number
+      finalPrice: number
+      id: string
+      name: string
+      yourIncome: number
+      platformFee: number
+    }>
+  > {
+    const response = await axiosClient.axiosInstance.get(`learning/instructor/courses/${courseId}/price`)
+    return response.data
+  }
+
+  async getCourseOverview(courseId: string): Promise<
+    ApiResponse<{
+      lessonNum: number
+      videoDuration: number
+      courseId: string
+      finalPrice: string
+    }>
+  > {
+    const response = await axiosClient.axiosInstance.get(`learning/instructor/courses/${courseId}/overview`)
+    return response.data
+  }
+
+  async requestApproval(courseId: string): Promise<
+    ApiResponse<{
+      id: string
+      name: string
+    }>
+  > {
+    const response = await axiosClient.axiosInstance.post(`learning/instructor/courses/${courseId}/request-approval`)
+    return response.data
+  }
+
+  async getBestSellerCourses(limit = 4): Promise<Course[]> {
+    const response = await axiosClient.axiosInstance.get('learning/courses-user/best-seller', {
+      params: { limit }
+    })
+    return response.data
+  }
+
+  async getTrendyCourseThisMonth(limit = 4): Promise<Course[]> {
+    const response = await axiosClient.axiosInstance.get('learning/courses-user/trend', {
+      params: { limit }
+    })
+    return response.data
+  }
 }
 
 export default new CourseService()
+
+// Types
+export type AdminInstructorSummary = {
+  instructorQuantity: number
+  instructorName: string
+  instructorEmail: string
+  totalCourse: number
+}

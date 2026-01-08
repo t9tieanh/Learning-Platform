@@ -3,7 +3,7 @@ import CustomButton from '@/components/common/Button'
 import { Send, LogIn } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
-import { toast } from 'react-toastify'
+import { toast } from 'sonner'
 import * as yup from 'yup'
 import useLoading from '@/hooks/useLoading.hook'
 import userService from '@/services/user/user.service'
@@ -34,6 +34,7 @@ const ForgotPassForm = () => {
       const response = await userService.requestForgotPassword(email)
       if (response && response.code === 200) {
         toast.success(response.message)
+        navigator('/auth')
       } else toast.error(response.message)
     } catch (error: any) {
       toast.error('Đã có lỗi trong quá trình xử lý !')
@@ -55,7 +56,7 @@ const ForgotPassForm = () => {
         {errors.email && <span className='text-red-500 text-xs text-left'>{errors.email.message}</span>}
         <CustomButton
           className='hover:bg-blue-600 shadow-lg transition-transform duration-300 ease-in-out hover:scale-105 text-white font-semibold py-2 rounded-lg'
-          label='Nhận liên kết đặt lại'
+          label='Gửi liên kết xác nhận'
           isLoader={loading}
           type='submit'
           icon={<Send />}

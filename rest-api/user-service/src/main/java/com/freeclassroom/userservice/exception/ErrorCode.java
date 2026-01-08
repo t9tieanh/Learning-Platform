@@ -15,14 +15,17 @@ public enum ErrorCode {
     WRONG_PASSWORD(1003, "Sai mật khẩu", HttpStatus.UNAUTHORIZED), // 401
     UNCATEGORIZED_EXEPTION(999, "Lỗi không xác định", HttpStatus.OK),
     UNAUTHORIZED(1006, "Bạn không có quyền truy cập", HttpStatus.UNAUTHORIZED), // 401
+    WRONG_USERNAME_PASSWORD(1002, "Username hoặc password không đúng", HttpStatus.OK),
     USERNAME_INVALID(1004, "Tên đăng nhập phải có ít nhất 3 ký tự", HttpStatus.OK),
     PASSWORD_INVALID(1005, "Mật khẩu phải có ít nhất 8 ký tự", HttpStatus.OK),
     INVALID_DOB(1008, "Ngày sinh phải từ {min} trở lên", HttpStatus.OK),
     UNAUTHENTICATED(1009, "Chưa xác thực", HttpStatus.UNAUTHORIZED), // 401
     OTP_SEND(1010, "Không thể gửi mã OTP", HttpStatus.OK),
+    EXPERTISE_NOT_FOUND(1010, "Expertise không tồn tại !", HttpStatus.OK),
 
     // wrong token user signup
     WRONG_VERFY_TOKEN(1002, "Token verify không đúng hoặc đã hết hạn", HttpStatus.OK),
+    OTP_EXPIRED(1003, "Token đã hết hạn, vui lòng thử lại sau !", HttpStatus.OK),
 
     // dùng cho xác thực otp
     NOT_VERIFY_OTP(1011, "Mã OTP không hợp lệ, vui lòng thử lại", HttpStatus.OK);

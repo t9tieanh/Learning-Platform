@@ -1,15 +1,21 @@
 import fs from 'fs/promises'
 import path from 'path'
+import Handlebars from 'handlebars'
 
-export async function renderTemplate(templateName: string, data: Record<string, string>) {
-  const filePath = path.join(__dirname, '../templates', templateName)
-  let content = await fs.readFile(filePath, 'utf-8')
-
-  // Thay thế {{placeholder}} trong file HTML
-  for (const key in data) {
-    const placeholder = new RegExp(`{{\\s*${key}\\s*}}`, 'g')
-    content = content.replace(placeholder, data[key])
+// Register formatCurrency helper
+Handlebars.registerHelper('formatCurrency', function (value: any) {
+  if (typeof value !== 'number') {
+    value = Number(value)
   }
+  if (isNaN(value)) return value
+  return value.toLocaleString('vi-VN')
+})
 
-  return content
+export async function renderTemplate(templateName: string, data: Record<string, unknown>) {
+  const filePath = path.join(__dirname, '../templates', templateName)
+  const content = await fs.readFile(filePath, 'utf-8')
+
+  // Compile with Handlebars to support arrays/sections and conditionals
+  const template = Handlebars.compile(content)
+  return template(data)
 }

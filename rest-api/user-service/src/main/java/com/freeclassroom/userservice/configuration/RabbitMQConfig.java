@@ -13,7 +13,7 @@ public class RabbitMQConfig {
     public static final String EXCHANGE = "user-notification-exchange";
 
     //queue
-    public static final String VERIFY_REGISTER_QUEUE = "verify-email";
+    public static final String VERIFY_REGISTER_QUEUE = "register-user-queue";
     public static final String FORGOT_PASSWORD_QUEUE = "forgot-password-queue";
 
     //routing key
@@ -34,6 +34,7 @@ public class RabbitMQConfig {
     public Queue forgotPasswordQueue() {
         return new Queue(FORGOT_PASSWORD_QUEUE, true);
     }
+    
 
     @Bean
     public Binding bindingVerifyRegister(Queue verifyRegisterQueue, DirectExchange userNotificationExchange) {

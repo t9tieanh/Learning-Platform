@@ -14,26 +14,33 @@ import java.util.List;
 @Getter
 @Setter
 @Entity
-@Table(name = "enrollments")
+@Table(
+        name = "enrollments",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"user_id", "course_id"})
+        }
+)
 @AllArgsConstructor
 @NoArgsConstructor(force = true)
 @SuperBuilder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class EnrollmentsEntity extends AbstractEntity {
+    @Column(name = "user_id", nullable = false)
     String userId;
+
     LocalDateTime enrollmentDate;
 
     @Enumerated(EnumType.STRING)
     EnumCompletionStatus status;
+
     Double progress;
 
     // Course
     @ManyToOne
-    @JoinColumn(name = "course_id")
+    @JoinColumn(name = "course_id", nullable = false)
     CourseEntity course;
 
     // Lesson Progress
     @OneToMany(mappedBy = "enrollment")
-    List<LessonProgress> progresses;
+    List<LessonProgressEntity> progresses;
 }
-

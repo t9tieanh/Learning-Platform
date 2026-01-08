@@ -28,7 +28,7 @@ const CustomCheckbox = ({ className, id, label, checked, value, onChange, ...res
         }}
         {...rest}
       />
-      <Label htmlFor={id} className='text-gray-700 font-normal'>
+      <Label htmlFor={id} className={`text-gray-700 font-normal ${className ?? ''}`}>
         {label}
       </Label>
     </div>

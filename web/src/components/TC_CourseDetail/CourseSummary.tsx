@@ -11,14 +11,7 @@ interface CourseSummaryProps {
   tags?: string[]
 }
 
-export function CourseSummary({
-  shortDescription,
-  studentsCount,
-  rating,
-  reviewsCount,
-  category,
-  tags = []
-}: CourseSummaryProps) {
+export function CourseSummary({ shortDescription, category, tags = [] }: CourseSummaryProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -29,7 +22,7 @@ export function CourseSummary({
       <div className='flex items-center justify-between'>
         <h2 className='text-xl font-bold'>Tổng quan</h2>
       </div>
-      <p className='text-base leading-relaxed text-foreground mb-6 mt-2'>{shortDescription}</p>
+      <p className='text-sm leading-relaxed text-foreground mb-6 mt-2'>{shortDescription}</p>
 
       <div className='flex flex-wrap items-center gap-6 mb-6'>
         {category && (

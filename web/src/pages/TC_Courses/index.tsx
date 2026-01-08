@@ -5,6 +5,7 @@ import CoursePagination from '@/components/TC_Courses/CoursePagination'
 import { Course } from '@/components/TC_Courses/CourseTypes'
 import AcademySidebar from '@/components/TC_HomePage/AcademySidebar'
 import courseService from '@/services/course/course.service'
+import { Loader } from '@/components/ui/loader'
 
 interface State {
   courses: Course[]
@@ -62,7 +63,7 @@ class TC_Course extends Component<Record<string, never>, State> {
         tags: c.tagNames ?? undefined,
         duration: undefined,
         students: undefined,
-        createdAt: undefined
+        createdAt: new Date(c.createdAt).toLocaleDateString() ?? undefined
       }))
       this.setState({
         courses: mapped,
@@ -93,10 +94,10 @@ class TC_Course extends Component<Record<string, never>, State> {
           <AcademySidebar />
         </div>
         {/* Main content */}
-        <div className='flex-1 ml-64 p-6 space-y-6'>
+        <div className='flex-1 p-6 space-y-6'>
           <CourseSearchBar onSearch={(v) => this.setState({ search: v })} />
           {this.state.loading ? (
-            <div className='text-center text-sm text-gray-500'>Đang tải dữ liệu...</div>
+            <Loader />
           ) : (
             <CoursesTable
               courses={filtered}

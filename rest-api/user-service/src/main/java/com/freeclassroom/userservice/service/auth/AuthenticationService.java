@@ -6,6 +6,7 @@ import com.freeclassroom.userservice.dto.request.outbound.oauth2.GoogleExchanceT
 import com.freeclassroom.userservice.dto.response.ApiResponse;
 import com.freeclassroom.userservice.dto.response.auth.IntrospectResponse;
 import com.freeclassroom.userservice.dto.response.outbound.oauth2.GoogleGetUserInfo;
+import com.freeclassroom.userservice.entity.role.RoleEntity;
 import com.freeclassroom.userservice.enums.role.TokenEnum;
 import com.freeclassroom.userservice.dto.request.auth.AuthRequest;
 import com.freeclassroom.userservice.dto.response.user.AuthResponse;
@@ -29,6 +30,7 @@ import org.springframework.stereotype.Service;
 
 import java.text.ParseException;
 import java.util.Date;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -73,7 +75,7 @@ public class AuthenticationService implements IAuthenticationService {
 
     // login with username password
     public ApiResponse<AuthResponse> authentication (AuthRequest request) throws JOSEException {
-        UserEntity account = userRepository.findByEmailOrUsername(request.getUsername()).orElseThrow(
+        UserEntity account = userRepository.findFirstByEmailOrUsername(request.getUsername()).orElseThrow(
                 () -> new CustomExeption(ErrorCode.USER_NOT_FOUND)
         );
 
@@ -90,8 +92,13 @@ public class AuthenticationService implements IAuthenticationService {
                     .refreshToken(jwtService.generateToken(account,TokenEnum.REFRESH_TOKEN))
                     .email(account.getEmail())
                     .username(account.getUsername())
+                    .userId(account.getId())
                     .name(account.getName())
                     .avatarUrl(account.getImage())
+                    .role(account.getRoles().stream()
+                            .map(RoleEntity::getName)
+                            .collect(Collectors.joining(","))
+                    )
                     .build();
 
             return ApiResponse.<AuthResponse>builder()
@@ -101,7 +108,7 @@ public class AuthenticationService implements IAuthenticationService {
                     .build();
         }
 
-        throw new CustomExeption(ErrorCode.UNAUTHENTICATED);
+        throw new CustomExeption(ErrorCode.WRONG_USERNAME_PASSWORD);
     }
 
     public void logout(LogoutRequest request) {
@@ -180,6 +187,7 @@ public class AuthenticationService implements IAuthenticationService {
                         .refreshToken(jwtService.generateToken(account,TokenEnum.REFRESH_TOKEN))
                         .email(account.getEmail())
                         .username(account.getUsername())
+                        .userId(account.getId())
                         .name(account.getName())
                         .avatarUrl(account.getImage())
                         .build())

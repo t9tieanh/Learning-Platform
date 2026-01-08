@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.example.grpc.user";
+option java_outer_classname = "SaleProto";
+
+message GetRevenueAndProfitRequest {
+  repeated string coursesId = 1;
+  int64 year = 2;
+}
+
+message GetRevenueAndProfitResponse {
+  repeated GetRevenueAndProfitList dataList = 1;
+}
+
+message GetRevenueAndProfitList {
+  int64 month = 1;
+  double revenue = 2;
+  double profit = 3;
+}

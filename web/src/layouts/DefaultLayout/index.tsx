@@ -1,15 +1,25 @@
 import { FC } from 'react'
-import { Outlet } from 'react-router-dom'
+import { Outlet, useMatches } from 'react-router-dom'
 import Header from '@/components/Header'
+import BubbleChat from '@/components/BubbleChat'
 import { Footer } from '@/components/Footer/footer2'
+import AuthenticationGate from '@/components/auth-gate/AuthenticationGate'
+import ScrollToTop from '@/components/common/ScrollToTop'
 
 const DefaultLayout: FC = () => {
+  const matches = useMatches()
+  const current = matches[matches.length - 1]
+  const hideFooter = current?.handle?.hideFooter
+  const hideBubble = current?.handle?.hideBubble
+
   return (
-    <>
+    <AuthenticationGate>
       <Header />
+      <ScrollToTop />
       <Outlet />
-      <Footer />
-    </>
+      {!hideBubble && <BubbleChat />}
+      {!hideFooter && <Footer />}
+    </AuthenticationGate>
   )
 }
 export default DefaultLayout

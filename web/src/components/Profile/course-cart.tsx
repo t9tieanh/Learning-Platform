@@ -1,0 +1,139 @@
+/* eslint-disable react/no-children-prop */
+import { Star, MessageCircle, Send } from 'lucide-react'
+import { Progress } from '@/components/ui/progress'
+import { Card } from '@/components/ui/card'
+import { useNavigate } from 'react-router-dom'
+import { CourseListItem } from '@/types/course-user'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Item, ItemContent, ItemTitle, ItemDescription, ItemActions } from '@/components/ui/item'
+import CustomButton from '@/components/common/Button'
+import { useState } from 'react'
+import type { MouseEvent } from 'react'
+import CustomDialog from '@/components/common/Dialog'
+import AddFeedback from '@/components/Profile/addFeedback'
+import { useAuthStore } from '@/stores/useAuth.stores'
+
+const CourseCard = ({ courseItem }: { courseItem: CourseListItem }) => {
+  const navigate = useNavigate()
+  const { data } = useAuthStore()
+
+  const handleClick = () => {
+    navigate(`/course-page/${courseItem.id}`)
+  }
+
+  // open dialog instead of navigating directly
+  const [showDialog, setShowDialog] = useState(false)
+
+  // stop propagation so parent Card onClick won't trigger and open dialog
+  const handleAddFeedback = (e: MouseEvent) => {
+    e.stopPropagation()
+    setShowDialog(true)
+  }
+
+  return (
+    <>
+      <Card
+        className='group border border-border/60 bg-card/60 backdrop-blur-sm cursor-pointer hover:shadow-md transition-all duration-300 p-0'
+        onClick={handleClick}
+      >
+        <div className='flex flex-col sm:flex-row items-stretch sm:h-[210px]'>
+          <div className='relative w-full sm:w-[280px] h-[210px] flex-shrink-0'>
+            <img
+              src={courseItem.thumbnailUrl}
+              alt={courseItem.title}
+              className='absolute inset-0 w-full h-full object-cover object-center transition-transform duration-300 group-hover:scale-105'
+            />
+          </div>
+          {/* Content dùng Item UI */}
+          <div className='flex-1 flex flex-col justify-between p-5'>
+            <Item variant='default' size='default' className='p-0'>
+              <ItemContent>
+                <ItemTitle className='text-base sm:text-lg font-semibold line-clamp-2 text-foreground group-hover:text-primary transition-colors duration-200'>
+                  {courseItem.title}
+                </ItemTitle>
+                <ItemDescription className='text-sm text-muted-foreground/80 line-clamp-2 mb-2'>
+                  {courseItem.shortDescription}
+                </ItemDescription>
+                {data && data.userId !== courseItem.instructor.id && (
+                  <>
+                    <div className='flex items-center gap-2 mt-1'>
+                      <span className='text-xs text-muted-foreground'>Hoàn thành</span>
+                      <span className='text-xs font-semibold text-primary'>
+                        {Math.round((courseItem.progress || 0) * 100)}%
+                      </span>
+                    </div>
+                    <Progress value={Math.round((courseItem.progress || 0) * 100)} className='h-2 bg-gray-200 my-1' />
+                  </>
+                )}
+                <div className='flex items-center justify-between mt-2'>
+                  <div className='flex items-center gap-2'>
+                    <Avatar>
+                      <AvatarImage src={courseItem.instructor.image} />
+                      <AvatarFallback>
+                        {data && data.userId === courseItem.instructor.id ? 'Bạn' : courseItem.instructor.name}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className='text-xs text-muted-foreground italic'>
+                      {data && data.userId === courseItem.instructor.id ? 'Bạn' : courseItem.instructor.name}
+                    </span>
+                  </div>
+                  <div className='flex items-center gap-1'>
+                    <span className='text-sm font-semibold text-yellow-500'>{courseItem?.rating}</span>
+                    <div className='flex items-center gap-0.5'>
+                      {[...Array(5)].map((_, i) => (
+                        <Star
+                          key={i}
+                          className={`w-3.5 h-3.5 ${
+                            i < Math.floor(courseItem?.rating || 0)
+                              ? 'fill-yellow-400 text-yellow-400 drop-shadow-sm'
+                              : 'text-muted-foreground/20'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </ItemContent>
+            </Item>
+          </div>
+          {data && data.userId != courseItem.instructor.id && (
+            <div className='p-5 pt-0 sm:pt-5'>
+              {(courseItem.progress || 0) > 0.3 ? (
+                <CustomButton
+                  onClick={handleAddFeedback}
+                  icon={<MessageCircle size={16} />}
+                  label='Thêm đánh giá'
+                  className='w-full mt-2 bg-gray-100 text-black hover:bg-gray-200'
+                />
+              ) : (
+                <CustomButton
+                  onClick={handleClick}
+                  icon={<Send size={16} />}
+                  label='Học ngay'
+                  className='w-full mt-2 bg-blue-500 text-white hover:bg-blue-600'
+                />
+              )}
+            </div>
+          )}
+        </div>
+      </Card>
+
+      <CustomDialog
+        open={showDialog}
+        setOpen={setShowDialog}
+        children={
+          <>
+            <AddFeedback courseItem={courseItem} onClose={() => setShowDialog(false)} />
+          </>
+        }
+        title={
+          <>
+            <Send className='w-5 h-5' /> Đánh giá khóa học
+          </>
+        }
+      />
+    </>
+  )
+}
+
+export default CourseCard

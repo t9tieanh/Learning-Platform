@@ -12,17 +12,6 @@ interface CurriculumAccordionProps {
   onPlayLesson: (lesson: Lesson) => void
 }
 
-const getLessonIcon = (type: Lesson['type']) => {
-  switch (type) {
-    case 'video':
-      return PlayCircle
-    case 'article':
-      return FileText
-    default:
-      return FileText
-  }
-}
-
 export function CurriculumAccordion({ sections, courseId, onPlayLesson }: CurriculumAccordionProps) {
   const [openSections, setOpenSections] = useState<string[]>([])
 
@@ -50,7 +39,7 @@ export function CurriculumAccordion({ sections, courseId, onPlayLesson }: Curric
       className='rounded-xl bg-card p-6 shadow-md space-y-4'
     >
       <div className='flex items-center justify-between'>
-        <h2 className='text-xl font-bold'>Nội dung khóa học</h2>
+        <h2 className='text-lg font-bold'>Nội dung khóa học</h2>
       </div>
 
       <Accordion type='multiple' value={openSections} onValueChange={setOpenSections} className='space-y-4'>
@@ -98,9 +87,8 @@ export function CurriculumAccordion({ sections, courseId, onPlayLesson }: Curric
               </div>
             </AccordionTrigger>
             <AccordionContent className='px-6 pb-6'>
-              <div className='ml-14 space-y-3'>
+              <div className='ml-20 space-y-3'>
                 {section.lessons.map((lesson) => {
-                  const LessonIcon = getLessonIcon(lesson.type)
                   const canPlay = lesson.type === 'video' && lesson.videoUrl
                   return (
                     <div
@@ -108,7 +96,16 @@ export function CurriculumAccordion({ sections, courseId, onPlayLesson }: Curric
                       className='flex items-center gap-3 p-3 rounded-lg bg-slate-100 hover:bg-muted transition-colors'
                     >
                       <div className='w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center'>
-                        <LessonIcon className='w-4 h-4 text-primary' />
+                        {canPlay && (
+                          <Button
+                            size='icon'
+                            variant='ghost'
+                            onClick={() => onPlayLesson(lesson)}
+                            aria-label={`Phát ${lesson.title}`}
+                          >
+                            <PlayCircle className='h-4 w-4' />
+                          </Button>
+                        )}
                       </div>
                       <span className='text-muted-foreground flex-1 truncate'>{lesson.title}</span>
                       <Badge variant='secondary' className='text-xs'>
@@ -122,16 +119,6 @@ export function CurriculumAccordion({ sections, courseId, onPlayLesson }: Curric
                           return hours > 0 ? `${hours}h${minutes.toString().padStart(2, '0')}m` : `${minutes}m`
                         })()}
                       </span>
-                      {canPlay && (
-                        <Button
-                          size='icon'
-                          variant='ghost'
-                          onClick={() => onPlayLesson(lesson)}
-                          aria-label={`Phát ${lesson.title}`}
-                        >
-                          <PlayCircle className='h-4 w-4' />
-                        </Button>
-                      )}
                     </div>
                   )
                 })}

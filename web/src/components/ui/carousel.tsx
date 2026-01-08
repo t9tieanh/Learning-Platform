@@ -17,6 +17,8 @@ type CarouselProps = {
   plugins?: CarouselPlugin
   orientation?: "horizontal" | "vertical"
   setApi?: (api: CarouselApi) => void
+  autoplayDelay?: number
+  autoplayStopOnInteraction?: boolean
 }
 
 type CarouselContextProps = {
@@ -90,6 +92,52 @@ function Carousel({
     if (!api || !setApi) return
     setApi(api)
   }, [api, setApi])
+
+  // Autoplay behaviour: if autoplayDelay is provided, automatically scroll
+  React.useEffect(() => {
+    const delay = (props as any).autoplayDelay as number | undefined
+    const stopOnInteraction = (props as any).autoplayStopOnInteraction ?? true
+    if (!api || !delay || delay <= 0) return
+
+    let timer: number | null = null
+    const stop = () => {
+      if (timer) {
+        window.clearInterval(timer)
+        timer = null
+      }
+    }
+
+    const play = () => {
+      stop()
+      timer = window.setInterval(() => {
+        try {
+          if (api && api.canScrollNext && api.canScrollNext()) api.scrollNext()
+          else api && api.scrollTo && api.scrollTo(0)
+        } catch (e) {
+          // ignore scroll errors
+        }
+      }, delay)
+    }
+
+    play()
+
+    if (stopOnInteraction) {
+      api.on('pointerDown', stop)
+      api.on('pointerUp', play)
+    }
+
+    return () => {
+      stop()
+      if (stopOnInteraction) {
+        try {
+          api.off('pointerDown', stop)
+          api.off('pointerUp', play)
+        } catch (e) {
+          // ignore
+        }
+      }
+    }
+  }, [api, props])
 
   React.useEffect(() => {
     if (!api) return
@@ -236,4 +284,62 @@ export {
   CarouselItem,
   CarouselPrevious,
   CarouselNext,
+}
+
+// Autoplay plugin for embla carousel
+// Usage: pass plugins={[autoplayPlugin(4000)]} to <Carousel plugins={...} />
+export function autoplayPlugin(delay = 4000, stopOnInteraction = true) {
+  return (emblaParam: any) => {
+    const embla = emblaParam
+    if (!embla) {
+      return {
+        destroy() {},
+      }
+    }
+
+    let timer: number | null = null
+    const stop = () => {
+      if (timer) {
+        window.clearInterval(timer)
+        timer = null
+      }
+    }
+
+    const play = () => {
+      stop()
+      timer = window.setInterval(() => {
+        try {
+          if (embla && embla.canScrollNext && embla.canScrollNext()) embla.scrollNext()
+          else embla && embla.scrollTo && embla.scrollTo(0)
+        } catch (e) {
+          // ignore errors during automatic scrolling
+        }
+      }, delay)
+    }
+
+    const onPointerDown = () => {
+      if (stopOnInteraction) stop()
+    }
+
+    const onPointerUp = () => {
+      if (stopOnInteraction) play()
+    }
+
+    embla.on('init', play)
+    embla.on('pointerDown', onPointerDown)
+    embla.on('pointerUp', onPointerUp)
+
+    return {
+      destroy() {
+        stop()
+        try {
+          embla.off('init', play)
+          embla.off('pointerDown', onPointerDown)
+          embla.off('pointerUp', onPointerUp)
+        } catch (e) {
+          // ignore if embla already destroyed
+        }
+      },
+    }
+  }
 }

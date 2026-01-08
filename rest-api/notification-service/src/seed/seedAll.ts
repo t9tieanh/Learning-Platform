@@ -1,102 +1,74 @@
-import { ConversationModel } from '../models/message/conversation.model'
-import { MessageModel } from '../models/message/message.model'
-import { NotificationModel } from '../models/notifications/notification.model'
-import { CommentModel } from '../models/review/comment.model'
-import { FeedbackModel } from '../models/review/feedback.model'
+import mongoose from 'mongoose'
+import Conversation from '../models/message/conversation.model'
+import Message from '../models/message/message.model'
 
-async function seedAll() {
-  console.log('Seeding all collections...')
-  // Xóa dữ liệu cũ
-  await ConversationModel.deleteMany({})
-  await MessageModel.deleteMany({})
-  await NotificationModel.deleteMany({})
-  await CommentModel.deleteMany({})
-  await FeedbackModel.deleteMany({})
+async function seed() {
+  const instructorId = '4d376e51-e408-4d9c-b181-54f2401a787f'
+  const studentId = 'df51b10d-d4e0-4ea7-92e4-748a1ad1cdb9'
 
-  // Seed Conversation
-  const conversations = await ConversationModel.insertMany(
-    Array.from({ length: 20 }).map((_, i) => ({
-      members: [`user${i + 1}`, `user${i + 2}`],
-      avatarUrl: `https://api.adorable.io/avatars/285/${i}.png`,
-      name: `Conversation ${i + 1}`,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    }))
-  )
+  // 1️⃣ Tạo key cố định (sort ID theo string)
+  const sortedIds = [instructorId.toString(), studentId.toString()].sort()
+  const key = `dm:${sortedIds[0]}:${sortedIds[1]}`
 
-  // Seed Message (đúng schema: conversation, senderId, message, content, ...)
-  await MessageModel.insertMany(
-    Array.from({ length: 20 }).map((_, i) => ({
-      conversation: conversations[i % conversations.length]._id,
-      senderId: `user${(i % 5) + 1}`,
-      message: `Message content ${i + 1}`,
-      content: `Message content ${i + 1}`,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    }))
-  )
+  // 2️⃣ Tìm hoặc tạo conversation
+  let conversation = await Conversation.findOne({ key })
+  if (!conversation) {
+    conversation = await Conversation.create({
+      key,
+      participants: [instructorId, studentId],
+      type: 'direct',
+      lastMessageAt: new Date()
+    })
+    console.log('✅ Created conversation:', conversation._id)
+  } else {
+    console.log('ℹ️ Conversation already exists:', conversation._id)
+  }
 
-  // Seed Notification
-  await NotificationModel.insertMany(
-    Array.from({ length: 20 }).map((_, i) => ({
-      userId: `user${(i % 10) + 1}`,
-      type: 'info',
-      title: `Notification ${i + 1}`,
-      message: `Nội dung thông báo ${i + 1}`,
-      isRead: false,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    }))
-  )
+  // 3️⃣ Fake tin nhắn
+  const messagesData = [
+    {
+      conversationId: conversation._id,
+      senderId: instructorId,
+      senderRole: 'instructor',
+      content: 'Chào em, hôm nay mình học phần nào rồi?',
+      type: 'text',
+      status: 'delivered',
+      deliveredTo: [studentId],
+      readBy: []
+    },
+    {
+      conversationId: conversation._id,
+      senderId: studentId,
+      senderRole: 'student',
+      content: 'Em đã học xong phần React Hooks ạ!',
+      type: 'text',
+      status: 'read',
+      deliveredTo: [instructorId],
+      readBy: [instructorId]
+    },
+    {
+      conversationId: conversation._id,
+      senderId: instructorId,
+      senderRole: 'instructor',
+      content: 'Tốt lắm, vậy mai ta làm bài tập useEffect nhé 💪',
+      type: 'text',
+      status: 'sent',
+      deliveredTo: [],
+      readBy: []
+    }
+  ]
 
-  //   id: Types.ObjectId
-  //     userId: string
-  //     type: string
-  //     title: string
-  //     message: string
-  //     read: boolean
-  //     createdAt: Date
-  //     updatedAt: Date
+  const insertedMessages = await Message.insertMany(messagesData)
+  console.log('✅ Inserted messages:', insertedMessages.length)
 
-  // Seed Comment
-  await CommentModel.insertMany(
-    Array.from({ length: 20 }).map((_, i) => ({
-      courseId: `course${(i % 3) + 1}`,
-      lessonId: `lesson${(i % 5) + 1}`,
-      userId: `user${(i % 10) + 1}`,
-      content: `Comment nội dung ${i + 1}`,
-      reply: [
-        {
-          userId: `user${((i + 1) % 10) + 1}`,
-          content: `Reply cho comment ${i + 1}`,
-          createdAt: new Date(),
-          updatedAt: new Date()
-        },
-        {
-          userId: `user${((i + 2) % 10) + 1}`,
-          content: `Reply khác cho comment ${i + 1}`,
-          createdAt: new Date(),
-          updatedAt: new Date()
-        }
-      ],
-      createdAt: new Date(),
-      updatedAt: new Date()
-    }))
-  )
+  // 4️⃣ Cập nhật last message
+  const lastMsg = insertedMessages[insertedMessages.length - 1]
+  conversation.lastMessageId = lastMsg._id as any
+  conversation.lastMessageAt = lastMsg.createdAt
+  await conversation.save()
 
-  // Seed Feedback
-  await FeedbackModel.insertMany(
-    Array.from({ length: 20 }).map((_, i) => ({
-      userId: `user${(i % 10) + 1}`,
-      courseId: `course${(i % 3) + 1}`,
-      rating: Math.floor(Math.random() * 5) + 1,
-      message: `Feedback nội dung ${i + 1}`,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    }))
-  )
-
-  console.log('Seed tất cả collection thành công!')
+  console.log('✅ Updated conversation last message')
+  await mongoose.disconnect()
 }
 
-export { seedAll }
+export { seed }

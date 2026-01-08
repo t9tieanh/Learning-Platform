@@ -6,16 +6,31 @@ import MediaInfomation from './MediaInfomation'
 import SeoTagInfomation from './SeoTagInfomation'
 import { Info, Video, Tag, Send } from 'lucide-react'
 import { landingPageSchema, LandingPageFormValues } from '@/utils/create-course/landingPage'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import CustomButton from '@/components/common/Button'
 import { useEffect } from 'react'
-import courseService from '@/services/course/course.service'
 import { useNavigate } from 'react-router'
-import { toast } from 'react-toastify'
+import { toast } from 'sonner'
 import tagsService from '@/services/course/tags.service'
 
-const LandingPageForm: React.FC<{ id: string }> = ({ id }: { id: string }) => {
+const LandingPageForm = ({
+  id,
+  courseInfo
+}: {
+  id: string
+  courseInfo: {
+    courseTitle: string
+    subtitle: string
+    description: string
+    language: string
+    learnItems: string[]
+    category: string
+    requirements: string[]
+    thumbnailUrl: string
+    introductoryVideo: string
+  }
+}) => {
   const {
     control,
     register,
@@ -23,9 +38,11 @@ const LandingPageForm: React.FC<{ id: string }> = ({ id }: { id: string }) => {
     watch,
     setValue,
     getValues,
+    reset,
     formState: { errors }
   } = useForm<LandingPageFormValues>({
-    resolver: yupResolver(landingPageSchema) as any
+    resolver: yupResolver(landingPageSchema) as any,
+    defaultValues: {} // optional empty, we'll reset when courseInfo arrives
   })
 
   const navigator = useNavigate()
@@ -35,34 +52,11 @@ const LandingPageForm: React.FC<{ id: string }> = ({ id }: { id: string }) => {
       if (!id) return
 
       try {
-        // Fetch course info và tags song song
-        const [courseResponse, tagsResponse] = await Promise.all([
-          courseService.getCourseInfo(id),
-          tagsService.getAllByCourseId(id)
-        ])
-
-        // Set course info
-        if (courseResponse.code === 200 && courseResponse.result) {
-          const course = courseResponse.result
-
-          setValue('courseTitle', course.title || '')
-          setValue('subtitle', course.shortDescription || '')
-          setValue('description', course.longDescription || '')
-          setValue('language', course.language || '')
-          setValue('learnItems', course.outcomes || [])
-          setValue('category', course.category || '') // Đây là giá trị từ API
-          setValue('requirements', course.requirements || [])
-          setValue('thumbnailUrl', course.thumbnailUrl || '')
-        } else {
-          console.log('Failed to fetch course info')
-          navigator('/teacher')
-          toast.error(courseResponse.message || 'Không tìm thấy khóa học')
-          return
-        }
+        // fetch course info và tags song song
+        const tagsResponse = await tagsService.getAllByCourseId(id)
 
         // Set tags
         if (tagsResponse && tagsResponse.code === 200 && tagsResponse.result) {
-          // console.log('🏷️ Setting tags:', tagsResponse.result)
           setValue('tags', tagsResponse.result)
         }
       } catch (error) {
@@ -74,6 +68,23 @@ const LandingPageForm: React.FC<{ id: string }> = ({ id }: { id: string }) => {
 
     fetchCourseData()
   }, [id, setValue, navigator])
+
+  // khi courseInfo từ parent thay đổi -> reset form
+  useEffect(() => {
+    if (!courseInfo) return
+    reset({
+      courseTitle: courseInfo.courseTitle,
+      subtitle: courseInfo.subtitle,
+      description: courseInfo.description,
+      language: courseInfo.language,
+      learnItems: courseInfo.learnItems,
+      category: courseInfo.category,
+      requirements: courseInfo.requirements,
+      thumbnailUrl: courseInfo.thumbnailUrl,
+      introductoryVideo: courseInfo.introductoryVideo
+    })
+  }, [courseInfo, reset])
+
   // Watch form values
   const formValues = watch()
 
@@ -169,13 +180,6 @@ const LandingPageForm: React.FC<{ id: string }> = ({ id }: { id: string }) => {
         {/* Preview Section */}
         <div className='space-y-8'>
           <PreviewComponent {...formValues} />
-        </div>
-      </div>
-
-      {/* Action Buttons */}
-      <div className='flex justify-end pt-6 border-t border-border/60'>
-        <div className='space-x-3'>
-          <CustomButton className='bg-primary/90 hover:bg-primary' label='Tiếp tục' icon={<Send className='mr-2' />} />
         </div>
       </div>
     </div>

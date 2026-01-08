@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package blog;
+
+import "google/protobuf/empty.proto";
+import "blog.proto";
+import "user.proto";
+import "course.proto";
+option java_multiple_files = true;
+option java_package = "com.example.grpc.user";
+option java_outer_classname = "BlogServiceProto";
+
+service BlogService {
+  rpc getTotalBlog (google.protobuf.Empty) returns (TotalBlogResponse);
+  rpc getTotalInstructorBlog (GetUserRequest) returns (TotalBlogResponse);
+  rpc pushCourseSupabase (PushSupabaseRequest) returns (PushSupabaseResponse);
+  rpc createConversationAI (CreateConversationAIRequest) returns (CreateConversationAIResponse);
+  rpc getFeedbackByCourseId (GetFeedbackByCourseIdRequest) returns (GetFeedbackByCourseIdResponse);
+}

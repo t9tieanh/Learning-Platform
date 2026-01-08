@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
-import { ArrowLeft, Plus, Loader2 } from 'lucide-react'
-// import { mockCourse } from '@/lib/mockCourse' // ĐÃ THAY BẰNG DỮ LIỆU THẬT
+import { ArrowLeft } from 'lucide-react'
 import { Lesson } from '@/types/course.type'
 import { CourseHero } from '@/components/TC_CourseDetail/CourseHero'
 import { CourseSummary } from '@/components/TC_CourseDetail/CourseSummary'
@@ -12,14 +11,13 @@ import { ReviewsList } from '@/components/TC_CourseDetail/ReviewsList'
 import { StatsSidebar } from '@/components/TC_CourseDetail/StatsSidebar'
 import { VideoModal } from '@/components/TC_CourseDetail/VideoModal'
 import { Button } from '@/components/ui/button'
-import { toast } from 'react-toastify'
-import { Separator } from '@/components/ui/separator'
-import { useParams, useNavigate } from 'react-router-dom'
-import courseService from '@/services/course.service'
+import { toast } from 'sonner'
+import { useLocation, useParams, useNavigate } from 'react-router-dom'
+import courseService from '@/services/course/course.service'
 import { ApiResponse } from '@/types/response.type'
+import { Loader } from '@/components/ui/loader'
+import courseAdminService from '@/services/course/course-admin.service'
 
-// Kiểu tạm thời cho dữ liệu trả về từ API backend (CourseResponse)
-// Bạn có thể tạo file riêng nếu backend ổn định
 interface CourseResponseDTO {
   id: string
   title: string
@@ -28,8 +26,8 @@ interface CourseResponseDTO {
   description?: string
   status: string
   price?: number
+  introductoryVideo?: string
   createdAt?: string
-  // tuỳ backend: tags, sections, lessons...
   tagNames?: string[]
   categories?: string[]
   chapters?: Array<{
@@ -41,7 +39,7 @@ interface CourseResponseDTO {
       title: string
       type?: string
       duration?: string
-      videoUrl?: string
+      url?: string
     }>
   }>
   reviews?: Array<{
@@ -63,8 +61,8 @@ interface CourseResponseDTO {
 export default function CourseDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-
-  console.log('[CourseDetailPage] param id =', id)
+  const location = useLocation()
+  const isAdminPage = location.pathname.startsWith('/admin')
 
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -87,27 +85,7 @@ export default function CourseDetailPage() {
   }
 
   const handleEdit = () => {
-    toast.success('Đang chuyển đến trang chỉnh sửa...')
-  }
-
-  const handlePublish = () => {
-    toast.success('Khóa học đã được xuất bản!')
-  }
-
-  const handleUnpublish = () => {
-    toast.info('Khóa học đã được gỡ xuất bản')
-  }
-
-  const handleShare = () => {
-    toast.success('Link chia sẻ đã được sao chép!')
-  }
-
-  const handleAddSection = () => {
-    toast.success('Thêm phần mới')
-  }
-
-  const handleAddLesson = () => {
-    toast.success('Thêm bài học mới')
+    navigate('/teacher/course/' + id)
   }
 
   // Fetch data
@@ -121,10 +99,14 @@ export default function CourseDetailPage() {
       }
       try {
         setLoading(true)
-        const res: ApiResponse<any> = await courseService.getCourseDetail(id)
+        let res: ApiResponse<any>
+        if (isAdminPage) {
+          res = await courseAdminService.getCourseDetailAdmin(id)
+        } else {
+          res = await courseService.getCourseDetail(id)
+        }
         if (!mounted) return
         const data = res.result
-        console.log('data', data)
         if (!data) throw new Error('Không có dữ liệu trả về')
         const mapped: CourseResponseDTO = {
           id: data.id,
@@ -138,6 +120,7 @@ export default function CourseDetailPage() {
           createdAt: data.createdAt,
           tagNames: data.tagNames || data.tags || [],
           categories: data.categories || (data.category ? [data.category] : []),
+          introductoryVideo: data.introductoryVideo || data.videoIntro || '',
           learningOutcomes: data.outcomes || [],
           requirements: data.requirements || [],
           chapters: (data.chapters || []).map((s: any, idx: number) => ({
@@ -149,19 +132,19 @@ export default function CourseDetailPage() {
               title: l.title || l.name || `Bài học ${lidx + 1}`,
               type: (l.type || 'video').toLowerCase(),
               duration: l.duration || '0:00',
-              videoUrl: l.videoUrl || l.video || undefined
+              url: l.url || l.url || undefined
             }))
           })),
           reviews: (data.reviews || []).map((r: any, ridx: number) => ({
             id: r.id || `rv-${ridx}`,
             reviewerName: r.reviewerName || r.userName || 'Học viên',
-            rating: r.rating || 5,
+            rating: r.rating || 0,
             comment: r.comment || r.content || '',
             createdAt: r.createdAt || r.date || new Date().toISOString(),
             avatar: r.avatar || r.reviewerAvatar
           })),
           students: data.enrollments.length || data.students || 0,
-          rating: data.rating || 5,
+          rating: data.rating || 0,
           revenue: data.revenue || data.stats?.revenue || 0,
           publishedAt: data.publishedAt || data.stats?.publishedAt || data.createdAt
         }
@@ -177,31 +160,30 @@ export default function CourseDetailPage() {
     return () => {
       mounted = false
     }
-  }, [id])
+  }, [id, isAdminPage])
 
   const goBack = () => navigate(-1)
 
   return (
-    <div className='min-h-screen bg-background'>
+    <div className='min-h-screen bg-white-200'>
       {/* Header */}
-      <header className='sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60'>
-        <div className='container mx-auto px-4 py-4'>
-          <div className='flex items-center justify-between'>
-            <Button variant='ghost' size='sm' className='gap-2' onClick={goBack}>
-              <ArrowLeft className='h-4 w-4' /> Quay lại
-            </Button>
-          </div>
-        </div>
-      </header>
+      {!isAdminPage && (
+        <>
+          <header className='sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60'>
+            <div className='container mx-auto px-4 py-4'>
+              <div className='flex items-center justify-between'>
+                <Button variant='ghost' size='sm' className='gap-2' onClick={goBack}>
+                  <ArrowLeft className='h-4 w-4' /> Quay lại
+                </Button>
+              </div>
+            </div>
+          </header>
+        </>
+      )}
 
       {/* Main Content */}
       <main className='container mx-auto px-4 py-8'>
-        {loading && (
-          <div className='flex flex-col items-center justify-center py-20 gap-4'>
-            <Loader2 className='h-10 w-10 animate-spin text-primary' />
-            <p className='text-muted-foreground'>Đang tải dữ liệu khóa học...</p>
-          </div>
-        )}
+        {loading && <Loader />}
         {!loading && error && (
           <div className='flex flex-col items-center justify-center py-20 gap-4'>
             <p className='text-destructive font-medium'>Không tải được khoá học: {error}</p>
@@ -211,17 +193,19 @@ export default function CourseDetailPage() {
           </div>
         )}
         {!loading && !error && course && (
-          <div className='grid gap-8 lg:grid-cols-[1fr_320px]'>
+          <div className={isAdminPage ? 'grid gap-8 lg:grid-cols-1' : 'grid gap-8 lg:grid-cols-[1fr_320px]'}>
             {/* Left Column - Main Content */}
             <div className='space-y-8'>
               <CourseHero
                 title={course.title}
                 coverImage={course.thumbnailUrl || '/placeholder.png'}
+                introductoryVideo={course?.introductoryVideo || ''}
                 status={course.status.toLowerCase()}
                 publishedAt={course.publishedAt || course.createdAt || new Date().toISOString()}
                 price={course.price}
                 onPlayIntro={handlePlayIntro}
                 onEdit={handleEdit}
+                courseStatus={course.status.toLowerCase()}
               />
 
               <CourseSummary
@@ -247,7 +231,7 @@ export default function CourseDetailPage() {
                     title: l.title,
                     type: (l.type as any) || 'video',
                     duration: l.duration || '0:00',
-                    videoUrl: l.videoUrl
+                    videoUrl: l.url || undefined
                   }))
                 }))}
                 courseId={course.id}
@@ -271,37 +255,18 @@ export default function CourseDetailPage() {
             </div>
 
             {/* Right Column - Sidebar */}
-            <aside className='hidden lg:block'>
-              <StatsSidebar
-                revenue={(course.price || 0) * (course.students || 0)}
-                studentsCount={course.students || 0}
-                rating={course.rating || 5}
-                status={course.status === 'published' ? 'published' : 'draft'}
-                onPublish={handlePublish}
-                onUnpublish={handleUnpublish}
-                onShare={handleShare}
-              />
-            </aside>
+            {!isAdminPage && (
+              <aside className='hidden lg:block'>
+                <StatsSidebar
+                  revenue={(course.price || 0) * (course.students || 0)}
+                  studentsCount={course.students || 0}
+                  rating={course.rating || 0}
+                  status={course.status === 'published' ? 'published' : 'draft'}
+                />
+              </aside>
+            )}
           </div>
         )}
-
-        {/* Footer Actions */}
-        <div className='mt-12 mb-8'>
-          <Separator className='mb-8' />
-          <div className='flex flex-wrap gap-3 justify-center'>
-            <Button variant='outline' onClick={handleAddSection} className='gap-2'>
-              <Plus className='h-4 w-4' />
-              Thêm phần mới
-            </Button>
-            <Button variant='outline' onClick={handleAddLesson} className='gap-2'>
-              <Plus className='h-4 w-4' />
-              Thêm bài học
-            </Button>
-            <Button variant='outline' onClick={handleEdit} className='gap-2'>
-              Chỉnh sửa khóa học
-            </Button>
-          </div>
-        </div>
       </main>
 
       {/* Video Modal */}
@@ -312,19 +277,6 @@ export default function CourseDetailPage() {
           videoUrl={currentVideo.url}
           title={currentVideo.title}
         />
-      )}
-
-      {/* Mobile Sticky CTA */}
-      {course && !loading && !error && (
-        <div className='fixed bottom-0 left-0 right-0 z-40 border-t bg-background/95 backdrop-blur p-4 lg:hidden'>
-          <Button
-            onClick={course.status === 'published' ? handleUnpublish : handlePublish}
-            className='w-full shadow-primary'
-            size='lg'
-          >
-            {course.status === 'published' ? 'Gỡ xuất bản' : 'Xuất bản khóa học'}
-          </Button>
-        </div>
       )}
     </div>
   )

@@ -17,5 +17,5 @@ public class ChapterResponse {
     String description;
     Long position;
 
-    List<LessonResponse> lessons;
+    List<LessonCourseAdminTeacherResponse> lessons;
 }

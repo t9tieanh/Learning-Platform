@@ -27,7 +27,7 @@ const getStatusBadge = (status: CourseStatus) => {
     case 'DRAFT':
       return (
         <Badge className='bg-red-100 text-red-700 dark:bg-red-800 dark:text-red-200 px-3 py-1.5 text-xs rounded-full'>
-          Tạm đóng
+          Bản nháp
         </Badge>
       )
   }
@@ -79,7 +79,6 @@ const CoursesTable: FC<CoursesTableProps> = ({ courses, statusFilter = '', onCha
                 </DropdownMenu>
               </div>
             </TableHead>
-            <TableHead className='p-3 sm:p-6 text-blue-600 dark:text-gray-300'>Học viên</TableHead>
             <TableHead className='p-3 sm:p-6 text-blue-600 dark:text-gray-300'>Thời lượng</TableHead>
             <TableHead className='p-3 sm:p-6 text-blue-600 dark:text-gray-300'>Ngày tạo</TableHead>
             <TableHead />
@@ -94,13 +93,18 @@ const CoursesTable: FC<CoursesTableProps> = ({ courses, statusFilter = '', onCha
             >
               <TableCell className='p-3 sm:p-4 flex items-center gap-3 sm:gap-4'>
                 <img
-                  src={course.thumbnailUrl || course.image || 'https://picsum.photos/200/120?grayscale'}
+                  src={
+                    course.thumbnailUrl ||
+                    course.image ||
+                    'https://img.freepik.com/premium-vector/no-photo-available-vector-icon-default-image-symbol-picture-coming-soon-web-site-mobile-app_87543-18055.jpg'
+                  }
                   alt={course.title}
                   className='w-20 h-14 sm:w-28 sm:h-20 rounded-lg object-cover shadow-sm'
                 />
                 <div>
                   <div className='font-semibold text-gray-700 dark:text-gray-100 text-base sm:text-lg'>
                     {course.title}
+                    <p className='text-sm text-gray-400 dark:text-gray-500 font-light'>{course?.shortDescription}</p>
                   </div>
                   <div className='flex flex-wrap gap-2 mt-2'>
                     {(course.tagNames || course.tags || []).map((tag, idx) => (
@@ -115,10 +119,9 @@ const CoursesTable: FC<CoursesTableProps> = ({ courses, statusFilter = '', onCha
                 </div>
               </TableCell>
               <TableCell className='px-4'>{getStatusBadge(course.status)}</TableCell>
-              <TableCell className='text-gray-700 dark:text-gray-300 px-10'>{course.students ?? 0}</TableCell>
-              <TableCell className='text-gray-700 dark:text-gray-300'>{course.duration ?? '-'}</TableCell>
+              <TableCell className='text-gray-700 dark:text-gray-300'>{course.duration ?? ''}</TableCell>
               <TableCell className='text-gray-500 dark:text-gray-400 text-xs sm:text-sm px-5'>
-                {course.createdAt ?? ''}
+                {course.createdAt ?? 'hi'}
               </TableCell>
               <TableCell className='text-right'>
                 <DropdownMenu>

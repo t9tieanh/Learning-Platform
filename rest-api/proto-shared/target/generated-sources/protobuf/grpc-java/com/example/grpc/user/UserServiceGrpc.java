@@ -46,6 +46,68 @@ public final class UserServiceGrpc {
     return getGetUserMethod;
   }
 
+  private static volatile io.grpc.MethodDescriptor<com.example.grpc.user.GetTeachersRequest,
+      com.example.grpc.user.GetTeachersResponse> getGetBulkTeachersMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "GetBulkTeachers",
+      requestType = com.example.grpc.user.GetTeachersRequest.class,
+      responseType = com.example.grpc.user.GetTeachersResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<com.example.grpc.user.GetTeachersRequest,
+      com.example.grpc.user.GetTeachersResponse> getGetBulkTeachersMethod() {
+    io.grpc.MethodDescriptor<com.example.grpc.user.GetTeachersRequest, com.example.grpc.user.GetTeachersResponse> getGetBulkTeachersMethod;
+    if ((getGetBulkTeachersMethod = UserServiceGrpc.getGetBulkTeachersMethod) == null) {
+      synchronized (UserServiceGrpc.class) {
+        if ((getGetBulkTeachersMethod = UserServiceGrpc.getGetBulkTeachersMethod) == null) {
+          UserServiceGrpc.getGetBulkTeachersMethod = getGetBulkTeachersMethod =
+              io.grpc.MethodDescriptor.<com.example.grpc.user.GetTeachersRequest, com.example.grpc.user.GetTeachersResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "GetBulkTeachers"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.example.grpc.user.GetTeachersRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.example.grpc.user.GetTeachersResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new UserServiceMethodDescriptorSupplier("GetBulkTeachers"))
+              .build();
+        }
+      }
+    }
+    return getGetBulkTeachersMethod;
+  }
+
+  private static volatile io.grpc.MethodDescriptor<com.example.grpc.user.GetUserRequest,
+      com.example.grpc.user.TeacherDetail> getGetTeacherDetailMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "GetTeacherDetail",
+      requestType = com.example.grpc.user.GetUserRequest.class,
+      responseType = com.example.grpc.user.TeacherDetail.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<com.example.grpc.user.GetUserRequest,
+      com.example.grpc.user.TeacherDetail> getGetTeacherDetailMethod() {
+    io.grpc.MethodDescriptor<com.example.grpc.user.GetUserRequest, com.example.grpc.user.TeacherDetail> getGetTeacherDetailMethod;
+    if ((getGetTeacherDetailMethod = UserServiceGrpc.getGetTeacherDetailMethod) == null) {
+      synchronized (UserServiceGrpc.class) {
+        if ((getGetTeacherDetailMethod = UserServiceGrpc.getGetTeacherDetailMethod) == null) {
+          UserServiceGrpc.getGetTeacherDetailMethod = getGetTeacherDetailMethod =
+              io.grpc.MethodDescriptor.<com.example.grpc.user.GetUserRequest, com.example.grpc.user.TeacherDetail>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "GetTeacherDetail"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.example.grpc.user.GetUserRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.example.grpc.user.TeacherDetail.getDefaultInstance()))
+              .setSchemaDescriptor(new UserServiceMethodDescriptorSupplier("GetTeacherDetail"))
+              .build();
+        }
+      }
+    }
+    return getGetTeacherDetailMethod;
+  }
+
   /**
    * Creates a new async stub that supports all call types for the service
    */
@@ -100,6 +162,20 @@ public final class UserServiceGrpc {
         io.grpc.stub.StreamObserver<com.example.grpc.user.GetUserResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetUserMethod(), responseObserver);
     }
+
+    /**
+     */
+    default void getBulkTeachers(com.example.grpc.user.GetTeachersRequest request,
+        io.grpc.stub.StreamObserver<com.example.grpc.user.GetTeachersResponse> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetBulkTeachersMethod(), responseObserver);
+    }
+
+    /**
+     */
+    default void getTeacherDetail(com.example.grpc.user.GetUserRequest request,
+        io.grpc.stub.StreamObserver<com.example.grpc.user.TeacherDetail> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetTeacherDetailMethod(), responseObserver);
+    }
   }
 
   /**
@@ -136,6 +212,22 @@ public final class UserServiceGrpc {
       io.grpc.stub.ClientCalls.asyncUnaryCall(
           getChannel().newCall(getGetUserMethod(), getCallOptions()), request, responseObserver);
     }
+
+    /**
+     */
+    public void getBulkTeachers(com.example.grpc.user.GetTeachersRequest request,
+        io.grpc.stub.StreamObserver<com.example.grpc.user.GetTeachersResponse> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getGetBulkTeachersMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     */
+    public void getTeacherDetail(com.example.grpc.user.GetUserRequest request,
+        io.grpc.stub.StreamObserver<com.example.grpc.user.TeacherDetail> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getGetTeacherDetailMethod(), getCallOptions()), request, responseObserver);
+    }
   }
 
   /**
@@ -159,6 +251,20 @@ public final class UserServiceGrpc {
     public com.example.grpc.user.GetUserResponse getUser(com.example.grpc.user.GetUserRequest request) {
       return io.grpc.stub.ClientCalls.blockingUnaryCall(
           getChannel(), getGetUserMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public com.example.grpc.user.GetTeachersResponse getBulkTeachers(com.example.grpc.user.GetTeachersRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getGetBulkTeachersMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public com.example.grpc.user.TeacherDetail getTeacherDetail(com.example.grpc.user.GetUserRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getGetTeacherDetailMethod(), getCallOptions(), request);
     }
   }
 
@@ -185,9 +291,27 @@ public final class UserServiceGrpc {
       return io.grpc.stub.ClientCalls.futureUnaryCall(
           getChannel().newCall(getGetUserMethod(), getCallOptions()), request);
     }
+
+    /**
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.example.grpc.user.GetTeachersResponse> getBulkTeachers(
+        com.example.grpc.user.GetTeachersRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getGetBulkTeachersMethod(), getCallOptions()), request);
+    }
+
+    /**
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.example.grpc.user.TeacherDetail> getTeacherDetail(
+        com.example.grpc.user.GetUserRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getGetTeacherDetailMethod(), getCallOptions()), request);
+    }
   }
 
   private static final int METHODID_GET_USER = 0;
+  private static final int METHODID_GET_BULK_TEACHERS = 1;
+  private static final int METHODID_GET_TEACHER_DETAIL = 2;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -209,6 +333,14 @@ public final class UserServiceGrpc {
         case METHODID_GET_USER:
           serviceImpl.getUser((com.example.grpc.user.GetUserRequest) request,
               (io.grpc.stub.StreamObserver<com.example.grpc.user.GetUserResponse>) responseObserver);
+          break;
+        case METHODID_GET_BULK_TEACHERS:
+          serviceImpl.getBulkTeachers((com.example.grpc.user.GetTeachersRequest) request,
+              (io.grpc.stub.StreamObserver<com.example.grpc.user.GetTeachersResponse>) responseObserver);
+          break;
+        case METHODID_GET_TEACHER_DETAIL:
+          serviceImpl.getTeacherDetail((com.example.grpc.user.GetUserRequest) request,
+              (io.grpc.stub.StreamObserver<com.example.grpc.user.TeacherDetail>) responseObserver);
           break;
         default:
           throw new AssertionError();
@@ -235,6 +367,20 @@ public final class UserServiceGrpc {
               com.example.grpc.user.GetUserRequest,
               com.example.grpc.user.GetUserResponse>(
                 service, METHODID_GET_USER)))
+        .addMethod(
+          getGetBulkTeachersMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.example.grpc.user.GetTeachersRequest,
+              com.example.grpc.user.GetTeachersResponse>(
+                service, METHODID_GET_BULK_TEACHERS)))
+        .addMethod(
+          getGetTeacherDetailMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.example.grpc.user.GetUserRequest,
+              com.example.grpc.user.TeacherDetail>(
+                service, METHODID_GET_TEACHER_DETAIL)))
         .build();
   }
 
@@ -284,6 +430,8 @@ public final class UserServiceGrpc {
           serviceDescriptor = result = io.grpc.ServiceDescriptor.newBuilder(SERVICE_NAME)
               .setSchemaDescriptor(new UserServiceFileDescriptorSupplier())
               .addMethod(getGetUserMethod())
+              .addMethod(getGetBulkTeachersMethod())
+              .addMethod(getGetTeacherDetailMethod())
               .build();
         }
       }

@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface ChapterRepository extends JpaRepository<ChapterEntity, String> {
@@ -13,4 +14,32 @@ public interface ChapterRepository extends JpaRepository<ChapterEntity, String> 
     @Query("SELECT ch FROM ChapterEntity ch WHERE ch.id = :id")
     Optional<ChapterEntity> findByIdWithLessons(@Param("id") String id);
 
+    @EntityGraph(attributePaths = {"lessons"})
+    List<ChapterEntity> findAllByCourseId(@Param("id") String id);
+
+    @Query("SELECT c.course.instructorId FROM ChapterEntity c WHERE c.id = :chapterId")
+    Optional<String> findInstructorIdByChapterId(@Param("chapterId") String chapterId);
+
+    Optional<ChapterEntity> findById(String id);
+
+    @Query("""
+    SELECT COALESCE(SUM(l.duration), 0)
+    FROM ChapterEntity ch
+    JOIN ch.lessons l
+    WHERE ch.id = :chapterId
+      AND l.type = com.freeclassroom.courseservice.enums.entity.EnumLessonType.video
+      AND l.deleted = false
+""")
+    Double getTotalVideoDurationByChapterId(@Param("chapterId") String chapterId);
+
+    @Query("""
+    SELECT COUNT(l)
+    FROM ChapterEntity ch
+    JOIN ch.lessons l
+    WHERE ch.id = :chapterId
+      AND l.deleted = false
+""")
+    Long countLessonsByChapterId(@Param("chapterId") String chapterId);
+
+    List<ChapterEntity> findByCourseIdOrderByPositionAsc(String courseId);
 }

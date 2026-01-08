@@ -1,43 +1,74 @@
-import React, { useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { Users, BookOpen, Newspaper } from 'lucide-react'
 import { StatsCard } from '../StatsCard'
+import instructorService from '@/services/instructor/instructor.service'
+import { useAuthStore } from '@/stores/useAuth.stores'
 import Chart from 'react-apexcharts'
 
 const DashboardStats: React.FC = () => {
   const [year, setYear] = useState<number>(2025)
+  const userId = useAuthStore((s) => s.data?.userId)
+  const [stats, setStats] = useState<{ totalCourse: number; totalStudent: number; totalBlog: number } | null>(null)
+  const [loadingStats, setLoadingStats] = useState(false)
+  const [errorStats, setErrorStats] = useState<string | null>(null)
+  const [revenueData, setRevenueData] = useState<number[]>(Array(12).fill(0))
+  const [profitData, setProfitData] = useState<number[]>(Array(12).fill(0))
+  const [studentData, setStudentData] = useState<number[]>(Array(12).fill(0))
+  const [loadingChart, setLoadingChart] = useState(false)
+  const [errorChart, setErrorChart] = useState<string | null>(null)
 
-  const yearlyData: Record<number, number[][]> = {
-    2020: [
-      [10, 15, 12, 18, 20, 25, 22, 28, 24, 30, 27, 35], // Doanh thu
-      [8, 12, 15, 10, 18, 14, 12, 20, 16, 22, 19, 25], // Lợi nhuận
-      [12, 18, 15, 22, 20, 27, 25, 30, 28, 35, 32, 40] // Học viên
-    ],
-    2021: [
-      [12, 16, 20, 24, 22, 28, 30, 35, 32, 38, 36, 42],
-      [9, 14, 18, 12, 20, 16, 14, 22, 18, 24, 20, 28],
-      [14, 20, 18, 25, 22, 30, 28, 34, 30, 38, 35, 42]
-    ],
-    2022: [
-      [15, 20, 22, 28, 25, 32, 30, 38, 35, 42, 40, 48],
-      [10, 16, 20, 15, 22, 18, 16, 25, 20, 28, 22, 30],
-      [16, 22, 20, 28, 24, 32, 30, 36, 34, 40, 38, 45]
-    ],
-    2023: [
-      [18, 24, 26, 32, 30, 38, 35, 42, 40, 48, 45, 52],
-      [12, 18, 22, 16, 25, 20, 18, 28, 22, 30, 24, 32],
-      [18, 25, 22, 30, 26, 35, 32, 38, 36, 42, 40, 48]
-    ],
-    2024: [
-      [20, 26, 30, 35, 32, 40, 38, 45, 42, 50, 48, 55],
-      [14, 20, 24, 18, 28, 22, 20, 30, 24, 32, 26, 35],
-      [20, 28, 25, 32, 28, 38, 35, 40, 38, 45, 42, 50]
-    ],
-    2025: [
-      [22, 28, 32, 38, 35, 42, 40, 48, 45, 52, 50, 58],
-      [16, 22, 26, 20, 30, 25, 22, 35, 28, 38, 30, 40],
-      [22, 30, 28, 35, 32, 40, 38, 45, 42, 50, 48, 55]
-    ]
-  }
+  useEffect(() => {
+    if (!userId) return
+    let mounted = true
+    setLoadingStats(true)
+    instructorService
+      .getStatistic(userId)
+      .then((data) => {
+        if (mounted) {
+          setStats(data)
+          setErrorStats(null)
+        }
+      })
+      .catch((e) => {
+        if (mounted) {
+          setErrorStats(e?.message || 'Không lấy được thống kê')
+        }
+      })
+      .finally(() => mounted && setLoadingStats(false))
+    return () => {
+      mounted = false
+    }
+  }, [userId])
+
+  // Fetch chart data when year or user changes
+  useEffect(() => {
+    if (!userId || !year) return
+    let mounted = true
+    setLoadingChart(true)
+    setErrorChart(null)
+    instructorService
+      .getChart({ year, userId })
+      .then((chart) => {
+        if (!mounted) return
+        const byMonth: Record<number, { revenue: number; profit: number; studentCount: number }> = {}
+        chart.monthlyData.forEach((m) => {
+          byMonth[m.month] = {
+            revenue: Number(m.revenue) || 0,
+            profit: Number(m.profit) || 0,
+            studentCount: Number(m.studentCount) || 0
+          }
+        })
+        const months = Array.from({ length: 12 }, (_, i) => i + 1)
+        setRevenueData(months.map((m) => byMonth[m]?.revenue ?? 0))
+        setProfitData(months.map((m) => byMonth[m]?.profit ?? 0))
+        setStudentData(months.map((m) => byMonth[m]?.studentCount ?? 0))
+      })
+      .catch((e) => setErrorChart(e?.message || 'Không lấy được dữ liệu biểu đồ'))
+      .finally(() => mounted && setLoadingChart(false))
+    return () => {
+      mounted = false
+    }
+  }, [userId, year])
 
   const options: ApexCharts.ApexOptions = {
     chart: {
@@ -67,11 +98,14 @@ const DashboardStats: React.FC = () => {
     }
   }
 
-  const series = [
-    { name: 'Doanh thu (triệu đồng)', data: yearlyData[year][0] },
-    { name: 'Lợi nhuận (triệu đồng)', data: yearlyData[year][1] },
-    { name: 'Học viên', data: yearlyData[year][2] }
-  ]
+  const series = useMemo(
+    () => [
+      { name: 'Doanh thu', data: revenueData },
+      { name: 'Lợi nhuận', data: profitData },
+      { name: 'Học viên', data: studentData }
+    ],
+    [revenueData, profitData, studentData]
+  )
 
   return (
     <div className='flex flex-col md:flex-row gap-6 items-start mb-4'>
@@ -79,25 +113,23 @@ const DashboardStats: React.FC = () => {
       <div className='flex flex-col gap-4'>
         <StatsCard
           title='Khóa học'
-          value='24'
+          value={loadingStats ? '...' : String(stats?.totalCourse ?? 0)}
           icon={BookOpen}
           variant='primary'
-          trend={{ value: '+2', isPositive: true }}
         />
         <StatsCard
           title='Học viên'
-          value='328'
+          value={loadingStats ? '...' : String(stats?.totalStudent ?? 0)}
           icon={Users}
           variant='success'
-          trend={{ value: '+15', isPositive: true }}
         />
         <StatsCard
           title='Bài viết'
-          value='19'
+          value={loadingStats ? '...' : String(stats?.totalBlog ?? 0)}
           icon={Newspaper}
           variant='warning'
-          trend={{ value: '+15', isPositive: true }}
         />
+        {errorStats && <p className='text-xs text-red-600'>Lỗi: {errorStats}</p>}
       </div>
 
       {/* Chart với chọn năm */}

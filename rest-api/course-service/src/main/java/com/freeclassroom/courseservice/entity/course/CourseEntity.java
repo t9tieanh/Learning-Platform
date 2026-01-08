@@ -25,8 +25,13 @@ import java.util.Set;
 public class CourseEntity extends AbstractEntity {
     String title;
     String shortDescription;
+
+    @Column(columnDefinition = "TEXT")
     String longDescription;
     String thumbnailUrl;
+    Double rating;
+
+    String introductoryVideo;
     String language;
     Double originalPrice;
     Double finalPrice;
@@ -38,12 +43,12 @@ public class CourseEntity extends AbstractEntity {
     String instructorId;
 
     // Chapter
-    @OneToMany(mappedBy = "course")
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
     List<ChapterEntity> chapters;
 
     // Enrollment
-    @OneToMany(mappedBy = "course")
-    List<EnrollmentsEntity> enrollments;
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    Set<EnrollmentsEntity> enrollments;
 
     // Tag
     @ManyToMany
@@ -55,7 +60,7 @@ public class CourseEntity extends AbstractEntity {
     List<TagEntity> tags;
 
     // Category
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     CategoryEntity category;
 
     @Enumerated(EnumType.STRING)
@@ -72,4 +77,7 @@ public class CourseEntity extends AbstractEntity {
     @Column(name = "requirement")
     //requiment
     Set<String> requirements;
+
+    // optinal -> reason of reject course
+    String reason;
 }

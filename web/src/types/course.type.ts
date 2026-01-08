@@ -18,9 +18,9 @@ export interface Section {
 
 export interface Instructor {
   id: string
-  name: string
-  avatar: string
-  bio: string
+  name?: string
+  image?: string
+  bio?: string
   coursesCount?: number
   email?: string
 }
@@ -42,14 +42,15 @@ export interface CourseStats {
 export interface Course {
   id: string
   title: string
-  coverImage: string
+  thumbnailUrl: string
   introVideo?: string
   shortDescription: string
   longDescription: string
   studentsCount: number
   rating: number
   reviewsCount: number
-  price?: number
+  originalPrice?: number
+  finalPrice?: number
   category?: string
   tags?: string[]
   status: 'published' | 'draft'
@@ -59,4 +60,11 @@ export interface Course {
   instructor: Instructor
   stats: CourseStats
   reviews: Review[]
+}
+
+export interface CourseResponse {
+  id: number
+  title: string
+  price: string
+  image: string
 }

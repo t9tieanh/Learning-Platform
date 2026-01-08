@@ -1,33 +1,31 @@
 import { useState } from 'react'
-import { User, Settings, BookOpen } from 'lucide-react'
+import { User, BookOpen, FileClock } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import PersonalInfo from '@/components/Profile/PersonalInfo'
-import AccountSetting from '@/components/Profile/AccountSetting'
-import CourseStudied from '@/components/Profile/CourseStudied'
-
-type ProfileSection = 'info' | 'settings' | 'courses'
+import PersonalInfo from '@/components/Profile/personal-info'
+import CourseStudied from '@/components/Profile/my-course'
+import OrderHistory from '@/components/Profile/orderHistory'
 
 const Profile = () => {
-  const [activeSection, setActiveSection] = useState<ProfileSection>('info')
+  const [activeSection, setActiveSection] = useState<string>('info')
 
   const navigationItems = [
     {
-      id: 'info' as ProfileSection,
+      id: 'info',
       title: 'Thông tin cá nhân',
       icon: User,
       description: 'Xem và chỉnh sửa thông tin'
     },
     {
-      id: 'settings' as ProfileSection,
-      title: 'Cài đặt',
-      icon: Settings,
-      description: 'Tùy chỉnh tài khoản'
-    },
-    {
-      id: 'courses' as ProfileSection,
-      title: 'Khóa học đã học',
+      id: 'courses',
+      title: 'Khóa học của tôi',
       icon: BookOpen,
       description: 'Lịch sử học tập'
+    },
+    {
+      id: 'order-history',
+      title: 'Lịch sử đơn hàng',
+      icon: FileClock,
+      description: 'Xem lịch sử đơn hàng của bạn'
     }
   ]
 
@@ -35,22 +33,22 @@ const Profile = () => {
     switch (activeSection) {
       case 'info':
         return <PersonalInfo />
-      case 'settings':
-        return <AccountSetting />
       case 'courses':
         return <CourseStudied />
+      case 'order-history':
+        return <OrderHistory />
       default:
         return <PersonalInfo />
     }
   }
 
   return (
-    <div className='min-h-screen bg-gray-50'>
+    <div className='max-w-7xl mx-auto bg-gray-50 py-6 min-h-screen'>
       <div className='container mx-auto p-6'>
         <div className='grid grid-cols-1 lg:grid-cols-4 gap-6'>
           {/* Navigation Sidebar */}
           <div className='lg:col-span-1'>
-            <Card className='border-border sticky top-6'>
+            <Card className='sticky top-6 shadow-md'>
               <CardHeader>
                 <CardTitle className='text-xl bg-gradient-to-r from-primary to-primary-glow bg-clip-text text-transparent'>
                   Hồ sơ cá nhân
@@ -66,7 +64,7 @@ const Profile = () => {
                       <button
                         key={item.id}
                         onClick={() => setActiveSection(item.id)}
-                        className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors rounded-lg mx-2 ${
+                        className={`w-full shadow-sm flex items-center gap-3 px-4 py-3 text-left transition-colors rounded-lg mx-2 ${
                           isActive
                             ? 'bg-primary text-primary-foreground shadow-sm'
                             : 'text-muted-foreground hover:text-foreground hover:bg-muted'
@@ -74,7 +72,7 @@ const Profile = () => {
                       >
                         <Icon className='h-5 w-5' />
                         <div>
-                          <div className='font-base'>{item.title}</div>
+                          <div className='font-sm text-base font-medium'>{item.title}</div>
                           <div
                             className={`text-xs ${isActive ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}
                           >

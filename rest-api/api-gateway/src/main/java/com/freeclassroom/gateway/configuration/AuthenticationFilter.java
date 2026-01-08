@@ -28,11 +28,21 @@ import java.util.List;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PACKAGE, makeFinal = true)
 public class AuthenticationFilter implements GlobalFilter, Ordered {
+    private record PublicEndpoint(String pattern, String method) {}
 
     @NonFinal
-    private String[] publicEndpoints = {
-            "/user.*", "/auth.*", "/course.*",
-    };
+    private List<PublicEndpoint> publicEndpoints = List.of(
+            new PublicEndpoint("/user.*", "ALL"),
+            new PublicEndpoint("/auth.*", "ALL"),
+            new PublicEndpoint("/learning/courses.*", "ALL"),
+            new PublicEndpoint("/learning/categories.*", "ALL"),
+            new PublicEndpoint("/learning/storage.*", "ALL"),
+            new PublicEndpoint("/learning/chapters-user.*", "ALL"),
+            new PublicEndpoint("/learning/lesson-student.*", "ALL"),
+            new PublicEndpoint("/notify/blog.*", "GET"), // chỉ GET blog là public
+            new PublicEndpoint("/sale.*", "ALL"),
+            new PublicEndpoint("/notify/ai.*", "ALL")
+    );
 
     ObjectMapper objectMapper;
 
@@ -40,9 +50,14 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
     @NonFinal
     private String apiPrefix;
 
-    private boolean isPublicEndpoint(ServerHttpRequest request){
-        return Arrays.stream(publicEndpoints)
-                .anyMatch(s -> request.getURI().getPath().matches(apiPrefix + s));
+    private boolean isPublicEndpoint(ServerHttpRequest request) {
+        String path = request.getURI().getPath();
+        String method = String.valueOf(request.getMethod()); // GET, POST, etc.
+
+        return publicEndpoints.stream().anyMatch(e ->
+                path.matches(apiPrefix + e.pattern()) &&
+                        (e.method().equalsIgnoreCase("ALL") || e.method().equalsIgnoreCase(method))
+        );
     }
 
     @Override

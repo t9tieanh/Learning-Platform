@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+import "course.proto";
+import "user.proto";
+
+option java_multiple_files = true;
+option java_package = "com.example.grpc.user";
+option java_outer_classname = "CourseServiceProto";
+
+service CourseService {
+  rpc getCourse (GetCourseRequest) returns (CourseResponse);
+  rpc getBulkCourses (GetCoursesRequest) returns (GetCoursesResponse);
+  rpc listEnrolledCourses (EnrolledCoursesRequest) returns (GetCoursesResponse);
+  rpc getCourseAdminData (google.protobuf.Empty) returns (GetCourseAdminDataResponse);
+  rpc getTotalCoursesAndStudent (GetUserRequest) returns (GetCourseAndStudentResponse);
+  rpc getChartData (GetChartDataRequest) returns (GetChartDataResponse);
+  rpc checkHasPurchased(HasPurchasedCourseRequest) returns (HasPurchasedCourseResponse);
+  rpc updateCourseRating(UpdateCourseRatingRequest) returns (UpdateCourseRatingResponse);
+  rpc isInstructor(IsInstructorRequest) returns (IsInstructorResponse);
+}

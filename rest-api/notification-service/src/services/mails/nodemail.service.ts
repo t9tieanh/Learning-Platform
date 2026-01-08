@@ -1,12 +1,14 @@
 import nodemailer from 'nodemailer'
 import { env } from '~/config/env'
 import { NotificationDto, VerifyEmail } from '~/dto/request/notification.dto'
+import { CourseApprovalEvent } from '~/dto/event/course-approval-event.dto'
 import { QueueNameEnum } from '~/enums/rabbitQueue.enum'
+import { getUser } from '~/grpc/userClient'
 import { renderTemplate } from '~/utils/templateUtil'
 
 // Interface cho options gửi mail
 export interface SendEmailOptions {
-  to: string[]
+  to: string | string[]
   subject: string
   text?: string
   html?: string
@@ -73,6 +75,55 @@ class NodeMailService {
         break
       }
 
+      case QueueNameEnum.ORDERCONFIRM: {
+        // Order confirmation notification - payload should contain customer and items
+        const orderNotification = notification as {
+          email?: string | string[]
+          to?: string | string[]
+          payload?: unknown
+        }
+
+        subject = 'Xác nhận đơn hàng của bạn'
+        to = orderNotification.email || orderNotification.to || []
+        templateName = 'order-confirmation.html'
+        templateData = orderNotification.payload || orderNotification
+        break
+      }
+      case QueueNameEnum.COURSE_APPROVAL: {
+        const event = notification as unknown as CourseApprovalEvent
+        // Lấy email instructor qua userGrpc
+        let instructorEmail = ''
+        try {
+          const user = await getUser(event.instructorId)
+          instructorEmail = user?.email || ''
+        } catch (err) {
+          console.error('Lỗi lấy email instructor:', err)
+          return
+        }
+        to = instructorEmail
+        if (event.action === 'APPROVED') {
+          subject = 'Khóa học của bạn đã được duyệt!'
+          templateName = 'course-approved.html'
+          templateData = {
+            title: event.title,
+            shortDescription: event.shortDescription,
+            finalPrice: event.finalPrice,
+            thumbnailUrl: event.thumbnailUrl
+          }
+        } else if (event.action === 'REJECTED') {
+          subject = 'Khóa học của bạn bị từ chối'
+          templateName = 'course-rejected.html'
+          templateData = {
+            title: event.title,
+            reason: event.reason,
+            thumbnailUrl: event.thumbnailUrl
+          }
+        } else {
+          console.log('Không xác định action cho course approval:', event)
+          return
+        }
+        break
+      }
       // Thêm các loại khác nếu cần
       default:
         console.log(`Chưa thể gửi mail to ${notification.email}: ${notification.type}`)
@@ -83,7 +134,7 @@ class NodeMailService {
     const html = await renderTemplate(templateName, templateData)
 
     const mailPayload: SendEmailOptions = {
-      to,
+      to: to || [notification.email],
       subject,
       text: html.replace(/<[^>]+>/g, ''), // Convert HTML to plain text thô sơ
       html

@@ -7,18 +7,25 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { FcGoogle } from 'react-icons/fc'
 import CustomCheckbox from '../../common/CustomCheckbox'
 import { FaSquareFacebook } from 'react-icons/fa6'
-import { BookOpen } from 'lucide-react'
 import { SignInFormInputs, signInSchema } from '@/utils/auth'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import userService from '@/services/user/user.service'
-import { toast } from 'react-toastify'
+import aiChatService from '@/services/aiChat.service'
+import { toast } from 'sonner'
 import useLoading from '@/hooks/useLoading.hook'
 import { useAuthStore } from '@/stores/useAuth.stores'
 import { useNavigate } from 'react-router-dom'
 import logo from '@/assets/images/logo1.png'
+import { LogIn } from 'lucide-react'
 
-const SignInForm: FC = () => {
+const SignInForm = ({
+  handleLoginWithGoogle,
+  setIsSignUpMode
+}: {
+  handleLoginWithGoogle: () => void
+  setIsSignUpMode: (value: boolean) => void
+}) => {
   const {
     register,
     handleSubmit,
@@ -26,10 +33,10 @@ const SignInForm: FC = () => {
   } = useForm<SignInFormInputs>({
     resolver: yupResolver(signInSchema)
   })
-  const navigator = useNavigate()
+  const navigate = useNavigate()
 
   // Get state and actions
-  const { data, setData } = useAuthStore()
+  const { data, setData, setConversationId } = useAuthStore()
 
   const { loading, startLoading, stopLoading } = useLoading()
 
@@ -39,33 +46,38 @@ const SignInForm: FC = () => {
       startLoading()
       const response = await userService.login(data.username, data.password)
       if (response && response.result && response.code === 200) {
-        // save to localstorage
-        setData(response.result)
+        const r: any = response.result
+        const userId = r.userId || r.id || r._id || ''
+        setData({
+          accessToken: r.accessToken,
+          refreshToken: r.refreshToken,
+          userId,
+          name: r.name || r.userName || r.username,
+          username: r.username || r.userName,
+          email: r.email,
+          avatarUrl: r.avatarUrl,
+          role: r.role
+        })
+        // create/fetch AI conversation
+        if (userId) {
+          try {
+            const convRes = await aiChatService.createConversation(userId)
+            if (convRes?.conversationId) setConversationId(convRes.conversationId)
+          } catch (e) {
+            console.warn('Cannot init AI conversation', e)
+          }
+        }
         toast.success('Đăng nhập thành công!')
-        navigator('/')
+        const role = response.result.role
+        const path = role === 'admin' ? '/admin' : '/'
+        navigate(path)
       } else toast.error(response.message)
     } catch (error: any) {
       toast.error('Đã có lỗi trong quá trình xử lý !')
     } finally {
       stopLoading()
-    }
-  }
 
-  //handle login with google
-  const handleLoginWithGoogle = () => {
-    try {
-      const authUri = import.meta.env.VITE_GOOGLE_AUTH_URI as string
-      const callbackUri = import.meta.env.VITE_GOOGLE_REDIRECT_URI as string
-      const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID as string
-
-      const targetUrl = `${authUri}?redirect_uri=${encodeURIComponent(
-        callbackUri
-      )}&response_type=code&client_id=${googleClientId}&scope=openid%20email%20profile`
-
-      window.location.href = targetUrl
-    } catch (error: any) {
-      console.log(error)
-      toast.error('Đã có lỗi trong quá trình xử lý !')
+      // Fetch conversation
     }
   }
 
@@ -89,11 +101,11 @@ const SignInForm: FC = () => {
                 {errors.password && <span className='text-red-500 text-xs text-left'>{errors.password.message}</span>}
               </div>
               <div className='remember-me flex justify-between items-center mt-5'>
-                <CustomCheckbox id='remember-me' label='Ghi nhớ tôi' className='text-gray-700' />
+                <p></p>
                 <p
-                  className='text-gray-700 text-sm font-bold'
+                  className='text-blue-700 text-sm font-bold underline hover:cursor-pointer'
                   onClick={() => {
-                    navigator('/forgot')
+                    navigate('/forgot')
                   }}
                 >
                   Quên mật khẩu ?
@@ -104,7 +116,8 @@ const SignInForm: FC = () => {
                   label='Đăng nhập'
                   isLoader={loading}
                   type='submit'
-                  className='w-full rounded-md border border-gray-300 bg-blue-500 py-3 text-white hover:bg-blue-600'
+                  icon={<LogIn size={16} />}
+                  className='w-full rounded-md shadow-lg border border-gray-300 bg-blue-500 py-3 text-white hover:bg-blue-600'
                 />
               </div>
             </form>
@@ -131,9 +144,9 @@ const SignInForm: FC = () => {
             </div>
             <p className='text-center text-sm text-gray-500 mt-5'>
               Bạn chưa có tài khoản?{' '}
-              <a href='/login' className='text-blue-500 hover:underline'>
+              <button type='button' onClick={() => setIsSignUpMode(true)} className='text-blue-500 hover:underline'>
                 Đăng ký
-              </a>
+              </button>
             </p>
           </CardContent>
         </CardHeader>
