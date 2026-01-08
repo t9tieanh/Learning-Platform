@@ -1,6 +1,8 @@
 import Banner from '@/components/Checkout/baner'
 import PaymentForm from '@/components/Checkout/paymentForm'
+import PaymentFormSkeleton from '@/components/Checkout/PaymentFormSkeleton'
 import OrderSummary from '@/components/Checkout/summary'
+import OrderSummarySkeleton from '@/components/Checkout/OrderSummarySkeleton'
 import TimeToLive from '@/components/Checkout/timetolive'
 import orderService from '@/services/sale/order.service'
 import { useEffect, useState } from 'react'
@@ -12,12 +14,14 @@ import OrderSuccess from '@/components/Checkout/order-success'
 const CheckoutPage = () => {
   const navigate = useNavigate()
   const [order, setOrder] = useState<Order | null>(null)
+  const [loading, setLoading] = useState(true)
   const [mode, setMode] = useState<'view' | 'pay'>('pay')
   const { id } = useParams<{ id: string }>()
 
   useEffect(() => {
     const fetchOrderData = async () => {
       try {
+        setLoading(true)
         let response = null
         if (!id) {
           // get current order
@@ -45,11 +49,13 @@ const CheckoutPage = () => {
       } catch (error) {
         toast.error('Không thể lấy thông tin đơn hàng.')
         navigate('/')
+      } finally {
+        setLoading(false)
       }
     }
 
     fetchOrderData()
-  }, [])
+  }, [id, navigate])
 
   return (
     <div className='bg-gray-50'>
@@ -61,11 +67,9 @@ const CheckoutPage = () => {
             <Banner />
             {order?.ttl && <TimeToLive ttl={order.ttl} />}
             <div className='py-5 grid grid-cols-1 md:grid-cols-5 items-start min-h-[60vh] gap-6'>
-              <div className='md:col-span-3'>
-                <PaymentForm order={order} />
-              </div>
+              <div className='md:col-span-3'>{loading ? <PaymentFormSkeleton /> : <PaymentForm order={order} />}</div>
               <div className='md:col-span-2'>
-                <OrderSummary order={order} setOrder={setOrder} />
+                {loading ? <OrderSummarySkeleton /> : <OrderSummary order={order} setOrder={setOrder} />}
               </div>
             </div>
           </div>

@@ -82,7 +82,7 @@ const Cover = ({ video, image, title, shortDescription, teacher, tags, showSmall
       )}
       <div className='relative group cover-container min-h-96 bg-[#0C356A] flex flex-col md:flex-row items-center justify-center mx-auto w-full py-16'>
         <div
-          className='absolute left-4 z-50 invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-opacity duration-200'
+          className='absolute left-4 z-20 invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-opacity duration-200'
           style={{ top: showSmallHeader ? 'calc(var(--main-header-height, 100px) + 1rem)' : '1rem' }}
         >
           <CustomButton

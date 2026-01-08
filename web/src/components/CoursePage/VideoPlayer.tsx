@@ -100,7 +100,7 @@ const VideoPlayer = ({ lesson, markDoneVideo }: { lesson: Lesson; markDoneVideo:
             : ''
         }
       `}</style>
-      {!showVideo && lesson?.thumbnailUrl ? (
+      {!showVideo && lesson?.thumbnailUrl && !lesson.introductionVideo ? (
         <img
           src={lesson?.thumbnailUrl}
           alt='Video Thumbnail'

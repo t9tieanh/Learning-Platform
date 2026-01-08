@@ -6,6 +6,7 @@ import { formatDuration } from '@/utils/time/time.utils'
 import { Lesson } from '@/types/course-user'
 import chapterUserService from '@/services/course/chapter-user.service'
 import PreviewPublicLesson from './previewPublicLesson'
+import LessonSkeleton from './LessonSkeleton'
 
 export interface Section {
   id: string
@@ -83,7 +84,7 @@ const CourseSection = ({ section, index }: { section: Section; index: number }) 
 
       <AccordionContent className='px-6 pb-6'>
         <div className='ml-20 space-y-3'>
-          {loading && <div className='text-muted-foreground text-sm'>Đang tải bài học...</div>}
+          {loading && <LessonSkeleton />}
 
           {!loading &&
             lessons.length > 0 &&

@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import courseAdminService from '@/services/course/course-admin.service'
 import { toast } from 'sonner'
 import { AiFillDislike } from 'react-icons/ai'
+import useLoading from '@/hooks/useLoading.hook'
 
 interface CourseHeroProps {
   title: string
@@ -78,9 +79,9 @@ export function CourseHero({
 }: CourseHeroProps) {
   const [openPreview, setOpenPreview] = useState(false)
   const [openApproveModal, setOpenApproveModal] = useState(false)
-  const [approving, setApproving] = useState(false)
-  const [rejecting, setRejecting] = useState(false)
   const [rejectReason, setRejectReason] = useState('')
+  const { loading: approving, startLoading: startApproving, stopLoading: stopApproving } = useLoading()
+  const { loading: rejecting, startLoading: startRejecting, stopLoading: stopRejecting } = useLoading()
   const location = useLocation()
   const isAdminRoute = location.pathname.startsWith('/admin/course')
   const { id } = useParams<{ id: string }>()
@@ -92,8 +93,8 @@ export function CourseHero({
       toast.error('Missing course id')
       return
     }
-    setApproving(true)
     try {
+      startApproving()
       const res = await courseAdminService.aprovalCourse(id)
       if (res && res.code === 200) {
         toast.success('Phê duyệt khoá học thành công')
@@ -105,7 +106,7 @@ export function CourseHero({
       console.error(err)
       toast.error('Phê duyệt thất bại. Vui lòng thử lại.')
     } finally {
-      setApproving(false)
+      stopApproving()
     }
   }
 
@@ -118,8 +119,8 @@ export function CourseHero({
     if (!rejectReason) {
       // require reason? we allow empty
     }
-    setRejecting(true)
     try {
+      startRejecting()
       const res = await courseAdminService.rejectCourse(id, rejectReason)
       if (res && res.code === 200) {
         toast.success('Từ chối khoá học thành công')
@@ -131,7 +132,7 @@ export function CourseHero({
       console.error(err)
       toast.error('Lỗi khi gọi API từ chối')
     } finally {
-      setRejecting(false)
+      stopRejecting()
     }
   }
 

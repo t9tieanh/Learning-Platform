@@ -10,6 +10,9 @@ import courseService from '@/services/course/course-student.service'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import Button from '@/components/common/Button'
+import { CourseSkeleton } from '@/components/CoursePage/CourseSkeleton'
+import { TabNavigationSkeleton } from '@/components/CoursePage/TabNavigationSkeleton'
+import { CourseSidebarSkeleton } from '@/components/CoursePage/CourseSidebarSkeleton'
 
 const CoursePage = () => {
   type UILecture = {
@@ -23,6 +26,7 @@ const CoursePage = () => {
   }
   const { courseId } = useParams<{ courseId: string }>()
   const [courseData, setCourseData] = useState<CourseDetail | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
 
   const [currentLecture, setCurrentLecture] = useState<Lesson>()
   const [currentLectureId, setCurrentLectureId] = useState<string>()
@@ -32,6 +36,7 @@ const CoursePage = () => {
   useEffect(() => {
     const fetchCourseInfo = async () => {
       if (!courseId) return
+      setIsLoading(true)
       try {
         const response = await courseService.getCourseDetails(courseId)
         if (response && response.code === 200 && response.result) {
@@ -54,6 +59,8 @@ const CoursePage = () => {
         }
       } catch (error) {
         console.log('Failed to fetch course details')
+      } finally {
+        setIsLoading(false)
       }
     }
 
@@ -145,7 +152,14 @@ const CoursePage = () => {
       <div className='flex-1 flex overflow-hidden'>
         {/* Left Column - Video & Tabs */}
         <div className='flex-1 flex flex-col overflow-y-auto px-6 py-4'>
-          {currentLecture && (
+          {isLoading ? (
+            <>
+              <CourseSkeleton />
+              <div className='mt-2 mx-auto w-full'>
+                <TabNavigationSkeleton />
+              </div>
+            </>
+          ) : currentLecture ? (
             <>
               <LessonViewer lesson={currentLecture} />
               <div className='mt-2 mx-auto w-full'>
@@ -157,17 +171,21 @@ const CoursePage = () => {
                 />
               </div>
             </>
-          )}
+          ) : null}
         </div>
 
         {/* Right Column - Course Sidebar (Desktop) */}
         <div className='hidden lg:flex lg:flex-col lg:w-96 flex-shrink-0 border-l border-border overflow-y-auto'>
-          <CourseSidebar
-            sections={uiSections}
-            currentLectureId={currentLectureId as string}
-            onSelectLecture={handleSelectLecture}
-            onClose={() => setSidebarOpen(false)}
-          />
+          {isLoading ? (
+            <CourseSidebarSkeleton />
+          ) : (
+            <CourseSidebar
+              sections={uiSections}
+              currentLectureId={currentLectureId as string}
+              onSelectLecture={handleSelectLecture}
+              onClose={() => setSidebarOpen(false)}
+            />
+          )}
         </div>
 
         {/* Mobile Sidebar Overlay */}

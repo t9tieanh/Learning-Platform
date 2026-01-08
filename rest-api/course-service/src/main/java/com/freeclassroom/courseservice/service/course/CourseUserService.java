@@ -3,8 +3,6 @@ package com.freeclassroom.courseservice.service.course;
 import com.example.grpc.user.GetTeachersResponse;
 import com.example.grpc.user.GetUserResponse;
 import com.example.grpc.user.Teacher;
-import com.example.grpc.user.TeacherDetail;
-import com.freeclassroom.courseservice.dto.grpc.FeedbackDto;
 import com.freeclassroom.courseservice.dto.response.ApiResponse;
 import com.freeclassroom.courseservice.dto.response.common.Pagination;
 import com.freeclassroom.courseservice.dto.response.common.PagingResponse;
@@ -154,14 +152,14 @@ public class CourseUserService implements ICourseUserService{
     }
 
     @Override
-    public ApiResponse<List<CourseResponse>> getBestSellerCourse(int limit) {
+    public ApiResponse<List<CourseUserResponse>> getBestSellerCourse(int limit) {
         try {
             Pageable pageable = PageRequest.of(0, limit);
             List<CourseEntity> courseEntities = courseRepo.findBestSellerCourses(pageable);
 
-            List<CourseResponse> courses = getInstructorGrpc(courseEntities);
+            List<CourseUserResponse> courses = getInstructorGrpc(courseEntities);
 
-            return ApiResponse.<List<CourseResponse>>builder()
+            return ApiResponse.<List<CourseUserResponse>>builder()
                     .code(HttpStatus.OK.value())
                     .message("Thành công")
                     .result(courses)
@@ -169,7 +167,7 @@ public class CourseUserService implements ICourseUserService{
 
         } catch (Exception e) {
             e.printStackTrace();
-            return ApiResponse.<List<CourseResponse>>builder()
+            return ApiResponse.<List<CourseUserResponse>>builder()
                     .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
                     .message("Lỗi: " + e.getMessage())
                     .result(null)
@@ -178,22 +176,22 @@ public class CourseUserService implements ICourseUserService{
     }
 
     @Override
-    public ApiResponse<List<CourseResponse>> getTrendyCourse(int limit) {
+    public ApiResponse<List<CourseUserResponse>> getTrendyCourse(int limit) {
         try {
             int month = LocalDate.now().getMonthValue();
             int year = LocalDate.now().getYear();
             Pageable pageable = PageRequest.of(0, limit);
             List<CourseEntity> courseEntities = courseRepo.getTrendyCourse(pageable, month, year);
 
-            List<CourseResponse> courses = getInstructorGrpc(courseEntities);
+            List<CourseUserResponse> courses = getInstructorGrpc(courseEntities);
 
-            return ApiResponse.<List<CourseResponse>>builder()
+            return ApiResponse.<List<CourseUserResponse>>builder()
                     .code(HttpStatus.OK.value())
                     .message("Thành công")
                     .result(courses)
                     .build();
         } catch (Exception e) {
-            return ApiResponse.<List<CourseResponse>>builder()
+            return ApiResponse.<List<CourseUserResponse>>builder()
                     .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
                     .message("Lỗi: " + e.getMessage())
                     .result(null)
@@ -202,7 +200,7 @@ public class CourseUserService implements ICourseUserService{
     }
 
     @Override
-    public ApiResponse<PageResponse<CourseResponse>> getAllCourses(int page, int limit, String search, String category,
+    public ApiResponse<PageResponse<CourseUserResponse>> getAllCourses(int page, int limit, String search, String category,
                                                                    Double minPrice, Double minRating, String sort) {
         try {
             Sort sortOption = switch (sort) {
@@ -215,9 +213,9 @@ public class CourseUserService implements ICourseUserService{
 
             Page<CourseEntity> result = courseRepo.findAllWithFilters(search, category, minPrice, minRating, pageable);
 
-            List<CourseResponse> content = getInstructorGrpc(result.getContent());
+            List<CourseUserResponse> content = getInstructorGrpc(result.getContent());
 
-            PageResponse<CourseResponse> pageResponse = new PageResponse<>(
+            PageResponse<CourseUserResponse> pageResponse = new PageResponse<>(
                     content,
                     result.getNumber() + 1,
                     result.getSize(),
@@ -225,14 +223,14 @@ public class CourseUserService implements ICourseUserService{
                     result.getTotalPages()
             );
 
-            return ApiResponse.<PageResponse<CourseResponse>>builder()
+            return ApiResponse.<PageResponse<CourseUserResponse>>builder()
                     .code(HttpStatus.OK.value())
                     .message("Lấy danh sách khóa học thành công")
                     .result(pageResponse)
                     .build();
 
         } catch (Exception e) {
-            return ApiResponse.<PageResponse<CourseResponse>>builder()
+            return ApiResponse.<PageResponse<CourseUserResponse>>builder()
                     .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
                     .message("Lỗi: " + e.getMessage())
                     .result(null)
@@ -285,7 +283,7 @@ public class CourseUserService implements ICourseUserService{
                     .result(response)
                     .build();
         } catch (Exception e) {
-            e.printStackTrace(); // Log ra console hoặc dùng logger
+            e.printStackTrace();
             return ApiResponse.<List<CourseResponse>>builder()
                     .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
                     .message("Đã xảy ra lỗi khi lấy danh sách khóa học: " + e.getMessage())
@@ -320,10 +318,10 @@ public class CourseUserService implements ICourseUserService{
     }
 
     // general code
-    private List<CourseResponse> getInstructorGrpc(List<CourseEntity> courseEntities) {
+    private List<CourseUserResponse> getInstructorGrpc(List<CourseEntity> courseEntities) {
         return courseEntities.stream()
                 .map(entity -> {
-                    CourseResponse dto = courseMapper.toDto(entity);
+                    CourseUserResponse dto = courseMapper.toUserDto(entity);
 
                     // Gọi sang user-service để lấy instructor
                     GetUserResponse user = userGrpcClient.getUser(
