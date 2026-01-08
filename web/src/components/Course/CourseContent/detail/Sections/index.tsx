@@ -109,7 +109,6 @@ const CourseSection = ({ section, index }: { section: Section; index: number }) 
                     <span className='text-muted-foreground'>{lesson.title}</span>
                   </div>
                   <div className='text-sm text-muted-foreground flex items-center gap-2'>
-                    {formatDuration(lesson.duration)}
                     {lesson?.isPublic && (
                       <div className='preview'>
                         <button
@@ -132,6 +131,7 @@ const CourseSection = ({ section, index }: { section: Section; index: number }) 
                         </button>
                       </div>
                     )}
+                    {formatDuration(lesson.duration)}
                   </div>
                 </div>
               )

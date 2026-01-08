@@ -12,25 +12,25 @@ import {
   DrawerHeader,
   DrawerTitle
 } from '@/components/ui/drawer'
-import { useEffect } from 'react'
 import { Send, NotebookPen } from 'lucide-react'
 
 const NoteSection = ({
   lessonId,
   open,
   setOpen,
-  note
+  note,
+  setNote
 }: {
   lessonId: string
   open: boolean
   setOpen: (open: boolean) => void
   note: string
+  setNote: (note: string) => void
 }) => {
-  const [noteContent, setNoteContent] = React.useState(note || '')
 
   const handleSaveNote = async () => {
     try {
-      const response = await lessonStudentService.makeNote(lessonId, noteContent)
+      const response = await lessonStudentService.makeNote(lessonId, note)
       if (response && response.code === 200) {
         toast.success(response.message)
       } else {
@@ -58,8 +58,8 @@ const NoteSection = ({
           <div className='p-4 pb-0'>
             <Textarea
               placeholder='Nhập ghi chú của bạn tại đây...'
-              value={noteContent}
-              onChange={(e) => setNoteContent(e.target.value)}
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
             />
           </div>
           <DrawerFooter className='flex flex-row gap-2 justify-end'>

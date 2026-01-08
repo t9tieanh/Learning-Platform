@@ -103,6 +103,7 @@ class TC_Course extends Component<Record<string, never>, State> {
               courses={filtered}
               statusFilter={this.state.statusFilter}
               onChangeStatusFilter={(s) => this.setState({ statusFilter: s as State['statusFilter'] })}
+              fetchCourses={this.fetchCourses}
             />
           )}
           <CoursePagination

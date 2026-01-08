@@ -26,7 +26,7 @@ public class WebClientConfiguration {
     public CorsWebFilter corsWebFilter() {
         CorsConfiguration corsConfig = new CorsConfiguration();
         corsConfig.setAllowCredentials(true);
-        corsConfig.setAllowedOrigins(List.of("http://localhost:3000", "http://127.0.0.1:3000"));
+        corsConfig.setAllowedOrigins(List.of("http://localhost:3000", "http://127.0.0.1:3000", "https://qtsmrtrs-3000.asse.devtunnels.ms"));
         corsConfig.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         corsConfig.setAllowedHeaders(List.of("*"));
         corsConfig.setExposedHeaders(List.of("*"));
