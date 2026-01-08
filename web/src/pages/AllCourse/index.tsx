@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
 import { CourseCard } from '@/components/AllCourse/CourseCard'
+import CourseCardListSkeleton from '@/components/AllCourse/CourseCardListSkeleton'
 import { FilterSidebar } from '@/components/AllCourse/FilterSidebar'
 import { SortBar } from '@/components/AllCourse/SortBar'
 import { Button } from '@/components/ui/button'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import instructorAvatar from '@/assets/images/course.jpg'
 import courseService from '@/services/course/course-user.service'
-import { Loader } from '@/components/ui/loader'
 import useDebounce from '@/hooks/useDebounce.hook'
 
 const Index = () => {
@@ -138,7 +138,9 @@ const Index = () => {
           />
 
           <div className='flex flex-col gap-4 mb-8'>
-            {loading ? <Loader /> : mappedCourses.map((course) => <CourseCard key={course.id} {...course} />)}
+            {loading
+              ? [...Array(10)].map((_, idx) => <CourseCardListSkeleton key={idx} />)
+              : mappedCourses.map((course) => <CourseCard key={course.id} {...course} />)}
           </div>
 
           <div className='flex items-center justify-center gap-2'>

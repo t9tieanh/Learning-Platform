@@ -1,4 +1,3 @@
-import { CiDiscount1 } from 'react-icons/ci'
 import CustomButton from '@/components/common/Button'
 import { GrLinkNext } from 'react-icons/gr'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -9,6 +8,8 @@ import { Dispatch, SetStateAction } from 'react'
 import orderService from '@/services/sale/order.service'
 import { useAuthStore } from '@/stores/useAuth.stores'
 import { useNavigate } from 'react-router-dom'
+import { showConfirmToast } from '@/components/common/ShowConfirmToast'
+import useLoading from '@/hooks/useLoading.hook'
 
 const OrderDetail = ({
   order,
@@ -56,6 +57,7 @@ const CheckoutSummary = ({
 }) => {
   const { data } = useAuthStore()
   const navigate = useNavigate()
+  const { loading, startLoading, stopLoading } = useLoading()
 
   const handleCheckout = async () => {
     if (!data?.accessToken) {
@@ -68,14 +70,32 @@ const CheckoutSummary = ({
       return
     }
 
-    // Proceed to checkout process
-    const response = await orderService.createOrder(selectedCourses.map((course) => course.id))
+    // Ask for confirmation
+    const confirmed = await showConfirmToast({
+      title: 'Xác nhận đặt hàng',
+      description: `Bạn có chắc chắn muốn đặt ${selectedCourses.length} khóa học?`,
+      confirmLabel: 'Có, đặt hàng',
+      cancelLabel: 'Hủy'
+    })
 
-    if (response.code === 200 && response.message) {
-      toast.success(response.message || 'Tạo đơn hàng thành công !, Vui lòng hoàn thành đơn hàng này !')
-      navigate('/check-out')
-    } else {
-      toast.error(response.message || 'Có lỗi trong quá trình đặt hàng ! Vui lòng thử lại.')
+    if (!confirmed) return
+
+    // Proceed to checkout process
+    try {
+      startLoading()
+      const response = await orderService.createOrder(selectedCourses.map((course) => course.id))
+
+      if (response.code === 200 && response.message) {
+        toast.success(response.message || 'Tạo đơn hàng thành công !, Vui lòng hoàn thành đơn hàng này !')
+        stopLoading()
+        navigate('/check-out')
+      } else {
+        toast.error(response.message || 'Có lỗi trong quá trình đặt hàng ! Vui lòng thử lại.')
+      }
+    } catch (error) {
+      toast.error('Có lỗi xảy ra trong quá trình đặt hàng. Vui lòng thử lại.')
+    } finally {
+      stopLoading()
     }
   }
 
@@ -106,6 +126,7 @@ const CheckoutSummary = ({
             label='Đặt hàng'
             className='bg-blue-500 hover:bg-blue-600 text-white w-full'
             onClick={handleCheckout}
+            isLoader={loading}
           />
           <CustomButton
             icon={<MousePointer2 />}

@@ -27,7 +27,6 @@ const NoteSection = ({
   note: string
   setNote: (note: string) => void
 }) => {
-
   const handleSaveNote = async () => {
     try {
       const response = await lessonStudentService.makeNote(lessonId, note)
