@@ -51,4 +51,4 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:8082/actuator/health || exit 1
 
 # Start application
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar", "--spring.config.location=optional:classpath:/,file:/app/application.yaml"]

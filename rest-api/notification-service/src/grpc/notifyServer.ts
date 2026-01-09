@@ -69,20 +69,6 @@ const blogServiceImpl = {
   }
 }
 
-// function startGrpcServer() {
-//   const server = new grpc.Server();
-//   console.log('start server');
-//   server.addService(proto.BlogService.service, blogServiceImpl);
-
-//   server.bindAsync(
-//     `${APP_HOST}:${GRPC_PORT}`,
-//     grpc.ServerCredentials.createInsecure(),
-//     () => {
-//       console.log(`gRPC server running at ${APP_HOST}:${GRPC_PORT}`);
-//     }
-//   );
-// }
-
 function findBlogService(protoRoot: any) {
   if (!protoRoot) return null
   if (protoRoot.BlogService) return protoRoot.BlogService

@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # ============================================
   # API Gateway (Spring Boot)
@@ -11,17 +9,17 @@ services:
     image: api-gateway:latest
     container_name: learning-platform-api-gateway
     environment:
-      SERVER_PORT: 8080
+      SERVER_PORT: 8888
       SPRING_PROFILES_ACTIVE: prod
     ports:
-      - "${API_GATEWAY_PORT:-8080}:8080"
+      - "${API_GATEWAY_PORT:-8888}:8888"
     volumes:
       - ./rest-api/api-gateway/src/main/resources/application.yaml:/app/application.yaml
     networks:
       - learning-platform-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/actuator/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8888/actuator/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -37,17 +35,19 @@ services:
     image: user-service:latest
     container_name: learning-platform-user-service
     environment:
-      SERVER_PORT: 8081
+      SERVER_PORT: 8080
       SPRING_PROFILES_ACTIVE: prod
+      GRPC_SERVER_PORT: 9090
     ports:
-      - "${USER_SERVICE_PORT:-8081}:8081"
+      - "${USER_SERVICE_PORT:-8080}:8080"
+      - "${USER_SERVICE_GRPC_PORT:-9090}:9090"
     volumes:
       - ./rest-api/user-service/src/main/resources/application.yaml:/app/application.yaml
     networks:
       - learning-platform-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8081/actuator/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/actuator/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -63,10 +63,12 @@ services:
     image: course-service:latest
     container_name: learning-platform-course-service
     environment:
-      SERVER_PORT: 8082
+      SERVER_PORT: 8081
       SPRING_PROFILES_ACTIVE: prod
+      GRPC_SERVER_PORT: 9091
     ports:
-      - "${COURSE_SERVICE_PORT:-8082}:8082"
+      - "${COURSE_SERVICE_PORT:-8081}:8081"
+      - "${COURSE_SERVICE_GRPC_PORT:-9091}:9091"
     volumes:
       - ./rest-api/course-service/src/main/resources/application.yaml:/app/application.yaml
       - ./rest-api/course-service/src/main/resources/cloudfront-private-key.pem:/app/cloudfront-private-key.pem
@@ -74,7 +76,7 @@ services:
       - learning-platform-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8082/actuator/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8081/actuator/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -91,16 +93,18 @@ services:
     container_name: learning-platform-sale-service
     environment:
       NODE_ENV: production
-      PORT: 3005
+      PORT: 8083
+      GRPC_PORT: 9093
     ports:
-      - "${SALE_SERVICE_PORT:-3005}:3005"
+      - "${SALE_SERVICE_PORT:-8083}:8083"
+      - "${SALE_SERVICE_GRPC_PORT:-9093}:9093"
     volumes:
       - ./rest-api/sale-service/.env:/app/.env
     networks:
       - learning-platform-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3005/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"]
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:8083/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -117,22 +121,22 @@ services:
     container_name: learning-platform-notification-service
     environment:
       NODE_ENV: production
-      PORT: 3002
-      GRPC_PORT: 50051
+      PORT: 8082
+      GRPC_PORT: 9092
     ports:
-      - "${NOTIFICATION_SERVICE_PORT:-3002}:3002"
-      - "${NOTIFICATION_GRPC_PORT:-50051}:50051"
+      - "${NOTIFICATION_SERVICE_PORT:-8082}:8082"
+      - "${NOTIFICATION_SERVICE_GRPC_PORT:-9092}:9092"
     volumes:
       - ./rest-api/notification-service/.env:/app/.env
     networks:
       - learning-platform-network
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3002/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
+    # healthcheck:
+    #   test: ["CMD", "node", "-e", "require('http').get('http://localhost:8082/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"]
+    #   interval: 30s
+    #   timeout: 10s
+    #   retries: 3
+    #   start_period: 10s
 
   # ============================================
   # Socket Server (Node.js)
@@ -145,16 +149,16 @@ services:
     container_name: learning-platform-socket-server
     environment:
       NODE_ENV: production
-      PORT: 3001
+      PORT: 5001
     ports:
-      - "${SOCKET_SERVER_PORT:-3001}:3001"
+      - "${SOCKET_SERVER_PORT:-5001}:5001"
     depends_on:
       - notification-service
     networks:
       - learning-platform-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3001', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"]
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:5001/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"]
       interval: 30s
       timeout: 10s
       retries: 3
