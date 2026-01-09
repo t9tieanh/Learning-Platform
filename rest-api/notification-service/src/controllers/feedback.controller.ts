@@ -52,7 +52,7 @@ const addFeedback = async (req: Request, res: Response) => {
       message: 'Thêm đánh giá cho khóa học thành công',
       result
     })
-  } catch (e) {
+  } catch (e: any) {
     throw new ApiError(StatusCodes.BAD_REQUEST, e.message || 'Thêm đánh giá cho khóa học thất bại, xin vui lòng thử lại !')
   }
 }
