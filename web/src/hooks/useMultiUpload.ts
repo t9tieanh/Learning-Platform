@@ -129,7 +129,7 @@ export function useMultiUpload({
       const controller = new AbortController()
       controllersRef.current[id] = controller
 
-      const url = `${baseUrl.replace(/\/$/, '')}${uri.replace(/^\//, '')}`
+      const url = `${baseUrl.replace(/\/$/, '')}/${uri.replace(/^\//, '')}`
 
       ;(async () => {
         // const fd = new FormData()
