@@ -48,7 +48,7 @@ const PreviewPublicLesson = ({
         {preview.previewUrl ? (
           <div className='w-full'>
             <video
-              src={`http://${preview.previewUrl}` || undefined}
+              src={`https://${preview.previewUrl}` || undefined}
               controls
               autoPlay
               className='w-full h-[480px] rounded-md bg-black'

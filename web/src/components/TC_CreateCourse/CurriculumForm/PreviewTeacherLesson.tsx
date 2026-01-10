@@ -125,7 +125,7 @@ const PreviewTeacherLesson = ({
             <div className='w-full'>
               <p className='text-xs font-medium text-gray-300 uppercase mb-2'>Video</p>
               <video
-                src={`http://${lesson.url}` || undefined}
+                src={`https://${lesson.url}` || undefined}
                 controls
                 className='w-full h-[480px] rounded-md bg-black'
               >
@@ -139,7 +139,7 @@ const PreviewTeacherLesson = ({
             <div className='w-full'>
               <p className='text-xs font-medium text-gray-300 uppercase mb-2'>Nội dung bài viết</p>
               <iframe
-                src={`http://${lesson.url}`}
+                src={`https://${lesson.url}`}
                 className='w-full h-[600px] rounded-md bg-white'
                 title='Article Content'
               />
