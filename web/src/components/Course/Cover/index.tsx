@@ -112,7 +112,7 @@ const Cover = ({ video, image, title, shortDescription, teacher, tags, showSmall
             <img src={image} alt='Video Thumbnail' className='h-[320px] w-[580px] object-cover rounded-2xl shadow-xl' />
           ) : video && showVideo ? (
             <video
-              src={`http://${video}`}
+              src={`https://${video}`}
               controls
               autoPlay
               muted

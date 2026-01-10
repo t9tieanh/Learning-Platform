@@ -274,7 +274,7 @@ export function CourseHero({
                   {introductoryVideo ? (
                     <div className='w-full'>
                       <video
-                        src={`http://${introductoryVideo}`}
+                        src={`https://${introductoryVideo}`}
                         controls
                         autoPlay
                         className='w-full h-[480px] rounded-md'
