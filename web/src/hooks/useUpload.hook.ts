@@ -30,7 +30,7 @@ export function useUpload({ accessToken, uri }: UploadOptions): UploadResult {
 
       try {
         const response = await fetch(
-          `${(import.meta.env.VITE_BACKEND_URI as string) || 'http://localhost:8888/api/v1'}/${uri}`,
+          `${(import.meta.env.VITE_BACKEND_URI as string) || 'http://localhost:8888/api/v1'}${uri}`,
           {
             method: 'POST',
             headers: {
