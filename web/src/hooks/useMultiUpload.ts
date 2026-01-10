@@ -36,7 +36,7 @@ interface MultiUploadResult {
  */
 export function useMultiUpload({
   accessToken,
-  baseUrl = 'http://localhost:8888/api/v1',
+  baseUrl = (import.meta.env.VITE_BACKEND_URI as string) || 'http://localhost:8888/api/v1',
   callback
 }: MultiUploadOptions): MultiUploadResult {
   const [uploads, setUploads] = useState<MultiUploadItem[]>([])
