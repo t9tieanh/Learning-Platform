@@ -23,6 +23,9 @@ COPY proto-shared/src/main/proto /proto-shared/src/main/proto
 # Build TypeScript to JavaScript
 RUN npm run build
 
+# Copy non-TS static assets (templates, views, public...) into dist so runtime can read them
+RUN if [ -d src/templates ]; then cp -r src/templates dist/templates; fi
+
 # ============================================
 # Production Stage - Runtime Only
 # ============================================
