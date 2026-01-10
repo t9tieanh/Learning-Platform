@@ -17,7 +17,7 @@ import static org.springframework.http.MediaTypeFactory.getMediaType;
 @RequestMapping("/storage")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
+@CrossOrigin(origins = {"http://localhost:3000", "https://learnova.t9tieanh.io.vn"}, allowCredentials = "true")
 public class StorageController {
     IUploadFileService uploadFileService;
     ICloudFrontService  cloudFrontService;

@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react'
 import orderService from '@/services/sale/order.service'
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/components/ui/tooltip'
 import { User } from 'lucide-react'
+import OrderDetailSkeleton from './order-detail-skeleton'
 
 const OrderDetail = ({ orderId }: { orderId: string }) => {
   const [order, setOrder] = useState<Order | null>(null)
@@ -20,7 +21,7 @@ const OrderDetail = ({ orderId }: { orderId: string }) => {
   }, [orderId])
 
   if (!order) {
-    return <p className='text-sm'>Đang tải chi tiết đơn hàng...</p>
+    return <OrderDetailSkeleton />
   }
 
   const subtotal = order?.items?.reduce((sum, item) => sum + (item.price || 0), 0) || 0

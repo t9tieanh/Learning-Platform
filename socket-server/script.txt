@@ -1,0 +1,1 @@
+sudo docker build -t socket-server:latest -f socket-server/Dockerfile .

@@ -7,7 +7,7 @@ import { errorHandlingMiddleware } from '~/middleware/error-handler.midleware'
 import http from 'http'
 import { initSagas } from '~/sagas/init/initSaga'
 import router from '~/routes/index'
-const { startGrpcServer } = require('../src/grpc/notifyServer')
+const { startGrpcServer } = require('./grpc/notifyServer')
 
 const START_SERVER = async () => {
   const app = express()

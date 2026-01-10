@@ -7,7 +7,7 @@ import session from 'express-session';
 import { env } from './config/env';
 import indexRoute from '~/routes';
 import { initSagas } from './sagas/init/initSaga';
-const { startGrpcServer } = require('../src/grpc/server/saleServer.grpc')
+const { startGrpcServer } = require('./grpc/server/saleServer.grpc')
 
 const app = express();
 

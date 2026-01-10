@@ -19,28 +19,28 @@ spring:
     gateway:
       routes:
         - id: user
-          uri: http://localhost:8080
+          uri: http://user-service:8080
           predicates:
             - Path=${app.api-prefix}/user/**, ${app.api-prefix}/user**, ${app.api-prefix}/auth**, ${app.api-prefix}/auth/**, ${app.api-prefix}/self**, ${app.api-prefix}/self/**, ${app.api-prefix}/instructor**, ${app.api-prefix}/instructor/**
           filters:
             - StripPrefix=2
 
         - id: course
-          uri: http://localhost:8081
+          uri: http://course-service:8081
           predicates:
             - Path=${app.api-prefix}/learning/**, ${app.api-prefix}/learning**
           filters:
             - StripPrefix=3
 
         - id: sale
-          uri: http://localhost:8083
+          uri: http://sale-service:8083
           predicates:
             - Path=${app.api-prefix}/sale/**, ${app.api-prefix}/sale**
           filters:
             - StripPrefix=3
 
         - id: notify
-          uri: http://localhost:8082
+          uri: http://notification-service:8082
           predicates:
             - Path=${app.api-prefix}/notify/**, ${app.api-prefix}/notify**
           filters:

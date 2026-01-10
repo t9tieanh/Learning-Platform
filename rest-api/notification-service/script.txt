@@ -21,3 +21,6 @@ docker run -d \
   -e MONGO_INITDB_ROOT_PASSWORD=1942004anh \
   -p 27017:27017 \
   mongo:latest
+
+
+  sudo docker build -t notification-service:latest -f notification-service/Dockerfile .

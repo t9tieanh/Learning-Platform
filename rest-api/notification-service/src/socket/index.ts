@@ -1,7 +1,7 @@
 // src/socket/socketClient.ts
 import { io, Socket } from 'socket.io-client'
 
-const SOCKET_URL = 'http://localhost:5001'
+const SOCKET_URL = 'http://socket-server:5001'
 
 const socket: Socket = io(SOCKET_URL, {
   reconnection: true,

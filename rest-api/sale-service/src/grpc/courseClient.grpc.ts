@@ -1,6 +1,7 @@
 import * as grpc from '@grpc/grpc-js'
 import * as protoLoader from '@grpc/proto-loader'
 import path from 'path'
+import { env } from '~/config/env'
 
 class CourseGrpcClient {
     courseClient: any
@@ -27,7 +28,7 @@ class CourseGrpcClient {
             throw new Error('CourseService not found in proto definition')
         }
 
-        this.courseClient = new CourseSvcCtor('localhost:9091', grpc.credentials.createInsecure())
+        this.courseClient = new CourseSvcCtor(env.COURSE_GRPC_URL, grpc.credentials.createInsecure())
 
         // quick readiness check (wait up to 5s)
         this.courseClient.waitForReady(Date.now() + 5000, (err: Error | null) => {

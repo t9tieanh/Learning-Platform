@@ -2,6 +2,7 @@ import * as grpc from '@grpc/grpc-js'
 import * as protoLoader from '@grpc/proto-loader'
 import path from 'path'
 import { UserGrpc } from '~/dto/grpc/user.dto';
+import { env } from '~/config/env'
 
 class UserGrpcClient {
     userClient: any
@@ -28,7 +29,7 @@ class UserGrpcClient {
             throw new Error('UserService not found in proto definition')
         }
 
-        this.userClient = new UserSvcCtor('localhost:9090', grpc.credentials.createInsecure())
+        this.userClient = new UserSvcCtor(env.USER_GRPC_URL, grpc.credentials.createInsecure())
 
         // quick readiness check (wait up to 5s)
         this.userClient.waitForReady(Date.now() + 5000, (err: Error | null) => {

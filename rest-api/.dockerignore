@@ -1,0 +1,61 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+*~
+*.iml
+
+# Build artifacts
+target/
+.DS_Store
+*.log
+
+# Maven
+.mvn
+mvnw
+mvnw.cmd
+
+# Node (for other services)
+node_modules
+package-lock.json
+yarn.lock
+npm-debug.log
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Test files
+src/test
+**/*.test.js
+**/*.test.ts
+**/*.spec.js
+**/*.spec.ts
+
+# Documentation
+README.md
+docs/
+
+# Environment
+.env
+.env.local
+.env.*.local
+**/application.yaml
+**/application-*.yaml
+**/application.yml
+**/application-*.yml
+*.pem
+*.key
+*.crt
+
+# Other
+*.md
+backup/
+script*/

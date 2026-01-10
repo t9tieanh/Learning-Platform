@@ -22,5 +22,7 @@ export const env = {
     REDIS_DB_PORT: parseInt(process.env.REDIS_DB_PORT || '6379', 10),
     REDIS_DB_PASSWORD: process.env.REDIS_DB_PASSWORD,
     REDIS_DB_NAME: parseInt(process.env.REDIS_DB_NAME || '0', 10),
-    WEB_URL: process.env.WEB_URL || 'http://localhost:3000/check-out/'
+    WEB_URL: process.env.WEB_URL || 'http://localhost:3000/check-out/',
+    COURSE_GRPC_URL: process.env.COURSE_GRPC_URL || 'course-service:9091',
+    USER_GRPC_URL: process.env.USER_GRPC_URL || 'user-service:9090'
 }
