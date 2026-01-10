@@ -1,3 +1,6 @@
 script.for.dev
 
 .env
+
+production
+docker-compose.prod.yml

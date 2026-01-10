@@ -6,7 +6,6 @@ import courseClient from '~/grpc/courseClient'
 import { StatusCodes } from 'http-status-codes'
 import ApiError from '~/middleware/ApiError'
 import { FeedbackDto } from '~/dto/request/feedback.dto'
-import mongoose from 'mongoose'
 
 interface LeanFeedback {
   _id: Types.ObjectId

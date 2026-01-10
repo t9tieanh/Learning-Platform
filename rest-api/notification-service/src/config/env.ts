@@ -28,5 +28,7 @@ export const env = {
   RABBIT_MQ_USER_NAME: process.env.RABBIT_MQ_USER_NAME,
   RABBIT_MQ_PASSWORD: process.env.RABBIT_MQ_PASSWORD,
   RABBIT_MQ_VHOST: process.env.RABBIT_MQ_VHOST,
-  RABBIT_MQ_URI: process.env.RABBIT_MQ_URI || ''
+  RABBIT_MQ_URI: process.env.RABBIT_MQ_URI || '',
+  COURSE_GRPC_URL: process.env.COURSE_GRPC_URL || 'course-service:9091',
+  USER_GRPC_URL: process.env.USER_GRPC_URL || 'user-service:9090'
 }
