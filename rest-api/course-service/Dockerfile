@@ -39,12 +39,19 @@ COPY --from=builder /build/proto-shared /proto-shared
 
 # Create non-root user for security
 RUN addgroup -g 1001 -S appuser && \
-    adduser -S appuser -u 1001
+  adduser -S appuser -u 1001
+
+# Ensure /app is writable by the non-root user and create an uploads dir
+# so code that writes temp files into the working directory won't get
+# Permission denied when running as appuser.
+RUN mkdir -p /app/uploads && \
+  chown -R appuser:appuser /app /app/uploads && \
+  chmod -R 750 /app && chmod 750 /app/uploads
 
 USER appuser
 
-# Expose port
-EXPOSE 8082
+# Expose correct application port
+EXPOSE 8081
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
