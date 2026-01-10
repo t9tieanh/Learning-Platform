@@ -73,7 +73,7 @@ A comprehensive full-stack e-learning platform designed to empower users to crea
 
 **Project Start**: January 2025  
 **Video demo**: https://www.youtube.com/watch?v=N56jemgKceE  
-**Office website**: updating...
+**Office website**: https://learnova.t9tieanh.io.vn
 
 ---
 
