@@ -29,13 +29,16 @@ export function useUpload({ accessToken, uri }: UploadOptions): UploadResult {
       setIsUploading(true)
 
       try {
-        const response = await fetch(`http://localhost:8888/api/v1/${uri}`, {
-          method: 'POST',
-          headers: {
-            Authorization: accessToken ? 'Bearer ' + accessToken : ''
-          },
-          body: formData
-        })
+        const response = await fetch(
+          `${(import.meta.env.VITE_BACKEND_URI as string) || 'http://localhost:8888/api/v1'}/${uri}`,
+          {
+            method: 'POST',
+            headers: {
+              Authorization: accessToken ? 'Bearer ' + accessToken : ''
+            },
+            body: formData
+          }
+        )
 
         if (!response.ok || !response.body) {
           throw new Error('Upload failed')
