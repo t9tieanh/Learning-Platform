@@ -1,0 +1,9 @@
+
+sudo docker build -t user-service:latest -f user-service/Dockerfile .
+
+
+sudo docker run -d \
+  -p 8081:8081 \
+  -v /home/t9tieanh/learn/Learning-Platform/rest-api/user-service/src/main/resources:/app/resources \
+  --name user-service \
+  user-service:latest
