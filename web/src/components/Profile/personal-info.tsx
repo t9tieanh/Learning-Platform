@@ -123,8 +123,8 @@ const PersonalInfo = () => {
         <div className='space-y-6 shadow-sm rounded-xl'>
           <Card className='hover:bg-profile-card-hover transition-colors rounded-xl shadow-md'>
             <CardContent className='px-8'>
-              <div className='flex gap-4 items-center text-center mb-8 px-4 py-6 rounded-xl bg-[#0C356A]'>
-                <div className='relative'>
+              <div className='flex gap-3 md:gap-4 items-center text-center mb-8 px-4 py-6 rounded-xl bg-[#0C356A] flex-col md:flex-row'>
+                <div className='relative flex-shrink-0'>
                   {editing ? (
                     <>
                       <button
@@ -133,7 +133,7 @@ const PersonalInfo = () => {
                         onClick={() => fileInputRef.current?.click()}
                         aria-label='Chọn ảnh đại diện mới'
                       >
-                        <Avatar className='h-28 w-28 shadow-lg cursor-pointer'>
+                        <Avatar className='h-20 md:h-28 w-20 md:w-28 shadow-lg cursor-pointer'>
                           <AvatarImage
                             src={form.imageFile ? URL.createObjectURL(form.imageFile) : userInfo?.image}
                             alt={userInfo?.name}
@@ -158,7 +158,7 @@ const PersonalInfo = () => {
                     </>
                   ) : (
                     <div className='relative'>
-                      <Avatar className='h-28 w-28 shadow-lg'>
+                      <Avatar className='h-20 md:h-28 w-20 md:w-28 shadow-lg'>
                         <AvatarImage src={userInfo?.image} alt={userInfo?.name} className='object-cover' />
                         <AvatarFallback className='text-lg font-semibold bg-primary text-primary-foreground'>
                           <User className='h-6 w-6' />
@@ -167,9 +167,13 @@ const PersonalInfo = () => {
                     </div>
                   )}
                 </div>
-                <div>
-                  <h3 className='text-3xl font-bold flex text-white mb-1'>{userInfo?.name}</h3>
-                  <p className='text-sm text-slate-300 text-start'>@{userInfo?.username}</p>
+                <div className='flex-1 min-w-0'>
+                  <h3 className='text-lg md:text-3xl font-bold text-white mb-1 truncate text-start'>
+                    {userInfo?.name}
+                  </h3>
+                  <p className='text-xs md:text-sm text-slate-300 text-center md:text-start truncate'>
+                    @{userInfo?.username}
+                  </p>
                 </div>
               </div>
 

@@ -110,7 +110,8 @@ const AuthPage: React.FC<SlidingLoginSignupProps> = ({ isSignUpMode, setIsSignUp
     ? 'lg:left-1/4 max-lg:top-[-10%] max-lg:-translate-x-2/4 max-lg:translate-y-0'
     : 'lg:left-3/4'
 
-  const formBase = 'absolute inset-0 flex items-center justify-center transition-all duration-\\[6000ms\\] ease-in-out max-lg:static max-lg:w-full max-lg:h-auto'
+  const formBase =
+    'absolute inset-0 flex items-center justify-center transition-all duration-\\[6000ms\\] ease-in-out max-lg:static max-lg:w-full max-lg:h-auto'
   const signInMode = isSignUpMode ? 'opacity-0 -translate-x-20 pointer-events-none' : 'opacity-100 translate-x-0'
   const signUpMode = isSignUpMode ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-20 pointer-events-none'
 
@@ -129,9 +130,7 @@ const AuthPage: React.FC<SlidingLoginSignupProps> = ({ isSignUpMode, setIsSignUp
         {!isSignUpMode && (
           <SignInForm handleLoginWithGoogle={handleLoginWithGoogle} setIsSignUpMode={setIsSignUpMode} />
         )}
-        {isSignUpMode && (
-          <SignUpForm setIsSignUpMode={setIsSignUpMode} handleLoginWithGoogle={handleLoginWithGoogle} />
-        )}
+        {isSignUpMode && <SignUpForm setIsSignUpMode={setIsSignUpMode} handleLoginWithGoogle={handleLoginWithGoogle} />}
       </div>
     </div>
   )

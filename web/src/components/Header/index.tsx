@@ -11,7 +11,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { LogIn, UserPlus, House, BookOpen, Building2, StickyNote, ShoppingCart, Menu as MenuIcon } from 'lucide-react'
 import Menu from './menu'
-import logo from '../../assets/images/logo1.png'
+import logo from '@/assets/images/logo1.png'
 
 const Header: FC = () => {
   const navigate = useNavigate()

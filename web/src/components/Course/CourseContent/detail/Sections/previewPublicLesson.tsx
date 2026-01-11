@@ -31,15 +31,15 @@ const PreviewPublicLesson = ({
       }
       size='full'
     >
-      <div className='preview-content p-3 flex flex-col gap-4'>
-        <span className='text-white text-base font-medium font-sans'>
-          <BookOpenCheck className='inline w-5 h-5 mr-2' />
+      <div className='preview-content p-3 md:p-6 flex flex-col gap-4 max-h-[85vh] overflow-y-auto'>
+        <span className='text-white text-sm md:text-base font-medium font-sans'>
+          <BookOpenCheck className='inline w-4 md:w-5 h-4 md:h-5 mr-2' />
           Tiêu đề: {preview.previewTitle}
         </span>
         <hr />
-        <span className='text-white text-sm font-medium text-base text-[#66D2CE]'>
+        <span className='text-white text-xs md:text-sm font-medium text-[#66D2CE]'>
           *Đây là bản xem trước công khai của bài học
-          <p className='text-white mt-1 font-normal'>
+          <p className='text-white mt-1 font-normal text-xs md:text-sm line-clamp-1 md:line-clamp-none'>
             {preview.subTitle ||
               `Hãy mua khóa học ngay hôm nay để mở khóa toàn bộ các bài giảng và tận hưởng trọn vẹn hành trình học tập nhé!
             🚀`}
@@ -51,13 +51,13 @@ const PreviewPublicLesson = ({
               src={`https://${preview.previewUrl}` || undefined}
               controls
               autoPlay
-              className='w-full h-[480px] rounded-md bg-black'
+              className='w-full h-[250px] md:h-[480px] rounded-md bg-black'
             >
               <track kind='captions' srcLang='en' label='English captions' src={`${preview.previewUrl || ''}.vtt`} />
             </video>
           </div>
         ) : (
-          <div className='text-sm text-muted-foreground'>Không có video để xem trước</div>
+          <div className='text-xs md:text-sm text-muted-foreground'>Không có video để xem trước</div>
         )}
       </div>
     </CustomDialog>

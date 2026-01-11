@@ -18,7 +18,7 @@ export const TabNavigation = ({
   currentLectureId: string
   instructorId: string
 }) => {
-  const [activeTab, setActiveTab] = useState('Overview')
+  const [activeTab, setActiveTab] = useState('Tổng quan')
   const [open, setOpen] = useState(false)
   const [noteContent, setNoteContent] = useState('')
   const tabs = useMemo(
@@ -59,15 +59,15 @@ export const TabNavigation = ({
 
   return (
     <div className='border-b border-border'>
-      <div className='flex items-center gap-1'>
-        <button className='p-4 text-muted-foreground hover:text-foreground transition-colors'>
-          <Search className='w-5 h-5' />
+      <div className='flex items-center gap-1 overflow-x-auto'>
+        <button className='p-3 md:p-4 text-muted-foreground hover:text-foreground transition-colors flex-shrink-0'>
+          <Search className='w-4 md:w-5 h-4 md:h-5' />
         </button>
         {tabs.map((tab) => (
           <CustomButton
             key={tab.label}
             onClick={() => (tab.onClick ? tab.onClick() : setActiveTab(tab.label))}
-            className={`py-4 text-sm font-medium bg-white transition-colors relative ${
+            className={`py-3 md:py-4 px-2 md:px-4 text-xs md:text-sm font-medium bg-white transition-colors relative whitespace-nowrap flex-shrink-0 ${
               activeTab === tab.label ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
             }`}
             label={
@@ -84,10 +84,10 @@ export const TabNavigation = ({
         ))}
       </div>
 
-      <div>
+      <div className='px-3 md:px-6'>
         {activeTab === 'Hỏi đáp' && <QASection lessonId={String(currentLectureId)} instructorId={instructorId} />}
         {activeTab === 'Tổng quan' && (
-          <div className='mt-6 px-6 mx-auto w-full'>
+          <div className='mt-6 mx-auto w-full'>
             <LectureInfo lesson={currentLecture} thumbnailUri={thumbnailUri} />
           </div>
         )}

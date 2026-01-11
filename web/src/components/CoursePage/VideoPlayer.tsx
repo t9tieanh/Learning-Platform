@@ -5,6 +5,8 @@ import { useRef, useCallback, useState } from 'react'
 import { Lesson } from '@/types/course-student'
 import { useAuthStore } from '@/stores/useAuth.stores'
 import { toast } from 'sonner'
+import logo from '@/assets/images/logo1.png'
+import { LoadingDots } from '@/components/common/Loading/LoadingDots'
 
 const VideoPlayer = ({ lesson, markDoneVideo }: { lesson: Lesson; markDoneVideo: () => Promise<void> }) => {
   const backEndUri = import.meta.env.VITE_BACKEND_URI as string
@@ -18,6 +20,7 @@ const VideoPlayer = ({ lesson, markDoneVideo }: { lesson: Lesson; markDoneVideo:
   const lastValidTime = useRef(0)
 
   const [showVideo, setShowVideo] = useState(!lesson.thumbnailUrl)
+  const [isVideoLoading, setIsVideoLoading] = useState(true)
 
   const SKIP_DETECTION_WINDOW = 10000
   const SKIP_THRESHOLD = 3
@@ -108,22 +111,37 @@ const VideoPlayer = ({ lesson, markDoneVideo }: { lesson: Lesson; markDoneVideo:
           onClick={() => setShowVideo(true)}
         />
       ) : (
-        <video
-          ref={videoRef}
-          src={
-            lesson.introductionVideo
-              ? `https://${lesson.introductionVideo}`
-              : `${backEndUri}learning/lesson-student/${lesson.id}?token=${data?.accessToken}`
-          }
-          controls
-          autoPlay
-          muted
-          playsInline
-          className='w-full h-full shadow-lg'
-          title={lesson.title}
-          onSeeking={handleSeeking}
-          onTimeUpdate={handleTimeUpdate}
-        />
+        <div className='relative w-full h-full bg-black'>
+          <video
+            ref={videoRef}
+            src={
+              lesson.introductionVideo
+                ? `https://${lesson.introductionVideo}`
+                : `${backEndUri}learning/lesson-student/${lesson.id}?token=${data?.accessToken}`
+            }
+            controls
+            autoPlay
+            muted
+            playsInline
+            className='w-full h-full shadow-lg'
+            title={lesson.title}
+            onSeeking={handleSeeking}
+            onTimeUpdate={handleTimeUpdate}
+            onLoadStart={() => setIsVideoLoading(true)}
+            onCanPlay={() => setIsVideoLoading(false)}
+            onLoadedData={() => setIsVideoLoading(false)}
+          />
+          {isVideoLoading && (
+            <div className='absolute inset-0 flex items-center justify-center bg-black/40'>
+              <div className='flex flex-col items-center gap-4'>
+                <div className='relative w-16 h-16'>
+                  <img src={logo} alt='Loading' className='w-full h-full object-contain animate-bounce' />
+                </div>
+                <LoadingDots text='Chờ Learnova nhé' className='text-white text-sm font-medium' />
+              </div>
+            </div>
+          )}
+        </div>
       )}
     </div>
   )

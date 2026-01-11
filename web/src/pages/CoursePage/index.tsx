@@ -30,7 +30,6 @@ const CoursePage = () => {
 
   const [currentLecture, setCurrentLecture] = useState<Lesson>()
   const [currentLectureId, setCurrentLectureId] = useState<string>()
-  const [sidebarOpen, setSidebarOpen] = useState(false)
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -100,7 +99,6 @@ const CoursePage = () => {
       completionStatus: lecture.completionStatus || 'NOT_STARTED'
     })
     setCurrentLectureId(lecture.id)
-    setSidebarOpen(false)
   }
 
   // Initialize the first lecture as current
@@ -123,35 +121,35 @@ const CoursePage = () => {
   return (
     <div className='min-h-screen flex flex-col'>
       {/* Header */}
-      <header className='bg-[#0C356A] shadow-lg text-white border-b border-border px-6 py-3 flex items-center justify-between '>
-        <div className='flex items-center gap-4'>
+      <header className='bg-[#0C356A] shadow-lg text-white border-b border-border px-3 md:px-6 py-2 md:py-3 flex items-center justify-between'>
+        <div className='flex items-center gap-2 md:gap-4 min-w-0'>
           <button
-            className='ml-2 flex items-center gap-2 text-white hover:text-foreground transition-colors hover:text-primary'
+            className='ml-1 md:ml-2 flex items-center gap-2 text-white hover:text-primary transition-colors flex-shrink-0'
             onClick={() => navigate(-1)}
           >
-            <ChevronLeft className='w-5 h-5' />
-            <span className='text-sm cursor-pointer hover:underline'>Trở lại</span>
+            <ChevronLeft className='w-4 md:w-5 h-4 md:h-5' />
+            <span className='text-xs md:text-sm cursor-pointer hover:underline hidden sm:inline'>Trở lại</span>
           </button>
           <div className='hidden sm:block w-px h-6 bg-border' />
           <Button
-            className='!bg-transparent !hover:bg-transparent !shadow-none !p-0 !hover:bg-blue-800'
+            className='!bg-transparent !hover:bg-transparent !shadow-none !p-0 !hover:bg-blue-800 min-w-0 flex-1'
             onClick={() => navigate('/course/' + courseId)}
           >
-            <div className='text-sm font-medium sm:block !flex gap-2 items-center'>
-              <Avatar>
+            <div className='text-xs md:text-sm font-medium flex gap-2 items-center min-w-0'>
+              <Avatar className='h-8 w-8 md:h-10 md:w-10 flex-shrink-0'>
                 <AvatarImage src={courseData?.thumbnailUrl} />
                 <AvatarFallback>CN</AvatarFallback>
               </Avatar>
-              {courseData?.title}
+              <span className='truncate'>{courseData?.title}</span>
             </div>
           </Button>
         </div>
       </header>
 
       {/* Main Content */}
-      <div className='flex-1 flex overflow-hidden'>
+      <div className='flex-1 flex overflow-hidden flex-col lg:flex-row'>
         {/* Left Column - Video & Tabs */}
-        <div className='flex-1 flex flex-col overflow-y-auto px-6 py-4'>
+        <div className='flex-1 flex flex-col overflow-y-auto px-3 md:px-6 py-3 md:py-4 lg:border-r lg:border-border'>
           {isLoading ? (
             <>
               <CourseSkeleton />
@@ -167,11 +165,24 @@ const CoursePage = () => {
                   currentLecture={currentLecture}
                   thumbnailUri={courseData?.thumbnailUrl as string}
                   currentLectureId={currentLectureId as string}
-                  instructorId={courseData?.instructor?.id}
+                  instructorId={(courseData?.instructor as any)?.id || ''}
                 />
               </div>
             </>
           ) : null}
+        </div>
+
+        {/* Mobile Sidebar (Below video on mobile, beside on desktop) */}
+        <div className='w-full lg:hidden lg:w-96 flex-shrink-0 border-t lg:border-l lg:border-t-0 border-border overflow-y-auto'>
+          {isLoading ? (
+            <CourseSidebarSkeleton />
+          ) : (
+            <CourseSidebar
+              sections={uiSections}
+              currentLectureId={currentLectureId as string}
+              onSelectLecture={handleSelectLecture}
+            />
+          )}
         </div>
 
         {/* Right Column - Course Sidebar (Desktop) */}
@@ -183,36 +194,9 @@ const CoursePage = () => {
               sections={uiSections}
               currentLectureId={currentLectureId as string}
               onSelectLecture={handleSelectLecture}
-              onClose={() => setSidebarOpen(false)}
             />
           )}
         </div>
-
-        {/* Mobile Sidebar Overlay */}
-        {sidebarOpen && (
-          <>
-            <div
-              role='button'
-              tabIndex={0}
-              aria-label='Close sidebar'
-              className='fixed inset-0 bg-black/50 z-40 lg:hidden'
-              onClick={() => setSidebarOpen(false)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  setSidebarOpen(false)
-                }
-              }}
-            />
-            <div className='fixed right-0 top-0 bottom-0 z-50 lg:hidden'>
-              <CourseSidebar
-                sections={uiSections}
-                currentLectureId={currentLectureId as string}
-                onSelectLecture={handleSelectLecture}
-                onClose={() => setSidebarOpen(false)}
-              />
-            </div>
-          </>
-        )}
       </div>
     </div>
   )
