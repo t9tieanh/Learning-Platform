@@ -90,7 +90,7 @@ const SignUpForm: FC<{ setIsSignUpMode: (value: boolean) => void; handleLoginWit
                   <a
                     href='/term'
                     target='_blank'
-                    className='text-blue-600 text-base underline underline-offset-2 cursor-pointer hover:text-blue-700'
+                    className='text-blue-600 text-sm underline underline-offset-2 cursor-pointer hover:text-blue-700'
                   >
                     Điều khoản
                   </a>
