@@ -2,8 +2,8 @@ import './style.scss'
 
 const TrendingCategories = () => {
   return (
-    <div className='trending-categories-container py-6 space-y-12 mt-6'>
-      <h4 className='text-center text-3xl title-categories font-extrabold tracking-tight mt-4'>
+    <div className='trending-categories-container py-6 space-y-12 mt-6 px-4 md:px-0'>
+      <h4 className='text-center text-2xl md:text-3xl title-categories font-extrabold tracking-tight mt-4'>
         Công nghệ nổi bật hiện nay
       </h4>
 
@@ -13,7 +13,7 @@ const TrendingCategories = () => {
         .marquee-inner { animation: marqueeScroll linear infinite; }
         @keyframes marqueeScroll { 0% { transform: translateX(0%); } 100% { transform: translateX(-50%); } }
       `}</style>
-        <div className='absolute left-0 top-0 h-full w-20 z-10 pointer-events-none' />
+        <div className='absolute left-0 top-0 h-full w-10 md:w-20 z-10 pointer-events-none' />
         <div className='marquee-inner flex will-change-transform min-w-[200%]' style={{ animationDuration: '15s' }}>
           <div className='flex'>
             {[
@@ -47,13 +47,13 @@ const TrendingCategories = () => {
                   key={`${tech}-${index}`}
                   src={`https://cdn.simpleicons.org/${tech}`}
                   alt={tech}
-                  className='h-16 w-auto object-contain mx-6 opacity-80 hover:opacity-100 transition-opacity'
+                  className='h-10 md:h-16 w-auto object-contain mx-3 md:mx-6 opacity-80 hover:opacity-100 transition-opacity'
                   draggable={false}
                 />
               ))}
           </div>
         </div>
-        <div className='absolute right-0 top-0 h-full w-20 md:w-40 z-10 pointer-events-none' />
+        <div className='absolute right-0 top-0 h-full w-10 md:w-20 md:w-40 z-10 pointer-events-none' />
       </div>
 
       {/* Marquee icons - Row 2 (reverse direction) */}
@@ -62,7 +62,7 @@ const TrendingCategories = () => {
         .marquee-inner-reverse { animation: marqueeScrollReverse linear infinite; }
         @keyframes marqueeScrollReverse { 0% { transform: translateX(-50%); } 100% { transform: translateX(0%); } }
       `}</style>
-        <div className='absolute left-0 top-0 h-full w-20 z-10 pointer-events-none' />
+        <div className='absolute left-0 top-0 h-full w-10 md:w-20 z-10 pointer-events-none' />
         <div
           className='marquee-inner-reverse flex will-change-transform min-w-[200%]'
           style={{ animationDuration: '18s' }}
@@ -101,13 +101,13 @@ const TrendingCategories = () => {
                   key={`${tech}-reverse-${index}`}
                   src={`https://cdn.simpleicons.org/${tech}`}
                   alt={tech}
-                  className='h-16 w-auto object-contain mx-6 opacity-80 hover:opacity-100 transition-opacity'
+                  className='h-10 md:h-16 w-auto object-contain mx-3 md:mx-6 opacity-80 hover:opacity-100 transition-opacity'
                   draggable={false}
                 />
               ))}
           </div>
         </div>
-        <div className='absolute right-0 top-0 h-full w-20 md:w-40 z-10 pointer-events-none' />
+        <div className='absolute right-0 top-0 h-full w-10 md:w-20 md:w-40 z-10 pointer-events-none' />
       </div>
     </div>
   )

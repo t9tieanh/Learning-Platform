@@ -33,7 +33,7 @@ const AuthLayout: React.FC = () => {
       </div>
 
       <div
-        className='absolute h-full w-full top-0 left-0 grid grid-cols-1   max-lg:grid-rows-[1fr_2fr_1fr]  
+        className='absolute h-full w-full top-0 left-0 grid grid-cols-1   max-lg:grid-rows-[1fr_2fr_1fr] max-lg:pointer-events-none 
       lg:grid-cols-2'
       >
         <div
@@ -56,7 +56,7 @@ const AuthLayout: React.FC = () => {
             <button
               className='bg-transparent w-[110px] h-[35px] text-[0.7rem] lg:w-[130px] lg:h-[41px] 
               lg:text-[0.8rem]  font-semibold   border-2 border-white rounded-full transition-colors duration-600 
-              hover:bg-white hover:text-gray-700'
+              hover:bg-white hover:text-gray-700 max-lg:hidden'
               id='sign-up-btn'
               onClick={toggleSignUpMode}
             >
@@ -92,7 +92,7 @@ const AuthLayout: React.FC = () => {
             <button
               className='bg-transparent w-[110px] h-[35px]  text-[0.7rem] lg:w-[130px] 
               lg:h-[41px] lg:text-[0.8rem]  font-semibold   border-2 border-white rounded-full 
-              transition-colors duration-600 hover:bg-white hover:text-gray-700'
+              transition-colors duration-600 hover:bg-white hover:text-gray-700 max-lg:hidden'
               id='sign-in-btn'
               onClick={toggleSignUpMode}
             >

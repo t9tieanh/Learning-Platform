@@ -93,7 +93,7 @@ const Index = () => {
   )
 
   return (
-    <div className='flex min-h-screen bg-white'>
+    <div className='flex flex-col md:flex-row min-h-screen bg-white'>
       <FilterSidebar
         selectedCategories={selectedCategories}
         onCategoriesChange={(cats) => {
@@ -117,13 +117,13 @@ const Index = () => {
         }}
       />
 
-      <main className='flex-1 p-8'>
+      <main className='flex-1 p-4 md:p-8'>
         <div className='max-w-7xl mx-auto'>
-          <div className='mb-12 text-center'>
-            <h1 className='text-5xl font-bold mb-3 bg-gradient-to-r from-blue-500 to-indigo-600 bg-clip-text text-transparent'>
+          <div className='mb-12 text-center px-4 md:px-0'>
+            <h1 className='text-3xl md:text-5xl font-bold mb-3 bg-gradient-to-r from-blue-500 to-indigo-600 bg-clip-text text-transparent'>
               Khám phá khóa học
             </h1>
-            <p className='text-lg text-muted-foreground max-w-3xl mx-auto'>
+            <p className='text-base md:text-lg text-muted-foreground max-w-3xl mx-auto'>
               Tìm kiếm và lựa chọn khóa học phù hợp với mục tiêu học tập của bạn
             </p>
           </div>

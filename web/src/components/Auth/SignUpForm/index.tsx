@@ -6,13 +6,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { FcGoogle } from 'react-icons/fc'
 import CustomCheckbox from '../../common/CustomCheckbox'
 import { FaSquareFacebook } from 'react-icons/fa6'
-import { BookOpen, Send } from 'lucide-react'
+import { Send } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import userService from '@/services/user/user.service'
 import { toast } from 'sonner'
 import { SignUpFormInputs, signUpSchema } from '@/utils/auth'
 import useLoading from '@/hooks/useLoading.hook'
+import logo from '@/assets/images/logo1.png'
 
 const SignUpForm: FC<{ setIsSignUpMode: (value: boolean) => void; handleLoginWithGoogle: () => void }> = ({
   setIsSignUpMode,
@@ -47,14 +48,15 @@ const SignUpForm: FC<{ setIsSignUpMode: (value: boolean) => void; handleLoginWit
   }
 
   return (
-    <div className='w-full bg-white rounded-lg md:mt-0 sm:max-w-md xl:py-0'>
+    <div className='w-full bg-white rounded-lg md:mt-0 sm:max-w-md xl:py-0 max-lg:-mt-12'>
       <Card className='shadow-xl py-12 border-none'>
         <CardHeader className='text-center'>
-          <CardTitle className='font-bold flex items-center justify-center gap-2'>
-            <BookOpen />
-            Đăng ký tài khoản mới
+          <CardTitle className='flex items-center justify-center'>
+            <img src={logo} alt='LEARNOVA logo' className='h-12 md:h-14 w-auto object-contain mx-auto select-none' />
           </CardTitle>
-          <CardDescription>Nhâp thông tin đăng nhập của bạn để tiếp tục.</CardDescription>
+          <CardDescription className='text-[#2DD4BF] text-base font-semibold mt-2'>
+            Bắt đầu để khám phá tri thức cùng Learnova.
+          </CardDescription>
           <CardContent className='mt-5'>
             <form onSubmit={handleSubmit(onSubmit)}>
               <div className='login-form flex flex-col gap-3'>
@@ -90,7 +92,7 @@ const SignUpForm: FC<{ setIsSignUpMode: (value: boolean) => void; handleLoginWit
                   <a
                     href='/term'
                     target='_blank'
-                    className='text-blue-600 text-base underline underline-offset-2 cursor-pointer hover:text-blue-700'
+                    className='text-blue-500 text-sm underline underline-offset-2 cursor-pointer hover:text-blue-600'
                   >
                     Điều khoản
                   </a>
@@ -108,6 +110,16 @@ const SignUpForm: FC<{ setIsSignUpMode: (value: boolean) => void; handleLoginWit
                   icon={<Send size={16} />}
                 />
               </div>
+              <p className='text-center text-sm text-gray-500 mt-5'>
+                Bạn đã có tài khoản?{' '}
+                <button
+                  type='button'
+                  onClick={() => setIsSignUpMode(false)}
+                  className='text-blue-500 font-bold hover:underline'
+                >
+                  Đăng nhập
+                </button>
+              </p>
               {/* Divider */}
               <div className='relative mt-5'>
                 <div className='absolute inset-0 flex items-center'>
@@ -129,12 +141,6 @@ const SignUpForm: FC<{ setIsSignUpMode: (value: boolean) => void; handleLoginWit
                   className='bg-blue-600 w-1/2 border-2 border-solid hover:bg-blue-700'
                 />
               </div>
-              <p className='text-center text-sm text-gray-500 mt-5'>
-                Bạn đã có tài khoản?{' '}
-                <button type='button' onClick={() => setIsSignUpMode(false)} className='text-blue-500 hover:underline'>
-                  Đăng nhập
-                </button>
-              </p>
             </form>
           </CardContent>
         </CardHeader>

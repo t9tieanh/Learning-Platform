@@ -33,7 +33,7 @@ interface Teacher {
 const TeacherInfo = ({ teacher }: { teacher: Teacher }) => {
   const navigate = useNavigate()
   return (
-    <Card className='ml-20 border-none'>
+    <Card className='ml-0 md:ml-20 border-none'>
       <CardContent className='p-6'>
         <div className='flex flex-col md:flex-row gap-6'>
           {/* Teacher Avatar and Basic Info */}

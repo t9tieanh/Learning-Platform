@@ -5,7 +5,6 @@ import CustomButton from '../../common/Button'
 import CustomInput from '../../common/Input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { FcGoogle } from 'react-icons/fc'
-import CustomCheckbox from '../../common/CustomCheckbox'
 import { FaSquareFacebook } from 'react-icons/fa6'
 import { SignInFormInputs, signInSchema } from '@/utils/auth'
 import { useForm } from 'react-hook-form'
@@ -103,7 +102,7 @@ const SignInForm = ({
               <div className='remember-me flex justify-between items-center mt-5'>
                 <p></p>
                 <p
-                  className='text-blue-700 text-sm font-bold underline hover:cursor-pointer'
+                  className='text-blue-500 text-sm font-bold hover:cursor-pointer'
                   onClick={() => {
                     navigate('/forgot')
                   }}
@@ -144,7 +143,11 @@ const SignInForm = ({
             </div>
             <p className='text-center text-sm text-gray-500 mt-5'>
               Bạn chưa có tài khoản?{' '}
-              <button type='button' onClick={() => setIsSignUpMode(true)} className='text-blue-500 hover:underline'>
+              <button
+                type='button'
+                onClick={() => setIsSignUpMode(true)}
+                className='text-blue-500 hover:underline font-bold'
+              >
                 Đăng ký
               </button>
             </p>
