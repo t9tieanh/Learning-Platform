@@ -30,5 +30,6 @@ export const env = {
   RABBIT_MQ_VHOST: process.env.RABBIT_MQ_VHOST,
   RABBIT_MQ_URI: process.env.RABBIT_MQ_URI || '',
   COURSE_GRPC_URL: process.env.COURSE_GRPC_URL || 'course-service:9091',
-  USER_GRPC_URL: process.env.USER_GRPC_URL || 'user-service:9090'
+  USER_GRPC_URL: process.env.USER_GRPC_URL || 'user-service:9090',
+  SOCKET_URL: process.env.SOCKET_URL || 'http://socket-server:5001'
 }
