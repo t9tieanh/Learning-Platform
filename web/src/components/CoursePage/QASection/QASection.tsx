@@ -1,4 +1,4 @@
-import { ThumbsUp, MessageSquare, Send, MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
+import { MessageSquare, Send, MoreHorizontal, Pencil, Trash2, MessageCircleQuestionMark } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
@@ -11,7 +11,8 @@ import {
   DialogHeader,
   DialogTitle
 } from '@/components/ui/dialog'
-import { useQASection, getInitials, CommentUI, ReplyUI } from './helper'
+import { useQASection, CommentUI, ReplyUI } from './helper'
+import { QASectionSkeleton } from './QASectionSkeleton'
 
 interface QASectionProps {
   lessonId: string
@@ -51,17 +52,24 @@ export const QASection = ({ lessonId, instructorId }: QASectionProps) => {
     getInitials
   } = useQASection(lessonId)
 
+  if (isLoading) {
+    return <QASectionSkeleton />
+  }
+
   return (
-    <div className='mx-auto p-6 space-y-6'>
+    <div className='py-6 space-y-6'>
       {/* New Comment Section */}
       <div className='bg-card rounded-lg border border-border p-6 space-y-4'>
-        <h3 className='text-lg font-semibold text-foreground'>Bình luận</h3>
+        <h3 className='text-base font-semibold text-foreground flex items-center'>
+          <MessageCircleQuestionMark className='mr-2' />
+          Bình luận
+        </h3>
         {!userId && <p className='text-sm text-muted-foreground'>Bạn cần đăng nhập để bình luận.</p>}
         <Textarea
           placeholder='Đặt câu hỏi hoặc chia sẻ kiến thức tại đây...'
           value={newComment}
           onChange={(e) => setNewComment(e.target.value)}
-          className='min-h-[100px] resize-none'
+          className='min-h-[100px] resize-none text-sm'
           disabled={!userId || isSubmitting}
         />
         <div className='flex justify-end'>
@@ -75,7 +83,6 @@ export const QASection = ({ lessonId, instructorId }: QASectionProps) => {
 
       {/* Comments List */}
       <div className='space-y-4 max-h-[600px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-muted-foreground/30 scrollbar-thumb-rounded-lg'>
-        {isLoading && <p className='text-sm text-muted-foreground px-2'>Đang tải bình luận...</p>}
         {!isLoading && comments.length === 0 && (
           <p className='text-sm text-muted-foreground px-2'>Chưa có bình luận nào.</p>
         )}
