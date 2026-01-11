@@ -76,8 +76,8 @@ const Course = () => {
             tags={courseDetail?.tags || []}
           />
           <WhatYouWillLearn learningPoints={courseDetail?.outcomes || []} />
-          <div className='grid grid-cols-3 gap-4 bg-white'>
-            <div className='col-span-2'>
+          <div className='grid grid-cols-1 md:grid-cols-3 gap-4 bg-white px-4 md:px-0'>
+            <div className='md:col-span-2'>
               <CourseContent
                 requirements={courseDetail?.requirements || []}
                 sections={courseDetail?.chapters || []}
@@ -101,7 +101,7 @@ const Course = () => {
                 }
               />
             </div>
-            <div className='col-span-1'>
+            <div className='col-span-1 md:sticky md:top-4 md:h-fit mt-6 md:mt-0'>
               {courseDetail && courseDetail.purchased !== undefined && courseDetail.purchased ? (
                 <LearnNow courseId={courseDetail.id} instructorId={courseDetail?.instructor?.id} />
               ) : (

@@ -64,23 +64,23 @@ const Cover = ({ video, image, title, shortDescription, teacher, tags, showSmall
           className='fixed shadow-lg left-0 right-0 z-40 bg-[#0C356A] backdrop-blur-sm'
           style={{ top: 'var(--main-header-height, 100px)' }}
         >
-          <div className='max-w-6xl mx-auto px-6 py-3 flex items-center justify-between min-h-[56px]'>
-            <div className='text-sm flex flex-col items-center text-white font-bold text-md text-ellipsis overflow-hidden whitespace-nowrap max-w-[60%]'>
-              <div className='flex justify-end items-center gap-2 rounded-2xl bg-white text-black py-1 px-4 shadow-xl'>
-                {title}
-                <span className='flex items-center gap-1 bg-white px-2 py-1 text-black'>
-                  <Avatar className='w-6 h-6'>
+          <div className='max-w-6xl mx-auto px-3 md:px-6 py-2 md:py-3 flex items-center justify-between min-h-[48px] md:min-h-[56px]'>
+            <div className='text-xs md:text-sm flex items-center text-white font-bold text-center text-ellipsis overflow-hidden whitespace-nowrap max-w-[95%] md:max-w-[60%]'>
+              <div className='flex flex-row justify-left items-center gap-1 md:gap-2 rounded-xl md:rounded-2xl bg-white text-black py-1 px-2 md:px-4 shadow-xl'>
+                <span className='truncate'>{title}</span>
+                <span className='flex items-center gap-1 bg-white px-1 md:px-2 py-0.5 text-black'>
+                  <Avatar className='w-5 h-5 md:w-6 md:h-6'>
                     <AvatarImage src={teacher.avatar || AvatarNotFound} />
                     <AvatarFallback>{teacher.name.charAt(0)}</AvatarFallback>
                   </Avatar>
-                  {teacher.name}
+                  <span className='hidden md:inline text-xs md:text-sm'>{teacher.name}</span>
                 </span>
               </div>
             </div>
           </div>
         </div>
       )}
-      <div className='relative group cover-container min-h-96 bg-[#0C356A] flex flex-col md:flex-row items-center justify-center mx-auto w-full py-16'>
+      <div className='relative group cover-container min-h-96 bg-[#0C356A] flex flex-col md:flex-row items-center justify-center mx-auto w-full py-8 md:py-16 px-4 md:px-0'>
         <div
           className='absolute left-4 z-20 invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-opacity duration-200'
           style={{ top: showSmallHeader ? 'calc(var(--main-header-height, 100px) + 1rem)' : '1rem' }}
@@ -95,7 +95,7 @@ const Cover = ({ video, image, title, shortDescription, teacher, tags, showSmall
         </div>
 
         <div
-          className='video-introduction relative p-0 md:p-10 mb-6 md:mb-0 cursor-pointer'
+          className='video-introduction relative p-0 md:p-10 mb-6 md:mb-0 cursor-pointer w-full md:w-auto'
           role='button'
           tabIndex={0}
           onClick={() => setPreview((prev) => ({ ...prev, openPreview: true }))}
@@ -109,18 +109,26 @@ const Cover = ({ video, image, title, shortDescription, teacher, tags, showSmall
           }}
         >
           {video && !showVideo ? (
-            <img src={image} alt='Video Thumbnail' className='h-[320px] w-[580px] object-cover rounded-2xl shadow-xl' />
+            <img
+              src={image}
+              alt='Video Thumbnail'
+              className='h-auto md:h-[320px] w-full md:w-[580px] object-cover rounded-lg md:rounded-2xl shadow-xl'
+            />
           ) : video && showVideo ? (
             <video
               src={`https://${video}`}
               controls
               autoPlay
               muted
-              className='h-[340px] w-[600px] object-cover rounded-2xl shadow-xl'
+              className='h-auto md:h-[340px] w-full md:w-[600px] object-cover rounded-lg md:rounded-2xl shadow-xl'
               poster={image}
             />
           ) : (
-            <img src={image} alt='Video Thumbnail' className='h-[340px] w-[600px] object-cover rounded-2xl shadow-xl' />
+            <img
+              src={image}
+              alt='Video Thumbnail'
+              className='h-auto md:h-[340px] w-full md:w-[600px] object-cover rounded-lg md:rounded-2xl shadow-xl'
+            />
           )}
           <div className='absolute inset-0 flex items-center justify-center'>
             {!showVideo && (
@@ -135,17 +143,17 @@ const Cover = ({ video, image, title, shortDescription, teacher, tags, showSmall
 
         <PreviewPublicLesson preview={preview} setPreview={setPreview} />
 
-        <div className='title-container text-left text-white'>
-          <h1 className='text-2xl md:text-4xl font-bold mb-4 max-w-xl text-justify'>Khóa học {title}</h1>
+        <div className='title-container text-left text-white w-full md:w-auto'>
+          <h1 className='text-xl md:text-4xl font-bold mb-4 max-w-xl text-justify'>Khóa học {title}</h1>
           <div className='flex items-center gap-2 mb-4'>
             <Avatar>
               <AvatarImage src={teacher.avatar} />
               <AvatarFallback>{teacher.name.charAt(0)}</AvatarFallback>
             </Avatar>
-            <div className='text-lg text-white-200'>{teacher.name}</div>
+            <div className='text-base md:text-lg text-white-200'>{teacher.name}</div>
           </div>
           <p className='text-sm md:text-base max-w-xl text-justify text-gray-200'>{shortDescription}</p>
-          <div className='flex flex-wrap gap-2 mt-2 w-full max-w-[640px] break-words'>
+          <div className='flex flex-wrap gap-2 mt-4 w-full max-w-[640px] break-words'>
             {tags?.map((tag) => (
               <Badge
                 key={tag.id}

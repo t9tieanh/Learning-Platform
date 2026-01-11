@@ -30,9 +30,11 @@ const CourseContent = ({
   }
 }) => {
   return (
-    <div className='course-content-container min-h-24 pt-0 pb-12'>
-      <h4 className='font-bold bg-primary text-white p-2 rounded-r-3xl max-w-80 pl-12'>Nội dung của khóa học</h4>
-      <div className='content-accordion-container text-left ml-20 mt-6'>
+    <div className='course-content-container min-h-24 pt-0 pb-12 px-4 md:px-0'>
+      <h4 className='font-bold bg-primary text-white p-2 rounded-r-3xl max-w-80 pl-4 md:pl-12'>
+        Nội dung của khóa học
+      </h4>
+      <div className='content-accordion-container text-left ml-0 md:ml-20 mt-6'>
         <Accordion type='single' collapsible className='w-full space-y-4'>
           {sections?.map((section, index) => (
             <CourseSection key={index} section={section} index={index} />
@@ -41,19 +43,23 @@ const CourseContent = ({
       </div>
       {/* requirements */}
       <div className='py-6'>
-        <h4 className='font-bold bg-primary text-white p-2 rounded-r-3xl max-w-80 pl-12'>Bạn nên chuẩn bị gì</h4>
+        <h4 className='font-bold bg-primary text-white p-2 rounded-r-3xl max-w-80 pl-4 md:pl-12'>
+          Bạn nên chuẩn bị gì
+        </h4>
       </div>
       <Requirement requirements={requirements} />
       {/* description */}
       <div className='py-6'>
-        <h4 className='font-bold bg-primary text-white p-2 rounded-r-3xl max-w-80 pl-12'>Mô tả chi tiết</h4>
+        <h4 className='font-bold bg-primary text-white p-2 rounded-r-3xl max-w-80 pl-4 md:pl-12'>Mô tả chi tiết</h4>
       </div>
-      <div className='text-base max-w-3xl ml-20 text-justify leading-relaxed font-normal text-gray-700'>
+      <div className='text-base max-w-3xl ml-0 md:ml-20 text-justify leading-relaxed font-normal text-gray-700'>
         {/* content of course */}
         <div dangerouslySetInnerHTML={{ __html: content }} />
       </div>
       <div className='py-6'>
-        <h4 className='font-bold bg-primary text-white p-2 rounded-r-3xl max-w-80 pl-12'>Thông tin giáo viên</h4>
+        <h4 className='font-bold bg-primary text-white p-2 rounded-r-3xl max-w-80 pl-4 md:pl-12'>
+          Thông tin giáo viên
+        </h4>
       </div>
       <TeacherInfo teacher={instructor} />
     </div>

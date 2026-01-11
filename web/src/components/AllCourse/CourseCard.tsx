@@ -46,27 +46,27 @@ export const CourseCard = ({
       className='overflow-hidden group border border-border/60 bg-card/60 backdrop-blur-sm cursor-pointer p-0'
       onClick={handleClickCourse}
     >
-      <div className='flex flex-row items-stretch h-40'>
-        <div className='w-72 h-full flex-shrink-0 overflow-hidden'>
+      <div className='flex flex-col md:flex-row items-stretch md:h-40'>
+        <div className='w-full md:w-72 h-40 md:h-full flex-shrink-0 overflow-hidden'>
           <img src={thumbnail} alt={title} className='w-full h-full object-cover object-center' />
         </div>
         {/* Content */}
-        <div className='flex-1 flex flex-col justify-between pl-5 p-3'>
+        <div className='flex-1 flex flex-col justify-between p-3 md:pl-5'>
           <div className='flex-1 pb-5'>
-            <h3 className='text-lg font-semibold mb-2 line-clamp-2 text-foreground group-hover:text-primary transition-colors duration-200'>
+            <h3 className='text-base md:text-lg font-semibold mb-2 line-clamp-2 text-foreground group-hover:text-primary transition-colors duration-200'>
               {title}
             </h3>
 
-            <p className='text-sm text-muted-foreground/80 mb-2 line-clamp-2'>{description}</p>
+            <p className='text-xs md:text-sm text-muted-foreground/80 mb-2 line-clamp-2'>{description}</p>
             <p className='text-xs text-muted-foreground italic mb-2'>{instructor.name}</p>
 
             <div className='flex items-center gap-2 mb-2'>
-              <span className='text-sm font-semibold text-yellow-500'>{rating}</span>
+              <span className='text-xs md:text-sm font-semibold text-yellow-500'>{rating}</span>
               <div className='flex items-center gap-0.5'>
                 {[...Array(5)].map((_, i) => (
                   <Star
                     key={i}
-                    className={`w-3.5 h-3.5 ${
+                    className={`w-3 h-3 md:w-3.5 md:h-3.5 ${
                       i < Math.floor(rating)
                         ? 'fill-yellow-400 text-yellow-400 drop-shadow-sm'
                         : 'text-muted-foreground/20'
@@ -79,12 +79,12 @@ export const CourseCard = ({
 
             <div className='flex items-center gap-3 text-xs text-muted-foreground/80'>
               <div className='flex items-center gap-1'>
-                <Clock className='w-3.5 h-3.5 text-blue-500/80' />
+                <Clock className='w-3 h-3 md:w-3.5 md:h-3.5 text-blue-500/80' />
                 <span>{duration}</span>
               </div>
               <span className='text-muted-foreground/50'>•</span>
               <div className='flex items-center gap-1'>
-                <BookOpen className='w-3.5 h-3.5 text-green-500/80' />
+                <BookOpen className='w-3 h-3 md:w-3.5 md:h-3.5 text-green-500/80' />
                 <span>{lectures} bài giảng</span>
               </div>
               <span className='text-muted-foreground/50'>•</span>
@@ -92,7 +92,7 @@ export const CourseCard = ({
             </div>
           </div>
         </div>
-        <div className='w-32 flex-shrink-0 pr-5 flex flex-col items-end justify-start p-3'>
+        <div className='w-full md:w-32 flex-shrink-0 flex flex-col md:flex-row md:flex-col items-start md:items-end justify-between md:justify-start p-3'>
           <p className='text-xl font-bold text-orange-500/90'>₫{salePrice.toLocaleString('vi-VN')}</p>
           {originalPrice > salePrice && (
             <p className='text-sm text-muted-foreground line-through'>₫{originalPrice.toLocaleString('vi-VN')}</p>

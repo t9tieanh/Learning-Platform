@@ -3,12 +3,14 @@ import { CheckCircle2 } from 'lucide-react'
 
 const WhatYouWillLearn = ({ learningPoints }: { learningPoints: string[] }) => {
   return (
-    <section className='my-8 bg-white'>
+    <section className='my-8 bg-white px-4 md:px-0'>
       <div className='shrink-0'>
-        <h4 className='font-bold max-w-80 bg-blue-500 text-white p-2 rounded-r-3xl pl-12'>Kiến thức đạt được</h4>
+        <h4 className='font-bold max-w-80 bg-blue-500 text-white p-2 rounded-r-3xl md:pl-12 pl-4'>
+          Kiến thức đạt được
+        </h4>
       </div>
 
-      <ul className='space-y-2 max-w-3xl ml-20 my-8'>
+      <ul className='space-y-2 max-w-3xl ml-0 md:ml-20 my-8'>
         {learningPoints.map((title, index) => (
           <li key={index} className='flex items-center space-x-4 group'>
             <div className='flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white transition-colors duration-300'>

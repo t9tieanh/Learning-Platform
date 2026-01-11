@@ -66,7 +66,7 @@ const HighlightedArticles = () => {
             ))}
           </>
         )}
-        {error && !loading && <div className='col-span-4 text-center text-red-500 py-8'>{error}</div>}
+        {error && !loading && <div className='col-span-4 text-center text-sm py-8'>{error}</div>}
         {!loading && !error && articles.map((article) => <ArticlesCard key={article.id} article={article} />)}
       </div>
     </div>

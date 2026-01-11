@@ -145,14 +145,17 @@ const Header: FC = () => {
                   <MenuIcon className='w-5 h-5' />
                 </button>
               </SheetTrigger>
-              <SheetContent side='right' className='w-[300px] sm:w-[400px]'>
-                <nav className='flex flex-col gap-4'>
+              <SheetContent side='right' className='w-[300px] sm:w-[400px] p-0'>
+                <div className='flex items-center gap-2 px-4 py-4 border-b'>
+                  <img src={logo} alt='LEARNOVA logo' className='h-6 w-auto select-none object-contain' />
+                </div>
+                <nav className='flex flex-col gap-1 px-2'>
                   {!data && (
-                    <div className='flex flex-col gap-2 mb-4'>
+                    <div className='flex flex-col gap-3 mb-6 px-2'>
                       <CustomButton
                         label='Đăng ký'
                         icon={<UserPlus className='w-4 h-4' />}
-                        className='w-full signup-btn shadow-lg bg-white-100 text-blue-700 hover:text-white hover:bg-blue-800 rounded-xl font-base'
+                        className='w-full signup-btn shadow-lg bg-white-100 text-blue-700 hover:text-white hover:bg-blue-800 rounded-lg font-medium text-sm py-2.5'
                         onClick={() => {
                           navigate('/auth?mode=signup')
                           setIsOpen(false)
@@ -160,7 +163,7 @@ const Header: FC = () => {
                       />
                       <CustomButton
                         label='Đăng nhập'
-                        className='w-full btn-primary shadow-lg login-btn bg-blue-600 hover:bg-blue-800 font-base rounded-xl'
+                        className='w-full btn-primary shadow-lg login-btn bg-blue-600 hover:bg-blue-800 font-medium text-sm rounded-lg py-2.5'
                         onClick={() => {
                           navigate('/auth')
                           setIsOpen(false)
@@ -176,10 +179,12 @@ const Header: FC = () => {
                         navigate(item.path)
                         setIsOpen(false)
                       }}
-                      className='flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg transition-colors'
+                      className='flex items-center gap-3 px-4 py-3 hover:bg-blue-50 rounded-lg transition-colors text-sm md:text-base font-medium hover:text-blue-600'
                     >
-                      {item.icon}
-                      <span className='font-medium'>{item.label}</span>
+                      <span className='w-5 h-5 flex items-center justify-center text-gray-600 group-hover:text-blue-600'>
+                        {item.icon}
+                      </span>
+                      <span>{item.label}</span>
                     </button>
                   ))}
                 </nav>

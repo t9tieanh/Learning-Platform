@@ -61,7 +61,7 @@ export const FilterSidebar = ({
   }, [categories, showAllCategories])
 
   return (
-    <div className='w-80 bg-white border-r border-gray-200 p-6 overflow-y-auto h-screen sticky top-0'>
+    <div className='hidden md:block w-80 bg-white border-r border-gray-200 p-6 overflow-y-auto h-screen sticky top-0'>
       {/* Search */}
       <div className='mb-8'>
         <div className='relative'>
