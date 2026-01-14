@@ -66,6 +66,7 @@ jobs:
 
   # Build all microservices
   build:
+    if: false
     needs: changes
     runs-on: ubuntu-latest
     permissions:
@@ -134,7 +135,7 @@ jobs:
 
       - name: Deploy to VPS
         run: |
-          ssh -i ~/.ssh/deploy_key -p ${{ secrets.VPS_SSH_PORT }} ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'DEPLOY_EOF'
+          ssh -T -i ~/.ssh/deploy_key -p ${{ secrets.VPS_SSH_PORT }} ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'DEPLOY_EOF'
             set -e
             
             # Cleanup function - runs on success or failure
@@ -155,18 +156,15 @@ jobs:
 
             echo "🔐 Writing env & config files..."
 
-            printf "%s" "${{ secrets.PROD_API_GATEWAY_CONFIG_YAML }}" > api-gateway.application.yaml
-            printf "%s" "${{ secrets.PROD_USER_SERVICE_CONFIG_YAML }}" > user-service.application.yaml
-            printf "%s" "${{ secrets.PROD_COURSE_SERVICE_CONFIG_YAML }}" > course-service.application.yaml
-
-            printf "%s" "${{ secrets.PROD_SALE_SERVICE_ENV }}" > sale-service.env
-            printf "%s" "${{ secrets.PROD_NOTIFICATION_SERVICE_ENV }}" > notification-service.env
-
-            printf "%s" "${{ secrets.AWS_CLOUDFRONT_PRIVATE_KEY_PEM }}" > cloudfront-private-key.pem
+            echo "${{ secrets.PROD_API_GATEWAY_CONFIG_YAML }}" | base64 -d > api-gateway.application.yaml
+            echo "${{ secrets.PROD_USER_SERVICE_CONFIG_YAML }}" | base64 -d > user-service.application.yaml
+            echo "${{ secrets.PROD_COURSE_SERVICE_CONFIG_YAML }}" | base64 -d > course-service.application.yaml
+            echo "${{ secrets.PROD_SALE_SERVICE_ENV }}" | base64 -d > sale-service.env
+            echo "${{ secrets.PROD_NOTIFICATION_SERVICE_ENV }}" | base64 -d > notification-service.env
+            echo "${{ secrets.AWS_CLOUDFRONT_PRIVATE_KEY_PEM }}" | base64 -d > cloudfront-private-key.pem
             chmod 600 cloudfront-private-key.pem
-
-            printf "%s" "${{ secrets.PROD_DOCKER_COMPOSE_ENV }}" > .env
-
+            echo "${{ secrets.PROD_DOCKER_COMPOSE_ENV }}" | base64 -d > .env            
+            
             echo "📦 Pull latest images..."
             docker pull docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.API_GATEWAY_IMAGE }}:latest
             docker pull docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.USER_SERVICE_IMAGE }}:latest
