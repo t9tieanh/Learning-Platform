@@ -144,39 +144,39 @@ jobs:
             echo "🔄 Creating environment files from secrets..."
             
             # API Gateway config
-            cat > api-gateway.application.yaml << 'YAML'
+            cat > api-gateway.application.yaml << 'EOF'
             ${{ secrets.PROD_API_GATEWAY_CONFIG_YAML }}
-            YAML
+            EOF
             
             # Course Service config
-            cat > course-service.application.yaml << 'YAML'
+            cat > course-service.application.yaml << 'EOF'
             ${{ secrets.PROD_COURSE_SERVICE_CONFIG_YAML }}
-            YAML
+            EOF
             
             # User Service config
-            cat > user-service.application.yaml << 'YAML'
+            cat > user-service.application.yaml << 'EOF'
             ${{ secrets.PROD_USER_SERVICE_CONFIG_YAML }}
-            YAML
+            EOF
             
             # Sale Service .env
-            cat > sale-service.env << 'ENV'
+            cat > sale-service.env << 'EOF'
             ${{ secrets.PROD_SALE_SERVICE_ENV }}
-            ENV
+            EOF
             
             # Notification Service .env
-            cat > notification-service.env << 'ENV'
+            cat > notification-service.env << 'EOF'
             ${{ secrets.PROD_NOTIFICATION_SERVICE_ENV }}
-            ENV
+            EOF
             
             # CloudFront private key
-            cat > cloudfront-private-key.pem << 'KEY'
+            cat > cloudfront-private-key.pem << 'EOF'
             ${{ secrets.AWS_CLOUDFRONT_PRIVATE_KEY_PEM }}
-            KEY
+            EOF
             chmod 600 cloudfront-private-key.pem
             
-            cat > .env << 'ENV'
+            cat > .env << 'EOF'
             ${{ secrets.PROD_DOCKER_COMPOSE_ENV }}
-            ENV
+            EOF
 
             echo "🚀 Pulling latest Docker images..."
             docker pull ${{ env.REGISTRY }}/${{ env.DOCKERHUB_USERNAME }}/${{ env.API_GATEWAY_IMAGE }}:latest
