@@ -3,10 +3,10 @@ name: Build & Deploy Microservices to VPS
 on:
   push:
     branches:
-      - feature/test_ci_cd
+      - main
   pull_request:
     branches:
-      - feature/test_ci_cd
+      - main
 
 env:
   REGISTRY: docker.io
@@ -66,7 +66,6 @@ jobs:
 
   # Build all microservices
   build:
-    if: false
     needs: changes
     runs-on: ubuntu-latest
     permissions:
@@ -118,9 +117,9 @@ jobs:
         run: echo "⏭️  Skipped building ${{ matrix.service }} (no changes detected)"
 
   deploy:
-    # needs: build
+    needs: build
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/feature/test_ci_cd' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
     steps:
       - name: Checkout code
