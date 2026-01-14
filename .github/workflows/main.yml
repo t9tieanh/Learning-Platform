@@ -135,56 +135,47 @@ jobs:
 
       - name: Deploy to VPS
         run: |
-            ssh -T -i ~/.ssh/deploy_key -p ${{ secrets.VPS_SSH_PORT }} \
-            ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << DEPLOY_EOF
-              set -e
+          API_GATEWAY_IMAGE=${{ env.API_GATEWAY_IMAGE }}
+          USER_SERVICE_IMAGE=${{ env.USER_SERVICE_IMAGE }}
+          COURSE_SERVICE_IMAGE=${{ env.COURSE_SERVICE_IMAGE }}
+          SALE_SERVICE_IMAGE=${{ env.SALE_SERVICE_IMAGE }}
+          NOTIFICATION_SERVICE_IMAGE=${{ env.NOTIFICATION_SERVICE_IMAGE }}
+          SOCKET_SERVER_IMAGE=${{ env.SOCKET_SERVER_IMAGE }}
+          DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}
 
-              SUCCESS=0
+          ssh -T -i ~/.ssh/deploy_key -p ${{ secrets.VPS_SSH_PORT }} \
+          ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << DEPLOY_EOF
+            set -e
 
-              cleanup() {
-                if [ "$SUCCESS" -eq 1 ]; then
-                  echo "🧹 Cleaning up production folder..."
-                  cd ~
-                  rm -rf ~/learning-platform/production
-                  echo "✅ Production folder cleaned up!"
-                else
-                  echo "❌ Deployment failed – skip cleanup"
-                fi
-              }
+            SUCCESS=0
 
-              echo "🚀 Starting deployment..."
+            cleanup() {
+              if [ "\$SUCCESS" -eq 1 ]; then
+                echo "🧹 Cleaning up production folder..."
+                rm -rf ~/learning-platform/production
+              else
+                echo "❌ Deployment failed – skip cleanup"
+              fi
+            }
 
-              rm -rf ~/learning-platform/production
-              mkdir -p ~/learning-platform/production
-              cd ~/learning-platform/production
+            mkdir -p ~/learning-platform/production
+            cd ~/learning-platform/production
 
-              echo "🔐 Writing env & config files..."
+            echo "🔐 Writing env files..."
+            printf "%s" "${{ secrets.PROD_DOCKER_COMPOSE_ENV }}" > .env
 
-              printf "%s" "${{ secrets.PROD_API_GATEWAY_CONFIG_YAML }}" > api-gateway.application.yaml
-              printf "%s" "${{ secrets.PROD_USER_SERVICE_CONFIG_YAML }}" > user-service.application.yaml
-              printf "%s" "${{ secrets.PROD_COURSE_SERVICE_CONFIG_YAML }}" > course-service.application.yaml
+            echo "📦 Pulling Docker images..."
+            docker pull docker.io/$DOCKERHUB_USERNAME/$API_GATEWAY_IMAGE:latest
+            docker pull docker.io/$DOCKERHUB_USERNAME/$USER_SERVICE_IMAGE:latest
+            docker pull docker.io/$DOCKERHUB_USERNAME/$COURSE_SERVICE_IMAGE:latest
+            docker pull docker.io/$DOCKERHUB_USERNAME/$SALE_SERVICE_IMAGE:latest
+            docker pull docker.io/$DOCKERHUB_USERNAME/$NOTIFICATION_SERVICE_IMAGE:latest
+            docker pull docker.io/$DOCKERHUB_USERNAME/$SOCKET_SERVER_IMAGE:latest
 
-              printf "%s" "${{ secrets.PROD_SALE_SERVICE_ENV }}" > sale-service.env
-              printf "%s" "${{ secrets.PROD_NOTIFICATION_SERVICE_ENV }}" > notification-service.env
+            echo "🚀 Starting services..."
+            docker compose up -d
+            docker compose ps
 
-              printf "%s" "${{ secrets.AWS_CLOUDFRONT_PRIVATE_KEY_PEM }}" > cloudfront-private-key.pem
-              chmod 600 cloudfront-private-key.pem
-
-              printf "%s" "${{ secrets.PROD_DOCKER_COMPOSE_ENV }}" > .env
-
-              echo "📦 Pulling Docker images..."
-              docker pull docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.API_GATEWAY_IMAGE }}:latest
-              docker pull docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.USER_SERVICE_IMAGE }}:latest
-              docker pull docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.COURSE_SERVICE_IMAGE }}:latest
-              docker pull docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.SALE_SERVICE_IMAGE }}:latest
-              docker pull docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.NOTIFICATION_SERVICE_IMAGE }}:latest
-              docker pull docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.SOCKET_SERVER_IMAGE }}:latest
-
-              echo "🚀 Starting services..."
-              docker compose up -d
-
-              docker compose ps
-
-              SUCCESS=1
-              cleanup
-            DEPLOY_EOF
+            SUCCESS=1
+            cleanup
+          DEPLOY_EOF
