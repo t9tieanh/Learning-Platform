@@ -161,8 +161,16 @@ jobs:
             mkdir -p ~/learning-platform/production
             cd ~/learning-platform/production
 
-            echo "🔐 Writing env files..."
+            echo "🔐 Writing config & env files..."
+            printf "%s" "${{ secrets.PROD_API_GATEWAY_CONFIG_YAML }}" > api-gateway.application.yaml
+            printf "%s" "${{ secrets.PROD_USER_SERVICE_CONFIG_YAML }}" > user-service.application.yaml
+            printf "%s" "${{ secrets.PROD_COURSE_SERVICE_CONFIG_YAML }}" > course-service.application.yaml
+            printf "%s" "${{ secrets.PROD_SALE_SERVICE_ENV }}" > sale-service.env
+            printf "%s" "${{ secrets.PROD_NOTIFICATION_SERVICE_ENV }}" > notification-service.env
+            printf "%s" "${{ secrets.AWS_CLOUDFRONT_PRIVATE_KEY_PEM }}" > cloudfront-private-key.pem
+            chmod 600 cloudfront-private-key.pem
             printf "%s" "${{ secrets.PROD_DOCKER_COMPOSE_ENV }}" > .env
+            echo "✅ All config & env files created"
 
             echo "📦 Pulling Docker images..."
             docker pull docker.io/$DOCKERHUB_USERNAME/$API_GATEWAY_IMAGE:latest
@@ -173,8 +181,8 @@ jobs:
             docker pull docker.io/$DOCKERHUB_USERNAME/$SOCKET_SERVER_IMAGE:latest
 
             echo "🚀 Starting services..."
-            docker compose down -v
-            docker compose up -d
+            # docker compose down -v
+            # docker compose up -d
             docker compose ps
 
             SUCCESS=1
