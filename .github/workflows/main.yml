@@ -137,7 +137,7 @@ jobs:
         run: |
           ssh -i ~/.ssh/deploy_key -p ${{ secrets.VPS_SSH_PORT }} \
           ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'EOF'
-          set -Eeuo pipefail
+          set -e
 
           echo "🚀 Starting deployment..."
 
@@ -155,18 +155,16 @@ jobs:
           SOCKET_SERVER_IMAGE="learnova_socket-server"
 
           ########################
-          # Cleanup on failure
+          # Cleanup on exit
           ########################
           cleanup() {
-            EXIT_CODE=$?
-            if [ $EXIT_CODE -eq 0 ]; then
+            if [ "$?" -eq 0 ]; then
               echo "🧹 Cleaning up production folder..."
               rm -rf "$WORKDIR"
               echo "✅ Cleanup completed"
             else
               echo "❌ Deployment failed. Keeping current production for investigation."
             fi
-            exit $EXIT_CODE
           }
 
           trap cleanup EXIT
