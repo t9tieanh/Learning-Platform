@@ -134,8 +134,19 @@ jobs:
 
       - name: Deploy to VPS
         run: |
-          ssh -i ~/.ssh/deploy_key -p ${{ secrets.VPS_SSH_PORT }} ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'EOF'
+          ssh -i ~/.ssh/deploy_key -p ${{ secrets.VPS_SSH_PORT }} ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'DEPLOY_EOF'
             set -e
+            
+            # Cleanup function - runs on success or failure
+            cleanup() {
+              echo "🧹 Cleaning up production folder..."
+              cd ~
+              rm -rf ~/learning-platform/production
+              echo "✅ Production folder cleaned up!"
+            }
+            
+            # Register cleanup to run on exit (both success and error)
+            trap cleanup EXIT
             
             # Create production folder if it doesn't exist
             mkdir -p ~/learning-platform/production
@@ -144,39 +155,39 @@ jobs:
             echo "🔄 Creating environment files from secrets..."
             
             # API Gateway config
-            cat > api-gateway.application.yaml << 'EOF'
+            cat > api-gateway.application.yaml << 'YAML_EOF'
             ${{ secrets.PROD_API_GATEWAY_CONFIG_YAML }}
-            EOF
+            YAML_EOF
             
             # Course Service config
-            cat > course-service.application.yaml << 'EOF'
+            cat > course-service.application.yaml << 'YAML_EOF'
             ${{ secrets.PROD_COURSE_SERVICE_CONFIG_YAML }}
-            EOF
+            YAML_EOF
             
             # User Service config
-            cat > user-service.application.yaml << 'EOF'
+            cat > user-service.application.yaml << 'YAML_EOF'
             ${{ secrets.PROD_USER_SERVICE_CONFIG_YAML }}
-            EOF
+            YAML_EOF
             
             # Sale Service .env
-            cat > sale-service.env << 'EOF'
+            cat > sale-service.env << 'ENV_EOF'
             ${{ secrets.PROD_SALE_SERVICE_ENV }}
-            EOF
+            ENV_EOF
             
             # Notification Service .env
-            cat > notification-service.env << 'EOF'
+            cat > notification-service.env << 'ENV_EOF'
             ${{ secrets.PROD_NOTIFICATION_SERVICE_ENV }}
-            EOF
+            ENV_EOF
             
             # CloudFront private key
-            cat > cloudfront-private-key.pem << 'EOF'
+            cat > cloudfront-private-key.pem << 'KEY_EOF'
             ${{ secrets.AWS_CLOUDFRONT_PRIVATE_KEY_PEM }}
-            EOF
+            KEY_EOF
             chmod 600 cloudfront-private-key.pem
             
-            cat > .env << 'EOF'
+            cat > .env << 'ENV_EOF'
             ${{ secrets.PROD_DOCKER_COMPOSE_ENV }}
-            EOF
+            ENV_EOF
 
             echo "🚀 Pulling latest Docker images..."
             docker pull ${{ env.REGISTRY }}/${{ env.DOCKERHUB_USERNAME }}/${{ env.API_GATEWAY_IMAGE }}:latest
@@ -200,12 +211,7 @@ jobs:
             echo "✅ Deployment completed successfully!"
             echo "Container status:"
             docker compose ps
-            
-            # Remove production folder after deployment
-            cd ~
-            rm -rf ~/learning-platform/production
-            echo "✅ Production folder cleaned up!"
-          EOF
+          DEPLOY_EOF
 
       - name: Deployment notification
         if: success()
