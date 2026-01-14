@@ -173,6 +173,7 @@ jobs:
             docker pull docker.io/$DOCKERHUB_USERNAME/$SOCKET_SERVER_IMAGE:latest
 
             echo "🚀 Starting services..."
+            docker compose down -v
             docker compose up -d
             docker compose ps
 
