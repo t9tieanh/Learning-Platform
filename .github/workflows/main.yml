@@ -188,6 +188,10 @@ jobs:
           ${{ secrets.PROD_COURSE_SERVICE_CONFIG_YAML }}
           YAML
 
+          cat > docker-compose.yml << 'COMPOSE'
+          ${{ secrets.PROD_DOCKER_COMPOSE_YAML }}
+          COMPOSE
+
           echo "${{ secrets.PROD_SALE_SERVICE_ENV }}" > sale-service.env
           echo "${{ secrets.PROD_NOTIFICATION_SERVICE_ENV }}" > notification-service.env
           echo "${{ secrets.PROD_DOCKER_COMPOSE_ENV }}" > .env
