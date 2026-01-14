@@ -158,10 +158,18 @@ jobs:
           # Cleanup on failure
           ########################
           cleanup() {
-            echo "❌ Deployment failed. Keeping current production for investigation."
+            EXIT_CODE=$?
+            if [ $EXIT_CODE -eq 0 ]; then
+              echo "🧹 Cleaning up production folder..."
+              rm -rf "$WORKDIR"
+              echo "✅ Cleanup completed"
+            else
+              echo "❌ Deployment failed. Keeping current production for investigation."
+            fi
+            exit $EXIT_CODE
           }
 
-          trap cleanup ERR
+          trap cleanup EXIT
 
           ########################
           # Prepare folder
