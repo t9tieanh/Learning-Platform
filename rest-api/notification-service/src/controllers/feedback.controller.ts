@@ -62,7 +62,7 @@ const getFeedbackByUserAndCourse = async (req: Request, res: Response) => {
     const courseId = req.params.courseId
     if (!req.user?.sub) throw new ApiError(StatusCodes.UNAUTHORIZED, 'Bạn cần đăng nhập để xem đánh giá')
 
-    const feedback = await FeedbackService.getFeedbackByUserIdAndCourseId(req.user.sub, courseId)
+    const feedback = await FeedbackService.getFeedbackByUserIdAndCourseId(req.user.sub, courseId as string)
 
     sendResponse(res, {
       code: StatusCodes.OK,
