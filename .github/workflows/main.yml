@@ -201,6 +201,9 @@ jobs:
           echo "${{ secrets.PROD_NOTIFICATION_SERVICE_ENV }}" > notification-service.env
           echo "${{ secrets.PROD_DOCKER_COMPOSE_ENV }}" > .env
 
+          echo "📄 Files created:"
+          ls -la "$WORKDIR"
+
           cat > cloudfront-private-key.pem << 'KEY'
           ${{ secrets.AWS_CLOUDFRONT_PRIVATE_KEY_PEM }}
           KEY
@@ -226,10 +229,10 @@ jobs:
           ########################
           echo "🚀 Starting services..."
 
-          docker compose pull
-          # docker compose down -v
-          # docker compose up -d
+          docker compose down -v || true
+          docker compose up -d
 
+          echo "📊 Service status:"
           docker compose ps
 
           echo "🎉 Deployment completed successfully!"
