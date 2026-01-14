@@ -50,4 +50,4 @@ RabbitMQService.getInstance().then(() => {
 //   console.error('Failed to connect to ElasticSearch:', error);
 // });
 
-app.listen(PORT, () => console.log(`Learnova:sale_service running http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(`Hello, I am Learnova:sale_service running http://localhost:${PORT}`));
