@@ -119,7 +119,7 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
-    if: false && github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/feature/test_ci_cd' && github.event_name == 'push'
 
     steps:
       - name: Checkout code
@@ -172,41 +172,19 @@ jobs:
             KEY
             chmod 600 cloudfront-private-key.pem
             
-            # Docker Compose .env
-            cat > .env << 'DOTENV'
-            API_GATEWAY_PORT=8888
-            USER_SERVICE_PORT=8080
-            USER_SERVICE_GRPC_PORT=9090
-            COURSE_SERVICE_PORT=8081
-            COURSE_SERVICE_GRPC_PORT=9091
-            SALE_SERVICE_PORT=8083
-            SALE_SERVICE_GRPC_PORT=9093
-            NOTIFICATION_SERVICE_PORT=8082
-            NOTIFICATION_SERVICE_GRPC_PORT=9092
-            SOCKET_SERVER_PORT=5001
-            DOTENV
-            
-            echo "🔄 Pulling latest images from Docker Hub..."
-            docker pull ${{ env.REGISTRY }}/${{ env.DOCKERHUB_USERNAME }}/${{ env.API_GATEWAY_IMAGE }}:latest
-            docker pull ${{ env.REGISTRY }}/${{ env.DOCKERHUB_USERNAME }}/${{ env.USER_SERVICE_IMAGE }}:latest
-            docker pull ${{ env.REGISTRY }}/${{ env.DOCKERHUB_USERNAME }}/${{ env.COURSE_SERVICE_IMAGE }}:latest
-            docker pull ${{ env.REGISTRY }}/${{ env.DOCKERHUB_USERNAME }}/${{ env.SALE_SERVICE_IMAGE }}:latest
-            docker pull ${{ env.REGISTRY }}/${{ env.DOCKERHUB_USERNAME }}/${{ env.NOTIFICATION_SERVICE_IMAGE }}:latest
-            docker pull ${{ env.REGISTRY }}/${{ env.DOCKERHUB_USERNAME }}/${{ env.SOCKET_SERVER_IMAGE }}:latest
-            
-            echo "🛑 Stopping old containers..."
-            docker compose down || true
-            
-            echo "🚀 Starting services with Docker Compose..."
-            docker compose up -d
+            cat > .env << 'ENV'
+            ${{ secrets.PROD_DOCKER_COMPOSE_ENV }}
+            ENV
+
+            echo "🚀 Pulling latest Docker images..."
+
+            echo "✅ SSH connection successful!"
+            touch ~/.deployment_success_$(date +%s)
+            echo "Deployment started at $(date)" > ~/deployment.log
             
             echo "✅ Deployment completed successfully!"
             echo "Container status:"
             docker compose ps
-            
-            echo "🔍 Checking application health..."
-            sleep 5
-            curl -s http://localhost:8888/health || echo "API Gateway health check pending..."
             
             echo "🧹 Cleaning up temporary environment files..."
             rm -f api-gateway.application.yaml

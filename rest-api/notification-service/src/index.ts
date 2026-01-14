@@ -27,7 +27,7 @@ const START_SERVER = async () => {
   const port = Number(env.APP_PORT)
 
   server.listen(port, hostname, () => {
-    console.log(`Server đang chạy trên: ${hostname}:${port}/`)
+    console.log(`Hello, Learnova:notification_service running at: ${hostname}:${port}/`)
   })
 }
 
