@@ -135,56 +135,93 @@ jobs:
 
       - name: Deploy to VPS
         run: |
-          API_GATEWAY_IMAGE=${{ env.API_GATEWAY_IMAGE }}
-          USER_SERVICE_IMAGE=${{ env.USER_SERVICE_IMAGE }}
-          COURSE_SERVICE_IMAGE=${{ env.COURSE_SERVICE_IMAGE }}
-          SALE_SERVICE_IMAGE=${{ env.SALE_SERVICE_IMAGE }}
-          NOTIFICATION_SERVICE_IMAGE=${{ env.NOTIFICATION_SERVICE_IMAGE }}
-          SOCKET_SERVER_IMAGE=${{ env.SOCKET_SERVER_IMAGE }}
-          DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}
+          ssh -i ~/.ssh/deploy_key -p ${{ secrets.VPS_SSH_PORT }} \
+          ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'EOF'
+          set -Eeuo pipefail
 
-          ssh -T -i ~/.ssh/deploy_key -p ${{ secrets.VPS_SSH_PORT }} \
-          ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << DEPLOY_EOF
-            set -e
+          echo "🚀 Starting deployment..."
 
-            SUCCESS=0
+          ########################
+          # Variables
+          ########################
+          WORKDIR="$HOME/learning-platform/production"
+          DOCKERHUB_USERNAME="${{ secrets.DOCKERHUB_USERNAME }}"
 
-            cleanup() {
-              if [ "\$SUCCESS" -eq 1 ]; then
-                echo "🧹 Cleaning up production folder..."
-                rm -rf ~/learning-platform/production
-              else
-                echo "❌ Deployment failed – skip cleanup"
-              fi
-            }
+          API_GATEWAY_IMAGE="learnova_api-gateway"
+          USER_SERVICE_IMAGE="learnova_user-service"
+          COURSE_SERVICE_IMAGE="learnova_course-service"
+          SALE_SERVICE_IMAGE="learnova_sale-service"
+          NOTIFICATION_SERVICE_IMAGE="learnova_notification-service"
+          SOCKET_SERVER_IMAGE="learnova_socket-server"
 
-            mkdir -p ~/learning-platform/production
-            cd ~/learning-platform/production
+          ########################
+          # Cleanup on failure
+          ########################
+          cleanup() {
+            echo "❌ Deployment failed. Keeping current production for investigation."
+          }
 
-            echo "🔐 Writing config & env files..."
-            printf "%s" "${{ secrets.PROD_API_GATEWAY_CONFIG_YAML }}" > api-gateway.application.yaml
-            printf "%s" "${{ secrets.PROD_USER_SERVICE_CONFIG_YAML }}" > user-service.application.yaml
-            printf "%s" "${{ secrets.PROD_COURSE_SERVICE_CONFIG_YAML }}" > course-service.application.yaml
-            printf "%s" "${{ secrets.PROD_SALE_SERVICE_ENV }}" > sale-service.env
-            printf "%s" "${{ secrets.PROD_NOTIFICATION_SERVICE_ENV }}" > notification-service.env
-            printf "%s" "${{ secrets.AWS_CLOUDFRONT_PRIVATE_KEY_PEM }}" > cloudfront-private-key.pem
-            chmod 600 cloudfront-private-key.pem
-            printf "%s" "${{ secrets.PROD_DOCKER_COMPOSE_ENV }}" > .env
-            echo "✅ All config & env files created"
+          trap cleanup ERR
 
-            echo "📦 Pulling Docker images..."
-            docker pull docker.io/$DOCKERHUB_USERNAME/$API_GATEWAY_IMAGE:latest
-            docker pull docker.io/$DOCKERHUB_USERNAME/$USER_SERVICE_IMAGE:latest
-            docker pull docker.io/$DOCKERHUB_USERNAME/$COURSE_SERVICE_IMAGE:latest
-            docker pull docker.io/$DOCKERHUB_USERNAME/$SALE_SERVICE_IMAGE:latest
-            docker pull docker.io/$DOCKERHUB_USERNAME/$NOTIFICATION_SERVICE_IMAGE:latest
-            docker pull docker.io/$DOCKERHUB_USERNAME/$SOCKET_SERVER_IMAGE:latest
+          ########################
+          # Prepare folder
+          ########################
+          mkdir -p "$WORKDIR"
+          cd "$WORKDIR"
 
-            echo "🚀 Starting services..."
-            # docker compose down -v
-            # docker compose up -d
-            docker compose ps
+          echo "📁 Working directory: $WORKDIR"
 
-            SUCCESS=1
-            cleanup
-          DEPLOY_EOF
+          ########################
+          # Write config files
+          ########################
+          echo "🔐 Writing config & env files..."
+
+          cat > api-gateway.application.yaml << 'YAML'
+          ${{ secrets.PROD_API_GATEWAY_CONFIG_YAML }}
+          YAML
+
+          cat > user-service.application.yaml << 'YAML'
+          ${{ secrets.PROD_USER_SERVICE_CONFIG_YAML }}
+          YAML
+
+          cat > course-service.application.yaml << 'YAML'
+          ${{ secrets.PROD_COURSE_SERVICE_CONFIG_YAML }}
+          YAML
+
+          echo "${{ secrets.PROD_SALE_SERVICE_ENV }}" > sale-service.env
+          echo "${{ secrets.PROD_NOTIFICATION_SERVICE_ENV }}" > notification-service.env
+          echo "${{ secrets.PROD_DOCKER_COMPOSE_ENV }}" > .env
+
+          cat > cloudfront-private-key.pem << 'KEY'
+          ${{ secrets.AWS_CLOUDFRONT_PRIVATE_KEY_PEM }}
+          KEY
+
+          chmod 600 cloudfront-private-key.pem
+
+          echo "✅ Config files created"
+
+          ########################
+          # Pull images
+          ########################
+          echo "📦 Pulling Docker images..."
+
+          docker pull docker.io/$DOCKERHUB_USERNAME/$API_GATEWAY_IMAGE:latest
+          docker pull docker.io/$DOCKERHUB_USERNAME/$USER_SERVICE_IMAGE:latest
+          docker pull docker.io/$DOCKERHUB_USERNAME/$COURSE_SERVICE_IMAGE:latest
+          docker pull docker.io/$DOCKERHUB_USERNAME/$SALE_SERVICE_IMAGE:latest
+          docker pull docker.io/$DOCKERHUB_USERNAME/$NOTIFICATION_SERVICE_IMAGE:latest
+          docker pull docker.io/$DOCKERHUB_USERNAME/$SOCKET_SERVER_IMAGE:latest
+
+          ########################
+          # Start services
+          ########################
+          echo "🚀 Starting services..."
+
+          docker compose pull
+          # docker compose down -v
+          # docker compose up -d
+
+          docker compose ps
+
+          echo "🎉 Deployment completed successfully!"
+          EOF
