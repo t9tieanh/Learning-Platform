@@ -3,10 +3,10 @@ name: Build & Deploy Microservices to VPS
 on:
   push:
     branches:
-      - test_ci_cd
+      - feature/test_ci_cd
   pull_request:
     branches:
-      - test_ci_cd
+      - feature/test_ci_cd
 
 env:
   REGISTRY: docker.io
