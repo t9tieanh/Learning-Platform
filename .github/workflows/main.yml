@@ -11,6 +11,7 @@ on:
 env:
   REGISTRY: docker.io
   DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+
   API_GATEWAY_IMAGE: learnova_api-gateway
   USER_SERVICE_IMAGE: learnova_user-service
   COURSE_SERVICE_IMAGE: learnova_course-service
@@ -18,59 +19,53 @@ env:
   NOTIFICATION_SERVICE_IMAGE: learnova_notification-service
   SOCKET_SERVER_IMAGE: learnova_socket-server
 
+# =========================
+# 1. Detect changed services
+# =========================
 jobs:
-  # Check which services changed
   changes:
     runs-on: ubuntu-latest
     outputs:
-      api-gateway: ${{ steps.changes.outputs.api-gateway }}
-      user-service: ${{ steps.changes.outputs.user-service }}
-      course-service: ${{ steps.changes.outputs.course-service }}
-      sale-service: ${{ steps.changes.outputs.sale-service }}
-      notification-service: ${{ steps.changes.outputs.notification-service }}
-      socket-server: ${{ steps.changes.outputs.socket-server }}
-    
+      api-gateway: ${{ steps.detect.outputs.api-gateway }}
+      user-service: ${{ steps.detect.outputs.user-service }}
+      course-service: ${{ steps.detect.outputs.course-service }}
+      sale-service: ${{ steps.detect.outputs.sale-service }}
+      notification-service: ${{ steps.detect.outputs.notification-service }}
+      socket-server: ${{ steps.detect.outputs.socket-server }}
+
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Check file changes
-        id: changes
+      - id: detect
         run: |
-          # Get the list of changed files
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            CHANGED_FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }})
+            FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }})
           else
-            # Handle initial commit or when github.event.before is empty
-            if [[ "${{ github.event.before }}" == "0000000000000000000000000000000000000000" || -z "${{ github.event.before }}" ]]; then
-              # For initial push, get all files from the commit
-              CHANGED_FILES=$(git diff-tree --no-commit-id --name-only -r ${{ github.event.after }})
-            else
-              # Normal push - compare with previous commit
-              CHANGED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.event.after }})
-            fi
+            FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.event.after }})
           fi
-          
-          echo "Changed files:"
-          echo "$CHANGED_FILES"
-          
-          # Check each service
-          echo "api-gateway=$(echo "$CHANGED_FILES" | grep -q 'rest-api/api-gateway' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
-          echo "user-service=$(echo "$CHANGED_FILES" | grep -q 'rest-api/user-service' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
-          echo "course-service=$(echo "$CHANGED_FILES" | grep -q 'rest-api/course-service' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
-          echo "sale-service=$(echo "$CHANGED_FILES" | grep -q 'rest-api/sale-service' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
-          echo "notification-service=$(echo "$CHANGED_FILES" | grep -q 'rest-api/notification-service' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
-          echo "socket-server=$(echo "$CHANGED_FILES" | grep -q 'socket-server' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
 
-  # Build all microservices
+          echo "Changed files:"
+          echo "$FILES"
+
+          check() {
+            echo "$FILES" | grep -q "$1" && echo true || echo false
+          }
+
+          echo "api-gateway=$(check rest-api/api-gateway)" >> $GITHUB_OUTPUT
+          echo "user-service=$(check rest-api/user-service)" >> $GITHUB_OUTPUT
+          echo "course-service=$(check rest-api/course-service)" >> $GITHUB_OUTPUT
+          echo "sale-service=$(check rest-api/sale-service)" >> $GITHUB_OUTPUT
+          echo "notification-service=$(check rest-api/notification-service)" >> $GITHUB_OUTPUT
+          echo "socket-server=$(check socket-server)" >> $GITHUB_OUTPUT
+
+# =========================
+# 2. Build & Push Docker
+# =========================
   build:
     needs: changes
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
 
     strategy:
       matrix:
@@ -83,140 +78,95 @@ jobs:
           - socket-server
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+      - uses: docker/setup-buildx-action@v3
 
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
+      - uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push Docker image - ${{ matrix.service }}
-        uses: docker/build-push-action@v5
+      - name: Build & Push ${{ matrix.service }}
         if: needs.changes.outputs[matrix.service] == 'true'
+        uses: docker/build-push-action@v5
         env:
-          IMAGE_NAME: ${{ env[format('{0}_IMAGE', matrix.service == 'api-gateway' && 'API_GATEWAY' || matrix.service == 'user-service' && 'USER_SERVICE' || matrix.service == 'course-service' && 'COURSE_SERVICE' || matrix.service == 'sale-service' && 'SALE_SERVICE' || matrix.service == 'notification-service' && 'NOTIFICATION_SERVICE' || 'SOCKET_SERVER')] }}
-          BUILD_CONTEXT: ${{ matrix.service == 'socket-server' && '.' || './rest-api' }}
-          DOCKERFILE_PATH: ${{ matrix.service == 'socket-server' && 'socket-server/Dockerfile' || format('rest-api/{0}/Dockerfile', matrix.service) }}
+          IMAGE_NAME: ${{ env[format(
+            '{0}_IMAGE',
+            matrix.service == 'api-gateway' && 'API_GATEWAY' ||
+            matrix.service == 'user-service' && 'USER_SERVICE' ||
+            matrix.service == 'course-service' && 'COURSE_SERVICE' ||
+            matrix.service == 'sale-service' && 'SALE_SERVICE' ||
+            matrix.service == 'notification-service' && 'NOTIFICATION_SERVICE' ||
+            'SOCKET_SERVER'
+          )] }}
+          CONTEXT: ${{ matrix.service == 'socket-server' && '.' || './rest-api' }}
+          DOCKERFILE: ${{ matrix.service == 'socket-server'
+            && 'socket-server/Dockerfile'
+            || format('rest-api/{0}/Dockerfile', matrix.service) }}
         with:
-          context: ${{ env.BUILD_CONTEXT }}
-          file: ${{ env.DOCKERFILE_PATH }}
+          context: ${{ env.CONTEXT }}
+          file: ${{ env.DOCKERFILE }}
           push: true
           tags: |
             ${{ env.REGISTRY }}/${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest
             ${{ env.REGISTRY }}/${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-      
-      - name: Skip build - ${{ matrix.service }}
-        if: needs.changes.outputs[matrix.service] == 'false'
-        run: echo "⏭️  Skipped building ${{ matrix.service }} (no changes detected)"
 
+      - name: Skip ${{ matrix.service }}
+        if: needs.changes.outputs[matrix.service] == 'false'
+        run: echo "⏭️ Skip ${{ matrix.service }}"
+
+# =========================
+# 3. Deploy to VPS
+# =========================
   deploy:
     needs: build
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/feature/test_ci_cd' && github.event_name == 'push'
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup SSH key
+      - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -p ${{ secrets.VPS_SSH_PORT }} ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
+          ssh-keyscan -p ${{ secrets.VPS_SSH_PORT }} ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Deploy to VPS
+      - name: Deploy
         run: |
-          ssh -i ~/.ssh/deploy_key -p ${{ secrets.VPS_SSH_PORT }} ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'DEPLOY_EOF'
+          ssh -i ~/.ssh/deploy_key -p ${{ secrets.VPS_SSH_PORT }} \
+          ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'EOF'
             set -e
-            
-            # Cleanup function - runs on success or failure
-            cleanup() {
-              echo "🧹 Cleaning up production folder..."
-              cd ~
-              rm -rf ~/learning-platform/production
-              echo "✅ Production folder cleaned up!"
-            }
-            
-            # Register cleanup to run on exit (both success and error)
-            trap cleanup EXIT
-            
-            # Create production folder if it doesn't exist
+
             mkdir -p ~/learning-platform/production
-            cd ~/learning-platform/production || exit 1
-            
-            echo "🔄 Creating environment files from secrets..."
-            
-            # API Gateway config
-            cat > api-gateway.application.yaml << 'YAML_EOF'
-            ${{ secrets.PROD_API_GATEWAY_CONFIG_YAML }}
-            YAML_EOF
-            
-            # Course Service config
-            cat > course-service.application.yaml << 'YAML_EOF'
-            ${{ secrets.PROD_COURSE_SERVICE_CONFIG_YAML }}
-            YAML_EOF
-            
-            # User Service config
-            cat > user-service.application.yaml << 'YAML_EOF'
-            ${{ secrets.PROD_USER_SERVICE_CONFIG_YAML }}
-            YAML_EOF
-            
-            # Sale Service .env
-            cat > sale-service.env << 'ENV_EOF'
-            ${{ secrets.PROD_SALE_SERVICE_ENV }}
-            ENV_EOF
-            
-            # Notification Service .env
-            cat > notification-service.env << 'ENV_EOF'
-            ${{ secrets.PROD_NOTIFICATION_SERVICE_ENV }}
-            ENV_EOF
-            
-            # CloudFront private key
-            cat > cloudfront-private-key.pem << 'KEY_EOF'
-            ${{ secrets.AWS_CLOUDFRONT_PRIVATE_KEY_PEM }}
-            KEY_EOF
+            cd ~/learning-platform/production
+
+            echo "🔐 Writing env & config files..."
+
+            printf "%s" "${{ secrets.PROD_API_GATEWAY_CONFIG_YAML }}" > api-gateway.application.yaml
+            printf "%s" "${{ secrets.PROD_USER_SERVICE_CONFIG_YAML }}" > user-service.application.yaml
+            printf "%s" "${{ secrets.PROD_COURSE_SERVICE_CONFIG_YAML }}" > course-service.application.yaml
+
+            printf "%s" "${{ secrets.PROD_SALE_SERVICE_ENV }}" > sale-service.env
+            printf "%s" "${{ secrets.PROD_NOTIFICATION_SERVICE_ENV }}" > notification-service.env
+
+            printf "%s" "${{ secrets.AWS_CLOUDFRONT_PRIVATE_KEY_PEM }}" > cloudfront-private-key.pem
             chmod 600 cloudfront-private-key.pem
-            
-            cat > .env << 'ENV_EOF'
-            ${{ secrets.PROD_DOCKER_COMPOSE_ENV }}
-            ENV_EOF
 
-            echo "🚀 Pulling latest Docker images..."
-            docker pull ${{ env.REGISTRY }}/${{ env.DOCKERHUB_USERNAME }}/${{ env.API_GATEWAY_IMAGE }}:latest
-            docker pull ${{ env.REGISTRY }}/${{ env.DOCKERHUB_USERNAME }}/${{ env.USER_SERVICE_IMAGE }}:latest
-            docker pull ${{ env.REGISTRY }}/${{ env.DOCKERHUB_USERNAME }}/${{ env.COURSE_SERVICE_IMAGE }}:latest
-            docker pull ${{ env.REGISTRY }}/${{ env.DOCKERHUB_USERNAME }}/${{ env.SALE_SERVICE_IMAGE }}:latest
-            docker pull ${{ env.REGISTRY }}/${{ env.DOCKERHUB_USERNAME }}/${{ env.NOTIFICATION_SERVICE_IMAGE }}:latest
-            docker pull ${{ env.REGISTRY }}/${{ env.DOCKERHUB_USERNAME }}/${{ env.SOCKET_SERVER_IMAGE }}:latest
+            printf "%s" "${{ secrets.PROD_DOCKER_COMPOSE_ENV }}" > .env
 
-            # echo "🛑 Stopping old containers..."
-            # docker compose down || true
+            echo "📦 Pull latest images..."
+            docker pull docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.API_GATEWAY_IMAGE }}:latest
+            docker pull docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.USER_SERVICE_IMAGE }}:latest
+            docker pull docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.COURSE_SERVICE_IMAGE }}:latest
+            docker pull docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.SALE_SERVICE_IMAGE }}:latest
+            docker pull docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.NOTIFICATION_SERVICE_IMAGE }}:latest
+            docker pull docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.SOCKET_SERVER_IMAGE }}:latest
 
-            # echo "🚀 Starting services with Docker Compose..."
-            # docker compose up -d
-
-            echo "✅ SSH connection successful!"
-            mkdir -p ~/deployment-logs
-            touch ~/deployment-logs/deployment_success_$(date +%s)
-            echo "Deployment LEARNOVA started at $(date)" > ~/deployment-logs/deployment.log
-            
-            echo "✅ Deployment completed successfully!"
-            echo "Container status:"
+            echo "🚀 Deploy done"
             docker compose ps
-          DEPLOY_EOF
+          EOF
 
-      - name: Deployment notification
-        if: success()
-        run: echo "✅ Successfully deployed to VPS"
-
-      - name: Deployment failed notification
-        if: failure()
-        run: echo "❌ Deployment failed"
+      - run: echo "✅ Deploy success"
