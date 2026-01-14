@@ -100,9 +100,11 @@ jobs:
         if: needs.changes.outputs[matrix.service] == 'true'
         env:
           IMAGE_NAME: ${{ env[format('{0}_IMAGE', matrix.service == 'api-gateway' && 'API_GATEWAY' || matrix.service == 'user-service' && 'USER_SERVICE' || matrix.service == 'course-service' && 'COURSE_SERVICE' || matrix.service == 'sale-service' && 'SALE_SERVICE' || matrix.service == 'notification-service' && 'NOTIFICATION_SERVICE' || 'SOCKET_SERVER')] }}
+          BUILD_CONTEXT: ${{ matrix.service == 'socket-server' && '.' || './rest-api' }}
+          DOCKERFILE_PATH: ${{ matrix.service == 'socket-server' && 'socket-server/Dockerfile' || format('rest-api/{0}/Dockerfile', matrix.service) }}
         with:
-          context: ./rest-api/${{ matrix.service }}
-          file: ./rest-api/${{ matrix.service }}/Dockerfile
+          context: ${{ env.BUILD_CONTEXT }}
+          file: ${{ env.DOCKERFILE_PATH }}
           push: true
           tags: |
             ${{ env.REGISTRY }}/${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest
