@@ -12,6 +12,6 @@ import org.springframework.data.redis.repository.configuration.EnableRedisReposi
 @EnableJpaAuditing
 public class CourseServiceApplication {
 	public static void main(String[] args) {
-		SpringApplication.run(CourseServiceApplication.class, args);
+		SpringApplication.run(CourseServiceApplication.class, args); 
 	}
 }
