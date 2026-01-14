@@ -137,6 +137,8 @@ jobs:
           ssh -i ~/.ssh/deploy_key -p ${{ secrets.VPS_SSH_PORT }} ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'EOF'
             set -e
             
+            # Create production folder if it doesn't exist
+            mkdir -p ~/learning-platform/production
             cd ~/learning-platform/production || exit 1
             
             echo "🔄 Creating environment files from secrets..."
@@ -177,25 +179,32 @@ jobs:
             ENV
 
             echo "🚀 Pulling latest Docker images..."
+            docker pull ${{ env.REGISTRY }}/${{ env.DOCKERHUB_USERNAME }}/${{ env.API_GATEWAY_IMAGE }}:latest
+            docker pull ${{ env.REGISTRY }}/${{ env.DOCKERHUB_USERNAME }}/${{ env.USER_SERVICE_IMAGE }}:latest
+            docker pull ${{ env.REGISTRY }}/${{ env.DOCKERHUB_USERNAME }}/${{ env.COURSE_SERVICE_IMAGE }}:latest
+            docker pull ${{ env.REGISTRY }}/${{ env.DOCKERHUB_USERNAME }}/${{ env.SALE_SERVICE_IMAGE }}:latest
+            docker pull ${{ env.REGISTRY }}/${{ env.DOCKERHUB_USERNAME }}/${{ env.NOTIFICATION_SERVICE_IMAGE }}:latest
+            docker pull ${{ env.REGISTRY }}/${{ env.DOCKERHUB_USERNAME }}/${{ env.SOCKET_SERVER_IMAGE }}:latest
+
+            # echo "🛑 Stopping old containers..."
+            # docker compose down || true
+
+            # echo "🚀 Starting services with Docker Compose..."
+            # docker compose up -d
 
             echo "✅ SSH connection successful!"
-            touch ~/.deployment_success_$(date +%s)
-            echo "Deployment started at $(date)" > ~/deployment.log
+            mkdir -p ~/deployment-logs
+            touch ~/deployment-logs/deployment_success_$(date +%s)
+            echo "Deployment LEARNOVA started at $(date)" > ~/deployment-logs/deployment.log
             
             echo "✅ Deployment completed successfully!"
             echo "Container status:"
             docker compose ps
             
-            echo "🧹 Cleaning up temporary environment files..."
-            rm -f api-gateway.application.yaml
-            rm -f course-service.application.yaml
-            rm -f user-service.application.yaml
-            rm -f sale-service.env
-            rm -f notification-service.env
-            rm -f cloudfront-private-key.pem
-            rm -f .env
-            
-            echo "✅ Cleanup completed!"
+            # Remove production folder after deployment
+            cd ~
+            rm -rf ~/learning-platform/production
+            echo "✅ Production folder cleaned up!"
           EOF
 
       - name: Deployment notification
