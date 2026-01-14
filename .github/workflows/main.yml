@@ -118,7 +118,7 @@ jobs:
         run: echo "⏭️  Skipped building ${{ matrix.service }} (no changes detected)"
 
   deploy:
-    needs: build
+    # needs: build
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/feature/test_ci_cd' && github.event_name == 'push'
 
@@ -135,64 +135,56 @@ jobs:
 
       - name: Deploy to VPS
         run: |
-          ssh -T -i ~/.ssh/deploy_key -p ${{ secrets.VPS_SSH_PORT }} ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'DEPLOY_EOF'
-            set -e
-            
-            # Cleanup function - runs on success or failure
-            cleanup() {
-              echo "🧹 Cleaning up production folder..."
-              cd ~
+            ssh -T -i ~/.ssh/deploy_key -p ${{ secrets.VPS_SSH_PORT }} \
+            ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << DEPLOY_EOF
+              set -e
+
+              SUCCESS=0
+
+              cleanup() {
+                if [ "$SUCCESS" -eq 1 ]; then
+                  echo "🧹 Cleaning up production folder..."
+                  cd ~
+                  rm -rf ~/learning-platform/production
+                  echo "✅ Production folder cleaned up!"
+                else
+                  echo "❌ Deployment failed – skip cleanup"
+                fi
+              }
+
+              echo "🚀 Starting deployment..."
+
               rm -rf ~/learning-platform/production
-              echo "✅ Production folder cleaned up!"
-            }
-            
-            # Register cleanup to run on exit (both success and error)
-            trap cleanup EXIT
-            
-            # Start deployment
-            echo "🚀 Starting deployment to VPS..."
-            mkdir -p ~/learning-platform/production
-            cd ~/learning-platform/production
+              mkdir -p ~/learning-platform/production
+              cd ~/learning-platform/production
 
-            echo "🔐 Writing env & config files..."
+              echo "🔐 Writing env & config files..."
 
-            echo "${{ secrets.PROD_API_GATEWAY_CONFIG_YAML }}" | base64 -d > api-gateway.application.yaml
-            echo "${{ secrets.PROD_USER_SERVICE_CONFIG_YAML }}" | base64 -d > user-service.application.yaml
-            echo "${{ secrets.PROD_COURSE_SERVICE_CONFIG_YAML }}" | base64 -d > course-service.application.yaml
-            echo "${{ secrets.PROD_SALE_SERVICE_ENV }}" | base64 -d > sale-service.env
-            echo "${{ secrets.PROD_NOTIFICATION_SERVICE_ENV }}" | base64 -d > notification-service.env
-            echo "${{ secrets.AWS_CLOUDFRONT_PRIVATE_KEY_PEM }}" | base64 -d > cloudfront-private-key.pem
-            chmod 600 cloudfront-private-key.pem
-            echo "${{ secrets.PROD_DOCKER_COMPOSE_ENV }}" | base64 -d > .env            
-            
-            echo "📦 Pull latest images..."
-            docker pull docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.API_GATEWAY_IMAGE }}:latest
-            docker pull docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.USER_SERVICE_IMAGE }}:latest
-            docker pull docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.COURSE_SERVICE_IMAGE }}:latest
-            docker pull docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.SALE_SERVICE_IMAGE }}:latest
-            docker pull docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.NOTIFICATION_SERVICE_IMAGE }}:latest
-            docker pull docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.SOCKET_SERVER_IMAGE }}:latest
+              printf "%s" "${{ secrets.PROD_API_GATEWAY_CONFIG_YAML }}" > api-gateway.application.yaml
+              printf "%s" "${{ secrets.PROD_USER_SERVICE_CONFIG_YAML }}" > user-service.application.yaml
+              printf "%s" "${{ secrets.PROD_COURSE_SERVICE_CONFIG_YAML }}" > course-service.application.yaml
 
-            # echo "🛑 Stopping old containers..."
-            # docker compose down || true
+              printf "%s" "${{ secrets.PROD_SALE_SERVICE_ENV }}" > sale-service.env
+              printf "%s" "${{ secrets.PROD_NOTIFICATION_SERVICE_ENV }}" > notification-service.env
 
-            # echo "🚀 Starting services with Docker Compose..."
-            # docker compose up -d
+              printf "%s" "${{ secrets.AWS_CLOUDFRONT_PRIVATE_KEY_PEM }}" > cloudfront-private-key.pem
+              chmod 600 cloudfront-private-key.pem
 
-            echo "✅ SSH connection successful!"
-            mkdir -p ~/deployment-logs
-            touch ~/deployment-logs/deployment_success_$(date +%s)
-            echo "Deployment LEARNOVA started at $(date)" > ~/deployment-logs/deployment.log
-            
-            echo "✅ Deployment completed successfully!"
-            echo "Container status:"
-            docker compose ps
-          DEPLOY_EOF
+              printf "%s" "${{ secrets.PROD_DOCKER_COMPOSE_ENV }}" > .env
 
-      - name: Deployment notification
-        if: success()
-        run: echo "✅ Successfully deployed to VPS"
+              echo "📦 Pulling Docker images..."
+              docker pull docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.API_GATEWAY_IMAGE }}:latest
+              docker pull docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.USER_SERVICE_IMAGE }}:latest
+              docker pull docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.COURSE_SERVICE_IMAGE }}:latest
+              docker pull docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.SALE_SERVICE_IMAGE }}:latest
+              docker pull docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.NOTIFICATION_SERVICE_IMAGE }}:latest
+              docker pull docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.SOCKET_SERVER_IMAGE }}:latest
 
-      - name: Deployment failed notification
-        if: failure()
-        run: echo "❌ Deployment failed"
+              echo "🚀 Starting services..."
+              docker compose up -d
+
+              docker compose ps
+
+              SUCCESS=1
+              cleanup
+            DEPLOY_EOF
