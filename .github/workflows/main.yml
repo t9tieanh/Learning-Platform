@@ -1,0 +1,220 @@
+name: Build & Deploy Microservices to VPS
+
+on:
+  push:
+    branches:
+      - test_ci_cd
+  pull_request:
+    branches:
+      - test_ci_cd
+
+env:
+  REGISTRY: docker.io
+  DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+  API_GATEWAY_IMAGE: learnova_api-gateway
+  USER_SERVICE_IMAGE: learnova_user-service
+  COURSE_SERVICE_IMAGE: learnova_course-service
+  SALE_SERVICE_IMAGE: learnova_sale-service
+  NOTIFICATION_SERVICE_IMAGE: learnova_notification-service
+  SOCKET_SERVER_IMAGE: learnova_socket-server
+
+jobs:
+  # Check which services changed
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      api-gateway: ${{ steps.changes.outputs.api-gateway }}
+      user-service: ${{ steps.changes.outputs.user-service }}
+      course-service: ${{ steps.changes.outputs.course-service }}
+      sale-service: ${{ steps.changes.outputs.sale-service }}
+      notification-service: ${{ steps.changes.outputs.notification-service }}
+      socket-server: ${{ steps.changes.outputs.socket-server }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check file changes
+        id: changes
+        run: |
+          # Get the list of changed files
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            CHANGED_FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }})
+          else
+            CHANGED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.event.after }})
+          fi
+          
+          echo "Changed files:"
+          echo "$CHANGED_FILES"
+          
+          # Check each service
+          echo "api-gateway=$(echo "$CHANGED_FILES" | grep -q 'rest-api/api-gateway' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+          echo "user-service=$(echo "$CHANGED_FILES" | grep -q 'rest-api/user-service' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+          echo "course-service=$(echo "$CHANGED_FILES" | grep -q 'rest-api/course-service' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+          echo "sale-service=$(echo "$CHANGED_FILES" | grep -q 'rest-api/sale-service' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+          echo "notification-service=$(echo "$CHANGED_FILES" | grep -q 'rest-api/notification-service' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+          echo "socket-server=$(echo "$CHANGED_FILES" | grep -q 'socket-server' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+
+  # Build all microservices
+  build:
+    needs: changes
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    strategy:
+      matrix:
+        service:
+          - api-gateway
+          - user-service
+          - course-service
+          - sale-service
+          - notification-service
+          - socket-server
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push Docker image - ${{ matrix.service }}
+        uses: docker/build-push-action@v5
+        if: needs.changes.outputs[matrix.service] == 'true'
+        env:
+          IMAGE_NAME: ${{ env[format('{0}_IMAGE', matrix.service == 'api-gateway' && 'API_GATEWAY' || matrix.service == 'user-service' && 'USER_SERVICE' || matrix.service == 'course-service' && 'COURSE_SERVICE' || matrix.service == 'sale-service' && 'SALE_SERVICE' || matrix.service == 'notification-service' && 'NOTIFICATION_SERVICE' || 'SOCKET_SERVER')] }}
+        with:
+          context: ./rest-api/${{ matrix.service }}
+          file: ./rest-api/${{ matrix.service }}/Dockerfile
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest
+            ${{ env.REGISTRY }}/${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      
+      - name: Skip build - ${{ matrix.service }}
+        if: needs.changes.outputs[matrix.service] == 'false'
+        run: echo "⏭️  Skipped building ${{ matrix.service }} (no changes detected)"
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    if: false && github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -p ${{ secrets.VPS_SSH_PORT }} ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Deploy to VPS
+        run: |
+          ssh -i ~/.ssh/deploy_key -p ${{ secrets.VPS_SSH_PORT }} ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'EOF'
+            set -e
+            
+            cd ~/learning-platform/production || exit 1
+            
+            echo "🔄 Creating environment files from secrets..."
+            
+            # API Gateway config
+            cat > api-gateway.application.yaml << 'YAML'
+            ${{ secrets.PROD_API_GATEWAY_CONFIG_YAML }}
+            YAML
+            
+            # Course Service config
+            cat > course-service.application.yaml << 'YAML'
+            ${{ secrets.PROD_COURSE_SERVICE_CONFIG_YAML }}
+            YAML
+            
+            # User Service config
+            cat > user-service.application.yaml << 'YAML'
+            ${{ secrets.PROD_USER_SERVICE_CONFIG_YAML }}
+            YAML
+            
+            # Sale Service .env
+            cat > sale-service.env << 'ENV'
+            ${{ secrets.PROD_SALE_SERVICE_ENV }}
+            ENV
+            
+            # Notification Service .env
+            cat > notification-service.env << 'ENV'
+            ${{ secrets.PROD_NOTIFICATION_SERVICE_ENV }}
+            ENV
+            
+            # CloudFront private key
+            cat > cloudfront-private-key.pem << 'KEY'
+            ${{ secrets.AWS_CLOUDFRONT_PRIVATE_KEY_PEM }}
+            KEY
+            chmod 600 cloudfront-private-key.pem
+            
+            # Docker Compose .env
+            cat > .env << 'DOTENV'
+            API_GATEWAY_PORT=8888
+            USER_SERVICE_PORT=8080
+            USER_SERVICE_GRPC_PORT=9090
+            COURSE_SERVICE_PORT=8081
+            COURSE_SERVICE_GRPC_PORT=9091
+            SALE_SERVICE_PORT=8083
+            SALE_SERVICE_GRPC_PORT=9093
+            NOTIFICATION_SERVICE_PORT=8082
+            NOTIFICATION_SERVICE_GRPC_PORT=9092
+            SOCKET_SERVER_PORT=5001
+            DOTENV
+            
+            echo "🔄 Pulling latest images from Docker Hub..."
+            docker pull ${{ env.REGISTRY }}/${{ env.DOCKERHUB_USERNAME }}/${{ env.API_GATEWAY_IMAGE }}:latest
+            docker pull ${{ env.REGISTRY }}/${{ env.DOCKERHUB_USERNAME }}/${{ env.USER_SERVICE_IMAGE }}:latest
+            docker pull ${{ env.REGISTRY }}/${{ env.DOCKERHUB_USERNAME }}/${{ env.COURSE_SERVICE_IMAGE }}:latest
+            docker pull ${{ env.REGISTRY }}/${{ env.DOCKERHUB_USERNAME }}/${{ env.SALE_SERVICE_IMAGE }}:latest
+            docker pull ${{ env.REGISTRY }}/${{ env.DOCKERHUB_USERNAME }}/${{ env.NOTIFICATION_SERVICE_IMAGE }}:latest
+            docker pull ${{ env.REGISTRY }}/${{ env.DOCKERHUB_USERNAME }}/${{ env.SOCKET_SERVER_IMAGE }}:latest
+            
+            echo "🛑 Stopping old containers..."
+            docker compose down || true
+            
+            echo "🚀 Starting services with Docker Compose..."
+            docker compose up -d
+            
+            echo "✅ Deployment completed successfully!"
+            echo "Container status:"
+            docker compose ps
+            
+            echo "🔍 Checking application health..."
+            sleep 5
+            curl -s http://localhost:8888/health || echo "API Gateway health check pending..."
+            
+            echo "🧹 Cleaning up temporary environment files..."
+            rm -f api-gateway.application.yaml
+            rm -f course-service.application.yaml
+            rm -f user-service.application.yaml
+            rm -f sale-service.env
+            rm -f notification-service.env
+            rm -f cloudfront-private-key.pem
+            rm -f .env
+            
+            echo "✅ Cleanup completed!"
+          EOF
+
+      - name: Deployment notification
+        if: success()
+        run: echo "✅ Successfully deployed to VPS"
+
+      - name: Deployment failed notification
+        if: failure()
+        run: echo "❌ Deployment failed"
