@@ -1,0 +1,353 @@
+{
+  "name": "Learnova",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {
+          "responseMode": "responseNodes"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -16,
+        -96
+      ],
+      "id": "fcd33d96-5c68-4a07-ad8e-501a71c9b8ec",
+      "name": "When chat message received",
+      "webhookId": "75fa6849-e821-4ab6-92ea-d482b60c5967",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Bạn là trợ lý ảo chuyên nghiệp của hệ thống giáo dục Learnova, được vận hành bởi Quản trị viên Phạm Tiên Anh.\n\nQuy tắc về ngôn ngữ:\n\nBạn phải tự động nhận diện ngôn ngữ của người dùng và phản hồi bằng chính ngôn ngữ đó (ví dụ: người dùng hỏi tiếng Việt trả lời tiếng Việt, hỏi tiếng Anh trả lời tiếng Anh).\n\nNhiệm vụ và Quy tắc xử lý dữ liệu:\n\nCung cấp thông tin: Sử dụng công cụ Supabase Vector Store để tìm kiếm thông tin khóa học chính xác nhất.\n\nXử lý URL: > * Nếu thông tin tìm thấy có chứa đường dẫn (URL) cụ thể, bạn phải gửi URL đó cho người dùng.\n\nBẮT BUỘC: Nếu bất kỳ URL nào có chứa localhost (ví dụ: http://localhost:3000/...), bạn phải thay thế phần localhost bằng domain: https://learnova.t9tieanh.io.vn/.\n\nPhong cách: Trả lời lịch sự, thân thiện, tập trung vào lợi ích của học viên. Trình bày URL dưới dạng Markdown link để người dùng dễ nhấn vào.\n\nGiới hạn: Nếu không tìm thấy thông tin trong dữ liệu hệ thống, hãy thông báo rằng bạn chưa có thông tin cụ thể và đề xuất người dùng liên hệ hỗ trợ thay vì tự ý bịa đặt thông tin.\n\nDưới đây là câu hỏi từ người dùng: \"{{ $json.chatInput }}\". Hãy phân tích và phản hồi dựa trên các quy tắc hệ thống đã thiết lập.",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        416,
+        -96
+      ],
+      "id": "a3892218-25d0-47a1-aaf8-4076c08be34e",
+      "name": "AI Agent",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryRedisChat",
+      "typeVersion": 1.5,
+      "position": [
+        176,
+        176
+      ],
+      "id": "155f70cf-0ca1-40a8-93e1-b37081549dcd",
+      "name": "Redis Chat Memory",
+      "credentials": {
+        "redis": {
+          "id": "2caGiCFtfMsI7tzU",
+          "name": "Tieanh's Redis server"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        0,
+        160
+      ],
+      "id": "e41bac2a-aabf-490c-8805-e50ee0b21f14",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "NsVrvFwboafcPjAg",
+          "name": "Tieanh's Gemini"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        384,
+        352
+      ],
+      "id": "bd7a977b-7add-45dd-834f-1c19b0cc543f",
+      "name": "Embeddings Google Gemini",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "NsVrvFwboafcPjAg",
+          "name": "Tieanh's Gemini"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        688,
+        352
+      ],
+      "id": "426b2e6a-3d74-426f-ae3c-afb9b33404eb",
+      "name": "Embeddings Google Gemini1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "NsVrvFwboafcPjAg",
+          "name": "Tieanh's Gemini"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "⚠️ SYSTEM PROFILE CONTEXT — HIGHEST PRIORITY\n\nThis tool contains ONLY system-level identity and global rules of the Learnova platform.\n\nIncludes:\n- Platform name, purpose, and vision\n- Core system capabilities and limitations\n- Global behavior rules for the AI\n- System-wide terminology and definitions\n\nSTRICT RULES:\n- DO NOT use this tool for course content\n- DO NOT use this tool for lessons, tutorials, or learning materials\n- DO NOT answer programming or study questions using this tool\n\nUse this tool ONLY when:\n- The user asks \"what is Learnova\"\n- The user asks about platform identity, system behavior, or global rules\n- The AI needs authoritative system context\n\nIf the question is about learning content, courses, or lessons → DO NOT use this tool.\n",
+        "tableName": {
+          "__rl": true,
+          "value": "system_profile_embeddings",
+          "mode": "list",
+          "cachedResultName": "system_profile_embeddings"
+        },
+        "includeDocumentMetadata": false,
+        "options": {
+          "queryName": "match_system_profile"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        688,
+        176
+      ],
+      "id": "2548f384-18fb-4d4a-8ab8-9af89a4ac752",
+      "name": "Supabase Vector Store (System Profile)",
+      "credentials": {
+        "supabaseApi": {
+          "id": "Gx25qU6nkxxOH5Qm",
+          "name": "Tieanh's SUPABASE"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "📚 COURSE LEARNING CONTEXT\n\nThis tool contains educational content for learners.\n\nIncludes:\n- Course materials\n- Lessons and chapters\n- Programming tutorials and explanations\n- Technical knowledge used for learning and practice\n\nSTRICT RULES:\n- DO NOT use this tool for system identity or platform rules\n- DO NOT answer \"what is Learnova\" or system questions using this tool\n\nUse this tool ONLY when:\n- The user asks technical or learning questions\n- The user asks about programming concepts, tutorials, or lessons\n- The user wants explanations, examples, or study help\n\nIf the question is about platform identity or system behavior → DO NOT use this tool.\n",
+        "tableName": {
+          "__rl": true,
+          "value": "course_embeddings",
+          "mode": "list",
+          "cachedResultName": "course_embeddings"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        384,
+        176
+      ],
+      "id": "90f4ca60-cef6-49e6-82f0-200d41b35025",
+      "name": "Supabase Vector Store (Course)",
+      "credentials": {
+        "supabaseApi": {
+          "id": "Gx25qU6nkxxOH5Qm",
+          "name": "Tieanh's SUPABASE"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "chienthannodejs@gmail.com",
+        "toEmail": "phama9162@gmail.com",
+        "subject": "[Hệ thống Learnova] Thông báo lỗi vận hành AI",
+        "html": "=<!DOCTYPE html>\n<html>\n  <head>\n    <meta charset=\"UTF-8\" />\n    <title>Thông báo lỗi hệ thống AI</title>\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />\n    <style>\n      body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f7f9fc; margin: 0; padding: 20px; }\n      .container { max-width: 480px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); padding: 30px; }\n      .title { font-size: 20px; color: #d9534f; margin-bottom: 16px; font-weight: 700; }\n      .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; border-bottom: 2px solid #f7f9fc; padding-bottom: 10px; }\n      .brand { font-size: 18px; font-weight: 700; color: #1d4e8f; }\n      .error-box { background-color: #fff5f5; border-left: 4px solid #d9534f; padding: 15px; margin: 20px 0; border-radius: 4px; font-family: monospace; font-size: 13px; color: #333; overflow-x: auto; white-space: pre-wrap; }\n      .footer { font-size: 12px; color: #999999; margin-top: 30px; text-align: center; }\n      .status-badge { background-color: #d9534f; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; text-transform: uppercase; }\n    </style>\n  </head>\n  <body>\n    <div class=\"container\">\n      <div class=\"header\">\n        <div class=\"brand\">Learnova Monitor</div>\n        <div class=\"status-badge\">Critical Error</div>\n      </div>\n      <h2 class=\"title\">Phát hiện lỗi AI Agent!</h2>\n      <p>Chào <strong>quản trị viên Phạm Tiên Anh</strong>, hệ thống vừa ghi nhận một lỗi vận hành từ AI Agent.</p>\n      \n      <div class=\"error-box\">\n        <strong>Thông điệp lỗi:</strong><br>\n        {{ $node[\"AI Agent\"].json.message || \"The service is receiving too many requests from you\" }}\n      </div>\n\n      <p><strong>Thời gian phát hiện:</strong> {{ $now.format('HH:mm:ss - DD/MM/YYYY') }}</p>\n      <p>Hệ thống hiện tại đang gặp lỗi <strong>Rate Limit</strong> từ Google Gemini. Bạn hãy kiểm tra lại lưu lượng truy cập hoặc nâng cấp gói API.</p>\n      \n      <div class=\"footer\">\n        © 2026 Learnova Platform - dev by Phạm Tiên Anh. All rights reserved.\n      </div>\n    </div>\n  </body>\n</html>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1168,
+        -80
+      ],
+      "id": "c4a40fa6-a491-4a93-9f86-42c9df50cd54",
+      "name": "Send email1",
+      "webhookId": "af9823f0-294c-44b3-a40d-87f24974efaf",
+      "retryOnFail": false,
+      "executeOnce": false,
+      "alwaysOutputData": false,
+      "credentials": {
+        "smtp": {
+          "id": "jlA2QqlAr9UmVD9F",
+          "name": "SMTP account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "message": "⚠️ Hệ thống đang quá tải. Quản trị viên Phạm Tiên Anh sẽ sớm khắc phục sự cố này. Bạn vui lòng thử lại sau nhé!",
+        "waitUserReply": false,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chat",
+      "typeVersion": 1,
+      "position": [
+        912,
+        -80
+      ],
+      "id": "4f87edc2-883c-4bac-a1eb-e52a4ae44a2a",
+      "name": "Respond to Chat"
+    },
+    {
+      "parameters": {
+        "message": "={{ $node[\"AI Agent\"].json[\"output\"] }}",
+        "waitUserReply": false,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chat",
+      "typeVersion": 1,
+      "position": [
+        816,
+        -240
+      ],
+      "id": "0e97c59b-904a-405a-9e44-9c2490dddcae",
+      "name": "Respond to Chat1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Respond to Chat1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond to Chat",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Supabase Vector Store (Course)",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Supabase Vector Store (System Profile)",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase Vector Store (System Profile)": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase Vector Store (Course)": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send email1": {
+      "main": [
+        []
+      ]
+    },
+    "Respond to Chat": {
+      "main": [
+        [
+          {
+            "node": "Send email1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionTimeout": -1,
+    "errorWorkflow": "94rYD9yWSvVNWNEGiQ4nG"
+  },
+  "versionId": "4371bf6b-61c7-455d-aaf3-49296818cf6e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "aa0d61baa79d86b6f813abe8ede138cd5e00c5ba3b6baaec012b10b9ce4f4b8a"
+  },
+  "id": "qr8982kT6yw4I7ukx5kqE",
+  "tags": []
+}
