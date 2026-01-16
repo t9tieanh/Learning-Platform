@@ -207,9 +207,7 @@ jobs:
           cat > cloudfront-private-key.pem << 'KEY'
           ${{ secrets.AWS_CLOUDFRONT_PRIVATE_KEY_PEM }}
           KEY
-
-          chmod 600 cloudfront-private-key.pem
-
+          
           echo "✅ Config files created"
 
           ########################
