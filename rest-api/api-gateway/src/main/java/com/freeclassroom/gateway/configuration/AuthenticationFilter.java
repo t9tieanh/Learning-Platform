@@ -33,6 +33,7 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
     @NonFinal
     private List<PublicEndpoint> publicEndpoints = List.of(
             new PublicEndpoint("/user.*", "ALL"),
+            new PublicEndpoint("/chat-bot.*", "ALL"),
             new PublicEndpoint("/auth.*", "ALL"),
             new PublicEndpoint("/learning/courses.*", "ALL"),
             new PublicEndpoint("/learning/categories.*", "ALL"),
