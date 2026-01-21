@@ -11,7 +11,6 @@ const Chat = () => {
   const { peerId: peerIdParam } = useParams<{ peerId?: string }>()
   const forcedRole: 'instructor' | 'student' = location.pathname.startsWith('/teacher') ? 'instructor' : 'student'
 
-  // Khi user click chọn hội thoại, điều hướng theo /chat/:peerId hoặc /teacher/chat/:peerId
   const handleSelect = (c: ConversationListItem) => {
     setSelectedConversation(c)
     const base = forcedRole === 'instructor' ? '/teacher/chat' : '/chat'

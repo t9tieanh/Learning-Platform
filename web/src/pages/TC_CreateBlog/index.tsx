@@ -18,7 +18,7 @@ const Index = () => {
   useEffect(() => {
     let mounted = true
     if (isUpdate && id) {
-      ;(async () => {
+      ; (async () => {
         try {
           const blog = await blogService.getDetails(id)
           if (!mounted) return
@@ -37,7 +37,7 @@ const Index = () => {
     }
   }, [id, isUpdate, setTitleStore, setImageStore])
   return (
-    <div className='min-h-screen px-28 py-10'>
+    <div className='min-h-screen px-4 md:px-28 py-10 pt-20 lg:pt-10'>
       <div className='max-w-7xl mx-auto'>
         <TitleComponent
           title={isUpdate ? 'Cập nhật bài viết' : 'Tạo bài viết mới'}

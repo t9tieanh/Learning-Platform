@@ -8,8 +8,11 @@ import { useParams, useNavigate } from 'react-router-dom'
 import CourseProgressStep from '@/types/courseProgressStep'
 import courseService from '@/services/course/course.service'
 import CustomButton from '@/components/common/Button'
-import { ArrowLeftToLine, SendHorizontal } from 'lucide-react'
+import { ArrowLeftToLine, SendHorizontal, Menu } from 'lucide-react'
 import { toast } from 'sonner'
+import TC_CreateCourseSkeleton from '@/components/TC_CreateCourse/TC_CreateCourseSkeleton'
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
+import { Button } from '@/components/ui/button'
 
 const TC_CreateCourse = () => {
   const [activeSection, setActiveSection] = useState<CourseProgressStep>(CourseProgressStep.INTRO)
@@ -35,6 +38,8 @@ const TC_CreateCourse = () => {
     introductoryVideo: ''
   })
 
+  const [loading, setLoading] = useState(true)
+
   const navigate = useNavigate()
 
   const { id } = useParams<{ id: string }>()
@@ -42,28 +47,35 @@ const TC_CreateCourse = () => {
   useEffect(() => {
     const getCourseInfo = async () => {
       if (!id) return
-      const response = await courseService.getCourseInfo(id)
-      if (response && response.code === 200 && response.result) {
-        const course = response.result
-        if (course.status === 'PUBLISHED') {
-          toast.error('Khóa học đã được xuất bản, không thể chỉnh sửa nữa.')
-          navigate(`/course/${id}`)
-          return
+      setLoading(true)
+      try {
+        const response = await courseService.getCourseInfo(id)
+        if (response && response.code === 200 && response.result) {
+          const course = response.result
+          if (course.status === 'PUBLISHED') {
+            toast.error('Khóa học đã được xuất bản, không thể chỉnh sửa nữa.')
+            navigate(`/course/${id}`)
+            return
+          }
+          if (course.progressStep) {
+            setActiveSection(course.progressStep as CourseProgressStep)
+            setCourseInfo({
+              courseTitle: course.title,
+              subtitle: course.shortDescription,
+              description: course.longDescription,
+              language: course.language,
+              learnItems: course.outcomes,
+              category: course.category,
+              requirements: course.requirements,
+              thumbnailUrl: course.thumbnailUrl,
+              introductoryVideo: course.introductoryVideo
+            })
+          }
         }
-        if (course.progressStep) {
-          setActiveSection(course.progressStep as CourseProgressStep)
-          setCourseInfo({
-            courseTitle: course.title,
-            subtitle: course.shortDescription,
-            description: course.longDescription,
-            language: course.language,
-            learnItems: course.outcomes,
-            category: course.category,
-            requirements: course.requirements,
-            thumbnailUrl: course.thumbnailUrl,
-            introductoryVideo: course.introductoryVideo
-          })
-        }
+      } catch (error) {
+        console.error('Failed to fetch course info', error)
+      } finally {
+        setLoading(false)
       }
     }
     getCourseInfo()
@@ -104,13 +116,36 @@ const TC_CreateCourse = () => {
     if (prev) setActiveSection(prev)
   }
 
+  if (loading) {
+    return <TC_CreateCourseSkeleton />
+  }
+
   return (
-    <div className='h-screen bg-background'>
-      <div className='flex h-screen'>
-        <CourseSidebar activeSection={activeSection} onSectionChange={setActiveSection} />
-        <main className='flex-1 p-8 min-h-screen overflow-auto'>
+    <div className='h-screen bg-background flex flex-col'>
+      {/* Mobile Header */}
+      <div className='lg:hidden p-4 border-b flex items-center gap-4 bg-white dark:bg-slate-900 z-20'>
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button variant='outline' size='icon'>
+              <Menu className='h-5 w-5' />
+            </Button>
+          </SheetTrigger>
+          <SheetContent side='left' className='p-0 w-72'>
+            <CourseSidebar activeSection={activeSection} onSectionChange={setActiveSection} />
+          </SheetContent>
+        </Sheet>
+        <h1 className='font-semibold text-lg truncate'>Tạo khóa học</h1>
+      </div>
+
+      <div className='flex flex-1 overflow-hidden'>
+        {/* Desktop Sidebar */}
+        <div className='hidden lg:block h-full'>
+          <CourseSidebar activeSection={activeSection} onSectionChange={setActiveSection} />
+        </div>
+
+        <main className='flex-1 p-4 md:p-8 overflow-auto'>
           {renderContent()}
-          <div className='max-w-6xl mx-auto flex justify-between mt-5'>
+          <div className='max-w-6xl mx-auto flex justify-between mt-5 pb-10'>
             <CustomButton
               label='Quay lại'
               className='bg-gray-100 text-black hover:bg-gray-200'

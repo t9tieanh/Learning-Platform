@@ -163,48 +163,26 @@ public class CourseService implements ICourseService {
     }
 
     @Override
-    public ApiResponse<PageResponse<CourseResponse>> getCoursesByTeacherId(String instructorId, int page, int size, Boolean isPublic) {
-        try {
-            Pageable pageable = PageRequest.of(Math.max(0, page - 1), size, Sort.by("createdAt").descending());
+    public ApiResponse<PageResponse<CoursesInstructorResponse>> getCoursesByTeacherId(String instructorId, int page, int size) {
+        Pageable pageable = PageRequest.of(Math.max(0, page - 1), size, Sort.by("createdAt").descending());
 
-            Page<CourseEntity> coursePage;
-            if (Boolean.TRUE.equals(isPublic)) {
-                coursePage = courseRepo.findByInstructorIdAndStatusAndProgressStep(
-                        instructorId,
-                        EnumCourseStatus.PUBLISHED,
-                        EnumCourseProgressStep.COMPLETED,
-                        pageable
-                );
-            } else {
-                coursePage = courseRepo.findByInstructorId(instructorId, pageable);
-            }
+        Page<CourseEntity> coursePage;
+        coursePage = courseRepo.findByInstructorId(instructorId, pageable);
+        List<CoursesInstructorResponse> items = courseMapper.toDtoList(coursePage.getContent());
 
-            List<CourseResponse> items = courseMapper.toDtoList(coursePage.getContent());
+        PageResponse<CoursesInstructorResponse> pageResponse = PageResponse.<CoursesInstructorResponse>builder()
+                .items(items)
+                .page(coursePage.getNumber() + 1)
+                .size(coursePage.getSize())
+                .totalElements(coursePage.getTotalElements())
+                .totalPages(coursePage.getTotalPages())
+                .build();
 
-            PageResponse<CourseResponse> pageResponse = PageResponse.<CourseResponse>builder()
-                    .items(items)
-                    .page(coursePage.getNumber() + 1)
-                    .size(coursePage.getSize())
-                    .totalElements(coursePage.getTotalElements())
-                    .totalPages(coursePage.getTotalPages())
-                    .build();
-
-            return ApiResponse.<PageResponse<CourseResponse>>builder()
-                    .code(HttpStatus.OK.value())
-                    .message("Lấy danh sách khóa học thành công")
-                    .result(pageResponse)
-                    .build();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.err.println("Lỗi khi lấy danh sách course theo instructorId = " + instructorId);
-
-            return ApiResponse.<PageResponse<CourseResponse>>builder()
-                    .code(999)
-                    .message("Lỗi server: " + e.getMessage())
-                    .result(null)
-                    .build();
-        }
+        return ApiResponse.<PageResponse<CoursesInstructorResponse>>builder()
+                .code(HttpStatus.OK.value())
+                .message("Lấy danh sách khóa học thành công")
+                .result(pageResponse)
+                .build();
     }
 
     @Override
