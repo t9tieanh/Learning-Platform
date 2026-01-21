@@ -17,6 +17,7 @@ import courseService from '@/services/course/course.service'
 import { ApiResponse } from '@/types/response.type'
 import { Loader } from '@/components/ui/loader'
 import courseAdminService from '@/services/course/course-admin.service'
+import { TC_CourseDetailSkeleton } from '@/components/TC_CourseDetail/Skeleton/TC_CourseDetailSkeleton'
 
 interface CourseResponseDTO {
   id: string
@@ -180,10 +181,9 @@ export default function CourseDetailPage() {
           </header>
         </>
       )}
-
       {/* Main Content */}
       <main className='container mx-auto px-4 py-8'>
-        {loading && <Loader />}
+        {loading && <TC_CourseDetailSkeleton />}
         {!loading && error && (
           <div className='flex flex-col items-center justify-center py-20 gap-4'>
             <p className='text-destructive font-medium'>Không tải được khoá học: {error}</p>
@@ -216,11 +216,8 @@ export default function CourseDetailPage() {
                 category={course.categories?.[0]}
                 tags={course.tagNames}
               />
-
               <LearningOutcomes outcomes={course.learningOutcomes || []} />
-
               <Prerequisites prerequisites={course.requirements || []} />
-
               <CurriculumAccordion
                 sections={(course.chapters || []).map((s) => ({
                   id: s.id,
@@ -237,9 +234,7 @@ export default function CourseDetailPage() {
                 courseId={course.id}
                 onPlayLesson={handlePlayLesson}
               />
-
               <FullDescription description={course.description || ''} />
-
               <ReviewsList
                 reviews={(course.reviews || []).map((r) => ({
                   id: r.id,
@@ -253,7 +248,6 @@ export default function CourseDetailPage() {
                 courseId={course.id}
               />
             </div>
-
             {/* Right Column - Sidebar */}
             {!isAdminPage && (
               <aside className='hidden lg:block'>
@@ -268,7 +262,6 @@ export default function CourseDetailPage() {
           </div>
         )}
       </main>
-
       {/* Video Modal */}
       {currentVideo && (
         <VideoModal
