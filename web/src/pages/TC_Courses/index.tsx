@@ -3,7 +3,6 @@ import CourseSearchBar from '@/components/TC_Courses/CourseSearchBar'
 import CoursesTable from '@/components/TC_Courses/CoursesTable'
 import CoursePagination from '@/components/TC_Courses/CoursePagination'
 import { Course } from '@/components/TC_Courses/CourseTypes'
-import AcademySidebar from '@/components/TC_HomePage/AcademySidebar'
 import courseService from '@/services/course/course.service'
 import CoursesTableSkeleton from '@/components/TC_Courses/CoursesTableSkeleton'
 
@@ -88,30 +87,23 @@ class TC_Course extends Component<Record<string, never>, State> {
     })
 
     return (
-      <div className='flex min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-slate-900 dark:to-slate-950 transition-colors'>
-        {/* Sidebar */}
-        <div className='fixed top-0 left-0 h-screen w-64 bg-[#1D1D2A] z-30'>
-          <AcademySidebar />
-        </div>
-        {/* Main content */}
-        <div className='flex-1 p-6 space-y-6'>
-          <CourseSearchBar onSearch={(v) => this.setState({ search: v })} />
-          {this.state.loading ? (
-            <CoursesTableSkeleton />
-          ) : (
-            <CoursesTable
-              courses={filtered}
-              statusFilter={this.state.statusFilter}
-              onChangeStatusFilter={(s) => this.setState({ statusFilter: s as State['statusFilter'] })}
-              fetchCourses={this.fetchCourses}
-            />
-          )}
-          <CoursePagination
-            pages={this.state.totalPages}
-            current={this.state.page}
-            onChange={(p) => this.fetchCourses(p)}
+      <div className='flex-1 p-6 space-y-6 pt-16 lg:pt-6'>
+        <CourseSearchBar onSearch={(v) => this.setState({ search: v })} />
+        {this.state.loading ? (
+          <CoursesTableSkeleton />
+        ) : (
+          <CoursesTable
+            courses={filtered}
+            statusFilter={this.state.statusFilter}
+            onChangeStatusFilter={(s) => this.setState({ statusFilter: s as State['statusFilter'] })}
+            fetchCourses={this.fetchCourses}
           />
-        </div>
+        )}
+        <CoursePagination
+          pages={this.state.totalPages}
+          current={this.state.page}
+          onChange={(p) => this.fetchCourses(p)}
+        />
       </div>
     )
   }

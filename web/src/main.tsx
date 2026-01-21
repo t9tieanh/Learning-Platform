@@ -39,6 +39,7 @@ import AD_BlogDetails from './pages/AD_BlogDetails'
 import Home2 from './pages/Home2'
 import { SocketProvider } from '@/api/socket/socket.context'
 import DiscountsAdmin from './pages/AD_Discounts'
+import AuthenticationGate from '@/components/auth-gate/AuthenticationGate'
 
 const router = createBrowserRouter([
   {
@@ -76,7 +77,6 @@ const router = createBrowserRouter([
         children: [
           { path: '', element: <TCHomePage /> },
           { path: 'course', element: <TC_Course /> },
-          { path: 'course/:id', element: <TC_CreateCourse /> },
           { path: 'course-details/:id', element: <TC_CourseDetail /> },
           { path: 'chat/:id', element: <Chat /> },
           { path: 'blogs', element: <TC_Blog /> },
@@ -85,6 +85,14 @@ const router = createBrowserRouter([
           { path: 'blog/:id', element: <TC_BlogDetails /> },
           { path: 'update-blog/:id', element: <TC_UpdateBlog /> }
         ]
+      },
+      {
+        path: 'teacher/course/:id',
+        element: (
+          <AuthenticationGate>
+            <TC_CreateCourse />
+          </AuthenticationGate>
+        )
       },
       {
         path: 'admin',

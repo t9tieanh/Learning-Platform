@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react'
-import AcademySidebar from '@/components/TC_HomePage/AcademySidebar'
 import BlogSearchBar from '@/components/TC_Blog/BlogSearchBar'
 import BlogTableSkeleton from '@/components/TC_Blog/BlogTableSkeleton'
 import BlogTable from '@/components/TC_Blog/BlogTable'
@@ -60,40 +59,32 @@ const TC_Blog: React.FC = () => {
   }, [page, search])
 
   return (
-    <div className='flex min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-slate-900 dark:to-slate-950 transition-colors'>
-      {/* Sidebar */}
-      <div className='fixed top-0 left-0 h-screen w-64 bg-[#1D1D2A] z-30'>
-        <AcademySidebar />
-      </div>
+    <div className='flex-1 p-6 space-y-6 pt-16 lg:pt-6'>
+      <BlogSearchBar
+        onSearch={(v) => {
+          setSearch(v)
+          setPage(1)
+        }}
+      />
 
-      {/* Main content */}
-      <div className='flex-1 p-6 space-y-6'>
-        <BlogSearchBar
-          onSearch={(v) => {
-            setSearch(v)
-            setPage(1)
-          }}
+      {loading ? (
+        <BlogTableSkeleton />
+      ) : error ? (
+        <div className='text-center text-red-500 py-10'>{error}</div>
+      ) : (
+        <BlogTable
+          courses={blogs.map((b) => ({
+            id: b._id,
+            title: b.title,
+            image: b.image_url,
+            shortDescription: b.content.slice(0, 80) + '...',
+            createdAt: b.created_at
+          }))}
+          onDeleted={(id) => setBlogs((prev) => prev.filter((b) => b._id !== id))}
         />
+      )}
 
-        {loading ? (
-          <BlogTableSkeleton />
-        ) : error ? (
-          <div className='text-center text-red-500 py-10'>{error}</div>
-        ) : (
-          <BlogTable
-            courses={blogs.map((b) => ({
-              id: b._id,
-              title: b.title,
-              image: b.image_url,
-              shortDescription: b.content.slice(0, 80) + '...',
-              createdAt: b.created_at
-            }))}
-            onDeleted={(id) => setBlogs((prev) => prev.filter((b) => b._id !== id))}
-          />
-        )}
-
-        <BlogPagination pages={totalPages} current={page} onChange={setPage} />
-      </div>
+      <BlogPagination pages={totalPages} current={page} onChange={setPage} />
     </div>
   )
 }
