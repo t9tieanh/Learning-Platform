@@ -4,7 +4,7 @@ import BlogPreviewSubmit from '@/components/TC_CreateBlog/BlogPreviewSubmit'
 import TitleComponent from '@/components/TC_CreateCourse/common/Title'
 import QuillEditor from '@/components/TC_CreateBlog/QuillEditor'
 import { useParams } from 'react-router-dom'
-import blogService from '@/services/blog.service'
+import blogService from '@/services/blog/blog.service'
 import { useBlogPostStore } from '@/stores/blogPostStore'
 const Index = () => {
   const [html, setHtml] = useState<string>('')

@@ -40,10 +40,10 @@ public class WebClientConfiguration {
     @Bean
     public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
         http
-                .cors(cors -> {})          // bật CORS
+                .cors(cors -> {})
                 .csrf(csrf -> csrf.disable())
                 .authorizeExchange(auth -> auth.anyExchange().permitAll())
-                .headers(headers -> headers.frameOptions(frame -> frame.disable())); // tắt X-Frame-Options cho iframe
+                .headers(headers -> headers.frameOptions(frame -> frame.disable()));
 
         return http.build();
     }

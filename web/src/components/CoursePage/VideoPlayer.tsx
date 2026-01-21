@@ -116,7 +116,7 @@ const VideoPlayer = ({ lesson, markDoneVideo }: { lesson: Lesson; markDoneVideo:
             ref={videoRef}
             src={
               lesson.introductionVideo
-                ? `https://${lesson.introductionVideo}`
+                ? lesson.introductionVideo
                 : `${backEndUri}learning/lesson-student/${lesson.id}?token=${data?.accessToken}`
             }
             controls
