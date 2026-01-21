@@ -4,7 +4,7 @@ import BlogSearchBar from '@/components/TC_Blog/BlogSearchBar'
 import { Loader } from '@/components/ui/loader'
 import BlogTable from '@/components/TC_Blog/BlogTable'
 import BlogPagination from '@/components/TC_Blog/BlogPagination'
-import { blogService, type BlogItem } from '@/services/blog.service'
+import { blogService, type BlogItem } from '@/services/blog/blog.service'
 import { useAuthStore } from '@/stores/useAuth.stores'
 
 interface Blog {

@@ -116,7 +116,7 @@ const Cover = ({ video, image, title, shortDescription, teacher, tags, showSmall
             />
           ) : video && showVideo ? (
             <video
-              src={`https://${video}`}
+              src={`${video}`}
               controls
               autoPlay
               muted

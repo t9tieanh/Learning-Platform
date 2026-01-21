@@ -9,7 +9,7 @@ import { Upload } from 'lucide-react'
 // Ensure Quill content styles (lists, headings, indents) also apply in preview
 import 'quill/dist/quill.snow.css'
 import './blog-preview.css'
-import blogService from '@/services/blog.service'
+import blogService from '@/services/blog/blog.service'
 import { useAuthStore } from '@/stores/useAuth.stores'
 import userService from '@/services/user/user.service'
 import useLoading from '@/hooks/useLoading.hook'

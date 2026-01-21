@@ -4,7 +4,7 @@ import SignUpForm from '@/components/Auth/SignUpForm'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import useLoading from '@/hooks/useLoading.hook'
 import userService from '@/services/user/user.service'
-import aiChatService from '@/services/aiChat.service'
+import aiChatService from '@/services/chat-bot/aiChat.service'
 import { useAuthStore } from '@/stores/useAuth.stores'
 import { toast } from 'sonner'
 
