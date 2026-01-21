@@ -5,7 +5,7 @@ import CoursePagination from '@/components/TC_Courses/CoursePagination'
 import { Course } from '@/components/TC_Courses/CourseTypes'
 import AcademySidebar from '@/components/TC_HomePage/AcademySidebar'
 import courseService from '@/services/course/course.service'
-import { Loader } from '@/components/ui/loader'
+import CoursesTableSkeleton from '@/components/TC_Courses/CoursesTableSkeleton'
 
 interface State {
   courses: Course[]
@@ -38,7 +38,7 @@ class TC_Course extends Component<Record<string, never>, State> {
     this.setState({ loading: true })
     try {
       const page = nextPage ?? this.state.page
-      const res = await courseService.getTeacherCourses(undefined, { page, limit: this.state.size })
+      const res = await courseService.getTeacherCourses({ page, limit: this.state.size })
       const payload = res.result
       const list = payload?.items as any[] | undefined
       const mapped: Course[] = (list || []).map((c, idx) => ({
@@ -97,7 +97,7 @@ class TC_Course extends Component<Record<string, never>, State> {
         <div className='flex-1 p-6 space-y-6'>
           <CourseSearchBar onSearch={(v) => this.setState({ search: v })} />
           {this.state.loading ? (
-            <Loader />
+            <CoursesTableSkeleton />
           ) : (
             <CoursesTable
               courses={filtered}

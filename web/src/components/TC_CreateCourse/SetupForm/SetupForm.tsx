@@ -11,6 +11,8 @@ import useLoading from '@/hooks/useLoading.hook'
 import formatPrice from '@/utils/common/formatPrice'
 import formatDuration from '@/utils/time/formatDuration.utils'
 
+import SetupFormSkeleton from './Skeleton/SetupFormSkeleton'
+
 const SetupForm = ({ id }: { id: string }) => {
   const [overviewCourse, setOverviewCourse] = useState<{
     lessonNum: number
@@ -20,13 +22,21 @@ const SetupForm = ({ id }: { id: string }) => {
   }>()
 
   const { loading, startLoading, stopLoading } = useLoading()
+  const [initialLoading, setInitialLoading] = useState(true)
 
   useEffect(() => {
     const getCourseOverview = async () => {
-      const response = await courseService.getCourseOverview(id)
-      if (response && response.code === 200 && response.result) {
-        setOverviewCourse(response.result)
-      } else toast.error('Không thể tải tóm tắt khóa học')
+      setInitialLoading(true)
+      try {
+        const response = await courseService.getCourseOverview(id)
+        if (response && response.code === 200 && response.result) {
+          setOverviewCourse(response.result)
+        } else toast.error('Không thể tải tóm tắt khóa học')
+      } catch (error) {
+        console.log('Error fetching course overview:', error)
+      } finally {
+        setInitialLoading(false)
+      }
     }
 
     getCourseOverview()
@@ -53,6 +63,10 @@ const SetupForm = ({ id }: { id: string }) => {
     } finally {
       stopLoading()
     }
+  }
+
+  if (initialLoading) {
+    return <SetupFormSkeleton />
   }
 
   return (

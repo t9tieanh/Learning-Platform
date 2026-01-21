@@ -10,6 +10,7 @@ import courseService from '@/services/course/course.service'
 import CustomButton from '@/components/common/Button'
 import { ArrowLeftToLine, SendHorizontal } from 'lucide-react'
 import { toast } from 'sonner'
+import TC_CreateCourseSkeleton from '@/components/TC_CreateCourse/TC_CreateCourseSkeleton'
 
 const TC_CreateCourse = () => {
   const [activeSection, setActiveSection] = useState<CourseProgressStep>(CourseProgressStep.INTRO)
@@ -35,6 +36,8 @@ const TC_CreateCourse = () => {
     introductoryVideo: ''
   })
 
+  const [loading, setLoading] = useState(true)
+
   const navigate = useNavigate()
 
   const { id } = useParams<{ id: string }>()
@@ -42,28 +45,35 @@ const TC_CreateCourse = () => {
   useEffect(() => {
     const getCourseInfo = async () => {
       if (!id) return
-      const response = await courseService.getCourseInfo(id)
-      if (response && response.code === 200 && response.result) {
-        const course = response.result
-        if (course.status === 'PUBLISHED') {
-          toast.error('Khóa học đã được xuất bản, không thể chỉnh sửa nữa.')
-          navigate(`/course/${id}`)
-          return
+      setLoading(true)
+      try {
+        const response = await courseService.getCourseInfo(id)
+        if (response && response.code === 200 && response.result) {
+          const course = response.result
+          if (course.status === 'PUBLISHED') {
+            toast.error('Khóa học đã được xuất bản, không thể chỉnh sửa nữa.')
+            navigate(`/course/${id}`)
+            return
+          }
+          if (course.progressStep) {
+            setActiveSection(course.progressStep as CourseProgressStep)
+            setCourseInfo({
+              courseTitle: course.title,
+              subtitle: course.shortDescription,
+              description: course.longDescription,
+              language: course.language,
+              learnItems: course.outcomes,
+              category: course.category,
+              requirements: course.requirements,
+              thumbnailUrl: course.thumbnailUrl,
+              introductoryVideo: course.introductoryVideo
+            })
+          }
         }
-        if (course.progressStep) {
-          setActiveSection(course.progressStep as CourseProgressStep)
-          setCourseInfo({
-            courseTitle: course.title,
-            subtitle: course.shortDescription,
-            description: course.longDescription,
-            language: course.language,
-            learnItems: course.outcomes,
-            category: course.category,
-            requirements: course.requirements,
-            thumbnailUrl: course.thumbnailUrl,
-            introductoryVideo: course.introductoryVideo
-          })
-        }
+      } catch (error) {
+        console.error('Failed to fetch course info', error)
+      } finally {
+        setLoading(false)
       }
     }
     getCourseInfo()
@@ -102,6 +112,10 @@ const TC_CreateCourse = () => {
     if (idx === -1) return
     const prev = stepOrder[idx - 1]
     if (prev) setActiveSection(prev)
+  }
+
+  if (loading) {
+    return <TC_CreateCourseSkeleton />
   }
 
   return (

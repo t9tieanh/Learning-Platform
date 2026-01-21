@@ -9,10 +9,10 @@ import ChapterForm from './ChapterForm'
 import chapterService from '@/services/course/chapter.service'
 import { toast } from 'sonner'
 import UploadProgress from './UploadProgress'
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import useMultiUpload from '@/hooks/useMultiUpload'
 import { useAuthStore } from '@/stores/useAuth.stores'
 import CustomButton from '@/components/common/Button'
+import CurriculumFormSkeleton from './Skeleton/CurriculumFormSkeleton'
 
 export type HandleAddLesson = (
   selectedFile: File,
@@ -27,9 +27,16 @@ const CurriculumForm: React.FC<{ id: string }> = ({ id }: { id: string }) => {
   const { data } = useAuthStore()
   const token = data?.accessToken
 
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetchChapters()
+  }, [id])
+
   // fetch chapters when component mounts or id changes
   const fetchChapters = async () => {
     if (!id) return
+    setLoading(true)
     try {
       const response = await chapterService.getChaptersByCourseId(id)
       if (response && response.code === 200 && response.result) {
@@ -37,6 +44,8 @@ const CurriculumForm: React.FC<{ id: string }> = ({ id }: { id: string }) => {
       }
     } catch (error) {
       console.log('Error fetching chapters:', error)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -46,10 +55,6 @@ const CurriculumForm: React.FC<{ id: string }> = ({ id }: { id: string }) => {
     callback: fetchChapters
   })
   const [showUpload, setShowUpload] = useState(false)
-
-  useEffect(() => {
-    fetchChapters()
-  }, [id])
 
   const handleAddChapter = async () => {
     const data = await chapterService.addChapter({
@@ -147,6 +152,10 @@ const CurriculumForm: React.FC<{ id: string }> = ({ id }: { id: string }) => {
         console.error(err)
       }
     }
+  }
+
+  if (loading) {
+    return <CurriculumFormSkeleton />
   }
 
   return (

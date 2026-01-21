@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom'
 import courseService from '@/services/course/course.service'
 import { toast } from 'sonner'
 import { showConfirmToast } from '../common/ShowConfirmToast'
+import noPhoto from '@/assets/images/no-photo.avif'
 
 const getStatusBadge = (status: CourseStatus) => {
   switch (status) {
@@ -78,9 +79,8 @@ const CoursesTable: FC<CoursesTableProps> = ({ courses, statusFilter = '', onCha
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <button
-                      className={`p-1 rounded-md border transition-colors ${
-                        statusFilter ? 'border-blue-300 text-blue-600 bg-white' : 'border-transparent text-blue-600'
-                      } hover:bg-blue-50`}
+                      className={`p-1 rounded-md border transition-colors ${statusFilter ? 'border-blue-300 text-blue-600 bg-white' : 'border-transparent text-blue-600'
+                        } hover:bg-blue-50`}
                       aria-label='Lọc theo trạng thái'
                     >
                       <Filter className='w-4 h-4' />
@@ -107,76 +107,80 @@ const CoursesTable: FC<CoursesTableProps> = ({ courses, statusFilter = '', onCha
           </TableRow>
         </TableHeader>
         <TableBody>
-          {courses.map((course) => (
-            <TableRow
-              key={course.id}
-              className='hover:bg-white dark:hover:bg-slate-800 hover:shadow-md transition-all cursor-pointer'
-              onClick={() => navigate(`/teacher/course-details/${course.id}`)}
-            >
-              <TableCell className='p-3 sm:p-4 flex items-center gap-3 sm:gap-4'>
-                <img
-                  src={
-                    course.thumbnailUrl ||
-                    course.image ||
-                    'https://img.freepik.com/premium-vector/no-photo-available-vector-icon-default-image-symbol-picture-coming-soon-web-site-mobile-app_87543-18055.jpg'
-                  }
-                  alt={course.title}
-                  className='w-20 h-14 sm:w-28 sm:h-20 rounded-lg object-cover shadow-sm'
-                />
-                <div>
-                  <div className='font-semibold text-gray-700 dark:text-gray-100 text-base sm:text-lg'>
-                    {course.title}
-                    <p className='text-sm text-gray-400 dark:text-gray-500 font-light'>{course?.shortDescription}</p>
-                  </div>
-                  <div className='flex flex-wrap gap-2 mt-2'>
-                    {(course.tagNames || course.tags || []).map((tag, idx) => (
-                      <span
-                        key={idx}
-                        className='px-2 py-0.5 text-[10px] sm:text-xs rounded-full bg-indigo-50 text-blue-700 dark:bg-slate-700 dark:text-indigo-300 shadow-sm'
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </TableCell>
-              <TableCell className='px-4'>{getStatusBadge(course.status)}</TableCell>
-              <TableCell className='text-gray-700 dark:text-gray-300'>{course.duration ?? ''}</TableCell>
-              <TableCell className='text-gray-500 dark:text-gray-400 text-xs sm:text-sm px-5'>
-                {course.createdAt ?? 'hi'}
-              </TableCell>
-              <TableCell className='text-right'>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant='ghost'
-                      size='icon'
-                      className='rounded-full transition-all hover:bg-blue-50 hover:text-blue-600 focus-visible:ring-2 focus-visible:ring-blue-200'
-                    >
-                      <MoreHorizontal className='w-5 h-5' />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align='end' className='rounded-xl shadow-lg border border-gray-100'>
-                    <DropdownMenuItem className='rounded-md px-3 py-2 text-sm transition-colors data-[highlighted]:bg-blue-500 data-[highlighted]:text-white'>
-                      Xem chi tiết
-                    </DropdownMenuItem>
-                    <DropdownMenuItem className='rounded-md px-3 py-2 text-sm transition-colors data-[highlighted]:bg-blue-500 data-[highlighted]:text-white'>
-                      Chỉnh sửa
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      className='rounded-md px-3 py-2 text-sm text-red-600 transition-colors data-[highlighted]:bg-red-500 data-[highlighted]:text-white'
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        handleDelete(course.id)
-                      }}
-                    >
-                      Xóa
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+          {courses.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={5} className='text-center py-10 text-gray-500 dark:text-gray-400'>
+                Hiện tại bạn chưa đăng tải bất kỳ khóa học nào
               </TableCell>
             </TableRow>
-          ))}
+          ) : (
+            courses.map((course) => (
+              <TableRow
+                key={course.id}
+                className='hover:bg-white dark:hover:bg-slate-800 hover:shadow-md transition-all cursor-pointer'
+                onClick={() => navigate(`/teacher/course-details/${course.id}`)}
+              >
+                <TableCell className='p-3 sm:p-4 flex items-center gap-3 sm:gap-4'>
+                  <img
+                    src={course.thumbnailUrl || course.image || noPhoto}
+                    alt={course.title}
+                    className='w-20 h-14 sm:w-28 sm:h-20 rounded-lg object-cover shadow-sm'
+                  />
+                  <div>
+                    <div className='font-semibold text-gray-700 dark:text-gray-100 text-base sm:text-lg'>
+                      {course.title}
+                      <p className='text-sm text-gray-400 dark:text-gray-500 font-light'>{course?.shortDescription}</p>
+                    </div>
+                    <div className='flex flex-wrap gap-2 mt-2'>
+                      {(course.tagNames || course.tags || []).map((tag, idx) => (
+                        <span
+                          key={idx}
+                          className='px-2 py-0.5 text-[10px] sm:text-xs rounded-full bg-indigo-50 text-blue-700 dark:bg-slate-700 dark:text-indigo-300 shadow-sm'
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </TableCell>
+                <TableCell className='px-4'>{getStatusBadge(course.status)}</TableCell>
+                <TableCell className='text-gray-700 dark:text-gray-300'>{course.duration ?? ''}</TableCell>
+                <TableCell className='text-gray-500 dark:text-gray-400 text-xs sm:text-sm px-5'>
+                  {course.createdAt ?? 'hi'}
+                </TableCell>
+                <TableCell className='text-right'>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant='ghost'
+                        size='icon'
+                        className='rounded-full transition-all hover:bg-blue-50 hover:text-blue-600 focus-visible:ring-2 focus-visible:ring-blue-200'
+                      >
+                        <MoreHorizontal className='w-5 h-5' />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align='end' className='rounded-xl shadow-lg border border-gray-100'>
+                      <DropdownMenuItem className='rounded-md px-3 py-2 text-sm transition-colors data-[highlighted]:bg-blue-500 data-[highlighted]:text-white'>
+                        Xem chi tiết
+                      </DropdownMenuItem>
+                      <DropdownMenuItem className='rounded-md px-3 py-2 text-sm transition-colors data-[highlighted]:bg-blue-500 data-[highlighted]:text-white'>
+                        Chỉnh sửa
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        className='rounded-md px-3 py-2 text-sm text-red-600 transition-colors data-[highlighted]:bg-red-500 data-[highlighted]:text-white'
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleDelete(course.id)
+                        }}
+                      >
+                        Xóa
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+              </TableRow>
+            ))
+          )}
         </TableBody>
       </Table>
     </div>

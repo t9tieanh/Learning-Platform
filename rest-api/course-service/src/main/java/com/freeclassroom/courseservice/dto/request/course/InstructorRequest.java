@@ -9,8 +9,6 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class InstructorRequest {
-    String instructorId;
     Integer page;
     Integer limit;
-    Boolean isPublic;
 }

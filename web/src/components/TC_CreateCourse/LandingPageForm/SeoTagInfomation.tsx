@@ -9,6 +9,8 @@ import tagsService from '@/services/course/tags.service'
 import useLoading from '@/hooks/useLoading.hook'
 import { toast } from 'sonner';
 
+import SeoTagInfomationSkeleton from './Skeleton/SeoTagInfomationSkeleton'
+
 interface SeoTagInfomationProps {
   formProps: CommonProps
   id: string
@@ -17,7 +19,7 @@ interface SeoTagInfomationProps {
 const SeoTagInfomation = ({ formProps, id }: SeoTagInfomationProps) => {
   const { register, control, errors, setValue, getValues } = formProps
   const tags = getValues('tags') || []
-  const availableTags = useTags()
+  const { tags: availableTags, loading: tagsLoading } = useTags()
   const { loading, startLoading, stopLoading } = useLoading()
 
   const removeTag = (tagToRemove: { id: string; name: string }) => {
@@ -27,7 +29,7 @@ const SeoTagInfomation = ({ formProps, id }: SeoTagInfomationProps) => {
     )
   }
 
-  const handleAddNewTags = async() => {
+  const handleAddNewTags = async () => {
     const tagIds = tags.map((tag: any) => (typeof tag === 'object' ? tag.id : tag))
     const courseId = id
 
@@ -46,6 +48,10 @@ const SeoTagInfomation = ({ formProps, id }: SeoTagInfomationProps) => {
     }
   }
 
+  if (tagsLoading) {
+    return <SeoTagInfomationSkeleton />
+  }
+
   return (
     <>
       <Card className='border border-blue-200 shadow-md bg-blue-50'>
@@ -57,28 +63,28 @@ const SeoTagInfomation = ({ formProps, id }: SeoTagInfomationProps) => {
         <CardContent className='space-y-4'>
           {/* Tags list */}
           <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 mb-4'>
-    {
-      availableTags?.map((tag) => (
-        <CustomTag
-          key={tag.id}
-          label={tag.name}
-          imageUri={tag.imageUrl}
-          checked={tags.some((t: any) => (typeof t === 'object' ? t.id === tag.id : t === tag.id))}
-          onChange={(checked: boolean) => {
-            if (checked) {
-              // Add tag object (not just id)
-              if (!tags.some((t: any) => (typeof t === 'object' ? t.id === tag.id : t === tag.id)) && tags.length < 10) {
-                setValue('tags', [...tags, tag]) // Lưu cả object tag
-              }
-            } else {
-              // Remove tag by id
-              removeTag(tag)
+            {
+              availableTags?.map((tag) => (
+                <CustomTag
+                  key={tag.id}
+                  label={tag.name}
+                  imageUri={tag.imageUrl}
+                  checked={tags.some((t: any) => (typeof t === 'object' ? t.id === tag.id : t === tag.id))}
+                  onChange={(checked: boolean) => {
+                    if (checked) {
+                      // Add tag object (not just id)
+                      if (!tags.some((t: any) => (typeof t === 'object' ? t.id === tag.id : t === tag.id)) && tags.length < 10) {
+                        setValue('tags', [...tags, tag]) // Lưu cả object tag
+                      }
+                    } else {
+                      // Remove tag by id
+                      removeTag(tag)
+                    }
+                  }}
+                />
+              ))
             }
-          }}
-        />
-      ))
-    }
-  </div>
+          </div>
 
           <div className='flex justify-end'>
             <CustomButton

@@ -22,7 +22,6 @@ import Blog from './pages/Blog'
 import BlogList from './pages/BlogList'
 import BlogDetails from './pages/BlogDetails'
 import Terms from './pages/GeneralTerms'
-import CourseOfTeacher from './pages/CourseOfTeacher'
 import TC_Course from './pages/TC_Courses'
 import TC_CreateCourse from './pages/TC_CreateCourse'
 import TC_CourseDetail from './pages/TC_CourseDetail'
@@ -62,8 +61,7 @@ const router = createBrowserRouter([
           { path: 'home2', element: <Home2 /> },
           { path: 'about', element: <About /> },
           { path: 'check-out', element: <CheckoutPage /> },
-          { path: 'check-out/:id', element: <CheckoutPage /> },
-          { path: 'instructor/:id', element: <CourseOfTeacher /> }
+          { path: 'check-out/:id', element: <CheckoutPage /> }
         ]
       },
       { path: 'auth', element: <AuthLayout /> },

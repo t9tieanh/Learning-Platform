@@ -32,7 +32,7 @@ public interface CourseMapper {
             expression = "java(entity.getCategory() != null ? entity.getCategory().getName() : null)")
     CourseUserResponse toUserDto(CourseEntity entity);
 
-    List<CourseResponse> toDtoList(List<CourseEntity> entities);
+    List<CoursesInstructorResponse> toDtoList(List<CourseEntity> entities);
 
     List<CourseListResponse> toListResponse(List<CourseEntity> entities);
 
