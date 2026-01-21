@@ -4,7 +4,7 @@ import { ArticleCard } from '@/components/Blog/ArticleCard'
 import { FeaturedCard } from '@/components/Blog/FeaturedCard'
 import { ImageCard } from '@/components/Blog/ImageCard'
 import { useEffect, useState } from 'react'
-import { blogService, type BlogItem } from '@/services/blog.service'
+import { blogService, type BlogItem } from '@/services/blog/blog.service'
 
 const BlogPage = () => {
   const [trending, setTrending] = useState<BlogItem[]>([])

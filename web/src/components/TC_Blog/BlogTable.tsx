@@ -6,7 +6,7 @@ import { MoreHorizontal } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { toast } from 'sonner'
-import { blogService } from '@/services/blog.service'
+import { blogService } from '@/services/blog/blog.service'
 
 interface BlogItem {
   id: string
