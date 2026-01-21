@@ -9,6 +9,7 @@ import { SocketContext } from '@/api/socket/socket.context'
 import { useAuthStore } from '@/stores/useAuth.stores'
 import { useLocation } from 'react-router-dom'
 import useDebounce from '@/hooks/useDebounce.hook'
+import { ConversationListSkeleton } from './Skeleton/ConversationListSkeleton'
 interface ConversationListProps {
   selected?: ConversationListItem | null
   onSelect: (item: ConversationListItem) => void
@@ -24,28 +25,31 @@ export const ConversationList = ({ selected, onSelect, desiredPeerId }: Conversa
   const location = useLocation()
   const myRole: 'instructor' | 'student' = location.pathname.startsWith('/teacher') ? 'instructor' : 'student'
 
+  const [loading, setLoading] = useState(true)
+
   useEffect(() => {
     let mounted = true
-    ;(async () => {
-      try {
-        const res = await chatService.getConversations(myRole)
-        if (mounted) {
-          const list = res.result || []
-          setConversations(list)
-          // Tự động chọn hội thoại đầu tiên khi lần đầu vào trang nếu chưa chọn
-          if (!selected && list.length > 0) {
-            if (desiredPeerId) {
-              const found = list.find((c) => c.peerId === desiredPeerId)
-              onSelect(found || list[0])
-            } else {
-              onSelect(list[0])
+      ; (async () => {
+        try {
+          setLoading(true)
+          const res = await chatService.getConversations(myRole)
+          if (mounted) {
+            const list = res.result || []
+            setConversations(list)
+            // Tự động chọn hội thoại đầu tiên khi lần đầu vào trang nếu chưa chọn
+            if (!selected && list.length > 0) {
+              if (desiredPeerId) {
+                const found = list.find((c) => c.peerId === desiredPeerId)
+                if (found) onSelect(found)
+              }
             }
           }
+        } catch (e) {
+          console.error('Load conversations error', e)
+        } finally {
+          if (mounted) setLoading(false)
         }
-      } catch (e) {
-        console.error('Load conversations error', e)
-      }
-    })()
+      })()
     return () => {
       mounted = false
     }
@@ -171,13 +175,13 @@ export const ConversationList = ({ selected, onSelect, desiredPeerId }: Conversa
           ...item,
           lastMessage: newLastMessage
             ? {
-                _id: newLastMessage._id,
-                content: newLastMessage.content,
-                senderId: newLastMessage.senderId,
-                createdAt: newLastMessage.createdAt,
-                senderRole:
-                  newLastMessage.senderId === myId ? myRole : myRole === 'instructor' ? 'student' : 'instructor'
-              }
+              _id: newLastMessage._id,
+              content: newLastMessage.content,
+              senderId: newLastMessage.senderId,
+              createdAt: newLastMessage.createdAt,
+              senderRole:
+                newLastMessage.senderId === myId ? myRole : myRole === 'instructor' ? 'student' : 'instructor'
+            }
             : undefined,
           lastMessageAt: newLastMessage?.createdAt
         }
@@ -221,12 +225,12 @@ export const ConversationList = ({ selected, onSelect, desiredPeerId }: Conversa
         const item = prev[idx]
         const computedLast = lastMessage
           ? {
-              _id: lastMessage._id,
-              content: lastMessage.content,
-              senderId: lastMessage.senderId,
-              createdAt: lastMessage.createdAt,
-              senderRole: lastMessage.senderId === myId ? myRole : myRole === 'instructor' ? 'student' : 'instructor'
-            }
+            _id: lastMessage._id,
+            content: lastMessage.content,
+            senderId: lastMessage.senderId,
+            createdAt: lastMessage.createdAt,
+            senderRole: lastMessage.senderId === myId ? myRole : myRole === 'instructor' ? 'student' : 'instructor'
+          }
           : undefined
 
         const updated: ConversationListItem = {
@@ -248,6 +252,10 @@ export const ConversationList = ({ selected, onSelect, desiredPeerId }: Conversa
     const q = searchText.trim().toLowerCase()
     return conversations.filter((c) => (c.peerName || '').toLowerCase().includes(q))
   }, [conversations, searchText])
+
+  if (loading) {
+    return <ConversationListSkeleton />
+  }
 
   return (
     <div className='flex h-full min-h-0 flex-col bg-white border-r border-slate-200'>

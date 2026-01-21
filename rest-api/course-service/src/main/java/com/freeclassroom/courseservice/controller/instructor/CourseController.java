@@ -50,9 +50,9 @@ public class CourseController {
         return courseService.getCourse(id);
     }
 
-    @PostMapping("/")
-    ApiResponse<PageResponse<CourseResponse>> getCoursesByTeacherId(@RequestBody InstructorRequest request) {
-        return courseService.getCoursesByTeacherId(request.getInstructorId(), request.getPage(), request.getLimit(), request.getIsPublic());
+    @GetMapping()
+    ApiResponse<PageResponse<CoursesInstructorResponse>> getCoursesByTeacherId(@ModelAttribute InstructorRequest request) {
+        return courseService.getCoursesByTeacherId(SecurityContextHolder.getContext().getAuthentication().getName(), request.getPage(), request.getLimit());
     }
 
     @PostMapping

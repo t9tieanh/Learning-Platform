@@ -1,15 +1,11 @@
 import React from 'react'
 
-// Turn URLs in text into clickable links
-// Turn URLs in text into clickable links
 const renderWithLinks = (text: string) => {
-  // Regex for markdown links: [text](url)
   const markdownLinkRegex = /\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/g
   const parts = text.split(markdownLinkRegex)
 
   return parts.map((part, i) => {
     if (i % 3 === 0) {
-      // Regular text (may contain plain URLs)
       const urlRegex = /(https?:\/\/[^\s]+)/g
       const subParts = part.split(urlRegex)
       return subParts.map((subPart, subIdx) => {

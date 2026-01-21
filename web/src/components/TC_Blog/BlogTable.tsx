@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { toast } from 'sonner'
 import { blogService } from '@/services/blog/blog.service'
+import noPhoto from '@/assets/images/no-photo.avif'
 
 interface BlogItem {
   id: string
@@ -65,83 +66,88 @@ const BlogTable: FC<BlogTableProps> = ({ courses, onDeleted, base = 'teacher' })
           </TableRow>
         </TableHeader>
         <TableBody>
-          {courses.map((blog) => (
-            <TableRow
-              key={blog.id}
-              className='hover:bg-white dark:hover:bg-slate-800 hover:shadow-md transition-all cursor-pointer'
-              onClick={() => navigate(`/${base}/blog/${blog.id}`)}
-            >
-              <TableCell className='p-3 sm:p-4 flex items-center gap-3 sm:gap-4'>
-                <img
-                  src={
-                    blog.image ||
-                    'https://img.freepik.com/premium-vector/no-photo-available-vector-icon-default-image-symbol-picture-coming-soon-web-site-mobile-app_87543-18055.jpg'
-                  }
-                  alt={blog.title}
-                  className='w-20 h-14 sm:w-28 sm:h-20 rounded-lg object-cover shadow-sm'
-                />
-                <div>
-                  <div className='font-semibold text-gray-700 dark:text-gray-100 text-base sm:text-lg'>
-                    {blog.title}
-                  </div>
-                  <p className='text-sm text-gray-400 dark:text-gray-500 font-light mt-1'>
-                    <div className='text-gray-700' dangerouslySetInnerHTML={{ __html: blog.shortDescription }} />
-                  </p>
-                </div>
-              </TableCell>
-
-              <TableCell className='text-gray-500 dark:text-gray-400 text-xs sm:text-sm px-5'>
-                {new Date(blog.createdAt).toLocaleDateString('vi-VN')}
-              </TableCell>
-
-              <TableCell className='text-right'>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant='ghost'
-                      size='icon'
-                      className='rounded-full transition-all hover:bg-blue-50 hover:text-blue-600 focus-visible:ring-2 focus-visible:ring-blue-200'
-                      onClick={(e) => e.stopPropagation()}
-                      onMouseDown={(e) => e.stopPropagation()}
-                      onPointerDown={(e) => e.stopPropagation()}
-                    >
-                      <MoreHorizontal className='w-5 h-5' />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align='end' className='rounded-xl shadow-lg border border-gray-100'>
-                    <DropdownMenuItem
-                      className='rounded-md px-3 py-2 text-sm transition-colors data-[highlighted]:bg-blue-500 data-[highlighted]:text-white'
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        navigate(`/${base}/blog/${blog.id}`)
-                      }}
-                    >
-                      Xem chi tiết
-                    </DropdownMenuItem>
-                    {base === 'teacher' && (
-                      <>
-                        <DropdownMenuItem
-                          className='rounded-md px-3 py-2 text-sm transition-colors data-[highlighted]:bg-blue-500 data-[highlighted]:text-white'
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            navigate(`/teacher/update-blog/${blog.id}`)
-                          }}
-                        >
-                          Chỉnh sửa
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          className='rounded-md px-3 py-2 text-sm text-red-600 transition-colors data-[highlighted]:bg-red-500 data-[highlighted]:text-white'
-                          onClick={(e) => askDelete(e, blog.id)}
-                        >
-                          Xóa
-                        </DropdownMenuItem>
-                      </>
-                    )}
-                  </DropdownMenuContent>
-                </DropdownMenu>
+          {courses.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={4} className='text-center py-10 text-gray-500 dark:text-gray-400'>
+                Hiện tại bạn chưa có bài viết nào
               </TableCell>
             </TableRow>
-          ))}
+          ) : (
+            courses.map((blog) => (
+              <TableRow
+                key={blog.id}
+                className='hover:bg-white dark:hover:bg-slate-800 hover:shadow-md transition-all cursor-pointer'
+                onClick={() => navigate(`/${base}/blog/${blog.id}`)}
+              >
+                <TableCell className='p-3 sm:p-4 flex items-center gap-3 sm:gap-4'>
+                  <img
+                    src={blog.image || noPhoto}
+                    alt={blog.title}
+                    className='w-20 h-14 sm:w-28 sm:h-20 rounded-lg object-cover shadow-sm'
+                  />
+                  <div>
+                    <div className='font-semibold text-gray-700 dark:text-gray-100 text-base sm:text-lg'>
+                      {blog.title}
+                    </div>
+                    <p className='text-sm text-gray-400 dark:text-gray-500 font-light mt-1'>
+                      <div className='text-gray-700' dangerouslySetInnerHTML={{ __html: blog.shortDescription }} />
+                    </p>
+                  </div>
+                </TableCell>
+
+                <TableCell className='text-gray-500 dark:text-gray-400 text-xs sm:text-sm px-5'>
+                  {new Date(blog.createdAt).toLocaleDateString('vi-VN')}
+                </TableCell>
+
+                <TableCell className='text-right'>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant='ghost'
+                        size='icon'
+                        className='rounded-full transition-all hover:bg-blue-50 hover:text-blue-600 focus-visible:ring-2 focus-visible:ring-blue-200'
+                        onClick={(e) => e.stopPropagation()}
+                        onMouseDown={(e) => e.stopPropagation()}
+                        onPointerDown={(e) => e.stopPropagation()}
+                      >
+                        <MoreHorizontal className='w-5 h-5' />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align='end' className='rounded-xl shadow-lg border border-gray-100'>
+                      <DropdownMenuItem
+                        className='rounded-md px-3 py-2 text-sm transition-colors data-[highlighted]:bg-blue-500 data-[highlighted]:text-white'
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          navigate(`/${base}/blog/${blog.id}`)
+                        }}
+                      >
+                        Xem chi tiết
+                      </DropdownMenuItem>
+                      {base === 'teacher' && (
+                        <>
+                          <DropdownMenuItem
+                            className='rounded-md px-3 py-2 text-sm transition-colors data-[highlighted]:bg-blue-500 data-[highlighted]:text-white'
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              navigate(`/teacher/update-blog/${blog.id}`)
+                            }}
+                          >
+                            Chỉnh sửa
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            className='rounded-md px-3 py-2 text-sm text-red-600 transition-colors data-[highlighted]:bg-red-500 data-[highlighted]:text-white'
+                            onClick={(e) => askDelete(e, blog.id)}
+                          >
+                            Xóa
+                          </DropdownMenuItem>
+                        </>
+                      )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+              </TableRow>
+            ))
+          )}
         </TableBody>
       </Table>
       <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
