@@ -3,6 +3,11 @@ server:
 
 app:
   api-prefix: /api/v1
+  n8n:
+    base-url: https://n8n.sirobabycloud.io.vn
+    webhook-path: /webhook/dcd3f279-f229-4918-bbb7-d957438913c1
+    auth-header: Basic bGVhcm5vdmE6MTk0MjAwNEB0aWVhbmgxOTQyMDA0
+
 
 logging:
   level:
@@ -17,6 +22,20 @@ spring:
 
   cloud:
     gateway:
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins:
+              - http://localhost:3000
+              - learnova.t9tieanh.io.vn
+            allowedMethods:
+              - POST
+              - GET
+              - OPTIONS
+            allowedHeaders:
+              - "*"
+            allowCredentials: true
+
       routes:
         - id: user
           uri: http://user-service:8080
@@ -46,3 +65,15 @@ spring:
           filters:
             - StripPrefix=2
             - AddResponseHeader=X-Gateway, passed
+
+        - id: chatbot
+          uri: ${app.n8n.base-url}
+          predicates:
+            - Method=POST
+            - Path=${app.api-prefix}/chat-bot
+          filters:
+            - SetPath=${app.n8n.webhook-path}
+            - SetRequestHeader=Authorization, ${app.n8n.auth-header}
+            - SetRequestHeader=Content-Type, application/json
+            - SetRequestHeader=User-Agent, Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36
+            - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_FIRST
