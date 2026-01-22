@@ -1,5 +1,5 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@radix-ui/react-avatar'
-import { BookOpen, Home, MessageSquare, FileText, LogOut } from 'lucide-react'
+import { BookOpen, Home, MessageSquare, FileText, LogOut, ChartColumn } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useAuthStore } from '@/stores/useAuth.stores'
 import { useNavigate } from 'react-router-dom'
@@ -10,14 +10,17 @@ import { showConfirmToast } from '@/components/common/ShowConfirmToast'
 const sidebarItems = [
   {
     category: 'TỔNG QUAN',
-    items: [{ name: 'Trang chủ', icon: Home, active: true }]
+    items: [
+      { name: 'Thống kê', icon: ChartColumn, active: true }
+    ]
   },
   {
     category: 'DANH MỤC',
     items: [
       { name: 'Khóa học', icon: BookOpen, active: true },
       { name: 'Tin nhắn', icon: MessageSquare, active: true },
-      { name: 'Bài viết', icon: FileText, active: true }
+      { name: 'Bài viết', icon: FileText, active: true },
+      { name: 'Trang chủ', icon: Home, active: false }
     ]
   }
 ]
@@ -45,12 +48,7 @@ const AcademySidebar = () => {
   }
   return (
     <div
-      className='w-64 h-screen bg-[#1D1D2A] text-sidebar-foreground flex flex-col
-  min-w-[220px] max-w-full
-  fixed lg:static top-0 left-0 z-40
-  transition-transform duration-300
-  lg:translate-x-0 translate-x-0
-  '
+      className='w-full h-full bg-[#1D1D2A] text-sidebar-foreground flex flex-col min-w-[220px]'
     >
       <div className='flex p-4 md:p-6 items-center gap-3'>
         <button onClick={() => navigate('/teacher')} className='p-0 border-none bg-transparent cursor-pointer'>
@@ -66,7 +64,8 @@ const AcademySidebar = () => {
               {section.items.map((item, itemIndex) => {
                 const Icon = item.icon
                 let onClick = undefined
-                if (item.name === 'Trang chủ') onClick = () => navigate('/teacher')
+                if (item.name === 'Thống kê') onClick = () => navigate('/teacher')
+                if (item.name === 'Quay lại') onClick = () => navigate('/')
                 if (item.name === 'Khóa học') onClick = () => navigate('/teacher/course')
                 if (item.name === 'Tin nhắn') onClick = () => navigate('/teacher/chat/:id')
                 if (item.name === 'Bài viết') onClick = () => navigate('/teacher/blogs')
@@ -74,11 +73,10 @@ const AcademySidebar = () => {
                   <Button
                     key={itemIndex}
                     variant={item.active ? 'secondary' : 'ghost'}
-                    className={`w-full justify-start h-11 px-3 ${
-                      item.active
+                    className={`w-full justify-start h-11 px-3 ${item.active
                         ? 'bg-sidebar-accent text-sidebar-accent-foreground hover:bg-[#ababaf]'
                         : 'text-sidebar-foreground/80 hover:bg-[#afafb3] hover:text-sidebar-accent-foreground'
-                    }`}
+                      }`}
                     onClick={onClick}
                   >
                     <Icon className='w-5 h-5 mr-3' />

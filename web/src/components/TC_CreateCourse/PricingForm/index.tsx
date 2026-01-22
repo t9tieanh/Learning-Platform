@@ -9,6 +9,7 @@ import { PriceFormSchema, PriceFormValues } from '@/utils/create-course/price'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import courseService from '@/services/course/course.service'
+import PricingFormSkeleton from './Skeleton/PricingFormSkeleton'
 
 const PricingForm = ({ id }: { id: string }) => {
   const {
@@ -28,6 +29,7 @@ const PricingForm = ({ id }: { id: string }) => {
   const [currency, setCurrency] = useState('VND')
   const [yourIncome, setYourIncome] = useState(0)
   const [platformFee, setPlatformFee] = useState(0)
+  const [loading, setLoading] = useState(true)
 
   const suggestedPrices = [
     { price: 480000, tier: 'Cơ bản', description: 'Phù hợp cho khóa học ngắn' },
@@ -37,19 +39,30 @@ const PricingForm = ({ id }: { id: string }) => {
   ]
 
   const getPrice = async () => {
-    const response = await courseService.getPrice(id)
-    if (response && response.code === 200 && response.result) {
-      const { originalPrice, finalPrice, yourIncome, platformFee } = response.result
-      setValue('originalPrice', originalPrice / 1000)
-      setValue('finalPrice', finalPrice / 1000)
-      setYourIncome(yourIncome / 1000)
-      setPlatformFee(platformFee / 1000)
+    setLoading(true)
+    try {
+      const response = await courseService.getPrice(id)
+      if (response && response.code === 200 && response.result) {
+        const { originalPrice, finalPrice, yourIncome, platformFee } = response.result
+        setValue('originalPrice', originalPrice / 1000)
+        setValue('finalPrice', finalPrice / 1000)
+        setYourIncome(yourIncome / 1000)
+        setPlatformFee(platformFee / 1000)
+      }
+    } catch (error) {
+      console.log('Error fetching price:', error)
+    } finally {
+      setLoading(false)
     }
   }
 
   useEffect(() => {
     getPrice()
   }, [id])
+
+  if (loading) {
+    return <PricingFormSkeleton />
+  }
 
   return (
     <div className='max-w-6xl space-y-8 mx-auto'>

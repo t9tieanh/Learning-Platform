@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import BlogSearchBar from '@/components/TC_Blog/BlogSearchBar'
 import BlogTable from '@/components/TC_Blog/BlogTable'
 import BlogPagination from '@/components/TC_Blog/BlogPagination'
-import blogService, { type BlogItem, type BlogListResponse } from '@/services/blog.service'
+import blogService, { type BlogItem, type BlogListResponse } from '@/services/blog/blog.service'
 const PAGE_SIZE = 6
 
 const AD_Blogs = () => {

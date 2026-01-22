@@ -1,0 +1,438 @@
+{
+  "name": "Learnova",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=**Identity & Role:**\nYou are the Professional Virtual Assistant of the Learnova Educational System, operated by Administrator Pham Tien Anh. Your primary goal is to assist users with information regarding courses, platform navigation, system identity, and account management.\n\n**Language Policy (HIGHEST PRIORITY):**\n- Automatically detect the user's input language and respond in the same language (e.g., if the user asks in Vietnamese, respond in Vietnamese).\n- **CRITICAL:** Always maintain the entire conversation in the language initiated by the user.\n\n**Core Competencies & Data Handling:**\n1. **Course & Learning Content:** Use the `course_embeddings` tool to search for specific courses, lessons, tutorials, and learning materials. This is the primary source for academic or course-related queries.\n2. **System Identity:** Use the `system_profile_embeddings` tool to answer questions about Learnova's ownership (Administrator: Pham Tien Anh), vision, and global platform rules.\n3. **Platform Navigation:** Use the `navigator_embeddings` tool to provide specific URLs for pages like profiles, order history, or dashboards.\n4. **URL Sanitization (STRICT RULE):**\n   - If retrieved information contains a URL with \"localhost\" (e.g., http://localhost:3000/...), you MUST replace it with the production domain: https://learnova.t9tieanh.io.vn/.\n   - Always present URLs as clickable Markdown links (e.g., [Page Name](URL)).\n5. **Accuracy:** If no information is found in any system tool, politely inform the user in their language and suggest they contact support. Never fabricate information.\n\n**Scope & Restrictions (Out-of-Domain Policy):**\n- You are a specialized assistant for Learnova ONLY. \n- **Strict Refusal:** Politely decline to answer questions unrelated to Learnova (e.g., global politics, non-educational celebrities, or world leaders).\n- **Refusal Instruction:** Use the following logic in the user's language: \"I apologize, but as the Learnova Assistant, I am specialized in providing information about our courses and educational platform. I am unable to answer questions outside of this scope. Is there anything related to Learnova I can help you with?\"\n\n**Tone & Style:**\nPolite, professional, friendly, and student-centric. Focus on providing clear instructions, course details, and helpful links.\n\nThis is a question from a user: \"{{ $json.body.question }}\"",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        416,
+        -96
+      ],
+      "id": "a3892218-25d0-47a1-aaf8-4076c08be34e",
+      "name": "AI Agent",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryRedisChat",
+      "typeVersion": 1.5,
+      "position": [
+        176,
+        192
+      ],
+      "id": "155f70cf-0ca1-40a8-93e1-b37081549dcd",
+      "name": "Redis Chat Memory",
+      "credentials": {
+        "redis": {
+          "id": "2caGiCFtfMsI7tzU",
+          "name": "Tieanh's Redis server"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        384,
+        352
+      ],
+      "id": "bd7a977b-7add-45dd-834f-1c19b0cc543f",
+      "name": "Embeddings Google Gemini",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "NsVrvFwboafcPjAg",
+          "name": "Tieanh's Gemini"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        688,
+        352
+      ],
+      "id": "426b2e6a-3d74-426f-ae3c-afb9b33404eb",
+      "name": "Embeddings Google Gemini1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "NsVrvFwboafcPjAg",
+          "name": "Tieanh's Gemini"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "⚠️ SYSTEM PROFILE CONTEXT — HIGHEST PRIORITY\n\nThis tool contains ONLY system-level identity and global rules of the Learnova platform.\n\nIncludes:\n- Platform name, purpose, and vision\n- Core system capabilities and limitations\n- Global behavior rules for the AI\n- System-wide terminology and definitions\n\nSTRICT RULES:\n- DO NOT use this tool for course content\n- DO NOT use this tool for lessons, tutorials, or learning materials\n- DO NOT answer programming or study questions using this tool\n\nUse this tool ONLY when:\n- The user asks \"what is Learnova\"\n- The user asks about platform identity, system behavior, or global rules\n- The AI needs authoritative system context\n\nIf the question is about learning content, courses, or lessons → DO NOT use this tool.\n",
+        "tableName": {
+          "__rl": true,
+          "value": "system_profile_embeddings",
+          "mode": "list",
+          "cachedResultName": "system_profile_embeddings"
+        },
+        "topK": 10,
+        "includeDocumentMetadata": false,
+        "options": {
+          "queryName": "match_system_profile"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        688,
+        176
+      ],
+      "id": "2548f384-18fb-4d4a-8ab8-9af89a4ac752",
+      "name": "Supabase Vector Store (System Profile)",
+      "credentials": {
+        "supabaseApi": {
+          "id": "Gx25qU6nkxxOH5Qm",
+          "name": "Tieanh's SUPABASE"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "📚 COURSE LEARNING CONTEXT\n\nThis tool contains educational content for learners.\n\nIncludes:\n- Course materials\n- Lessons and chapters\n- Programming tutorials and explanations\n- Technical knowledge used for learning and practice\n\nSTRICT RULES:\n- DO NOT use this tool for system identity or platform rules\n- DO NOT answer \"what is Learnova\" or system questions using this tool\n\nUse this tool ONLY when:\n- The user asks technical or learning questions\n- The user asks about programming concepts, tutorials, or lessons\n- The user wants explanations, examples, or study help\n\nIf the question is about platform identity or system behavior → DO NOT use this tool.\n",
+        "tableName": {
+          "__rl": true,
+          "value": "course_embeddings",
+          "mode": "list",
+          "cachedResultName": "course_embeddings"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        384,
+        176
+      ],
+      "id": "90f4ca60-cef6-49e6-82f0-200d41b35025",
+      "name": "Supabase Vector Store (Course)",
+      "credentials": {
+        "supabaseApi": {
+          "id": "Gx25qU6nkxxOH5Qm",
+          "name": "Tieanh's SUPABASE"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "chienthannodejs@gmail.com",
+        "toEmail": "phama9162@gmail.com",
+        "subject": "[Hệ thống Learnova] Thông báo lỗi vận hành AI",
+        "html": "=<!DOCTYPE html>\n<html>\n  <head>\n    <meta charset=\"UTF-8\" />\n    <title>Thông báo lỗi hệ thống AI</title>\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />\n    <style>\n      body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f7f9fc; margin: 0; padding: 20px; }\n      .container { max-width: 480px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); padding: 30px; }\n      .title { font-size: 20px; color: #d9534f; margin-bottom: 16px; font-weight: 700; }\n      .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; border-bottom: 2px solid #f7f9fc; padding-bottom: 10px; }\n      .brand { font-size: 18px; font-weight: 700; color: #1d4e8f; }\n      .error-box { background-color: #fff5f5; border-left: 4px solid #d9534f; padding: 15px; margin: 20px 0; border-radius: 4px; font-family: monospace; font-size: 13px; color: #333; overflow-x: auto; white-space: pre-wrap; }\n      .footer { font-size: 12px; color: #999999; margin-top: 30px; text-align: center; }\n      .status-badge { background-color: #d9534f; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; text-transform: uppercase; }\n    </style>\n  </head>\n  <body>\n    <div class=\"container\">\n      <div class=\"header\">\n        <div class=\"brand\">Learnova Monitor</div>\n        <div class=\"status-badge\">Critical Error</div>\n      </div>\n      <h2 class=\"title\">Phát hiện lỗi AI Agent!</h2>\n      <p>Chào <strong>quản trị viên Phạm Tiên Anh</strong>, hệ thống vừa ghi nhận một lỗi vận hành từ AI Agent.</p>\n      \n      <div class=\"error-box\">\n        <strong>Thông điệp lỗi:</strong><br>\n        {{ $node[\"AI Agent\"].json.message || \"The service is receiving too many requests from you\" }}\n      </div>\n\n      <p><strong>Thời gian phát hiện:</strong> {{ $now.format('HH:mm:ss - DD/MM/YYYY') }}</p>\n      <p>Hệ thống hiện tại đang gặp lỗi <strong>Rate Limit</strong> từ Google Gemini. Bạn hãy kiểm tra lại lưu lượng truy cập hoặc nâng cấp gói API.</p>\n      \n      <div class=\"footer\">\n        © 2026 Learnova Platform - dev by Phạm Tiên Anh. All rights reserved.\n      </div>\n    </div>\n  </body>\n</html>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1328,
+        -64
+      ],
+      "id": "c4a40fa6-a491-4a93-9f86-42c9df50cd54",
+      "name": "Send email1",
+      "webhookId": "af9823f0-294c-44b3-a40d-87f24974efaf",
+      "retryOnFail": false,
+      "executeOnce": false,
+      "alwaysOutputData": false,
+      "credentials": {
+        "smtp": {
+          "id": "jlA2QqlAr9UmVD9F",
+          "name": "SMTP account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        992,
+        368
+      ],
+      "id": "370ae24b-1e66-4fa2-8d27-d97aa342bfcd",
+      "name": "Embeddings Google Gemini2",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "NsVrvFwboafcPjAg",
+          "name": "Tieanh's Gemini"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "This tool contains ONLY system-level identity and global navigation rules for the Learnova platform. It provides authoritative context regarding platform name, purpose, vision, and system-wide terminology. Use this tool ONLY when the user asks about platform identity (\"What is Learnova?\"), system behavior, or needs assistance locating specific pages like personal profiles, order history, purchased courses, or dashboards. STRICTLY DO NOT use this tool for course content, lessons, tutorials, or answering academic/programming questions. The tool performs a semantic search to provide the most relevant page URL and global system context",
+        "tableName": {
+          "__rl": true,
+          "value": "navigator_embeddings",
+          "mode": "list",
+          "cachedResultName": "navigator_embeddings"
+        },
+        "topK": 10,
+        "options": {
+          "queryName": "match_navigator"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        992,
+        176
+      ],
+      "id": "225bfd81-a614-42c8-93bf-453152b179f9",
+      "name": "Supabase Vector Store (Navigate Infomation)",
+      "credentials": {
+        "supabaseApi": {
+          "id": "Gx25qU6nkxxOH5Qm",
+          "name": "Tieanh's SUPABASE"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -64,
+        160
+      ],
+      "id": "c683c43b-d3f3-4ae4-a826-33954f921db8",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "wPjhKgF4w63I9f27",
+          "name": "OpenAI API Của Em Phét Nhá"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "dcd3f279-f229-4918-bbb7-d957438913c1",
+        "authentication": "basicAuth",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        32,
+        -96
+      ],
+      "id": "b6c6c033-9e09-44bc-95f6-947594ac5f9d",
+      "name": "Webhook",
+      "webhookId": "dcd3f279-f229-4918-bbb7-d957438913c1",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "rmxvPXvc6nvk9vZR",
+          "name": "learnova basic-auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{\n{\n  \"code\": 200,\n  \"success\": true,\n  \"message\": \"Xử lý thành công\",\n  \"data\": {\n    \"answer\": $node[\"AI Agent\"].json.output\n  }\n}\n}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        912,
+        -224
+      ],
+      "id": "49c2b24a-d5a7-4d03-a8d1-fb4ea848a97d",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"code\": 500,\n  \"success\": false,\n  \"message\": \"Hệ thống đang gặp sự cố. Chúng tôi đang liên hệ Phạm Tiến Anh để xử lý và sẽ quay lại sớm. 🙏\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        928,
+        -64
+      ],
+      "id": "56e40d86-6dc9-45f3-b047-8d278f31a428",
+      "name": "Respond to Webhook1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Redis Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Supabase Vector Store (Course)",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Supabase Vector Store (System Profile)",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase Vector Store (System Profile)": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase Vector Store (Course)": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send email1": {
+      "main": [
+        []
+      ]
+    },
+    "Embeddings Google Gemini2": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Supabase Vector Store (Navigate Infomation)",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase Vector Store (Navigate Infomation)": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond to Webhook1": {
+      "main": [
+        [
+          {
+            "node": "Send email1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": "94rYD9yWSvVNWNEGiQ4nG"
+  },
+  "versionId": "b919eb86-1dc4-4a59-b356-37d4a22921cf",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "aa0d61baa79d86b6f813abe8ede138cd5e00c5ba3b6baaec012b10b9ce4f4b8a"
+  },
+  "id": "qr8982kT6yw4I7ukx5kqE",
+  "tags": []
+}

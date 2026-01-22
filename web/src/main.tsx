@@ -22,7 +22,6 @@ import Blog from './pages/Blog'
 import BlogList from './pages/BlogList'
 import BlogDetails from './pages/BlogDetails'
 import Terms from './pages/GeneralTerms'
-import CourseOfTeacher from './pages/CourseOfTeacher'
 import TC_Course from './pages/TC_Courses'
 import TC_CreateCourse from './pages/TC_CreateCourse'
 import TC_CourseDetail from './pages/TC_CourseDetail'
@@ -40,6 +39,7 @@ import AD_BlogDetails from './pages/AD_BlogDetails'
 import Home2 from './pages/Home2'
 import { SocketProvider } from '@/api/socket/socket.context'
 import DiscountsAdmin from './pages/AD_Discounts'
+import AuthenticationGate from '@/components/auth-gate/AuthenticationGate'
 
 const router = createBrowserRouter([
   {
@@ -62,8 +62,7 @@ const router = createBrowserRouter([
           { path: 'home2', element: <Home2 /> },
           { path: 'about', element: <About /> },
           { path: 'check-out', element: <CheckoutPage /> },
-          { path: 'check-out/:id', element: <CheckoutPage /> },
-          { path: 'instructor/:id', element: <CourseOfTeacher /> }
+          { path: 'check-out/:id', element: <CheckoutPage /> }
         ]
       },
       { path: 'auth', element: <AuthLayout /> },
@@ -78,7 +77,6 @@ const router = createBrowserRouter([
         children: [
           { path: '', element: <TCHomePage /> },
           { path: 'course', element: <TC_Course /> },
-          { path: 'course/:id', element: <TC_CreateCourse /> },
           { path: 'course-details/:id', element: <TC_CourseDetail /> },
           { path: 'chat/:id', element: <Chat /> },
           { path: 'blogs', element: <TC_Blog /> },
@@ -87,6 +85,14 @@ const router = createBrowserRouter([
           { path: 'blog/:id', element: <TC_BlogDetails /> },
           { path: 'update-blog/:id', element: <TC_UpdateBlog /> }
         ]
+      },
+      {
+        path: 'teacher/course/:id',
+        element: (
+          <AuthenticationGate>
+            <TC_CreateCourse />
+          </AuthenticationGate>
+        )
       },
       {
         path: 'admin',

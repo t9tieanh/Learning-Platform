@@ -1,7 +1,7 @@
 import type { LessonComment, CreateLessonCommentDto, UpdateLessonCommentDto } from '@/types/comment.type'
 import { useState, useEffect, useCallback } from 'react'
 import { useAuthStore } from '@/stores/useAuth.stores'
-import commentService from '@/services/comment.service'
+import commentService from '@/services/comment/comment.service'
 
 export interface ReplyUI {
   id: string

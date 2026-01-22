@@ -4,11 +4,12 @@ const path = require('path')
 const { BlogModel } = require('../models/blog/blog.model')
 import { saveToSupabase } from '~/utils/supabase'
 import AiChatService from '~/services/aiChat.service'
+import { env } from '~/config/env'
 const feedbackServiceModule = require('../services/feedback.service')
 const feedbackService = (feedbackServiceModule && feedbackServiceModule.default) || feedbackServiceModule
 
-const GRPC_PORT = 9092
-const APP_HOST = process.env.APP_HOST || '0.0.0.0'
+const GRPC_PORT = env.NOTIFICATION_POST || 9092
+const APP_HOST = env.APP_HOST || '0.0.0.0'
 
 const PROTO_PATH = path.join(__dirname, '..', '..', '..', 'proto-shared', 'src', 'main', 'proto', 'blogService.proto')
 

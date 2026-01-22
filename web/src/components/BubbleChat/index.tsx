@@ -3,11 +3,11 @@ import { MessageCircle, X, Send, BotMessageSquare, Bot } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { toast } from 'sonner'
+import RenderWithLink from '@/components/common/Render/RenderWithLinks'
 import { Card } from '@/components/ui/card'
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/components/ui/tooltip'
-import { askAi } from '@/services/ai.service'
-import aiChatService from '@/services/aiChat.service'
+import chatBotService from '@/services/chat-bot/ai.service'
+import aiChatService from '@/services/chat-bot/aiChat.service'
 import { useAuthStore } from '@/stores/useAuth.stores'
 
 interface Message {
@@ -50,10 +50,12 @@ const ChatBubble = () => {
     setMessages((prev) => [...prev, { role: 'ai', content: 'typing...' }])
 
     try {
-      const { reply } = await askAi({ message: userText, userId, conversationId })
+      // const { reply } = await chatBotService.askAi({ message: userText, userId, conversationId })
+      const data = await chatBotService.requestToChat(userText)
       setMessages((prev) => {
         const updated = [...prev]
-        updated[updated.length - 1].content = reply
+        updated[updated.length - 1].content =
+          data.data?.reply || 'Xin lỗi, hiện tại Nova chưa thể trả lời. Vui lòng thử lại sau.'
         return updated
       })
     } catch (err: any) {
@@ -148,7 +150,7 @@ const ChatBubble = () => {
               {messages.length === 0 && (
                 <div className='text-center text-muted-foreground py-8'>
                   <MessageCircle className='h-12 w-12 mx-auto mb-2 text-primary' />
-                  <p className='text-sm'>Ask me anything! I'm here to help you learn.</p>
+                  <p className='text-sm'>Ask me anything! I&apos;m here to help you learn.</p>
                 </div>
               )}
               {messages.map((message, idx) => {
@@ -169,7 +171,9 @@ const ChatBubble = () => {
                           <span className='inline-block h-1.5 w-1.5 rounded-full bg-current animate-bounce' />
                         </div>
                       ) : (
-                        <div className='whitespace-pre-wrap'>{renderWithLinks(message.content)}</div>
+                        <div className='whitespace-pre-wrap'>
+                          <RenderWithLink text={message.content} />
+                        </div>
                       )}
                     </div>
                   </div>
@@ -207,26 +211,3 @@ const ChatBubble = () => {
 }
 
 export default ChatBubble
-
-// Turn URLs in text into clickable links
-function renderWithLinks(text: string) {
-  const urlRegex = /(https?:\/\/[^\s]+)/g
-  const parts = text.split(urlRegex)
-  return parts.map((part, idx) => {
-    const isUrl = part.startsWith('http://') || part.startsWith('https://')
-    if (isUrl) {
-      return (
-        <a
-          key={idx}
-          href={part}
-          target='_blank'
-          rel='noopener noreferrer'
-          className='underline text-blue-600 hover:text-blue-700'
-        >
-          {part}
-        </a>
-      )
-    }
-    return <span key={idx}>{part}</span>
-  })
-}

@@ -4,3 +4,5 @@ script.for.dev
 
 production
 docker-compose.prod.yml
+
+rest-api/api-gateway/src/main/resources/application.yaml
