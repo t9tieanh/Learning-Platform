@@ -22,3 +22,4 @@ export const CONNECT_DATABASES = async (): Promise<void> => {
     console.error('Database connection failed:', err)
   }
 }
+//first
