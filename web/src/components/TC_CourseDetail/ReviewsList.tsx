@@ -4,7 +4,7 @@ import { Star, ChevronDown, Loader2 } from 'lucide-react'
 import { Review } from '@/types/course.type'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import feedbackService, { FeedbackItem } from '@/services/feedback.service'
+import feedbackService, { FeedbackItem } from '@/services/feedback/feedback.service'
 import { Loader } from '../ui/loader'
 
 interface ReviewsListProps {

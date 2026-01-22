@@ -23,19 +23,19 @@ function decodeJwtPayload(token: string): any | null {
   }
 }
 
-function getCurrentInstructorId(): string | null {
-  const { data } = useAuthStore.getState()
-  if (!data) return null
-  const direct = (data as any).id || (data as any).userId || (data as any).instructorId
-  if (direct) return String(direct)
-  const token = data.accessToken
-  if (token) {
-    const payload = decodeJwtPayload(token)
-    const pid = payload?.id || payload?.userId || payload?.uid || payload?.sub
-    if (pid) return String(pid)
-  }
-  return null
-}
+// function getCurrentInstructorId(): string | null {
+//   const { data } = useAuthStore.getState()
+//   if (!data) return null
+//   const direct = (data as any).id || (data as any).userId || (data as any).instructorId
+//   if (direct) return String(direct)
+//   const token = data.accessToken
+//   if (token) {
+//     const payload = decodeJwtPayload(token)
+//     const pid = payload?.id || payload?.userId || payload?.uid || payload?.sub
+//     if (pid) return String(pid)
+//   }
+//   return null
+// }
 
 type Paginated<T> = {
   items: T[]
@@ -96,20 +96,13 @@ class CourseService {
   }
 
   async getTeacherCourses(
-    instructorId?: string,
-    options?: { page?: number; limit?: number; isPublic?: boolean }
+    options?: { page?: number; limit?: number }
   ): Promise<ApiResponse<Paginated<any>>> {
-    const id = instructorId ?? getCurrentInstructorId()
-    if (!id) {
-      throw new Error('Không tìm thấy ID giảng viên từ phiên đăng nhập')
-    }
-    const body = {
-      instructorId: id,
+    const params = {
       page: options?.page ?? 1,
-      limit: options?.limit ?? 10,
-      isPublic: options?.isPublic ?? false
+      limit: options?.limit ?? 10
     }
-    const response = await axiosClient.axiosInstance.post('learning/instructor/courses/', body)
+    const response = await axiosClient.axiosInstance.get('learning/instructor/courses', { params })
     return response.data
   }
 

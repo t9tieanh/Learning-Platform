@@ -1,10 +1,13 @@
 import { cn } from '@/lib/utils'
-import { BookOpen, Image, DollarSign, Settings, CheckCircle } from 'lucide-react'
+import { BookOpen, Image, DollarSign, Settings, CheckCircle, ArrowLeft } from 'lucide-react'
 import { FC } from 'react'
 import CourseProgressStep from '@/types/courseProgressStep'
+import { useNavigate } from 'react-router-dom'
+import { showConfirmToast } from '@/components/common/ShowConfirmToast'
+import logo from '@/assets/images/logo1.png'
 
 interface SidebarItem {
-  id: CourseProgressStep
+  id: CourseProgressStep | 'BACK'
   label: string
   description: string
   icon: FC<{ className?: string }>
@@ -44,18 +47,49 @@ const sidebarItems: SidebarItem[] = [
     icon: Settings,
     description: 'Cấu hình cài đặt và chính sách khoá học',
     completed: false
+  },
+  {
+    id: 'BACK',
+    label: 'Quay lại',
+    icon: ArrowLeft,
+    description: 'Quay lại trang trước',
+    completed: false
   }
 ]
 
 const CourseSidebar: FC<CourseSidebarProps> = ({ activeSection = CourseProgressStep.INTRO, onSectionChange }) => {
+  const navigate = useNavigate()
+
+  const handleOnclick = (item: SidebarItem) => {
+    if (item.id === 'BACK') {
+      showConfirmToast({
+        title: 'Bạn có chắc chắn muốn quay lại?',
+        description: 'Những thay đổi chưa lưu có thể bị mất.',
+        confirmLabel: 'Quay lại',
+        cancelLabel: 'Hủy'
+      }).then((confirmed: boolean) => {
+        if (confirmed) {
+          navigate(-1)
+        }
+      })
+    } else {
+      onSectionChange?.(item.id as CourseProgressStep)
+    }
+  }
+
   return (
     <aside
-      className='md:w-80 w-full bg-[#1D1D2A] border-r border-gray-800 overflow-y-auto text-white'
+      className='md:w-80 w-full !h-screen bg-[#1D1D2A] border-r border-gray-800 overflow-y-auto text-white'
       aria-label='Course sidebar'
     >
       <div className='p-6'>
         {/* Header */}
         <div className='mb-6'>
+          <div className='flex mb-6 items-center gap-3'>
+            <button onClick={() => navigate('/teacher')} className='p-0 border-none bg-transparent cursor-pointer'>
+              <img src={logo} alt='LEARNOVA logo' className='h-12 md:h-8 w-auto select-none object-contain' />
+            </button>
+          </div>
           <h2 className='text-lg font-semibold mb-2 items-center'>
             <Settings className='inline-block h-5 w-5 mr-1' />
             Lên kế hoạch cho khoá học
@@ -72,7 +106,7 @@ const CourseSidebar: FC<CourseSidebarProps> = ({ activeSection = CourseProgressS
             return (
               <button
                 key={item.id}
-                onClick={() => onSectionChange?.(item.id as CourseProgressStep)}
+                onClick={() => handleOnclick(item)}
                 aria-current={isActive ? 'page' : undefined}
                 className={cn(
                   'w-full text-left p-3 rounded-lg transition-colors group focus:outline-none focus:ring-2 focus:ring-primary/50',

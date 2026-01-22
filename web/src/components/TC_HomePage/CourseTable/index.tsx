@@ -60,7 +60,7 @@ const CourseTable = () => {
     const fetch = async () => {
       setLoading(true)
       try {
-        const res = await courseService.getTeacherCourses(undefined, { page: 1, limit: 10 })
+        const res = await courseService.getTeacherCourses({ page: 1, limit: 10 })
         const payload = res.result
         const list = (payload?.items as any[]) || []
         const mapped: Course[] = list.map((c, idx) => ({

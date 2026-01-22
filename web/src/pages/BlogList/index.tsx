@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { SearchBar } from '@/components/BlogList/SearchBar'
 import { ArticleCard, type Article } from '@/components/BlogList/ArticleCard'
 import { PaginationControls } from '@/components/BlogList/PaginationControls'
-import { blogService } from '@/services/blog.service'
+import { blogService } from '@/services/blog/blog.service'
 import { formatDate } from '@/utils/common/formattDate'
 
 const ITEMS_PER_PAGE = 6

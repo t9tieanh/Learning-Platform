@@ -52,7 +52,7 @@ const PreviewComponent = ({
               <div className='aspect-video bg-blue-100 rounded-lg flex items-center justify-center'>
                 {introductoryVideo ? (
                   <video
-                    src={`https://${introductoryVideo}`}
+                    src={`${introductoryVideo}`}
                     controls
                     className='object-contain w-full h-full rounded-lg'
                   >

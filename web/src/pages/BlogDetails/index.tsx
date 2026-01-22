@@ -4,7 +4,7 @@ import { Card } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { blogService, type BlogItem } from '@/services/blog.service'
+import { blogService, type BlogItem } from '@/services/blog/blog.service'
 // Apply the same Quill and preview styles used in the editor preview
 import 'quill/dist/quill.snow.css'
 import '@/components/TC_CreateBlog/blog-preview.css'

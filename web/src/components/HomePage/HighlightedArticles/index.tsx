@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import ArticlesCard from '@/components/common/ArticlesCard'
 import ArticlesCardSkeleton from '@/components/HomePage/ArticlesCardSkeleton'
-import { blogService } from '@/services/blog.service'
+import { blogService } from '@/services/blog/blog.service'
 
 type HighlightArticle = {
   id: string

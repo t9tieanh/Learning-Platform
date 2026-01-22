@@ -10,22 +10,27 @@ const useTags = () => {
     }[]
   >([])
 
+  const [loading, setLoading] = useState(true)
+
   useEffect(() => {
     const fetchTags = async () => {
       try {
+        setLoading(true)
         const response = await tagsService.getAllTags()
         if (response && response.code && response.code === 200 && response.result) {
           setTags(response.result)
         }
       } catch (error) {
         console.error('Failed to fetch tags:', error)
+      } finally {
+        setLoading(false)
       }
     }
 
     fetchTags()
   }, [])
 
-  return tags
+  return { tags, loading }
 }
 
 export default useTags

@@ -31,3 +31,5 @@ dist-ssr
 .env
 
 script-for-dev
+
+src/main/resources/
