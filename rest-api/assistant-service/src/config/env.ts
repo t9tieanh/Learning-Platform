@@ -1,0 +1,28 @@
+import dotenv from 'dotenv'
+dotenv.config()
+
+export const env = {
+  SESSION_SECRET: process.env.SESSION_SECRET || 'default_session_secret',
+  DATABASE_URL: process.env.DATABASE_URL || 'mongodb://localhost:27017/sale-service',
+    PORT: process.env.PORT || 4000,
+    JWT_SECRET: process.env.JWT_SECRET || 'default_jwt_secret',
+    GMAIL_USER: process.env.GMAIL_USER || '',
+    GMAIL_PASS: process.env.GMAIL_PASS || '',
+    VNPAY_TMN_CODE: process.env.VNPAY_TMN_CODE || '',
+    VNPAY_HASH_SECRET: process.env.VNPAY_HASH_SECRET || '',
+    VNPAY_URL: process.env.VNPAY_URL || '',
+    VNPAY_REDIRECT_URL: process.env.VNPAY_REDIRECT_URL || '',
+    ES_NODE: process.env.ES_NODE || 'http://localhost:9200',
+    RABBIT_MQ_HOST: process.env.RABBIT_MQ_HOST || 'localhost',
+    RABBIT_MQ_PORT: process.env.RABBIT_MQ_PORT ? parseInt(process.env.RABBIT_MQ_PORT) : 5672,
+    RABBIT_MQ_USER_NAME: process.env.RABBIT_MQ_USER_NAME || 'guest',
+    RABBIT_MQ_PASSWORD: process.env.RABBIT_MQ_PASSWORD || 'guest',
+    REDIS_DB_HOST: process.env.REDIS_DB_HOST,
+    REDIS_DB_USER: process.env.REDIS_DB_USER || 'default',
+    REDIS_DB_PORT: parseInt(process.env.REDIS_DB_PORT || '6379', 10),
+    REDIS_DB_PASSWORD: process.env.REDIS_DB_PASSWORD,
+    REDIS_DB_NAME: parseInt(process.env.REDIS_DB_NAME || '0', 10),
+    WEB_URL: process.env.WEB_URL || 'http://localhost:3000/check-out/',
+    COURSE_GRPC_URL: process.env.COURSE_GRPC_URL || 'course-service:9091',
+    USER_GRPC_URL: process.env.USER_GRPC_URL || 'user-service:9090'
+}
