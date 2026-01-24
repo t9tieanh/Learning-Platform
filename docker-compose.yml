@@ -18,12 +18,12 @@ services:
     networks:
       - learning-platform-network
     restart: unless-stopped
-    # healthcheck:
-    #   test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8888/actuator/health"]
-    #   interval: 30s
-    #   timeout: 10s
-    #   retries: 3
-    #   start_period: 40s
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8888/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   # ============================================
   # User Service (Spring Boot)
@@ -37,21 +37,21 @@ services:
     environment:
       SERVER_PORT: 8080
       SPRING_PROFILES_ACTIVE: prod
-      GRPC_SERVER_PORT: 9090
+      GRPC_SERVER_PORT: 50051
     ports:
       - "${USER_SERVICE_PORT:-8080}:8080"
-      - "${USER_SERVICE_GRPC_PORT:-9090}:9090"
+      - "${USER_SERVICE_GRPC_PORT:-50051}:50051"
     volumes:
       - ./rest-api/user-service/src/main/resources/application.yaml:/app/application.yaml
     networks:
       - learning-platform-network
     restart: unless-stopped
-    # healthcheck:
-    #   test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/actuator/health"]
-    #   interval: 30s
-    #   timeout: 10s
-    #   retries: 3
-    #   start_period: 40s
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   # ============================================
   # Course Service (Spring Boot)
@@ -65,22 +65,22 @@ services:
     environment:
       SERVER_PORT: 8081
       SPRING_PROFILES_ACTIVE: prod
-      GRPC_SERVER_PORT: 9091
+      GRPC_SERVER_PORT: 50054
     ports:
       - "${COURSE_SERVICE_PORT:-8081}:8081"
-      - "${COURSE_SERVICE_GRPC_PORT:-9091}:9091"
+      - "${COURSE_SERVICE_GRPC_PORT:-50054}:50054"
     volumes:
       - ./rest-api/course-service/src/main/resources/application.yaml:/app/application.yaml
       - ./rest-api/course-service/src/main/resources/cloudfront-private-key.pem:/app/cloudfront-private-key.pem
     networks:
       - learning-platform-network
     restart: unless-stopped
-    # healthcheck:
-    #   test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8081/actuator/health"]
-    #   interval: 30s
-    #   timeout: 10s
-    #   retries: 3
-    #   start_period: 40s
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8081/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   # ============================================
   # Sale Service (Node.js)
@@ -94,21 +94,47 @@ services:
     environment:
       NODE_ENV: production
       PORT: 8083
-      GRPC_PORT: 9093
+      GRPC_PORT: 50053
     ports:
       - "${SALE_SERVICE_PORT:-8083}:8083"
-      - "${SALE_SERVICE_GRPC_PORT:-9093}:9093"
+      - "${SALE_SERVICE_GRPC_PORT:-50053}:50053"
     volumes:
       - ./rest-api/sale-service/.env:/app/.env
     networks:
       - learning-platform-network
     restart: unless-stopped
-    # healthcheck:
-    #   test: ["CMD", "node", "-e", "require('http').get('http://localhost:8083/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"]
-    #   interval: 30s
-    #   timeout: 10s
-    #   retries: 3
-    #   start_period: 10s
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:8083/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # ============================================
+  # Assistant Service (Node.js)
+  # ============================================
+  assistant-service:
+    build:
+      context: ./rest-api
+      dockerfile: assistant-service/Dockerfile
+    image: assistant-service:latest
+    container_name: learning-platform-assistant-service
+    environment:
+      NODE_ENV: production
+      PORT: 8084
+    ports:
+      - "${ASSISTANT_SERVICE_PORT:-8084}:8084"
+    volumes:
+      - ./rest-api/assistant-service/.env:/app/.env
+    networks:
+      - learning-platform-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:8084/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
 
   # ============================================
   # Notification Service (Node.js)
@@ -122,21 +148,21 @@ services:
     environment:
       NODE_ENV: production
       PORT: 8082
-      GRPC_PORT: 9092
+      GRPC_PORT: 50052
     ports:
       - "${NOTIFICATION_SERVICE_PORT:-8082}:8082"
-      - "${NOTIFICATION_SERVICE_GRPC_PORT:-9092}:9092"
+      - "${NOTIFICATION_SERVICE_GRPC_PORT:-50052}:50052"
     volumes:
       - ./rest-api/notification-service/.env:/app/.env
     networks:
       - learning-platform-network
     restart: unless-stopped
-    # healthcheck:
-    #   test: ["CMD", "node", "-e", "require('http').get('http://localhost:8082/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"]
-    #   interval: 30s
-    #   timeout: 10s
-    #   retries: 3
-    #   start_period: 10s
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:8082/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
 
   # ============================================
   # Socket Server (Node.js)
@@ -157,12 +183,12 @@ services:
     networks:
       - learning-platform-network
     restart: unless-stopped
-    # healthcheck:
-    #   test: ["CMD", "node", "-e", "require('http').get('http://localhost:5001/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"]
-    #   interval: 30s
-    #   timeout: 10s
-    #   retries: 3
-    #   start_period: 10s
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:5001/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
 
 networks:
   learning-platform-network:

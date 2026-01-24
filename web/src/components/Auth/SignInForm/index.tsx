@@ -10,7 +10,6 @@ import { SignInFormInputs, signInSchema } from '@/utils/auth'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import userService from '@/services/user/user.service'
-import aiChatService from '@/services/chat-bot/aiChat.service'
 import { toast } from 'sonner'
 import useLoading from '@/hooks/useLoading.hook'
 import { useAuthStore } from '@/stores/useAuth.stores'
@@ -57,15 +56,6 @@ const SignInForm = ({
           avatarUrl: r.avatarUrl,
           role: r.role
         })
-        // create/fetch AI conversation
-        if (userId) {
-          try {
-            const convRes = await aiChatService.createConversation(userId)
-            if (convRes?.conversationId) setConversationId(convRes.conversationId)
-          } catch (e) {
-            console.warn('Cannot init AI conversation', e)
-          }
-        }
         toast.success('Đăng nhập thành công!')
         const role = response.result.role
         const path = role === 'admin' ? '/admin' : '/'
