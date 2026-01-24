@@ -169,6 +169,10 @@ class RedisService {
     }
     return []
   }
+  async rpush(key: string, value: any): Promise<number> {
+    const stringValue = typeof value === 'string' ? value : JSON.stringify(value)
+    return await this.redis.rpush(key, stringValue)
+  }
 }
 
 export default new RedisService()

@@ -8,8 +8,9 @@ class ChatbotController {
             const { question } = req.data;
             // Prefer userId if logged in, otherwise use guestId from checkCookie middleware
             const userId = req.user?.sub || (req as any).guestId;
+            const isGuest = !req.user?.sub;
 
-            const result = await chatbotService.sendMessage(question, userId);
+            const result = await chatbotService.sendMessage(question, userId, isGuest);
 
             sendResponse(res, {
                 code: 200,

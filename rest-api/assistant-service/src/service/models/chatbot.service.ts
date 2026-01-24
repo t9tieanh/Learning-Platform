@@ -1,26 +1,39 @@
-import axios from 'axios';
 import { env } from '~/config/env';
-import { CHATBOT_ERROR_MESSAGE, CHATBOT_KEY } from '~/utils/constants';
+import { CHATBOT_ERROR_MESSAGE, CHATBOT_KEY, CHATBOT_STORES_KEY } from '~/utils/constants';
 import redisService from '~/service/utils/redis.service';
+import https from 'https';
+import axios from 'axios';
 
 class ChatbotService {
+    private axiosInstance = axios.create({
+        timeout: 30000,
+        httpsAgent: new https.Agent({
+            family: 4
+        })
+    });
+
+    private ttlKey = {
+        guest: 3 * 24 * 60 * 60,
+        user: 7 * 24 * 60 * 60
+    }
+
     async getChatHistory(userId: string): Promise<{ type: string; content: string }[]> {
-        const key = `${CHATBOT_KEY}:${userId}`;
+        const key = `${CHATBOT_STORES_KEY}:${userId}`;
         const history = await redisService.getList(key);
 
         return history.map((item: any) => ({
             type: item.type,
-            content: item.data?.content || ''
+            content: item.content
         }));
     }
 
-    async sendMessage(question: string, userId: string): Promise<{
+    async sendMessage(question: string, userId: string, isGuest: boolean): Promise<{
         reply: string
     }> {
         const n8nUrl = `${env.N8N_BASE_URL}${env.N8N_WEBHOOK_PATH}`;
 
         try {
-            const response = await axios.post(n8nUrl, {
+            const response = await this.axiosInstance.post(n8nUrl, {
                 question
             }, {
                 headers: {
@@ -31,8 +44,22 @@ class ChatbotService {
                 }
             });
 
+            const reply = response.data.data.reply ? response.data.data.reply : CHATBOT_ERROR_MESSAGE;
+
+            // Save chat history to Redis asynchronously
+            const key = `${CHATBOT_STORES_KEY}:${userId}`;
+            const ttl = isGuest ? this.ttlKey.guest : this.ttlKey.user;
+
+            Promise.all([
+                redisService.rpush(key, { type: 'human', content: question }),
+                redisService.rpush(key, { type: 'ai', content: reply }),
+                redisService.expire(key, ttl)
+            ]).catch(err => {
+                console.error('Error saving chat history to Redis:', err);
+            });
+
             return {
-                reply: response.data.data.reply ? response.data.data.reply : CHATBOT_ERROR_MESSAGE
+                reply
             };
         } catch (error) {
             console.error('Error calling N8N webhook:', error);
