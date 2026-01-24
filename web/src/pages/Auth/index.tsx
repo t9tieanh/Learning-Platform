@@ -4,7 +4,6 @@ import SignUpForm from '@/components/Auth/SignUpForm'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import useLoading from '@/hooks/useLoading.hook'
 import userService from '@/services/user/user.service'
-import aiChatService from '@/services/chat-bot/aiChat.service'
 import { useAuthStore } from '@/stores/useAuth.stores'
 import { toast } from 'sonner'
 
@@ -54,15 +53,6 @@ const AuthPage: React.FC<SlidingLoginSignupProps> = ({ isSignUpMode, setIsSignUp
           avatarUrl: r.avatarUrl,
           role: r.role
         } as any)
-        // init/create AI conversation
-        if (userId) {
-          try {
-            const convRes = await aiChatService.createConversation(userId)
-            if (convRes?.conversationId) setConversationId(convRes.conversationId)
-          } catch (e) {
-            console.warn('Cannot init AI conversation (Google OAuth)', e)
-          }
-        }
         toast.success('Đăng nhập thành công!')
         const role = r.role
         const path = role === 'admin' ? '/admin' : '/'

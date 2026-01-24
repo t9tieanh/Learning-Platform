@@ -5,6 +5,10 @@ import { initSocket } from './app';
 const app = express();
 const server = http.createServer(app);
 
+app.get('/health', (_req, res) => {
+    res.status(200).send('OK');
+});
+
 initSocket(server);
 
 const PORT = process.env.PORT || 5001;
