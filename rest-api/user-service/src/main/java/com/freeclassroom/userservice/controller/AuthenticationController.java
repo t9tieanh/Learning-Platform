@@ -15,6 +15,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.ParseException;
+
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
@@ -38,6 +40,11 @@ public class AuthenticationController {
     @PostMapping("/introspect")
     ApiResponse<IntrospectResponse> introspect(@RequestBody IntrospectRequest request) {
         return authenticationService.introspect(request);
+    }
+
+    @PostMapping("/refresh")
+    ApiResponse<AuthResponse> refreshToken(@RequestBody RefreshTokenRequest request) throws JOSEException, ParseException {
+        return authenticationService.refreshToken(request);
     }
 
     @PostMapping("oauth2/google")
