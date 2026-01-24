@@ -137,10 +137,37 @@ class RedisService {
     for (let i = 0; i < maxRetry; i++) {
       const lock = await this.setLock(lockKey, value, ttl)
       if (lock) return true
-      // Nếu chưa lấy được lock, chờ delayMs rồi thử lại
       await new Promise((res) => setTimeout(res, delayMs))
     }
     return false
+  }
+
+  async lrange(key: string, start: number, stop: number): Promise<string[]> {
+    return await this.redis.lrange(key, start, stop)
+  }
+
+  async type(key: string): Promise<string> {
+    return await this.redis.type(key)
+  }
+
+  async getList(key: string): Promise<any[]> {
+    const type = await this.type(key)
+    if (type === 'list') {
+      const list = await this.redis.lrange(key, 0, -1)
+      return list.map((item) => {
+        try {
+          return JSON.parse(item)
+        } catch {
+          return item
+        }
+      })
+    }
+
+    const data = await this.get(key)
+    if (data) {
+      return Array.isArray(data) ? data : [data]
+    }
+    return []
   }
 }
 

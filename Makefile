@@ -93,6 +93,11 @@ sale-dev:
 	@echo "$(BLUE)Running sale service in dev mode...$(NC)"
 	cd rest-api/sale-service && npm run dev
 
+# ============ Assistant Service (Node.js) ============
+assistant-dev:
+	@echo "$(BLUE)Running assistant service in dev mode...$(NC)"
+	cd rest-api/assistant-service && npm run dev
+
 # ============ Socket Server (Node.js) ============
 socket-dev:
 	@echo "$(BLUE)Running socket server in dev mode...$(NC)"
@@ -116,11 +121,13 @@ dev-all:
 	@echo "  - Web (React)"
 	@echo "  - Notification Service"
 	@echo "  - Sale Service"
+	@echo "  - Assistant Service"
 	@echo "  - Socket Server"
 	@echo ""
 	cd web && yarn run dev & \
 	cd rest-api/notification-service && npm run dev & \
 	cd rest-api/sale-service && npm run dev & \
+	cd rest-api/assistant-service && npm run dev & \
 	cd socket-server && npm run dev & \
 	wait
 
