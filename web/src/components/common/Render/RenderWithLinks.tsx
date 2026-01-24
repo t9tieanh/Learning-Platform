@@ -2,9 +2,9 @@ import React from 'react'
 
 const renderWithLinks = (text: string) => {
   const markdownLinkRegex = /\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/g
-  const parts = text.split(markdownLinkRegex)
+  const parts = text?.split(markdownLinkRegex)
 
-  return parts.map((part, i) => {
+  return parts?.map((part, i) => {
     if (i % 3 === 0) {
       const urlRegex = /(https?:\/\/[^\s]+)/g
       const subParts = part.split(urlRegex)

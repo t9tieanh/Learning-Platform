@@ -39,7 +39,7 @@ public class SecurityConfig {
 
     private final CustomJwtDecoder jwtDecoder;
 
-    private final String[] PUBLIC_ENDPOINTS = {"/auth/**", "/user/**", "test/**", "expertises/**"};
+    private final String[] PUBLIC_ENDPOINTS = {"/auth/**", "/user/**", "test/**", "expertises/**", "/actuator/health"};
 
     @Bean
     public JwtAuthenticationConverter jwtAuthenticationConverter() {

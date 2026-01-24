@@ -1,4 +1,4 @@
 docker run --name my-postgres -e POSTGRES_PASSWORD=mysecretpassword -e POSTGRES_DB=mydb -p 5432:5432 -d postgres:15
 
 
-sudo docker build -t sale-service:latest -f sale-service/Dockerfile .
+sudo docker build -t assistant-service:latest -f assistant-service/Dockerfile .
