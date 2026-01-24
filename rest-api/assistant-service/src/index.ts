@@ -15,6 +15,9 @@ app.use(cookieParser());
 
 //health check
 app.get('/ping', (_req, res) => res.json({ message: 'pong' }));
+app.get('/health', (_req, res) => {
+    res.status(200).send('OK');
+});
 
 app.use(indexRoute);
 

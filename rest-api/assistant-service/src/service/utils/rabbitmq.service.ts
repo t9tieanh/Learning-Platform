@@ -1,6 +1,5 @@
 import amqp, { Channel } from 'amqplib'
 import { QueueNameEnum } from '../../enums/emailType.enum'
-import { NotificationDto } from '../../dto/request/notification.dto'
 
 const RabbitMQConf = {
   protocol: 'amqp',
@@ -74,7 +73,7 @@ class RabbitClient {
   }
 
   // Gửi message tới queue
-  public static async sendMessage(data: NotificationDto, queueName: QueueNameEnum): Promise<boolean> {
+  public static async sendMessage(data: any, queueName: QueueNameEnum): Promise<boolean> {
     try {
       if (!RabbitClient.channel) {
         throw new Error('RabbitMQ channel is not initialized')

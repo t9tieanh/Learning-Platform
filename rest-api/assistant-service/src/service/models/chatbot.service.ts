@@ -13,8 +13,8 @@ class ChatbotService {
     });
 
     private ttlKey = {
-        guest: 3 * 24 * 60 * 60,
-        user: 7 * 24 * 60 * 60
+        guest: 24 * 60 * 60, // 1 day
+        user: 5 * 24 * 60 * 60 // 5 days
     }
 
     async getChatHistory(userId: string): Promise<{ type: string; content: string }[]> {
