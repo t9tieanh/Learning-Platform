@@ -19,7 +19,6 @@ const START_SERVER = async () => {
 
   await initSagas()
 
-  // tạo server duy nhất
   const server = http.createServer(app)
   startGrpcServer()
   // start listen

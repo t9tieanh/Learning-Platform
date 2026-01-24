@@ -7,6 +7,12 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+package-lock.json
+yarn.lock
+.yarn
+.vscode
+.yarnrc.yml
+
 node_modules
 dist
 dist-ssr
@@ -26,8 +32,4 @@ dist-ssr
 
 script-for-dev
 
-package-lock.json
-yarn.lock
-.yarn
-.yarnrc.yml
-.vscode
+src/main/resources/

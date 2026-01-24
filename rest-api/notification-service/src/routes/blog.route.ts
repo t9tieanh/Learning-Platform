@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import BlogController from '~/controllers/blogcontroller'
+import BlogController from '~/controllers/blog.controller'
 import { ValidateDto } from '~/middleware'
 import authen from '~/middleware/authen.middleware'
 import {
