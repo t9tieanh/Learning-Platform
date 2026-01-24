@@ -1,7 +1,6 @@
 package com.freeclassroom.courseservice.controller.user;
 
 import com.freeclassroom.courseservice.dto.response.ApiResponse;
-import com.freeclassroom.courseservice.dto.response.common.PagingResponse;
 import com.freeclassroom.courseservice.dto.response.course.*;
 import com.freeclassroom.courseservice.service.course.ICourseService;
 import com.freeclassroom.courseservice.service.course.ICourseUserService;

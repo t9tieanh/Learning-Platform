@@ -22,6 +22,7 @@ jobs:
   # Check which services changed
   changes:
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     outputs:
       api-gateway: ${{ steps.changes.outputs.api-gateway }}
       user-service: ${{ steps.changes.outputs.user-service }}
@@ -68,6 +69,7 @@ jobs:
   build:
     needs: changes
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     permissions:
       contents: read
       packages: write

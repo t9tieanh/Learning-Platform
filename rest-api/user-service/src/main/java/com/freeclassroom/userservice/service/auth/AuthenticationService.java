@@ -17,7 +17,10 @@ import com.freeclassroom.userservice.exception.ErrorCode;
 import com.freeclassroom.userservice.repository.entity.UserRepository;
 import com.freeclassroom.userservice.repository.httpclient.oauth2.GoogleOutboundAuthenticateClient;
 import com.freeclassroom.userservice.repository.httpclient.oauth2.GoogleOutboundUserInfoClient;
+import com.freeclassroom.userservice.service.token.RefreshTokenService;
 import com.freeclassroom.userservice.service.token.TokenBlacklistService;
+import com.freeclassroom.userservice.dto.request.auth.RefreshTokenRequest;
+import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.jose.JOSEException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -41,6 +44,7 @@ public class AuthenticationService implements IAuthenticationService {
     UserRepository userRepository;
 
     TokenBlacklistService tokenBlacklistService;
+    RefreshTokenService refreshTokenService;
 
     PasswordEncoder passwordEncoder;
     JwtService jwtService;
@@ -87,9 +91,12 @@ public class AuthenticationService implements IAuthenticationService {
         boolean result = passwordEncoder.matches(request.getPassword(), account.getPassword());
 
         if (result) {
+            String refreshToken = jwtService.generateToken(account, TokenEnum.REFRESH_TOKEN);
+            saveRefreshTokenToRedis(refreshToken, account.getId());
+
             AuthResponse response = AuthResponse.builder()
                     .accessToken(jwtService.generateToken(account, TokenEnum.ACCESS_TOKEN))
-                    .refreshToken(jwtService.generateToken(account,TokenEnum.REFRESH_TOKEN))
+                    .refreshToken(refreshToken)
                     .email(account.getEmail())
                     .username(account.getUsername())
                     .userId(account.getId())
@@ -179,12 +186,15 @@ public class AuthenticationService implements IAuthenticationService {
                 }
         );
 
+        String refreshToken = jwtService.generateToken(account, TokenEnum.REFRESH_TOKEN);
+        saveRefreshTokenToRedis(refreshToken, account.getId());
+
         return ApiResponse.<AuthResponse>builder()
                 .code(200)
                 .message("Xác thực tài khoản google thành công !")
                 .result(AuthResponse.builder()
                         .accessToken(jwtService.generateToken(account, TokenEnum.ACCESS_TOKEN))
-                        .refreshToken(jwtService.generateToken(account,TokenEnum.REFRESH_TOKEN))
+                        .refreshToken(refreshToken)
                         .email(account.getEmail())
                         .username(account.getUsername())
                         .userId(account.getId())
@@ -192,5 +202,63 @@ public class AuthenticationService implements IAuthenticationService {
                         .avatarUrl(account.getImage())
                         .build())
                 .build();
+    }
+
+    @Override
+    public ApiResponse<AuthResponse> refreshToken(RefreshTokenRequest request) throws JOSEException, ParseException {
+        var signedJWT = jwtService.verifyToken(request.getToken(), true);
+        var jit = signedJWT.getJWTClaimsSet().getJWTID();
+        var expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
+
+        // Check if token is in blacklist (revoked)
+        if (tokenBlacklistService.isTokenBlacklisted(jit))
+            throw new CustomExeption(ErrorCode.UNAUTHENTICATED);
+
+        // Check if token is in redis (valid)
+        if (!refreshTokenService.isValidRefreshToken(jit))
+            throw new CustomExeption(ErrorCode.UNAUTHENTICATED);
+
+        // Revoke old refresh token (delete from redis, add to blacklist)
+        refreshTokenService.deleteRefreshToken(jit);
+        tokenBlacklistService.blacklistToken(jit, expiryTime);
+
+        var userId = signedJWT.getJWTClaimsSet().getSubject();
+        var user = userRepository.findById(userId).orElseThrow(
+                () -> new CustomExeption(ErrorCode.USER_NOT_FOUND)
+        );
+
+        String newAccessToken = jwtService.generateToken(user, TokenEnum.ACCESS_TOKEN);
+        String newRefreshToken = jwtService.generateToken(user, TokenEnum.REFRESH_TOKEN);
+
+        saveRefreshTokenToRedis(newRefreshToken, user.getId());
+
+        return ApiResponse.<AuthResponse>builder()
+                .code(200)
+                .message("Refresh token success")
+                .result(AuthResponse.builder()
+                        .accessToken(newAccessToken)
+                        .refreshToken(newRefreshToken)
+                        .email(user.getEmail())
+                        .username(user.getUsername())
+                        .userId(user.getId())
+                        .name(user.getName())
+                        .avatarUrl(user.getImage())
+                        .role(user.getRoles().stream()
+                                .map(RoleEntity::getName)
+                                .collect(Collectors.joining(","))
+                        )
+                        .build())
+                .build();
+    }
+
+    private void saveRefreshTokenToRedis(String token, String userId) {
+        try {
+            SignedJWT signedJWT = jwtService.parseToken(token);
+            String jti = signedJWT.getJWTClaimsSet().getJWTID();
+            Date expirationTime = signedJWT.getJWTClaimsSet().getExpirationTime();
+            refreshTokenService.saveRefreshToken(jti, userId, expirationTime);
+        } catch (ParseException e) {
+            log.error("Cannot parse refresh token to save to redis", e);
+        }
     }
 }
