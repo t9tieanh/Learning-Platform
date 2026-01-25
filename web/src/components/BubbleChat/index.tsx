@@ -7,59 +7,46 @@ import RenderWithLink from '@/components/common/Render/RenderWithLinks'
 import { Card } from '@/components/ui/card'
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/components/ui/tooltip'
 import chatBotService from '@/services/chat-bot/ai.service'
-import aiChatService from '@/services/chat-bot/aiChat.service'
 import { useAuthStore } from '@/stores/useAuth.stores'
+import { CHATBOT_GREETING_MESSAGE, CHATBOT_ERROR_MESSAGE } from '@/constant'
 
-interface Message {
-  role: 'user' | 'ai'
-  content: string
-}
+import { ConversationMessage } from '@/types/ai'
+import ChatBubbleSkeleton from './ChatBubbleSkeleton'
+import useLoading from '@/hooks/useLoading.hook'
 
 const ChatBubble = () => {
   const [isOpen, setIsOpen] = useState(false)
-  const [messages, setMessages] = useState<Message[]>([])
+  const [messages, setMessages] = useState<ConversationMessage[]>([])
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [isTyping, setIsTyping] = useState(false)
   const [welcomed, setWelcomed] = useState(false)
+  const { loading: isHistoryLoading, startLoading, stopLoading } = useLoading()
   const bottomRef = useRef<HTMLDivElement | null>(null)
-
-  const { data: authData } = useAuthStore()
-  const userId = authData?.userId
-  const conversationId = (authData as any)?.conversationId
-
-  // Reset local messages when user logs out
-  useEffect(() => {
-    if (!userId) {
-      setMessages([])
-      setWelcomed(false)
-    }
-  }, [userId])
 
   const sendMessage = async () => {
     if (!input.trim() || isLoading) return
 
     const userText = input.trim()
-    const userMessage: Message = { role: 'user', content: userText }
+    const userMessage: ConversationMessage = { type: 'human', content: userText }
     setMessages((prev) => [...prev, userMessage])
     setInput('')
     setIsLoading(true)
     setIsTyping(true)
 
     // Show assistant typing placeholder
-    setMessages((prev) => [...prev, { role: 'ai', content: 'typing...' }])
+    setMessages((prev) => [...prev, { type: 'ai', content: 'typing...' }])
 
     try {
-      // const { reply } = await chatBotService.askAi({ message: userText, userId, conversationId })
       const data = await chatBotService.requestToChat(userText)
       setMessages((prev) => {
         const updated = [...prev]
         updated[updated.length - 1].content =
-          data.data?.reply || 'Xin lỗi, hiện tại Nova chưa thể trả lời. Vui lòng thử lại sau.'
+          data.result?.reply || CHATBOT_ERROR_MESSAGE
         return updated
       })
     } catch (err: any) {
-      const fallback = 'Xin lỗi, hiện tại Nova chưa thể trả lời. Vui lòng thử lại sau.'
+      const fallback = CHATBOT_ERROR_MESSAGE
       setMessages((prev) => {
         const updated = [...prev]
         updated[updated.length - 1].content = fallback
@@ -86,29 +73,31 @@ const ChatBubble = () => {
   // Load existing conversation history when opening the chat
   useEffect(() => {
     const loadHistory = async () => {
-      if (!isOpen || !userId || messages.length > 0) return
+      if (!isOpen || messages.length > 0) return
+      startLoading()
       try {
-        const data = await aiChatService.loadConversation(userId, conversationId)
-        if (data && data.messages && data.messages.length) {
-          setMessages(data.messages.map((m) => ({ role: m.role, content: m.content })))
+        const data = await chatBotService.loadConversation()
+        if (data && data.result && data.result.length) {
+          setMessages(data.result)
           setWelcomed(true) // prevent greeting if history exists
         }
       } catch (e) {
         // Silent fail; will show greeting instead
         console.warn('Cannot load conversation history', e)
+      } finally {
+        stopLoading()
       }
     }
     loadHistory()
-  }, [isOpen, userId, conversationId, messages.length])
+  }, [isOpen, messages.length])
 
   // Auto-send a welcome message from AI on first open when empty (no delay)
   useEffect(() => {
-    if (!isOpen || welcomed || messages.length > 0) return
+    if (!isOpen || welcomed || messages.length > 0 || isHistoryLoading) return
     setWelcomed(true)
-    const greeting =
-      'Xin chào! 😊 Mình là Nova Compilot. Mình có thể giúp bạn tìm khóa học, giải đáp thắc mắc và gợi ý lộ trình học. Bạn muốn bắt đầu với điều gì?'
-    setMessages((prev) => [...prev, { role: 'ai', content: greeting }])
-  }, [isOpen, welcomed, messages.length])
+    const greeting = CHATBOT_GREETING_MESSAGE
+    setMessages((prev) => [...prev, { type: 'ai', content: greeting }])
+  }, [isOpen, welcomed, messages.length, isHistoryLoading])
 
   return (
     <div className='fixed bottom-6 right-6 z-50'>
@@ -147,22 +136,22 @@ const ChatBubble = () => {
 
           <ScrollArea className='flex-1 min-h-0 p-4'>
             <div className='space-y-3 pr-1'>
-              {messages.length === 0 && (
+              {isHistoryLoading && <ChatBubbleSkeleton />}
+              {!isHistoryLoading && messages.length === 0 && (
                 <div className='text-center text-muted-foreground py-8'>
                   <MessageCircle className='h-12 w-12 mx-auto mb-2 text-primary' />
                   <p className='text-sm'>Ask me anything! I&apos;m here to help you learn.</p>
                 </div>
               )}
-              {messages.map((message, idx) => {
-                const isUser = message.role === 'user'
+              {!isHistoryLoading && messages.map((message, idx) => {
+                const isUser = message.type === 'human'
                 return (
                   <div key={idx} className={`group flex items-end gap-2 ${isUser ? 'justify-end' : 'justify-start'}`}>
                     <div
-                      className={`relative max-w-[76%] break-words select-text px-3 py-2 text-sm leading-relaxed shadow-sm ring-1 ${
-                        isUser
-                          ? 'bg-primary text-primary-foreground ring-black/10 rounded-2xl rounded-br-md'
-                          : 'bg-muted text-foreground ring-black/5 rounded-2xl rounded-bl-md'
-                      }`}
+                      className={`relative max-w-[76%] break-words select-text px-3 py-2 text-sm leading-relaxed shadow-sm ring-1 ${isUser
+                        ? 'bg-primary text-primary-foreground ring-black/10 rounded-2xl rounded-br-md'
+                        : 'bg-muted text-foreground ring-black/5 rounded-2xl rounded-bl-md'
+                        }`}
                     >
                       {message.content === 'typing...' ? (
                         <div className='flex items-center gap-1 text-current'>

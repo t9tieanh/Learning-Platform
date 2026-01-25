@@ -54,7 +54,7 @@ const CurriculumForm: React.FC<{ id: string }> = ({ id }: { id: string }) => {
     accessToken: token,
     callback: fetchChapters
   })
-  const [showUpload, setShowUpload] = useState(false)
+  const [showUpload, setShowUpload] = useState(true)
 
   const handleAddChapter = async () => {
     const data = await chapterService.addChapter({

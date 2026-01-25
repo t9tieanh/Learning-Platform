@@ -14,12 +14,14 @@ const START_SERVER = async () => {
 
   // app.use(express.json())
   app.use(express.json({ limit: '10mb' }))
+  app.get('/health', (_req, res) => {
+    res.status(200).send('OK');
+  });
   app.use('/notify', router)
   app.use(errorHandlingMiddleware)
 
   await initSagas()
 
-  // tạo server duy nhất
   const server = http.createServer(app)
   startGrpcServer()
   // start listen

@@ -6,3 +6,15 @@ production
 docker-compose.prod.yml
 
 rest-api/api-gateway/src/main/resources/application.yaml
+
+
+package-lock.json
+yarn.lock
+.yarn
+.vscode
+.yarnrc.yml
+
+key
+
+
+.agent
