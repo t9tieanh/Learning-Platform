@@ -1,20 +1,14 @@
-export interface AiChatRequest {
-  message: string
-  userId?: string
-  conversationId?: string
-}
-
 export interface AiChatResponse {
   reply: string
 }
 
 export interface ConversationMessage {
-  role: 'user' | 'ai'
+  type: 'ai' | 'human'
   content: string
-  createdAt?: string
 }
 
 export interface ConversationLoadResponse {
-  conversationId: string
-  messages: ConversationMessage[]
+  code: number
+  message: string
+  result: ConversationMessage[]
 }

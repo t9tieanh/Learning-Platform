@@ -16,6 +16,7 @@ env:
   COURSE_SERVICE_IMAGE: learnova_course-service
   SALE_SERVICE_IMAGE: learnova_sale-service
   NOTIFICATION_SERVICE_IMAGE: learnova_notification-service
+  ASSISTANT_SERVICE_IMAGE: learnova_assistant-service
   SOCKET_SERVER_IMAGE: learnova_socket-server
 
 jobs:
@@ -28,6 +29,7 @@ jobs:
       user-service: ${{ steps.changes.outputs.user-service }}
       course-service: ${{ steps.changes.outputs.course-service }}
       sale-service: ${{ steps.changes.outputs.sale-service }}
+      assistant-service: ${{ steps.changes.outputs.assistant-service }}
       notification-service: ${{ steps.changes.outputs.notification-service }}
       socket-server: ${{ steps.changes.outputs.socket-server }}
     
@@ -62,6 +64,7 @@ jobs:
           echo "user-service=$(echo "$CHANGED_FILES" | grep -q 'rest-api/user-service' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
           echo "course-service=$(echo "$CHANGED_FILES" | grep -q 'rest-api/course-service' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
           echo "sale-service=$(echo "$CHANGED_FILES" | grep -q 'rest-api/sale-service' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+          echo "assistant-service=$(echo "$CHANGED_FILES" | grep -q 'rest-api/assistant-service' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
           echo "notification-service=$(echo "$CHANGED_FILES" | grep -q 'rest-api/notification-service' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
           echo "socket-server=$(echo "$CHANGED_FILES" | grep -q 'socket-server' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
 
@@ -81,6 +84,7 @@ jobs:
           - user-service
           - course-service
           - sale-service
+          - assistant-service
           - notification-service
           - socket-server
 
@@ -101,7 +105,7 @@ jobs:
         uses: docker/build-push-action@v5
         if: needs.changes.outputs[matrix.service] == 'true'
         env:
-          IMAGE_NAME: ${{ env[format('{0}_IMAGE', matrix.service == 'api-gateway' && 'API_GATEWAY' || matrix.service == 'user-service' && 'USER_SERVICE' || matrix.service == 'course-service' && 'COURSE_SERVICE' || matrix.service == 'sale-service' && 'SALE_SERVICE' || matrix.service == 'notification-service' && 'NOTIFICATION_SERVICE' || 'SOCKET_SERVER')] }}
+          IMAGE_NAME: ${{ env[format('{0}_IMAGE', matrix.service == 'api-gateway' && 'API_GATEWAY' || matrix.service == 'user-service' && 'USER_SERVICE' || matrix.service == 'course-service' && 'COURSE_SERVICE' || matrix.service == 'sale-service' && 'SALE_SERVICE' || matrix.service == 'assistant-service' && 'ASSISTANT_SERVICE' || matrix.service == 'notification-service' && 'NOTIFICATION_SERVICE' || 'SOCKET_SERVER')] }}
           BUILD_CONTEXT: ${{ matrix.service == 'socket-server' && '.' || './rest-api' }}
           DOCKERFILE_PATH: ${{ matrix.service == 'socket-server' && 'socket-server/Dockerfile' || format('rest-api/{0}/Dockerfile', matrix.service) }}
         with:
@@ -152,6 +156,7 @@ jobs:
           USER_SERVICE_IMAGE="learnova_user-service"
           COURSE_SERVICE_IMAGE="learnova_course-service"
           SALE_SERVICE_IMAGE="learnova_sale-service"
+          ASSISTANT_SERVICE_IMAGE="learnova_assistant-service"
           NOTIFICATION_SERVICE_IMAGE="learnova_notification-service"
           SOCKET_SERVER_IMAGE="learnova_socket-server"
 
@@ -200,6 +205,7 @@ jobs:
           COMPOSE
 
           echo "${{ secrets.PROD_SALE_SERVICE_ENV }}" > sale-service.env
+          echo "${{ secrets.PROD_ASSISTANT_SERVICE_ENV }}" > assistant-service.env
           echo "${{ secrets.PROD_NOTIFICATION_SERVICE_ENV }}" > notification-service.env
           echo "${{ secrets.PROD_DOCKER_COMPOSE_ENV }}" > .env
 
@@ -221,6 +227,7 @@ jobs:
           docker pull docker.io/$DOCKERHUB_USERNAME/$USER_SERVICE_IMAGE:latest
           docker pull docker.io/$DOCKERHUB_USERNAME/$COURSE_SERVICE_IMAGE:latest
           docker pull docker.io/$DOCKERHUB_USERNAME/$SALE_SERVICE_IMAGE:latest
+          docker pull docker.io/$DOCKERHUB_USERNAME/$ASSISTANT_SERVICE_IMAGE:latest
           docker pull docker.io/$DOCKERHUB_USERNAME/$NOTIFICATION_SERVICE_IMAGE:latest
           docker pull docker.io/$DOCKERHUB_USERNAME/$SOCKET_SERVER_IMAGE:latest
 
