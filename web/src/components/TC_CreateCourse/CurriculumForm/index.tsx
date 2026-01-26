@@ -232,12 +232,14 @@ const CurriculumForm: React.FC<{ id: string }> = ({ id }: { id: string }) => {
           </CardTitle>
         </CardHeader>
         <CardContent className='space-y-4'>
-          {Chapters?.map((Chapter) => (
+          {Chapters?.map((chapter) => (
             <ChapterForm
-              key={Chapter.id}
-              chapter={Chapter}
+              key={chapter.id}
+              chapter={chapter}
               setChapters={setChapters}
               handleAddLesson={handleAddLesson}
+              uploads={uploads}
+              startUpload={startUpload}
             />
           ))}
 

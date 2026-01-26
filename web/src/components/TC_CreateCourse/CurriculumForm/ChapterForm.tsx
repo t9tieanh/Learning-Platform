@@ -14,20 +14,25 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import CustomTextarea from '@/components/common/Textarea'
 import chapterService from '@/services/course/chapter.service'
 import CustomDialog from '@/components/common/Dialog'
-import AddVideoForm from './addVideo/AddVideoForm'
+import AddVideoForm from './AddVideoUpdated/AddVideoForm'
 import { toast } from 'sonner'
 import { showConfirmToast } from '@/components/common/ShowConfirmToast'
 import { HandleAddLesson } from '@/components/TC_CreateCourse/CurriculumForm/index'
 import AddDocumentForm from './addVideo/AddDocumentForm'
+import { MultiUploadItem } from '@/hooks/useMultiUpload'
 
 const ChapterForm = ({
   chapter,
   setChapters,
-  handleAddLesson
+  handleAddLesson,
+  uploads,
+  startUpload
 }: {
   chapter: Chapter
   setChapters?: React.Dispatch<React.SetStateAction<Chapter[]>>
   handleAddLesson: HandleAddLesson
+  uploads: MultiUploadItem[]
+  startUpload: (file: File, fd: FormData, titlePost: string, uri: string) => string
 }) => {
   const [updateTitle, setUpdateTitle] = useState(false)
   const {
@@ -209,6 +214,7 @@ const ChapterForm = ({
       <CustomDialog
         open={open}
         setOpen={setOpen}
+        size='full'
         title={
           <>
             <BookOpen className='h-4 w-4 mr-2' />
@@ -218,12 +224,17 @@ const ChapterForm = ({
         description='Hãy thêm Thêm bài giảng cho khóa học của bạn !'
         children={
           dialogType === 'video' ? (
-            <AddVideoForm setOpen={setOpen} chapterId={chapter.id} handleAddLesson={handleAddLesson} />
+            <AddVideoForm
+              setOpen={setOpen}
+              chapterId={chapter.id}
+              handleAddLesson={handleAddLesson}
+              uploads={uploads}
+              startUpload={startUpload}
+            />
           ) : (
             <AddDocumentForm setOpen={setOpen} chapterId={chapter.id} handleAddLesson={handleAddLesson} />
           )
         }
-        size='xl'
       />
     </div>
   )
