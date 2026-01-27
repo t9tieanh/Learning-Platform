@@ -72,7 +72,7 @@ const CourseSidebar: FC<CourseSidebarProps> = ({ activeSection = CourseProgressS
 
   return (
     <aside
-      className='md:w-80 w-full !h-screen bg-[#1D1D2A] border-r border-gray-800 overflow-y-auto text-white flex flex-col'
+      className='md:w-80 w-full h-full bg-[#1D1D2A] border-r border-gray-800 overflow-y-auto text-white flex flex-col'
       aria-label='Course sidebar'
     >
       <div className='p-6 flex-1'>
