@@ -47,13 +47,6 @@ const sidebarItems: SidebarItem[] = [
     icon: Settings,
     description: 'Cấu hình cài đặt và chính sách khoá học',
     completed: false
-  },
-  {
-    id: 'BACK',
-    label: 'Quay lại',
-    icon: ArrowLeft,
-    description: 'Quay lại trang trước',
-    completed: false
   }
 ]
 
@@ -79,10 +72,10 @@ const CourseSidebar: FC<CourseSidebarProps> = ({ activeSection = CourseProgressS
 
   return (
     <aside
-      className='md:w-80 w-full !h-screen bg-[#1D1D2A] border-r border-gray-800 overflow-y-auto text-white'
+      className='md:w-80 w-full !h-screen bg-[#1D1D2A] border-r border-gray-800 overflow-y-auto text-white flex flex-col'
       aria-label='Course sidebar'
     >
-      <div className='p-6'>
+      <div className='p-6 flex-1'>
         {/* Header */}
         <div className='mb-6'>
           <div className='flex mb-6 items-center gap-3'>
@@ -98,7 +91,7 @@ const CourseSidebar: FC<CourseSidebarProps> = ({ activeSection = CourseProgressS
         </div>
 
         {/* Navigation */}
-        <nav className='space-y-1'>
+        <nav className='space-y-1 flex-1'>
           {sidebarItems.map((item) => {
             const Icon = item.icon
             const isActive = activeSection === item.id
@@ -141,6 +134,29 @@ const CourseSidebar: FC<CourseSidebarProps> = ({ activeSection = CourseProgressS
             )
           })}
         </nav>
+      </div>
+
+      {/* Back Button Footer */}
+      <div className='p-6 mt-auto border-t border-gray-800'>
+        <button
+          onClick={() => handleOnclick({ id: 'BACK', label: 'Quay lại', icon: ArrowLeft, description: 'Quay lại trang trước' })}
+          className={cn(
+            'w-full text-left p-3 rounded-lg transition-colors group focus:outline-none focus:ring-2 focus:ring-primary/50',
+            'hover:bg-gray-800'
+          )}
+        >
+          <div className='flex items-start space-x-3'>
+            <div className='mt-0.5 flex-shrink-0'>
+              <ArrowLeft className='h-5 w-5 text-red-500 group-hover:text-red-800' aria-hidden='true' />
+            </div>
+            <div className='flex-1 min-w-0'>
+              <span className='text-sm font-medium truncate block text-red-500 group-hover:text-red-800'>
+                Quay lại
+              </span>
+              <span className='text-xs text-gray-500 mt-1 leading-tight block'>Quay lại trang trước</span>
+            </div>
+          </div>
+        </button>
       </div>
     </aside>
   )

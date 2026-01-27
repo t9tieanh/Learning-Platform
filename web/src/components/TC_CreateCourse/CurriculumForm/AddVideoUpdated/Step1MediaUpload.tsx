@@ -1,5 +1,5 @@
 import React from 'react'
-import { Upload, Trash2, FileVideo, CloudUpload } from 'lucide-react'
+import { Upload, Trash2, FileVideo, CloudUpload, FileText, ExternalLink } from 'lucide-react'
 import CustomButton from '@/components/common/Button'
 import { cn } from '@/lib/utils'
 import learnovaLogo from '@/assets/images/logo1.png'
@@ -18,6 +18,7 @@ interface Step1MediaUploadProps {
     onContinueEditing: () => void
     isUploading: boolean
     uploadProgress?: number
+    contentType: 'video' | 'document'
 }
 
 const Step1MediaUpload: React.FC<Step1MediaUploadProps> = ({
@@ -32,7 +33,8 @@ const Step1MediaUpload: React.FC<Step1MediaUploadProps> = ({
     onQuickSave,
     onContinueEditing,
     isUploading,
-    uploadProgress = 0
+    uploadProgress = 0,
+    contentType
 }) => {
     return (
         <div className="space-y-6 w-full">
@@ -47,19 +49,35 @@ const Step1MediaUpload: React.FC<Step1MediaUploadProps> = ({
                 >
                     {videoSrc ? (
                         <div className="relative w-full h-full flex items-center justify-center group p-4">
-                            <video
-                                ref={videoRef}
-                                src={videoSrc}
-                                controls
-                                onLoadedMetadata={handleLoadedMetadata}
-                                className="w-full h-full max-h-[300px] object-contain rounded-lg shadow-sm"
-                            />
-                            <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                            {contentType === 'video' ? (
+                                <video
+                                    ref={videoRef}
+                                    src={videoSrc}
+                                    controls
+                                    onLoadedMetadata={handleLoadedMetadata}
+                                    className="w-full h-full max-h-[300px] object-contain rounded-lg shadow-sm"
+                                />
+                            ) : (
+                                <iframe
+                                    src={videoSrc}
+                                    className="w-full h-full min-h-[400px] rounded-lg border border-gray-200 shadow-sm"
+                                    title="PDF Preview"
+                                />
+                            )}
+                            <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-2">
+                                <CustomButton
+                                    type="button"
+                                    onClick={() => window.open(videoSrc, '_blank')}
+                                    className="bg-white text-blue-500 hover:bg-blue-50 p-2 rounded-full h-9 w-9 flex items-center justify-center shadow-md border border-gray-100"
+                                    icon={<ExternalLink className="w-4 h-4" />}
+                                    title="Xem chi tiết"
+                                />
                                 <CustomButton
                                     type="button"
                                     onClick={handleRemoveFile}
                                     className="bg-white text-red-500 hover:bg-red-50 p-2 rounded-full h-9 w-9 flex items-center justify-center shadow-md border border-gray-100"
                                     icon={<Trash2 className="w-4 h-4" />}
+                                    title="Xóa file"
                                 />
                             </div>
                         </div>
@@ -70,11 +88,13 @@ const Step1MediaUpload: React.FC<Step1MediaUploadProps> = ({
                             </div>
                             <h4 className="text-base font-semibold text-gray-900 mb-2 flex items-center justify-center gap-2">
                                 <CloudUpload className="w-5 h-5 text-blue-600" />
-                                Tải lên bài giảng video
+                                {contentType === 'video' ? 'Tải lên bài giảng video' : 'Tải lên tài liệu PDF'}
                             </h4>
                             <p className="text-sm text-gray-500 mb-6 max-w-xs mx-auto">
-                                Kéo và thả video của bạn vào đây, hoặc nhấn để chọn file.
-                                <br />Dung lượng tối đa: 500MB.
+                                {contentType === 'video'
+                                    ? 'Kéo và thả video của bạn vào đây, hoặc nhấn để chọn file.'
+                                    : 'Kéo và thả tài liệu PDF vào đây, hoặc nhấn để chọn file.'}
+                                <br />Dung lượng tối đa: {contentType === 'video' ? '500MB' : '50MB'}.
                             </p>
                             <CustomButton
                                 type="button"
@@ -91,7 +111,7 @@ const Step1MediaUpload: React.FC<Step1MediaUploadProps> = ({
                     <input
                         ref={fileInputRef}
                         type="file"
-                        accept="video/*"
+                        accept={contentType === 'video' ? "video/*" : "application/pdf"}
                         className="hidden"
                         onChange={handleSelectFile}
                     />
@@ -126,7 +146,7 @@ const Step1MediaUpload: React.FC<Step1MediaUploadProps> = ({
                             )}
 
                             <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center text-blue-600 flex-shrink-0">
-                                <FileVideo className="w-5 h-5" />
+                                {contentType === 'video' ? <FileVideo className="w-5 h-5" /> : <FileText className="w-5 h-5" />}
                             </div>
 
                             <div className="flex-1 min-w-0">

@@ -36,11 +36,22 @@ const CurriculumForm: React.FC<{ id: string }> = ({ id }: { id: string }) => {
   // fetch chapters when component mounts or id changes
   const fetchChapters = async () => {
     if (!id) return
-    setLoading(true)
+
+    if (Chapters.length === 0) {
+      setLoading(true)
+    }
+
     try {
       const response = await chapterService.getChaptersByCourseId(id)
       if (response && response.code === 200 && response.result) {
-        setChapters(response.result)
+        const newChapters = response.result
+        setChapters((prev) => {
+          const openChapterIds = new Set(prev.filter((ch) => ch.isOpen).map((ch) => ch.id))
+          return newChapters.map((ch: Chapter, index: number) => ({
+            ...ch,
+            isOpen: openChapterIds.size > 0 ? openChapterIds.has(ch.id) : index === 0
+          }))
+        })
       }
     } catch (error) {
       console.log('Error fetching chapters:', error)

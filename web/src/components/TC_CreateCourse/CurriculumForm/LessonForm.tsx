@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { FileText, GripVertical, HelpCircle, Play, Trash2, Send, X, Eye } from 'lucide-react'
+import { FileText, GripVertical, HelpCircle, Play, Trash2, Send, X, Eye, Video } from 'lucide-react'
 import { Chapter, Lesson } from '@/utils/create-course/curriculum'
 import { useCallback, useState } from 'react'
 import lessonService from '@/services/course/lesson.service'
@@ -12,7 +12,7 @@ import * as yup from 'yup'
 import CustomInput from '@/components/common/Input'
 import CustomButton from '@/components/common/Button'
 import CustomDialog from '@/components/common/Dialog'
-import AddVideoForm from './AddVideoUpdated/AddVideoForm'
+import AddVideoForm from './AddVideoUpdated'
 import { CreationLessonFormValues } from '@/utils/create-course/curriculum'
 import { MultiUploadItem } from '@/hooks/useMultiUpload'
 import { BookOpen } from 'lucide-react'
@@ -149,7 +149,8 @@ const LessonForm = ({
           )}
         </div>
         <div className='flex items-center space-x-2'>
-          <Badge variant='secondary' className='capitalize bg-blue-100 text-blue-700'>
+          <Badge variant='secondary' className='capitalize flex items-center gap-1'>
+            {lesson.type === 'video' ? <Video className="w-3 h-3" /> : lesson.type === 'article' ? <FileText className="w-3 h-3" /> : <HelpCircle className="w-3 h-3" />}
             {lesson.type === 'video' ? 'Video' : lesson.type === 'article' ? 'Bài viết' : 'Quiz'}
           </Badge>
           <Button
@@ -176,7 +177,7 @@ const LessonForm = ({
         description='Chỉnh sửa thông tin bài giảng'
       >
         <AddVideoForm
-          lessonId={lesson.id}
+          lessonId={lesson.id as string}
           chapterId="" // Not needed for edit
           setOpen={(v) => setPreview(prev => ({ ...prev, openPreview: typeof v === 'function' ? v(prev.openPreview) : v }))}
           fetchChapters={fetchChapters}
@@ -184,6 +185,8 @@ const LessonForm = ({
           mode="edit"
           uploads={uploads}
           startUpload={startUpload}
+          initialType={lesson.type === 'article' ? 'document' : 'video'}
+          handleDelLesson={handleDelLesson}
         />
       </CustomDialog>
     </>
