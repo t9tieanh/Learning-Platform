@@ -1,8 +1,9 @@
 /* eslint-disable react/no-children-prop */
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Plus, ChevronDown, ChevronRight, GripVertical, Trash2, Send, X, BookOpen, PlusCircle } from 'lucide-react'
+import { ChevronDown, GripVertical, Trash2, Send, X, BookOpen, PlusCircle } from 'lucide-react'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
+import { cn } from '@/lib/utils'
 import { Chapter, UpdateChapterSchema, UpdateChapterFormValues } from '@/utils/create-course/curriculum'
 import LessonForm from './LessonForm'
 import CustomInput from '@/components/common/Input'
@@ -105,16 +106,21 @@ const ChapterForm = ({
           <div className='flex items-center justify-between p-4 hover:bg-blue-100/50 border-b border-blue-200 rounded-t-xl'>
             <div className='flex items-center space-x-3'>
               <GripVertical className='h-4 w-4 text-blue-400' />
-              {chapter.isOpen ? (
-                <ChevronDown className='h-4 w-4 text-blue-500' />
-              ) : (
-                <ChevronRight className='h-4 w-4 text-blue-500' />
-              )}
+              <ChevronDown
+                className={cn(
+                  'h-5 w-5 text-blue-500 transition-transform duration-300 ease-in-out',
+                  chapter.isOpen ? 'rotate-0' : '-rotate-90'
+                )}
+              />
               <div className='group relative flex space-x-2 px-2 py-1 rounded-md'>
                 <span className='font-medium text-gray-800'>Phần {chapter.position}:</span>
 
                 {updateTitle ? (
-                  <form className='space-y-2 w-full' onSubmit={handleSubmit(handleUpdateChapter)}>
+                  <form
+                    className='space-y-2 w-full'
+                    onSubmit={handleSubmit(handleUpdateChapter)}
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <CustomInput placeholder='Nhập tiêu đề mới' type='text' {...register('title')} />
                     {errors.title && <span className='text-red-500 text-xs'>{errors.title.message}</span>}
 
@@ -216,7 +222,7 @@ const ChapterForm = ({
         description='Hãy thêm Thêm bài giảng cho khóa học của bạn !'
         children={
           <>
-          <AddVideoForm
+            <AddVideoForm
               setOpen={setOpen}
               chapterId={chapter.id}
               handleAddLesson={handleAddLesson}
