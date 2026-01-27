@@ -1,7 +1,9 @@
 import React from 'react'
-import { Upload, Trash2, FileVideo } from 'lucide-react'
+import { Upload, Trash2, FileVideo, CloudUpload } from 'lucide-react'
 import CustomButton from '@/components/common/Button'
 import { cn } from '@/lib/utils'
+import learnovaLogo from '@/assets/images/logo1.png'
+import { LoadingDots } from '@/components/common/Loading/LoadingDots'
 
 interface Step1MediaUploadProps {
     videoSrc: string | null
@@ -63,17 +65,21 @@ const Step1MediaUpload: React.FC<Step1MediaUploadProps> = ({
                         </div>
                     ) : (
                         <div className="text-center p-8 cursor-pointer" onClick={() => fileInputRef.current?.click()}>
-                            <div className="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-6">
-                                <Upload className="w-8 h-8" />
+                            <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                                <img src={learnovaLogo} alt="Learnova" className="w-10 h-10 object-contain" />
                             </div>
-                            <h4 className="text-base font-semibold text-gray-900 mb-2">Upload video lesson</h4>
+                            <h4 className="text-base font-semibold text-gray-900 mb-2 flex items-center justify-center gap-2">
+                                <CloudUpload className="w-5 h-5 text-blue-600" />
+                                Tải lên bài giảng video
+                            </h4>
                             <p className="text-sm text-gray-500 mb-6 max-w-xs mx-auto">
-                                Drag and drop your video here, or click to browse.
-                                <br />Maximum file size: 500MB.
+                                Kéo và thả video của bạn vào đây, hoặc nhấn để chọn file.
+                                <br />Dung lượng tối đa: 500MB.
                             </p>
                             <CustomButton
                                 type="button"
-                                label="Browse files"
+                                label="Chọn file từ máy tính"
+                                icon={<Upload className="w-4 h-4 mr-2" />}
                                 onClick={(e) => {
                                     e.stopPropagation()
                                     fileInputRef.current?.click()
@@ -89,12 +95,27 @@ const Step1MediaUpload: React.FC<Step1MediaUploadProps> = ({
                         className="hidden"
                         onChange={handleSelectFile}
                     />
+
+                    {/* Loading Overlay */}
+                    {isUploading && (
+                        <div className='absolute inset-0 flex items-center justify-center bg-white/80 rounded-xl z-10 backdrop-blur-sm'>
+                            <div className='flex flex-col items-center gap-3'>
+                                <div className='relative w-12 h-12'>
+                                    <img src={learnovaLogo} alt='Loading' className='w-full h-full object-contain animate-bounce' />
+                                </div>
+                                <LoadingDots text='Đang tải lên video' className='text-black-600 text-sm font-medium' />
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {/* File List Item (Selected or Uploading) */}
                 {selectedFile && (
                     <div className="mt-6">
-                        <h4 className="text-sm font-medium text-gray-700 mb-3">File to upload</h4>
+                        <h4 className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
+                            <FileVideo className="w-4 h-4 text-blue-600" />
+                            File đã chọn
+                        </h4>
                         <div className="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-4 shadow-sm relative overflow-hidden">
                             {/* Progress Bar Background (if uploading) */}
                             {isUploading && (
@@ -122,7 +143,7 @@ const Step1MediaUpload: React.FC<Step1MediaUploadProps> = ({
                                 </div>
                                 <div className="flex items-center justify-between text-xs text-gray-500">
                                     <span>{(selectedFile.size / (1024 * 1024)).toFixed(2)} MB</span>
-                                    {isUploading && <span>{uploadProgress}% • Uploading...</span>}
+                                    {isUploading && <span>{uploadProgress}% • Đang tải lên...</span>}
                                 </div>
                             </div>
                         </div>

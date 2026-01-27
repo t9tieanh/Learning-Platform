@@ -9,16 +9,35 @@ import Step1MediaUpload from './Step1MediaUpload'
 import Step2DetailsForm from './Step2DetailsForm'
 
 import { MultiUploadItem } from '@/hooks/useMultiUpload'
+import { Lesson } from '@/utils/create-course/curriculum'
+import lessonService from '@/services/course/lesson.service'
+import { toast } from 'sonner'
+import useLoading from '@/hooks/useLoading.hook'
+import { Upload, ArrowRight, ArrowLeft, X } from 'lucide-react'
 
 interface AddVideoFormProps {
+    lessonId?: string
     chapterId: string
-    handleAddLesson: HandleAddLesson
+    handleAddLesson?: HandleAddLesson
     setOpen: React.Dispatch<React.SetStateAction<boolean>>
-    uploads: MultiUploadItem[]
-    startUpload: (file: File, fd: FormData, titlePost: string, uri: string) => string
+    uploads?: MultiUploadItem[]
+    startUpload?: (file: File, fd: FormData, titlePost: string, uri: string, isCallCallback: boolean) => string
+    fetchChapters: () => Promise<void>
+    initialData?: Lesson
+    mode?: 'create' | 'edit'
 }
 
-const AddVideoForm: React.FC<AddVideoFormProps> = ({ chapterId, handleAddLesson, setOpen, uploads, startUpload }) => {
+const AddVideoForm: React.FC<AddVideoFormProps> = ({
+    lessonId,
+    chapterId,
+    handleAddLesson,
+    setOpen,
+    uploads = [],
+    startUpload = () => '',
+    fetchChapters,
+    initialData,
+    mode = 'create',
+}) => {
     const {
         register,
         handleSubmit,
@@ -28,13 +47,15 @@ const AddVideoForm: React.FC<AddVideoFormProps> = ({ chapterId, handleAddLesson,
     } = useForm<CreationLessonFormValues>({
         resolver: yupResolver(CreationLessonSchema) as any,
         defaultValues: {
-            isPublic: false,
-            title: '',
-            content: ''
+            isPublic: initialData?.isPublic || false,
+            title: initialData?.title || '',
+            content: initialData?.content || '',
+            duration: initialData?.duration ? Number(initialData.duration) : null
         }
     })
 
-    const [videoSrc, setVideoSrc] = useState<string | null>(null)
+    const { loading, startLoading, stopLoading } = useLoading()
+    const [videoSrc, setVideoSrc] = useState<string | null>(initialData?.url || null)
     const [selectedFile, setSelectedFile] = useState<File | null>(null)
     const videoRef = useRef<HTMLVideoElement | null>(null)
     const fileInputRef = useRef<HTMLInputElement | null>(null)
@@ -72,11 +93,18 @@ const AddVideoForm: React.FC<AddVideoFormProps> = ({ chapterId, handleAddLesson,
 
     useEffect(() => {
         return () => {
-            if (videoSrc) URL.revokeObjectURL(videoSrc)
+            if (videoSrc && !videoSrc.startsWith('http')) URL.revokeObjectURL(videoSrc)
         }
     }, [videoSrc])
 
-    const [step, setStep] = useState<1 | 2>(1)
+    const [step, setStep] = useState<1 | 2>(mode === 'edit' ? 2 : 1)
+
+    const handleCloseForm: React.Dispatch<React.SetStateAction<boolean>> = (value) => {
+        setOpen(value)
+        if (value === false) {
+            fetchChapters()
+        }
+    }
 
     // Quick save: Upload and close modal
     const handleQuickSave = () => {
@@ -86,13 +114,15 @@ const AddVideoForm: React.FC<AddVideoFormProps> = ({ chapterId, handleAddLesson,
         const currentContent = watch('content')
 
         const submitData: CreationLessonFormValues = {
-            title: currentTitle || 'Bài giảng chưa có tiêu đề',
+            title: currentTitle || selectedFile.name || 'Bài giảng chưa có tiêu đề',
             content: currentContent || '',
             isPublic: false,
             duration: watch('duration')
         }
 
-        handleAddLesson(selectedFile, chapterId, setOpen, 'learning/lessons/video')(submitData)
+        if (handleAddLesson) {
+            handleAddLesson(selectedFile, chapterId, handleCloseForm, 'learning/lessons/video')(submitData)
+        }
     }
 
     // Continue editing: Start upload but keep modal open and move to step 2
@@ -109,7 +139,7 @@ const AddVideoForm: React.FC<AddVideoFormProps> = ({ chapterId, handleAddLesson,
         const currentContent = watch('content')
 
         const submitData: CreationLessonFormValues = {
-            title: currentTitle || 'Bài giảng chưa có tiêu đề',
+            title: currentTitle || selectedFile.name || 'Bài giảng chưa có tiêu đề',
             content: currentContent || '',
             isPublic: false,
             duration: watch('duration')
@@ -135,26 +165,36 @@ const AddVideoForm: React.FC<AddVideoFormProps> = ({ chapterId, handleAddLesson,
         formData.append('file', selectedFile)
 
         // Start upload and store ID
-        const id = startUpload(selectedFile, formData, submitData.title, 'learning/lessons/video')
+        const id = startUpload(selectedFile, formData, submitData.title, 'learning/lessons/video', false)
         setCurrentUploadId(id)
     }
 
-    // When upload finishes, we might want to do something?
-    // The user said "tải xong mới chuyển qua step 2" (finish upload then move to step 2)
-    // BUT also "vẫn hiển thị form và form chuyển qua hiển thị progress... tải xong mới chuyển qua step 2"
-    // Wait, if we are showing progress, we are likely IN step 2 or a special progress step.
-    // My previous interpretation was: Step 1 -> Click Continue -> Step 2 (with progress bar) -> Upload finishes -> Enable Save.
+    // for step 2 - update metadata form
+    const handleUpdateLesson = async (data: CreationLessonFormValues, startLoading?: () => void, stopLoading?: () => void) => {
+        try {
+            startLoading && startLoading()
+            const result = await lessonService.updateMetaLesson({
+                id: lessonId as string,
+                title: data.title,
+                content: data.content,
+                isPublic: data.isPublic
+            })
 
-    // Let's stick to: Click Continue -> Go to Step 2 -> Show Progress in Step 2 -> When done, enable Save.
-
-    // However, if the user meant "Stay on Step 1 showing progress, THEN go to Step 2", I should adjust.
-    // "form chuyển qua hiển thị progress tải lên video đó. tải xong mới chuyển qua step 2"
-    // This literally means: Form switches to show upload progress. Upload done -> Move to Step 2.
-
-    // So: Step 1 -> Click Continue -> Show Progress (in Step 1 or special view) -> Upload Done -> Step 2.
-
-    // Let's modify Step 1 to show progress if uploading.
-    // And use an effect to move to Step 2 when upload is done.
+            if (result && result.code === 200) {
+                toast.success('Cập nhật thông tin bài giảng thành công')
+                await fetchChapters()
+                handleCloseForm(false)
+            } else {
+                toast.error(result?.message || 'Cập nhật thất bại. Vui lòng thử lại')
+            }
+        }
+        catch (e: any) {
+            toast.error('Cập nhật thất bại. Vui lòng thử lại')
+        }
+        finally {
+            stopLoading && stopLoading()
+        }
+    }
 
     useEffect(() => {
         if (currentUploadId && currentUpload?.status === 'done' && step === 1) {
@@ -168,9 +208,10 @@ const AddVideoForm: React.FC<AddVideoFormProps> = ({ chapterId, handleAddLesson,
             <div className="bg-white border-b border-gray-200 px-8 py-4 flex items-center justify-between sticky top-0 z-10">
                 <button
                     type="button"
-                    onClick={() => setOpen(false)}
-                    className="text-gray-500 hover:text-gray-800 font-medium text-sm transition-colors"
+                    onClick={() => handleCloseForm(false)}
+                    className="text-gray-500 hover:text-gray-800 font-medium text-sm transition-colors flex items-center gap-1"
                 >
+                    <X className="w-4 h-4" />
                     Cancel
                 </button>
 
@@ -207,18 +248,11 @@ const AddVideoForm: React.FC<AddVideoFormProps> = ({ chapterId, handleAddLesson,
 
                 {/* Right Actions */}
                 <div className="flex items-center gap-3">
-                    {step === 2 && (
-                        <CustomButton
-                            label="Back"
-                            onClick={() => setStep(1)}
-                            className="bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 text-sm px-4 py-2 h-9 rounded-lg"
-                            disabled={isUploading}
-                            type="button"
-                        />
-                    )}
                     {step === 1 ? (
                         <CustomButton
-                            label="Next"
+                            label="Lưa và tiếp tục"
+                            icon={<ArrowRight className="w-4 h-4 ml-2" />}
+                            iconPosition="right"
                             onClick={handleContinueEditing}
                             className="bg-blue-600 hover:bg-blue-700 text-white text-sm px-6 py-2 h-9 rounded-lg shadow-sm"
                             disabled={!selectedFile}
@@ -226,8 +260,17 @@ const AddVideoForm: React.FC<AddVideoFormProps> = ({ chapterId, handleAddLesson,
                         />
                     ) : (
                         <CustomButton
-                            label={isUploading ? "Uploading..." : "Save"}
-                            onClick={handleSubmit(handleAddLesson(selectedFile as File, chapterId, setOpen, 'learning/lessons/video'))}
+                            isLoader={loading}
+                            icon={!isUploading ? <Upload className="w-5 h-5 mr-2" /> : undefined}
+                            label={isUploading ? "Uploading..." : "Lưu bài giảng"}
+                            onClick={handleSubmit(async (data) => {
+                                if (mode === 'edit' && handleUpdateLesson) {
+                                    await handleUpdateLesson(data, startLoading, stopLoading)
+                                    handleCloseForm(false)
+                                } else if (handleAddLesson && selectedFile) {
+                                    await handleAddLesson(selectedFile, chapterId, handleCloseForm, 'learning/lessons/video')(data)
+                                }
+                            })}
                             className={cn(
                                 "text-white text-sm px-6 py-2 h-9 rounded-lg shadow-sm",
                                 isUploading ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
@@ -243,7 +286,14 @@ const AddVideoForm: React.FC<AddVideoFormProps> = ({ chapterId, handleAddLesson,
             <div className="flex-1 overflow-y-auto p-8">
                 <div className="max-w-4xl mx-auto">
                     <form
-                        onSubmit={handleSubmit(handleAddLesson(selectedFile as File, chapterId, setOpen, 'learning/lessons/video'))}
+                        onSubmit={handleSubmit(async (data) => {
+                            if (mode === 'edit' && handleUpdateLesson) {
+                                await handleUpdateLesson(data)
+                                handleCloseForm(false)
+                            } else if (handleAddLesson && selectedFile) {
+                                await handleAddLesson(selectedFile, chapterId, handleCloseForm, 'learning/lessons/video')(data)
+                            }
+                        })}
                         className="w-full"
                     >
                         {step === 1 && (
@@ -274,6 +324,8 @@ const AddVideoForm: React.FC<AddVideoFormProps> = ({ chapterId, handleAddLesson,
                                 errors={errors}
                                 isUploading={isUploading}
                                 uploadProgress={uploadProgress}
+                                handleSubmit={handleSubmit}
+                                handleUpdateLesson={handleUpdateLesson}
                             />
                         )}
                     </form>

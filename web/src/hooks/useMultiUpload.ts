@@ -116,7 +116,7 @@ export function useMultiUpload({
   )
 
   const startUpload = useCallback(
-    (file: File, fd: FormData, titlePost: string, uri: string) => {
+    (file: File, fd: FormData, titlePost: string, uri: string, isCallCallback: boolean = true) => {
       const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
       upsert(id, {
         id,
@@ -218,7 +218,7 @@ export function useMultiUpload({
               readersRef.current[id] = null
             }
             // call callback after upload finished
-            if (callback && typeof callback === 'function') {
+            if (isCallCallback && callback && typeof callback === 'function') {
               try {
                 await callback()
               } catch (e) {
@@ -232,6 +232,21 @@ export function useMultiUpload({
     },
     [accessToken, baseUrl, upsert]
   )
+
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      const isUploading = uploads.some((u) => u.status === 'uploading')
+      if (isUploading) {
+        e.preventDefault()
+        e.returnValue = ''
+      }
+    }
+
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload)
+    }
+  }, [uploads])
 
   useEffect(() => {
     return () => {

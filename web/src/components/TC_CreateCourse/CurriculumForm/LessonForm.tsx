@@ -11,7 +11,11 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
 import CustomInput from '@/components/common/Input'
 import CustomButton from '@/components/common/Button'
-import PreviewTeacherLesson from './PreviewTeacherLesson'
+import CustomDialog from '@/components/common/Dialog'
+import AddVideoForm from './AddVideoUpdated/AddVideoForm'
+import { CreationLessonFormValues } from '@/utils/create-course/curriculum'
+import { MultiUploadItem } from '@/hooks/useMultiUpload'
+import { BookOpen } from 'lucide-react'
 import { MdModeEditOutline } from "react-icons/md";
 
 const UpdateLessonSchema = yup.object({
@@ -23,11 +27,17 @@ type UpdateLessonFormValues = yup.InferType<typeof UpdateLessonSchema>
 const LessonForm = ({
   key,
   lesson,
-  setChapters
+  setChapters,
+  uploads,
+  startUpload,
+  fetchChapters
 }: {
   key: number
   lesson: Lesson
   setChapters?: React.Dispatch<React.SetStateAction<Chapter[]>>
+  uploads: MultiUploadItem[]
+  startUpload: (file: File, fd: FormData, titlePost: string, uri: string, isCallCallback: boolean) => string
+  fetchChapters: () => Promise<void>
 }) => {
   const [updateTitle, setUpdateTitle] = useState(false)
   const [preview, setPreview] = useState({
@@ -152,7 +162,30 @@ const LessonForm = ({
           </Button>
         </div>
       </div>
-      <PreviewTeacherLesson preview={preview} setPreview={setPreview} />
+      <CustomDialog
+        open={preview.openPreview}
+        setOpen={(v: boolean) => setPreview(prev => ({ ...prev, openPreview: v }))}
+        className="!max-w-[95vw] md:!max-w-5xl h-[90vh] overflow-hidden flex flex-col"
+        contentClassName="flex-1 min-h-0"
+        title={
+          <>
+            <BookOpen className='h-4 w-4 mr-2' />
+            Chỉnh sửa bài giảng
+          </>
+        }
+        description='Chỉnh sửa thông tin bài giảng'
+      >
+        <AddVideoForm
+          lessonId={lesson.id}
+          chapterId="" // Not needed for edit
+          setOpen={(v) => setPreview(prev => ({ ...prev, openPreview: typeof v === 'function' ? v(prev.openPreview) : v }))}
+          fetchChapters={fetchChapters}
+          initialData={lesson}
+          mode="edit"
+          uploads={uploads}
+          startUpload={startUpload}
+        />
+      </CustomDialog>
     </>
   )
 }

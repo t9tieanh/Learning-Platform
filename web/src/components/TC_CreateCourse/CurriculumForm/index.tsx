@@ -240,6 +240,7 @@ const CurriculumForm: React.FC<{ id: string }> = ({ id }: { id: string }) => {
               handleAddLesson={handleAddLesson}
               uploads={uploads}
               startUpload={startUpload}
+              fetchChapters={fetchChapters}
             />
           ))}
 

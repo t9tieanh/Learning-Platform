@@ -26,13 +26,15 @@ const ChapterForm = ({
   setChapters,
   handleAddLesson,
   uploads,
-  startUpload
+  startUpload,
+  fetchChapters
 }: {
   chapter: Chapter
   setChapters?: React.Dispatch<React.SetStateAction<Chapter[]>>
   handleAddLesson: HandleAddLesson
   uploads: MultiUploadItem[]
-  startUpload: (file: File, fd: FormData, titlePost: string, uri: string) => string
+  startUpload: (file: File, fd: FormData, titlePost: string, uri: string, isCallCallback: boolean) => string
+  fetchChapters: () => Promise<void>
 }) => {
   const [updateTitle, setUpdateTitle] = useState(false)
   const {
@@ -183,7 +185,14 @@ const ChapterForm = ({
                 <p className='text-gray-500 text-sm px-4'>Chưa có bài giảng nào trong phần này.</p>
               )}
               {chapter.lessons.map((lesson, index) => (
-                <LessonForm key={index} lesson={lesson} setChapters={setChapters} />
+                <LessonForm
+                  key={index}
+                  lesson={lesson}
+                  setChapters={setChapters}
+                  uploads={uploads}
+                  startUpload={startUpload}
+                  fetchChapters={fetchChapters}
+                />
               ))}
             </div>
 
@@ -230,6 +239,7 @@ const ChapterForm = ({
               handleAddLesson={handleAddLesson}
               uploads={uploads}
               startUpload={startUpload}
+              fetchChapters={fetchChapters}
             />
           ) : (
             <AddDocumentForm setOpen={setOpen} chapterId={chapter.id} handleAddLesson={handleAddLesson} />
