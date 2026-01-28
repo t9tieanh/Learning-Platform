@@ -1,10 +1,10 @@
-// Prisma schema for SALE SERVICE (MySQL)
+// Prisma schema for ASSISTANT SERVICE (PostgreSQL)
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }

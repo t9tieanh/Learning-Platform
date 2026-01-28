@@ -3,6 +3,7 @@ import * as protoLoader from '@grpc/proto-loader'
 import path from 'path'
 import { UserGrpc } from '~/dto/grpc/user.dto';
 import { env } from '~/config/env'
+import Logger from '~/utils/logger'
 
 class UserGrpcClient {
     userClient: any
@@ -25,7 +26,7 @@ class UserGrpcClient {
             grpcObject.UserService
 
         if (!UserSvcCtor) {
-            console.error('UserService not found in loaded proto. Available keys:', Object.keys(grpcObject))
+            Logger.error(`UserService not found in loaded proto. Available keys: ${Object.keys(grpcObject)}`)
             throw new Error('UserService not found in proto definition')
         }
 
@@ -34,9 +35,9 @@ class UserGrpcClient {
         // quick readiness check (wait up to 5s)
         this.userClient.waitForReady(Date.now() + 5000, (err: Error | null) => {
             if (err) {
-                console.error('UserService gRPC NOT ready:', err.message || err)
+                Logger.error(`UserService gRPC NOT ready: ${err.message || err}`)
             } else {
-                console.log('UserService gRPC ready')
+                Logger.info('UserService gRPC ready')
             }
         })
     }
@@ -47,7 +48,7 @@ class UserGrpcClient {
             const req = { teacher_ids: teacherIds }
             this.userClient.getBulkTeachers(req, (err: any, response: any) => {
                 if (err) {
-                    console.error('grpc getBulkTeachers error:', err)
+                    Logger.error(`grpc getBulkTeachers error: ${err}`)
                     return reject(err)
                 }
                 resolve(response)
@@ -60,7 +61,7 @@ class UserGrpcClient {
             const req = { id: userId }
             this.userClient.getUser(req, (err: any, response: any) => {
                 if (err) {
-                    console.error('grpc getUser error:', err)
+                    Logger.error(`grpc getUser error: ${err}`)
                     return reject(err)
                 }
                 resolve(response as UserGrpc)

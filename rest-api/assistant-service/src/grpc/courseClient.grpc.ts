@@ -2,6 +2,7 @@ import * as grpc from '@grpc/grpc-js'
 import * as protoLoader from '@grpc/proto-loader'
 import path from 'path'
 import { env } from '~/config/env'
+import Logger from '~/utils/logger'
 
 class CourseGrpcClient {
     courseClient: any
@@ -24,7 +25,7 @@ class CourseGrpcClient {
             grpcObject.CourseService
 
         if (!CourseSvcCtor) {
-            console.error('CourseService not found in loaded proto. Available keys:', Object.keys(grpcObject))
+            Logger.error(`CourseService not found in loaded proto. Available keys: ${Object.keys(grpcObject)}`)
             throw new Error('CourseService not found in proto definition')
         }
 
@@ -33,9 +34,9 @@ class CourseGrpcClient {
         // quick readiness check (wait up to 5s)
         this.courseClient.waitForReady(Date.now() + 5000, (err: Error | null) => {
             if (err) {
-                console.error('CourseService gRPC NOT ready:', err.message || err)
+                Logger.error(`CourseService gRPC NOT ready: ${err.message || err}`)
             } else {
-                console.log('CourseService gRPC ready')
+                Logger.info('CourseService gRPC ready')
             }
         })
     }
@@ -45,12 +46,12 @@ class CourseGrpcClient {
             const req = { course_ids: courseIds }
             this.courseClient.getBulkCourses(req, (err: any, response: any) => {
                 if (err) {
-                    console.error('grpc getBulkCourses error:', err)
+                    Logger.error(`grpc getBulkCourses error: ${err}`)
                     return reject(err)
                 }
 
                 if (!response || !Array.isArray(response.courses)) {
-                    console.warn('grpc getBulkCourses: invalid response, returning empty array', response)
+                    Logger.warn(`grpc getBulkCourses: invalid response, returning empty array: ${response}`)
                     return resolve([])
                 }
 
@@ -66,12 +67,12 @@ class CourseGrpcClient {
             const req = { courseId: courseId, userId: userId }
             this.courseClient.isInstructor(req, (err: any, response: any) => {
                 if (err) {
-                    console.error('grpc isInstructor error:', err)
+                    Logger.error(`grpc isInstructor error: ${err}`)
                     return reject(err)
                 }
 
                 if (!response || typeof response.isInstructor !== 'boolean') {
-                    console.warn('grpc isInstructor: invalid response, returning false', response)
+                    Logger.warn(`grpc isInstructor: invalid response, returning false: ${response}`)
                     return resolve(false)
                 }
 
