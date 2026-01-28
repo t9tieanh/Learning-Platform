@@ -8,7 +8,7 @@ import { TestimonialsCarousel } from '@/components/HomePage/StudentCarousel/Test
 
 const HomePage = () => {
   return (
-    <div className='home-page-container '>
+    <div className='home-page-container overflow-x-hidden'>
       <Banner />
       <CourseList title='Khóa học bán chạy nhất' fetcher={courseService.getBestSellerCourses} />
       <CourseList title='Khóa học hot tháng này' fetcher={courseService.getTrendyCourseThisMonth} />

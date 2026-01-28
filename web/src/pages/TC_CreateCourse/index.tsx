@@ -121,7 +121,7 @@ const TC_CreateCourse = () => {
   }
 
   return (
-    <div className='h-screen bg-background flex flex-col'>
+    <div className='fixed inset-0 z-50 bg-background flex flex-col overflow-hidden'>
       {/* Mobile Header */}
       <div className='lg:hidden p-4 border-b flex items-center gap-4 bg-white dark:bg-slate-900 z-20'>
         <Sheet>
@@ -139,11 +139,11 @@ const TC_CreateCourse = () => {
 
       <div className='flex flex-1 overflow-hidden'>
         {/* Desktop Sidebar */}
-        <div className='hidden lg:block h-full'>
+        <div className='hidden lg:block h-full shrink-0'>
           <CourseSidebar activeSection={activeSection} onSectionChange={setActiveSection} />
         </div>
 
-        <main className='flex-1 p-4 md:p-8 overflow-auto flex flex-col'>
+        <main className='flex-1 p-4 md:p-8 overflow-auto flex flex-col min-w-0'>
           <div className='flex-1'>
             {renderContent()}
           </div>

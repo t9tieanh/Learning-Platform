@@ -9,6 +9,7 @@
     "@grpc/proto-loader": "^0.8.0",
     "@prisma/client": "^6.16.2",
     "amqplib": "^0.10.9",
+    "assemblyai": "^4.22.1",
     "axios": "^1.13.2",
     "bcrypt": "^6.0.0",
     "class-transformer": "^0.5.1",
@@ -24,7 +25,8 @@
     "nodemailer": "^7.0.5",
     "prisma": "^6.16.2",
     "reflect-metadata": "^0.2.2",
-    "remove-accents": "^0.5.0"
+    "remove-accents": "^0.5.0",
+    "winston": "^3.19.0"
   },
   "devDependencies": {
     "@types/amqplib": "^0.10.7",

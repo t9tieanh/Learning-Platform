@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { FileText, GripVertical, HelpCircle, Play, Trash2, Send, X, Eye } from 'lucide-react'
+import { FileText, GripVertical, HelpCircle, Play, Trash2, Send, X, Eye, Video } from 'lucide-react'
 import { Chapter, Lesson } from '@/utils/create-course/curriculum'
 import { useCallback, useState } from 'react'
 import lessonService from '@/services/course/lesson.service'
@@ -11,8 +11,12 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
 import CustomInput from '@/components/common/Input'
 import CustomButton from '@/components/common/Button'
-import { MdEdit } from 'react-icons/md'
-import PreviewTeacherLesson from './PreviewTeacherLesson'
+import CustomDialog from '@/components/common/Dialog'
+import AddVideoForm from './AddVideoUpdated'
+import { CreationLessonFormValues } from '@/utils/create-course/curriculum'
+import { MultiUploadItem } from '@/hooks/useMultiUpload'
+import { BookOpen } from 'lucide-react'
+import { MdModeEditOutline } from "react-icons/md";
 
 const UpdateLessonSchema = yup.object({
   title: yup.string().required('Tiêu đề không được để trống').min(3, 'Tiêu đề phải có ít nhất 3 ký tự')
@@ -23,11 +27,17 @@ type UpdateLessonFormValues = yup.InferType<typeof UpdateLessonSchema>
 const LessonForm = ({
   key,
   lesson,
-  setChapters
+  setChapters,
+  uploads,
+  startUpload,
+  fetchChapters
 }: {
   key: number
   lesson: Lesson
   setChapters?: React.Dispatch<React.SetStateAction<Chapter[]>>
+  uploads: MultiUploadItem[]
+  startUpload: (file: File, fd: FormData, titlePost: string, uri: string, isCallCallback: boolean) => string
+  fetchChapters: () => Promise<void>
 }) => {
   const [updateTitle, setUpdateTitle] = useState(false)
   const [preview, setPreview] = useState({
@@ -95,40 +105,13 @@ const LessonForm = ({
     }
   }
 
-  const getLectureIcon = useCallback((type: string, lesson: Lesson) => {
-    switch (type) {
-      case 'video':
-        return (
-          <span className='flex items-center justify-center w-7 h-7 rounded-md bg-blue-100 text-blue-600 hover:cursor-pointer hover:shadow-lg hover:bg-blue-800'>
-            <Play className='h-4 w-4' onClick={() => setPreview({ openPreview: true, lesson })} />
-          </span>
-        )
-      case 'article':
-        return (
-          <span className='flex items-center justify-center w-7 h-7 rounded-md bg-amber-100 text-amber-600 hover:cursor-pointer hover:shadow-lg hover:bg-amber-800'>
-            <FileText className='h-4 w-4' onClick={() => setPreview({ openPreview: true, lesson })} />
-          </span>
-        )
-      case 'quiz':
-        return (
-          <span className='flex items-center justify-center w-7 h-7 rounded-md bg-purple-100 text-purple-600'>
-            <HelpCircle className='h-4 w-4' />
-          </span>
-        )
-      default:
-        return (
-          <span className='flex items-center justify-center w-7 h-7 rounded-md bg-gray-100 text-gray-600'>
-            <Play className='h-4 w-4' />
-          </span>
-        )
-    }
-  }, [])
-
   return (
     <>
       <div key={key} className='flex shadow-sm items-center space-x-3 p-3 rounded-lg border border-blue-200'>
         <GripVertical className='h-4 w-4 text-blue-400' />
-        {getLectureIcon(lesson.type, lesson)}
+        <span className='flex items-center justify-center w-7 h-7 rounded-md bg-blue-100 text-blue-600 hover:cursor-pointer hover:shadow-lg hover:bg-blue-800'>
+          <MdModeEditOutline className='h-4 w-4' onClick={() => setPreview({ openPreview: true, lesson })} />
+        </span>
         <div className='flex-1'>
           {updateTitle ? (
             <form className='space-y-2' onSubmit={handleSubmit(updateLesson)}>
@@ -157,7 +140,7 @@ const LessonForm = ({
               <span className='font-medium text-sm'>{lesson.title || 'Bài giảng chưa có tiêu đề'}</span>
               <CustomButton
                 className='opacity-0 transition-opacity duration-300 group-hover:opacity-100 bg-gray-200 text-dark p-1 rounded-md shadow hover:bg-gray-100 flex items-center justify-center ml-2'
-                icon={<MdEdit />}
+                icon={<MdModeEditOutline />}
                 onClick={() => {
                   setUpdateTitle(true)
                 }}
@@ -166,7 +149,8 @@ const LessonForm = ({
           )}
         </div>
         <div className='flex items-center space-x-2'>
-          <Badge variant='secondary' className='capitalize bg-blue-100 text-blue-700'>
+          <Badge variant='secondary' className='capitalize flex items-center gap-1'>
+            {lesson.type === 'video' ? <Video className="w-3 h-3" /> : lesson.type === 'article' ? <FileText className="w-3 h-3" /> : <HelpCircle className="w-3 h-3" />}
             {lesson.type === 'video' ? 'Video' : lesson.type === 'article' ? 'Bài viết' : 'Quiz'}
           </Badge>
           <Button
@@ -179,7 +163,32 @@ const LessonForm = ({
           </Button>
         </div>
       </div>
-      <PreviewTeacherLesson preview={preview} setPreview={setPreview} />
+      <CustomDialog
+        open={preview.openPreview}
+        setOpen={(v: boolean) => setPreview(prev => ({ ...prev, openPreview: v }))}
+        className="!max-w-[95vw] md:!max-w-5xl h-[90vh] overflow-hidden flex flex-col"
+        contentClassName="flex-1 min-h-0"
+        title={
+          <>
+            <BookOpen className='h-4 w-4 mr-2' />
+            Chỉnh sửa bài giảng
+          </>
+        }
+        description='Chỉnh sửa thông tin bài giảng'
+      >
+        <AddVideoForm
+          lessonId={lesson.id as string}
+          chapterId="" // Not needed for edit
+          setOpen={(v) => setPreview(prev => ({ ...prev, openPreview: typeof v === 'function' ? v(prev.openPreview) : v }))}
+          fetchChapters={fetchChapters}
+          initialData={lesson}
+          mode="edit"
+          uploads={uploads}
+          startUpload={startUpload}
+          initialType={lesson.type === 'article' ? 'document' : 'video'}
+          handleDelLesson={handleDelLesson}
+        />
+      </CustomDialog>
     </>
   )
 }
