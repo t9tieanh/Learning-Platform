@@ -1,8 +1,9 @@
 /* eslint-disable react/no-children-prop */
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Plus, Upload } from 'lucide-react'
+import { Plus, Upload, RotateCw, X } from 'lucide-react'
 import TitleComponent from '@/components/TC_CreateCourse/common/Title'
 import { Chapter, CreationLessonFormValues } from '@/utils/create-course/curriculum'
 import ChapterForm from './ChapterForm'
@@ -36,11 +37,22 @@ const CurriculumForm: React.FC<{ id: string }> = ({ id }: { id: string }) => {
   // fetch chapters when component mounts or id changes
   const fetchChapters = async () => {
     if (!id) return
-    setLoading(true)
+
+    if (Chapters.length === 0) {
+      setLoading(true)
+    }
+
     try {
       const response = await chapterService.getChaptersByCourseId(id)
       if (response && response.code === 200 && response.result) {
-        setChapters(response.result)
+        const newChapters = response.result
+        setChapters((prev) => {
+          const openChapterIds = new Set(prev.filter((ch) => ch.isOpen).map((ch) => ch.id))
+          return newChapters.map((ch: Chapter, index: number) => ({
+            ...ch,
+            isOpen: openChapterIds.size > 0 ? openChapterIds.has(ch.id) : index === 0
+          }))
+        })
       }
     } catch (error) {
       console.log('Error fetching chapters:', error)
@@ -55,6 +67,7 @@ const CurriculumForm: React.FC<{ id: string }> = ({ id }: { id: string }) => {
     callback: fetchChapters
   })
   const [showUpload, setShowUpload] = useState(true)
+  const isAnyUploading = uploads.some((u) => u.status === 'uploading')
 
   const handleAddChapter = async () => {
     const data = await chapterService.addChapter({
@@ -186,58 +199,82 @@ const CurriculumForm: React.FC<{ id: string }> = ({ id }: { id: string }) => {
       {/* Floating Upload Button */}
       {uploads && (
         <>
-          <CustomButton
-            className='fixed z-50 bottom-8 right-8 shadow-lg bg-gradient-to-br from-cyan-400 to-blue-400 rounded-full w-14 h-14 flex items-center justify-center hover:scale-105 transition-all group'
-            onClick={() => setShowUpload(true)}
-            style={{ boxShadow: '0 4px 24px 0 rgba(0,0,0,0.10)' }}
-            title='Xem tiến độ tải lên'
-            label={
-              <>
-                <Upload className='w-7 h-7 text-white' />
-                <span className='absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full px-2 py-0.5 border-2 border-white'>
-                  {uploads.length}
-                </span>
-              </>
-            }
-          />
+          <div className="fixed z-50 bottom-8 right-8">
+            {isAnyUploading && (
+              <div className="absolute -inset-2 rounded-full border-4 border-blue-400/30 border-t-blue-600 animate-spin" />
+            )}
+            <CustomButton
+              className={cn(
+                'shadow-lg bg-gradient-to-br from-cyan-400 to-blue-400 rounded-full w-14 h-14 flex items-center justify-center transition-all relative',
+                !isAnyUploading && 'hover:scale-105'
+              )}
+              onClick={() => setShowUpload(true)}
+              style={{ boxShadow: '0 4px 24px 0 rgba(0,0,0,0.10)' }}
+              title='Xem tiến độ tải lên'
+              label={
+                <>
+                  <Upload className={cn('w-7 h-7 text-white', isAnyUploading && 'animate-bounce')} />
+                  <span className='absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full px-2 py-0.5 border-2 border-white'>
+                    {uploads.length}
+                  </span>
+                </>
+              }
+            />
+          </div>
 
           {showUpload && (
-            <>
-              {/* <div className='' onClick={() => setShowUpload(false)}></div> */}
-              <div className='fixed z-50 bottom-24 right-8 bg-white rounded-2xl shadow-2xl border border-blue-200/60 p-4 animate-fadeIn flex flex-col gap-3'>
-                <div className='flex items-center justify-between mb-2'>
-                  <span className='flex items-center gap-2 text-base font-semibold text-blue-700 text-sm'>
-                    <Upload className='h-4 w-4' /> Tiến độ tải lên
-                  </span>
-                  <CustomButton
-                    className='text-gray-400 hover:text-red-500 text-xl font-bold px-2 bg-white'
-                    onClick={() => setShowUpload(false)}
-                    title='Đóng'
-                    label='×'
-                  />
+            <div className='fixed z-50 bottom-24 right-8 w-[400px] bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden animate-in slide-in-from-bottom-4 duration-300'>
+              <div className='flex items-center justify-between px-4 py-3 border-b border-gray-100 bg-gray-50/80 backdrop-blur-sm'>
+                <div className='flex items-center gap-3'>
+                  <div className='p-2 bg-blue-50 rounded-full ring-1 ring-blue-100'>
+                    <Upload className='h-4 w-4 text-blue-600' />
+                  </div>
+                  <div>
+                    <h4 className='text-sm font-semibold text-gray-800'>Trình quản lý tải lên</h4>
+                    <p className='text-xs text-gray-500 font-medium'>
+                      {uploads.filter((u) => u.status === 'uploading').length} đang xử lý
+                    </p>
+                  </div>
                 </div>
-                <div className='flex flex-col gap-3 text-balance'>
+                <Button
+                  variant='ghost'
+                  size='icon'
+                  className='h-8 w-8 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors'
+                  onClick={() => setShowUpload(false)}
+                >
+                  <X className='h-4 w-4' />
+                </Button>
+              </div>
+
+              <div className='max-h-[320px] overflow-y-auto p-3 bg-gray-50/30 scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent'>
+                <div className='flex flex-col gap-2'>
                   <UploadProgress progressLst={uploads} />
                 </div>
               </div>
-            </>
+            </div>
           )}
         </>
       )}
 
       <Card className='border border-blue-200/60 shadow-lg bg-white'>
-        <CardHeader className='flex items-center justify-between pb-0'>
+        <CardHeader className='flex flex-row items-center justify-between pb-0'>
           <CardTitle className='text-lg font-semibold text-gray-800'>
             <span>Nội dung khóa học</span>
           </CardTitle>
+          <Button variant='ghost' size='icon' onClick={fetchChapters} title='Tải lại'>
+            <RotateCw className='h-4 w-4' />
+          </Button>
         </CardHeader>
         <CardContent className='space-y-4'>
-          {Chapters?.map((Chapter) => (
+          {Chapters?.map((chapter) => (
             <ChapterForm
-              key={Chapter.id}
-              chapter={Chapter}
+              key={chapter.id}
+              chapter={chapter}
               setChapters={setChapters}
               handleAddLesson={handleAddLesson}
+              uploads={uploads}
+              startUpload={startUpload}
+              fetchChapters={fetchChapters}
             />
           ))}
 
