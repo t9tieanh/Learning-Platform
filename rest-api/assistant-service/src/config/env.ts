@@ -29,4 +29,7 @@ export const env = {
   N8N_WEBHOOK_PATH: process.env.N8N_WEBHOOK_PATH || '',
   N8N_AUTH_HEADER: process.env.N8N_AUTH_HEADER || '',
   COOKIE_NAME: process.env.COOKIE_NAME || 'assistant_session',
+  ASSEMBLYAI_API_KEY: process.env.ASSEMBLYAI_API_KEY || '',
+  WEBHOOK_URL: process.env.WEBHOOK_URL || '',
+  ASSEMBLYAI_WEBHOOK_SECRET: process.env.ASSEMBLYAI_WEBHOOK_SECRET || 'default_webhook_secret',
 }

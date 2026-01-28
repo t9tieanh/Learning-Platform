@@ -1,8 +1,9 @@
 /* eslint-disable react/no-children-prop */
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Plus, ChevronDown, ChevronRight, GripVertical, Trash2, Send, X, BookOpen } from 'lucide-react'
+import { ChevronDown, GripVertical, Trash2, Send, X, BookOpen, PlusCircle } from 'lucide-react'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
+import { cn } from '@/lib/utils'
 import { Chapter, UpdateChapterSchema, UpdateChapterFormValues } from '@/utils/create-course/curriculum'
 import LessonForm from './LessonForm'
 import CustomInput from '@/components/common/Input'
@@ -14,20 +15,26 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import CustomTextarea from '@/components/common/Textarea'
 import chapterService from '@/services/course/chapter.service'
 import CustomDialog from '@/components/common/Dialog'
-import AddVideoForm from './addVideo/AddVideoForm'
+import AddVideoForm from './AddVideoUpdated'
 import { toast } from 'sonner'
 import { showConfirmToast } from '@/components/common/ShowConfirmToast'
 import { HandleAddLesson } from '@/components/TC_CreateCourse/CurriculumForm/index'
-import AddDocumentForm from './addVideo/AddDocumentForm'
+import { MultiUploadItem } from '@/hooks/useMultiUpload'
 
 const ChapterForm = ({
   chapter,
   setChapters,
-  handleAddLesson
+  handleAddLesson,
+  uploads,
+  startUpload,
+  fetchChapters
 }: {
   chapter: Chapter
   setChapters?: React.Dispatch<React.SetStateAction<Chapter[]>>
   handleAddLesson: HandleAddLesson
+  uploads: MultiUploadItem[]
+  startUpload: (file: File, fd: FormData, titlePost: string, uri: string, isCallCallback: boolean) => string
+  fetchChapters: () => Promise<void>
 }) => {
   const [updateTitle, setUpdateTitle] = useState(false)
   const {
@@ -40,7 +47,6 @@ const ChapterForm = ({
 
   // for dialog add video, lecture
   const [open, setOpen] = useState(false)
-  const [dialogType, setDialogType] = useState<'video' | 'document'>('video')
 
   const handleUpdateChapter = async (data: UpdateChapterFormValues) => {
     const result = await chapterService.updateChapter({
@@ -60,11 +66,6 @@ const ChapterForm = ({
       }
       setUpdateTitle(false)
     }
-  }
-
-  const handleAddLecture = (type: 'video' | 'quiz' | 'article') => {
-    setDialogType(type === 'video' ? 'video' : 'document')
-    setOpen(true)
   }
 
   // Handle delete chapter
@@ -105,16 +106,21 @@ const ChapterForm = ({
           <div className='flex items-center justify-between p-4 hover:bg-blue-100/50 border-b border-blue-200 rounded-t-xl'>
             <div className='flex items-center space-x-3'>
               <GripVertical className='h-4 w-4 text-blue-400' />
-              {chapter.isOpen ? (
-                <ChevronDown className='h-4 w-4 text-blue-500' />
-              ) : (
-                <ChevronRight className='h-4 w-4 text-blue-500' />
-              )}
+              <ChevronDown
+                className={cn(
+                  'h-5 w-5 text-blue-500 transition-transform duration-300 ease-in-out',
+                  chapter.isOpen ? 'rotate-0' : '-rotate-90'
+                )}
+              />
               <div className='group relative flex space-x-2 px-2 py-1 rounded-md'>
                 <span className='font-medium text-gray-800'>Phần {chapter.position}:</span>
 
                 {updateTitle ? (
-                  <form className='space-y-2 w-full' onSubmit={handleSubmit(handleUpdateChapter)}>
+                  <form
+                    className='space-y-2 w-full'
+                    onSubmit={handleSubmit(handleUpdateChapter)}
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <CustomInput placeholder='Nhập tiêu đề mới' type='text' {...register('title')} />
                     {errors.title && <span className='text-red-500 text-xs'>{errors.title.message}</span>}
 
@@ -178,29 +184,26 @@ const ChapterForm = ({
                 <p className='text-gray-500 text-sm px-4'>Chưa có bài giảng nào trong phần này.</p>
               )}
               {chapter.lessons.map((lesson, index) => (
-                <LessonForm key={index} lesson={lesson} setChapters={setChapters} />
+                <LessonForm
+                  key={index}
+                  lesson={lesson}
+                  setChapters={setChapters}
+                  uploads={uploads}
+                  startUpload={startUpload}
+                  fetchChapters={fetchChapters}
+                />
               ))}
             </div>
 
             <div className='flex space-x-2 mt-6'>
               <Button
-                variant='outline'
+                variant='default'
                 size='sm'
-                onClick={() => handleAddLecture('video')}
-                className='flex items-center space-x-1 border-blue-300 text-blue-600 shadow-lg'
+                onClick={() => setOpen(true)}
+                className='flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg transition-all duration-200 px-6 rounded-full'
               >
-                <Plus className='h-4 w-4' />
-                <span>Bài giảng (Video)</span>
-              </Button>
-
-              <Button
-                variant='outline'
-                size='sm'
-                onClick={() => handleAddLecture('article')}
-                className='flex items-center space-x-1 border-blue-300 text-blue-600 shadow-lg'
-              >
-                <Plus className='h-4 w-4' />
-                <span>Bài viết</span>
+                <PlusCircle className='h-5 w-5' />
+                <span className="font-medium">Thêm bài giảng mới</span>
               </Button>
             </div>
           </div>
@@ -209,6 +212,7 @@ const ChapterForm = ({
       <CustomDialog
         open={open}
         setOpen={setOpen}
+        size='full'
         title={
           <>
             <BookOpen className='h-4 w-4 mr-2' />
@@ -217,13 +221,17 @@ const ChapterForm = ({
         }
         description='Hãy thêm Thêm bài giảng cho khóa học của bạn !'
         children={
-          dialogType === 'video' ? (
-            <AddVideoForm setOpen={setOpen} chapterId={chapter.id} handleAddLesson={handleAddLesson} />
-          ) : (
-            <AddDocumentForm setOpen={setOpen} chapterId={chapter.id} handleAddLesson={handleAddLesson} />
-          )
+          <>
+            <AddVideoForm
+              setOpen={setOpen}
+              chapterId={chapter.id}
+              handleAddLesson={handleAddLesson}
+              uploads={uploads}
+              startUpload={startUpload}
+              fetchChapters={fetchChapters}
+            />
+          </>
         }
-        size='xl'
       />
     </div>
   )

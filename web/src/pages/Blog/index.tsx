@@ -5,6 +5,8 @@ import { FeaturedCard } from '@/components/Blog/FeaturedCard'
 import { ImageCard } from '@/components/Blog/ImageCard'
 import { useEffect, useState } from 'react'
 import { blogService, type BlogItem } from '@/services/blog/blog.service'
+import { ArticleCardSkeleton } from '@/components/Blog/ArticleCardSkeleton'
+import { ImageCardSkeleton } from '@/components/Blog/ImageCardSkeleton'
 
 const BlogPage = () => {
   const [trending, setTrending] = useState<BlogItem[]>([])
@@ -15,20 +17,20 @@ const BlogPage = () => {
 
   useEffect(() => {
     let mounted = true
-    ;(async () => {
-      try {
-        setLoading(true)
-        const [tr, nw] = await Promise.all([blogService.getTrending(), blogService.getNew()])
-        if (!mounted) return
-        setTrending(tr)
-        setLatest(nw)
-      } catch (e) {
-        console.error(e)
-        if (mounted) setError('Không thể tải dữ liệu blog')
-      } finally {
-        if (mounted) setLoading(false)
-      }
-    })()
+      ; (async () => {
+        try {
+          setLoading(true)
+          const [tr, nw] = await Promise.all([blogService.getTrending(), blogService.getNew()])
+          if (!mounted) return
+          setTrending(tr)
+          setLatest(nw)
+        } catch (e) {
+          console.error(e)
+          if (mounted) setError('Không thể tải dữ liệu blog')
+        } finally {
+          if (mounted) setLoading(false)
+        }
+      })()
     return () => {
       mounted = false
     }
@@ -45,7 +47,7 @@ const BlogPage = () => {
             <section>
               <h2 className='text-2xl font-bold mb-6'>Cập nhật gần đây</h2>
               <div className='space-y-6'>
-                {loading && <div className='text-sm text-muted-foreground'>Đang tải bài viết thịnh hành...</div>}
+                {loading && Array.from({ length: 3 }).map((_, i) => <ArticleCardSkeleton key={i} />)}
                 {error && <div className='text-sm text-red-500'>{error}</div>}
                 {!loading &&
                   !error &&
@@ -85,7 +87,7 @@ const BlogPage = () => {
           </div>
 
           <div className='grid md:grid-cols-2 lg:grid-cols-3 gap-6'>
-            {loading && <div className='text-sm text-muted-foreground'>Đang tải bài viết mới nhất...</div>}
+            {loading && Array.from({ length: 6 }).map((_, i) => <ImageCardSkeleton key={i} />)}
             {error && <div className='text-sm text-red-500'>{error}</div>}
             {!loading &&
               !error &&

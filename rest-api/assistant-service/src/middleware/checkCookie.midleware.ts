@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import { JwtPayloadDto } from '../dto/request/auth.dto';
 import { env } from '~/config/env';
+import Logger from '~/utils/logger';
 
 const checkCookie = (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -21,7 +22,7 @@ const checkCookie = (req: Request, res: Response, next: NextFunction) => {
                 // For this middleware, let's treat invalid token as fall-through to guest logic 
                 // or just ignore and let auth middleware handle strict checks if needed.
                 // But here we want to identify the user.
-                console.warn('Token invalid in checkCookie, falling back to guest logic');
+                Logger.warn('Token invalid in checkCookie, falling back to guest logic');
             }
         }
 
@@ -49,7 +50,7 @@ const checkCookie = (req: Request, res: Response, next: NextFunction) => {
 
         next();
     } catch (error) {
-        console.error('Error in checkCookie middleware:', error);
+        Logger.error(`Error in checkCookie middleware: ${error}`);
         next();
     }
 };

@@ -1,4 +1,5 @@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { cn } from '@/lib/utils'
 
 interface CustomDialogProps {
   open: boolean
@@ -7,6 +8,7 @@ interface CustomDialogProps {
   description?: string
   children?: React.ReactNode
   className?: string
+  contentClassName?: string
   size?: 'sm' | 'md' | 'lg' | 'xl' | 'full'
 }
 
@@ -17,6 +19,7 @@ export default function CustomDialog({
   description,
   children,
   className,
+  contentClassName,
   size = 'md'
 }: CustomDialogProps) {
   const sizeClassMap: Record<NonNullable<CustomDialogProps['size']>, string> = {
@@ -37,7 +40,7 @@ export default function CustomDialog({
             <DialogTitle className='flex items-center gap-1'>{title}</DialogTitle>
             <DialogDescription>{description}</DialogDescription>
           </DialogHeader>
-          <div className='my-4'> {children}</div>
+          <div className={cn('my-4', contentClassName)}> {children}</div>
         </DialogContent>
       </Dialog>
     </>

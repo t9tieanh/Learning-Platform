@@ -12,6 +12,7 @@ export type MultiUploadItem = {
   message: string
   title?: string
   status: UploadStatus
+  data?: any
 }
 
 interface MultiUploadOptions {
@@ -69,14 +70,14 @@ export function useMultiUpload({
     if (ctrl) {
       try {
         ctrl.abort()
-      } catch {}
+      } catch { }
       controllersRef.current[id] = null
     }
     const rdr = readersRef.current[id]
     if (rdr) {
       try {
         rdr.cancel()
-      } catch {}
+      } catch { }
       readersRef.current[id] = null
     }
     setUploads((prev) => prev.filter((p) => p.id !== id))
@@ -86,7 +87,7 @@ export function useMultiUpload({
     Object.values(controllersRef.current).forEach((c) => {
       try {
         c?.abort()
-      } catch {}
+      } catch { }
     })
     controllersRef.current = {}
     readersRef.current = {}
@@ -99,14 +100,14 @@ export function useMultiUpload({
       if (ctrl) {
         try {
           ctrl.abort()
-        } catch {}
+        } catch { }
         controllersRef.current[id] = null
       }
       const rdr = readersRef.current[id]
       if (rdr) {
         try {
           rdr.cancel()
-        } catch {}
+        } catch { }
         readersRef.current[id] = null
       }
       upsert(id, { status: 'cancelled', message: 'Cancelled by user' })
@@ -115,7 +116,7 @@ export function useMultiUpload({
   )
 
   const startUpload = useCallback(
-    (file: File, fd: FormData, titlePost: string, uri: string) => {
+    (file: File, fd: FormData, titlePost: string, uri: string, isCallCallback: boolean = true) => {
       const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
       upsert(id, {
         id,
@@ -131,101 +132,101 @@ export function useMultiUpload({
 
       const url = `${baseUrl.replace(/\/$/, '')}/${uri.replace(/^\//, '')}`
 
-      ;(async () => {
-        // const fd = new FormData()
-        fd.append('file', file)
-        // fd.append('lesson', new Blob([JSON.stringify(meta)], { type: 'application/json' }))
+        ; (async () => {
+          // const fd = new FormData()
+          fd.append('file', file)
+          // fd.append('lesson', new Blob([JSON.stringify(meta)], { type: 'application/json' }))
 
-        try {
-          const headers: Record<string, string> = {}
-          if (accessToken) headers['Authorization'] = `Bearer ${accessToken}`
+          try {
+            const headers: Record<string, string> = {}
+            if (accessToken) headers['Authorization'] = `Bearer ${accessToken}`
 
-          const resp = await fetch(url, {
-            method: 'POST',
-            headers,
-            body: fd,
-            signal: controller.signal
-          })
-
-          if (!resp.ok || !resp.body) {
-            upsert(id, {
-              status: 'error',
-              message: `Đã có lỗi trong quá trình tải lên: ${resp.statusText || resp.status}`
+            const resp = await fetch(url, {
+              method: 'POST',
+              headers,
+              body: fd,
+              signal: controller.signal
             })
-            return
-          }
 
-          // use reader + TextDecoder to avoid TextDecoderStream typing issues
-          const reader = resp.body.getReader()
-          readersRef.current[id] = reader
-          const decoder = new TextDecoder()
-          let buffer = ''
+            if (!resp.ok || !resp.body) {
+              upsert(id, {
+                status: 'error',
+                message: `Đã có lỗi trong quá trình tải lên: ${resp.statusText || resp.status}`
+              })
+              return
+            }
 
-          while (true) {
-            const { value, done } = await reader.read()
-            if (done) break
-            if (value) {
-              // value is Uint8Array
-              const chunkText = decoder.decode(value, { stream: true })
-              buffer += chunkText
-              const events = buffer.split('\n\n')
-              for (let i = 0; i < events.length - 1; i++) {
-                const block = events[i].trim()
-                if (!block) continue
-                const lines = block.split('\n')
-                const dataLine = lines.find((l) => l.startsWith('data:'))
-                const eventLine = lines.find((l) => l.startsWith('event:'))
-                if (!dataLine) continue
-                const ev = eventLine ? eventLine.replace('event:', '').trim() : 'message'
-                const jsonStr = dataLine.replace('data:', '').trim()
-                try {
-                  const parsed = JSON.parse(jsonStr)
-                  if (ev === 'uploading' && typeof parsed.progress === 'number') {
-                    const p = Math.round(parsed.progress * 100)
-                    upsert(id, { progress: p, message: `Tài liệu đang được tải lên...(${p}%)` })
-                  } else if (ev === 'saving_db') {
-                    upsert(id, { message: parsed.message ?? '' })
-                  } else if (ev === 'completed') {
-                    upsert(id, { message: parsed.message ?? '', progress: 100, status: 'done' })
-                  } else {
-                    if (parsed.message) upsert(id, { message: parsed.message })
+            // use reader + TextDecoder to avoid TextDecoderStream typing issues
+            const reader = resp.body.getReader()
+            readersRef.current[id] = reader
+            const decoder = new TextDecoder()
+            let buffer = ''
+
+            while (true) {
+              const { value, done } = await reader.read()
+              if (done) break
+              if (value) {
+                // value is Uint8Array
+                const chunkText = decoder.decode(value, { stream: true })
+                buffer += chunkText
+                const events = buffer.split('\n\n')
+                for (let i = 0; i < events.length - 1; i++) {
+                  const block = events[i].trim()
+                  if (!block) continue
+                  const lines = block.split('\n')
+                  const dataLine = lines.find((l) => l.startsWith('data:'))
+                  const eventLine = lines.find((l) => l.startsWith('event:'))
+                  if (!dataLine) continue
+                  const ev = eventLine ? eventLine.replace('event:', '').trim() : 'message'
+                  const jsonStr = dataLine.replace('data:', '').trim()
+                  try {
+                    const parsed = JSON.parse(jsonStr)
+                    if (ev === 'uploading' && typeof parsed.progress === 'number') {
+                      const p = Math.round(parsed.progress * 100)
+                      upsert(id, { progress: p, message: `Tài liệu đang được tải lên...(${p}%)` })
+                    } else if (ev === 'saving_db') {
+                      upsert(id, { message: parsed.message ?? '' })
+                    } else if (ev === 'completed') {
+                      upsert(id, { message: parsed.message ?? '', progress: 100, status: 'done', data: parsed })
+                    } else {
+                      if (parsed.message) upsert(id, { message: parsed.message })
+                    }
+                  } catch (err) {
+                    console.warn('SSE parse error', err)
                   }
-                } catch (err) {
-                  console.warn('SSE parse error', err)
                 }
+                buffer = events[events.length - 1]
               }
-              buffer = events[events.length - 1]
             }
-          }
 
-          // finalize
-          setUploads((prev) => prev.map((it) => (it.id === id ? { ...it, status: 'done', progress: 100 } : it)))
-        } catch (err: any) {
-          if (err?.name === 'AbortError') {
-            upsert(id, { status: 'cancelled', message: 'Cancelled' })
-          } else {
-            console.error(err)
-            upsert(id, { status: 'error', message: err?.message ?? 'Có lỗi trong quá trình upload' })
-          }
-        } finally {
-          controllersRef.current[id] = null
-          const rdr = readersRef.current[id]
-          if (rdr) {
-            try {
-              rdr.cancel()
-            } catch {}
-            readersRef.current[id] = null
-          }
-          // call callback after upload finished
-          if (callback && typeof callback === 'function') {
-            try {
-              await callback()
-            } catch (e) {
-              console.error('Callback error after upload:', e)
+            // finalize
+            setUploads((prev) => prev.map((it) => (it.id === id ? { ...it, status: 'done', progress: 100 } : it)))
+          } catch (err: any) {
+            if (err?.name === 'AbortError') {
+              upsert(id, { status: 'cancelled', message: 'Cancelled' })
+            } else {
+              console.error(err)
+              upsert(id, { status: 'error', message: err?.message ?? 'Có lỗi trong quá trình upload' })
+            }
+          } finally {
+            controllersRef.current[id] = null
+            const rdr = readersRef.current[id]
+            if (rdr) {
+              try {
+                rdr.cancel()
+              } catch { }
+              readersRef.current[id] = null
+            }
+            // call callback after upload finished
+            if (isCallCallback && callback && typeof callback === 'function') {
+              try {
+                await callback()
+              } catch (e) {
+                console.error('Callback error after upload:', e)
+              }
             }
           }
-        }
-      })()
+        })()
 
       return id
     },
@@ -233,16 +234,31 @@ export function useMultiUpload({
   )
 
   useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      const isUploading = uploads.some((u) => u.status === 'uploading')
+      if (isUploading) {
+        e.preventDefault()
+        e.returnValue = ''
+      }
+    }
+
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload)
+    }
+  }, [uploads])
+
+  useEffect(() => {
     return () => {
       Object.values(controllersRef.current).forEach((c) => {
         try {
           c?.abort()
-        } catch {}
+        } catch { }
       })
       Object.values(readersRef.current).forEach((r) => {
         try {
           r?.cancel()
-        } catch {}
+        } catch { }
       })
     }
   }, [])

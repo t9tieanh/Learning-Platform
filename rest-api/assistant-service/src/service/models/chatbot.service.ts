@@ -3,6 +3,7 @@ import { CHATBOT_ERROR_MESSAGE, CHATBOT_KEY, CHATBOT_STORES_KEY } from '~/utils/
 import redisService from '~/service/utils/redis.service';
 import https from 'https';
 import axios from 'axios';
+import Logger from '~/utils/logger';
 
 class ChatbotService {
     private axiosInstance = axios.create({
@@ -55,14 +56,14 @@ class ChatbotService {
                 redisService.rpush(key, { type: 'ai', content: reply }),
                 redisService.expire(key, ttl)
             ]).catch(err => {
-                console.error('Error saving chat history to Redis:', err);
+                Logger.error(`Error saving chat history to Redis: ${err}`);
             });
 
             return {
                 reply
             };
         } catch (error) {
-            console.error('Error calling N8N webhook:', error);
+            Logger.error(`Error calling N8N webhook: ${error}`);
             return {
                 reply: CHATBOT_ERROR_MESSAGE
             };
