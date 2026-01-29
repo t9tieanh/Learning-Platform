@@ -3,6 +3,7 @@ import nodeMailService from '~/services/mails/nodemail.service'
 import { OrderConfirm } from '~/dto/request/notification.dto'
 import { QueueNameEnum } from '~/enums/rabbitQueue.enum'
 import chatService from '~/services/chat.service'
+import Logger from '~/utils/logger'
 
 
 class NotificationHandler {
@@ -23,7 +24,7 @@ class NotificationHandler {
         ),
       ])
     } catch (error) {
-      console.error('Error handling order created notification:', error)
+      Logger.error(`Error handling order created notification: ${error}`)
     }
   }
 }

@@ -1,5 +1,6 @@
 import Redis from 'ioredis'
 import { env } from '~/config/env'
+import Logger from '~/utils/logger'
 
 class RedisService {
   private redis: Redis
@@ -15,11 +16,11 @@ class RedisService {
     })
 
     this.redis.on('connect', () => {
-      console.log('🔌 Connected to Redis')
+      Logger.info('🔌 Connected to Redis')
     })
 
     this.redis.on('error', (err: Error) => {
-      console.error('❌ Redis error:', err)
+      Logger.error(`❌ Redis error: ${err}`)
     })
   }
 

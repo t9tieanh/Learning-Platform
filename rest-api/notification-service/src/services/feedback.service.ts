@@ -6,6 +6,7 @@ import courseClient from '~/grpc/courseClient'
 import { StatusCodes } from 'http-status-codes'
 import ApiError from '~/middleware/ApiError'
 import { FeedbackDto } from '~/dto/request/feedback.dto'
+import Logger from '~/utils/logger'
 
 interface LeanFeedback {
   _id: Types.ObjectId
@@ -65,7 +66,7 @@ const gets = async (request: GetFeedBackDTO): Promise<FeedbackListResult> => {
       item.userName = user.name || ''
       item.userAvatar = user.image || ''
     } catch (err) {
-      console.log(`Error fetching user info for userId=${item.userId}:`)
+      Logger.error(`Error fetching user info for userId=${item.userId}: ${err}`)
       item.userName = ''
       item.userAvatar = ''
     }
@@ -83,8 +84,8 @@ const getFeedbackByCourseId = async (courseId: string): Promise<FeedbackDto[]> =
   for (const feedback of feedbacks) {
     try {
       const user = await getUser(feedback.userId)
-      ;(feedback as any).userName = user.name || ''
-      ;(feedback as any).userAvatar = user.image || ''
+        ; (feedback as any).userName = user.name || ''
+        ; (feedback as any).userAvatar = user.image || ''
       feedback.id = String(feedback._id)
       result.push({
         id: feedback.id,
@@ -96,9 +97,9 @@ const getFeedbackByCourseId = async (courseId: string): Promise<FeedbackDto[]> =
         userAvatar: (feedback as any).userAvatar
       } as FeedbackDto)
     } catch (err) {
-      console.log(`Error fetching user info for userId=${feedback.userId}:`, err)
-      ;(feedback as any).userName = ''
-      ;(feedback as any).userAvatar = ''
+      Logger.error(`Error fetching user info for userId=${feedback.userId}: ${err}`)
+        ; (feedback as any).userName = ''
+        ; (feedback as any).userAvatar = ''
     }
   }
   return result
@@ -154,7 +155,7 @@ const addFeedBack = async (request: {
       await courseClient.updateCourseRating(courseId, avgRating)
     } catch (err) {
       // Log and continue — consider retrying via job/queue if this must succeed
-      console.error('Failed to update course rating via gRPC:', err)
+      Logger.error(`Failed to update course rating via gRPC: ${err}`)
     }
   }
 

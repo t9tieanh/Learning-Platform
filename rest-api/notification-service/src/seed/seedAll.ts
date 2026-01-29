@@ -1,6 +1,7 @@
 import mongoose from 'mongoose'
 import Conversation from '../models/message/conversation.model'
 import Message from '../models/message/message.model'
+import Logger from '~/utils/logger'
 
 async function seed() {
   const instructorId = '4d376e51-e408-4d9c-b181-54f2401a787f'
@@ -19,9 +20,9 @@ async function seed() {
       type: 'direct',
       lastMessageAt: new Date()
     })
-    console.log('✅ Created conversation:', conversation._id)
+    Logger.info(`✅ Created conversation: ${conversation._id}`)
   } else {
-    console.log('ℹ️ Conversation already exists:', conversation._id)
+    Logger.info(`ℹ️ Conversation already exists: ${conversation._id}`)
   }
 
   // 3️⃣ Fake tin nhắn
@@ -59,7 +60,7 @@ async function seed() {
   ]
 
   const insertedMessages = await Message.insertMany(messagesData)
-  console.log('✅ Inserted messages:', insertedMessages.length)
+  Logger.info(`✅ Inserted messages: ${insertedMessages.length}`)
 
   // 4️⃣ Cập nhật last message
   const lastMsg = insertedMessages[insertedMessages.length - 1]
@@ -67,7 +68,7 @@ async function seed() {
   conversation.lastMessageAt = lastMsg.createdAt
   await conversation.save()
 
-  console.log('✅ Updated conversation last message')
+  Logger.info('✅ Updated conversation last message')
   await mongoose.disconnect()
 }
 

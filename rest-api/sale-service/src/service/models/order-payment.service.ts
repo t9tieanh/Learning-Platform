@@ -8,6 +8,7 @@ import rabbitMQService from '~/service/utils/rabbitmq.service';
 import { createEnvelope } from '~/sagas/events/envelope';
 import { OrderCreatedPayload } from '~/sagas/order/dtos';
 import { MessageType } from '~/sagas/order/events';
+import Logger from '~/utils/logger';
 
 class OrderPaymentService {
     async verifyOrderForMomo(query: any) {
@@ -58,7 +59,7 @@ class OrderPaymentService {
             try {
                 await rabbitMQService.sendMessageTopic(envelope, 'app_events', MessageType.ORDER_CREATED, 'topic', true);
             } catch (err) {
-                console.error(`Publish OrderCreated failed (${provider}):`, err);
+                Logger.error(`Publish OrderCreated failed (${provider}): ${err}`);
                 await this.markOrderCancel(orderId);
                 return this.buildResponse(false, orderId, null, 'Không thể đẩy event thanh toán', '98');
             }
@@ -66,7 +67,7 @@ class OrderPaymentService {
             // Success
             return this.buildResponse(true, orderId, updated, `Thanh toán đơn hàng ${orderId} thành công`, '00');
         } catch (err: any) {
-            console.error(`Error verifying order (${provider}):`, err);
+            Logger.error(`Error verifying order (${provider}): ${err}`);
             if (orderId) await this.markOrderCancel(orderId);
 
             if (err instanceof ApiError) {

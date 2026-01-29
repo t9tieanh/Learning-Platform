@@ -25,6 +25,7 @@
     "prisma": "^6.16.2",
     "reflect-metadata": "^0.2.2",
     "remove-accents": "^0.5.0",
+    "winston": "^3.19.0",
     "zod": "^4.1.4"
   },
   "devDependencies": {

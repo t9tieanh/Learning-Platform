@@ -3,6 +3,7 @@ import Conversation, { IConversation } from '~/models/message/conversation.model
 import Message, { IMessage } from '~/models/message/message.model'
 import { Feedback } from '~/models/review/feedback.model'
 import socketClient from '~/socket'
+import Logger from '~/utils/logger'
 interface DirectConversationResult {
   conversation: IConversation
   isNew: boolean
@@ -90,7 +91,7 @@ const getMessages = async (conversationId: string, cursor?: string, limit = 20) 
       if (Types.ObjectId.isValid(cursor)) {
         query._id = { $lt: new Types.ObjectId(cursor) }
       } else {
-        console.warn('[getMessages] ⚠️ Cursor không hợp lệ:', cursor)
+        Logger.warn(`[getMessages] ⚠️ Cursor không hợp lệ: ${cursor}`)
       }
     }
 
@@ -105,7 +106,7 @@ const getMessages = async (conversationId: string, cursor?: string, limit = 20) 
 
     return { items, hasMore, nextCursor }
   } catch (error) {
-    console.error('[getMessages] ❌ Lỗi khi lấy tin nhắn:', error)
+    Logger.error(`[getMessages] ❌ Lỗi khi lấy tin nhắn: ${error}`)
     return { items: [], hasMore: false, nextCursor: null, error: (error as Error).message }
   }
 }
@@ -119,7 +120,7 @@ const sendMessage = async (
   peerId: string
 ): Promise<IMessage> => {
   try {
-    console.log({ conversationId, senderId, senderRole, content })
+    Logger.info(JSON.stringify({ conversationId, senderId, senderRole, content }))
 
     const message = await Message.create({
       conversationId: conversationId,
@@ -137,7 +138,7 @@ const sendMessage = async (
     })
 
     const messageId = message.id
-    console.log('messageId', messageId)
+    Logger.info(`messageId ${messageId}`)
     socketClient.emit('server_message_send', {
       conversationId,
       messageId,
@@ -149,7 +150,7 @@ const sendMessage = async (
 
     return message
   } catch (error) {
-    console.error('Error in sendMessage:', error)
+    Logger.error(`Error in sendMessage: ${error}`)
     throw new Error(`Không thể gửi tin nhắn: ${error instanceof Error ? error.message : String(error)}`)
   }
 }
@@ -157,7 +158,7 @@ const sendMessage = async (
 // Đánh dấu đã đọc tin nhắn (toàn bộ hoặc đến một messageId)
 const markRead = async (conversationId: string, senderId: string, peerId: string, messageId?: string) => {
   try {
-    console.log('READER ID', peerId)
+    Logger.info(`READER ID ${peerId}`)
     if (peerId) {
       const filter: any = { conversationId: conversationId, status: { $ne: 'read' } }
       // if (messageId && Types.ObjectId.isValid(messageId)) {
@@ -173,7 +174,7 @@ const markRead = async (conversationId: string, senderId: string, peerId: string
     }
     return null
   } catch (error) {
-    console.error('❌ Error in markRead:', error)
+    Logger.error(`❌ Error in markRead: ${error}`)
     return null
   }
 }
@@ -186,10 +187,10 @@ const updateMessage = async (
   peerId: string
 ) => {
   try {
-    console.log('conversationId', conversationId)
-    console.log('messageId', messageId)
-    console.log('senderId', senderId)
-    console.log('content', content)
+    Logger.info(`conversationId ${conversationId}`)
+    Logger.info(`messageId ${messageId}`)
+    Logger.info(`senderId ${senderId}`)
+    Logger.info(`content ${content}`)
 
     const updated = await Message.findOneAndUpdate(
       { _id: messageId, conversationId: conversationId, senderId: senderId },
@@ -208,8 +209,8 @@ const updateMessage = async (
 
     const isLastMessage = conversation.lastMessageId?.toString() === messageId.toString()
     const senderRole = updated.senderRole
-    console.log('isLastMessage', conversation.lastMessageId?.toString())
-    console.log('messageId', messageId)
+    Logger.info(`isLastMessage ${conversation.lastMessageId?.toString()}`)
+    Logger.info(`messageId ${messageId}`)
     if (isLastMessage) {
       await Conversation.findByIdAndUpdate(conversationId, {
         $set: { lastMessageAt: updated.createdAt, lastMessageId: updated._id }
@@ -235,7 +236,7 @@ const updateMessage = async (
 
     return updated
   } catch (err) {
-    console.error('Lỗi khi cập nhật tin nhắn:', err)
+    Logger.error(`Lỗi khi cập nhật tin nhắn: ${err}`)
     return null
   }
 }
@@ -286,10 +287,10 @@ const deleteMessage = async (conversationId: string, messageId: string, requeste
         deletedMessageId: messageId,
         newLastMessage: nextLast
           ? {
-              id: nextLast._id,
-              content: nextLast.content,
-              createdAt: nextLast.createdAt
-            }
+            id: nextLast._id,
+            content: nextLast.content,
+            createdAt: nextLast.createdAt
+          }
           : null,
         instructorId,
         studentId
@@ -305,7 +306,7 @@ const deleteMessage = async (conversationId: string, messageId: string, requeste
 
     return { deleted: true }
   } catch (err) {
-    console.error('Lỗi khi xóa tin nhắn:', err)
+    Logger.error(`Lỗi khi xóa tin nhắn: ${err}`)
     return { deleted: false }
   }
 }
@@ -339,7 +340,7 @@ const sendFirstMessage = async (courseName: string, instructorId: string, studen
       senderRole: 'instructor'
     })
   } catch (error) {
-    console.error('❌ Lỗi khi gửi tin nhắn chào mừng:', error)
+    Logger.error(`❌ Lỗi khi gửi tin nhắn chào mừng: ${error}`)
   }
 }
 
