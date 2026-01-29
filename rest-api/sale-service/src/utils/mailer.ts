@@ -1,11 +1,12 @@
 import nodemailer from 'nodemailer';
+import Logger from './logger';
 
 export const sendMail = async (to: string, subject: string, html: string) => {
   // In dev bạn có thể log nhưng tránh lộ secrets
-  console.log('sendMail -> to:', to);
-  console.log('SMTP_HOST:', process.env.SMTP_HOST, 'PORT:', process.env.SMTP_PORT);
-  console.log('MAIL_FROM:', process.env.MAIL_FROM);
-  console.log('SMTP_USER is set?', Boolean(process.env.SMTP_USER));
+  Logger.info(`sendMail -> to: ${to}`);
+  Logger.info(`SMTP_HOST: ${process.env.SMTP_HOST} PORT: ${process.env.SMTP_PORT}`);
+  Logger.info(`MAIL_FROM: ${process.env.MAIL_FROM}`);
+  Logger.info(`SMTP_USER is set? ${Boolean(process.env.SMTP_USER)}`);
 
   const port = Number(process.env.SMTP_PORT || 587);
   const transporter = nodemailer.createTransport({
@@ -23,9 +24,9 @@ export const sendMail = async (to: string, subject: string, html: string) => {
   // Xác minh kết nối SMTP trước khi gửi
   try {
     await transporter.verify();
-    console.log('SMTP connection verified ✅');
+    Logger.info('SMTP connection verified ✅');
   } catch (err) {
-    console.error('SMTP verify error ❌', err);
+    Logger.error(`SMTP verify error ❌ ${err}`);
     throw err; // cho controller bắt và trả về lỗi dễ hiểu
   }
 
@@ -36,10 +37,10 @@ export const sendMail = async (to: string, subject: string, html: string) => {
       subject,
       html
     });
-    console.log('Message sent ✔', info.messageId);
+    Logger.info(`Message sent ✔ ${info.messageId}`);
     return info;
   } catch (err) {
-    console.error('sendMail error ❌', err);
+    Logger.error(`sendMail error ❌ ${err}`);
     throw err;
   }
 };

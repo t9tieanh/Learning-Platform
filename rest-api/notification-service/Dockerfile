@@ -49,6 +49,10 @@ COPY --from=builder /proto-shared /proto-shared
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S nodejs -u 1001
 
+# Create logs directory and set permissions
+RUN mkdir -p logs && \
+    chown -R nodejs:nodejs /app
+
 USER nodejs
 
 # Expose port

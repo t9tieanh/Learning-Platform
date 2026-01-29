@@ -1,6 +1,7 @@
 // src/socket/socketClient.ts
 import { io, Socket } from 'socket.io-client'
 import { env } from '~/config/env'
+import Logger from '~/utils/logger'
 
 const SOCKET_URL = env.SOCKET_URL || 'http://socket-server:5001'
 
@@ -10,15 +11,15 @@ const socket: Socket = io(SOCKET_URL, {
 })
 
 socket.on('connect', () => {
-  console.log('Backend connected to socket server:', socket.id)
+  Logger.info(`Backend connected to socket server: ${socket.id}`)
 })
 
 socket.on('disconnect', (reason) => {
-  console.log('⚠️ Disconnected from socket server:', reason)
+  Logger.warn(`⚠️ Disconnected from socket server: ${reason}`)
 })
 
 socket.on('connect_error', (err) => {
-  console.error('❌ Socket connection error:', err.message)
+  Logger.error(`❌ Socket connection error: ${err.message}`)
 })
 
 export default socket

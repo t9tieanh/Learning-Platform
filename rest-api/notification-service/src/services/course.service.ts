@@ -1,6 +1,7 @@
 import { QueueNameEnum } from '~/enums/rabbitQueue.enum'
 import nodemailService from '~/services/mails/nodemail.service'
 import { CourseApprovalEvent } from '~/dto/event/course-approval-event.dto'
+import Logger from '~/utils/logger'
 
 export const handleCourseApprovalEvent = async (event: CourseApprovalEvent): Promise<void> => {
   try {
@@ -11,6 +12,6 @@ export const handleCourseApprovalEvent = async (event: CourseApprovalEvent): Pro
       })
     ])
   } catch (err) {
-    console.error('Lỗi gửi email course approval:', err)
+    Logger.error(`Lỗi gửi email course approval: ${err}`)
   }
 }

@@ -1,6 +1,7 @@
 // elasticsearch.service.ts
 
 import { Client } from '@elastic/elasticsearch';
+import Logger from '~/utils/logger';
 
 /**
  * ElasticSearchService wraps việc khởi tạo và sử dụng Elasticsearch client
@@ -12,7 +13,7 @@ class ElasticsearchService {
     this.client = new Client({
       node: process.env.ES_NODE || 'http://localhost:9200',
     });
-    console.log('Elasticsearch client initialized with node:', process.env.ES_NODE);
+    Logger.info(`Elasticsearch client initialized with node: ${process.env.ES_NODE}`);
   }
 
   /**
@@ -23,8 +24,8 @@ class ElasticsearchService {
       await this.client.ping();
       return true;
     } catch (error) {
-      console.error('Elasticsearch ping failed:', error);
-      return false; 
+      Logger.error(`Elasticsearch ping failed: ${error}`);
+      return false;
     }
   }
 
@@ -47,14 +48,14 @@ class ElasticsearchService {
   /**
    * Tạo hoặc cập nhật document
    */
-   public async index<T extends Record<string, any>>(index: string, id: string, document: T): Promise<void> {
-        await this.client.index({
-        index,
-        id,
-        body: document,
-        refresh: 'wait_for'
-        });
-    }
+  public async index<T extends Record<string, any>>(index: string, id: string, document: T): Promise<void> {
+    await this.client.index({
+      index,
+      id,
+      body: document,
+      refresh: 'wait_for'
+    });
+  }
 
   /**
    * Search documents trong index
