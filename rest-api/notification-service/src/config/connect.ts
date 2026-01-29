@@ -1,24 +1,22 @@
 import CONNECT_DB from './mongodb'
-import Redis from './redis'
 import RabbitClient from './rabbitmq'
+import Logger from '~/utils/logger'
 
 export const CONNECT_DATABASES = async (): Promise<void> => {
   try {
     await Promise.all([
       CONNECT_DB()
-        .then(() => console.log('Connected MongoDB'))
+        .then(() => Logger.info('Connected MongoDB'))
         .catch((error) => {
-          console.error('MongoDB connection error:', error)
+          Logger.error(`MongoDB connection error: ${error}`)
         }),
-      // Redis.CONNECT_REDIS_DB().then(() => console.log('Connected Redis')),
-      // có thể kết nối rabbit mq hoặc không
       RabbitClient.getInstance()
-        .then(() => console.log('Connected RabbitMQ'))
+        .then(() => Logger.info('Connected RabbitMQ'))
         .catch((error) => {
-          console.log(error)
+          Logger.error(`RabbitMQ connection error: ${error}`)
         })
     ])
   } catch (err) {
-    console.error('Database connection failed:', err)
+    Logger.error(`Database connection failed: ${err}`)
   }
 }

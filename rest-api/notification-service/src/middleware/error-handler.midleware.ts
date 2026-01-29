@@ -1,6 +1,7 @@
 import { StatusCodes } from 'http-status-codes'
 import ApiError from '~/middleware/ApiError'
 import { Request, Response, NextFunction } from 'express'
+import Logger from '~/utils/logger'
 
 // Middleware xử lý lỗi tập trung trong ứng dụng Back-end NodeJS (ExpressJS)
 export const errorHandlingMiddleware = (err: ApiError, req: Request, res: Response, next: NextFunction) => {
@@ -14,15 +15,13 @@ export const errorHandlingMiddleware = (err: ApiError, req: Request, res: Respon
     stack: err.stack
   }
 
-  console.error('Error occurred:', responseError)
-  // console.error(responseError)
+  Logger.error(`Error occurred: ${JSON.stringify(responseError)}`)
 
   // Chỉ khi môi trường là DEV thì mới trả về Stack Trace để debug dễ dàng hơn, còn không thì xóa đi. (Muốn hiểu rõ hơn hãy xem video 55 trong bộ MERN Stack trên kênh Youtube: https://www.youtube.com/@trungquandev)
   // if (env.BUILD_MODE !== 'dev') delete responseError.stack
 
   // Đoạn này có thể mở rộng nhiều về sau như ghi Error Log vào file, bắn thông báo lỗi vào group Slack, Telegram, Email...vv Hoặc có thể viết riêng Code ra một file Middleware khác tùy dự án.
   // ...
-  // console.error(responseError)
 
   // Trả responseError về phía Front-end
   res.status(responseError.code).json(responseError)

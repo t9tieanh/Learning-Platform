@@ -26,7 +26,7 @@ class LoggerService {
             winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss:ms' }),
             winston.format.colorize({ all: true }),
             winston.format.printf(
-                (info) => `${info.timestamp} \x1b[35m[AssistantService]\x1b[0m ${info.level}: ${info.message}`,
+                (info) => `${info.timestamp} \x1b[33m[SaleService]\x1b[0m ${info.level}: ${info.message}`,
             ),
         );
 

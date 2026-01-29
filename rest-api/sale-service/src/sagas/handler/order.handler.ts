@@ -1,18 +1,19 @@
 import { RegisterUpdatedPayload } from '../order/dtos';
 import prismaService from '~/service/utils/prisma.service'
-import { OrderStatus } from '@prisma/client'; 
+import { OrderStatus } from '@prisma/client';
 import rabbitMQService from '~/service/utils/rabbitmq.service';
 import { createEnvelope } from '../events/envelope';
 import { MessageType } from '../order/events';
 import orderService from '~/service/models/order.service';
 import cartService from '~/service/models/cart.service';
+import Logger from '~/utils/logger';
 
 class OrderHandler {
   // send message to other services (notification service / course service)
   private async sendMessage(type: string, payload: any, correlationId: string) {
     const envelope = createEnvelope({ type, payload, correlationId });
     await rabbitMQService.sendMessageTopic(envelope, 'app_events', type, 'topic', true).catch(err => {
-      console.error(`Failed to send message [${type}]:`, err);
+      Logger.error(`Failed to send message [${type}]: ${err}`);
     });
   }
 
@@ -37,12 +38,12 @@ class OrderHandler {
       orderData.items.forEach(async (item) => {
         //handle del cart of them
         cartService.removeFromCart(await cartService.getCartId(orderData.user_id), item.course_id.toString()).catch(err => {
-          console.error('Failed to remove order items from cart:', err);
+          Logger.error(`Failed to remove order items from cart: ${err}`);
         });
       });
 
     } catch (error) {
-      console.error('Error completing order, rolling back:', error);
+      Logger.error(`Error completing order, rolling back: ${error}`);
 
       // Rollback order status to Cancel
       const order = await prismaService.order.findFirst({
@@ -66,7 +67,7 @@ class OrderHandler {
 
   // Handle when receiving event register.update.failed.v1
   async handleRegisterUpdateFailed(message: RegisterUpdatedPayload) {
-    console.error('Register update failed for order:', message.orderId);
+    Logger.error(`Register update failed for order: ${message.orderId}`);
     await prismaService.order.update({ where: { id: message.orderId }, data: { status: OrderStatus.Cancel } });
   }
 }

@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import prismaService from '~/service/utils/prisma.service';
 import crypto from 'crypto';
 import redisService from '~/service/utils/redis.service';
+import Logger from '~/utils/logger';
 
 const checkSession = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -57,7 +58,7 @@ const checkSession = async (req: Request, res: Response, next: NextFunction) => 
           try {
             await redisService.del(guestKey);
           } catch (e) {
-            console.warn('Lỗi khi gộp cart của guest với user đã đăng nhập:', e);
+            Logger.warn(`Lỗi khi gộp cart của guest với user đã đăng nhập: ${e}`);
           }
         }
 
@@ -78,7 +79,7 @@ const checkSession = async (req: Request, res: Response, next: NextFunction) => 
     return next();
 
   } catch (err) {
-    console.error('checkSession middleware error:', err);
+    Logger.error(`checkSession middleware error: ${err}`);
     // fail-safe: create a guest id so subsequent handlers have a cartId
     const cartId = crypto.randomBytes(16).toString('hex');
     if (!req.session) req.session = {} as any;

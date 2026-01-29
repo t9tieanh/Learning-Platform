@@ -4,6 +4,7 @@ import sendResponse from '~/dto/response/send-response'
 import ChatService from '~/services/chat.service'
 import { getUser } from '~/grpc/userClient'
 import Message from '~/models/message/message.model'
+import Logger from '~/utils/logger'
 
 const createOrGetDirect = async (req: Request, res: Response) => {
   try {
@@ -148,7 +149,7 @@ const sendMessage = async (req: Request, res: Response) => {
     const currentUserId = (req.user as any)?.sub as string
     if (!currentUserId) throw new Error('Thiếu thông tin người dùng (token)')
 
-    console.log('[REQ DATA]', req.data)
+    Logger.info(`[REQ DATA] ${JSON.stringify(req.data)}`)
     const { conversationId, content, senderRole, peerId, senderId } = req.data as {
       conversationId: string
       content: string

@@ -3,6 +3,7 @@ import ApiError from '~/middleware/ApiError';
 import redisService from '../utils/redis.service';
 import courseGrpcClient from '~/grpc/courseClient.grpc';
 import courseService from './course.service';
+import Logger from '~/utils/logger';
 
 class CartService {
     private readonly TTL_GUEST_CART = 2 * 24 * 60 * 60; // 24 hours in seconds
@@ -70,7 +71,7 @@ class CartService {
         try {
             await redisService.sadd(`cart:${cartId}`, courseId);
         } catch (e) {
-            console.warn('redis sadd failed after addToCart:', e);
+            Logger.warn(`redis sadd failed after addToCart: ${e}`);
         }
 
         return createdItem;
@@ -79,7 +80,7 @@ class CartService {
     async removeFromCart(cartId: string, courseId: string, isGuest = false): Promise<void> {
         // remove from redis first
         await redisService.srem(`cart:${cartId}`, courseId);
-        
+
         if (isGuest) {
             return;
         }
@@ -114,7 +115,7 @@ class CartService {
         try {
             await redisService.srem(`cart:${cartId}`, courseId);
         } catch (e) {
-            console.warn('redis srem failed after removeFromCart:', e);
+            Logger.warn(`redis srem failed after removeFromCart: ${e}`);
         }
     }
 
@@ -173,7 +174,7 @@ class CartService {
     }
 
     async getCartItemCount(cartId: string): Promise<number> {
-         // find redis first
+        // find redis first
         const cart = await redisService.smembers(`cart:${cartId}`);
 
         // only use redis when set has members

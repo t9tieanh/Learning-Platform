@@ -1,14 +1,15 @@
 import mongoose from 'mongoose'
 import { env } from '~/config/env'
+import Logger from '~/utils/logger'
 
 const CONNECT_DB = async () => {
   try {
     await mongoose.connect(env.MONGODB_URI, {
       dbName: env.DATABASE_NAME
     })
-    console.log('Mongoose connected')
+    Logger.info('Mongoose connected')
   } catch (err) {
-    console.log(err)
+    Logger.error(`${err}`)
     process.exit(1)
   }
 }
