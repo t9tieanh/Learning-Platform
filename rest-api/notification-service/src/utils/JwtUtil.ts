@@ -1,12 +1,13 @@
 import { JwtPayloadDto } from '~/dto/request/Auth.dto'
 import jwt from 'jsonwebtoken'
 import { env } from '~/config/env'
+import Logger from '~/utils/logger'
 import { TokenType } from '~/enums/tokenType.enum'
 import ApiError from '~/middleware/ApiError'
 import { StatusCodes } from 'http-status-codes'
 
 export const GenerateSignature = async (payload: JwtPayloadDto) => {
-  console.log('GenerateSignature', payload)
+  Logger.info(`GenerateSignature ${JSON.stringify(payload)}`)
 
   return jwt.sign(payload, env.APP_SECRET, { expiresIn: '90d' })
 }

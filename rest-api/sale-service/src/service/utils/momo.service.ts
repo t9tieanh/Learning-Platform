@@ -3,6 +3,7 @@ import axios from 'axios'
 import crypto from 'crypto'
 import { StatusCodes } from 'http-status-codes'
 import ApiError from '~/middleware/ApiError'
+import Logger from '~/utils/logger'
 // import prisma from '~/prisma.service'
 
 // DTO
@@ -220,7 +221,7 @@ export class MomoService {
         signatureValid
       }
     } catch (error: any) {
-      console.error('MoMo verifyCallback error:', error)
+      Logger.error(`MoMo verifyCallback error: ${error}`)
       return {
         isSuccess: false,
         orderId: query.orderId || '',

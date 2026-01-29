@@ -1,5 +1,6 @@
 // import AiChatService from "~/services/aiChat.service";
 // import { saveToSupabase } from "./supabase";
+// import Logger from '~/utils/logger'
 
 // const mockCourses = [
 //     {
@@ -39,7 +40,7 @@
 
 //         const res = await saveToSupabase(course.id, course.name, course.description, course.tags, course.link, embedding);
 //         if (res) {
-//             console.log(`Saved course ${course.name} ✅`);
+//             Logger.info(`Saved course ${course.name} ✅`);
 //         }
 //     }
 // }

@@ -7,6 +7,7 @@ import { errorHandlingMiddleware } from '~/middleware/error-handler.midleware'
 import http from 'http'
 import { initSagas } from '~/sagas/init/initSaga'
 import router from '~/routes/index'
+import Logger from '~/utils/logger'
 const { startGrpcServer } = require('./grpc/notifyServer')
 
 const START_SERVER = async () => {
@@ -29,14 +30,14 @@ const START_SERVER = async () => {
   const port = Number(env.APP_PORT)
 
   server.listen(port, hostname, () => {
-    console.log(`Hello, Learnova:notification_service running at: ${hostname}:${port}/`)
+    Logger.info(`Hello, Learnova:notification_service running at: ${hostname}:${port}/`)
   })
 }
 
 CONNECT_DATABASES()
-  .then(() => console.log('Database connected successfully'))
+  .then(() => Logger.info('Database connected successfully'))
   .then(() => START_SERVER())
   .catch((err) => {
-    console.error('Database connection failed:', err)
+    Logger.error(`Database connection failed: ${err}`)
     process.exit(1)
   })

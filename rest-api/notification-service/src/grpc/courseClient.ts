@@ -2,6 +2,7 @@ import * as grpc from '@grpc/grpc-js'
 import * as protoLoader from '@grpc/proto-loader'
 import path from 'path'
 import { env } from '~/config/env'
+import Logger from '~/utils/logger'
 
 class CourseGrpcClient {
   courseClient: any
@@ -22,7 +23,7 @@ class CourseGrpcClient {
     const CourseSvcCtor = grpcObject.course?.CourseService ?? grpcObject.CourseService
 
     if (!CourseSvcCtor) {
-      console.error('CourseService not found in loaded proto. Available keys:', Object.keys(grpcObject))
+      Logger.error(`CourseService not found in loaded proto. Available keys: ${Object.keys(grpcObject)}`)
       throw new Error('CourseService not found in proto definition')
     }
 
@@ -31,9 +32,9 @@ class CourseGrpcClient {
     // quick readiness check (wait up to 5s)
     this.courseClient.waitForReady(Date.now() + 5000, (err: Error | null) => {
       if (err) {
-        console.error('CourseService gRPC NOT ready:', err.message || err)
+        Logger.error(`CourseService gRPC NOT ready: ${err.message || err}`)
       } else {
-        console.log('CourseService gRPC ready')
+        Logger.info('CourseService gRPC ready')
       }
     })
   }
@@ -43,12 +44,12 @@ class CourseGrpcClient {
       const req = { courseId, userId }
       this.courseClient.checkHasPurchased(req, (err: any, response: any) => {
         if (err) {
-          console.error('grpc checkHasPurchased error:', err)
+          Logger.error(`grpc checkHasPurchased error: ${err}`)
           return reject(err)
         }
 
         if (!response || typeof response.hasPurchased !== 'boolean') {
-          console.warn('grpc checkHasPurchased: invalid response, returning false', response)
+          Logger.warn(`grpc checkHasPurchased: invalid response, returning false ${JSON.stringify(response)}`)
           return resolve(false)
         }
 
@@ -64,7 +65,7 @@ class CourseGrpcClient {
         const req = { courseId, rating: newRating }
         this.courseClient.updateCourseRating(req, (err: any, response: any) => {
           if (err) {
-            console.error('grpc updateCourseRating error:', err)
+            Logger.error(`grpc updateCourseRating error: ${err}`)
             resolve(false)
           }
           resolve(response.isSucces)

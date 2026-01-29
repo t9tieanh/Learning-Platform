@@ -4,6 +4,7 @@ import { QueueName } from '~/sagas/order/queues'
 import orderHandler from '~/sagas/handler/order.handler'
 import { RegisterUpdatedPayload } from '../order/dtos'
 import { EventEnvelope } from '../events/envelope'
+import Logger from '~/utils/logger'
 
 export async function initSagas() {
   await RabbitClient.getInstance()
@@ -23,7 +24,7 @@ export async function initSagas() {
       throw new Error('Invalid payload for register.updated event')
     }
 
-    console.log('data', data)
+    Logger.info(`data ${JSON.stringify(data)}`)
 
     if (data.type === MessageType.REGISTER_UPDATED) {
       await orderHandler.handleOrderCreated(data.payload)

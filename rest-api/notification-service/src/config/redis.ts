@@ -1,5 +1,6 @@
 import { createClient, RedisClientType } from 'redis'
 import { env } from './env'
+import Logger from '~/utils/logger'
 
 let redisClient: RedisClientType | null = null
 
@@ -16,7 +17,7 @@ const CONNECT_REDIS_DB = async (): Promise<RedisClientType> => {
 
   try {
     await redisClient.connect()
-    console.log('Redis connected')
+    Logger.info('Redis connected')
   } catch (err) {
     // Có thể trả ApiError để middleware xử lý chung
     throw new Error('Cannot connect to Redis')

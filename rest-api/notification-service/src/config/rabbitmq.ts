@@ -5,6 +5,7 @@ import nodemailService from '~/services/mails/nodemail.service'
 import { VerifyEmail } from '~/dto/request/notification.dto'
 import { CourseApprovalEvent } from '~/dto/event/course-approval-event.dto'
 import { handleCourseApprovalEvent } from '~/services/course.service'
+import Logger from '~/utils/logger'
 
 const RabbitMQConf = {
   protocol: 'amqps',
@@ -46,7 +47,7 @@ class RabbitClient {
         await handler(parsed)
         RabbitClient.channel?.ack(data)
       } catch (err) {
-        console.error(`Lỗi xử lý message ở queue ${queue}:`, err)
+        Logger.error(`Lỗi xử lý message ở queue ${queue}: ${err}`)
         RabbitClient.channel?.nack(data, false, true)
       }
     })
@@ -81,9 +82,9 @@ class RabbitClient {
       // Import handler from course.service
       this.consumeQueue<CourseApprovalEvent>(QueueNameEnum.COURSE_APPROVAL, handleCourseApprovalEvent)
 
-      console.log('Connection to RabbitMQ established')
+      Logger.info('Connection to RabbitMQ established')
     } catch (error) {
-      console.error('RabbitMQ connection failed:', error)
+      Logger.error(`RabbitMQ connection failed: ${error}`)
       throw new Error('RabbitMQ connection failed')
     }
   }
@@ -102,7 +103,7 @@ class RabbitClient {
     for (const k of keys) {
       await RabbitClient.channel.bindQueue(queue, exchange, k)
     }
-    console.log(`Bound queue ${queue} -> ${exchange} [${keys.join(',')}]`)
+    Logger.info(`Bound queue ${queue} -> ${exchange} [${keys.join(',')}]`)
   }
 
   // Register consumer: bind then consume (handler receives parsed envelope)
@@ -126,7 +127,7 @@ class RabbitClient {
           await handler(envelope)
           RabbitClient.channel?.ack(msg)
         } catch (err) {
-          console.error(`Error processing message from ${queue}`, err)
+          Logger.error(`Error processing message from ${queue}: ${err}`)
           // nack and move to DLQ or drop depending on your policy
           RabbitClient.channel?.nack(msg, false, false)
         }
@@ -134,7 +135,7 @@ class RabbitClient {
       { noAck: false }
     )
 
-    console.log(`Consumer registered on queue ${queue}`)
+    Logger.info(`Consumer registered on queue ${queue}`)
   }
 }
 

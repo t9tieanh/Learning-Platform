@@ -1,6 +1,7 @@
 import amqp, { Channel } from 'amqplib'
 import { QueueNameEnum } from '../../enums/emailType.enum'
 import { NotificationDto } from '../../dto/request/notification.dto'
+import Logger from '../../utils/logger'
 
 const RabbitMQConf = {
   protocol: 'amqp',
@@ -35,14 +36,14 @@ class RabbitClient {
     RabbitClient.channel?.consume(queue, async (data) => {
       if (!data) return
       try {
-        console.log(data.content.toString());
+        Logger.info(data.content.toString());
         const parsed: T & { type?: string } = JSON.parse(data.content.toString())
         parsed.type = queue // Gán type cho parsed để biết queue nào đã gửi message
 
         await handler(parsed)
         RabbitClient.channel?.ack(data)
       } catch (err) {
-        console.error(`Lỗi xử lý message ở queue ${queue}:`, err)
+        Logger.error(`Lỗi xử lý message ở queue ${queue}: ${err}`)
         RabbitClient.channel?.nack(data, false, true)
       }
     })
@@ -66,9 +67,9 @@ class RabbitClient {
       //   await nodemailService.sendMail(parsed as any)
       // })
 
-      console.log('Connection to RabbitMQ established')
+      Logger.info('Connection to RabbitMQ established')
     } catch (error) {
-      console.error('RabbitMQ connection failed:', error)
+      Logger.error(`RabbitMQ connection failed: ${error}`)
       throw new Error('RabbitMQ connection failed')
     }
   }
@@ -85,10 +86,10 @@ class RabbitClient {
 
       const msgBuffer = Buffer.from(JSON.stringify(data))
       const sent = RabbitClient.channel.sendToQueue(queueName, msgBuffer)
-      console.log('Message sent to RabbitMQ')
+      Logger.info('Message sent to RabbitMQ')
       return sent
     } catch (error) {
-      console.error('Failed to send message:', error)
+      Logger.error(`Failed to send message: ${error}`)
       return false
     }
   }
@@ -111,10 +112,10 @@ class RabbitClient {
 
       const payload = Buffer.from(JSON.stringify(data))
       const published = RabbitClient.channel.publish(exchange, routingKey, payload, { persistent })
-      console.log(`Message published to exchange ${exchange} with routingKey '${routingKey}'`)
+      Logger.info(`Message published to exchange ${exchange} with routingKey '${routingKey}'`)
       return published
     } catch (error) {
-      console.error('Failed to publish message to exchange:', error)
+      Logger.error(`Failed to publish message to exchange: ${error}`)
       return false
     }
   }
@@ -133,7 +134,7 @@ class RabbitClient {
     for (const k of keys) {
       await RabbitClient.channel.bindQueue(queue, exchange, k)
     }
-    console.log(`Bound queue ${queue} -> ${exchange} [${keys.join(',')}]`)
+    Logger.info(`Bound queue ${queue} -> ${exchange} [${keys.join(',')}]`)
   }
 
   // Register consumer: bind then consume (handler receives parsed envelope)
@@ -155,13 +156,13 @@ class RabbitClient {
         await handler(envelope)
         RabbitClient.channel?.ack(msg)
       } catch (err) {
-        console.error(`Error processing message from ${queue}`, err)
+        Logger.error(`Error processing message from ${queue}: ${err}`)
         // nack and move to DLQ or drop depending on your policy
         RabbitClient.channel?.nack(msg, false, false)
       }
     }, { noAck: false })
 
-    console.log(`Consumer registered on queue ${queue}`)
+    Logger.info(`Consumer registered on queue ${queue}`)
   }
 }
 

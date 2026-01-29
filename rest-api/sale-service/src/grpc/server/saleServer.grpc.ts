@@ -3,6 +3,7 @@ const protoLoader = require('@grpc/proto-loader');
 const path = require('path');
 import prismaService from "~/service/utils/prisma.service";
 import { Prisma } from '@prisma/client';
+import Logger from '~/utils/logger';
 
 const GRPC_PORT = 9093;
 const APP_HOST = process.env.APP_HOST || '0.0.0.0';
@@ -54,7 +55,7 @@ const saleServiceImpl = {
 
             callback(null, { dataList });
         } catch (err) {
-            console.error('getRevenueAndProfit error:', err);
+            Logger.error(`getRevenueAndProfit error: ${err}`);
             callback(err, null);
         }
     }
@@ -64,14 +65,14 @@ const saleServiceImpl = {
 
 function startGrpcServer() {
     const server = new grpc.Server();
-    console.log('start server');
+    Logger.info('start server');
     server.addService(proto.SaleService.service, saleServiceImpl);
 
     server.bindAsync(
         `${APP_HOST}:${GRPC_PORT}`,
         grpc.ServerCredentials.createInsecure(),
         () => {
-            console.log(`gRPC server running at ${APP_HOST}:${GRPC_PORT}`);
+            Logger.info(`gRPC server running at ${APP_HOST}:${GRPC_PORT}`);
         }
     );
 }
