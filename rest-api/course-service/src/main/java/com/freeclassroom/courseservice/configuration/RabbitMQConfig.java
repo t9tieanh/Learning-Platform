@@ -61,6 +61,29 @@ public class RabbitMQConfig {
                 .to(courseApprovalExchange)
                 .with(COURSE_APPROVAL_ROUTING_KEY);
     }
+
+    // --- config video analysis ---
+    public static final String VIDEO_ANALYSIS_QUEUE = "video.analysis.queue";
+    public static final String VIDEO_ANALYSIS_EXCHANGE = "video.analysis.exchange";
+    public static final String VIDEO_ANALYSIS_ROUTING_KEY = "video.analysis.#";
+
+    @Bean
+    public Queue videoAnalysisQueue() {
+        return new Queue(VIDEO_ANALYSIS_QUEUE, true);
+    }
+
+    @Bean
+    public TopicExchange videoAnalysisExchange() {
+        return new TopicExchange(VIDEO_ANALYSIS_EXCHANGE, true, false);
+    }
+
+    @Bean
+    public Binding bindingVideoAnalysis(Queue videoAnalysisQueue, TopicExchange videoAnalysisExchange) {
+        return BindingBuilder
+                .bind(videoAnalysisQueue)
+                .to(videoAnalysisExchange)
+                .with(VIDEO_ANALYSIS_ROUTING_KEY);
+    }
     // --- config rabbit mq ----
 
     @Bean

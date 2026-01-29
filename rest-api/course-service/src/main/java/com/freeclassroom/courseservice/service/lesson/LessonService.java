@@ -24,6 +24,9 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.io.IOException;
+import com.freeclassroom.courseservice.configuration.RabbitMQConfig;
+import com.freeclassroom.courseservice.dto.event.VideoAnalysisEvent;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -34,6 +37,7 @@ public class LessonService implements ILessonService{
     LessonRepository lessonRepo;
     IUploadFileService uploadFileService;
     LessonMapper lessonMapper;
+    RabbitTemplate rabbitTemplate;
 
     @Override
     public Flux<ServerSentEvent<String>> addVideoWithProgress(CreationVideoRequest lesson) throws IOException {
@@ -72,6 +76,13 @@ public class LessonService implements ILessonService{
                             .event("completed")
                             .data("{\"lessonId\": \"" + newLesson.getId() + "\", \"message\": \"Bài học đã được tải lên thành công !\"}")
                             .build();
+
+                    // send message to queue
+                    VideoAnalysisEvent eventMsg = VideoAnalysisEvent.builder()
+                            .lessonId(newLesson.getId())
+                            .videoUrl(newLesson.getUrl())
+                            .build();
+                    rabbitTemplate.convertAndSend(RabbitMQConfig.VIDEO_ANALYSIS_EXCHANGE, RabbitMQConfig.VIDEO_ANALYSIS_ROUTING_KEY, eventMsg);
 
                     return Flux.just(savingEvent, completedEvent);
                 });

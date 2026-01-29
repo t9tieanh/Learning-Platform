@@ -1,13 +1,15 @@
 import amqp, { Channel } from 'amqplib'
 import { QueueNameEnum } from '../../enums/emailType.enum'
 import Logger from '~/utils/logger'
+import VideoAnalysisService from '../models/videoAnalysis.service'
+import { env } from '~/config/env'
 
 const RabbitMQConf = {
   protocol: 'amqp',
-  hostname: process.env.RABBIT_MQ_HOST,
-  port: process.env.RABBIT_MQ_PORT,
-  username: process.env.RABBIT_MQ_USER_NAME,
-  password: process.env.RABBIT_MQ_PASSWORD,
+  hostname: env.RABBIT_MQ_HOST,
+  port: env.RABBIT_MQ_PORT,
+  username: env.RABBIT_MQ_USER_NAME,
+  password: env.RABBIT_MQ_PASSWORD,
   authMechanism: 'AMQPLAIN',
   vhost: '/',
   uri: process.env.RABBIT_MQ_URI || null
@@ -48,23 +50,29 @@ class RabbitClient {
     })
   }
 
-  // Tạo kết nối và channel -> đăng ký consumer để lắng nghe data trên queue
+  // created connection and ...
   private static async createConnection(): Promise<void> {
     try {
       const uri = RabbitMQConf.uri || `${RabbitMQConf.protocol}://${RabbitMQConf.username}:${RabbitMQConf.password}@${RabbitMQConf.hostname}:${RabbitMQConf.port}${RabbitMQConf.vhost}`
       RabbitClient.connection = await amqp.connect(uri)
       RabbitClient.channel = await RabbitClient.connection.createChannel()
 
-      // Đảm bảo queue tồn tại
+      // check connection -> throw error if connection is not initialized
       if (!RabbitClient.channel) {
         throw new Error('RabbitMQ channel is not initialized')
       }
-      //await RabbitClient.channel.assertQueue(QueueNameEnum.ORDER_CONFIRMATION, { durable: true })
 
-      // // register consumer cho queue ORDER_CONFIRMATION
-      // this.consumeQueue<OrderConfirmationData>(QueueNameEnum.ORDER_CONFIRMATION, async (parsed) => {
-      //   await nodemailService.sendMail(parsed as any)
-      // })
+
+      // Register consumer for video analysis
+      await RabbitClient.registerConsumer(
+        QueueNameEnum.VIDEO_ANALYSIS,
+        'video.analysis.exchange',
+        'video.analysis.#',
+        async (envelope) => {
+          const payload = envelope as unknown as { lessonId: string; videoUrl: string };
+          await VideoAnalysisService.getInstance().handleVideoAnalysisEvent(payload);
+        }
+      )
 
       Logger.info('Connection to RabbitMQ established')
     } catch (error) {
@@ -73,14 +81,14 @@ class RabbitClient {
     }
   }
 
-  // Gửi message tới queue
+  // send message to message queue
   public static async sendMessage(data: any, queueName: QueueNameEnum): Promise<boolean> {
     try {
       if (!RabbitClient.channel) {
         throw new Error('RabbitMQ channel is not initialized')
       }
 
-      // Đảm bảo queue tồn tại
+      // make sure queue exists
       await RabbitClient.channel.assertQueue(queueName, { durable: true })
 
       const msgBuffer = Buffer.from(JSON.stringify(data))

@@ -24,10 +24,10 @@ app.use(errorHandlingMiddleware);
 
 const PORT = env.PORT || 4000;
 
-// RabbitMQService.getInstance().then(() => {
-//   Logger.info('Connected to RabbitMQ');
-// }).catch((error) => {
-//   Logger.error('Failed to connect to RabbitMQ:', error);
-// });
+RabbitMQService.getInstance().then(async (rabbitClient) => {
+    Logger.info('Connected to RabbitMQ');
+}).catch((error) => {
+    Logger.error(`Failed to connect to RabbitMQ: ${error}`);
+});
 
 app.listen(PORT, () => Logger.info(`Learnova:assistant_service running http://localhost:${PORT}`));

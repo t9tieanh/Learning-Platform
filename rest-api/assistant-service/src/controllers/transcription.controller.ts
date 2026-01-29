@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import assemblyaiService from '~/service/models/assemblyai.service';
+import assemblyaiService from '~/service/utils/assemblyai.service';
 import sendResponse from '~/dto/response/send-response';
 
 class TranscriptionController {

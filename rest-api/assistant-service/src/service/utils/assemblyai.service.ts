@@ -28,6 +28,11 @@ class AssemblyAIService {
         const transcript = await this.client.transcripts.submit(params);
         return transcript;
     }
+
+    async getTranscript(transcriptId: string): Promise<Transcript> {
+        const transcript = await this.client.transcripts.get(transcriptId);
+        return transcript;
+    }
 }
 
 export default new AssemblyAIService();

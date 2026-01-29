@@ -8,3 +8,26 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model Lesson {
+  id        String   @id @default(uuid())
+  title     String?
+  content   String?  @db.Text
+  duration  Int?
+  position  Int?
+  isPublic  Boolean? @default(false)
+  type      String?
+  url       String?
+  chapterId String?
+
+  // AI Context
+  transcriptId String? @unique
+  transcript   String? @db.Text
+  summary      String? @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deleted   Boolean  @default(false)
+
+  @@map("lessons")
+}
