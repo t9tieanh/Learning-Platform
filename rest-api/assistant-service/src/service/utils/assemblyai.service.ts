@@ -33,6 +33,11 @@ class AssemblyAIService {
         const transcript = await this.client.transcripts.get(transcriptId);
         return transcript;
     }
+
+    async getSubtitles(transcriptId: string, format: 'srt' | 'vtt' = 'srt'): Promise<string> {
+        const subtitles = await this.client.transcripts.subtitles(transcriptId, format);
+        return subtitles;
+    }
 }
 
 export default new AssemblyAIService();

@@ -52,11 +52,12 @@ class VideoAnalysisService {
     public async processTranscriptCompletion(transcriptId: string): Promise<void> {
         const transcript = await AssemblyAIService.getTranscript(transcriptId);
         if (transcript && transcript.text) {
-            await this.createOrUpdateLessonFromTranscript(transcriptId, transcript.text, transcript.audio_url);
+            const subtitles = await AssemblyAIService.getSubtitles(transcriptId, 'srt');
+            await this.createOrUpdateLessonFromTranscript(transcriptId, transcript.text, subtitles, transcript.audio_url);
         }
     }
 
-    public async createOrUpdateLessonFromTranscript(transcriptId: string, transcriptText: string, audioUrl: string): Promise<void> {
+    private async createOrUpdateLessonFromTranscript(transcriptId: string, transcriptText: string, subtitles: string, audioUrl: string): Promise<void> {
         // Try to find by transcriptId first
         let lesson = await prismaService.lesson.findUnique({
             where: { transcriptId }
@@ -68,6 +69,7 @@ class VideoAnalysisService {
                 where: { id: lesson.id },
                 data: {
                     transcript: transcriptText,
+                    subtitles: subtitles,
                     url: audioUrl
                 }
             });
@@ -85,7 +87,8 @@ class VideoAnalysisService {
                 where: { id: existingLessonByUrl.id },
                 data: {
                     transcriptId: transcriptId,
-                    transcript: transcriptText
+                    transcript: transcriptText,
+                    subtitles: subtitles
                 }
             });
             return;
@@ -96,6 +99,7 @@ class VideoAnalysisService {
             data: {
                 transcriptId,
                 transcript: transcriptText,
+                subtitles: subtitles,
                 url: audioUrl
             }
         });

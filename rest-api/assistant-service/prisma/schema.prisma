@@ -23,6 +23,7 @@ model Lesson {
   // AI Context
   transcriptId String? @unique
   transcript   String? @db.Text
+  subtitles    String? @db.Text
   summary      String? @db.Text
 
   createdAt DateTime @default(now())

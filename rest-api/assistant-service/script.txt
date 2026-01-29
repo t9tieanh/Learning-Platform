@@ -2,3 +2,5 @@ docker run --name my-postgres -e POSTGRES_PASSWORD=mysecretpassword -e POSTGRES_
 
 
 sudo docker build -t assistant-service:latest -f assistant-service/Dockerfile .
+
+npx prisma migrate dev --name update_subtitute
