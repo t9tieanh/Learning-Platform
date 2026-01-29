@@ -25,7 +25,8 @@ import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 import com.freeclassroom.courseservice.configuration.RabbitMQConfig;
-import com.freeclassroom.courseservice.dto.event.VideoAnalysisEvent;
+import com.freeclassroom.courseservice.dto.event.LessonAnalysisEvent;
+import com.freeclassroom.courseservice.enums.event.EnumLessonAnalysisType;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
 @RequiredArgsConstructor
@@ -78,11 +79,12 @@ public class LessonService implements ILessonService{
                             .build();
 
                     // send message to queue
-                    VideoAnalysisEvent eventMsg = VideoAnalysisEvent.builder()
+                    LessonAnalysisEvent eventMsg = LessonAnalysisEvent.builder()
                             .lessonId(newLesson.getId())
-                            .videoUrl(newLesson.getUrl())
+                            .fileUrl(newLesson.getUrl())
+                            .fileType(EnumLessonAnalysisType.video)
                             .build();
-                    rabbitTemplate.convertAndSend(RabbitMQConfig.VIDEO_ANALYSIS_EXCHANGE, RabbitMQConfig.VIDEO_ANALYSIS_ROUTING_KEY, eventMsg);
+                    rabbitTemplate.convertAndSend(RabbitMQConfig.LESSON_ANALYSIS_EXCHANGE, RabbitMQConfig.LESSON_ANALYSIS_ROUTING_KEY, eventMsg);
 
                     return Flux.just(savingEvent, completedEvent);
                 });
@@ -105,7 +107,7 @@ public class LessonService implements ILessonService{
                                     .build());
                         }
 
-                        // khi upload xong
+                        // while upload done
                         String fileUrl = event.getFileUrl();
 
                         ServerSentEvent<String> savingEvent = ServerSentEvent.<String>builder()
@@ -125,6 +127,14 @@ public class LessonService implements ILessonService{
                                 .event("completed")
                                 .data("{\"lessonId\": \"" + newLesson.getId() + "\", \"message\": \"Bài học đã được tải lên thành công!\"}")
                                 .build();
+
+                        // send message to queue
+                        LessonAnalysisEvent eventMsg = LessonAnalysisEvent.builder()
+                                .lessonId(newLesson.getId())
+                                .fileUrl(newLesson.getUrl())
+                                .fileType(EnumLessonAnalysisType.article)
+                                .build();
+                        rabbitTemplate.convertAndSend(RabbitMQConfig.LESSON_ANALYSIS_EXCHANGE, RabbitMQConfig.LESSON_ANALYSIS_ROUTING_KEY, eventMsg);
 
                         return Flux.just(savingEvent, completedEvent);
                     });

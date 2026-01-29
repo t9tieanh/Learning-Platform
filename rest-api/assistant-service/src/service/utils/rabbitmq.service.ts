@@ -1,7 +1,7 @@
 import amqp, { Channel } from 'amqplib'
 import { QueueNameEnum } from '../../enums/emailType.enum'
 import Logger from '~/utils/logger'
-import VideoAnalysisService from '../models/videoAnalysis.service'
+import LessonAnalysisService, { LessonAnalysisEvent } from '../models/lessonAnalysis.service'
 import { env } from '~/config/env'
 
 const RabbitMQConf = {
@@ -62,15 +62,14 @@ class RabbitClient {
         throw new Error('RabbitMQ channel is not initialized')
       }
 
-
-      // Register consumer for video analysis
+      // Register consumer for lesson analysis
       await RabbitClient.registerConsumer(
-        QueueNameEnum.VIDEO_ANALYSIS,
-        'video.analysis.exchange',
-        'video.analysis.#',
+        QueueNameEnum.LESSON_ANALYSIS,
+        'lesson.analysis.exchange',
+        'lesson.analysis.#',
         async (envelope) => {
-          const payload = envelope as unknown as { lessonId: string; videoUrl: string };
-          await VideoAnalysisService.getInstance().handleVideoAnalysisEvent(payload);
+          const payload = envelope as unknown as LessonAnalysisEvent;
+          await LessonAnalysisService.getInstance().handleLessonAnalysisEvent(payload);
         }
       )
 
@@ -154,7 +153,7 @@ class RabbitClient {
   ): Promise<void> {
     if (!RabbitClient.channel) throw new Error('RabbitMQ channel is not initialized')
 
-    //await RabbitClient.bindQueueToExchange(queue, exchange, routingKeys, exchangeType)
+    await RabbitClient.bindQueueToExchange(queue, exchange, routingKeys, exchangeType)
 
     RabbitClient.channel.consume(queue, async (msg) => {
       if (!msg) return

@@ -62,27 +62,27 @@ public class RabbitMQConfig {
                 .with(COURSE_APPROVAL_ROUTING_KEY);
     }
 
-    // --- config video analysis ---
-    public static final String VIDEO_ANALYSIS_QUEUE = "video.analysis.queue";
-    public static final String VIDEO_ANALYSIS_EXCHANGE = "video.analysis.exchange";
-    public static final String VIDEO_ANALYSIS_ROUTING_KEY = "video.analysis.#";
+    // --- config lesson analysis ---
+    public static final String LESSON_ANALYSIS_QUEUE = "lesson.analysis.queue";
+    public static final String LESSON_ANALYSIS_EXCHANGE = "lesson.analysis.exchange";
+    public static final String LESSON_ANALYSIS_ROUTING_KEY = "lesson.analysis.#";
 
     @Bean
-    public Queue videoAnalysisQueue() {
-        return new Queue(VIDEO_ANALYSIS_QUEUE, true);
+    public Queue lessonAnalysisQueue() {
+        return new Queue(LESSON_ANALYSIS_QUEUE, true);
     }
 
     @Bean
-    public TopicExchange videoAnalysisExchange() {
-        return new TopicExchange(VIDEO_ANALYSIS_EXCHANGE, true, false);
+    public TopicExchange lessonAnalysisExchange() {
+        return new TopicExchange(LESSON_ANALYSIS_EXCHANGE, true, false);
     }
 
     @Bean
-    public Binding bindingVideoAnalysis(Queue videoAnalysisQueue, TopicExchange videoAnalysisExchange) {
+    public Binding bindingLessonAnalysis(Queue lessonAnalysisQueue, TopicExchange lessonAnalysisExchange) {
         return BindingBuilder
-                .bind(videoAnalysisQueue)
-                .to(videoAnalysisExchange)
-                .with(VIDEO_ANALYSIS_ROUTING_KEY);
+                .bind(lessonAnalysisQueue)
+                .to(lessonAnalysisExchange)
+                .with(LESSON_ANALYSIS_ROUTING_KEY);
     }
     // --- config rabbit mq ----
 
