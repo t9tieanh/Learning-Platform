@@ -1,7 +1,9 @@
 package com.freeclassroom.userservice.controller;
 
+import com.freeclassroom.userservice.dto.request.auth.Identity;
 import com.freeclassroom.userservice.dto.request.certificates.CreateCertReq;
 import com.freeclassroom.userservice.dto.request.certificates.UpdateCertReq;
+import com.freeclassroom.userservice.dto.request.personal.TrackingEventRequest;
 import com.freeclassroom.userservice.dto.request.user.CreationUserRequest;
 import com.freeclassroom.userservice.dto.request.user.UpdateUserRequest;
 import com.freeclassroom.userservice.dto.response.ApiResponse;
@@ -12,14 +14,17 @@ import com.freeclassroom.userservice.dto.response.user.UserResponse;
 import com.freeclassroom.userservice.service.certificate.CertificateService;
 import com.freeclassroom.userservice.service.certificate.ICertificateService;
 import com.freeclassroom.userservice.service.user.IUserService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -29,6 +34,7 @@ import java.util.UUID;
 public class UserController {
     IUserService userService;
     ICertificateService certificateService;
+    StringRedisTemplate redis;
     @GetMapping
     ApiResponse<UserResponse> checkStatus() {
         return ApiResponse.<UserResponse>builder()
@@ -95,6 +101,34 @@ public class UserController {
     @DeleteMapping("/del-certificate")
     ApiResponse<Boolean> deleteCertificate (@RequestParam("id") String id) {
         return certificateService.deleteCertificate(id);
+    }
+
+    @PostMapping("/track-event")
+    ApiResponse<Void> trackEvent(@RequestBody TrackingEventRequest trackingEvent,
+                                 HttpServletRequest request) {
+        Identity identity = (Identity) request.getAttribute("IDENTITY");
+
+        if (identity != null) {
+            System.out.println("Type: " + identity.getType());
+            System.out.println("ID: " + identity.getId());
+        }
+
+        // redis stream logic to track event
+        String stream = identity.getType().equals("USER") ? "event:user" : "event:guest";
+
+        redis.opsForStream().add(
+                stream,
+                Map.of(
+                       "userId", identity.getId(),
+                        "eventName", trackingEvent.getEventName(),
+                        "payload", trackingEvent.getPayload(),
+                        "createdAt", System.currentTimeMillis()
+                )
+        );
+
+        return ApiResponse.<Void>builder()
+                .message("Personal event tracked successfully")
+                .build();
     }
 
 }

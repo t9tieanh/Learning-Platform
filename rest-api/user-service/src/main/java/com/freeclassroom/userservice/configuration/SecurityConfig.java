@@ -1,5 +1,6 @@
 package com.freeclassroom.userservice.configuration;
 
+import com.freeclassroom.userservice.filter.IdentityFilter;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +16,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
+import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -38,6 +40,7 @@ public class SecurityConfig {
     protected String SIGNER_KEY;
 
     private final CustomJwtDecoder jwtDecoder;
+    private final IdentityFilter identityFilter;
 
     private final String[] PUBLIC_ENDPOINTS = {"/auth/**", "/user/**", "test/**", "expertises/**", "/actuator/health"};
 
@@ -72,6 +75,11 @@ public class SecurityConfig {
 
         httpSecurity.oauth2ResourceServer(oauth2 ->
                 oauth2.jwt(jwt -> jwt.decoder(jwtDecoder).jwtAuthenticationConverter(jwtAuthenticationConverter()))
+        );
+
+        httpSecurity.addFilterAfter(
+                identityFilter,
+                BearerTokenAuthenticationFilter.class
         );
 
         return httpSecurity.build();
