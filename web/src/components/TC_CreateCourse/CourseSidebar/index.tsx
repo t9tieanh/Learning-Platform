@@ -139,7 +139,9 @@ const CourseSidebar: FC<CourseSidebarProps> = ({ activeSection = CourseProgressS
       {/* Back Button Footer */}
       <div className='p-6 mt-auto border-t border-gray-800'>
         <button
-          onClick={() => handleOnclick({ id: 'BACK', label: 'Quay lại', icon: ArrowLeft, description: 'Quay lại trang trước' })}
+          onClick={() =>
+            handleOnclick({ id: 'BACK', label: 'Quay lại', icon: ArrowLeft, description: 'Quay lại trang trước' })
+          }
           className={cn(
             'w-full text-left p-3 rounded-lg transition-colors group focus:outline-none focus:ring-2 focus:ring-primary/50',
             'hover:bg-gray-800'
@@ -150,9 +152,7 @@ const CourseSidebar: FC<CourseSidebarProps> = ({ activeSection = CourseProgressS
               <ArrowLeft className='h-5 w-5 text-red-500 group-hover:text-red-800' aria-hidden='true' />
             </div>
             <div className='flex-1 min-w-0'>
-              <span className='text-sm font-medium truncate block text-red-500 group-hover:text-red-800'>
-                Quay lại
-              </span>
+              <span className='text-sm font-medium truncate block text-red-500 group-hover:text-red-800'>Quay lại</span>
               <span className='text-xs text-gray-500 mt-1 leading-tight block'>Quay lại trang trước</span>
             </div>
           </div>

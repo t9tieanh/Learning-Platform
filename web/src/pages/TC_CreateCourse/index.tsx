@@ -144,9 +144,7 @@ const TC_CreateCourse = () => {
         </div>
 
         <main className='flex-1 p-4 md:p-8 overflow-auto flex flex-col min-w-0'>
-          <div className='flex-1'>
-            {renderContent()}
-          </div>
+          <div className='flex-1'>{renderContent()}</div>
           <div className='max-w-6xl mx-auto flex justify-between mt-5 pb-10 w-full'>
             <CustomButton
               label='Quay lại'

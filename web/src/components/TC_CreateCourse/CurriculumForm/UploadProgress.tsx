@@ -27,9 +27,7 @@ const UploadProgress = ({ progressLst }: { progressLst: MultiUploadItem[] }) => 
               <ItemDescription className='text-xs text-gray-500'>{item.message}</ItemDescription>
               <div className='flex items-center gap-2 mt-1.5'>
                 <ProgressShadcn className='h-1.5 flex-1' value={item.progress} />
-                <span className='text-xs font-medium text-gray-600 w-8 text-right'>
-                  {Math.round(item.progress)}%
-                </span>
+                <span className='text-xs font-medium text-gray-600 w-8 text-right'>{Math.round(item.progress)}%</span>
               </div>
             </ItemContent>
           </Item>

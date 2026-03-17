@@ -65,7 +65,7 @@ const CourseSection = ({ section, index }: { section: Section; index: number }) 
               {index + 1}
             </div>
             <div className='min-w-0'>
-              <h3 className='font-semibold text-foreground group-hover:text-primary transition-colors text-sm md:text-base truncate'>
+              <h3 className='font-semibold text-foreground group-hover:text-primary transition-colors text-sm md:text-base line-clamp-2 break-words'>
                 {section.title}
               </h3>
               <div className='flex items-center gap-2 md:gap-4 mt-1 text-xs md:text-sm text-muted-foreground'>
@@ -113,7 +113,9 @@ const CourseSection = ({ section, index }: { section: Section; index: number }) 
                     <div className='w-5 md:w-6 h-5 md:h-6 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0'>
                       {createElement(Icon, { className: 'w-3 md:w-4 h-3 md:h-4 text-primary' })}
                     </div>
-                    <span className='text-muted-foreground text-xs md:text-sm truncate'>{lesson.title}</span>
+                    <span className='text-muted-foreground text-xs md:text-sm truncate break-words'>
+                      {lesson.title}
+                    </span>
                   </div>
                   <div className='text-xs md:text-sm text-muted-foreground flex items-center gap-1 md:gap-2 flex-shrink-0'>
                     {lesson?.isPublic && (

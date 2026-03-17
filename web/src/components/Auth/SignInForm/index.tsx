@@ -82,7 +82,11 @@ const SignInForm = ({
               className='focus:outline-none'
               aria-label='Về trang chủ'
             >
-              <img src={logo} alt='LEARNOVA logo' className='h-12 md:h-14 w-auto object-contain mx-auto select-none hover:opacity-80 transition-opacity' />
+              <img
+                src={logo}
+                alt='LEARNOVA logo'
+                className='h-12 md:h-14 w-auto object-contain mx-auto select-none hover:opacity-80 transition-opacity'
+              />
             </button>
           </CardTitle>
           <CardDescription className='text-[#2DD4BF] text-base font-semibold mt-2'>

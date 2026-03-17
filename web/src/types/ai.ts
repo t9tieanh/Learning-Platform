@@ -13,7 +13,6 @@ export interface ConversationLoadResponse {
   result: ConversationMessage[]
 }
 
-
 export interface LessonChunk {
   id: string
   chunkIndex: number

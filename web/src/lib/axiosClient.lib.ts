@@ -65,10 +65,9 @@ class AxiosClient {
       }
 
       try {
-        const response = await axios.post(
-          (import.meta.env.VITE_API as string) + '/api/v1/auth/refresh',
-          { token: refreshToken }
-        )
+        const response = await axios.post((import.meta.env.VITE_API as string) + '/api/v1/auth/refresh', {
+          token: refreshToken
+        })
 
         if (response.data?.code === 1009) {
           useAuthStore.getState().logout()

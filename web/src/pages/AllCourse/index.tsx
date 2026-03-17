@@ -237,16 +237,16 @@ const Index = () => {
             {loading
               ? [...Array(10)].map((_, idx) => <CourseCardListSkeleton key={idx} />)
               : mappedCourses.map((course) => (
-                <CourseCard
-                  key={course.id}
-                  {...course}
-                  onViewCourse={(courseId) =>
-                    eventTracker.trackingEvent('VIEW_COURSE', courseId).catch(() => {
-                      // ignore tracking errors
-                    })
-                  }
-                />
-              ))}
+                  <CourseCard
+                    key={course.id}
+                    {...course}
+                    onViewCourse={(courseId) =>
+                      eventTracker.trackingEvent('VIEW_COURSE', courseId).catch(() => {
+                        // ignore tracking errors
+                      })
+                    }
+                  />
+                ))}
           </div>
 
           <div className='flex items-center justify-center gap-2'>

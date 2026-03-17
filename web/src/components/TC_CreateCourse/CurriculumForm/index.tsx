@@ -199,9 +199,9 @@ const CurriculumForm: React.FC<{ id: string }> = ({ id }: { id: string }) => {
       {/* Floating Upload Button */}
       {uploads && (
         <>
-          <div className="fixed z-50 bottom-8 right-8">
+          <div className='fixed z-50 bottom-8 right-8'>
             {isAnyUploading && (
-              <div className="absolute -inset-2 rounded-full border-4 border-blue-400/30 border-t-blue-600 animate-spin" />
+              <div className='absolute -inset-2 rounded-full border-4 border-blue-400/30 border-t-blue-600 animate-spin' />
             )}
             <CustomButton
               className={cn(

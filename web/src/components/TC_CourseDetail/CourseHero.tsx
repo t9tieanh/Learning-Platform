@@ -273,12 +273,7 @@ export function CourseHero({
                 >
                   {introductoryVideo ? (
                     <div className='w-full'>
-                      <video
-                        src={`${introductoryVideo}`}
-                        controls
-                        autoPlay
-                        className='w-full h-[480px] rounded-md'
-                      >
+                      <video src={`${introductoryVideo}`} controls autoPlay className='w-full h-[480px] rounded-md'>
                         <track kind='captions' srcLang='en' label='English captions' src={`${introductoryVideo}.vtt`} />
                       </video>
                     </div>

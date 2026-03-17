@@ -135,7 +135,11 @@ const PersonalInfo = () => {
                         onClick={() => fileInputRef.current?.click()}
                         aria-label='Chọn ảnh đại diện mới'
                       >
-                        <Avatar className={`h-20 md:h-28 w-20 md:w-28 shadow-lg cursor-pointer ${userInfo?.isVip ? 'ring-4 ring-yellow-400 ring-offset-4 ring-offset-[#0C356A]' : ''}`}>
+                        <Avatar
+                          className={`h-20 md:h-28 w-20 md:w-28 shadow-lg cursor-pointer ${
+                            userInfo?.isVip ? 'ring-4 ring-yellow-400 ring-offset-4 ring-offset-[#0C356A]' : ''
+                          }`}
+                        >
                           <AvatarImage
                             src={form.imageFile ? URL.createObjectURL(form.imageFile) : userInfo?.image}
                             alt={userInfo?.name}
@@ -165,7 +169,11 @@ const PersonalInfo = () => {
                     </>
                   ) : (
                     <div className='relative'>
-                      <Avatar className={`h-20 md:h-28 w-20 md:w-28 shadow-lg ${userInfo?.isVip ? 'ring-4 ring-yellow-400 ring-offset-4 ring-offset-[#0C356A]' : ''}`}>
+                      <Avatar
+                        className={`h-20 md:h-28 w-20 md:w-28 shadow-lg ${
+                          userInfo?.isVip ? 'ring-4 ring-yellow-400 ring-offset-4 ring-offset-[#0C356A]' : ''
+                        }`}
+                      >
                         <AvatarImage src={userInfo?.image} alt={userInfo?.name} className='object-cover' />
                         <AvatarFallback className='text-lg font-semibold bg-primary text-primary-foreground'>
                           <User className='h-6 w-6' />
@@ -183,8 +191,8 @@ const PersonalInfo = () => {
                   <h3 className='text-lg md:text-3xl font-bold text-white mb-1 truncate text-center md:text-start flex items-center gap-3 w-full justify-center md:justify-start'>
                     {userInfo?.name}
                     {userInfo?.isVip && (
-                      <span className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-white text-xs md:text-sm uppercase font-bold px-2 py-0.5 rounded-md shadow-sm flex items-center gap-1.5 flex-shrink-0">
-                        <Crown className="w-3 h-3 md:w-4 md:h-4" /> VIP
+                      <span className='bg-gradient-to-r from-yellow-400 to-yellow-600 text-white text-xs md:text-sm uppercase font-bold px-2 py-0.5 rounded-md shadow-sm flex items-center gap-1.5 flex-shrink-0'>
+                        <Crown className='w-3 h-3 md:w-4 md:h-4' /> VIP
                       </span>
                     )}
                   </h3>
@@ -198,7 +206,7 @@ const PersonalInfo = () => {
                       icon={<Crown className='w-4 h-4 mr-1.5 text-yellow-600' />}
                       className='border-none bg-gradient-to-r from-yellow-100 to-amber-100 hover:from-yellow-200 hover:to-amber-200 text-yellow-800 font-semibold rounded-full px-4 text-xs shadow-sm h-8 mt-1 md:mt-2 transition-transform hover:scale-105'
                       onClick={openVipDialog}
-                      type="button"
+                      type='button'
                     />
                   )}
                 </div>

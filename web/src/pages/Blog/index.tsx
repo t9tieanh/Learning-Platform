@@ -17,20 +17,20 @@ const BlogPage = () => {
 
   useEffect(() => {
     let mounted = true
-      ; (async () => {
-        try {
-          setLoading(true)
-          const [tr, nw] = await Promise.all([blogService.getTrending(), blogService.getNew()])
-          if (!mounted) return
-          setTrending(tr)
-          setLatest(nw)
-        } catch (e) {
-          console.error(e)
-          if (mounted) setError('Không thể tải dữ liệu blog')
-        } finally {
-          if (mounted) setLoading(false)
-        }
-      })()
+    ;(async () => {
+      try {
+        setLoading(true)
+        const [tr, nw] = await Promise.all([blogService.getTrending(), blogService.getNew()])
+        if (!mounted) return
+        setTrending(tr)
+        setLatest(nw)
+      } catch (e) {
+        console.error(e)
+        if (mounted) setError('Không thể tải dữ liệu blog')
+      } finally {
+        if (mounted) setLoading(false)
+      }
+    })()
     return () => {
       mounted = false
     }

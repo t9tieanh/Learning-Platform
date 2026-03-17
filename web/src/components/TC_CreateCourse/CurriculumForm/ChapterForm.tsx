@@ -203,7 +203,7 @@ const ChapterForm = ({
                 className='flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg transition-all duration-200 px-6 rounded-full'
               >
                 <PlusCircle className='h-5 w-5' />
-                <span className="font-medium">Thêm bài giảng mới</span>
+                <span className='font-medium'>Thêm bài giảng mới</span>
               </Button>
             </div>
           </div>
@@ -212,8 +212,8 @@ const ChapterForm = ({
       <CustomDialog
         open={open}
         setOpen={setOpen}
-        className="!max-w-[95vw] md:!max-w-5xl h-[90vh] overflow-hidden flex flex-col"
-        contentClassName="flex-1 min-h-0"
+        className='!max-w-[95vw] md:!max-w-5xl h-[90vh] overflow-hidden flex flex-col'
+        contentClassName='flex-1 min-h-0'
         title={
           <>
             <BookOpen className='h-4 w-4 mr-2' />

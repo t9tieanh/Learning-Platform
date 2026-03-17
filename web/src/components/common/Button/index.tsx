@@ -10,13 +10,21 @@ type CustomButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
 }
 
 // eslint-disable-next-line react/prop-types
-const CustomButton: React.FC<CustomButtonProps> = ({ label, icon, iconPosition = 'left', className, isLoader, children, ...rest }) => {
+const CustomButton: React.FC<CustomButtonProps> = ({
+  label,
+  icon,
+  iconPosition = 'left',
+  className,
+  isLoader,
+  children,
+  ...rest
+}) => {
   return (
     <Button className={className} disabled={rest.disabled || isLoader} {...rest}>
       {isLoader && <Loader2Icon className='animate-spin mr-2' />}
-      {icon && iconPosition === 'left' && <span className="mr-2">{icon}</span>}
+      {icon && iconPosition === 'left' && <span className='mr-2'>{icon}</span>}
       {label}
-      {icon && iconPosition === 'right' && <span className="ml-2">{icon}</span>}
+      {icon && iconPosition === 'right' && <span className='ml-2'>{icon}</span>}
       {children}
     </Button>
   )
