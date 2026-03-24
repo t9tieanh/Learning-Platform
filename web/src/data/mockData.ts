@@ -32,9 +32,10 @@ export const studentsByAge = [
 ]
 
 export const trafficSource = [
-  { name: 'SEO', value: 45 },
-  { name: 'Ads', value: 30 },
-  { name: 'Direct', value: 25 }
+  { name: 'SEO', value: 35 },
+  { name: 'Ads', value: 25 },
+  { name: 'Direct', value: 20 },
+  { name: 'Referral', value: 20 },
 ]
 
 export const userMetrics = {
@@ -53,7 +54,6 @@ export const progressMetrics = {
 export const funnelData = [
   { stage: 'Enrolled', value: 920 },
   { stage: 'Started', value: 780 },
-  { stage: '50% Done', value: 560 },
   { stage: 'Finished', value: 625 }
 ]
 

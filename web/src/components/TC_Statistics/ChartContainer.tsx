@@ -9,10 +9,10 @@ interface ChartContainerProps {
 
 const ChartContainer = ({ title, subtitle, children, className = "" }: ChartContainerProps) => {
   return (
-    <div className={`rounded-2xl border border-border bg-card p-5 ${className}`}>
+    <div className={`rounded-2xl border border-slate-200 bg-white p-5 ${className}`}>
       <div className="mb-4">
-        <h3 className="text-sm font-semibold text-card-foreground">{title}</h3>
-        {subtitle && <p className="text-xs text-muted-foreground mt-0.5">{subtitle}</p>}
+        <h3 className="text-base font-semibold text-slate-900">{title}</h3>
+        {subtitle && <p className="mt-0.5 text-xs text-slate-500">{subtitle}</p>}
       </div>
       {children}
     </div>

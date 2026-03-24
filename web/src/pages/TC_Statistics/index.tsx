@@ -6,10 +6,10 @@ import RevenueTab from '@/components/TC_Statistics/RevenueTab'
 import FeedbackTab from '@/components/TC_Statistics/FeedbackTab'
 
 const tabs = [
-  { id: 'analytics', label: 'User Analytics', icon: BarChart3 },
-  { id: 'progress', label: 'Progress Tracking', icon: Target },
-  { id: 'revenue', label: 'Revenue', icon: DollarSign },
-  { id: 'feedback', label: 'Feedback', icon: MessageSquare }
+  { id: 'analytics', label: 'Phân tích học viên', icon: BarChart3 },
+  { id: 'progress', label: 'Theo dõi tiến độ', icon: Target },
+  { id: 'revenue', label: 'Doanh thu', icon: DollarSign },
+  { id: 'feedback', label: 'Phản hồi', icon: MessageSquare }
 ] as const
 
 type TabId = (typeof tabs)[number]['id']
@@ -29,12 +29,12 @@ const Index = () => {
       {/* Header */}
       <header className='border-b border-border bg-card sticky top-0 z-10'>
         <div className='max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center gap-3'>
-          <div className='rounded-xl bg-primary/15 p-2'>
-            <GraduationCap size={22} className='text-primary' />
+          <div className='rounded-xl bg-blue-100 p-2'>
+            <BarChart3 size={22} className='text-blue-600' />
           </div>
           <div>
-            <h1 className='text-lg font-bold text-card-foreground tracking-tight'>Instructor Dashboard</h1>
-            <p className='text-xs text-muted-foreground'>Course performance at a glance</p>
+            <h1 className='text-lg font-bold text-card-foreground tracking-tight'>Trang thống kê</h1>
+            <p className='text-xs text-muted-foreground'>Tổng quan hiệu suất khóa học</p>
           </div>
         </div>
       </header>
@@ -49,10 +49,11 @@ const Index = () => {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${isActive
+                  className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
+                    isActive
                       ? 'border-primary text-primary'
                       : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
-                    }`}
+                  }`}
                 >
                   <tab.icon size={16} />
                   {tab.label}
