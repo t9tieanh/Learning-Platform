@@ -1,53 +1,81 @@
-import { LucideIcon, TrendingUp, TrendingDown } from "lucide-react";
+import { ComponentType } from 'react'
+import { TrendingDown, TrendingUp } from 'lucide-react'
 
 interface StatCardProps {
-  title: string;
-  value: string | number;
-  subtitle?: string;
-  icon: LucideIcon;
-  trend?: { value: number; positive: boolean };
-  variant?: "default" | "primary" | "success" | "warning";
+  title: string
+  value: string | number
+  subtitle?: string
+  icon: ComponentType<{ size?: string | number; strokeWidth?: string | number; className?: string }>
+  trend?: { value: number; positive: boolean }
+  variant?: 'default' | 'primary' | 'success' | 'warning'
 }
 
 const cardStyles: Record<string, string> = {
-  default: "bg-white text-gray-800",
-  primary: "bg-indigo-50 text-indigo-700",
-  success: "bg-emerald-50 text-emerald-700",
-  warning: "bg-amber-50 text-amber-700",
-};
+  default: 'border-slate-200/80 bg-white text-slate-900 shadow-[0_14px_34px_-22px_rgba(15,23,42,0.28)]',
+  primary:
+    'border-sky-200/70 bg-gradient-to-br from-sky-50 via-white to-blue-50 text-slate-900 shadow-[0_16px_36px_-24px_rgba(14,165,233,0.38)]',
+  success:
+    'border-emerald-200/70 bg-gradient-to-br from-emerald-50 via-white to-teal-50 text-slate-900 shadow-[0_16px_36px_-24px_rgba(16,185,129,0.36)]',
+  warning:
+    'border-amber-200/70 bg-gradient-to-br from-amber-50 via-white to-orange-50 text-slate-900 shadow-[0_16px_36px_-24px_rgba(245,158,11,0.34)]'
+}
 
 const iconStyles: Record<string, string> = {
-  default: "bg-gray-100 text-gray-600",
-  primary: "bg-indigo-500 text-white",
-  success: "bg-emerald-500 text-white",
-  warning: "bg-amber-500 text-white",
-};
+  default: 'border-slate-200/80 bg-slate-50 text-slate-600',
+  primary: 'border-sky-200/70 bg-sky-500 text-white',
+  success: 'border-emerald-200/70 bg-emerald-500 text-white',
+  warning: 'border-amber-200/70 bg-amber-500 text-white'
+}
 
-const StatCard = ({ title, value, subtitle, icon: Icon, trend, variant = "default" }: StatCardProps) => {
+const accentStyles: Record<string, string> = {
+  default: 'from-slate-200/80 to-transparent',
+  primary: 'from-sky-300/60 to-transparent',
+  success: 'from-emerald-300/60 to-transparent',
+  warning: 'from-amber-300/60 to-transparent'
+}
+
+const StatCard = ({ title, value, subtitle, icon: Icon, trend, variant = 'default' }: StatCardProps) => {
   return (
-    <div className={`relative overflow-hidden rounded-2xl border border-slate-200 ${cardStyles[variant]} p-6 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-500/10`}>
-      <div className="flex items-start justify-between gap-4">
-        <div className="space-y-2 flex-1">
-          <p className="text-sm font-medium tracking-wide text-slate-500">{title}</p>
-          <p className="text-3xl font-extrabold tracking-tight text-slate-900">{value}</p>
-          {subtitle && <p className="text-xs text-slate-500">{subtitle}</p>}
+    <div
+      className={`group relative overflow-hidden rounded-[28px] border p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_22px_50px_-28px_rgba(15,23,42,0.32)] ${cardStyles[variant]}`}
+    >
+      <div className='absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/90 to-transparent' />
+      <div
+        className={`absolute -right-10 -top-10 h-28 w-28 rounded-full bg-gradient-to-br ${accentStyles[variant]} blur-2xl`}
+      />
+      <div className='absolute -bottom-14 right-8 h-24 w-24 rounded-full bg-white/40 blur-2xl' />
+
+      <div className='relative flex items-start justify-between gap-4'>
+        <div className='min-w-0 flex-1 space-y-3'>
+          <div className='space-y-1'>
+            <p className='text-xs font-semibold uppercase tracking-[0.22em] text-slate-500'>{title}</p>
+            <p className='text-3xl font-semibold tracking-tight text-slate-950 sm:text-[2rem]'>{value}</p>
+          </div>
+
+          {subtitle && <p className='max-w-[22rem] text-sm leading-6 text-slate-500'>{subtitle}</p>}
+
           {trend && (
-            <div className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${trend.positive
-                ? "bg-emerald-100 text-emerald-700"
-                : "bg-rose-100 text-rose-700"
-              }`}>
+            <div
+              className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold ${
+                trend.positive
+                  ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                  : 'border-rose-200 bg-rose-50 text-rose-700'
+              }`}
+            >
               {trend.positive ? <TrendingUp size={13} /> : <TrendingDown size={13} />}
               {Math.abs(trend.value)}% so với tháng trước
             </div>
           )}
         </div>
-        <div className={`rounded-xl p-3 shadow-sm ${iconStyles[variant]}`}>
+
+        <div
+          className={`relative flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border shadow-sm transition-transform duration-300 group-hover:scale-105 ${iconStyles[variant]}`}
+        >
           <Icon size={22} strokeWidth={2} />
         </div>
       </div>
-      <div className="absolute -right-6 -bottom-6 h-24 w-24 rounded-full bg-blue-500/5" />
     </div>
-  );
-};
+  )
+}
 
-export default StatCard;
+export default StatCard
