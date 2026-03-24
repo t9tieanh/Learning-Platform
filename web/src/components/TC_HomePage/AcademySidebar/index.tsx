@@ -10,7 +10,7 @@ import { showConfirmToast } from '@/components/common/ShowConfirmToast'
 const sidebarItems = [
   {
     category: 'TỔNG QUAN',
-    items: [{ name: 'Thống kê', icon: ChartColumn, active: true }]
+    items: [{ name: 'Trang chủ', icon: Home, active: false }]
   },
   {
     category: 'DANH MỤC',
@@ -18,7 +18,7 @@ const sidebarItems = [
       { name: 'Khóa học', icon: BookOpen, active: true },
       { name: 'Tin nhắn', icon: MessageSquare, active: true },
       { name: 'Bài viết', icon: FileText, active: true },
-      { name: 'Trang chủ', icon: Home, active: false }
+      { name: 'Thống kê', icon: ChartColumn, active: true }
     ]
   }
 ]
@@ -60,20 +60,20 @@ const AcademySidebar = () => {
               {section.items.map((item, itemIndex) => {
                 const Icon = item.icon
                 let onClick = undefined
-                if (item.name === 'Thống kê') onClick = () => navigate('/teacher')
+                if (item.name === 'Trang chủ') onClick = () => navigate('/teacher')
                 if (item.name === 'Quay lại') onClick = () => navigate('/')
                 if (item.name === 'Khóa học') onClick = () => navigate('/teacher/course')
                 if (item.name === 'Tin nhắn') onClick = () => navigate('/teacher/chat/:id')
                 if (item.name === 'Bài viết') onClick = () => navigate('/teacher/blogs')
+                if (item.name === 'Thống kê') onClick = () => navigate('/teacher/statistics')
                 return (
                   <Button
                     key={itemIndex}
                     variant={item.active ? 'secondary' : 'ghost'}
-                    className={`w-full justify-start h-11 px-3 ${
-                      item.active
+                    className={`w-full justify-start h-11 px-3 ${item.active
                         ? 'bg-sidebar-accent text-sidebar-accent-foreground hover:bg-[#ababaf]'
                         : 'text-sidebar-foreground/80 hover:bg-[#afafb3] hover:text-sidebar-accent-foreground'
-                    }`}
+                      }`}
                     onClick={onClick}
                   >
                     <Icon className='w-5 h-5 mr-3' />
