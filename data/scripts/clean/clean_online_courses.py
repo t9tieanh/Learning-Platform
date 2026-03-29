@@ -85,7 +85,7 @@ def clean_courses(input_file, output_file):
                     cleaned_row['thumbnail_url'] = f"https://picsum.photos/seed/course_{rows_processed+1:04d}/1280/720"
                     
                     # Add introductory_video with default value
-                    cleaned_row['introductory_video'] = "https://core-learnova.t9tieanh.io.vn/api/v1/learning/storage/1769169333825-What_is_Docker_in_5_minutes.mp4"
+                    cleaned_row['introductory_video'] = "https://core-learnova.t9tieanh.io.vn/api/v1/learning/storage/1774780379542-YTDown.com_YouTube_What-is-Docker-in-5-minutes_Media_dfLOzuIg2o_001_1080p.mp4"
                     
                     # Add default prices
                     # Generate a random variance: 0 to 9 * 1000 (e.g., 0, 1000, 2000, ... 9000)
