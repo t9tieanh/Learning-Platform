@@ -35,13 +35,13 @@ RUN npm install --omit=dev && \
 # Copy built application from builder
 COPY --from=builder /app/dist ./dist
 
-# Create logs directory and set permissions
-RUN mkdir -p logs && \
-    chown -R nodejs:nodejs /app
-
 # Create non-root user for security
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S nodejs -u 1001 && \
+    chown -R nodejs:nodejs /app
+
+# Create logs directory and set permissions
+RUN mkdir -p logs && \
     chown -R nodejs:nodejs /app
 
 USER nodejs

@@ -30,7 +30,7 @@ const START_SERVER = async () => {
   const port = Number(env.APP_PORT)
 
   server.listen(port, hostname, () => {
-    Logger.info(`Hello, Learnova:notification_service running at: ${hostname}:${port}/`)
+    Logger.info(`Hello, Learnova:notification_service running at: ${hostname}:${port}`)
   })
 }
 

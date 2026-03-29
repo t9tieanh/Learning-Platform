@@ -36,6 +36,7 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
             new PublicEndpoint("/chat-bot.*", "ALL"),
             new PublicEndpoint("/assistant.*", "ALL"),
             new PublicEndpoint("/auth.*", "ALL"),
+            new PublicEndpoint("/learning/tags.*", "ALL"),
             new PublicEndpoint("/learning/courses.*", "ALL"),
             new PublicEndpoint("/learning/categories.*", "ALL"),
             new PublicEndpoint("/learning/storage.*", "ALL"),

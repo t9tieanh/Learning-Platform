@@ -41,8 +41,7 @@ const ChatBubble = () => {
       const data = await chatBotService.requestToChat(userText)
       setMessages((prev) => {
         const updated = [...prev]
-        updated[updated.length - 1].content =
-          data.result?.reply || CHATBOT_ERROR_MESSAGE
+        updated[updated.length - 1].content = data.result?.reply || CHATBOT_ERROR_MESSAGE
         return updated
       })
     } catch (err: any) {
@@ -143,31 +142,33 @@ const ChatBubble = () => {
                   <p className='text-sm'>Ask me anything! I&apos;m here to help you learn.</p>
                 </div>
               )}
-              {!isHistoryLoading && messages.map((message, idx) => {
-                const isUser = message.type === 'human'
-                return (
-                  <div key={idx} className={`group flex items-end gap-2 ${isUser ? 'justify-end' : 'justify-start'}`}>
-                    <div
-                      className={`relative max-w-[76%] break-words select-text px-3 py-2 text-sm leading-relaxed shadow-sm ring-1 ${isUser
-                        ? 'bg-primary text-primary-foreground ring-black/10 rounded-2xl rounded-br-md'
-                        : 'bg-muted text-foreground ring-black/5 rounded-2xl rounded-bl-md'
+              {!isHistoryLoading &&
+                messages.map((message, idx) => {
+                  const isUser = message.type === 'human'
+                  return (
+                    <div key={idx} className={`group flex items-end gap-2 ${isUser ? 'justify-end' : 'justify-start'}`}>
+                      <div
+                        className={`relative max-w-[76%] break-words select-text px-3 py-2 text-sm leading-relaxed shadow-sm ring-1 ${
+                          isUser
+                            ? 'bg-primary text-primary-foreground ring-black/10 rounded-2xl rounded-br-md'
+                            : 'bg-muted text-foreground ring-black/5 rounded-2xl rounded-bl-md'
                         }`}
-                    >
-                      {message.content === 'typing...' ? (
-                        <div className='flex items-center gap-1 text-current'>
-                          <span className='inline-block h-1.5 w-1.5 rounded-full bg-current animate-bounce [animation-delay:-.3s]' />
-                          <span className='inline-block h-1.5 w-1.5 rounded-full bg-current animate-bounce [animation-delay:-.15s]' />
-                          <span className='inline-block h-1.5 w-1.5 rounded-full bg-current animate-bounce' />
-                        </div>
-                      ) : (
-                        <div className='whitespace-pre-wrap'>
-                          <RenderWithLink text={message.content} />
-                        </div>
-                      )}
+                      >
+                        {message.content === 'typing...' ? (
+                          <div className='flex items-center gap-1 text-current'>
+                            <span className='inline-block h-1.5 w-1.5 rounded-full bg-current animate-bounce [animation-delay:-.3s]' />
+                            <span className='inline-block h-1.5 w-1.5 rounded-full bg-current animate-bounce [animation-delay:-.15s]' />
+                            <span className='inline-block h-1.5 w-1.5 rounded-full bg-current animate-bounce' />
+                          </div>
+                        ) : (
+                          <div className='whitespace-pre-wrap'>
+                            <RenderWithLink text={message.content} />
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                )
-              })}
+                  )
+                })}
 
               <div ref={bottomRef} />
             </div>

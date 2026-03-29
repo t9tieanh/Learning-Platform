@@ -2,6 +2,7 @@ package com.freeclassroom.courseservice.controller.user;
 
 import com.freeclassroom.courseservice.service.utils.cloudfront.ICloudFrontService;
 import com.freeclassroom.courseservice.service.utils.file.IUploadFileService;
+import com.freeclassroom.courseservice.service.utils.other.FileUtils;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -21,6 +22,7 @@ import static org.springframework.http.MediaTypeFactory.getMediaType;
 public class StorageController {
     IUploadFileService uploadFileService;
     ICloudFrontService  cloudFrontService;
+    FileUtils fileUtils;
 
     @PostMapping("/upload-file")
     public String uploadFile(@RequestPart(value = "file") MultipartFile file) {
@@ -47,7 +49,7 @@ public class StorageController {
             ByteArrayResource resource = new ByteArrayResource(fileBytes);
 
             return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + fileName + "\"")
+                    .header(HttpHeaders.CONTENT_DISPOSITION, fileUtils.buildInlineContentDisposition(fileName))
                     .contentType(mediaType)
                     .contentLength(fileBytes.length)
                     .body(resource);

@@ -6,7 +6,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { FcGoogle } from 'react-icons/fc'
 import CustomCheckbox from '../../common/CustomCheckbox'
 import { FaSquareFacebook } from 'react-icons/fa6'
-import { Send } from 'lucide-react'
+import { Send, ArrowLeft } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import userService from '@/services/user/user.service'
@@ -19,6 +20,7 @@ const SignUpForm: FC<{ setIsSignUpMode: (value: boolean) => void; handleLoginWit
   setIsSignUpMode,
   handleLoginWithGoogle
 }) => {
+  const navigate = useNavigate()
   const {
     register,
     handleSubmit,
@@ -52,7 +54,18 @@ const SignUpForm: FC<{ setIsSignUpMode: (value: boolean) => void; handleLoginWit
       <Card className='shadow-xl py-12 border-none'>
         <CardHeader className='text-center'>
           <CardTitle className='flex items-center justify-center'>
-            <img src={logo} alt='LEARNOVA logo' className='h-12 md:h-14 w-auto object-contain mx-auto select-none' />
+            <button
+              type='button'
+              onClick={() => navigate('/')}
+              className='focus:outline-none'
+              aria-label='Về trang chủ'
+            >
+              <img
+                src={logo}
+                alt='LEARNOVA logo'
+                className='h-12 md:h-14 w-auto object-contain mx-auto select-none hover:opacity-80 transition-opacity'
+              />
+            </button>
           </CardTitle>
           <CardDescription className='text-[#2DD4BF] text-base font-semibold mt-2'>
             Bắt đầu để khám phá tri thức cùng Learnova.
@@ -145,6 +158,14 @@ const SignUpForm: FC<{ setIsSignUpMode: (value: boolean) => void; handleLoginWit
           </CardContent>
         </CardHeader>
       </Card>
+      <button
+        type='button'
+        onClick={() => navigate('/')}
+        className='flex items-center justify-center gap-1.5 mt-3 mx-auto text-sm text-gray-500 hover:text-blue-600 transition-colors group'
+      >
+        <ArrowLeft className='w-4 h-4 group-hover:-translate-x-0.5 transition-transform' />
+        Về trang chủ
+      </button>
     </div>
   )
 }

@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { FileText, GripVertical, HelpCircle, Play, Trash2, Send, X, Eye, Video } from 'lucide-react'
-import { Chapter, Lesson } from '@/utils/create-course/curriculum'
+import { FileText, GripVertical, HelpCircle, Play, Trash2, Send, X, Eye, Video, BookOpen } from 'lucide-react'
+import { Chapter, Lesson, CreationLessonFormValues } from '@/utils/create-course/curriculum'
 import { useCallback, useState } from 'react'
 import lessonService from '@/services/course/lesson.service'
 import { toast } from 'sonner'
@@ -13,10 +13,8 @@ import CustomInput from '@/components/common/Input'
 import CustomButton from '@/components/common/Button'
 import CustomDialog from '@/components/common/Dialog'
 import AddVideoForm from './AddVideoUpdated'
-import { CreationLessonFormValues } from '@/utils/create-course/curriculum'
-import { MultiUploadItem } from '@/hooks/useMultiUpload'
-import { BookOpen } from 'lucide-react'
-import { MdModeEditOutline } from "react-icons/md";
+import { useChunkedUpload } from '@/hooks/useChunkedUpload.hook'
+import { MdModeEditOutline } from 'react-icons/md'
 
 const UpdateLessonSchema = yup.object({
   title: yup.string().required('Tiêu đề không được để trống').min(3, 'Tiêu đề phải có ít nhất 3 ký tự')
@@ -28,15 +26,13 @@ const LessonForm = ({
   key,
   lesson,
   setChapters,
-  uploads,
-  startUpload,
+  chunkedUpload,
   fetchChapters
 }: {
   key: number
   lesson: Lesson
   setChapters?: React.Dispatch<React.SetStateAction<Chapter[]>>
-  uploads: MultiUploadItem[]
-  startUpload: (file: File, fd: FormData, titlePost: string, uri: string, isCallCallback: boolean) => string
+  chunkedUpload: ReturnType<typeof useChunkedUpload>
   fetchChapters: () => Promise<void>
 }) => {
   const [updateTitle, setUpdateTitle] = useState(false)
@@ -150,7 +146,13 @@ const LessonForm = ({
         </div>
         <div className='flex items-center space-x-2'>
           <Badge variant='secondary' className='capitalize flex items-center gap-1'>
-            {lesson.type === 'video' ? <Video className="w-3 h-3" /> : lesson.type === 'article' ? <FileText className="w-3 h-3" /> : <HelpCircle className="w-3 h-3" />}
+            {lesson.type === 'video' ? (
+              <Video className='w-3 h-3' />
+            ) : lesson.type === 'article' ? (
+              <FileText className='w-3 h-3' />
+            ) : (
+              <HelpCircle className='w-3 h-3' />
+            )}
             {lesson.type === 'video' ? 'Video' : lesson.type === 'article' ? 'Bài viết' : 'Quiz'}
           </Badge>
           <Button
@@ -165,9 +167,9 @@ const LessonForm = ({
       </div>
       <CustomDialog
         open={preview.openPreview}
-        setOpen={(v: boolean) => setPreview(prev => ({ ...prev, openPreview: v }))}
-        className="!max-w-[95vw] md:!max-w-5xl h-[90vh] overflow-hidden flex flex-col"
-        contentClassName="flex-1 min-h-0"
+        setOpen={(v: boolean) => setPreview((prev) => ({ ...prev, openPreview: v }))}
+        className='!max-w-[95vw] md:!max-w-5xl h-[90vh] overflow-hidden flex flex-col'
+        contentClassName='flex-1 min-h-0'
         title={
           <>
             <BookOpen className='h-4 w-4 mr-2' />
@@ -178,13 +180,14 @@ const LessonForm = ({
       >
         <AddVideoForm
           lessonId={lesson.id as string}
-          chapterId="" // Not needed for edit
-          setOpen={(v) => setPreview(prev => ({ ...prev, openPreview: typeof v === 'function' ? v(prev.openPreview) : v }))}
+          chapterId='' // Not needed for edit
+          setOpen={(v) =>
+            setPreview((prev) => ({ ...prev, openPreview: typeof v === 'function' ? v(prev.openPreview) : v }))
+          }
           fetchChapters={fetchChapters}
           initialData={lesson}
-          mode="edit"
-          uploads={uploads}
-          startUpload={startUpload}
+          mode='edit'
+          chunkedUpload={chunkedUpload}
           initialType={lesson.type === 'article' ? 'document' : 'video'}
           handleDelLesson={handleDelLesson}
         />

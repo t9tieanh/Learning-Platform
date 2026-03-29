@@ -2,6 +2,76 @@ import csv
 import os
 import re
 import random
+import sys
+from pathlib import Path
+
+SCRIPT_ROOT = Path(__file__).resolve().parents[1]
+if str(SCRIPT_ROOT) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_ROOT))
+
+import deepl
+
+from utils import load_env
+
+
+load_env()
+
+DEEPL_API_KEY = os.getenv('DEEPL_API_KEY') or os.getenv('DEEPL_AUTH_KEY')
+_translator = None
+_translation_cache = {}
+_translation_disabled_warned = False
+
+
+def get_translator():
+    global _translator, _translation_disabled_warned
+    if _translator is not None:
+        return _translator
+
+    if not DEEPL_API_KEY:
+        if not _translation_disabled_warned:
+            print("Warning: Deepl API key not found. Set DEEPL_API_KEY to enable translation.")
+            _translation_disabled_warned = True
+        return None
+
+    try:
+        _translator = deepl.Translator(DEEPL_API_KEY)
+    except deepl.DeepLException as exc:
+        if not _translation_disabled_warned:
+            print(f"Warning: Could not initialize Deepl translator ({exc}). Falling back to original text.")
+            _translation_disabled_warned = True
+        _translator = None
+
+    return _translator
+
+
+def translate_to_vietnamese(text):
+    """Translate text to Vietnamese with caching and retry."""
+    if not text:
+        return ''
+
+    normalized = text.strip()
+    if not normalized:
+        return ''
+
+    if normalized in _translation_cache:
+        return _translation_cache[normalized]
+
+    translator = get_translator()
+    if not translator:
+        _translation_cache[normalized] = normalized
+        return normalized
+
+    try:
+        translated = translator.translate_text(normalized, target_lang='VI')
+        translated_text = translated.text.strip()
+        if not translated_text:
+            translated_text = normalized
+    except deepl.DeepLException as exc:
+        print(f"Warning: Deepl translation failed ({exc}). Using original text.")
+        translated_text = normalized
+
+    _translation_cache[normalized] = translated_text
+    return translated_text
 
 def parse_rating(rating_str):
     """
@@ -66,7 +136,9 @@ def clean_courses(input_file, output_file):
                             val = ''
                         
                         # Transformations
-                        if output_col == 'rating':
+                        if output_col == 'title':
+                            val = translate_to_vietnamese(val)
+                        elif output_col == 'rating':
                             val = parse_rating(val)
                         elif output_col == 'instructors':
                              if val:

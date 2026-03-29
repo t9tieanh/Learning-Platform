@@ -39,10 +39,15 @@ class CourseHandler {
                         { ...orderData, orderType: 'COURSE' },
                         `order-${order.id}`
                     );
-                    orderData.items.forEach(async (item) => {
-                        cartService.removeFromCart(await cartService.getCartId(orderData.user_id), item.course_id.toString())
-                            .catch(err => Logger.error(`Failed to remove order items from cart: ${err}`));
-                    });
+                    try {
+                        const cartId = await cartService.getCartId(orderData.user_id);
+                        orderData.items.forEach((item) => {
+                            cartService.removeFromCart(cartId, item.course_id.toString())
+                                .catch(err => Logger.error(`Failed to remove order items from cart: ${err}`));
+                        });
+                    } catch (err) {
+                        Logger.error(`Failed to process cart cleanup: ${err}`);
+                    }
                 })
                 .catch(err => Logger.error(`Failed to send course notification for order ${message.orderId}: ${err}`));
 

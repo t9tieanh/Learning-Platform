@@ -15,7 +15,7 @@ import useLoading from '@/hooks/useLoading.hook'
 import { useAuthStore } from '@/stores/useAuth.stores'
 import { useNavigate } from 'react-router-dom'
 import logo from '@/assets/images/logo1.png'
-import { LogIn } from 'lucide-react'
+import { LogIn, ArrowLeft } from 'lucide-react'
 
 const SignInForm = ({
   handleLoginWithGoogle,
@@ -76,7 +76,18 @@ const SignInForm = ({
       <Card className='shadow-xl py-12 border-none'>
         <CardHeader className='text-center'>
           <CardTitle className='flex items-center justify-center'>
-            <img src={logo} alt='LEARNOVA logo' className='h-12 md:h-14 w-auto object-contain mx-auto select-none' />
+            <button
+              type='button'
+              onClick={() => navigate('/')}
+              className='focus:outline-none'
+              aria-label='Về trang chủ'
+            >
+              <img
+                src={logo}
+                alt='LEARNOVA logo'
+                className='h-12 md:h-14 w-auto object-contain mx-auto select-none hover:opacity-80 transition-opacity'
+              />
+            </button>
           </CardTitle>
           <CardDescription className='text-[#2DD4BF] text-base font-semibold mt-2'>
             Đăng nhập để khám phá tri thức cùng Learnova.
@@ -145,7 +156,17 @@ const SignInForm = ({
           </CardContent>
         </CardHeader>
       </Card>
-      <p className='text-xs text-center mt-2 text-muted-foreground'>Copyright © 2025 Learnova. All rights reserved.</p>
+      <div className='flex items-center justify-center gap-4 mt-2'>
+        <p className='text-xs text-center text-muted-foreground'>Copyright © 2025 Learnova. All rights reserved.</p>
+      </div>
+      <button
+        type='button'
+        onClick={() => navigate('/')}
+        className='flex items-center justify-center gap-1.5 mt-2 mx-auto text-sm text-gray-500 hover:text-blue-600 transition-colors group'
+      >
+        <ArrowLeft className='w-4 h-4 group-hover:-translate-x-0.5 transition-transform' />
+        Về trang chủ
+      </button>
     </div>
   )
 }

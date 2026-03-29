@@ -82,113 +82,113 @@ services:
       retries: 3
       start_period: 40s
 
-  # ============================================
-  # Sale Service (Node.js)
-  # ============================================
-  sale-service:
-    build:
-      context: ./rest-api
-      dockerfile: sale-service/Dockerfile
-    image: sale-service:latest
-    container_name: learning-platform-sale-service
-    environment:
-      NODE_ENV: production
-      PORT: 8083
-      GRPC_PORT: 50053
-    ports:
-      - "${SALE_SERVICE_PORT:-8083}:8083"
-      - "${SALE_SERVICE_GRPC_PORT:-50053}:50053"
-    volumes:
-      - ./rest-api/sale-service/.env:/app/.env
-    networks:
-      - learning-platform-network
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://localhost:8083/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
+  # # ============================================
+  # # Sale Service (Node.js)
+  # # ============================================
+  # sale-service:
+  #   build:
+  #     context: ./rest-api
+  #     dockerfile: sale-service/Dockerfile
+  #   image: sale-service:latest
+  #   container_name: learning-platform-sale-service
+  #   environment:
+  #     NODE_ENV: production
+  #     PORT: 8083
+  #     GRPC_PORT: 50053
+  #   ports:
+  #     - "${SALE_SERVICE_PORT:-8083}:8083"
+  #     - "${SALE_SERVICE_GRPC_PORT:-50053}:50053"
+  #   volumes:
+  #     - ./rest-api/sale-service/.env:/app/.env
+  #   networks:
+  #     - learning-platform-network
+  #   restart: unless-stopped
+  #   healthcheck:
+  #     test: ["CMD", "node", "-e", "require('http').get('http://localhost:8083/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+  #     start_period: 10s
 
-  # ============================================
-  # Assistant Service (Node.js)
-  # ============================================
-  assistant-service:
-    build:
-      context: ./rest-api
-      dockerfile: assistant-service/Dockerfile
-    image: assistant-service:latest
-    container_name: learning-platform-assistant-service
-    environment:
-      NODE_ENV: production
-      PORT: 8084
-    ports:
-      - "${ASSISTANT_SERVICE_PORT:-8084}:8084"
-    volumes:
-      - ./rest-api/assistant-service/.env:/app/.env
-    networks:
-      - learning-platform-network
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://localhost:8084/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
+  # # ============================================
+  # # Assistant Service (Node.js)
+  # # ============================================
+  # assistant-service:
+  #   build:
+  #     context: ./rest-api
+  #     dockerfile: assistant-service/Dockerfile
+  #   image: assistant-service:latest
+  #   container_name: learning-platform-assistant-service
+  #   environment:
+  #     NODE_ENV: production
+  #     PORT: 8084
+  #   ports:
+  #     - "${ASSISTANT_SERVICE_PORT:-8084}:8084"
+  #   volumes:
+  #     - ./rest-api/assistant-service/.env:/app/.env
+  #   networks:
+  #     - learning-platform-network
+  #   restart: unless-stopped
+  #   healthcheck:
+  #     test: ["CMD", "node", "-e", "require('http').get('http://localhost:8084/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+  #     start_period: 10s
 
-  # ============================================
-  # Notification Service (Node.js)
-  # ============================================
-  notification-service:
-    build:
-      context: ./rest-api
-      dockerfile: notification-service/Dockerfile
-    image: notification-service:latest
-    container_name: learning-platform-notification-service
-    environment:
-      NODE_ENV: production
-      PORT: 8082
-      GRPC_PORT: 50052
-    ports:
-      - "${NOTIFICATION_SERVICE_PORT:-8082}:8082"
-      - "${NOTIFICATION_SERVICE_GRPC_PORT:-50052}:50052"
-    volumes:
-      - ./rest-api/notification-service/.env:/app/.env
-    networks:
-      - learning-platform-network
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://localhost:8082/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
+  # # ============================================
+  # # Notification Service (Node.js)
+  # # ============================================
+  # notification-service:
+  #   build:
+  #     context: ./rest-api
+  #     dockerfile: notification-service/Dockerfile
+  #   image: notification-service:latest
+  #   container_name: learning-platform-notification-service
+  #   environment:
+  #     NODE_ENV: production
+  #     PORT: 8082
+  #     GRPC_PORT: 50052
+  #   ports:
+  #     - "${NOTIFICATION_SERVICE_PORT:-8082}:8082"
+  #     - "${NOTIFICATION_SERVICE_GRPC_PORT:-50052}:50052"
+  #   volumes:
+  #     - ./rest-api/notification-service/.env:/app/.env
+  #   networks:
+  #     - learning-platform-network
+  #   restart: unless-stopped
+  #   healthcheck:
+  #     test: ["CMD", "node", "-e", "require('http').get('http://localhost:8082/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+  #     start_period: 10s
 
-  # ============================================
-  # Socket Server (Node.js)
-  # ============================================
-  socket-server:
-    build:
-      context: .
-      dockerfile: socket-server/Dockerfile
-    image: socket-server:latest
-    container_name: learning-platform-socket-server
-    environment:
-      NODE_ENV: production
-      PORT: 5001
-    ports:
-      - "${SOCKET_SERVER_PORT:-5001}:5001"
-    depends_on:
-      - notification-service
-    networks:
-      - learning-platform-network
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://localhost:5001/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
+  # # ============================================
+  # # Socket Server (Node.js)
+  # # ============================================
+  # socket-server:
+  #   build:
+  #     context: .
+  #     dockerfile: socket-server/Dockerfile
+  #   image: socket-server:latest
+  #   container_name: learning-platform-socket-server
+  #   environment:
+  #     NODE_ENV: production
+  #     PORT: 5001
+  #   ports:
+  #     - "${SOCKET_SERVER_PORT:-5001}:5001"
+  #   depends_on:
+  #     - notification-service
+  #   networks:
+  #     - learning-platform-network
+  #   restart: unless-stopped
+  #   healthcheck:
+  #     test: ["CMD", "node", "-e", "require('http').get('http://localhost:5001/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+  #     start_period: 10s
 
 networks:
   learning-platform-network:

@@ -25,6 +25,7 @@ const CourseList = () => {
   const [page, setPage] = useState<number>(0)
   const [size] = useState<number>(MAX_SIZE)
   const [totalPages, setTotalPages] = useState<number>(0)
+  const [totalItems, setTotalItems] = useState<number>(0)
   const [hasNext, setHasNext] = useState<boolean>(false)
   const [hasPrevious, setHasPrevious] = useState<boolean>(false)
 
@@ -39,6 +40,7 @@ const CourseList = () => {
         setTotalPages(result.pagination?.totalPages ?? 0)
         setHasNext(Boolean(result.pagination?.hasNext))
         setHasPrevious(Boolean(result.pagination?.hasPrevious))
+        setTotalItems(result.pagination?.totalItems ?? 0)
       }
     } catch (error) {
       console.error('Error fetching courses:', error)
@@ -67,7 +69,7 @@ const CourseList = () => {
         <div className='cart-section pb-5 px-5 bg-white rounded-lg'>
           <div className='total-cart-item'>
             <p className='text-sm font-semibold mb-1 flex items-center'>
-              Bạn đang sỡ hữu &nbsp;<span className='text-primary'>{courses.length || 0}</span>&nbsp; khóa học !
+              Bạn đang sỡ hữu &nbsp;<span className='text-primary'>{totalItems || 0}</span>&nbsp; khóa học !
             </p>
             <hr />
           </div>

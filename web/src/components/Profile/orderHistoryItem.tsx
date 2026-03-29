@@ -22,8 +22,8 @@ const OrderHistoryItem = ({ item }: { item: HistoryOrder }) => {
           {item.type === 'VIP_SUBSCRIPTION' ? (
             <div className='flex items-center justify-center relative z-10'>
               <Avatar className='w-12 h-12 ring-2 ring-yellow-400 border border-yellow-400 bg-yellow-50 text-yellow-500'>
-                <AvatarFallback className="bg-transparent">
-                  <Crown className="fill-yellow-500 w-6 h-6" />
+                <AvatarFallback className='bg-transparent'>
+                  <Crown className='fill-yellow-500 w-6 h-6' />
                 </AvatarFallback>
               </Avatar>
             </div>

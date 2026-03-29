@@ -4,7 +4,9 @@ import prismaService from '~/service/utils/prisma.service';
 import redisService from '~/service/utils/redis.service';
 import { LessonEvent } from '~/enums/lessonEvents.enum';
 import { SemanticChunkingService } from '~/service/chunking/semanticChunking.service';
+import { EmbeddingE5Service } from '~/service/embedding/embeddingE5.service';
 import { SummaryService } from '~/service/analysis/summary.service';
+import { lessonChunkService } from '~/service/analysis/lessonChunk.service';
 import {
     TranscriptSavedPayload,
     ChunkingCompletedPayload,
@@ -26,15 +28,18 @@ import { AnalysisOutcome } from '~/enums/analysisOutcome.enum';
 export class LessonAnalysisEvents {
     private emitter: EventEmitter;
     private chunkingService: SemanticChunkingService;
+    private embeddingService: EmbeddingE5Service;
     private summaryService: SummaryService;
 
     constructor(
         emitter: EventEmitter,
         chunkingService: SemanticChunkingService,
-        summaryService: SummaryService
+        summaryService: SummaryService,
+        embeddingService: EmbeddingE5Service = new EmbeddingE5Service()
     ) {
         this.emitter = emitter;
         this.chunkingService = chunkingService;
+        this.embeddingService = embeddingService;
         this.summaryService = summaryService;
         this.register();
     }
@@ -131,6 +136,8 @@ export class LessonAnalysisEvents {
         );
 
         // 1. Run semantic chunking on the text
+        // 2 - 95 / 3 - 95 for e5base
+        // 3 - 95 for openai
         const chunks = await this.chunkingService.processRawText(subtitles, {
             bufferSize: 3,
             percentileThreshold: 95,
@@ -171,6 +178,8 @@ export class LessonAnalysisEvents {
      * Runs Map-Reduce summarization:
      *   - MAP:    Summarises each chunk individually → saves to LessonChunk.summary
      *   - REDUCE: Synthesises all chunk summaries → saves to Lesson.summary
+     *
+     * Then generates and persists vector embeddings for all chunks using pgvector.
      */
     private async onChunkingCompleted(lessonId: string, chunkCount: number): Promise<void> {
         Logger.info(
@@ -182,17 +191,56 @@ export class LessonAnalysisEvents {
             chunkCount,
         } satisfies SummarizationStartedPayload);
 
+        // Step 1: Map-Reduce summarization
         await this.summaryService.summarizeLesson(lessonId);
-
-        this.emitter.emit(LessonEvent.SUMMARIZATION_COMPLETED, {
-            lessonId,
-            chunkCount,
-        } satisfies SummarizationCompletedPayload);
 
         // Notify long-polling HTTP subscribers via Redis pub/sub
         await redisService.publish(`analysis:${lessonId}`, {
             lessonId,
             status: AnalysisOutcome.COMPLETED,
         });
+
+        // Step 2: Fetch all chunks for embedding generation
+        Logger.info(
+            `[EmbeddingGeneration] Fetching chunks for embedding generation – lessonId=${lessonId}`
+        );
+
+        const chunks = await prismaService.lessonChunk.findMany({
+            where: { lessonId },
+            orderBy: { chunkIndex: 'asc' },
+        });
+
+        if (chunks.length > 0) {
+            // Step 3: Generate embeddings for all chunk contents
+            const chunkContents = chunks.map((chunk) => chunk.content);
+            const embeddingMap = await this.embeddingService.generateEmbeddingsForChunkContents(
+                chunkContents
+            );
+
+            // Step 4: Update chunks with their embeddings in bulk
+            Logger.info(
+                `[EmbeddingGeneration] Updating ${chunks.length} chunk(s) with embeddings – lessonId=${lessonId}`
+            );
+
+            const updateData = chunks.map((chunk) => ({
+                chunkId: chunk.id,
+                embeddingVector: embeddingMap.get(chunk.chunkIndex) || null,
+            }));
+
+            await lessonChunkService.updateEmbeddingsBatch(updateData);
+
+            Logger.info(
+                `[EmbeddingGeneration] Successfully generated and persisted embeddings for lessonId=${lessonId}`
+            );
+        } else {
+            Logger.warn(
+                `[EmbeddingGeneration] No chunks found for embedding generation – lessonId=${lessonId}`
+            );
+        }
+
+        this.emitter.emit(LessonEvent.SUMMARIZATION_COMPLETED, {
+            lessonId,
+            chunkCount,
+        } satisfies SummarizationCompletedPayload);
     }
 }

@@ -102,15 +102,24 @@ const OrderSuccess = ({ order, id }: { order: Order; id: string }) => {
             <div className='bg-gray-50/50 rounded-lg px-4 border border-gray-50'>
               <div className='items order-items'>
                 {order?.items.map((item, index) => (
-                  <div key={index} className='flex justify-between text-sm mb-2 py-4 border-b border-gray-100 last:border-0'>
+                  <div
+                    key={index}
+                    className='flex justify-between text-sm mb-2 py-4 border-b border-gray-100 last:border-0'
+                  >
                     <div className='flex items-center gap-3 font-medium'>
-                      <img src={item.image} alt={item.title} className='w-10 h-10 object-cover rounded-md shadow-sm border border-gray-100' />
+                      <img
+                        src={item.image}
+                        alt={item.title}
+                        className='w-10 h-10 object-cover rounded-md shadow-sm border border-gray-100'
+                      />
                       <span>
                         <p className='text-gray-900'>{item.title}</p>
                         <p className='font-normal text-xs text-gray-500 mt-0.5'>@{item.instructor_name}</p>
                       </span>
                     </div>
-                    <span className='font-medium text-gray-800 flex items-center'>{formatCurrency(item.price)} VNĐ</span>
+                    <span className='font-medium text-gray-800 flex items-center'>
+                      {formatCurrency(item.price)} VNĐ
+                    </span>
                   </div>
                 ))}
               </div>
@@ -156,7 +165,14 @@ const OrderSuccess = ({ order, id }: { order: Order; id: string }) => {
                 if (completed) return null
                 const mm = String(minutes).padStart(2, '0')
                 const ss = String(seconds).padStart(2, '0')
-                return <span>Tự động chuyển hướng sau <span className='font-semibold text-gray-600'>{mm}:{ss}</span></span>
+                return (
+                  <span>
+                    Tự động chuyển hướng sau{' '}
+                    <span className='font-semibold text-gray-600'>
+                      {mm}:{ss}
+                    </span>
+                  </span>
+                )
               }}
             />
           </p>

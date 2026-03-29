@@ -112,3 +112,23 @@ message CanEditLessonRequest {
 message CanEditLessonResponse {
   bool canEdit = 1;
 }
+
+message CanViewLessonRequest {
+  string lessonId = 1;
+  string userId = 2;
+}
+
+message CanViewLessonResponse {
+  bool canView = 1;
+}
+
+// RCM v2: get course tags
+message GetCourseTagsRequest {
+  string courseId = 1;
+}
+
+message GetCourseTagsResponse {
+  repeated string tags = 1;
+  string category = 2;
+}
+

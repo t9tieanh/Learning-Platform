@@ -20,3 +20,4 @@ export const CONNECT_DATABASES = async (): Promise<void> => {
     Logger.error(`Database connection failed: ${err}`)
   }
 }
+//first

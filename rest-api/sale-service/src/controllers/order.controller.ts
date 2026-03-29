@@ -113,14 +113,6 @@ class OrderController {
         try {
             const query = req.query;
             const verificationResult = await orderPaymentService.verifyOrderForMomo(query);
-            if (!verificationResult.isSuccess) {
-                sendResponse(res, {
-                    code: 400,
-                    message: 'Xác thực đơn hàng thất bại !',
-                    result: verificationResult
-                });
-                return;
-            }
             return res.redirect(env.WEB_URL + verificationResult.orderId);
         } catch (error) {
             next(error);
@@ -150,12 +142,7 @@ class OrderController {
             const query = req.query;
             const verificationResult = await orderPaymentService.verifyVipOrderForMomo(query);
             if (!verificationResult.isSuccess) {
-                sendResponse(res, {
-                    code: 400,
-                    message: 'Xác thực đơn vip thất bại !',
-                    result: verificationResult
-                });
-                return;
+                return res.redirect(env.WEB_URL + verificationResult.orderId);
             }
             return res.redirect(env.WEB_URL + 'vip-success/' + verificationResult.orderId);
         } catch (error) {

@@ -18,22 +18,17 @@ import CustomDialog from '@/components/common/Dialog'
 import AddVideoForm from './AddVideoUpdated'
 import { toast } from 'sonner'
 import { showConfirmToast } from '@/components/common/ShowConfirmToast'
-import { HandleAddLesson } from '@/components/TC_CreateCourse/CurriculumForm/index'
-import { MultiUploadItem } from '@/hooks/useMultiUpload'
+import { useChunkedUpload } from '@/hooks/useChunkedUpload.hook'
 
 const ChapterForm = ({
   chapter,
   setChapters,
-  handleAddLesson,
-  uploads,
-  startUpload,
+  chunkedUpload,
   fetchChapters
 }: {
   chapter: Chapter
   setChapters?: React.Dispatch<React.SetStateAction<Chapter[]>>
-  handleAddLesson: HandleAddLesson
-  uploads: MultiUploadItem[]
-  startUpload: (file: File, fd: FormData, titlePost: string, uri: string, isCallCallback: boolean) => string
+  chunkedUpload: ReturnType<typeof useChunkedUpload>
   fetchChapters: () => Promise<void>
 }) => {
   const [updateTitle, setUpdateTitle] = useState(false)
@@ -188,8 +183,7 @@ const ChapterForm = ({
                   key={index}
                   lesson={lesson}
                   setChapters={setChapters}
-                  uploads={uploads}
-                  startUpload={startUpload}
+                  chunkedUpload={chunkedUpload}
                   fetchChapters={fetchChapters}
                 />
               ))}
@@ -203,7 +197,7 @@ const ChapterForm = ({
                 className='flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg transition-all duration-200 px-6 rounded-full'
               >
                 <PlusCircle className='h-5 w-5' />
-                <span className="font-medium">Thêm bài giảng mới</span>
+                <span className='font-medium'>Thêm bài giảng mới</span>
               </Button>
             </div>
           </div>
@@ -212,8 +206,8 @@ const ChapterForm = ({
       <CustomDialog
         open={open}
         setOpen={setOpen}
-        className="!max-w-[95vw] md:!max-w-5xl h-[90vh] overflow-hidden flex flex-col"
-        contentClassName="flex-1 min-h-0"
+        className='!max-w-[95vw] md:!max-w-5xl h-[90vh] overflow-hidden flex flex-col'
+        contentClassName='flex-1 min-h-0'
         title={
           <>
             <BookOpen className='h-4 w-4 mr-2' />
@@ -226,9 +220,7 @@ const ChapterForm = ({
             <AddVideoForm
               setOpen={setOpen}
               chapterId={chapter.id}
-              handleAddLesson={handleAddLesson}
-              uploads={uploads}
-              startUpload={startUpload}
+              chunkedUpload={chunkedUpload}
               fetchChapters={fetchChapters}
             />
           </>

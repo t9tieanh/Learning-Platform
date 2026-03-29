@@ -62,7 +62,7 @@ async function bootstrap() {
     }
 
     // 3. Start Express server
-    app.listen(PORT, () => Logger.info(`Learnova:sale_service running http://localhost:${PORT}`));
+    app.listen(PORT, () => Logger.info(`Learnova:sale_service running at http://localhost:${PORT}`));
 
   } catch (error) {
     Logger.error(`Bootstrap failed: ${error}`);

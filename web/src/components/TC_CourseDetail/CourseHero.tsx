@@ -19,7 +19,6 @@ interface CourseHeroProps {
   courseStatus: string
   onPlayIntro: () => void
   onEdit: () => void
-  // onApprove handled internally via admin API
   courseId?: string
   introductoryVideo: string
 }
@@ -35,17 +34,17 @@ enum EnumCourseStatus {
 function getStatusColor(status: EnumCourseStatus | string) {
   switch (status.toString().toLowerCase()) {
     case 'draft':
-      return 'bg-gray-500 text-white' // Bản nháp
+      return 'bg-gray-500 text-white' 
     case 'pending_review':
-      return 'bg-yellow-400 text-black' // Chờ duyệt
+      return 'bg-yellow-400 text-black'
     case 'published':
-      return 'bg-blue-500 text-white' // Đang mở
+      return 'bg-blue-500 text-white'
     case 'rejected':
-      return 'bg-red-500 text-white' // Bị từ chối
+      return 'bg-red-500 text-white'
     case 'archived':
-      return 'bg-gray-700 text-white' // Đã lưu trữ
+      return 'bg-gray-700 text-white'
     default:
-      return 'bg-gray-300 text-black' // Mặc định
+      return 'bg-gray-300 text-black'
   }
 }
 
@@ -151,13 +150,11 @@ export function CourseHero({
           <div className='flex items-center gap-3 flex-wrap'>
             <Badge className={`${getStatusColor(status)} text-sm p-1 px-2`}>{getStatusLabel(status)}</Badge>
 
-            {/* Ngày: trung tính, không cần màu đậm */}
             <div className='flex items-center gap-2 text-sm text-muted-foreground bg-gray-100 p-1 rounded-md'>
               <Calendar className='h-4 w-4 text-gray-600' />
               <span>{new Date(publishedAt).toLocaleDateString('vi-VN')}</span>
             </div>
 
-            {/* Giá: nổi bật nhẹ (cam), nhưng có thể dùng outline cho đỡ nặng */}
             {price && (
               <Badge variant='outline' className='text-sm border-orange-500 text-orange-600 font-semibold p-1'>
                 {price.toLocaleString('vi-VN')}đ
@@ -273,12 +270,7 @@ export function CourseHero({
                 >
                   {introductoryVideo ? (
                     <div className='w-full'>
-                      <video
-                        src={`${introductoryVideo}`}
-                        controls
-                        autoPlay
-                        className='w-full h-[480px] rounded-md'
-                      >
+                      <video src={`${introductoryVideo}`} controls autoPlay className='w-full h-[480px] rounded-md'>
                         <track kind='captions' srcLang='en' label='English captions' src={`${introductoryVideo}.vtt`} />
                       </video>
                     </div>

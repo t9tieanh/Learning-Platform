@@ -3,7 +3,7 @@ import { Card } from '@/components/ui/card'
 import { useNavigate } from 'react-router-dom'
 
 interface CourseCardProps {
-  id: string
+  id: string | number
   title: string
   description: string
   originalPrice: number
@@ -19,6 +19,7 @@ interface CourseCardProps {
   level: string
   isBestseller?: boolean
   thumbnail: string
+  onViewCourse?: (courseId: string) => void | Promise<void>
 }
 
 export const CourseCard = ({
@@ -33,12 +34,15 @@ export const CourseCard = ({
   duration,
   lectures,
   level,
-  thumbnail
+  thumbnail,
+  onViewCourse
 }: CourseCardProps) => {
   const navigate = useNavigate()
 
   const handleClickCourse = () => {
-    navigate(`/course/${id}`)
+    const courseId = String(id)
+    onViewCourse?.(courseId)
+    navigate(`/course/${courseId}`)
   }
 
   return (

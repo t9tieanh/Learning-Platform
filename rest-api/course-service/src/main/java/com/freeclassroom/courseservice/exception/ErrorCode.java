@@ -44,6 +44,12 @@ public enum ErrorCode {
     FILE_NOT_FOUND(400, "Không tìm thấy file trong hệ thống !", HttpStatus.OK),
     FILE_TYPE_INVALID(12346, "Loại file không hợp lệ !", HttpStatus.OK),
 
+    LESSON_UPLOAD_SESSION_NOT_FOUND(1400, "Phiên upload không tồn tại !", HttpStatus.OK),
+    LESSON_UPLOAD_SESSION_EXPIRED(1401, "Phiên upload đã hết hạn !", HttpStatus.OK),
+    LESSON_UPLOAD_INVALID_STATE(1402, "Trạng thái phiên upload không hợp lệ để thao tác !", HttpStatus.OK),
+    LESSON_UPLOAD_INVALID_PART(1403, "Thông tin phần upload không hợp lệ !", HttpStatus.OK),
+    LESSON_UPLOAD_TOO_MANY_PARTS(1404, "Số lượng phần upload vượt quá giới hạn !", HttpStatus.OK),
+
     // admin
     COURSE_NOT_DONE(1234561231, "Khóa học chưa được khởi tạo xong !", HttpStatus.OK);
     ;
@@ -58,6 +64,4 @@ public enum ErrorCode {
         this.statusCode = statusCode;
     }
 }
-
-
 

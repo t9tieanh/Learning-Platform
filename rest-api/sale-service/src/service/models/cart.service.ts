@@ -198,12 +198,29 @@ class CartService {
     }
 
     async getCartId(userId: string): Promise<string> {
-        const userCart = await prismaService.cart.upsert({
+        let userCart = await prismaService.cart.findUnique({
             where: { user_id: userId },
-            update: {},
-            create: { user_id: userId },
-            select: { id: true },
+            select: { id: true }
         });
+
+        if (!userCart) {
+            try {
+                userCart = await prismaService.cart.create({
+                    data: { user_id: userId },
+                    select: { id: true }
+                });
+            } catch (error: any) {
+                if (error.code === 'P2002') {
+                    userCart = await prismaService.cart.findUnique({
+                        where: { user_id: userId },
+                        select: { id: true }
+                    });
+                    if (!userCart) throw error;
+                } else {
+                    throw error;
+                }
+            }
+        }
 
         return userCart.id;
     }

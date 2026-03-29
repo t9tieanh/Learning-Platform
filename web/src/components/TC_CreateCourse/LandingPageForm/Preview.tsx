@@ -51,11 +51,7 @@ const PreviewComponent = ({
             <TabsContent value='intro'>
               <div className='aspect-video bg-blue-100 rounded-lg flex items-center justify-center'>
                 {introductoryVideo ? (
-                  <video
-                    src={`${introductoryVideo}`}
-                    controls
-                    className='object-contain w-full h-full rounded-lg'
-                  >
+                  <video src={`${introductoryVideo}`} controls className='object-contain w-full h-full rounded-lg'>
                     <track kind='captions' />
                   </video>
                 ) : (

@@ -32,7 +32,11 @@ const TC_Layout: FC = () => {
         <div className='lg:hidden fixed top-4 left-4 z-50'>
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
-              <Button variant='outline' size='icon' className='bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700'>
+              <Button
+                variant='outline'
+                size='icon'
+                className='bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700'
+              >
                 <Menu className='h-5 w-5' />
               </Button>
             </SheetTrigger>

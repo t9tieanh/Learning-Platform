@@ -17,20 +17,20 @@ const BlogPage = () => {
 
   useEffect(() => {
     let mounted = true
-      ; (async () => {
-        try {
-          setLoading(true)
-          const [tr, nw] = await Promise.all([blogService.getTrending(), blogService.getNew()])
-          if (!mounted) return
-          setTrending(tr)
-          setLatest(nw)
-        } catch (e) {
-          console.error(e)
-          if (mounted) setError('Không thể tải dữ liệu blog')
-        } finally {
-          if (mounted) setLoading(false)
-        }
-      })()
+    ;(async () => {
+      try {
+        setLoading(true)
+        const [tr, nw] = await Promise.all([blogService.getTrending(), blogService.getNew()])
+        if (!mounted) return
+        setTrending(tr)
+        setLatest(nw)
+      } catch (e) {
+        console.error(e)
+        if (mounted) setError('Không thể tải dữ liệu blog')
+      } finally {
+        if (mounted) setLoading(false)
+      }
+    })()
     return () => {
       mounted = false
     }
@@ -42,7 +42,6 @@ const BlogPage = () => {
         <HeroSection />
 
         <div className='grid lg:grid-cols-2 gap-8'>
-          {/* Cột 1 - Bài viết nổi bật */}
           <div className='space-y-8'>
             <section>
               <h2 className='text-2xl font-bold mb-6'>Cập nhật gần đây</h2>

@@ -21,6 +21,9 @@ import com.freeclassroom.courseservice.mapper.InstructorMapper;
 import com.freeclassroom.courseservice.repository.entity.ChapterRepository;
 import com.freeclassroom.courseservice.repository.entity.CourseRepository;
 import com.freeclassroom.courseservice.repository.entity.EnrollmentRepository;
+import com.freeclassroom.courseservice.dto.search.CourseEsDocument;
+import com.freeclassroom.courseservice.service.search.CourseSearchService;
+import com.freeclassroom.courseservice.service.cache.RedisCacheService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -32,6 +35,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -52,6 +56,9 @@ public class CourseUserService implements ICourseUserService{
 
     CourseMapper courseMapper;
     InstructorMapper instructorMapper;
+    CourseSearchService courseSearchService;
+
+    RedisCacheService redisCacheService;
 
     @Override
     public ApiResponse<CourseUserDetailResponse> getCourseDetail(String id, String userId) {
@@ -153,11 +160,35 @@ public class CourseUserService implements ICourseUserService{
 
     @Override
     public ApiResponse<List<CourseUserResponse>> getBestSellerCourse(int limit) {
+        final String key = "best_seller_courses";
+        final Duration ttl = Duration.ofSeconds(86400);
+
         try {
+            // 1) Check Redis
+            List<CourseUserResponse> cached = redisCacheService.get(
+                    key,
+                    redisCacheService.listOf(CourseUserResponse.class)
+            );
+            if (cached != null) {
+                log.debug("Best-seller cache hit key='{}' size={}", key, cached.size());
+                // keep existing API contract: still apply limit
+                List<CourseUserResponse> limited = cached.size() <= limit ? cached : cached.subList(0, limit);
+                return ApiResponse.<List<CourseUserResponse>>builder()
+                        .code(HttpStatus.OK.value())
+                        .message("Thành công")
+                        .result(limited)
+                        .build();
+            }
+
+            log.debug("Best-seller cache miss key='{}' -> querying DB", key);
+
+            // 2) Query DB
             Pageable pageable = PageRequest.of(0, limit);
             List<CourseEntity> courseEntities = courseRepo.findBestSellerCourses(pageable);
-
             List<CourseUserResponse> courses = getInstructorGrpc(courseEntities);
+
+            // 3) Save to Redis with TTL = 1 day
+            redisCacheService.set(key, courses, ttl);
 
             return ApiResponse.<List<CourseUserResponse>>builder()
                     .code(HttpStatus.OK.value())
@@ -166,7 +197,7 @@ public class CourseUserService implements ICourseUserService{
                     .build();
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("getBestSellerCourse failed", e);
             return ApiResponse.<List<CourseUserResponse>>builder()
                     .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
                     .message("Lỗi: " + e.getMessage())
@@ -202,6 +233,46 @@ public class CourseUserService implements ICourseUserService{
     @Override
     public ApiResponse<PageResponse<CourseUserResponse>> getAllCourses(int page, int limit, String search, String category,
                                                                    Double minPrice, Double minRating, String sort) {
+        // 1) Try Elasticsearch first
+        try {
+            CourseSearchService.EsPage<CourseEsDocument> esPage = courseSearchService.searchCourses(
+                    page <= 0 ? 1 : page,
+                    limit,
+                    search,
+                    category,
+                    minPrice,
+                    minRating,
+                    sort
+            );
+
+            List<CourseUserResponse> content = esPage.items().stream()
+                    .map(this::mapEsDocToCourseUserResponse)
+                    .toList();
+
+            PageResponse<CourseUserResponse> pageResponse = new PageResponse<>(
+                    content,
+                    esPage.page(),
+                    esPage.size(),
+                    esPage.totalItems(),
+                    esPage.totalPages()
+            );
+
+            return ApiResponse.<PageResponse<CourseUserResponse>>builder()
+                    .code(HttpStatus.OK.value())
+                    .message("Lấy danh sách khóa học thành công")
+                    .result(pageResponse)
+                    .build();
+
+        } catch (Exception esEx) {
+            // 2) Fallback to DB if ES is unavailable / query failed
+            log.error("Elasticsearch search failed. Falling back to database query. index=courses-dev, page={}, limit={}, search='{}', category='{}', minPrice={}, minRating={}, sort={}",
+                    page, limit, search, category, minPrice, minRating, sort, esEx);
+            return getAllCoursesFromDb(page, limit, search, category, minPrice, minRating, sort);
+        }
+    }
+
+    private ApiResponse<PageResponse<CourseUserResponse>> getAllCoursesFromDb(int page, int limit, String search, String category,
+                                                                              Double minPrice, Double minRating, String sort) {
         try {
             Sort sortOption = switch (sort) {
                 case "price-low" -> Sort.by(Sort.Direction.ASC, "finalPrice");
@@ -236,6 +307,41 @@ public class CourseUserService implements ICourseUserService{
                     .result(null)
                     .build();
         }
+    }
+
+    private CourseUserResponse mapEsDocToCourseUserResponse(CourseEsDocument doc) {
+        CourseUserResponse dto = CourseUserResponse.builder()
+                .id(doc.getId())
+                .title(doc.getTitle())
+                .shortDescription(doc.getShortDescription())
+                .longDescription(doc.getLongDescription())
+                .thumbnailUrl(doc.getThumbnailUrl())
+                .introductoryVideo(doc.getIntroductoryVideo())
+                .language(doc.getLanguage())
+                .originalPrice(doc.getOriginalPrice())
+                .finalPrice(doc.getFinalPrice())
+                .rating(doc.getRating())
+                .category(doc.getCategory())
+                .createdAt(doc.getCreatedAt())
+                .build();
+
+        // Enrich instructor via existing gRPC call. ES doc must include instructorId.
+        if (doc.getInstructorId() != null && !doc.getInstructorId().isBlank()) {
+            try {
+                GetUserResponse user = userGrpcClient.getUser(doc.getInstructorId());
+                dto.setInstructor(new InstructorResponse(
+                        user.getId(),
+                        user.getName(),
+                        user.getEmail(),
+                        user.getImage(),
+                        0
+                ));
+            } catch (Exception ex) {
+                log.warn("Failed to enrich instructor from user-service for instructorId={}", doc.getInstructorId(), ex);
+            }
+        }
+
+        return dto;
     }
 
     @Override

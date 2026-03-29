@@ -1,5 +1,5 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { TrendingUp, Clock, ArrowDown, ArrowUp } from 'lucide-react'
+import { Clock, ArrowDown, ArrowUp } from 'lucide-react'
 
 interface SortBarProps {
   totalCourses: number
@@ -33,15 +33,21 @@ export const SortBar = ({ totalCourses, sortValue, onSortChange }: SortBarProps)
 
             <SelectItem value='price-low'>
               <div className='flex items-center gap-2'>
-                <ArrowDown className='w-4 h-4 text-green-500' />
-                <span>Giá thấp nhất</span>
+                <ArrowUp className='w-4 h-4 text-green-500' />
+                <span>Giá: Thấp đến cao</span>
               </div>
             </SelectItem>
 
             <SelectItem value='price-high'>
               <div className='flex items-center gap-2'>
-                <ArrowUp className='w-4 h-4 text-orange-500' />
-                <span>Giá cao nhất</span>
+                <ArrowDown className='w-4 h-4 text-orange-500' />
+                <span>Giá: Cao đến thấp</span>
+              </div>
+            </SelectItem>
+
+            <SelectItem value='recommend'>
+              <div className='flex items-center gap-2'>
+                <span>✨ Khóa học gợi ý</span>
               </div>
             </SelectItem>
           </SelectContent>

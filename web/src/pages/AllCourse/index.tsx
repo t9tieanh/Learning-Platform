@@ -7,15 +7,61 @@ import CustomPagination from '@/components/common/Pagination/CustomPagination'
 import instructorAvatar from '@/assets/images/course.jpg'
 import courseService from '@/services/course/course-user.service'
 import useDebounce from '@/hooks/useDebounce.hook'
+import eventTracker from '@/services/personalize/eventTracker'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
+
+type PaginationItem = number | 'ellipsis'
+
+const getPaginationItems = (
+  total: number,
+  current: number,
+  siblingCount: number,
+  boundaryCount: number
+): PaginationItem[] => {
+  if (total <= 0) return []
+
+  const safeTotal = Math.max(1, Math.floor(total))
+  const safeCurrent = Math.min(safeTotal, Math.max(1, Math.floor(current)))
+  const safeSibling = Math.max(0, Math.floor(siblingCount))
+  const safeBoundary = Math.max(0, Math.floor(boundaryCount))
+
+  // If we can show everything, just do it.
+  const maxItems = safeBoundary * 2 + safeSibling * 2 + 3
+  if (safeTotal <= maxItems) {
+    return Array.from({ length: safeTotal }, (_, i) => i + 1)
+  }
+
+  const leftSiblingIndex = Math.max(safeCurrent - safeSibling, safeBoundary + 2)
+  const rightSiblingIndex = Math.min(safeCurrent + safeSibling, safeTotal - safeBoundary - 1)
+
+  const showLeftEllipsis = leftSiblingIndex > safeBoundary + 2
+  const showRightEllipsis = rightSiblingIndex < safeTotal - safeBoundary - 1
+
+  const startPages = Array.from({ length: safeBoundary }, (_, i) => i + 1)
+  const endPages = Array.from({ length: safeBoundary }, (_, i) => safeTotal - safeBoundary + 1 + i)
+
+  const siblingRange = Array.from({ length: rightSiblingIndex - leftSiblingIndex + 1 }, (_, i) => leftSiblingIndex + i)
+
+  if (!showLeftEllipsis && showRightEllipsis) {
+    const leftRange = Array.from({ length: safeBoundary + safeSibling * 2 + 1 }, (_, i) => i + 1)
+    return [...leftRange, 'ellipsis', ...endPages]
+  }
+
+  if (showLeftEllipsis && !showRightEllipsis) {
+    const rightRange = Array.from(
+      { length: safeBoundary + safeSibling * 2 + 1 },
+      (_, i) => safeTotal - (safeBoundary + safeSibling * 2) + i
+    )
+    return [...startPages, 'ellipsis', ...rightRange]
+  }
+
+  return [...startPages, 'ellipsis', ...siblingRange, 'ellipsis', ...endPages]
+}
 
 const Index = () => {
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize] = useState(10)
-  const [totalPages, setTotalPages] = useState(1)
-  const [totalElements, setTotalElements] = useState(0)
 
-  const [loading, setLoading] = useState(false)
-  const [items, setItems] = useState<any[]>([])
   const [selectedCategories, setSelectedCategories] = useState<string[]>([])
   const [sortValue, setSortValue] = useState('')
   const [search, setSearch] = useState('')
@@ -23,42 +69,85 @@ const Index = () => {
   const [minRating, setMinRating] = useState<number | undefined>(undefined)
   const debouncedSearch = useDebounce(search, 400)
 
-  useEffect(() => {
-    let mounted = true
-    const fetchData = async () => {
-      setLoading(true)
-      try {
-        const res = await courseService.getAllCourses({
-          page: currentPage,
-          limit: pageSize,
-          category: selectedCategories.length === 1 ? selectedCategories[0] : undefined,
-          search: debouncedSearch || undefined,
-          minPrice,
-          minRating,
-          sort: sortValue || ''
-        })
-        const payload = res.result
-        if (!mounted) return
-        const list = payload?.items ?? []
-        setItems(list)
-        setTotalPages(payload?.totalPages ?? 1)
-        setTotalElements(payload?.totalElements ?? list.length)
-      } catch (e) {
-        console.error('Failed to load courses', e)
-        if (mounted) {
-          setItems([])
-          setTotalPages(1)
-          setTotalElements(0)
-        }
-      } finally {
-        if (mounted) setLoading(false)
+  const selectedCategory = useMemo(
+    () => (selectedCategories.length === 1 ? selectedCategories[0] : undefined),
+    [selectedCategories]
+  )
+
+  const coursesQueryKey = useMemo(() => {
+    if (sortValue === 'recommend') {
+      return ['courses', 'recommend', currentPage, pageSize] as const
+    }
+
+    return [
+      'courses',
+      'all',
+      currentPage,
+      pageSize,
+      sortValue || '',
+      {
+        category: selectedCategory,
+        search: debouncedSearch || undefined,
+        minPrice,
+        minRating
       }
-    }
-    fetchData()
-    return () => {
-      mounted = false
-    }
-  }, [currentPage, pageSize, selectedCategories, debouncedSearch, minPrice, minRating, sortValue])
+    ] as const
+  }, [currentPage, pageSize, sortValue, selectedCategory, debouncedSearch, minPrice, minRating])
+
+  const recommendQuery = useQuery({
+    queryKey: ['courses', 'recommend', currentPage, pageSize],
+    enabled: sortValue === 'recommend',
+    queryFn: async () => {
+      const page = Math.max(0, currentPage - 1)
+      const res = await courseService.getPersonalizationCourse(page, pageSize)
+      const list = res.result ?? []
+      return {
+        items: list,
+        totalElements: list.length,
+        totalPages: list.length === pageSize ? currentPage + 1 : currentPage
+      }
+    },
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnMount: 'always',
+    retry: false
+  })
+
+  const allCoursesQuery = useQuery({
+    queryKey: coursesQueryKey,
+    enabled: sortValue !== 'recommend',
+    queryFn: async () => {
+      const res = await courseService.getAllCourses({
+        page: currentPage,
+        limit: pageSize,
+        category: selectedCategory,
+        search: debouncedSearch || undefined,
+        minPrice,
+        minRating,
+        sort: sortValue || ''
+      })
+
+      const payload = res.result
+      const list = payload?.items ?? []
+      return {
+        items: list,
+        totalElements: payload?.totalElements ?? list.length,
+        totalPages: payload?.totalPages ?? 1
+      }
+    },
+    staleTime: 10 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+    placeholderData: keepPreviousData,
+    retry: false
+  })
+
+  const activeQuery = sortValue === 'recommend' ? recommendQuery : allCoursesQuery
+
+  const items = useMemo(() => activeQuery.data?.items ?? [], [activeQuery.data?.items])
+  const totalPages = activeQuery.data?.totalPages ?? 1
+  const totalElements = activeQuery.data?.totalElements ?? 0
+  const loading = activeQuery.isLoading
+  const busy = activeQuery.isFetching
 
   const filteredItems = useMemo(() => {
     if (!selectedCategories || selectedCategories.length === 0) return items
@@ -90,6 +179,14 @@ const Index = () => {
       })),
     [filteredItems]
   )
+
+  // const paginationItems = useMemo(() => {
+  //   // Keep pagination compact to avoid UI overflow.
+  //   // Smaller screens get fewer siblings.
+  //   const siblingCount = 1
+  //   const boundaryCount = 1
+  //   return getPaginationItems(totalPages, currentPage, siblingCount, boundaryCount)
+  // }, [totalPages, currentPage])
 
   return (
     <div className='flex flex-col md:flex-row min-h-screen bg-white'>
@@ -139,7 +236,17 @@ const Index = () => {
           <div className='flex flex-col gap-4 mb-8'>
             {loading
               ? [...Array(10)].map((_, idx) => <CourseCardListSkeleton key={idx} />)
-              : mappedCourses.map((course) => <CourseCard key={course.id} {...course} />)}
+              : mappedCourses.map((course) => (
+                  <CourseCard
+                    key={course.id}
+                    {...course}
+                    onViewCourse={(courseId) =>
+                      eventTracker.trackingEvent('VIEW_COURSE', courseId).catch(() => {
+                        // ignore tracking errors
+                      })
+                    }
+                  />
+                ))}
           </div>
 
           <div className='flex items-center justify-center gap-2'>

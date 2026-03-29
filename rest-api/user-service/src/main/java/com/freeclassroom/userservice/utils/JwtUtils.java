@@ -4,11 +4,15 @@ import com.freeclassroom.userservice.enums.role.TokenEnum;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.SignedJWT;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.text.ParseException;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 @Component
@@ -24,6 +28,13 @@ public class JwtUtils {
     @Value("${spring.jwt.refresh-token-expiration}")
     private Long refreshTokenExpiration;
 
+    public Claims verifyToken(String token) {
+        return Jwts.parserBuilder()
+            .setSigningKey(Keys.hmacShaKeyFor(SIGNER_KEY.getBytes(StandardCharsets.UTF_8)))
+            .build()
+            .parseClaimsJws(token)
+            .getBody();
+    }
 
 //
 //    public String generateToken (AccountEntity account, TokenEnum tokenType) throws JOSEException {

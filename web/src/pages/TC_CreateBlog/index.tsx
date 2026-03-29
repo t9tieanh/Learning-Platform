@@ -18,7 +18,7 @@ const Index = () => {
   useEffect(() => {
     let mounted = true
     if (isUpdate && id) {
-      ; (async () => {
+      ;(async () => {
         try {
           const blog = await blogService.getDetails(id)
           if (!mounted) return

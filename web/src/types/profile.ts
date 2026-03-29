@@ -14,7 +14,6 @@ export type Profile = {
   }[]
 }
 
-
 export interface VipStatusResult {
   isVip: boolean
   durationMonths?: number

@@ -3,8 +3,9 @@
 import './style.scss'
 import CustomButton from '@/components/common/Button'
 import { motion, easeOut } from 'framer-motion'
-import { useNavigate } from 'react-router-dom'
 import { Send } from 'lucide-react'
+import { useState } from 'react'
+import ExplorePreferencesModal, { type ExplorePreferencesPayload } from '@/components/HomePage/ExplorePreferencesModal'
 
 const container = {
   hidden: { opacity: 0, y: 50 },
@@ -31,8 +32,18 @@ const item = {
   }
 }
 
-const Banner = () => {
-  const navigate = useNavigate()
+type BannerProps = {
+  onPreferencesSaved?: () => void
+}
+
+const Banner = ({ onPreferencesSaved }: BannerProps) => {
+  const [open, setOpen] = useState(false)
+
+  const handleSave = (payload: ExplorePreferencesPayload) => {
+    console.log(JSON.stringify(payload, null, 2))
+    onPreferencesSaved?.()
+  }
+
   return (
     <div className='banner-container p-32'>
       <motion.div variants={container} initial='hidden' animate='show'>
@@ -59,12 +70,9 @@ const Banner = () => {
           &quot;Cùng công nghệ, học tập trở nên dễ dàng hơn.&quot;
         </motion.blockquote>
       </motion.div>
-      <CustomButton
-        className='mt-10'
-        label='Khám phá ngay'
-        onClick={() => navigate('/course/f4018410-e6eb-4687-bb94-61ceb1ed4493')}
-        icon={<Send size={16} />}
-      />
+      <CustomButton className='mt-10' label='Khám phá ngay' onClick={() => setOpen(true)} icon={<Send size={16} />} />
+
+      <ExplorePreferencesModal open={open} onOpenChange={setOpen} onSave={handleSave} />
     </div>
   )
 }

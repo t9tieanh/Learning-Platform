@@ -10,7 +10,7 @@ import ChapterForm from './ChapterForm'
 import chapterService from '@/services/course/chapter.service'
 import { toast } from 'sonner'
 import UploadProgress from './UploadProgress'
-import useMultiUpload from '@/hooks/useMultiUpload'
+import { useChunkedUpload } from '@/hooks/useChunkedUpload.hook'
 import { useAuthStore } from '@/stores/useAuth.stores'
 import CustomButton from '@/components/common/Button'
 import CurriculumFormSkeleton from './Skeleton/CurriculumFormSkeleton'
@@ -62,12 +62,9 @@ const CurriculumForm: React.FC<{ id: string }> = ({ id }: { id: string }) => {
   }
 
   // hook must be called at top level of component
-  const { uploads, startUpload } = useMultiUpload({
-    accessToken: token,
-    callback: fetchChapters
-  })
+  const chunkedUpload = useChunkedUpload()
   const [showUpload, setShowUpload] = useState(true)
-  const isAnyUploading = uploads.some((u) => u.status === 'uploading')
+  const isAnyUploading = chunkedUpload.uploads.some((u) => u.status === 'uploading')
 
   const handleAddChapter = async () => {
     const data = await chapterService.addChapter({
@@ -126,47 +123,6 @@ const CurriculumForm: React.FC<{ id: string }> = ({ id }: { id: string }) => {
 
   const stats = getTotalStats()
 
-  // Handle form submission for save lesson
-  const handleAddLesson: HandleAddLesson = (
-    selectedFile: File,
-    chapterId: string,
-    setOpen: React.Dispatch<React.SetStateAction<boolean>>,
-    uri: string
-  ) => {
-    return async (newVideo: CreationLessonFormValues) => {
-      if (!selectedFile) {
-        toast.error('Vui lòng chọn file video trước khi lưu bài giảng')
-        return
-      }
-
-      // FormData cho cả video và lesson metadata
-      const formData = new FormData()
-      formData.append(
-        'lesson',
-        new Blob(
-          [
-            JSON.stringify({
-              title: newVideo.title,
-              content: newVideo.content,
-              isPublic: newVideo.isPublic,
-              duration: newVideo.duration,
-              chapterId: chapterId
-            })
-          ],
-          { type: 'application/json' }
-        )
-      )
-
-      try {
-        startUpload(selectedFile, formData, newVideo.title, uri)
-        // Close the modal add video -> start upload video
-        setOpen(false)
-      } catch (err) {
-        console.error(err)
-      }
-    }
-  }
-
   if (loading) {
     return <CurriculumFormSkeleton />
   }
@@ -197,11 +153,11 @@ const CurriculumForm: React.FC<{ id: string }> = ({ id }: { id: string }) => {
       />
 
       {/* Floating Upload Button */}
-      {uploads && (
+      {chunkedUpload.uploads && (
         <>
-          <div className="fixed z-50 bottom-8 right-8">
+          <div className='fixed z-50 bottom-8 right-8'>
             {isAnyUploading && (
-              <div className="absolute -inset-2 rounded-full border-4 border-blue-400/30 border-t-blue-600 animate-spin" />
+              <div className='absolute -inset-2 rounded-full border-4 border-blue-400/30 border-t-blue-600 animate-spin' />
             )}
             <CustomButton
               className={cn(
@@ -215,7 +171,7 @@ const CurriculumForm: React.FC<{ id: string }> = ({ id }: { id: string }) => {
                 <>
                   <Upload className={cn('w-7 h-7 text-white', isAnyUploading && 'animate-bounce')} />
                   <span className='absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full px-2 py-0.5 border-2 border-white'>
-                    {uploads.length}
+                    {chunkedUpload.uploads.length}
                   </span>
                 </>
               }
@@ -232,7 +188,7 @@ const CurriculumForm: React.FC<{ id: string }> = ({ id }: { id: string }) => {
                   <div>
                     <h4 className='text-sm font-semibold text-gray-800'>Trình quản lý tải lên</h4>
                     <p className='text-xs text-gray-500 font-medium'>
-                      {uploads.filter((u) => u.status === 'uploading').length} đang xử lý
+                      {chunkedUpload.uploads.filter((u) => u.status === 'uploading').length} đang xử lý
                     </p>
                   </div>
                 </div>
@@ -248,7 +204,7 @@ const CurriculumForm: React.FC<{ id: string }> = ({ id }: { id: string }) => {
 
               <div className='max-h-[320px] overflow-y-auto p-3 bg-gray-50/30 scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent'>
                 <div className='flex flex-col gap-2'>
-                  <UploadProgress progressLst={uploads} />
+                  <UploadProgress progressLst={chunkedUpload.uploads} />
                 </div>
               </div>
             </div>
@@ -271,9 +227,7 @@ const CurriculumForm: React.FC<{ id: string }> = ({ id }: { id: string }) => {
               key={chapter.id}
               chapter={chapter}
               setChapters={setChapters}
-              handleAddLesson={handleAddLesson}
-              uploads={uploads}
-              startUpload={startUpload}
+              chunkedUpload={chunkedUpload}
               fetchChapters={fetchChapters}
             />
           ))}

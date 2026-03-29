@@ -2,11 +2,13 @@
 
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  extensions = [vector]
 }
 
 model Lesson {
@@ -46,6 +48,9 @@ model LessonChunk {
   // AI-generated title and summary for this chunk (Map step of Map-Reduce summarization)
   title    String? @db.Text
   summary  String? @db.Text
+
+  // Vector embedding of the chunk content (768-dim from e5-base-v2), native pgvector type
+  embedding Unsupported("vector(768)")?
 
   // Position of the chunk within the lesson (0-based)
   chunkIndex Int

@@ -10,9 +10,7 @@ import { showConfirmToast } from '@/components/common/ShowConfirmToast'
 const sidebarItems = [
   {
     category: 'TỔNG QUAN',
-    items: [
-      { name: 'Thống kê', icon: ChartColumn, active: true }
-    ]
+    items: [{ name: 'Thống kê', icon: ChartColumn, active: true }]
   },
   {
     category: 'DANH MỤC',
@@ -47,9 +45,7 @@ const AcademySidebar = () => {
     }
   }
   return (
-    <div
-      className='w-full h-full bg-[#1D1D2A] text-sidebar-foreground flex flex-col min-w-[220px]'
-    >
+    <div className='w-full h-full bg-[#1D1D2A] text-sidebar-foreground flex flex-col min-w-[220px]'>
       <div className='flex p-4 md:p-6 items-center gap-3'>
         <button onClick={() => navigate('/teacher')} className='p-0 border-none bg-transparent cursor-pointer'>
           <img src={logo} alt='LEARNOVA logo' className='h-12 md:h-8 w-auto select-none object-contain' />
@@ -73,10 +69,11 @@ const AcademySidebar = () => {
                   <Button
                     key={itemIndex}
                     variant={item.active ? 'secondary' : 'ghost'}
-                    className={`w-full justify-start h-11 px-3 ${item.active
+                    className={`w-full justify-start h-11 px-3 ${
+                      item.active
                         ? 'bg-sidebar-accent text-sidebar-accent-foreground hover:bg-[#ababaf]'
                         : 'text-sidebar-foreground/80 hover:bg-[#afafb3] hover:text-sidebar-accent-foreground'
-                      }`}
+                    }`}
                     onClick={onClick}
                   >
                     <Icon className='w-5 h-5 mr-3' />

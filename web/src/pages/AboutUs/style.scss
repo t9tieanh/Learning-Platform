@@ -1,0 +1,37 @@
+.banner-about-us-container {
+    // background-image: url('https://images.unsplash.com/photo-1495465798138-718f86d1a4bc?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
+    // background-image: url('https://images.unsplash.com/photo-1758876019070-2e4fd5f505cb?q=80&w=1632&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
+     /* Path must be relative to this scss file when bundled. This file is at src/pages/AboutUs/,
+         so go up to src/ then into assets/images. */
+     background-image: url('../../assets/images/banner-aboutus.avif');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+
+    min-height: 550px;
+    /* Hoặc 100vh cho full screen */
+    width: 100%;
+    padding: 50px;
+    position: relative;
+
+    h1,
+    blockquote {
+        max-width: 600px !important;
+    }
+
+    color: white;
+
+    &::before {
+        content: '';
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1;
+        pointer-events: none;
+        position: absolute;
+    }
+
+    > * {
+        position: relative;
+        z-index: 2;
+    }
+}

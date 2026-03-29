@@ -79,8 +79,9 @@ const CoursesTable: FC<CoursesTableProps> = ({ courses, statusFilter = '', onCha
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <button
-                      className={`p-1 rounded-md border transition-colors ${statusFilter ? 'border-blue-300 text-blue-600 bg-white' : 'border-transparent text-blue-600'
-                        } hover:bg-blue-50`}
+                      className={`p-1 rounded-md border transition-colors ${
+                        statusFilter ? 'border-blue-300 text-blue-600 bg-white' : 'border-transparent text-blue-600'
+                      } hover:bg-blue-50`}
                       aria-label='Lọc theo trạng thái'
                     >
                       <Filter className='w-4 h-4' />
@@ -127,10 +128,16 @@ const CoursesTable: FC<CoursesTableProps> = ({ courses, statusFilter = '', onCha
                     className='w-20 h-14 sm:w-28 sm:h-20 rounded-lg object-cover shadow-sm'
                   />
                   <div className='max-w-[200px] sm:max-w-[300px]'>
-                    <div className='font-semibold text-gray-700 dark:text-gray-100 text-base sm:text-lg truncate' title={course.title}>
+                    <div
+                      className='font-semibold text-gray-700 dark:text-gray-100 text-base sm:text-lg truncate'
+                      title={course.title}
+                    >
                       {course.title}
                     </div>
-                    <p className='text-sm text-gray-400 dark:text-gray-500 font-light line-clamp-2' title={course?.shortDescription || undefined}>
+                    <p
+                      className='text-sm text-gray-400 dark:text-gray-500 font-light line-clamp-2'
+                      title={course?.shortDescription || undefined}
+                    >
                       {course?.shortDescription}
                     </p>
                     <div className='flex flex-wrap gap-2 mt-2'>

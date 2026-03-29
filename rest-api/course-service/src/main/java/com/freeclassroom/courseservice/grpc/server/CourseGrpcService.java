@@ -5,7 +5,7 @@ import com.example.grpc.user.*;
 import com.example.grpc.user.CourseServiceGrpc.CourseServiceImplBase;
 import com.freeclassroom.courseservice.entity.course.CourseEntity;
 import com.freeclassroom.courseservice.entity.member.EnrollmentsEntity;
-import com.freeclassroom.courseservice.enums.entity.EnumCourseProgressStep;
+import com.freeclassroom.courseservice.entity.category.TagEntity;
 import com.freeclassroom.courseservice.enums.entity.EnumCourseStatus;
 import com.freeclassroom.courseservice.exception.CustomExeption;
 import com.freeclassroom.courseservice.exception.ErrorCode;
@@ -13,9 +13,8 @@ import com.freeclassroom.courseservice.grpc.client.SaleGrpcClient;
 import com.freeclassroom.courseservice.grpc.client.UserGrpcClient;
 import com.freeclassroom.courseservice.repository.entity.CourseRepository;
 import com.freeclassroom.courseservice.repository.entity.EnrollmentRepository;
-import com.freeclassroom.courseservice.service.course.CourseStudentService;
-import com.freeclassroom.courseservice.service.course.CourseUserService;
 import com.freeclassroom.courseservice.service.lesson.ILessonService;
+import com.freeclassroom.courseservice.service.lesson.ILessonStudentService;
 import com.google.protobuf.Empty;
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
@@ -35,6 +34,7 @@ public class CourseGrpcService extends CourseServiceImplBase {
     private final UserGrpcClient userGrpcClient;
     private final SaleGrpcClient saleGrpcClient;
     private final ILessonService lessonService;
+    private final ILessonStudentService lessonStudentService;
 
     @Override
     public void getCourse(GetCourseRequest request, StreamObserver<CourseResponse> responseObserver) {
@@ -136,19 +136,15 @@ public class CourseGrpcService extends CourseServiceImplBase {
     @Override
     public void listEnrolledCourses(EnrolledCoursesRequest request, StreamObserver<GetCoursesResponse> responseObserver) {
         if(request.getUserRole().equals("instructor")) {
-            // 1. Lấy danh sách enrollment của student
             List<EnrollmentsEntity> enrollments = enrollmentRepo.findAllByUserId(request.getStudentId());
 
-            // 2. Lọc ra các courseId mà instructor trùng yêu cầu
             List<String> courseIds = enrollments.stream()
                     .map(enrollment -> enrollment.getCourse().getId())
                     .distinct()
                     .toList();
 
-            // Lấy tất cả course dựa trên courseIds
             List<CourseEntity> courses = courseRepo.findAllById(courseIds);
 
-            // Chỉ giữ các course có instructor trùng instructorId
             List<CourseEntity> filteredCourses = courses.stream()
                     .filter(course -> course.getInstructorId().equals(request.getInstructorId()))
                     .toList();
@@ -159,7 +155,6 @@ public class CourseGrpcService extends CourseServiceImplBase {
             convertCourseDTO(responseObserver, courses);
         }
     }
-
 
 
     private void convertCourseDTO(StreamObserver<GetCoursesResponse> responseObserver, List<CourseEntity> courses) {
@@ -217,7 +212,6 @@ public class CourseGrpcService extends CourseServiceImplBase {
             );
         }
     }
-
 
     @Override
     public void getTotalCoursesAndStudent(GetUserRequest request, StreamObserver<GetCourseAndStudentResponse> responseObserver) {
@@ -333,7 +327,7 @@ public class CourseGrpcService extends CourseServiceImplBase {
     }
 
     @Override
-    public void isInstructor(IsInstructorRequest request, StreamObserver<IsInstructorResponse> resObs) {
+    public void isInstructor(IsInstructorRequest request, StreamObserver<IsInstructorResponse> responseObserver) {
         boolean result = courseRepo
                 .findByIdAndInstructorId(request.getCourseId(), request.getUserId())
                 .isPresent();
@@ -342,8 +336,56 @@ public class CourseGrpcService extends CourseServiceImplBase {
                 .setIsInstructor(result)
                 .build();
 
-        resObs.onNext(response);
-        resObs.onCompleted();
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    // RCM v2: return course tags (topic)
+    @Override
+    public void getCourseTags(GetCourseTagsRequest request, StreamObserver<GetCourseTagsResponse> responseObserver) {
+        try {
+            String courseId = request.getCourseId();
+            if (courseId == null || courseId.isBlank()) {
+                responseObserver.onNext(GetCourseTagsResponse.newBuilder().build());
+                responseObserver.onCompleted();
+                return;
+            }
+
+            CourseEntity course = courseRepo.findByIdWithTags(courseId)
+                    .orElseThrow(() -> new CustomExeption(ErrorCode.COURSE_NOT_FOUND));
+
+            List<String> tags = Optional.ofNullable(course.getTags())
+                    .orElseGet(Collections::emptyList)
+                    .stream()
+                    .map(TagEntity::getName)
+                    .filter(Objects::nonNull)
+                    .map(String::trim)
+                    .filter(s -> !s.isBlank())
+                    .distinct()
+                    .toList();
+
+            GetCourseTagsResponse response = GetCourseTagsResponse.newBuilder()
+                    .addAllTags(tags)
+                    .setCategory(course.getCategory() != null && course.getCategory().getName() != null
+                        ? course.getCategory().getName()
+                        : "")
+                    .build();
+
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+        } catch (CustomExeption e) {
+            responseObserver.onError(
+                    Status.NOT_FOUND
+                            .withDescription(e.getMessage())
+                            .asRuntimeException()
+            );
+        } catch (Exception e) {
+            responseObserver.onError(
+                    Status.INTERNAL
+                            .withDescription("Failed to load course tags: " + e.getMessage())
+                            .asRuntimeException()
+            );
+        }
     }
 
     @Override
@@ -358,6 +400,24 @@ public class CourseGrpcService extends CourseServiceImplBase {
 
         CanEditLessonResponse response = CanEditLessonResponse.newBuilder()
                 .setCanEdit(result)
+                .build();
+
+        resObs.onNext(response);
+        resObs.onCompleted();
+    }
+
+    @Override
+    public void canViewLesson(CanViewLessonRequest request, StreamObserver<CanViewLessonResponse> resObs) {
+        boolean result = false;
+        try {
+            result = lessonStudentService.canViewLesson(request.getLessonId(), request.getUserId());
+        } catch (Exception e) {
+            // Return false if any issue or UNAUTHORIZED exception is thrown
+            result = false;
+        }
+
+        CanViewLessonResponse response = CanViewLessonResponse.newBuilder()
+                .setCanView(result)
                 .build();
 
         resObs.onNext(response);

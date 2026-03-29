@@ -1,7 +1,8 @@
 
+import Logger from '~/utils/logger';
 import { DocumentLoader } from "~/service/chunking/documentLoader.service";
 import { SentenceProcessor } from "~/service/chunking/sentenceProcessor.service";
-import { EmbeddingService } from "~/service/chunking/embeddingService.service";
+import { EmbeddingE5Service } from "~/service/embedding/embeddingE5.service";
 import { SemanticAnalyzer } from "~/service/chunking/semanticAnalyzer.service";
 import { SemanticChunk } from "~/service/chunking/types";
 
@@ -29,13 +30,13 @@ export interface SemanticChunkingConfig {
 export class SemanticChunkingService {
     private documentLoader: DocumentLoader;
     private sentenceProcessor: SentenceProcessor;
-    private embeddingService: EmbeddingService;
+    private embeddingService: EmbeddingE5Service;
     private semanticAnalyzer: SemanticAnalyzer;
 
     constructor() {
         this.documentLoader = new DocumentLoader();
         this.sentenceProcessor = new SentenceProcessor();
-        this.embeddingService = new EmbeddingService();
+        this.embeddingService = new EmbeddingE5Service();
         this.semanticAnalyzer = new SemanticAnalyzer();
     }
 
@@ -108,38 +109,40 @@ export class SemanticChunkingService {
     }
 
     /**
-   * Logs semantic chunks with formatting.
-   *
-   * @param {SemanticChunk[]} semanticChunks - Array of semantic chunks to log.
-   */
+     * Logs semantic chunks with formatting using Logger service.
+     *
+     * @param {SemanticChunk[]} semanticChunks - Array of semantic chunks to log.
+     */
     logSemanticChunks(semanticChunks: SemanticChunk[]): void {
-        console.log(`\n${'='.repeat(80)}`);
-        console.log(`Total Chunks Processed: ${semanticChunks.length}`);
-        console.log(`${'='.repeat(80)}\n`);
+        const separator = '='.repeat(80);
+        const divider = '-'.repeat(80);
+
+        Logger.info(`${separator}`);
+        Logger.info(`Total Chunks Processed: ${semanticChunks.length}`);
+        Logger.info(`${separator}`);
 
         semanticChunks.forEach((chunk, index) => {
-            console.log(`\n${'-'.repeat(80)}`);
-            console.log(`Chunk #${index + 1}`);
-            console.log(`${'-'.repeat(80)}`);
+            Logger.info(`${divider}`);
+            Logger.info(`Chunk #${index + 1}`);
+            Logger.info(`${divider}`);
 
             if (chunk.metadata) {
-                console.log(`\n📊 Metadata:`);
+                Logger.info(`📊 Metadata:`);
                 if (chunk.metadata.timestamp) {
-                    console.log(`  ⏱️  Timestamp: ${chunk.metadata.timestamp}`);
+                    Logger.info(`  ⏱️  Timestamp: ${chunk.metadata.timestamp}`);
                 }
                 if (chunk.metadata.subtitleIndex !== undefined) {
-                    console.log(`  🔢 Subtitle Index: ${chunk.metadata.subtitleIndex}`);
+                    Logger.info(`  🔢 Subtitle Index: ${chunk.metadata.subtitleIndex}`);
                 }
                 if (chunk.metadata.sentenceCount) {
-                    console.log(`  📝 Sentences: ${chunk.metadata.sentenceCount}`);
+                    Logger.info(`  📝 Sentences: ${chunk.metadata.sentenceCount}`);
                 }
             }
 
-            console.log(`\n📄 Content:`);
-            console.log(chunk.content);
-            console.log();
+            Logger.info(`📄 Content:`);
+            Logger.info(chunk.content);
         });
 
-        console.log(`\n${'='.repeat(80)}\n`);
+        Logger.info(`${separator}`);
     }
 }
