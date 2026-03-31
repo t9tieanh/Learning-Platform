@@ -70,7 +70,7 @@ const LearnovaVideoPlayer = forwardRef<HTMLVideoElement | null, LearnovaVideoPla
             <div ref={videoContainerRef} className={`bg-gray-50 pb-4 min-h-[300px] ${containerClassName}`}>
                 <div
                     className={`transition-all duration-500 ease-in-out ${isPiP && isPiPEnabled
-                        ? 'fixed bottom-6 right-6 w-80 z-[100] shadow-2xl scale-100'
+                        ? 'fixed bottom-6 left-6 w-80 z-[100] shadow-2xl scale-100'
                         : 'relative w-full aspect-video scale-100'
                         } ${className}`}
                 >
@@ -86,8 +86,8 @@ const LearnovaVideoPlayer = forwardRef<HTMLVideoElement | null, LearnovaVideoPla
 
                         {/* PiP Label */}
                         {isPiP && isPiPEnabled && (
-                            <div className='absolute top-2 left-2 bg-blue-600/80 backdrop-blur-sm text-white text-[10px] font-bold px-2 py-0.5 rounded-full z-10 animate-pulse'>
-                                Đang xem chế độ thu nhỏ
+                            <div className='absolute top-2 right-2 bg-white-600/80 backdrop-blur-sm text-white text-[10px] font-bold px-2 py-0.5 rounded-full z-10 animate-pulse'>
+                                Picture in picture (PiP)
                             </div>
                         )}
 

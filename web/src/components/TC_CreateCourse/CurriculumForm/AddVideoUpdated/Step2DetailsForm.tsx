@@ -24,6 +24,7 @@ import { LoadingDots } from '@/components/common/Loading/LoadingDots'
 import CustomInput from '@/components/common/Input'
 import CustomButton from '@/components/common/Button'
 import QuillEditor from '@/components/common/Input/QuillEditor'
+import AssistantAnalysisService from '@/services/assistant/analysis.service'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { UseFormRegister, UseFormWatch, UseFormSetValue, FieldErrors, UseFormHandleSubmit } from 'react-hook-form'
@@ -36,6 +37,7 @@ import { LessonChunk } from '@/types/ai'
 import { toast } from 'sonner'
 
 import LearnovaVideoPlayer, { SubtitleEntry } from '@/components/common/Video/LearnovaVideoPlayer'
+import LearnovaDetailedView from './LearnovaAIDetail/LearnovaDetailedView'
 
 const MOCK_SUBTITLES: SubtitleEntry[] = [
   { start: 0, end: 3, text: 'Chào mừng bạn đến với Learnova AI!' },
@@ -140,6 +142,27 @@ const Step2DetailsForm: React.FC<Step2DetailsFormProps> = ({
     }))
   }
 
+  const handleSaveChunkSummary = async (chunkId: string, newSummary: string) => {
+    try {
+      if (analysisState.status === 'completed' && analysisState.data) {
+        const res = await AssistantAnalysisService.updateChunkSummary(
+          analysisState.data.lessonId,
+          chunkId,
+          newSummary
+        )
+        if (res.code === 200) {
+          toast.success(res.message || 'Đã cập nhật tóm tắt thành công')
+          refetchAnalysis()
+        } else {
+          throw new Error(res.message)
+        }
+      }
+    } catch (error: any) {
+      toast.error(error?.message || 'Không thể cập nhật tóm tắt')
+      throw error
+    }
+  }
+
   const handleSeek = (startTime: string | null) => {
     const targetVideo = detailedVideoRef.current
     if (!targetVideo || !startTime) return
@@ -169,165 +192,21 @@ const Step2DetailsForm: React.FC<Step2DetailsFormProps> = ({
 
   if (isDetailedView) {
     return (
-      <div ref={mainWrapperRef} className='animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-8 pb-12 relative'>
-        {/* Header */}
-        <div className='flex items-center justify-between bg-gray-50/90 backdrop-blur-md py-4 z-40 border-b border-gray-200'>
-          <div className='flex items-center gap-4'>
-            <button
-              onClick={() => setIsDetailedView(false)}
-              className='p-2 hover:bg-white rounded-full transition-colors text-gray-500 hover:text-blue-600 border border-transparent hover:border-gray-200'
-            >
-              <ArrowLeft className='w-5 h-5' />
-            </button>
-            <div>
-              <h2 className='text-xl font-bold text-gray-800 flex items-center gap-2'>
-                Phân tích chi tiết Learnova AI
-                <img src={learnovaLogo} alt='Logo' className='h-5 w-auto object-contain' />
-              </h2>
-              <p className='text-sm text-gray-500'>Xem và tùy chỉnh nội dung phân đoạn, câu hỏi và SRT</p>
-            </div>
-          </div>
-          <CustomButton
-            label='Lưu tất cả thay đổi'
-            icon={<CheckCheck className='w-4 h-4 mr-2' />}
-            className='bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-lg shadow-blue-200'
-          />
-        </div>
-
-        {/* Video Playback Section - Using Shared Component */}
-        <LearnovaVideoPlayer
-          src={videoSrc || ''}
-          ref={detailedVideoRef}
-          subtitles={MOCK_SUBTITLES}
-          isPiPEnabled={true}
-        />
-
-        {/* Chunks & Questions Section */}
-        <div className='space-y-6'>
-          <h3 className='text-lg font-bold text-gray-800 flex items-center gap-2 px-1'>
-            <MessageSquare className='w-5 h-5 text-indigo-500' />
-            Danh sách phân đoạn & Câu hỏi tương ứng
-          </h3>
-
-          <div className='grid grid-cols-1 gap-6'>
-            {chunks.map((chunk, idx) => (
-              <div
-                key={chunk.id}
-                className='bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden hover:shadow-md transition-shadow'
-              >
-                <div className='bg-gradient-to-r from-gray-50 to-white px-6 py-4 border-b border-gray-100 flex items-center justify-between'>
-                  <div className='flex items-center gap-3'>
-                    <div className='w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold text-sm'>
-                      {idx + 1}
-                    </div>
-                    <div>
-                      <h4 className='font-bold text-gray-800 text-[15px]'>{chunk.title || `Phân đoạn ${idx + 1}`}</h4>
-                      <div className='flex items-center gap-3 text-xs text-gray-400 mt-0.5'>
-                        <span className='flex items-center gap-1'>
-                          Thời gian: <span className='text-indigo-600 font-semibold'>{chunk.timestamp}</span>
-                        </span>
-                        <button
-                          type='button'
-                          onClick={() => handleSeek(chunk.startTime)}
-                          className='flex items-center gap-1 text-blue-500 hover:text-blue-700 transition-colors'
-                        >
-                          <PlayCircle className='w-3 h-3' /> Tua tới đây
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className='p-6 space-y-6'>
-                  {/* Chunk Summary */}
-                  <div>
-                    <label className='text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 block'>
-                      Tóm tắt nội dung
-                    </label>
-                    <p className='text-gray-700 text-sm leading-relaxed bg-gray-50 p-4 rounded-xl border border-gray-100 italic'>
-                      "{chunk.summary}"
-                    </p>
-                  </div>
-
-                  {/* Questions Section */}
-                  <div className='bg-indigo-50/50 rounded-2xl p-5 border border-indigo-100/50'>
-                    <div className='flex items-center justify-between mb-4'>
-                      <label className='text-sm font-bold text-indigo-700 flex items-center gap-2'>
-                        <Search className='w-4 h-4' />
-                        Câu hỏi tự ôn luyện ({chunkQuestions[chunk.id]?.length || 0})
-                      </label>
-                    </div>
-
-                    <div className='space-y-3'>
-                      {(chunkQuestions[chunk.id] || []).map((q, qIndex) => (
-                        <div
-                          key={qIndex}
-                          className='flex items-center gap-3 bg-white p-3 rounded-xl border border-indigo-100 shadow-sm animate-in slide-in-from-left-2 duration-300'
-                        >
-                          <div className='w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-[10px] font-bold'>
-                            Q{qIndex + 1}
-                          </div>
-                          <span className='text-sm text-gray-700 flex-1'>{q}</span>
-                          <button
-                            type='button'
-                            onClick={() => handleRemoveQuestion(chunk.id, qIndex)}
-                            className='text-gray-400 hover:text-red-500 transition-colors'
-                          >
-                            <Trash2 className='w-4 h-4' />
-                          </button>
-                        </div>
-                      ))}
-
-                      {/* Add Question Input */}
-                      <div className='relative mt-4'>
-                        <CustomInput
-                          placeholder='Nhập câu hỏi mới cho phân đoạn bài học này...'
-                          className='pr-12'
-                          value={newQuestionInputs[chunk.id] || ''}
-                          onChange={(e) =>
-                            setNewQuestionInputs((prev) => ({ ...prev, [chunk.id]: e.target.value }))
-                          }
-                          onKeyDown={(e) => e.key === 'Enter' && handleAddQuestion(chunk.id)}
-                        />
-                        <button
-                          type='button'
-                          onClick={() => handleAddQuestion(chunk.id)}
-                          className='absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-indigo-600 text-white rounded-lg flex items-center justify-center hover:bg-indigo-700 transition-colors'
-                        >
-                          <Plus className='w-4 h-4' />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* SRT Editor Section */}
-        <div className='space-y-6 pt-4'>
-          <h3 className='text-lg font-bold text-gray-800 flex items-center gap-2 px-1'>
-            <AlignLeft className='w-5 h-5 text-blue-500' />
-            Biên tập SRT Content (Transcript)
-          </h3>
-          <div className='bg-white p-6 rounded-3xl border border-gray-100 shadow-xl'>
-            <div className='relative min-h-[400px]'>
-              <QuillEditor
-                initialHtml={chunks.map((c) => `<p>[${c.timestamp}] ${c.summary}</p>`).join('')}
-                className='min-h-[400px] text-base leading-loose'
-              />
-            </div>
-            <div className='mt-4 flex items-start gap-3 bg-blue-50 p-4 rounded-2xl border border-blue-100'>
-              <ScanEye className='w-5 h-5 text-blue-600 mt-0.5' />
-              <p className='text-xs text-blue-700 leading-relaxed'>
-                <strong>Lưu ý:</strong> Việc chỉnh sửa SRT Content sẽ ảnh hưởng đến kết quả tìm kiếm và phụ đề hiển thị
-                trong khóa học. Hãy đảm bảo nội dung chính xác so với video.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
+      <LearnovaDetailedView
+        analysisData={analysisData}
+        videoSrc={videoSrc}
+        onBack={() => setIsDetailedView(false)}
+        detailedVideoRef={detailedVideoRef}
+        chunkQuestions={chunkQuestions}
+        newQuestionInputs={newQuestionInputs}
+        handleAddQuestion={handleAddQuestion}
+        handleRemoveQuestion={handleRemoveQuestion}
+        setNewQuestionInputs={setNewQuestionInputs}
+        handleSeek={handleSeek}
+        mockSubtitles={MOCK_SUBTITLES}
+        mainWrapperRef={mainWrapperRef}
+        onSaveSummary={handleSaveChunkSummary}
+      />
     )
   }
 
