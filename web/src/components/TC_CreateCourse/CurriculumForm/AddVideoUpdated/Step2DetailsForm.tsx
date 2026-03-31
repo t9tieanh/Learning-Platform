@@ -35,6 +35,32 @@ import { useVipUpgrade } from '@/contexts/VipUpgradeContext'
 import { LessonChunk } from '@/types/ai'
 import { toast } from 'sonner'
 
+import LearnovaVideoPlayer, { SubtitleEntry } from '@/components/common/Video/LearnovaVideoPlayer'
+
+const MOCK_SUBTITLES: SubtitleEntry[] = [
+  { start: 0, end: 3, text: 'Chào mừng bạn đến với Learnova AI!' },
+  { start: 4, end: 7, text: 'Trong bài hướng dẫn này, chúng ta sẽ khám phá tính năng phân tích video.' },
+  { start: 8, end: 11, text: 'Đầu tiên, hệ thống sẽ tự động quét toàn bộ bài giảng của bạn.' },
+  { start: 12, end: 15, text: 'Nó sẽ nhận diện các khái niệm quan trọng nhất.' },
+  { start: 16, end: 19, text: 'Sau đó, video được chia thành các phân đoạn nhỏ (chunks).' },
+  { start: 20, end: 23, text: 'Giúp học viên dễ dàng theo dõi và nắm bắt kiến thức.' },
+  { start: 24, end: 27, text: 'Mỗi phân đoạn sẽ đi kèm với một tóm tắt ngắn gọn.' },
+  { start: 28, end: 31, text: 'Bạn cũng có thể tùy chỉnh các tóm tắt này theo ý muốn.' },
+  { start: 32, end: 35, text: 'Tính năng này giúp tiết kiệm thời gian biên tập tối đa.' },
+  { start: 36, end: 39, text: 'Tiếp theo, hãy cùng nhìn vào phần Câu hỏi ôn luyện.' },
+  { start: 40, end: 43, text: 'Learnova AI sẽ gợi ý các câu hỏi dựa trên nội dung video.' },
+  { start: 44, end: 47, text: 'Bạn có thể thêm mới hoặc xóa các câu hỏi không cần thiết.' },
+  { start: 48, end: 51, text: 'Điều này tăng tính tương tác cực cao trong khóa học.' },
+  { start: 52, end: 55, text: 'Học viên sẽ hiểu sâu hơn nhờ các bộ câu hỏi ôn tập này.' },
+  { start: 56, end: 59, text: 'Bây giờ, chúng ta hãy xem qua trình biên tập SRT.' },
+  { start: 60, end: 63, text: 'Toàn bộ lời thoại (Transcript) được hiển thị đầy đủ.' },
+  { start: 64, end: 67, text: 'Bạn có thể chỉnh sửa ngay lập tức nếu AI nhận diện sai từ.' },
+  { start: 68, end: 71, text: 'Mọi thay đổi sẽ được đồng bộ trực tiếp lên hệ thống.' },
+  { start: 72, end: 75, text: 'Đảm bảo nội dung bài giảng của bạn luôn chuyên nghiệp nhất.' },
+  { start: 76, end: 79, text: 'Vừa rồi là cái nhìn tổng quan về hệ thống phân tích.' },
+  { start: 80, end: 85, text: 'Cảm ơn bạn đã lựa chọn Learnova AI cho bài giảng của mình!' }
+]
+
 interface Step2DetailsFormProps {
   videoSrc: string | null
   selectedFile: File | null
@@ -86,6 +112,12 @@ const Step2DetailsForm: React.FC<Step2DetailsFormProps> = ({
   const analysisData = analysisState.status === 'completed' ? analysisState.data : null
   const isAnalysisLoading = analysisState.status === 'loading' || analysisState.status === 'processing'
 
+  const [isVideoLoading, setIsVideoLoading] = useState(true)
+
+  const handleMediaLoad = () => {
+    setIsVideoLoading(false)
+  }
+
   // --- Questions State (Mock) ---
   const [chunkQuestions, setChunkQuestions] = useState<Record<string, string[]>>({})
   const [newQuestionInputs, setNewQuestionInputs] = useState<Record<string, string>>({})
@@ -109,7 +141,7 @@ const Step2DetailsForm: React.FC<Step2DetailsFormProps> = ({
   }
 
   const handleSeek = (startTime: string | null) => {
-    const targetVideo = isDetailedView ? detailedVideoRef.current : videoRef.current
+    const targetVideo = detailedVideoRef.current
     if (!targetVideo || !startTime) return
 
     // SRT: "00:00:18,831" → strip milliseconds first
@@ -123,69 +155,21 @@ const Step2DetailsForm: React.FC<Step2DetailsFormProps> = ({
     targetVideo.play()
   }
 
-  const [isVideoLoading, setIsVideoLoading] = useState(true)
-  const [activeSubtitle, setActiveSubtitle] = useState<string | null>(null)
-
-  // --- Mock Subtitles Data (Detailed from 0 to 1m25s) ---
-  const MOCK_SUBTITLES = [
-    { start: 0, end: 3, text: 'Chào mừng bạn đến với Learnova AI!' },
-    { start: 4, end: 7, text: 'Trong bài hướng dẫn này, chúng ta sẽ khám phá tính năng phân tích video.' },
-    { start: 8, end: 11, text: 'Đầu tiên, hệ thống sẽ tự động quét toàn bộ bài giảng của bạn.' },
-    { start: 12, end: 15, text: 'Nó sẽ nhận diện các khái niệm quan trọng nhất.' },
-    { start: 16, end: 19, text: 'Sau đó, video được chia thành các phân đoạn nhỏ (chunks).' },
-    { start: 20, end: 23, text: 'Giúp học viên dễ dàng theo dõi và nắm bắt kiến thức.' },
-    { start: 24, end: 27, text: 'Mỗi phân đoạn sẽ đi kèm với một tóm tắt ngắn gọn.' },
-    { start: 28, end: 31, text: 'Bạn cũng có thể tùy chỉnh các tóm tắt này theo ý muốn.' },
-    { start: 32, end: 35, text: 'Tính năng này giúp tiết kiệm thời gian biên tập tối đa.' },
-    { start: 36, end: 39, text: 'Tiếp theo, hãy cùng nhìn vào phần Câu hỏi ôn luyện.' },
-    { start: 40, end: 43, text: 'Learnova AI sẽ gợi ý các câu hỏi dựa trên nội dung video.' },
-    { start: 44, end: 47, text: 'Bạn có thể thêm mới hoặc xóa các câu hỏi không cần thiết.' },
-    { start: 48, end: 51, text: 'Điều này tăng tính tương tác cực cao trong khóa học.' },
-    { start: 52, end: 55, text: 'Học viên sẽ hiểu sâu hơn nhờ các bộ câu hỏi ôn tập này.' },
-    { start: 56, end: 59, text: 'Bây giờ, chúng ta hãy xem qua trình biên tập SRT.' },
-    { start: 60, end: 63, text: 'Toàn bộ lời thoại (Transcript) được hiển thị đầy đủ.' },
-    { start: 64, end: 67, text: 'Bạn có thể chỉnh sửa ngay lập tức nếu AI nhận diện sai từ.' },
-    { start: 68, end: 71, text: 'Mọi thay đổi sẽ được đồng bộ trực tiếp lên hệ thống.' },
-    { start: 72, end: 75, text: 'Đảm bảo nội dung bài giảng của bạn luôn chuyên nghiệp nhất.' },
-    { start: 76, end: 79, text: 'Vừa rồi là cái nhìn tổng quan về hệ thống phân tích.' },
-    { start: 80, end: 85, text: 'Cảm ơn bạn đã lựa chọn Learnova AI cho bài giảng của mình!' }
-  ]
-
-  const handleTimeUpdate = (e: React.SyntheticEvent<HTMLVideoElement>) => {
-    const time = e.currentTarget.currentTime
-    const sub = MOCK_SUBTITLES.find((s) => time >= s.start && time <= s.end)
-    setActiveSubtitle(sub ? sub.text : null)
-  }
-
-  const handleMediaLoad = () => {
-    setIsVideoLoading(false)
-  }
-
-  const [isPiP, setIsPiP] = useState(false)
-  const videoContainerRef = useRef<HTMLDivElement>(null)
+  const mainWrapperRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (!isDetailedView) return
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setIsPiP(!entry.isIntersecting)
-      },
-      { threshold: 0.1 }
-    )
-
-    if (videoContainerRef.current) {
-      observer.observe(videoContainerRef.current)
+    // Scroll correctly to top when switching views
+    if (mainWrapperRef.current) {
+      mainWrapperRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
     }
-
-    return () => observer.disconnect()
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }, [isDetailedView])
 
   const chunks: LessonChunk[] = analysisData?.chunks || []
 
   if (isDetailedView) {
     return (
-      <div className='animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-8 pb-12 relative'>
+      <div ref={mainWrapperRef} className='animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-8 pb-12 relative'>
         {/* Header */}
         <div className='flex items-center justify-between bg-gray-50/90 backdrop-blur-md py-4 z-40 border-b border-gray-200'>
           <div className='flex items-center gap-4'>
@@ -210,57 +194,13 @@ const Step2DetailsForm: React.FC<Step2DetailsFormProps> = ({
           />
         </div>
 
-        {/* Video Playback Section */}
-        <div ref={videoContainerRef} className='bg-gray-50 pb-4 min-h-[300px]'>
-          <div
-            className={`transition-all duration-500 ease-in-out ${isPiP
-                ? 'fixed bottom-6 right-6 w-80 z-[100] shadow-2xl scale-100'
-                : 'relative w-full aspect-video scale-100'
-              }`}
-          >
-            <div className='relative w-full h-full bg-black rounded-2xl overflow-hidden shadow-2xl border-4 border-white group'>
-              <video
-                src={videoSrc || ''}
-                ref={detailedVideoRef}
-                className='w-full h-full object-contain'
-                controls
-                onLoadedData={handleMediaLoad}
-                onTimeUpdate={handleTimeUpdate}
-              />
-
-              {/* PiP Label */}
-              {isPiP && (
-                <div className='absolute top-2 left-2 bg-blue-600/80 backdrop-blur-sm text-white text-[10px] font-bold px-2 py-0.5 rounded-full z-10 animate-pulse'>
-                  Đang xem chế độ thu nhỏ
-                </div>
-              )}
-
-              {/* Manual Subtitles Overlay */}
-              {activeSubtitle && (
-                <div
-                  className={`absolute left-0 right-0 flex justify-center px-4 z-10 pointer-events-none transition-all ${isPiP ? 'bottom-10' : 'bottom-16'
-                    }`}
-                >
-                  <div
-                    className={`bg-black/60 backdrop-blur-md text-white px-3 py-1.5 rounded-lg text-center font-medium shadow-lg animate-in slide-in-from-bottom-2 duration-300 ${isPiP ? 'text-[10px] max-w-[90%]' : 'text-sm md:text-base px-4 py-2'
-                      }`}
-                  >
-                    {activeSubtitle}
-                  </div>
-                </div>
-              )}
-
-              {isVideoLoading && (
-                <div className='absolute inset-0 flex items-center justify-center bg-gray-900'>
-                  <div className='flex flex-col items-center gap-2'>
-                    <img src={learnovaLogo} alt='Loading' className='w-12 h-12 object-contain animate-bounce' />
-                    <LoadingDots text='Đang tải trình phát...' className='text-blue-400 text-xs' />
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
+        {/* Video Playback Section - Using Shared Component */}
+        <LearnovaVideoPlayer
+          src={videoSrc || ''}
+          ref={detailedVideoRef}
+          subtitles={MOCK_SUBTITLES}
+          isPiPEnabled={true}
+        />
 
         {/* Chunks & Questions Section */}
         <div className='space-y-6'>
@@ -392,7 +332,7 @@ const Step2DetailsForm: React.FC<Step2DetailsFormProps> = ({
   }
 
   return (
-    <div className='grid grid-cols-1 lg:grid-cols-3 gap-8 animate-in fade-in slide-in-from-right-4 duration-300'>
+    <div ref={mainWrapperRef} className='grid grid-cols-1 lg:grid-cols-3 gap-8 animate-in fade-in slide-in-from-right-4 duration-300'>
       {/* Left: Mini Preview */}
       <div className='lg:col-span-1 space-y-6 sticky top-4 self-start'>
         <div className='bg-white p-4 rounded-2xl shadow-sm border border-gray-100'>
