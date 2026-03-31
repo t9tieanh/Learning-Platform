@@ -40,7 +40,6 @@ const Banner = ({ onPreferencesSaved }: BannerProps) => {
   const [open, setOpen] = useState(false)
 
   const handleSave = (payload: ExplorePreferencesPayload) => {
-    // TODO: Integrate with backend API later.
     console.log(JSON.stringify(payload, null, 2))
     onPreferencesSaved?.()
   }

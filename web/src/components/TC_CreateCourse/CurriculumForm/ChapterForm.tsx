@@ -18,22 +18,17 @@ import CustomDialog from '@/components/common/Dialog'
 import AddVideoForm from './AddVideoUpdated'
 import { toast } from 'sonner'
 import { showConfirmToast } from '@/components/common/ShowConfirmToast'
-import { HandleAddLesson } from '@/components/TC_CreateCourse/CurriculumForm/index'
-import { MultiUploadItem } from '@/hooks/useMultiUpload'
+import { useChunkedUpload } from '@/hooks/useChunkedUpload.hook'
 
 const ChapterForm = ({
   chapter,
   setChapters,
-  handleAddLesson,
-  uploads,
-  startUpload,
+  chunkedUpload,
   fetchChapters
 }: {
   chapter: Chapter
   setChapters?: React.Dispatch<React.SetStateAction<Chapter[]>>
-  handleAddLesson: HandleAddLesson
-  uploads: MultiUploadItem[]
-  startUpload: (file: File, fd: FormData, titlePost: string, uri: string, isCallCallback: boolean) => string
+  chunkedUpload: ReturnType<typeof useChunkedUpload>
   fetchChapters: () => Promise<void>
 }) => {
   const [updateTitle, setUpdateTitle] = useState(false)
@@ -188,8 +183,7 @@ const ChapterForm = ({
                   key={index}
                   lesson={lesson}
                   setChapters={setChapters}
-                  uploads={uploads}
-                  startUpload={startUpload}
+                  chunkedUpload={chunkedUpload}
                   fetchChapters={fetchChapters}
                 />
               ))}
@@ -226,9 +220,7 @@ const ChapterForm = ({
             <AddVideoForm
               setOpen={setOpen}
               chapterId={chapter.id}
-              handleAddLesson={handleAddLesson}
-              uploads={uploads}
-              startUpload={startUpload}
+              chunkedUpload={chunkedUpload}
               fetchChapters={fetchChapters}
             />
           </>

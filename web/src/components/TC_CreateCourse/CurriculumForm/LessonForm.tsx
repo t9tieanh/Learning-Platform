@@ -13,7 +13,7 @@ import CustomInput from '@/components/common/Input'
 import CustomButton from '@/components/common/Button'
 import CustomDialog from '@/components/common/Dialog'
 import AddVideoForm from './AddVideoUpdated'
-import { MultiUploadItem } from '@/hooks/useMultiUpload'
+import { useChunkedUpload } from '@/hooks/useChunkedUpload.hook'
 import { MdModeEditOutline } from 'react-icons/md'
 
 const UpdateLessonSchema = yup.object({
@@ -26,15 +26,13 @@ const LessonForm = ({
   key,
   lesson,
   setChapters,
-  uploads,
-  startUpload,
+  chunkedUpload,
   fetchChapters
 }: {
   key: number
   lesson: Lesson
   setChapters?: React.Dispatch<React.SetStateAction<Chapter[]>>
-  uploads: MultiUploadItem[]
-  startUpload: (file: File, fd: FormData, titlePost: string, uri: string, isCallCallback: boolean) => string
+  chunkedUpload: ReturnType<typeof useChunkedUpload>
   fetchChapters: () => Promise<void>
 }) => {
   const [updateTitle, setUpdateTitle] = useState(false)
@@ -189,8 +187,7 @@ const LessonForm = ({
           fetchChapters={fetchChapters}
           initialData={lesson}
           mode='edit'
-          uploads={uploads}
-          startUpload={startUpload}
+          chunkedUpload={chunkedUpload}
           initialType={lesson.type === 'article' ? 'document' : 'video'}
           handleDelLesson={handleDelLesson}
         />

@@ -389,18 +389,6 @@ const Step2DetailsForm: React.FC<Step2DetailsFormProps> = ({
                 title='Xem chi tiết'
               />
             </div>
-
-            {isUploading && (
-              <div className='absolute inset-0 bg-black/60 flex flex-col items-center justify-center text-white p-4'>
-                <div className='w-full max-w-[80%] h-2 bg-gray-700 rounded-full overflow-hidden mb-2'>
-                  <div
-                    className='h-full bg-blue-500 transition-all duration-300'
-                    style={{ width: `${uploadProgress}%` }}
-                  />
-                </div>
-                <p className='text-sm font-medium'>Đang tải lên {uploadProgress}%</p>
-              </div>
-            )}
           </div>
           <div className='mt-3 flex items-center justify-between text-xs text-gray-500'>
             <span className='truncate max-w-[150px]'>{selectedFile?.name}</span>

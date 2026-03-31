@@ -11,13 +11,12 @@ import { ReviewsList } from '@/components/TC_CourseDetail/ReviewsList'
 import { StatsSidebar } from '@/components/TC_CourseDetail/StatsSidebar'
 import { VideoModal } from '@/components/TC_CourseDetail/VideoModal'
 import { Button } from '@/components/ui/button'
-import { toast } from 'sonner'
 import { useLocation, useParams, useNavigate } from 'react-router-dom'
 import courseService from '@/services/course/course.service'
 import { ApiResponse } from '@/types/response.type'
-import { Loader } from '@/components/ui/loader'
 import courseAdminService from '@/services/course/course-admin.service'
 import { TC_CourseDetailSkeleton } from '@/components/TC_CourseDetail/Skeleton/TC_CourseDetailSkeleton'
+import noPhotoImage from '@/assets/images/no-photo.avif'
 
 interface CourseResponseDTO {
   id: string
@@ -198,7 +197,7 @@ export default function CourseDetailPage() {
             <div className='space-y-8'>
               <CourseHero
                 title={course.title}
-                coverImage={course.thumbnailUrl || '/placeholder.png'}
+                coverImage={course.thumbnailUrl || noPhotoImage}
                 introductoryVideo={course?.introductoryVideo || ''}
                 status={course.status.toLowerCase()}
                 publishedAt={course.publishedAt || course.createdAt || new Date().toISOString()}

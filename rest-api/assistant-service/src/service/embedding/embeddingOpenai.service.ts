@@ -1,6 +1,6 @@
 
 import { OpenAIEmbeddings } from "@langchain/openai";
-import { SentenceObject } from "./types";
+import { SentenceObject } from "../chunking/types";
 
 /**
  * Service class for generating and attaching embeddings to sentences.

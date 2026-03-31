@@ -42,7 +42,6 @@ const BlogPage = () => {
         <HeroSection />
 
         <div className='grid lg:grid-cols-2 gap-8'>
-          {/* Cột 1 - Bài viết nổi bật */}
           <div className='space-y-8'>
             <section>
               <h2 className='text-2xl font-bold mb-6'>Cập nhật gần đây</h2>

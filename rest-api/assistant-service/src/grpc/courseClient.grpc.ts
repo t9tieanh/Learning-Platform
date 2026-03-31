@@ -101,6 +101,26 @@ class CourseGrpcClient {
         })
     }
 
+    // check if user can view lesson (enrolled in course)
+    async canViewLesson(lessonId: string, userId: string): Promise<boolean> {
+        return new Promise<boolean>((resolve, reject) => {
+            const req = { lessonId: lessonId, userId: userId }
+            this.courseClient.canViewLesson(req, (err: any, response: any) => {
+                if (err) {
+                    Logger.error(`grpc canViewLesson error: ${err}`)
+                    return reject(err)
+                }
+
+                if (!response || typeof response.canView !== 'boolean') {
+                    Logger.warn(`grpc canViewLesson: invalid response, returning false: ${response}`)
+                    return resolve(false)
+                }
+
+                resolve(response.canView)
+            })
+        })
+    }
+
     // optional helper to await readiness from elsewhere
     async isReady(timeoutMs = 5000): Promise<boolean> {
         return new Promise((resolve) => {
