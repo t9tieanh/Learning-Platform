@@ -152,25 +152,28 @@ const MediaInfomation = ({ formProps, id }: MediaInfomationProps) => {
   return (
     <>
       {/* Upload Course Image */}
-      <Card className='border border-blue-200 shadow-md bg-blue-50'>
-        <CardHeader>
-          <CardTitle className='text-lg font-semibold text-blue-900'>Hình ảnh khóa học</CardTitle>
-          <p className='text-sm text-blue-700'>Tải hình ảnh khóa học tại đây.</p>
+      <Card className='border-2 border-white ring-1 ring-gray-100 shadow-sm bg-white rounded-[32px] overflow-hidden'>
+        <CardHeader className='pb-4 border-b border-gray-50'>
+          <CardTitle className='text-[15px] font-bold text-gray-900 flex items-center gap-2'>
+            <ImageIcon className='w-4.5 h-4.5 text-blue-600' />
+            Hình ảnh khóa học
+          </CardTitle>
+          <p className='text-[11.5px] font-medium text-gray-400 mt-1'>Tải lên hình ảnh đại diện hấp dẫn cho khóa học của bạn.</p>
         </CardHeader>
         <CardContent>
           <div
-            className='border-2 border-dashed border-blue-300 rounded-xl p-10 text-center 
-                   hover:border-blue-500 hover:bg-blue-100/50 transition-colors cursor-pointer'
+            className='border-2 border-dashed border-gray-100 rounded-3xl p-12 text-center 
+                   hover:border-blue-200 hover:bg-blue-50/10 transition-all duration-300 cursor-pointer group bg-gray-50/20'
             onClick={triggerImageUpload}
           >
-            <ImageIcon className='h-10 w-10 mx-auto mb-4 text-blue-400' />
-            <h3 className='font-medium text-blue-900 mb-1'>Tải ảnh khóa học</h3>
-            <p className='text-xs text-blue-600 mb-4'>750x422 pixels. JPG, JPEG hoặc PNG.</p>
+            <ImageIcon className='h-12 w-12 mx-auto mb-4 text-gray-300 group-hover:text-blue-400 transition-colors' />
+            <h3 className='text-[13px] font-bold text-gray-700 mb-1.5'>Tải ảnh khóa học lên</h3>
+            <p className='text-[10px] font-bold text-gray-300 mb-6'>Kích thước chuẩn 750x422 pixels. Hỗ trợ JPG, JPEG hoặc PNG.</p>
 
             <CustomButton
-              className='bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow'
-              label={'Chọn ảnh'}
-              icon={<Upload className='h-4 w-4 mr-2' />}
+              className='bg-blue-600 hover:bg-blue-700 text-white rounded-xl px-8 h-7.5 text-[10.5px] font-bold shadow-lg shadow-blue-100 transition-all active:scale-95'
+              label={'Chọn ảnh từ máy'}
+              icon={<Upload className='h-3.5 w-3.5 mr-2' />}
               isLoader={loading}
               onClick={(e) => {
                 e.stopPropagation()
@@ -191,15 +194,18 @@ const MediaInfomation = ({ formProps, id }: MediaInfomationProps) => {
       </Card>
 
       {/* Upload Course Intro Video */}
-      <Card className='border border-blue-200 shadow-md bg-blue-50'>
-        <CardHeader>
-          <CardTitle className='text-lg font-semibold text-blue-900'>Video giới thiệu</CardTitle>
-          <p className='text-sm text-blue-700'>Học viên có thể xem trước khóa học qua video giới thiệu.</p>
+      <Card className='border-2 border-white ring-1 ring-gray-100 shadow-sm bg-white rounded-[32px] overflow-hidden'>
+        <CardHeader className='pb-4 border-b border-gray-50'>
+          <CardTitle className='text-[15px] font-bold text-gray-900 flex items-center gap-2'>
+            <Video className='w-4.5 h-4.5 text-blue-600' />
+            Video giới thiệu
+          </CardTitle>
+          <p className='text-[11.5px] font-medium text-gray-400 mt-1'>Video giới thiệu giúp học viên hiểu rõ hơn về giá trị mà khóa học mang lại.</p>
         </CardHeader>
         <CardContent>
           <div
-            className='border-2 border-dashed border-blue-300 rounded-xl p-10 text-center 
-                   hover:border-blue-500 hover:bg-blue-100/50 transition-colors cursor-pointer'
+            className='border-2 border-dashed border-gray-100 rounded-3xl p-12 text-center 
+                   hover:border-blue-200 hover:bg-blue-50/10 transition-all duration-300 cursor-pointer group bg-gray-50/20'
             onClick={triggerVideoUpload}
           >
             {videoSrc ? (
@@ -210,26 +216,26 @@ const MediaInfomation = ({ formProps, id }: MediaInfomationProps) => {
                   controls
                   className='w-full max-h-48 mb-3 rounded-md bg-black'
                 />
-                <div className='flex justify-center items-center gap-2 w-full'>
+                <div className='flex justify-center items-center gap-3 w-full'>
                   <CustomButton
-                    className='bg-blue-600 hover:bg-blue-700 text-white rounded-lg'
+                    className='bg-blue-600 hover:bg-blue-700 text-white rounded-xl h-7.5 px-6 text-[10.5px] font-bold shadow-lg shadow-blue-100'
                     label={'Xác nhận lưu'}
                     onClick={handleConfirmVideo}
-                    icon={<Send className='h-4 w-4 ml-1' />}
+                    icon={<Send className='h-3.5 w-3.5 mr-2' />}
                   />
                   <div className='flex items-center gap-2'>
                     <CustomButton
-                      className='bg-white hover:bg-gray-200 text-black border rounded-lg'
-                      icon={<MousePointer className='h-4 w-4 ml-1' />}
+                      className='bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-100 rounded-xl h-7.5 w-7.5 p-0 flex items-center justify-center'
+                      icon={<MousePointer className='h-3.5 w-3.5' />}
                       onClick={(e) => {
                         e.stopPropagation()
                         triggerVideoUpload()
                       }}
                     />
                     <CustomButton
-                      className='bg-red-600 text-white rounded-lg'
+                      className='bg-red-50 hover:bg-red-100 text-red-600 border border-red-100 rounded-xl h-7.5 w-7.5 p-0 flex items-center justify-center'
                       onClick={handleCancelVideo}
-                      icon={<CircleX className='h-4 w-4 ml-1' />}
+                      icon={<CircleX className='h-3.5 w-3.5' />}
                     />
                   </div>
                 </div>
@@ -237,18 +243,18 @@ const MediaInfomation = ({ formProps, id }: MediaInfomationProps) => {
               </div>
             ) : (
               <>
-                <Upload className='h-10 w-10 mx-auto mb-4 text-blue-400' />
-                <h3 className='font-medium text-blue-900 mb-1'>Tải video giới thiệu</h3>
-                <p className='text-xs text-blue-600 mb-4'>Tối đa 2 phút. Độ phân giải 1920x1080.</p>
+                <Video className='h-12 w-12 mx-auto mb-4 text-gray-300 group-hover:text-blue-400 transition-colors' />
+                <h3 className='text-[13px] font-bold text-gray-700 mb-1.5'>Tải video giới thiệu lên</h3>
+                <p className='text-[10px] font-bold text-gray-300 mb-6'>Thời lượng tối đa 2 phút. Độ phân giải chuẩn 1080p.</p>
 
                 <CustomButton
-                  className='bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow'
+                  className='bg-blue-600 hover:bg-blue-700 text-white rounded-xl px-8 h-7.5 text-[10.5px] font-bold shadow-lg shadow-blue-100 transition-all active:scale-95'
                   onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
                     e.stopPropagation()
                     triggerVideoUpload()
                   }}
-                  label={'Chọn video'}
-                  icon={<Video className='h-4 w-4 mr-2' />}
+                  label={'Chọn video từ máy'}
+                  icon={<Video className='h-3.5 w-3.5 mr-2' />}
                 />
               </>
             )}

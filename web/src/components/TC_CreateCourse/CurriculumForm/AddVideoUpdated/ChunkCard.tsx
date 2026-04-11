@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { ChevronDown, Clock, Hash, Pencil, PlayCircle } from 'lucide-react'
+import { ChevronDown, Clock, Hash, Pencil, PlayCircle, Check, X } from 'lucide-react'
 import CustomButton from '@/components/common/Button'
 import { LessonChunk } from '@/types/ai'
 
@@ -41,7 +41,7 @@ const ChunkCard: React.FC<ChunkCardProps> = ({ chunk, onSaveSummary, onSeek }) =
         }}
       >
         <div className='flex items-center gap-3 flex-1 min-w-0 pr-4'>
-          <div className='flex-shrink-0 w-6 h-6 flex items-center justify-center bg-blue-600 text-white text-[10px] font-bold rounded-lg shadow-sm shadow-blue-100'>
+          <div className='flex-shrink-0 w-6 h-6 flex items-center justify-center bg-blue-50 text-blue-600 text-[10px] font-bold rounded-lg border border-blue-100 shadow-sm'>
             {chunk.chunkIndex + 1}
           </div>
 
@@ -54,7 +54,7 @@ const ChunkCard: React.FC<ChunkCardProps> = ({ chunk, onSaveSummary, onSeek }) =
 
             {chunk.timestamp && (
               <div className='flex items-center gap-2'>
-                <div className='flex items-center gap-1.5 text-[10px] text-gray-400 font-bold uppercase tracking-widest'>
+                <div className='flex items-center gap-1.5 text-[10px] text-gray-400 font-bold'>
                   <span className='bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded'>
                     {chunk.timestamp}
                   </span>
@@ -87,7 +87,7 @@ const ChunkCard: React.FC<ChunkCardProps> = ({ chunk, onSaveSummary, onSeek }) =
               variant='ghost'
               size='sm'
               icon={<Pencil className='w-3 h-3' />}
-              className='h-6 w-6 p-0 text-gray-300 hover:text-blue-600 hover:bg-white'
+              className='h-7 w-7 p-0 text-gray-300 hover:text-blue-600 hover:bg-white border-none shadow-none'
             />
           )}
           <ChevronDown
@@ -101,35 +101,41 @@ const ChunkCard: React.FC<ChunkCardProps> = ({ chunk, onSaveSummary, onSeek }) =
         className={`grid transition-all duration-300 ease-in-out ${isExpanded ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}
       >
         <div className='overflow-hidden'>
-          <div className='px-4 pb-4 pt-2 space-y-3'>
+          <div className='px-4 pb-4 pt-2 space-y-4'>
             {isEditing ? (
-              <div className='space-y-3'>
-                <textarea
-                  value={draftSummary}
-                  onChange={(e) => setDraftSummary(e.target.value)}
-                  className='w-full text-xs text-gray-700 leading-relaxed bg-white p-3 rounded-lg border border-gray-200 focus:border-blue-300 outline-none transition-all min-h-[80px]'
-                  autoFocus
-                />
-                <div className='flex gap-2 justify-end'>
+              <div className='space-y-4 animate-in fade-in slide-in-from-top-1 duration-200'>
+                <div className='flex flex-col gap-1.5'>
+                  <label className='text-[10px] font-bold text-gray-400 px-1'>Tóm tắt kiến thức</label>
+                  <textarea
+                    value={draftSummary}
+                    onChange={(e) => setDraftSummary(e.target.value)}
+                    className='w-full text-[11px] font-medium text-gray-700 leading-relaxed bg-gray-50/20 p-4 rounded-xl border border-gray-100 focus:border-blue-200 focus:bg-white outline-none transition-all min-h-[110px] shadow-none placeholder:text-[11px]'
+                    autoFocus
+                    placeholder='Ghi lại những ý chính quan trọng của phân đoạn bài học này...'
+                  />
+                </div>
+                <div className='flex gap-3 justify-end items-center'>
                   <CustomButton
                     type='button'
-                    label='Hủy'
-                    className='bg-transparent text-gray-400 hover:text-gray-600 text-[10px] font-bold px-3 h-7 border-none shadow-none'
+                    label='Huỷ bỏ'
+                    variant='ghost'
+                    className='text-gray-400 hover:text-gray-600 text-[10px] font-bold px-4 h-8 transition-all'
                     onClick={handleCancel}
                   />
                   <CustomButton
                     type='button'
-                    label={isSaving ? 'Đang lưu' : 'Lưu'}
-                    className='bg-blue-600 text-white hover:bg-blue-700 text-[10px] font-bold px-4 h-7 rounded-md'
+                    label={isSaving ? 'Đang lưu...' : 'Lưu tóm tắt'}
+                    icon={!isSaving ? <Check className='w-4 h-4' /> : null}
+                    className='bg-blue-600 hover:bg-blue-700 text-white text-[10.5px] font-bold px-6 h-8.5 rounded-xl shadow-lg shadow-blue-100 transition-all active:scale-95'
                     onClick={handleSave}
                     disabled={isSaving}
                   />
                 </div>
               </div>
             ) : (
-              <div className='border-l-2 border-blue-50 pl-3 py-1'>
-                <p className='text-[13px] text-gray-600 leading-relaxed font-medium'>
-                  {chunk.summary || <span className='text-gray-300 italic'>Chưa có tóm tắt</span>}
+              <div className='border-l-2 border-blue-50/50 pl-4 py-1 mt-1'>
+                <p className='text-[13px] text-gray-700 leading-relaxed font-normal italic opacity-90'>
+                  {chunk.summary || <span className='text-gray-300 not-italic font-normal'>Chưa có nội dung tóm tắt cho phân đoạn này.</span>}
                 </p>
               </div>
             )}

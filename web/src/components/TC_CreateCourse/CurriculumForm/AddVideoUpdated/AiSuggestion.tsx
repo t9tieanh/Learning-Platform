@@ -25,9 +25,9 @@ const AiSuggestion: React.FC<AiSuggestionProps> = ({ isLoading, suggestion, onAp
       <div className='flex-1 min-w-0'>
         <div className='flex items-center justify-between mb-3'>
           <div className='flex items-center gap-2.5'>
-            <span className='text-[10px] font-black text-blue-700 uppercase tracking-[0.15em]'>Learnova AI</span>
+            <span className='text-[10px] font-medium text-blue-700 tracking-wide'>AI Learnova</span>
             <div className='h-3 w-px bg-blue-200' />
-            <img src={learnovaLogo} alt='Learnova Logo' className='h-2.5 w-auto object-contain brightness-0 opacity-30' />
+            <img src={learnovaLogo} alt='Logo Learnova' className='h-2.5 w-auto object-contain brightness-0 opacity-30' />
           </div>
           {!isLoading && (
             <CustomButton
@@ -49,14 +49,14 @@ const AiSuggestion: React.FC<AiSuggestionProps> = ({ isLoading, suggestion, onAp
           </div>
         ) : (
           <div className='relative'>
-            <p className={`text-[13px] text-gray-800 leading-relaxed font-bold italic ${!isExpanded && type === 'content' ? 'line-clamp-2' : ''}`}>
+            <p className={`text-[13px] text-gray-800 leading-relaxed font-medium italic ${!isExpanded && type === 'content' ? 'line-clamp-2' : ''}`}>
               "{suggestion}"
             </p>
             {shouldShowToggle && (
               <button
                 type='button'
                 onClick={() => setIsExpanded(!isExpanded)}
-                className='text-[10px] font-black text-blue-600 hover:text-blue-800 mt-2.5 flex items-center gap-1 uppercase tracking-widest'
+                className='text-[10px] font-medium text-blue-600 hover:text-blue-800 mt-2.5 flex items-center gap-1 tracking-wider'
               >
                 {isExpanded ? (
                   <>

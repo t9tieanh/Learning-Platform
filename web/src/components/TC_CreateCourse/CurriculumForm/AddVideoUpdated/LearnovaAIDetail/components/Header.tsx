@@ -29,11 +29,6 @@ const Header: React.FC<HeaderProps> = ({ onBack }) => {
                     </p>
                 </div>
             </div>
-            <CustomButton
-                label='Lưu thay đổi'
-                icon={<CheckCheck className='w-3.5 h-3.5 mr-2' />}
-                className='bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-md shadow-blue-100 border-none transition-all px-5 h-9 font-bold text-xs'
-            />
         </div>
     )
 }

@@ -106,19 +106,19 @@ const LearnovaAISection: React.FC<LearnovaAISectionProps> = ({
         {summary && (
           <div className='bg-gradient-to-br from-blue-100/50 to-cyan-100/50 border border-blue-200/40 rounded-2xl p-6 space-y-4 shadow-md shadow-blue-100/20'>
             <div className='flex items-center justify-between'>
-              <div className='flex items-center gap-2.5 text-[10px] font-black text-blue-700 uppercase tracking-[0.15em]'>
+              <div className='flex items-center gap-2.5 text-[10px] font-medium text-blue-700'>
                 <div className='p-1.5 bg-white rounded-lg shadow-sm border border-blue-50'>
                   <Brain className='w-3.5 h-3.5 text-blue-600' />
                 </div>
-                AI Tóm tắt nội dung
+                Tóm tắt nội dung bằng AI
               </div>
               {suggestedTitle && (
-                <div className='bg-white/90 backdrop-blur-sm text-amber-700 text-[9px] font-black px-2.5 py-1 rounded-lg border border-amber-200/50 flex items-center gap-1.5 uppercase tracking-wider shadow-sm'>
+                <div className='bg-white/90 backdrop-blur-sm text-amber-700 text-[9px] font-medium px-2.5 py-1 rounded-lg border border-amber-200/50 flex items-center gap-1.5 shadow-sm'>
                   <Sparkles className='w-2.5 h-2.5 shrink-0' /> Gợi ý tiêu đề
                 </div>
               )}
             </div>
-            <p className='text-[13px] text-gray-800 leading-relaxed font-bold italic px-1'>
+            <p className='text-[13px] text-gray-800 leading-relaxed font-normal italic px-1 opacity-90'>
               "{summary}"
             </p>
           </div>
@@ -126,7 +126,7 @@ const LearnovaAISection: React.FC<LearnovaAISectionProps> = ({
 
         <div className='flex items-center gap-3 text-xs text-gray-400 bg-gray-50/50 px-4 py-2.5 rounded-xl border border-gray-100'>
           <FileSearch className='w-3.5 h-3.5 text-blue-500' />
-          <span className='font-bold'>
+          <span className='font-medium'>
             {chunks.length} phân đoạn kiến thức
           </span>
         </div>
@@ -141,9 +141,9 @@ const LearnovaAISection: React.FC<LearnovaAISectionProps> = ({
           <div className='pt-2 flex justify-center'>
             <CustomButton
               type='button'
-              label='Tùy chỉnh & Xem chi tiết Quiz'
+              label='Tùy chỉnh & xem chi tiết bài tập'
               icon={<Search className='w-3.5 h-3.5 mr-2' />}
-              className='bg-blue-600 hover:bg-blue-700 text-white rounded-xl px-8 h-9 text-xs font-bold transition-all shadow-md shadow-blue-100 active:scale-95'
+              className='bg-blue-600 hover:bg-blue-700 text-white rounded-xl px-8 h-7.5 text-[10.5px] font-bold transition-all shadow-md shadow-blue-100 active:scale-95'
               onClick={onViewDetails}
             />
           </div>
@@ -167,11 +167,11 @@ const LearnovaAISection: React.FC<LearnovaAISectionProps> = ({
           <div>
             <div className='flex items-center gap-2'>
               <h3 className='text-gray-900 font-bold text-sm tracking-tight'>Trí tuệ nhân tạo</h3>
-              <img src={learnovaLogo} alt='Learnova AI' className='h-3 w-auto object-contain brightness-0' />
+              <img src={learnovaLogo} alt='Trí tuệ nhân tạo Learnova' className='h-3 w-auto object-contain brightness-0' />
             </div>
             <div className='flex items-center gap-2 mt-0.5'>
               <span className='w-1 h-1 rounded-full bg-blue-500'></span>
-              <p className='text-gray-400 text-[10px] font-bold uppercase tracking-widest'>
+              <p className='text-gray-400 text-[10px] font-medium'>
                 {state.status === 'completed' ? (
                   `${chunkCount} phân đoạn bài học`
                 ) : state.status === 'loading' || state.status === 'processing' ? (

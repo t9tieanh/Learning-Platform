@@ -8,7 +8,6 @@ import {
   AlignLeft,
   ExternalLink,
   Trash2,
-  PlayCircle
 } from 'lucide-react'
 import AiSuggestion from './AiSuggestion'
 import LearnovaAISection from './LearnovaAISection'
@@ -27,32 +26,7 @@ import { AnalysisState } from '@/hooks/useAnalysis.hook'
 import { LessonChunk } from '@/types/ai'
 import { toast } from 'sonner'
 
-import LearnovaVideoPlayer, { SubtitleEntry } from '@/components/common/Video/LearnovaVideoPlayer'
 import LearnovaDetailedView from './LearnovaAIDetail/LearnovaDetailedView'
-
-const MOCK_SUBTITLES: SubtitleEntry[] = [
-  { start: 0, end: 3, text: 'Chào mừng bạn đến với Learnova AI!' },
-  { start: 4, end: 7, text: 'Trong bài hướng dẫn này, chúng ta sẽ khám phá tính năng phân tích video.' },
-  { start: 8, end: 11, text: 'Đầu tiên, hệ thống sẽ tự động quét toàn bộ bài giảng của bạn.' },
-  { start: 12, end: 15, text: 'Nó sẽ nhận diện các khái niệm quan trọng nhất.' },
-  { start: 16, end: 19, text: 'Sau đó, video được chia thành các phân đoạn nhỏ (chunks).' },
-  { start: 20, end: 23, text: 'Giúp học viên dễ dàng theo dõi và nắm bắt kiến thức.' },
-  { start: 24, end: 27, text: 'Mỗi phân đoạn sẽ đi kèm với một tóm tắt ngắn gọn.' },
-  { start: 28, end: 31, text: 'Bạn cũng có thể tùy chỉnh các tóm tắt này theo ý muốn.' },
-  { start: 32, end: 35, text: 'Tính năng này giúp tiết kiệm thời gian biên tập tối đa.' },
-  { start: 36, end: 39, text: 'Tiếp theo, hãy cùng nhìn vào phần Câu hỏi ôn luyện.' },
-  { start: 40, end: 43, text: 'Learnova AI sẽ gợi ý các câu hỏi dựa trên nội dung video.' },
-  { start: 44, end: 47, text: 'Bạn có thể thêm mới hoặc xóa các câu hỏi không cần thiết.' },
-  { start: 48, end: 51, text: 'Điều này tăng tính tương tác cực cao trong khóa học.' },
-  { start: 52, end: 55, text: 'Học viên sẽ hiểu sâu hơn nhờ các bộ câu hỏi ôn tập này.' },
-  { start: 56, end: 59, text: 'Bây giờ, chúng ta hãy xem qua trình biên tập SRT.' },
-  { start: 60, end: 63, text: 'Toàn bộ lời thoại (Transcript) được hiển thị đầy đủ.' },
-  { start: 64, end: 67, text: 'Bạn có thể chỉnh sửa ngay lập tức nếu AI nhận diện sai từ.' },
-  { start: 68, end: 71, text: 'Mọi thay đổi sẽ được đồng bộ trực tiếp lên hệ thống.' },
-  { start: 72, end: 75, text: 'Đảm bảo nội dung bài giảng của bạn luôn chuyên nghiệp nhất.' },
-  { start: 76, end: 79, text: 'Vừa rồi là cái nhìn tổng quan về hệ thống phân tích.' },
-  { start: 80, end: 85, text: 'Cảm ơn bạn đã lựa chọn Learnova AI cho bài giảng của mình!' }
-]
 
 interface Step2DetailsFormProps {
   videoSrc: string | null
@@ -189,7 +163,6 @@ const Step2DetailsForm: React.FC<Step2DetailsFormProps> = ({
         handleRemoveQuestion={handleRemoveQuestion}
         setNewQuestionInputs={setNewQuestionInputs}
         handleSeek={handleSeek}
-        mockSubtitles={MOCK_SUBTITLES}
         mainWrapperRef={mainWrapperRef}
         onSaveSummary={handleSaveChunkSummary}
       />
@@ -338,7 +311,7 @@ const Step2DetailsForm: React.FC<Step2DetailsFormProps> = ({
               type='button'
               label='Xóa bài'
               variant='ghost'
-              className='text-gray-400 hover:text-red-500 hover:bg-red-50 px-4 h-9 text-xs font-bold transition-all'
+              className='text-gray-400 hover:text-red-500 hover:bg-red-50 px-4 h-7.5 text-[10.5px] font-bold transition-all'
               icon={<Trash2 className='w-3.5 h-3.5 mr-2' />}
               onClick={async () => {
                 await handleDelLesson(lessonId)
@@ -349,7 +322,7 @@ const Step2DetailsForm: React.FC<Step2DetailsFormProps> = ({
           <CustomButton
             type='button'
             label={loading ? 'Đang tải lên...' : contentType === 'video' ? 'Lưu bài giảng' : 'Lưu tài liệu'}
-            className='bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-6 h-10 text-sm font-bold transition-all shadow-md shadow-blue-100 disabled:bg-gray-300'
+            className='bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-6 h-7.5 text-[10.5px] font-bold transition-all shadow-md shadow-blue-100 disabled:bg-gray-300'
             icon={!isUploading ? <Upload className='w-4 h-4 mr-2' /> : undefined}
             disabled={isUploading || loading}
             isLoader={loading}

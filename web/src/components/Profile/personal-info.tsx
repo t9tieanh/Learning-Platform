@@ -13,6 +13,8 @@ import CertificateList from './CertificateList'
 import PersonalInfoSkeleton from './PersonalInfoSkeleton'
 import { Separator } from '@radix-ui/react-dropdown-menu'
 import { useVipUpgrade } from '@/contexts/VipUpgradeContext'
+import HighGlossBackground from '@/components/common/HighGlossBackground'
+
 const PersonalInfo = () => {
   const [userInfo, setUserInfo] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
@@ -31,7 +33,6 @@ const PersonalInfo = () => {
   const { openVipDialog } = useVipUpgrade()
 
   useEffect(() => {
-    // Fetch additional user info if needed
     const fetchUserInfo = async () => {
       try {
         setLoading(true)
@@ -125,7 +126,7 @@ const PersonalInfo = () => {
         <div className='space-y-6 shadow-sm rounded-xl'>
           <Card className='hover:bg-profile-card-hover transition-colors rounded-xl shadow-md'>
             <CardContent className='px-8'>
-              <div className='flex gap-3 md:gap-4 items-center text-center mb-8 px-4 py-6 rounded-xl bg-[#0C356A] flex-col md:flex-row'>
+              <HighGlossBackground className='flex gap-3 md:gap-4 items-center text-center mb-8 px-6 py-8 md:px-10 md:py-12 rounded-xl flex-col md:flex-row mt-6'>
                 <div className='relative flex-shrink-0'>
                   {editing ? (
                     <>
@@ -136,9 +137,8 @@ const PersonalInfo = () => {
                         aria-label='Chọn ảnh đại diện mới'
                       >
                         <Avatar
-                          className={`h-20 md:h-28 w-20 md:w-28 shadow-lg cursor-pointer ${
-                            userInfo?.isVip ? 'ring-4 ring-yellow-400 ring-offset-4 ring-offset-[#0C356A]' : ''
-                          }`}
+                          className={`h-20 md:h-28 w-20 md:w-28 shadow-lg cursor-pointer ${userInfo?.isVip ? 'ring-4 ring-yellow-400 ring-offset-4 ring-offset-[#0C356A]' : ''
+                            }`}
                         >
                           <AvatarImage
                             src={form.imageFile ? URL.createObjectURL(form.imageFile) : userInfo?.image}
@@ -170,9 +170,8 @@ const PersonalInfo = () => {
                   ) : (
                     <div className='relative'>
                       <Avatar
-                        className={`h-20 md:h-28 w-20 md:w-28 shadow-lg ${
-                          userInfo?.isVip ? 'ring-4 ring-yellow-400 ring-offset-4 ring-offset-[#0C356A]' : ''
-                        }`}
+                        className={`h-20 md:h-28 w-20 md:w-28 shadow-lg ${userInfo?.isVip ? 'ring-4 ring-yellow-400 ring-offset-4 ring-offset-[#0C356A]' : ''
+                          }`}
                       >
                         <AvatarImage src={userInfo?.image} alt={userInfo?.name} className='object-cover' />
                         <AvatarFallback className='text-lg font-semibold bg-primary text-primary-foreground'>
@@ -210,7 +209,7 @@ const PersonalInfo = () => {
                     />
                   )}
                 </div>
-              </div>
+              </HighGlossBackground>
 
               {/* Info Grid */}
               <h2 className='font-semibold text-base my-4'>Thông tin cơ bản</h2>
