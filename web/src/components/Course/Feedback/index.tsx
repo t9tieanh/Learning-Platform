@@ -36,9 +36,8 @@ const Feedback = ({ feedback }: { feedback: FeedbackProps }) => {
                   {[...Array(5)].map((_, i) => (
                     <Star
                       key={i}
-                      className={`w-3 md:w-4 h-3 md:h-4 ${
-                        i < feedback.rating ? 'fill-yellow-400 text-yellow-400' : 'fill-muted text-muted'
-                      }`}
+                      className={`w-3 md:w-4 h-3 md:h-4 ${i < feedback.rating ? 'fill-yellow-400 text-yellow-400' : 'fill-muted text-muted'
+                        }`}
                     />
                   ))}
                 </div>
@@ -71,24 +70,24 @@ const Feedbacks = ({ feedbacks }: { feedbacks: FeedbackProps[] }) => {
   }, [api])
 
   return (
-    <section className='py-4 md:py-6 bg-gradient-subtle'>
-      <div className='px-4 md:px-6'>
-        <h4 className='font-bold bg-primary text-white px-4 md:px-5 py-2.5 md:py-3 rounded-r-3xl max-w-full md:max-w-lg text-left flex items-center text-sm md:text-base gap-2'>
-          <BiSolidDetail size={16} className='md:size-5 flex-shrink-0' />
-          <span className='truncate'>Phản hồi từ học viên khóa học này</span>
+    <div className='w-full'>
+      <div className='px-4 md:px-6 relative z-10'>
+        <h4 className='font-black text-white px-2 md:px-0 py-2.5 md:py-3 text-left flex items-center text-xl md:text-2xl gap-3'>
+          <div className='p-3 bg-white/20 backdrop-blur-md rounded-2xl border border-white/30'>
+            <BiSolidDetail size={24} />
+          </div>
+          <span className='truncate tracking-tight'>Thông điệp từ học viên</span>
         </h4>
       </div>
 
-      {/* Carousel showing 3 items at once on large screens (responsive) */}
-      <div className='w-full px-4 sm:px-6 lg:px-24 py-6 md:py-8'>
-        <Carousel 
+      <div className='w-full px-4 sm:px-6 lg:px-24 py-6 md:py-8 relative z-10'>
+        <Carousel
           setApi={setApi}
-          opts={{ align: 'start', loop: true }} 
+          opts={{ align: 'start', loop: true }}
           className='w-full'
         >
           <CarouselContent className='-ml-4 sm:-ml-3'>
             {feedbacks.map((feedback, index) => (
-              // responsive basis: 1 per row on mobile, 2 on sm, 3 on lg
               <CarouselItem key={index} className='basis-full sm:basis-1/2 lg:basis-1/3 pl-4 sm:pl-3'>
                 <Feedback feedback={feedback} />
               </CarouselItem>
@@ -96,12 +95,12 @@ const Feedbacks = ({ feedbacks }: { feedbacks: FeedbackProps[] }) => {
           </CarouselContent>
 
           <div className='flex justify-center gap-2 mt-4'>
-            <CarouselPrevious className='h-9 w-9 md:h-10 md:w-10' />
-            <CarouselNext className='h-9 w-9 md:h-10 md:w-10' />
+            <CarouselPrevious className='h-9 w-9 md:h-10 md:w-10 bg-white/10 border-white/20 text-white hover:bg-white/20' />
+            <CarouselNext className='h-9 w-9 md:h-10 md:w-10 bg-white/10 border-white/20 text-white hover:bg-white/20' />
           </div>
         </Carousel>
       </div>
-    </section>
+    </div>
   )
 }
 

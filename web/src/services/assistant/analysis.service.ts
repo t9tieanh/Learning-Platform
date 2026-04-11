@@ -11,6 +11,7 @@ export interface AnalysisResult {
   status: 'completed' | 'processing' | 'not_found'
   summary: string | null
   suggestedTitle: string | null
+  subtitles: string | null
   chunks: LessonChunk[]
 }
 
