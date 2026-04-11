@@ -8,14 +8,6 @@ import {
   AlignLeft,
   ExternalLink,
   Trash2,
-  ArrowLeft,
-  Plus,
-  MessageSquare,
-  CheckCheck,
-  Search,
-  Check,
-  X,
-  PlayCircle
 } from 'lucide-react'
 import AiSuggestion from './AiSuggestion'
 import LearnovaAISection from './LearnovaAISection'
@@ -24,42 +16,17 @@ import { LoadingDots } from '@/components/common/Loading/LoadingDots'
 import CustomInput from '@/components/common/Input'
 import CustomButton from '@/components/common/Button'
 import QuillEditor from '@/components/common/Input/QuillEditor'
+import AssistantAnalysisService from '@/services/assistant/analysis.service'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { UseFormRegister, UseFormWatch, UseFormSetValue, FieldErrors, UseFormHandleSubmit } from 'react-hook-form'
 import { CreationLessonFormValues } from '@/utils/create-course/curriculum'
 import useLoading from '@/hooks/useLoading.hook'
 import { AnalysisState } from '@/hooks/useAnalysis.hook'
-import { useAuthStore } from '@/stores/useAuth.stores'
-import { useVipUpgrade } from '@/contexts/VipUpgradeContext'
 import { LessonChunk } from '@/types/ai'
 import { toast } from 'sonner'
 
-import LearnovaVideoPlayer, { SubtitleEntry } from '@/components/common/Video/LearnovaVideoPlayer'
-
-const MOCK_SUBTITLES: SubtitleEntry[] = [
-  { start: 0, end: 3, text: 'Chào mừng bạn đến với Learnova AI!' },
-  { start: 4, end: 7, text: 'Trong bài hướng dẫn này, chúng ta sẽ khám phá tính năng phân tích video.' },
-  { start: 8, end: 11, text: 'Đầu tiên, hệ thống sẽ tự động quét toàn bộ bài giảng của bạn.' },
-  { start: 12, end: 15, text: 'Nó sẽ nhận diện các khái niệm quan trọng nhất.' },
-  { start: 16, end: 19, text: 'Sau đó, video được chia thành các phân đoạn nhỏ (chunks).' },
-  { start: 20, end: 23, text: 'Giúp học viên dễ dàng theo dõi và nắm bắt kiến thức.' },
-  { start: 24, end: 27, text: 'Mỗi phân đoạn sẽ đi kèm với một tóm tắt ngắn gọn.' },
-  { start: 28, end: 31, text: 'Bạn cũng có thể tùy chỉnh các tóm tắt này theo ý muốn.' },
-  { start: 32, end: 35, text: 'Tính năng này giúp tiết kiệm thời gian biên tập tối đa.' },
-  { start: 36, end: 39, text: 'Tiếp theo, hãy cùng nhìn vào phần Câu hỏi ôn luyện.' },
-  { start: 40, end: 43, text: 'Learnova AI sẽ gợi ý các câu hỏi dựa trên nội dung video.' },
-  { start: 44, end: 47, text: 'Bạn có thể thêm mới hoặc xóa các câu hỏi không cần thiết.' },
-  { start: 48, end: 51, text: 'Điều này tăng tính tương tác cực cao trong khóa học.' },
-  { start: 52, end: 55, text: 'Học viên sẽ hiểu sâu hơn nhờ các bộ câu hỏi ôn tập này.' },
-  { start: 56, end: 59, text: 'Bây giờ, chúng ta hãy xem qua trình biên tập SRT.' },
-  { start: 60, end: 63, text: 'Toàn bộ lời thoại (Transcript) được hiển thị đầy đủ.' },
-  { start: 64, end: 67, text: 'Bạn có thể chỉnh sửa ngay lập tức nếu AI nhận diện sai từ.' },
-  { start: 68, end: 71, text: 'Mọi thay đổi sẽ được đồng bộ trực tiếp lên hệ thống.' },
-  { start: 72, end: 75, text: 'Đảm bảo nội dung bài giảng của bạn luôn chuyên nghiệp nhất.' },
-  { start: 76, end: 79, text: 'Vừa rồi là cái nhìn tổng quan về hệ thống phân tích.' },
-  { start: 80, end: 85, text: 'Cảm ơn bạn đã lựa chọn Learnova AI cho bài giảng của mình!' }
-]
+import LearnovaDetailedView from './LearnovaAIDetail/LearnovaDetailedView'
 
 interface Step2DetailsFormProps {
   videoSrc: string | null
@@ -77,7 +44,6 @@ interface Step2DetailsFormProps {
   handleUpdateLesson: (data: CreationLessonFormValues, startLoading?: () => void, stopLoading?: () => void) => void
   contentType: 'video' | 'document'
   handleDelLesson?: (lessonId: string) => Promise<void>
-  /** Lifted from parent so analysis persists between steps */
   analysisState: AnalysisState
   refetchAnalysis: () => void
 }
@@ -108,7 +74,6 @@ const Step2DetailsForm: React.FC<Step2DetailsFormProps> = ({
   const videoRef = useRef<HTMLVideoElement>(null)
   const detailedVideoRef = useRef<HTMLVideoElement>(null)
 
-  // Derived from injected analysis state
   const analysisData = analysisState.status === 'completed' ? analysisState.data : null
   const isAnalysisLoading = analysisState.status === 'loading' || analysisState.status === 'processing'
 
@@ -118,7 +83,6 @@ const Step2DetailsForm: React.FC<Step2DetailsFormProps> = ({
     setIsVideoLoading(false)
   }
 
-  // --- Questions State (Mock) ---
   const [chunkQuestions, setChunkQuestions] = useState<Record<string, string[]>>({})
   const [newQuestionInputs, setNewQuestionInputs] = useState<Record<string, string>>({})
 
@@ -130,7 +94,7 @@ const Step2DetailsForm: React.FC<Step2DetailsFormProps> = ({
       [chunkId]: [...(prev[chunkId] || []), q]
     }))
     setNewQuestionInputs((prev) => ({ ...prev, [chunkId]: '' }))
-    toast.success('Đã thêm câu hỏi (Mock)')
+    toast.success('Đã thêm câu hỏi')
   }
 
   const handleRemoveQuestion = (chunkId: string, index: number) => {
@@ -140,11 +104,31 @@ const Step2DetailsForm: React.FC<Step2DetailsFormProps> = ({
     }))
   }
 
+  const handleSaveChunkSummary = async (chunkId: string, newSummary: string) => {
+    try {
+      if (analysisState.status === 'completed' && analysisState.data) {
+        const res = await AssistantAnalysisService.updateChunkSummary(
+          analysisState.data.lessonId,
+          chunkId,
+          newSummary
+        )
+        if (res.code === 200) {
+          toast.success(res.message || 'Đã cập nhật tóm tắt thành công')
+          refetchAnalysis()
+        } else {
+          throw new Error(res.message)
+        }
+      }
+    } catch (error: any) {
+      toast.error(error?.message || 'Không thể cập nhật tóm tắt')
+      throw error
+    }
+  }
+
   const handleSeek = (startTime: string | null) => {
     const targetVideo = detailedVideoRef.current
     if (!targetVideo || !startTime) return
 
-    // SRT: "00:00:18,831" → strip milliseconds first
     const clean = startTime.split(',')[0].trim()
     const parts = clean.split(':').map(Number)
     let seconds = 0
@@ -158,7 +142,6 @@ const Step2DetailsForm: React.FC<Step2DetailsFormProps> = ({
   const mainWrapperRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    // Scroll correctly to top when switching views
     if (mainWrapperRef.current) {
       mainWrapperRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
     }
@@ -169,171 +152,25 @@ const Step2DetailsForm: React.FC<Step2DetailsFormProps> = ({
 
   if (isDetailedView) {
     return (
-      <div ref={mainWrapperRef} className='animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-8 pb-12 relative'>
-        {/* Header */}
-        <div className='flex items-center justify-between bg-gray-50/90 backdrop-blur-md py-4 z-40 border-b border-gray-200'>
-          <div className='flex items-center gap-4'>
-            <button
-              onClick={() => setIsDetailedView(false)}
-              className='p-2 hover:bg-white rounded-full transition-colors text-gray-500 hover:text-blue-600 border border-transparent hover:border-gray-200'
-            >
-              <ArrowLeft className='w-5 h-5' />
-            </button>
-            <div>
-              <h2 className='text-xl font-bold text-gray-800 flex items-center gap-2'>
-                Phân tích chi tiết Learnova AI
-                <img src={learnovaLogo} alt='Logo' className='h-5 w-auto object-contain' />
-              </h2>
-              <p className='text-sm text-gray-500'>Xem và tùy chỉnh nội dung phân đoạn, câu hỏi và SRT</p>
-            </div>
-          </div>
-          <CustomButton
-            label='Lưu tất cả thay đổi'
-            icon={<CheckCheck className='w-4 h-4 mr-2' />}
-            className='bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-lg shadow-blue-200'
-          />
-        </div>
-
-        {/* Video Playback Section - Using Shared Component */}
-        <LearnovaVideoPlayer
-          src={videoSrc || ''}
-          ref={detailedVideoRef}
-          subtitles={MOCK_SUBTITLES}
-          isPiPEnabled={true}
-        />
-
-        {/* Chunks & Questions Section */}
-        <div className='space-y-6'>
-          <h3 className='text-lg font-bold text-gray-800 flex items-center gap-2 px-1'>
-            <MessageSquare className='w-5 h-5 text-indigo-500' />
-            Danh sách phân đoạn & Câu hỏi tương ứng
-          </h3>
-
-          <div className='grid grid-cols-1 gap-6'>
-            {chunks.map((chunk, idx) => (
-              <div
-                key={chunk.id}
-                className='bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden hover:shadow-md transition-shadow'
-              >
-                <div className='bg-gradient-to-r from-gray-50 to-white px-6 py-4 border-b border-gray-100 flex items-center justify-between'>
-                  <div className='flex items-center gap-3'>
-                    <div className='w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold text-sm'>
-                      {idx + 1}
-                    </div>
-                    <div>
-                      <h4 className='font-bold text-gray-800 text-[15px]'>{chunk.title || `Phân đoạn ${idx + 1}`}</h4>
-                      <div className='flex items-center gap-3 text-xs text-gray-400 mt-0.5'>
-                        <span className='flex items-center gap-1'>
-                          Thời gian: <span className='text-indigo-600 font-semibold'>{chunk.timestamp}</span>
-                        </span>
-                        <button
-                          type='button'
-                          onClick={() => handleSeek(chunk.startTime)}
-                          className='flex items-center gap-1 text-blue-500 hover:text-blue-700 transition-colors'
-                        >
-                          <PlayCircle className='w-3 h-3' /> Tua tới đây
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className='p-6 space-y-6'>
-                  {/* Chunk Summary */}
-                  <div>
-                    <label className='text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 block'>
-                      Tóm tắt nội dung
-                    </label>
-                    <p className='text-gray-700 text-sm leading-relaxed bg-gray-50 p-4 rounded-xl border border-gray-100 italic'>
-                      "{chunk.summary}"
-                    </p>
-                  </div>
-
-                  {/* Questions Section */}
-                  <div className='bg-indigo-50/50 rounded-2xl p-5 border border-indigo-100/50'>
-                    <div className='flex items-center justify-between mb-4'>
-                      <label className='text-sm font-bold text-indigo-700 flex items-center gap-2'>
-                        <Search className='w-4 h-4' />
-                        Câu hỏi tự ôn luyện ({chunkQuestions[chunk.id]?.length || 0})
-                      </label>
-                    </div>
-
-                    <div className='space-y-3'>
-                      {(chunkQuestions[chunk.id] || []).map((q, qIndex) => (
-                        <div
-                          key={qIndex}
-                          className='flex items-center gap-3 bg-white p-3 rounded-xl border border-indigo-100 shadow-sm animate-in slide-in-from-left-2 duration-300'
-                        >
-                          <div className='w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-[10px] font-bold'>
-                            Q{qIndex + 1}
-                          </div>
-                          <span className='text-sm text-gray-700 flex-1'>{q}</span>
-                          <button
-                            type='button'
-                            onClick={() => handleRemoveQuestion(chunk.id, qIndex)}
-                            className='text-gray-400 hover:text-red-500 transition-colors'
-                          >
-                            <Trash2 className='w-4 h-4' />
-                          </button>
-                        </div>
-                      ))}
-
-                      {/* Add Question Input */}
-                      <div className='relative mt-4'>
-                        <CustomInput
-                          placeholder='Nhập câu hỏi mới cho phân đoạn bài học này...'
-                          className='pr-12'
-                          value={newQuestionInputs[chunk.id] || ''}
-                          onChange={(e) =>
-                            setNewQuestionInputs((prev) => ({ ...prev, [chunk.id]: e.target.value }))
-                          }
-                          onKeyDown={(e) => e.key === 'Enter' && handleAddQuestion(chunk.id)}
-                        />
-                        <button
-                          type='button'
-                          onClick={() => handleAddQuestion(chunk.id)}
-                          className='absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-indigo-600 text-white rounded-lg flex items-center justify-center hover:bg-indigo-700 transition-colors'
-                        >
-                          <Plus className='w-4 h-4' />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* SRT Editor Section */}
-        <div className='space-y-6 pt-4'>
-          <h3 className='text-lg font-bold text-gray-800 flex items-center gap-2 px-1'>
-            <AlignLeft className='w-5 h-5 text-blue-500' />
-            Biên tập SRT Content (Transcript)
-          </h3>
-          <div className='bg-white p-6 rounded-3xl border border-gray-100 shadow-xl'>
-            <div className='relative min-h-[400px]'>
-              <QuillEditor
-                initialHtml={chunks.map((c) => `<p>[${c.timestamp}] ${c.summary}</p>`).join('')}
-                className='min-h-[400px] text-base leading-loose'
-              />
-            </div>
-            <div className='mt-4 flex items-start gap-3 bg-blue-50 p-4 rounded-2xl border border-blue-100'>
-              <ScanEye className='w-5 h-5 text-blue-600 mt-0.5' />
-              <p className='text-xs text-blue-700 leading-relaxed'>
-                <strong>Lưu ý:</strong> Việc chỉnh sửa SRT Content sẽ ảnh hưởng đến kết quả tìm kiếm và phụ đề hiển thị
-                trong khóa học. Hãy đảm bảo nội dung chính xác so với video.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
+      <LearnovaDetailedView
+        analysisData={analysisData}
+        videoSrc={videoSrc}
+        onBack={() => setIsDetailedView(false)}
+        detailedVideoRef={detailedVideoRef}
+        chunkQuestions={chunkQuestions}
+        newQuestionInputs={newQuestionInputs}
+        handleAddQuestion={handleAddQuestion}
+        handleRemoveQuestion={handleRemoveQuestion}
+        setNewQuestionInputs={setNewQuestionInputs}
+        handleSeek={handleSeek}
+        mainWrapperRef={mainWrapperRef}
+        onSaveSummary={handleSaveChunkSummary}
+      />
     )
   }
 
   return (
     <div ref={mainWrapperRef} className='grid grid-cols-1 lg:grid-cols-3 gap-8 animate-in fade-in slide-in-from-right-4 duration-300'>
-      {/* Left: Mini Preview */}
       <div className='lg:col-span-1 space-y-6 sticky top-4 self-start'>
         <div className='bg-white p-4 rounded-2xl shadow-sm border border-gray-100'>
           <h3 className='font-semibold text-gray-700 mb-3 text-sm flex items-center gap-2'>
@@ -364,7 +201,6 @@ const Step2DetailsForm: React.FC<Step2DetailsFormProps> = ({
               />
             )}
 
-            {/* Media Loading Overlay */}
             {isVideoLoading && !isUploading && (
               <div className='absolute inset-0 flex items-center justify-center bg-gray-50 z-20'>
                 <div className='flex flex-col items-center gap-3'>
@@ -379,14 +215,12 @@ const Step2DetailsForm: React.FC<Step2DetailsFormProps> = ({
               </div>
             )}
 
-            {/* View Detail Button */}
             <div className='absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10'>
               <CustomButton
                 type='button'
                 onClick={() => window.open(videoSrc || '', '_blank')}
                 className='bg-white/90 text-blue-600 hover:bg-white p-2 rounded-full h-8 w-8 flex items-center justify-center shadow-sm backdrop-blur-sm'
                 icon={<ExternalLink className='w-4 h-4' />}
-                title='Xem chi tiết'
               />
             </div>
           </div>
@@ -396,7 +230,6 @@ const Step2DetailsForm: React.FC<Step2DetailsFormProps> = ({
         </div>
       </div>
 
-      {/* Right: Form Fields */}
       <div className='lg:col-span-2 space-y-6'>
         <div className='bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-6'>
           <div>
@@ -448,7 +281,6 @@ const Step2DetailsForm: React.FC<Step2DetailsFormProps> = ({
           </div>
         </div>
 
-        {/* Options & Visibility */}
         <div className='bg-white p-6 rounded-2xl shadow-sm border border-gray-100'>
           <h3 className='flex items-center gap-2 font-semibold text-base text-gray-700 mb-4'>
             <ScanEye />
@@ -466,7 +298,6 @@ const Step2DetailsForm: React.FC<Step2DetailsFormProps> = ({
           </div>
         </div>
 
-        {/* LearnovaAI Analysis Section */}
         <LearnovaAISection
           analysisState={analysisState}
           refetchAnalysis={refetchAnalysis}
@@ -474,14 +305,14 @@ const Step2DetailsForm: React.FC<Step2DetailsFormProps> = ({
           onViewDetails={() => setIsDetailedView(true)}
         />
 
-        {/* Action Buttons */}
         <div className='flex justify-end pt-4 gap-3'>
           {handleDelLesson && lessonId && (
             <CustomButton
               type='button'
-              label='Xóa bài giảng'
-              className='bg-red-500 rounded-xl hover:bg-red-50 border border-red-200 shadow-sm px-6'
-              icon={<Trash2 className='w-4 h-4 mr-2' />}
+              label='Xóa bài'
+              variant='ghost'
+              className='text-gray-400 hover:text-red-500 hover:bg-red-50 px-4 h-7.5 text-[10.5px] font-bold transition-all'
+              icon={<Trash2 className='w-3.5 h-3.5 mr-2' />}
               onClick={async () => {
                 await handleDelLesson(lessonId)
                 if (handleClose) handleClose(false)
@@ -491,10 +322,9 @@ const Step2DetailsForm: React.FC<Step2DetailsFormProps> = ({
           <CustomButton
             type='button'
             label={loading ? 'Đang tải lên...' : contentType === 'video' ? 'Lưu bài giảng' : 'Lưu tài liệu'}
-            className={`rounded-xl px-8 shadow-lg shadow-blue-600/20 ${isUploading ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white'
-              }`}
-            icon={!isUploading ? <Upload className='w-5 h-5 mr-2' /> : undefined}
-            disabled={isUploading}
+            className='bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-6 h-7.5 text-[10.5px] font-bold transition-all shadow-md shadow-blue-100 disabled:bg-gray-300'
+            icon={!isUploading ? <Upload className='w-4 h-4 mr-2' /> : undefined}
+            disabled={isUploading || loading}
             isLoader={loading}
             onClick={() => handleUpdateLesson(watch(), startLoading, stopLoading)}
           />

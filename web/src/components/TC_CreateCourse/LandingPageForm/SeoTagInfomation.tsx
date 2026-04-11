@@ -1,4 +1,4 @@
-/* eslint-disable prettier/prettier */
+import React, { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { CirclePlus } from 'lucide-react';
 import { Props as CommonProps } from '@/utils/common/reactHookFormProps'
@@ -8,6 +8,7 @@ import CustomButton from '@/components/common/Button'
 import tagsService from '@/services/course/tags.service'
 import useLoading from '@/hooks/useLoading.hook'
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils'
 
 import SeoTagInfomationSkeleton from './Skeleton/SeoTagInfomationSkeleton'
 
@@ -21,6 +22,8 @@ const SeoTagInfomation = ({ formProps, id }: SeoTagInfomationProps) => {
   const tags = getValues('tags') || []
   const { tags: availableTags, loading: tagsLoading } = useTags()
   const { loading, startLoading, stopLoading } = useLoading()
+  const [displayLimit, setDisplayLimit] = useState(10)
+  const hasMoreTags = (availableTags?.length || 0) > displayLimit
 
   const removeTag = (tagToRemove: { id: string; name: string }) => {
     setValue(
@@ -54,17 +57,16 @@ const SeoTagInfomation = ({ formProps, id }: SeoTagInfomationProps) => {
 
   return (
     <>
-      <Card className='border border-blue-200 shadow-md bg-blue-50'>
-        <CardHeader>
-          <CardTitle className='text-lg font-semibold text-blue-900'>Thẻ khóa học</CardTitle>
-          <p className='text-sm text-blue-700'>Thêm thẻ liên quan đến kỹ năng được dạy trong khóa.</p>
+      <Card className='border-2 border-white ring-1 ring-gray-100 shadow-sm bg-white rounded-[32px] overflow-hidden'>
+        <CardHeader className='pb-4'>
+          <CardTitle className='text-[15px] font-bold text-gray-900'>Thẻ khóa học</CardTitle>
+          <p className='text-[11.5px] font-medium text-gray-400'>Chọn tối đa 10 thẻ kỹ năng liên quan nhất đến nội dung giảng dạy.</p>
         </CardHeader>
 
-        <CardContent className='space-y-4'>
-          {/* Tags list */}
-          <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 mb-4'>
+        <CardContent className='space-y-6'>
+          <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3'>
             {
-              availableTags?.map((tag) => (
+              availableTags?.slice(0, displayLimit).map((tag) => (
                 <CustomTag
                   key={tag.id}
                   label={tag.name}
@@ -72,12 +74,10 @@ const SeoTagInfomation = ({ formProps, id }: SeoTagInfomationProps) => {
                   checked={tags.some((t: any) => (typeof t === 'object' ? t.id === tag.id : t === tag.id))}
                   onChange={(checked: boolean) => {
                     if (checked) {
-                      // Add tag object (not just id)
                       if (!tags.some((t: any) => (typeof t === 'object' ? t.id === tag.id : t === tag.id)) && tags.length < 10) {
-                        setValue('tags', [...tags, tag]) // Lưu cả object tag
+                        setValue('tags', [...tags, tag])
                       }
                     } else {
-                      // Remove tag by id
                       removeTag(tag)
                     }
                   }}
@@ -86,19 +86,36 @@ const SeoTagInfomation = ({ formProps, id }: SeoTagInfomationProps) => {
             }
           </div>
 
-          <div className='flex justify-end'>
+          {(hasMoreTags || displayLimit > 10) && (
+            <div className='flex justify-center pt-2'>
+              <button
+                type='button'
+                onClick={() => setDisplayLimit((prev: number) => hasMoreTags ? prev + 10 : 10)}
+                className='text-[10px] font-bold text-gray-400 hover:text-blue-600 transition-colors uppercase tracking-widest'
+              >
+                {hasMoreTags ? `Xem thêm (${(availableTags?.length || 0) - displayLimit} thẻ)` : 'Thu gọn'}
+              </button>
+            </div>
+          )}
+
+          <div className='flex items-center justify-between pt-4 border-t border-gray-50'>
+            <div className='flex items-center gap-2'>
+              <div className={cn(
+                'w-2 h-2 rounded-full transition-colors',
+                tags.length >= 10 ? 'bg-amber-400' : 'bg-blue-500'
+              )} />
+              <span className='text-[11px] font-bold text-gray-400'>{tags.length}/10 thẻ đã chọn</span>
+            </div>
             <CustomButton
               onClick={handleAddNewTags}
-              disabled={tags.length >= 10}
-              className='bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow'
-              icon={<CirclePlus className='h-5 w-5' />}
-              label='Thêm thẻ mới'
+              disabled={tags.length === 0}
+              variant='default'
+              className='bg-blue-600 hover:bg-blue-700 text-white rounded-xl px-6 h-7.5 text-[10.5px] font-bold shadow-lg shadow-blue-100 transition-all active:scale-95'
+              icon={<CirclePlus className='h-3.5 w-3.5' />}
+              label='Lưu thay đổi'
               isLoader={loading}
             />
           </div>
-
-          {/* Counter */}
-          <div className='text-xs text-blue-600'>{tags.length}/10 thẻ đã dùng</div>
         </CardContent>
       </Card>
     </>

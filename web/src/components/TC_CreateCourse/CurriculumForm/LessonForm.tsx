@@ -103,9 +103,9 @@ const LessonForm = ({
 
   return (
     <>
-      <div key={key} className='flex shadow-sm items-center space-x-3 p-3 rounded-lg border border-blue-200'>
-        <GripVertical className='h-4 w-4 text-blue-400' />
-        <span className='flex items-center justify-center w-7 h-7 rounded-md bg-blue-100 text-blue-600 hover:cursor-pointer hover:shadow-lg hover:bg-blue-800'>
+      <div key={key} className='flex items-center space-x-4 p-4 rounded-2xl border border-gray-200 bg-white shadow-sm transition-all hover:border-blue-100 group'>
+        <GripVertical className='h-3.5 w-3.5 text-gray-300' />
+        <span className='flex items-center justify-center w-8 h-8 rounded-xl bg-gray-50 text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-all border border-gray-100/50 cursor-pointer shadow-sm group-hover:scale-105'>
           <MdModeEditOutline className='h-4 w-4' onClick={() => setPreview({ openPreview: true, lesson })} />
         </span>
         <div className='flex-1'>
@@ -132,11 +132,11 @@ const LessonForm = ({
               </div>
             </form>
           ) : (
-            <div className='group flex items-center'>
-              <span className='font-medium text-sm'>{lesson.title || 'Bài giảng chưa có tiêu đề'}</span>
+            <div className='group flex items-center gap-3'>
+              <span className='text-[13px] font-medium text-gray-700'>{lesson.title || 'Bài giảng chưa có tiêu đề'}</span>
               <CustomButton
-                className='opacity-0 transition-opacity duration-300 group-hover:opacity-100 bg-gray-200 text-dark p-1 rounded-md shadow hover:bg-gray-100 flex items-center justify-center ml-2'
-                icon={<MdModeEditOutline />}
+                className='opacity-0 transition-all duration-300 group-hover:opacity-100 bg-gray-100 text-gray-500 p-1.5 rounded-lg shadow-sm hover:bg-white hover:text-blue-600 flex items-center justify-center'
+                icon={<MdModeEditOutline className='w-3.5 h-3.5' />}
                 onClick={() => {
                   setUpdateTitle(true)
                 }}
@@ -144,24 +144,27 @@ const LessonForm = ({
             </div>
           )}
         </div>
-        <div className='flex items-center space-x-2'>
-          <Badge variant='secondary' className='capitalize flex items-center gap-1'>
+        <div className='flex items-center space-x-3'>
+          <Badge
+            variant='outline'
+            className='capitalize flex items-center gap-2 border-gray-100 bg-gray-50/50 text-gray-500 text-[10px] font-bold px-3 py-1 rounded-xl shadow-none transition-all group-hover:bg-white group-hover:border-blue-100'
+          >
             {lesson.type === 'video' ? (
-              <Video className='w-3 h-3' />
+              <Video className='w-3 h-3 text-blue-500' />
             ) : lesson.type === 'article' ? (
-              <FileText className='w-3 h-3' />
+              <FileText className='w-3 h-3 text-blue-500' />
             ) : (
-              <HelpCircle className='w-3 h-3' />
+              <HelpCircle className='w-3 h-3 text-blue-500' />
             )}
-            {lesson.type === 'video' ? 'Video' : lesson.type === 'article' ? 'Bài viết' : 'Quiz'}
+            {lesson.type === 'video' ? 'Video' : lesson.type === 'article' ? 'Bài viết' : 'Trắc nghiệm'}
           </Badge>
           <Button
             variant='ghost'
             size='icon'
-            className='text-red-500 hover:bg-red-50'
+            className='h-8 w-8 text-gray-300 hover:text-red-500 hover:bg-red-50 transition-all rounded-xl p-0 flex items-center justify-center'
             onClick={() => handleDelLesson(lesson.id)}
           >
-            <Trash2 className='h-4 w-4' />
+            <Trash2 className='h-3.5 w-3.5' />
           </Button>
         </div>
       </div>

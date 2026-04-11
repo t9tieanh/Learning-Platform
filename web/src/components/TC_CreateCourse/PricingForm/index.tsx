@@ -10,6 +10,7 @@ import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import courseService from '@/services/course/course.service'
 import PricingFormSkeleton from './Skeleton/PricingFormSkeleton'
+import { Layout } from 'lucide-react'
 
 const PricingForm = ({ id }: { id: string }) => {
   const {
@@ -65,12 +66,11 @@ const PricingForm = ({ id }: { id: string }) => {
   }
 
   return (
-    <div className='max-w-6xl space-y-8 mx-auto'>
+    <div className='max-w-6xl mx-auto space-y-12 px-6 py-12 rounded-[48px] bg-[#f8fafc] border-2 border-white shadow-sm'>
       <TitleComponent
-        title='Đặt giá khóa học'
-        description='Đặt giá cho khóa học của bạn hoặc làm cho nó miễn phí. Bạn có thể thay đổi giá bất kỳ lúc nào, nhưng lưu ý
-          rằng sau khi xuất bản khóa học, bạn không thể đổi từ trả phí sang miễn phí. Vui lòng chọn loại tiền tệ và mức
-          giá cho khóa học.'
+        title='Cấu hình giá khóa học'
+        icon={<Layout className='h-6 w-6 text-white' />}
+        description='Đặt giá cho khóa học của bạn hoặc làm cho nó miễn phí. Bạn có thể thay đổi giá bất kỳ lúc nào để thu hút học viên và tối ưu hóa doanh thu cá nhân.'
       />
 
       <div className='grid lg:grid-cols-2 gap-8'>
