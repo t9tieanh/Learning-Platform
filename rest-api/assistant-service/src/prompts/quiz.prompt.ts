@@ -39,6 +39,7 @@ export const QuizPrompts = {
   singleSystemVi: () =>
     'Bạn là một chuyên gia tạo nội dung giáo dục, chuyên biệt trong việc tạo các câu hỏi trắc nghiệm chất lượng cao. ' +
     'Nhiệm vụ của bạn là tạo các câu hỏi quiz kiểm tra sự hiểu biết sâu sắc và tư duy phản biện, phù hợp với phân loại Bloom. ' +
+    '\n\n**QUAN TRỌNG: TẤT CẢ NỘI DUNG PHẢI ĐƯỢC VIẾT BẰNG TIẾNG VIỆT. KHÔNG DÙNG TIẾNG ANH.**' +
     '\n\nYÊU CẦU:\n' +
     '1. Câu hỏi phải rõ ràng, ngắn gọn và kiểm tra sự hiểu biết của khái niệm cốt lõi\n' +
     '2. Cung cấp chính xác 4 lựa chọn trả lời (chỉ có một đáp án đúng)\n' +
@@ -49,7 +50,8 @@ export const QuizPrompts = {
     '\n' +
     'BẠN PHẢI trả lời bằng một đối tượng JSON hoàn toàn hợp lệ.\n' +
     'KHÔNG bao gồm markdown, code fences, nhận xét, giải thích hoặc văn bản bổ sung.\n' +
-    'Phản hồi phải có thể phân tích cú pháp JSON trực tiếp.',
+    'Phản hồi phải có thể phân tích cú pháp JSON trực tiếp.\n' +
+    '**LƯU Ý: VIẾT TẤT CẢ BẰNG TIẾNG VIỆT, BẢO GỒM CÂU HỎI, ĐÁP ÁN, VÀ GIẢI THÍCH.**',
 
   /**
    * User prompt template for single quiz generation (English)
@@ -93,7 +95,8 @@ export const QuizPrompts = {
    * Substitutes: {lessonSummary}, {chunkSummary}, {chunkContent}, {difficulty}, {bloomLevel}
    */
   singleUserVi: () =>
-    'Dựa trên ngữ cảnh bài học và phần sau đây, hãy tạo một câu hỏi trắc nghiệm chất lượng cao.\n\n' +
+    '**VIẾT TẤT CẢ NỘI DUNG BẰNG TIẾNG VIỆT. KHÔNG DÙNG TIẾNG ANH BẠT CỬ NÀO.**\n\n' +
+    'Dựa trên ngữ cảnh bài học và phần sau đây, hãy tạo một câu hỏi trắc nghiệm chất lượng cao HOÀN TOÀN BẰNG TIẾNG VIỆT.\n\n' +
     'TỔNG QUAN BÀI HỌC:\n' +
     '{lessonSummary}\n\n' +
     'CHỦ ĐỀ PHẦN:\n' +
@@ -111,19 +114,20 @@ export const QuizPrompts = {
     '  * TẠO: kết hợp các phần tử để tạo ra cái gì đó mới\n' +
     '- Loại câu hỏi: Trắc nghiệm với 4 tùy chọn\n' +
     '- Đảm bảo phù hợp với mục tiêu bài học và nội dung phần\n\n' +
-    'ĐỊNH DẠNG PHẢN HỒI (JSON hợp lệ hoàn toàn):\n' +
+    '**VIẾT TẤT CẢ BẰNG TIẾNG VIỆT: CÂU HỎI, CÁC ĐÁP ÁN, VÀ GIẢI THÍCH ĐỀU PHẢI BẰNG TIẾNG VIỆT.**\n\n' +
+    'ĐỊNH DẠNG PHẢN HỒI (JSON hợp lệ hoàn toàn, TẤT CẢ BẰNG TIẾNG VIỆT):\n' +
     '{\n' +
-    '  "question": "Văn bản câu hỏi rõ ràng, cụ thể",\n' +
+    '  "question": "Văn bản câu hỏi rõ ràng, cụ thể (TIẾNG VIỆT)",\n' +
     '  "choices": [\n' +
-    '    { "text": "Đáp án đúng", "isCorrect": true },\n' +
-    '    { "text": "Đáp án sai có khả năng 1", "isCorrect": false },\n' +
-    '    { "text": "Đáp án sai có khả năng 2", "isCorrect": false },\n' +
-    '    { "text": "Đáp án sai có khả năng 3", "isCorrect": false }\n' +
+    '    { "text": "Đáp án đúng (TIẾNG VIỆT)", "isCorrect": true },\n' +
+    '    { "text": "Đáp án sai có khả năng 1 (TIẾNG VIỆT)", "isCorrect": false },\n' +
+    '    { "text": "Đáp án sai có khả năng 2 (TIẾNG VIỆT)", "isCorrect": false },\n' +
+    '    { "text": "Đáp án sai có khả năng 3 (TIẾNG VIỆT)", "isCorrect": false }\n' +
     '  ],\n' +
-    '  "explanation": "Giải thích chi tiết về lý do đáp án đúng là đúng và tại sao các đáp án khác là sai",\n' +
+    '  "explanation": "Giải thích chi tiết về lý do đáp án đúng là đúng và tại sao các đáp án khác là sai (TIẾNG VIỆT)",\n' +
     '  "confidence": 0.95\n' +
     '}\n\n' +
-    'Tạo câu hỏi ngay bây giờ:',
+    'Tạo câu hỏi ngay bây giờ (VIẾT TOÀN BỘ BẰNG TIẾNG VIỆT):',
 
   /**
    * System prompt for batch quiz generation (English)
@@ -150,6 +154,7 @@ export const QuizPrompts = {
   batchSystemVi: () =>
     'Bạn là một chuyên gia tạo nội dung giáo dục, chuyên biệt trong việc tạo nhiều câu hỏi trắc nghiệm chất lượng cao. ' +
     'Nhiệm vụ của bạn là tạo các câu hỏi quiz đa dạng kiểm tra các mức độ hiểu biết khác nhau, phù hợp với phân loại Bloom. ' +
+    '\n\n**QUAN TRỌNG: TẤT CẢ NỘI DUNG PHẢI ĐƯỢC VIẾT BẰNG TIẾNG VIỆT. KHÔNG DÙNG TIẾNG ANH.**' +
     '\n\nYÊU CẦU:\n' +
     '1. Mỗi câu hỏi phải rõ ràng, ngắn gọn và kiểm tra các khía cạnh khác nhau của nội dung\n' +
     '2. Mỗi câu hỏi phải cung cấp chính xác 4 lựa chọn trả lời (chỉ có một đáp án đúng)\n' +
@@ -161,7 +166,8 @@ export const QuizPrompts = {
     '\n' +
     'BẠN PHẢI trả lời bằng một mảng JSON hoàn toàn hợp lệ.\n' +
     'KHÔNG bao gồm markdown, code fences, nhận xét, giải thích hoặc văn bản bổ sung.\n' +
-    'Phản hồi phải có thể phân tích cú pháp JSON trực tiếp.',
+    'Phản hồi phải có thể phân tích cú pháp JSON trực tiếp.\n' +
+    '**LƯU Ý: VIẾT TẤT CẢ BẰNG TIẾNG VIỆT, BẢO GỒM CÁC CÂU HỎI, ĐÁP ÁN, VÀ GIẢI THÍCH.**',
 
   /**
    * User prompt template for batch quiz generation (English)
@@ -204,7 +210,8 @@ export const QuizPrompts = {
    * Substitutes: {lessonSummary}, {chunkSummary}, {chunkContent}, {distributionJson}
    */
   batchUserVi: () =>
-    'Dựa trên ngữ cảnh bài học và phần sau đây, hãy tạo nhiều câu hỏi trắc nghiệm chất lượng cao.\n\n' +
+    '**VIẾT TẤT CẢ NỘI DUNG BẰNG TIẾNG VIỆT. KHÔNG DÙNG TIẾNG ANH BẠT CỬ NÀO.**\n\n' +
+    'Dựa trên ngữ cảnh bài học và phần sau đây, hãy tạo nhiều câu hỏi trắc nghiệm chất lượng cao HOÀN TOÀN BẰNG TIẾNG VIỆT.\n\n' +
     'TỔNG QUAN BÀI HỌC:\n' +
     '{lessonSummary}\n\n' +
     'CHỦ ĐỀ PHẦN:\n' +
@@ -218,82 +225,83 @@ export const QuizPrompts = {
     '- Đảm bảo tính đa dạng: bao gồm các khía cạnh khác nhau của nội dung\n' +
     '- Căn chỉnh mỗi câu hỏi với mức độ khó và mức Bloom được chỉ định\n' +
     '- Mỗi câu hỏi phải liên quan đến nội dung phần và mục tiêu bài học\n\n' +
-    'ĐỊNH DẠNG PHẢN HỒI (Mảng JSON hợp lệ hoàn toàn):\n' +
+    '**VIẾT TẤT CẢ BẰNG TIẾNG VIỆT: CÁC CÂU HỎI, ĐÁP ÁN, VÀ GIẢI THÍCH ĐỀU PHẢI BẰNG TIẾNG VIỆT.**\n\n' +
+    'ĐỊNH DẠNG PHẢN HỒI (Mảng JSON hợp lệ hoàn toàn, TẤT CẢ BẰNG TIẾNG VIỆT):\n' +
     '[\n' +
     '  {\n' +
-    '    "question": "Văn bản câu hỏi rõ ràng, cụ thể",\n' +
+    '    "question": "Văn bản câu hỏi rõ ràng, cụ thể (TIẾNG VIỆT)",\n' +
     '    "choices": [\n' +
-    '      { "text": "Đáp án đúng", "isCorrect": true },\n' +
-    '      { "text": "Đáp án sai có khả năng 1", "isCorrect": false },\n' +
-    '      { "text": "Đáp án sai có khả năng 2", "isCorrect": false },\n' +
-    '      { "text": "Đáp án sai có khả năng 3", "isCorrect": false }\n' +
+    '      { "text": "Đáp án đúng (TIẾNG VIỆT)", "isCorrect": true },\n' +
+    '      { "text": "Đáp án sai có khả năng 1 (TIẾNG VIỆT)", "isCorrect": false },\n' +
+    '      { "text": "Đáp án sai có khả năng 2 (TIẾNG VIỆT)", "isCorrect": false },\n' +
+    '      { "text": "Đáp án sai có khả năng 3 (TIẾNG VIỆT)", "isCorrect": false }\n' +
     '    ],\n' +
-    '    "explanation": "Giải thích chi tiết",\n' +
+    '    "explanation": "Giải thích chi tiết (TIẾNG VIỆT)",\n' +
     '    "confidence": 0.95\n' +
     '  },\n' +
     '  // ... các câu hỏi tiếp theo theo phân bố\n' +
     ']\n\n' +
-    'Tạo các câu hỏi ngay bây giờ:',
+    'Tạo các câu hỏi ngay bây giờ (VIẾT TOÀN BỘ BẰNG TIẾNG VIỆT):',
 
-  /**
-   * Helper function to build single quiz prompt
-   */
-  buildSingleQuizPrompt: (
-    chunkContent: string,
-    chunkSummary: string,
-    lessonSummary: string,
-    options: { difficulty: string; bloomLevel: string; questionType: string },
-    language: QuizLanguage = 'en'
-  ) => {
-    const systemPrompt = language === 'vi' ? QuizPrompts.singleSystemVi() : QuizPrompts.singleSystem();
-    const userPromptTemplate = language === 'vi' ? QuizPrompts.singleUserVi() : QuizPrompts.singleUser();
+   /**
+    * Helper function to build single quiz prompt (always Vietnamese)
+    */
+   buildSingleQuizPrompt: (
+     chunkContent: string,
+     chunkSummary: string,
+     lessonSummary: string,
+     options: { difficulty: string; bloomLevel: string; questionType: string },
+     language: QuizLanguage = 'vi'
+   ) => {
+     // Always use Vietnamese
+     const systemPrompt = QuizPrompts.singleSystemVi();
+     const userPromptTemplate = QuizPrompts.singleUserVi();
 
-    const userPrompt = userPromptTemplate
-      .replace('{difficulty}', options.difficulty || 'MEDIUM')
-      .replace('{bloomLevel}', options.bloomLevel || 'UNDERSTAND')
-      .replace('{lessonSummary}', lessonSummary || 'No lesson summary available')
-      .replace('{chunkSummary}', chunkSummary || 'No chunk summary available')
-      .replace('{chunkContent}', chunkContent || 'No chunk content available');
+     const userPrompt = userPromptTemplate
+       .replace('{difficulty}', options.difficulty || 'MEDIUM')
+       .replace('{bloomLevel}', options.bloomLevel || 'UNDERSTAND')
+       .replace('{lessonSummary}', lessonSummary || 'Không có tóm tắt bài học')
+       .replace('{chunkSummary}', chunkSummary || 'Không có tóm tắt phần')
+       .replace('{chunkContent}', chunkContent || 'Không có nội dung phần');
 
-    return {
-      systemPrompt,
-      userPrompt,
-    };
-  },
+     return {
+       systemPrompt,
+       userPrompt,
+     };
+   },
 
-  /**
-   * Helper function to build batch quiz prompt
-   */
-  buildBatchQuizPrompt: (
-    chunkContent: string,
-    chunkSummary: string,
-    lessonSummary: string,
-    options: { count: number; distribution: Array<{ difficulty?: string; bloomLevel?: string; count?: number }> },
-    language: QuizLanguage = 'en'
-  ) => {
-    const systemPrompt = language === 'vi' ? QuizPrompts.batchSystemVi() : QuizPrompts.batchSystem();
-    const userPromptTemplate = language === 'vi' ? QuizPrompts.batchUserVi() : QuizPrompts.batchUser();
+   /**
+    * Helper function to build batch quiz prompt (always Vietnamese)
+    */
+   buildBatchQuizPrompt: (
+     chunkContent: string,
+     chunkSummary: string,
+     lessonSummary: string,
+     options: { count: number; distribution: Array<{ difficulty?: string; bloomLevel?: string; count?: number }> },
+     language: QuizLanguage = 'vi'
+   ) => {
+     // Always use Vietnamese
+     const systemPrompt = QuizPrompts.batchSystemVi();
+     const userPromptTemplate = QuizPrompts.batchUserVi();
 
-    const distributionJson = options.distribution
-      .map(
-        d =>
-          language === 'vi'
-            ? `${d.count || 1} câu hỏi ở mức độ khó ${d.difficulty || 'MEDIUM'}, mức độ Bloom ${d.bloomLevel || 'UNDERSTAND'}`
-            : `${d.count || 1} questions at ${d.difficulty || 'MEDIUM'} difficulty, ${d.bloomLevel || 'UNDERSTAND'} Bloom's level`
-      )
-      .join('\n');
+     const distributionJson = options.distribution
+       .map(
+         d =>
+           `${d.count || 1} câu hỏi ở mức độ khó ${d.difficulty || 'MEDIUM'}, mức độ Bloom ${d.bloomLevel || 'UNDERSTAND'}`
+       )
+       .join('\n');
 
-    const userPrompt = userPromptTemplate
-      .replace('{lessonSummary}', lessonSummary || (language === 'vi' ? 'Không có tóm tắt bài học' : 'No lesson summary available'))
-      .replace('{chunkSummary}', chunkSummary || (language === 'vi' ? 'Không có tóm tắt phần' : 'No chunk summary available'))
-      .replace('{chunkContent}', chunkContent || (language === 'vi' ? 'Không có nội dung phần' : 'No chunk content available'))
-      .replace('{distributionJson}', distributionJson);
+     const userPrompt = userPromptTemplate
+       .replace('{lessonSummary}', lessonSummary || 'Không có tóm tắt bài học')
+       .replace('{chunkSummary}', chunkSummary || 'Không có tóm tắt phần')
+       .replace('{chunkContent}', chunkContent || 'Không có nội dung phần')
+       .replace('{distributionJson}', distributionJson);
 
-    return {
-      systemPrompt,
-      userPrompt,
-    };
-  },
+     return {
+       systemPrompt,
+       userPrompt,
+     };
+   },
 } as const
 
 export interface ParsedQuizChoice {

@@ -94,7 +94,7 @@ export class QuizGenerationService {
       choices: quiz.choices.map(choice => ({
         text: choice.text,
         isCorrect: choice.isCorrect,
-        feedback: choice.feedback,
+        feedback: choice.feedback || (choice.isCorrect ? 'Chính xác!' : 'Không chính xác.'),
       })),
     };
   }
@@ -167,7 +167,7 @@ export class QuizGenerationService {
           choices: q.choices.map(choice => ({
             text: choice.text,
             isCorrect: choice.isCorrect,
-            feedback: choice.feedback,
+            feedback: choice.feedback || (choice.isCorrect ? 'Chính xác!' : 'Không chính xác.'),
           })),
         };
       }),
