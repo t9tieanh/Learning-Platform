@@ -8,13 +8,6 @@ import {
   AlignLeft,
   ExternalLink,
   Trash2,
-  ArrowLeft,
-  Plus,
-  MessageSquare,
-  CheckCheck,
-  Search,
-  Check,
-  X,
   PlayCircle
 } from 'lucide-react'
 import AiSuggestion from './AiSuggestion'
@@ -31,8 +24,6 @@ import { UseFormRegister, UseFormWatch, UseFormSetValue, FieldErrors, UseFormHan
 import { CreationLessonFormValues } from '@/utils/create-course/curriculum'
 import useLoading from '@/hooks/useLoading.hook'
 import { AnalysisState } from '@/hooks/useAnalysis.hook'
-import { useAuthStore } from '@/stores/useAuth.stores'
-import { useVipUpgrade } from '@/contexts/VipUpgradeContext'
 import { LessonChunk } from '@/types/ai'
 import { toast } from 'sonner'
 
@@ -79,7 +70,6 @@ interface Step2DetailsFormProps {
   handleUpdateLesson: (data: CreationLessonFormValues, startLoading?: () => void, stopLoading?: () => void) => void
   contentType: 'video' | 'document'
   handleDelLesson?: (lessonId: string) => Promise<void>
-  /** Lifted from parent so analysis persists between steps */
   analysisState: AnalysisState
   refetchAnalysis: () => void
 }
@@ -110,7 +100,6 @@ const Step2DetailsForm: React.FC<Step2DetailsFormProps> = ({
   const videoRef = useRef<HTMLVideoElement>(null)
   const detailedVideoRef = useRef<HTMLVideoElement>(null)
 
-  // Derived from injected analysis state
   const analysisData = analysisState.status === 'completed' ? analysisState.data : null
   const isAnalysisLoading = analysisState.status === 'loading' || analysisState.status === 'processing'
 
@@ -120,7 +109,6 @@ const Step2DetailsForm: React.FC<Step2DetailsFormProps> = ({
     setIsVideoLoading(false)
   }
 
-  // --- Questions State (Mock) ---
   const [chunkQuestions, setChunkQuestions] = useState<Record<string, string[]>>({})
   const [newQuestionInputs, setNewQuestionInputs] = useState<Record<string, string>>({})
 
@@ -132,7 +120,7 @@ const Step2DetailsForm: React.FC<Step2DetailsFormProps> = ({
       [chunkId]: [...(prev[chunkId] || []), q]
     }))
     setNewQuestionInputs((prev) => ({ ...prev, [chunkId]: '' }))
-    toast.success('Đã thêm câu hỏi (Mock)')
+    toast.success('Đã thêm câu hỏi')
   }
 
   const handleRemoveQuestion = (chunkId: string, index: number) => {
@@ -167,7 +155,6 @@ const Step2DetailsForm: React.FC<Step2DetailsFormProps> = ({
     const targetVideo = detailedVideoRef.current
     if (!targetVideo || !startTime) return
 
-    // SRT: "00:00:18,831" → strip milliseconds first
     const clean = startTime.split(',')[0].trim()
     const parts = clean.split(':').map(Number)
     let seconds = 0
@@ -181,7 +168,6 @@ const Step2DetailsForm: React.FC<Step2DetailsFormProps> = ({
   const mainWrapperRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    // Scroll correctly to top when switching views
     if (mainWrapperRef.current) {
       mainWrapperRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
     }
@@ -212,7 +198,6 @@ const Step2DetailsForm: React.FC<Step2DetailsFormProps> = ({
 
   return (
     <div ref={mainWrapperRef} className='grid grid-cols-1 lg:grid-cols-3 gap-8 animate-in fade-in slide-in-from-right-4 duration-300'>
-      {/* Left: Mini Preview */}
       <div className='lg:col-span-1 space-y-6 sticky top-4 self-start'>
         <div className='bg-white p-4 rounded-2xl shadow-sm border border-gray-100'>
           <h3 className='font-semibold text-gray-700 mb-3 text-sm flex items-center gap-2'>
@@ -243,7 +228,6 @@ const Step2DetailsForm: React.FC<Step2DetailsFormProps> = ({
               />
             )}
 
-            {/* Media Loading Overlay */}
             {isVideoLoading && !isUploading && (
               <div className='absolute inset-0 flex items-center justify-center bg-gray-50 z-20'>
                 <div className='flex flex-col items-center gap-3'>
@@ -258,14 +242,12 @@ const Step2DetailsForm: React.FC<Step2DetailsFormProps> = ({
               </div>
             )}
 
-            {/* View Detail Button */}
             <div className='absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10'>
               <CustomButton
                 type='button'
                 onClick={() => window.open(videoSrc || '', '_blank')}
                 className='bg-white/90 text-blue-600 hover:bg-white p-2 rounded-full h-8 w-8 flex items-center justify-center shadow-sm backdrop-blur-sm'
                 icon={<ExternalLink className='w-4 h-4' />}
-                title='Xem chi tiết'
               />
             </div>
           </div>
@@ -275,7 +257,6 @@ const Step2DetailsForm: React.FC<Step2DetailsFormProps> = ({
         </div>
       </div>
 
-      {/* Right: Form Fields */}
       <div className='lg:col-span-2 space-y-6'>
         <div className='bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-6'>
           <div>
@@ -327,7 +308,6 @@ const Step2DetailsForm: React.FC<Step2DetailsFormProps> = ({
           </div>
         </div>
 
-        {/* Options & Visibility */}
         <div className='bg-white p-6 rounded-2xl shadow-sm border border-gray-100'>
           <h3 className='flex items-center gap-2 font-semibold text-base text-gray-700 mb-4'>
             <ScanEye />
@@ -345,7 +325,6 @@ const Step2DetailsForm: React.FC<Step2DetailsFormProps> = ({
           </div>
         </div>
 
-        {/* LearnovaAI Analysis Section */}
         <LearnovaAISection
           analysisState={analysisState}
           refetchAnalysis={refetchAnalysis}
@@ -353,14 +332,14 @@ const Step2DetailsForm: React.FC<Step2DetailsFormProps> = ({
           onViewDetails={() => setIsDetailedView(true)}
         />
 
-        {/* Action Buttons */}
         <div className='flex justify-end pt-4 gap-3'>
           {handleDelLesson && lessonId && (
             <CustomButton
               type='button'
-              label='Xóa bài giảng'
-              className='bg-red-500 rounded-xl hover:bg-red-50 border border-red-200 shadow-sm px-6'
-              icon={<Trash2 className='w-4 h-4 mr-2' />}
+              label='Xóa bài'
+              variant='ghost'
+              className='text-gray-400 hover:text-red-500 hover:bg-red-50 px-4 h-9 text-xs font-bold transition-all'
+              icon={<Trash2 className='w-3.5 h-3.5 mr-2' />}
               onClick={async () => {
                 await handleDelLesson(lessonId)
                 if (handleClose) handleClose(false)
@@ -370,10 +349,9 @@ const Step2DetailsForm: React.FC<Step2DetailsFormProps> = ({
           <CustomButton
             type='button'
             label={loading ? 'Đang tải lên...' : contentType === 'video' ? 'Lưu bài giảng' : 'Lưu tài liệu'}
-            className={`rounded-xl px-8 shadow-lg shadow-blue-600/20 ${isUploading ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white'
-              }`}
-            icon={!isUploading ? <Upload className='w-5 h-5 mr-2' /> : undefined}
-            disabled={isUploading}
+            className='bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-6 h-10 text-sm font-bold transition-all shadow-md shadow-blue-100 disabled:bg-gray-300'
+            icon={!isUploading ? <Upload className='w-4 h-4 mr-2' /> : undefined}
+            disabled={isUploading || loading}
             isLoader={loading}
             onClick={() => handleUpdateLesson(watch(), startLoading, stopLoading)}
           />

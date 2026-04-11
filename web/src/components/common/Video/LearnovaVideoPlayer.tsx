@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useImperativeHandle, forwardRef } from 'react'
+import { motion } from 'framer-motion'
 import { LoadingDots } from '@/components/common/Loading/LoadingDots'
 import learnovaLogo from '@/assets/images/logo1.png'
 
@@ -24,10 +25,8 @@ const LearnovaVideoPlayer = forwardRef<HTMLVideoElement | null, LearnovaVideoPla
         const videoContainerRef = useRef<HTMLDivElement>(null)
         const internalVideoRef = useRef<HTMLVideoElement>(null)
 
-        // Expose the video ref to the parent
         useImperativeHandle(ref, () => internalVideoRef.current!)
 
-        // Intersection Observer for PiP
         useEffect(() => {
             if (!isPiPEnabled) {
                 setIsPiP(false)
@@ -48,7 +47,6 @@ const LearnovaVideoPlayer = forwardRef<HTMLVideoElement | null, LearnovaVideoPla
             return () => observer.disconnect()
         }, [isPiPEnabled])
 
-        // Video Loading
         useEffect(() => {
             setIsVideoLoading(true)
         }, [src])
@@ -57,7 +55,6 @@ const LearnovaVideoPlayer = forwardRef<HTMLVideoElement | null, LearnovaVideoPla
             setIsVideoLoading(false)
         }
 
-        // Subtitles Logic
         const handleTimeUpdate = (e: React.SyntheticEvent<HTMLVideoElement>) => {
             const time = e.currentTarget.currentTime
             const sub = subtitles.find((s) => time >= s.start && time <= s.end)
@@ -68,30 +65,32 @@ const LearnovaVideoPlayer = forwardRef<HTMLVideoElement | null, LearnovaVideoPla
 
         return (
             <div ref={videoContainerRef} className={`bg-gray-50 pb-4 min-h-[300px] ${containerClassName}`}>
-                <div
-                    className={`transition-all duration-500 ease-in-out ${isPiP && isPiPEnabled
-                        ? 'fixed bottom-6 left-6 w-80 z-[100] shadow-2xl scale-100'
-                        : 'relative w-full aspect-video scale-100'
+                <motion.div
+                    drag={isPiP && isPiPEnabled}
+                    dragMomentum={false}
+                    animate={isPiP && isPiPEnabled ? undefined : { x: 0, y: 0 }}
+                    transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                    className={`${isPiP && isPiPEnabled
+                        ? 'fixed bottom-6 left-6 w-80 z-[100] shadow-2xl scale-100 cursor-move'
+                        : 'relative w-full aspect-video scale-100 cursor-default'
                         } ${className}`}
                 >
                     <div className='relative w-full h-full bg-black rounded-2xl overflow-hidden shadow-2xl border-4 border-white group'>
                         <video
                             src={src || ''}
                             ref={internalVideoRef}
-                            className='w-full h-full object-contain'
+                            className='w-full h-full object-contain pointer-events-auto'
                             controls
                             onLoadedData={handleMediaLoad}
                             onTimeUpdate={handleTimeUpdate}
                         />
 
-                        {/* PiP Label */}
                         {isPiP && isPiPEnabled && (
-                            <div className='absolute top-2 right-2 bg-white-600/80 backdrop-blur-sm text-white text-[10px] font-bold px-2 py-0.5 rounded-full z-10 animate-pulse'>
+                            <div className='absolute top-2 right-2 bg-blue-600/80 backdrop-blur-sm text-white text-[10px] font-bold px-2 py-0.5 rounded-full z-10 animate-pulse pointer-events-none'>
                                 Picture in picture (PiP)
                             </div>
                         )}
 
-                        {/* Manual Subtitles Overlay */}
                         {activeSubtitle && (
                             <div
                                 className={`absolute left-0 right-0 flex justify-center px-4 z-10 pointer-events-none transition-all ${isPiP && isPiPEnabled ? 'bottom-10' : 'bottom-16'
@@ -115,12 +114,10 @@ const LearnovaVideoPlayer = forwardRef<HTMLVideoElement | null, LearnovaVideoPla
                             </div>
                         )}
                     </div>
-                </div>
+                </motion.div>
             </div>
         )
     }
 )
-
-LearnovaVideoPlayer.displayName = 'LearnovaVideoPlayer'
 
 export default LearnovaVideoPlayer

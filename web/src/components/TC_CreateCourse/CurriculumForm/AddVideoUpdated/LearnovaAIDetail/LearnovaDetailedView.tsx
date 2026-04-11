@@ -1,5 +1,5 @@
 import React from 'react'
-import { MessageSquare } from 'lucide-react'
+import { MessageSquare, Sparkles } from 'lucide-react'
 import { LessonChunk } from '@/types/ai'
 import { AnalysisResult } from '@/services/assistant/analysis.service'
 import { SubtitleEntry } from '@/components/common/Video/LearnovaVideoPlayer'
@@ -7,8 +7,6 @@ import { SubtitleEntry } from '@/components/common/Video/LearnovaVideoPlayer'
 import Header from './components/Header'
 import VideoPreview from './components/VideoPreview'
 import ChunkItem from './components/ChunkItem'
-import AnalyticsSidebar from './components/AnalyticsSidebar'
-import TranscriptEditor from './components/TranscriptEditor'
 
 interface LearnovaDetailedViewProps {
     analysisData: AnalysisResult | null
@@ -69,33 +67,41 @@ const LearnovaDetailedView: React.FC<LearnovaDetailedViewProps> = ({
     }
 
     return (
-        <div ref={mainWrapperRef} className='animate-in fade-in slide-in-from-bottom-6 duration-700 space-y-10 pb-20 relative px-2 md:px-0'>
-            {/* Header Area */}
+        <div ref={mainWrapperRef} className='animate-in fade-in slide-in-from-bottom-4 duration-700 space-y-8 pb-16 relative px-2 md:px-0'>
             <Header onBack={onBack} />
 
-            {/* Video Playback Section */}
-            <VideoPreview
-                videoSrc={videoSrc}
-                detailedVideoRef={detailedVideoRef}
-                subtitles={mockSubtitles}
-            />
+            <div className='max-w-6xl mx-auto w-full px-4'>
+                <VideoPreview
+                    videoSrc={videoSrc}
+                    detailedVideoRef={detailedVideoRef}
+                    subtitles={mockSubtitles}
+                />
+            </div>
 
-            {/* Content Split: Chunks vs Info */}
-            <div className='grid grid-cols-1 lg:grid-cols-12 gap-10 items-start'>
-                <div className='lg:col-span-8 space-y-8'>
-                    <div className='flex items-center justify-between px-2'>
-                        <h3 className='text-xl font-bold text-gray-900 flex items-center gap-3'>
-                            <div className='p-2 bg-blue-50 rounded-xl'>
-                                <MessageSquare className='w-6 h-6 text-blue-600' />
+            <div className='max-w-5xl mx-auto w-full px-4'>
+                <div className='space-y-6'>
+                    <div className='flex items-center justify-between px-6 py-5 bg-gradient-to-r from-blue-50/40 to-transparent rounded-2xl border-l-4 border-blue-600 shadow-sm'>
+                        <div className='flex items-center gap-4'>
+                            <div className='p-3 bg-blue-600 rounded-xl shadow-md shadow-blue-100'>
+                                <MessageSquare className='w-5 h-5 text-white' />
                             </div>
-                            Phân đoạn & Tương tác bài học
-                        </h3>
-                        <span className='text-[10px] font-black text-gray-400 bg-gray-100 px-3 py-1.5 rounded-full uppercase tracking-widest'>
-                            {chunks.length} PHÂN ĐOẠN ĐÃ ĐỊNH DẠNG
-                        </span>
+                            <div>
+                                <h2 className='text-lg font-bold text-gray-900 leading-tight'>
+                                    Cấu trúc nội dung bài giảng
+                                </h2>
+                                <p className='text-[11px] font-bold text-gray-400 uppercase tracking-widest mt-0.5 flex items-center gap-1.5'>
+                                    <Sparkles className='w-3 h-3 text-blue-500' /> AI Analysis
+                                </p>
+                            </div>
+                        </div>
+                        <div className='bg-white px-3 py-1 rounded-full border border-blue-100'>
+                            <span className='text-[10px] font-black text-blue-600 uppercase tracking-tight'>
+                                {chunks.length} phân đoạn
+                            </span>
+                        </div>
                     </div>
 
-                    <div className='space-y-8'>
+                    <div className='space-y-6'>
                         {chunks.map((chunk, idx) => (
                             <ChunkItem
                                 key={chunk.id}
@@ -118,13 +124,7 @@ const LearnovaDetailedView: React.FC<LearnovaDetailedViewProps> = ({
                         ))}
                     </div>
                 </div>
-
-                {/* Right Area: Fixed Intelligence Metadata */}
-                <AnalyticsSidebar chunkCount={chunks.length} />
             </div>
-
-            {/* Transcript Section */}
-            <TranscriptEditor chunks={chunks} />
         </div>
     )
 }
