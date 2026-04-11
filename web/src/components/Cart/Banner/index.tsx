@@ -1,17 +1,21 @@
 import { ShoppingCart } from 'lucide-react'
-import './style.scss'
+import HighGlossBackground from '@/components/common/HighGlossBackground'
 
 const Banner = () => {
   return (
-    <div className='cart-banner px-4 py-6 rounded-xl bg-primary'>
-      <p className='text-3xl font-bold flex text-white items-center'>
-        <ShoppingCart className='cart-icon text-white w-8 h-8' />
-        &nbsp;Giỏ hàng của bạn.
+    <HighGlossBackground className='px-10 py-12 rounded-[32px] shadow-2xl shadow-blue-900/10'>
+      <div className='flex items-center gap-4 mb-4'>
+        <div className='p-3 bg-white/20 backdrop-blur-md rounded-2xl border border-white/30'>
+          <ShoppingCart className='text-white w-7 h-7' />
+        </div>
+        <h1 className='text-3xl font-black text-white tracking-tight'>
+          Giỏ hàng của bạn.
+        </h1>
+      </div>
+      <p className='text-blue-100/90 text-[15px] font-medium max-w-2xl leading-relaxed'>
+        Chốt đơn ngay hôm nay để nhận mức giá ưu đãi cực khủng - cơ hội chỉ đến một lần! Đừng bỏ lỡ kiến thức quý giá đang chờ đón bạn.
       </p>
-      <p className='text-base flex items-center text-white mt-2'>
-        &nbsp;Chốt đơn ngay hôm nay để nhận mức giá ưu đãi cực khủng - cơ hội chỉ đến một lần!
-      </p>
-    </div>
+    </HighGlossBackground>
   )
 }
 

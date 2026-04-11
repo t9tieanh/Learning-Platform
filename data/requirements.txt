@@ -24,6 +24,7 @@ oauthlib==3.2.2
 packaging==24.0
 pexpect==4.9.0
 pillow==10.2.0
+psycopg2-binary==2.9.9
 ptyprocess==0.7.0
 Pygments==2.17.2
 PyJWT==2.7.0

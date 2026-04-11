@@ -13,6 +13,19 @@ export interface ConversationLoadResponse {
   result: ConversationMessage[]
 }
 
+export interface QuizChoice {
+  id: string
+  text: string
+  isCorrect: boolean
+}
+
+export interface Quiz {
+  id?: string
+  question: string
+  choices: QuizChoice[]
+  explanation: string
+}
+
 export interface LessonChunk {
   id: string
   chunkIndex: number
@@ -23,4 +36,5 @@ export interface LessonChunk {
   endTime: string | null
   sentenceCount: number | null
   content?: string
+  quizzes?: Quiz[]
 }

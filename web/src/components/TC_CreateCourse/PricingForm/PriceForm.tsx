@@ -29,11 +29,11 @@ const PriceInput = ({
 }) => {
   return (
     <>
-      <div className='title'>
-        <Label htmlFor='currency' className='text-blue-900 mb-2'>
+      <div className='flex flex-col gap-1.5'>
+        <Label htmlFor='currency' className='text-[11px] font-bold text-gray-400 uppercase tracking-wider'>
           {label}
         </Label>
-        <p className='text-sm text-gray-500'>*{subLabel}</p>
+        <p className='text-[10px] font-medium text-gray-300'>{subLabel}</p>
       </div>
       <div className='relative'>
         <CustomInput
@@ -42,22 +42,19 @@ const PriceInput = ({
           step={1}
           min={1}
           max={10000}
-          placeholder='Ví dụ: 200 (tương đương 200.000 VNĐ)'
+          placeholder='Ví dụ: 200'
           {...(register && name ? register(name) : {})}
           onChange={(e) => {
             const raw = e.target.value
-            if (raw === '') {
-              toast.error('Giá không hợp lệ (trống)')
-              return
-            }
+            if (raw === '') return
             const value = Number(raw)
             if (isNaN(value)) return
             setCoursePrice(value)
           }}
-          className='pl-8 pr-20 h-10 border-blue-300 focus:ring-2 focus:ring-blue-400'
+          className='pl-8 pr-24 h-11 text-[13.5px] font-bold border-gray-100 bg-gray-50/20 focus:bg-white transition-all rounded-2xl placeholder:text-gray-300'
         />
-        <span className='absolute left-3 top-1/2 -translate-y-1/2 text-blue-500'>₫</span>
-        <span className='absolute right-3 text-sm top-1/2 -translate-y-1/2 text-gray-500 font-medium'>.000 VND</span>
+        <span className='absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 font-bold'>₫</span>
+        <span className='absolute right-3.5 px-2 py-1 bg-gray-100/50 rounded-lg text-[10px] top-1/2 -translate-y-1/2 text-gray-400 font-black uppercase tracking-tighter'>.000 VND</span>
       </div>
     </>
   )
@@ -102,17 +99,17 @@ const PriceForm = ({
 
   return (
     <form onSubmit={handleSubmit(handleUpdatePrice)}>
-      <Card className='bg-white shadow-lg'>
-        <CardHeader className='bg-blue-200/40 rounded-t-lg'>
-          <CardTitle className='text-lg font-medium text-blue-900'>Giá khóa học</CardTitle>
+      <Card className='border-2 border-white ring-1 ring-gray-100 shadow-sm bg-white rounded-[32px] overflow-hidden'>
+        <CardHeader className='pb-4 border-b border-gray-50/50'>
+          <CardTitle className='text-[15px] font-bold text-gray-900'>Giá khóa học</CardTitle>
         </CardHeader>
 
-        <CardContent className='space-y-5'>
+        <CardContent className='space-y-6 pt-6'>
           <PriceInput
             currency={currency}
             setCurrency={setCurrency}
             label='Giá gốc của khóa học'
-            subLabel='*Giá hiển thị ở phần gạch ngang trên trang khóa học'
+            subLabel='Giá hiển thị gạch ngang để thu hút học viên'
             name='originalPrice'
             register={register}
             errors={errors}
@@ -123,8 +120,8 @@ const PriceForm = ({
           <PriceInput
             currency={currency}
             setCurrency={setCurrency}
-            label='Giá khuyến mãi (Giá thực tế) của khóa học'
-            subLabel='*Giá bán ra thực tế của khóa học'
+            label='Giá thực tế bán ra'
+            subLabel='Mức giá cuối cùng học viên sẽ thanh toán'
             name='finalPrice'
             register={register}
             errors={errors}
@@ -133,11 +130,16 @@ const PriceForm = ({
             }}
           />
 
-          <div className='text-sm text-blue-700'>
-            Giá phải nằm trong khoảng 50.000 VNĐ đến 20.000.000 VNĐ (nhập 50 - 20000)
+          <div className='p-4 bg-blue-50/30 rounded-2xl border border-blue-50/80 text-[11px] font-medium text-blue-600 leading-relaxed'>
+            * Hệ thống nhận đơn vị nghìn đồng. Phạm vi cho phép: 50 - 20,000 (tương đương 50.000đ - 20.000.000đ)
           </div>
-          <div className='flex justify-end'>
-            <CustomButton label='Lưu thay đổi' icon={<FaPaperPlane />} isLoader={loading} />
+          <div className='flex justify-end pt-2'>
+            <CustomButton
+              className='bg-blue-600 hover:bg-blue-700 text-white rounded-xl px-10 h-10 text-[11px] font-bold shadow-lg shadow-blue-100 transition-all active:scale-95'
+              label='Cập nhật giá'
+              icon={<FaPaperPlane className='h-3 w-3 mr-2' />}
+              isLoader={loading}
+            />
           </div>
         </CardContent>
       </Card>
