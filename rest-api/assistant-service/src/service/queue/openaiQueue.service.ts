@@ -4,7 +4,7 @@ import { ChatOpenAI } from '@langchain/openai';
 import Logger from '~/utils/logger';
 import { env } from '~/config/env';
 import { ParsedQuiz, ParsedQuizChoice } from '~/prompts/quiz.prompt';
-import { SingleQuizSchema, BatchQuizSchema, SingleQuiz, BatchQuiz, QuizChoice } from '~/schemas/openai.schema';
+import { SingleQuizSchema, BatchQuizSchema, SingleQuiz, BatchQuiz, QuizChoice, RAGAnswerSchema, RAGAnswer } from '~/schemas/openai.schema';
 
 /**
  * OpenAI Queue Service Job Data Type
@@ -24,6 +24,7 @@ interface OpenAiQueueJobData {
 export class OpenAiQueueService {
   private llm: ChatOpenAI;
   private llmBatch: ChatOpenAI;
+  private llmRAG: ChatOpenAI;
   private openaiQueue: Queue.Queue<OpenAiQueueJobData>;
 
   constructor() {
@@ -41,6 +42,14 @@ export class OpenAiQueueService {
       temperature: 0.7,
       apiKey: env.OPENAI_API_KEY,
       maxTokens: 4000,
+    });
+
+    // RAG answer generation LLM (lower temperature for consistency)
+    this.llmRAG = new ChatOpenAI({
+      model: 'gpt-4o-mini',
+      temperature: 0.3,
+      apiKey: env.OPENAI_API_KEY,
+      maxTokens: 800,
     });
 
     // Initialize Bull queue with Redis
@@ -278,14 +287,49 @@ export class OpenAiQueueService {
     };
   }
 
+   /**
+    * Generate RAG answer using structured outputs
+    * 
+    * @param systemPrompt - System message for RAG
+    * @param userPrompt - User message with context and question
+    * @returns Answer string
+    */
+   async queueRAGAnswer(
+     systemPrompt: string,
+     userPrompt: string
+   ): Promise<string> {
+     try {
+       const messages = [
+         new SystemMessage(systemPrompt),
+         new HumanMessage(userPrompt),
+       ];
+
+       Logger.info('[OpenAiQueueService] Calling RAG LLM with structured output');
+
+       // Use withStructuredOutput for guaranteed JSON response
+       const llmWithSchema = this.llmRAG.withStructuredOutput(RAGAnswerSchema);
+       const response = await llmWithSchema.invoke(messages) as RAGAnswer;
+
+       Logger.info('[OpenAiQueueService] RAG answer generated successfully');
+
+       return response.answer;
+     } catch (error) {
+       const errorMsg = error instanceof Error ? error.message : String(error);
+       Logger.error(
+         `[OpenAiQueueService] RAG generation error: ${errorMsg}`
+       );
+       throw new Error(`RAG answer generation failed: ${errorMsg}`);
+     }
+   }
+
   /**
-   * Clean up queue resources
-   */
-  async close(): Promise<void> {
-    await this.openaiQueue.close();
-    Logger.info('[OpenAiQueueService] Queue closed');
-  }
-}
+    * Clean up queue resources
+    */
+   async close(): Promise<void> {
+     await this.openaiQueue.close();
+     Logger.info('[OpenAiQueueService] Queue closed');
+   }
+ }
 
 // Export singleton instance
 export default new OpenAiQueueService();

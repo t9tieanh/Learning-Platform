@@ -76,8 +76,27 @@ export const BatchQuizSchema = {
 };
 
 /**
+ * Schema for RAG answer generation
+ */
+export const RAGAnswerSchema = {
+  type: 'object' as const,
+  properties: {
+    answer: {
+      type: 'string',
+      description: 'The answer to the user question based on the provided context',
+    },
+  },
+  required: ['answer'],
+  additionalProperties: false,
+};
+
+/**
  * JSON Schema type definitions for TypeScript
  */
+export interface RAGAnswer {
+  answer: string;
+}
+
 export interface QuizChoice {
   text: string;
   isCorrect: boolean;
