@@ -249,8 +249,8 @@ export const QuizPrompts = {
     const userPromptTemplate = language === 'vi' ? QuizPrompts.singleUserVi() : QuizPrompts.singleUser();
 
     const userPrompt = userPromptTemplate
-      .replace('{difficulty}', options.difficulty)
-      .replace('{bloomLevel}', options.bloomLevel)
+      .replace('{difficulty}', options.difficulty || 'MEDIUM')
+      .replace('{bloomLevel}', options.bloomLevel || 'UNDERSTAND')
       .replace('{lessonSummary}', lessonSummary || 'No lesson summary available')
       .replace('{chunkSummary}', chunkSummary || 'No chunk summary available')
       .replace('{chunkContent}', chunkContent || 'No chunk content available');
@@ -268,7 +268,7 @@ export const QuizPrompts = {
     chunkContent: string,
     chunkSummary: string,
     lessonSummary: string,
-    options: { count: number; distribution: Array<{ difficulty: string; bloomLevel: string; count: number }> },
+    options: { count: number; distribution: Array<{ difficulty?: string; bloomLevel?: string; count?: number }> },
     language: QuizLanguage = 'en'
   ) => {
     const systemPrompt = language === 'vi' ? QuizPrompts.batchSystemVi() : QuizPrompts.batchSystem();
@@ -278,8 +278,8 @@ export const QuizPrompts = {
       .map(
         d =>
           language === 'vi'
-            ? `${d.count} câu hỏi ở mức độ khó ${d.difficulty}, mức độ Bloom ${d.bloomLevel}`
-            : `${d.count} questions at ${d.difficulty} difficulty, ${d.bloomLevel} Bloom's level`
+            ? `${d.count || 1} câu hỏi ở mức độ khó ${d.difficulty || 'MEDIUM'}, mức độ Bloom ${d.bloomLevel || 'UNDERSTAND'}`
+            : `${d.count || 1} questions at ${d.difficulty || 'MEDIUM'} difficulty, ${d.bloomLevel || 'UNDERSTAND'} Bloom's level`
       )
       .join('\n');
 

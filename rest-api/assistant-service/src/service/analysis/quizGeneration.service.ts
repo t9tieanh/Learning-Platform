@@ -70,14 +70,21 @@ export class QuizGenerationService {
       chunkContent,
       chunkSummary,
       lessonSummary,
-      options,
+      {
+        difficulty: options.difficulty || 'MEDIUM',
+        bloomLevel: options.bloomLevel || 'UNDERSTAND',
+        questionType: options.questionType || 'MULTIPLE_CHOICE',
+      },
       language
     );
 
-    const quiz = await this.callOpenAiWithRetry(
+    const response = await this.callOpenAiWithRetry(
       prompt.systemPrompt,
       prompt.userPrompt
     );
+
+    // Ensure we're working with a single quiz, not an array
+    const quiz = Array.isArray(response) ? response[0] : response;
 
     Logger.info(
       `[QuizGenerationService] Successfully generated single quiz: "${quiz.question.substring(0, 50)}..."`
@@ -86,9 +93,9 @@ export class QuizGenerationService {
     return {
       question: quiz.question,
       explanation: quiz.explanation,
-      type: quiz.type || options.questionType,
-      difficulty: quiz.difficulty || options.difficulty,
-      bloomLevel: quiz.bloomLevel || options.bloomLevel,
+      type: quiz.type || options.questionType || 'MULTIPLE_CHOICE',
+      difficulty: quiz.difficulty || options.difficulty || 'MEDIUM',
+      bloomLevel: quiz.bloomLevel || options.bloomLevel || 'UNDERSTAND',
       choices: quiz.choices,
     };
   }
