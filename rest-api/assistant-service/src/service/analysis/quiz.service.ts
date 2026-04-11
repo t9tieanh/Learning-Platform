@@ -1,7 +1,7 @@
 import Logger from '~/utils/logger';
 import prismaService from '~/service/utils/prisma.service';
 import quizGenerationService from '~/service/analysis/quizGeneration.service';
-import quizPersistenceService from '~/service/quizPersistence.service';
+import quizPersistenceService from '~/service/quizz/quizPersistence.service';
 import { GenerateQuizDto, GenerateBatchQuizzesDto } from '~/dto/request/quiz-generation.dto';
 import { ListQuizzesResponse } from '~/dto/response/quiz-response.dto';
 import { Quiz, QuizChoice } from '@prisma/client';
@@ -44,13 +44,13 @@ export class QuizService {
       throw new Error(`Chunk not found: ${chunkId}`);
     }
 
-    // Generate quiz using OpenAI
+    // Generate quiz using OpenAI (always Vietnamese)
     const generatedQuiz = await quizGenerationService.generateSingleQuiz(
       chunk.content,
       chunk.summary || '',
       chunk.lesson.summary || '',
       options,
-      options.language || 'en'
+      'vi'  // Always use Vietnamese
     );
 
     // Save to database
@@ -91,13 +91,13 @@ export class QuizService {
       throw new Error(`Chunk not found: ${chunkId}`);
     }
 
-    // Generate batch of quizzes
+    // Generate batch of quizzes (always Vietnamese)
     const generatedBatch = await quizGenerationService.generateBatchQuizzes(
       chunk.content,
       chunk.summary || '',
       chunk.lesson.summary || '',
       options,
-      options.language || 'en'
+      'vi'  // Always use Vietnamese
     );
 
     // Save all quizzes to database

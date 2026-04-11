@@ -2,6 +2,7 @@ import prismaService from '~/service/utils/prisma.service';
 import Logger from '~/utils/logger';
 import { GeneratedQuizResponse, BatchGeneratedQuizzesResponse } from '~/dto/response/quiz-response.dto';
 import { Quiz, QuizChoice } from '@prisma/client';
+import { QuestionType, DifficultyLevel, BloomLevel } from '~/enums/quizStatus.enum';
 
 /**
  * QuizPersistenceService handles database operations for quizzes.
@@ -41,9 +42,9 @@ export class QuizPersistenceService {
         chunkId,
         question: quiz.question,
         explanation: quiz.explanation,
-        type: quiz.type,
-        difficulty: quiz.difficulty,
-        bloomLevel: quiz.bloomLevel,
+        type: quiz.type as QuestionType,
+        difficulty: quiz.difficulty as DifficultyLevel,
+        bloomLevel: quiz.bloomLevel as BloomLevel,
         createdBy: userId,
         aiGenerated: true,
         aiModel: 'gpt-4-turbo',
@@ -93,9 +94,9 @@ export class QuizPersistenceService {
             chunkId,
             question: quiz.question,
             explanation: quiz.explanation,
-            type: quiz.type,
-            difficulty: quiz.difficulty,
-            bloomLevel: quiz.bloomLevel,
+            type: quiz.type as QuestionType,
+            difficulty: quiz.difficulty as DifficultyLevel,
+            bloomLevel: quiz.bloomLevel as BloomLevel,
             createdBy: userId,
             aiGenerated: true,
             aiModel: 'gpt-4-turbo',

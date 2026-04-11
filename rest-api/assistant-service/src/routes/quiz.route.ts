@@ -9,9 +9,10 @@ import { GenerateQuizDto, GenerateBatchQuizzesDto } from '~/dto/request/quiz-gen
 const quizRouter: Router = express.Router();
 
 /**
- * POST /assistant/lessons/:lessonId/chunks/:chunkId/quizzes
+ * POST /assistant/chunks/:chunkId/quizzes
  * 
- * Generates a single quiz question for a lesson chunk.
+ * Generates a single quiz question for a lesson chunk in Vietnamese.
+ * The lessonId is fetched from the database using chunkId.
  * 
  * Requirements:
  * - User must be authenticated
@@ -28,11 +29,11 @@ const quizRouter: Router = express.Router();
  * {
  *   "code": 201,
  *   "message": "Quiz generated successfully",
- *   "result": { quiz object with choices }
+ *   "result": { quiz object with Vietnamese content }
  * }
  */
 quizRouter.post(
-  '/lessons/:lessonId/chunks/:chunkId/quizzes',
+  '/chunks/:chunkId/quizzes',
   Authentication(true),
   checkQuizGenerationVip,
   validateDto(GenerateQuizDto),
@@ -40,9 +41,10 @@ quizRouter.post(
 );
 
 /**
- * POST /assistant/lessons/:lessonId/chunks/:chunkId/quizzes/batch
+ * POST /assistant/chunks/:chunkId/quizzes/batch
  * 
- * Generates multiple quiz questions with distribution requirements.
+ * Generates multiple quiz questions with distribution requirements in Vietnamese.
+ * The lessonId is fetched from the database using chunkId.
  * 
  * Requirements:
  * - User must be authenticated
@@ -71,12 +73,12 @@ quizRouter.post(
  *   "message": "Batch quizzes generated successfully",
  *   "result": {
  *     "count": 5,
- *     "quizzes": [ { quiz1 }, { quiz2 }, ... ]
+ *     "quizzes": [ { quiz1 with Vietnamese content }, { quiz2 }, ... ]
  *   }
  * }
  */
 quizRouter.post(
-  '/lessons/:lessonId/chunks/:chunkId/quizzes/batch',
+  '/chunks/:chunkId/quizzes/batch',
   Authentication(true),
   checkQuizGenerationVip,
   validateDto(GenerateBatchQuizzesDto),
@@ -84,9 +86,10 @@ quizRouter.post(
 );
 
 /**
- * GET /assistant/lessons/:lessonId/chunks/:chunkId/quizzes
+ * GET /assistant/chunks/:chunkId/quizzes
  * 
  * Retrieves all quizzes for a lesson chunk (NO pagination).
+ * The lessonId is fetched from the database using chunkId.
  * 
  * Requirements:
  * - User must be authenticated
@@ -104,15 +107,16 @@ quizRouter.post(
  * }
  */
 quizRouter.get(
-  '/lessons/:lessonId/chunks/:chunkId/quizzes',
+  '/chunks/:chunkId/quizzes',
   Authentication(true),
   quizController.listQuizzesForChunk
 );
 
 /**
- * GET /assistant/lessons/:lessonId/chunks/:chunkId/quizzes/:quizId
+ * GET /assistant/chunks/:chunkId/quizzes/:quizId
  * 
  * Retrieves a single quiz by ID with all its choices.
+ * The lessonId is fetched from the database using chunkId.
  * 
  * Requirements:
  * - User must be authenticated
@@ -131,7 +135,7 @@ quizRouter.get(
  * }
  */
 quizRouter.get(
-  '/lessons/:lessonId/chunks/:chunkId/quizzes/:quizId',
+  '/chunks/:chunkId/quizzes/:quizId',
   Authentication(true),
   quizController.getQuiz
 );

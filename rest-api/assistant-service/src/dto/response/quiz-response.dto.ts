@@ -1,21 +1,38 @@
 import { QuestionType, DifficultyLevel, BloomLevel, QuizStatus } from '~/enums/quizStatus.enum'
 
 export class QuizChoiceResponse {
+  constructor(text: string, isCorrect: boolean, feedback?: string) {
+    this.text = text
+    this.isCorrect = isCorrect
+    this.feedback = feedback
+  }
+  text: string
+  isCorrect: boolean
+  
   id?: string
-  text?: string
-  isCorrect?: boolean
   order?: number
+  feedback?: string
 }
 
 export class GeneratedQuizResponse {
+  constructor(question: string, type: QuestionType | string, difficulty: DifficultyLevel | string, bloomLevel: BloomLevel | string, choices: QuizChoiceResponse[], explanation: string) {
+    this.question = question
+    this.type = type
+    this.difficulty = difficulty
+    this.bloomLevel = bloomLevel
+    this.choices = choices
+    this.explanation = explanation
+  }
+  question: string
+  type: QuestionType | string
+  difficulty: DifficultyLevel | string
+  bloomLevel: BloomLevel | string
+  choices: QuizChoiceResponse[]
+  explanation: string
+  
+  // Optional fields
   id?: string
   chunkId?: string
-  question?: string
-  type?: QuestionType
-  difficulty?: DifficultyLevel
-  bloomLevel?: BloomLevel
-  choices?: QuizChoiceResponse[]
-  explanation?: string
   aiGenerated?: boolean
   aiModel?: string | null
   aiConfidence?: number | null
@@ -27,10 +44,12 @@ export class GeneratedQuizResponse {
 }
 
 export class BatchGeneratedQuizzesResponse {
-  totalCount?: number
-  generatedCount?: number
-  quizzes?: GeneratedQuizResponse[]
-  generatedAt?: Date
+  constructor(count: number, quizzes: GeneratedQuizResponse[]) {
+    this.count = count
+    this.quizzes = quizzes
+  }
+  count: number
+  quizzes: GeneratedQuizResponse[]
 }
 
 export class ListQuizzesResponse extends Array<GeneratedQuizResponse> {}

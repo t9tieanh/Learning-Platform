@@ -1,17 +1,15 @@
-import { ChatOpenAI } from '@langchain/openai';
-import { HumanMessage, SystemMessage } from '@langchain/core/messages';
 import Logger from '~/utils/logger';
-import { env } from '~/config/env';
 import { 
   GenerateQuizDto, 
   GenerateBatchQuizzesDto,
-  QuizDistribution 
 } from '~/dto/request/quiz-generation.dto';
+import { DifficultyLevel, BloomLevel, QuestionType } from '~/enums/quizStatus.enum';
 import { 
   GeneratedQuizResponse,
   BatchGeneratedQuizzesResponse 
 } from '~/dto/response/quiz-response.dto';
-import { QuizPrompts, ParsedQuiz, QuizLanguage } from '~/prompts/quiz.prompt';
+import { QuizPrompts, QuizLanguage } from '~/prompts/quiz.prompt';
+import openaiQueueService from '~/service/queue/openaiQueue.service';
 
 /**
  * QuizGenerationService handles OpenAI integration for quiz generation.
@@ -19,27 +17,12 @@ import { QuizPrompts, ParsedQuiz, QuizLanguage } from '~/prompts/quiz.prompt';
  * Features:
  * - Single quiz generation with context (lesson + chunk summary)
  * - Batch quiz generation with distribution requirements
- * - Async retry logic with exponential backoff
+ * - Uses Bull Queue for reliable retry logic with exponential backoff
  * - Response parsing and validation
  * - Error handling and logging
  */
 export class QuizGenerationService {
-  private llm: ChatOpenAI;
-
-  /** Max retries for OpenAI API calls */
-  private static readonly MAX_RETRIES = 3;
-
-  /** Initial backoff delay in ms */
-  private static readonly INITIAL_BACKOFF_MS = 1000;
-
-  constructor() {
-    this.llm = new ChatOpenAI({
-      model: 'gpt-4-turbo',
-      temperature: 0.7,
-      apiKey: env.OPENAI_API_KEY,
-      maxTokens: 2000,
-    });
-  }
+  // All OpenAI operations are handled by openaiQueueService via Bull Queue
 
   // -------------------------------------------------------------------------
   // Public API
@@ -71,20 +54,32 @@ export class QuizGenerationService {
       chunkSummary,
       lessonSummary,
       {
-        difficulty: options.difficulty || 'MEDIUM',
-        bloomLevel: options.bloomLevel || 'UNDERSTAND',
-        questionType: options.questionType || 'MULTIPLE_CHOICE',
+        difficulty: options.difficulty || DifficultyLevel.MEDIUM,
+        bloomLevel: options.bloomLevel || BloomLevel.UNDERSTAND,
+        questionType: options.questionType || QuestionType.MULTIPLE_CHOICE,
       },
       language
     );
 
-    const response = await this.callOpenAiWithRetry(
-      prompt.systemPrompt,
-      prompt.userPrompt
+    Logger.info(
+      `[QuizGenerationService] Built prompt with language=${language}, system prompt starts: "${prompt.systemPrompt.substring(0, 80)}..."`
     );
 
+    const response = await openaiQueueService.queueQuizGeneration(
+      prompt.systemPrompt,
+      prompt.userPrompt,
+      false  // Single quiz generation
+    );
+
+    // Parse the response
+    const parsedResponse = openaiQueueService.parseQuizResponse(response);
+
     // Ensure we're working with a single quiz, not an array
-    const quiz = Array.isArray(response) ? response[0] : response;
+    const quiz = Array.isArray(parsedResponse) ? parsedResponse[0] : parsedResponse;
+
+    if (!quiz) {
+      throw new Error('No quiz generated from OpenAI response');
+    }
 
     Logger.info(
       `[QuizGenerationService] Successfully generated single quiz: "${quiz.question.substring(0, 50)}..."`
@@ -96,7 +91,11 @@ export class QuizGenerationService {
       type: quiz.type || options.questionType || 'MULTIPLE_CHOICE',
       difficulty: quiz.difficulty || options.difficulty || 'MEDIUM',
       bloomLevel: quiz.bloomLevel || options.bloomLevel || 'UNDERSTAND',
-      choices: quiz.choices,
+      choices: quiz.choices.map(choice => ({
+        text: choice.text,
+        isCorrect: choice.isCorrect,
+        feedback: choice.feedback,
+      })),
     };
   }
 
@@ -129,13 +128,17 @@ export class QuizGenerationService {
       language
     );
 
-    const response = await this.callOpenAiWithRetry(
+    const response = await openaiQueueService.queueQuizGeneration(
       prompt.systemPrompt,
-      prompt.userPrompt
+      prompt.userPrompt,
+      true  // Batch quiz generation
     );
 
+    // Parse the response
+    const parsedResponse = openaiQueueService.parseQuizResponse(response);
+
     // Response should be an array of quizzes
-    const quizzes = Array.isArray(response) ? response : [response];
+    const quizzes = Array.isArray(parsedResponse) ? parsedResponse : [parsedResponse];
 
     Logger.info(
       `[QuizGenerationService] Successfully generated ${quizzes.length} quizzes in batch`
@@ -144,8 +147,10 @@ export class QuizGenerationService {
     // Map distribution for defaults
     const distributionMap = new Map<number, any>();
     let distIndex = 0;
+    
     for (const dist of batchOptions.distribution) {
-      for (let i = 0; i < dist.count; i++) {
+      const count = dist.count || 1;
+      for (let i = 0; i < count; i++) {
         distributionMap.set(distIndex++, dist);
       }
     }
@@ -159,180 +164,15 @@ export class QuizGenerationService {
           type: q.type || 'MULTIPLE_CHOICE',
           difficulty: q.difficulty || dist?.difficulty || 'MEDIUM',
           bloomLevel: q.bloomLevel || dist?.bloomLevel || 'UNDERSTAND',
-          choices: q.choices,
+          choices: q.choices.map(choice => ({
+            text: choice.text,
+            isCorrect: choice.isCorrect,
+            feedback: choice.feedback,
+          })),
         };
       }),
       count: quizzes.length,
     };
-  }
-
-  // -------------------------------------------------------------------------
-  // Private Helpers
-  // -------------------------------------------------------------------------
-
-  /**
-   * Calls OpenAI API with exponential backoff retry logic.
-   * 
-   * @param systemPrompt - System message for the LLM
-   * @param userPrompt - User message with quiz generation instruction
-   * @returns Parsed quiz object(s)
-   * @throws Error if all retries fail
-   */
-  private async callOpenAiWithRetry(
-    systemPrompt: string,
-    userPrompt: string
-  ): Promise<ParsedQuiz | ParsedQuiz[]> {
-    let lastError: Error | null = null;
-
-    for (let attempt = 0; attempt < QuizGenerationService.MAX_RETRIES; attempt++) {
-      try {
-        const messages = [
-          new SystemMessage(systemPrompt),
-          new HumanMessage(userPrompt),
-        ];
-
-        const response = await this.llm.invoke(messages);
-        
-        // Handle different response structures from LangChain
-        let raw: string;
-        if (!response) {
-          throw new Error('Empty response from OpenAI');
-        }
-        
-        if (typeof response.content === 'string') {
-          raw = (response.content as string).trim();
-        } else if (response.content && typeof response.content === 'object') {
-          // Handle AIMessage or other structured responses
-          raw = JSON.stringify(response.content);
-        } else {
-          // Try to extract text from alternative structures
-          const contentStr = (response as any).text || (response as any).message || String(response);
-          raw = contentStr.trim();
-        }
-
-        if (!raw) {
-          throw new Error('No content extracted from OpenAI response');
-        }
-
-        Logger.info(
-          `[QuizGenerationService] Raw response (first 100 chars): ${raw.substring(0, 100)}`
-        );
-
-        return this.parseQuizResponse(raw);
-      } catch (error) {
-        lastError = error instanceof Error ? error : new Error(String(error));
-
-        const backoffMs = QuizGenerationService.INITIAL_BACKOFF_MS * Math.pow(2, attempt);
-        Logger.warn(
-          `[QuizGenerationService] Attempt ${attempt + 1} failed: ${lastError.message}. ` +
-          `Retrying in ${backoffMs}ms...`
-        );
-
-        if (attempt < QuizGenerationService.MAX_RETRIES - 1) {
-          await this.delay(backoffMs);
-        }
-      }
-    }
-
-    throw new Error(
-      `[QuizGenerationService] Failed after ${QuizGenerationService.MAX_RETRIES} retries. ` +
-      `Last error: ${lastError?.message}`
-    );
-  }
-
-  /**
-   * Parses the LLM response to extract structured quiz data.
-   * Handles both single quiz and batch quiz responses.
-   * 
-   * @param raw - Raw response string from LLM
-   * @returns Parsed quiz or quiz array
-   * @throws Error if parsing fails
-   */
-  private parseQuizResponse(raw: string): ParsedQuiz | ParsedQuiz[] {
-    try {
-      // If raw is not a string, convert it
-      const rawStr = typeof raw === 'string' ? raw : JSON.stringify(raw);
-      
-      // Try to find JSON in the response (sometimes LLM adds extra text)
-      let parsed;
-      try {
-        parsed = JSON.parse(rawStr);
-      } catch {
-        // Try to extract JSON from the response if it contains extra text
-        const jsonMatch = rawStr.match(/\{[\s\S]*\}|\[[\s\S]*\]/);
-        if (!jsonMatch) {
-          throw new Error(`No JSON found in response: ${rawStr.substring(0, 200)}`);
-        }
-        parsed = JSON.parse(jsonMatch[0]);
-      }
-
-      // Handle batch response (array of quizzes)
-      if (Array.isArray(parsed)) {
-        return parsed.map(q => this.validateQuizStructure(q));
-      }
-
-      // Handle single quiz response
-      return this.validateQuizStructure(parsed);
-    } catch (error) {
-      Logger.error(
-        `[QuizGenerationService] Failed to parse quiz response: ${error instanceof Error ? error.message : String(error)}`
-      );
-      throw new Error(
-        `Invalid quiz response format. Expected valid JSON with quiz structure. ` +
-        `Error: ${error instanceof Error ? error.message : String(error)}`
-      );
-    }
-  }
-
-  /**
-   * Validates that parsed quiz has all required fields.
-   * 
-   * @param quiz - Quiz object to validate
-   * @returns Validated quiz
-   * @throws Error if validation fails
-   */
-  private validateQuizStructure(quiz: any): ParsedQuiz {
-    if (
-      !quiz.question ||
-      !quiz.explanation ||
-      !Array.isArray(quiz.choices)
-    ) {
-      throw new Error(
-        'Quiz missing required fields: question, explanation, choices'
-      );
-    }
-
-    if (quiz.choices.length < 2) {
-      throw new Error('Quiz must have at least 2 choices');
-    }
-
-    const hasCorrectChoice = quiz.choices.some((c: any) => c.isCorrect === true);
-    if (!hasCorrectChoice) {
-      throw new Error('Quiz must have at least one correct choice');
-    }
-
-    return {
-      question: quiz.question,
-      explanation: quiz.explanation,
-      type: quiz.type,
-      difficulty: quiz.difficulty,
-      bloomLevel: quiz.bloomLevel,
-      confidence: quiz.confidence,
-      choices: quiz.choices.map((c: any) => ({
-        text: c.text,
-        isCorrect: c.isCorrect === true,
-        feedback: c.feedback,
-      })),
-    };
-  }
-
-  /**
-   * Utility: Sleep for given milliseconds.
-   * 
-   * @param ms - Milliseconds to delay
-   */
-  private delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
   }
 }
 

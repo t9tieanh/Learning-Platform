@@ -1,5 +1,5 @@
 import { DifficultyLevel, BloomLevel, QuestionType } from '~/enums/quizStatus.enum'
-import { IsEnum, IsOptional, IsNumber, IsArray, ValidateNested, Min, IsIn } from 'class-validator'
+import { IsEnum, IsOptional, IsNumber, IsArray, ValidateNested, Min } from 'class-validator'
 import { Type } from 'class-transformer'
 
 export class GenerateQuizDto {
@@ -14,13 +14,14 @@ export class GenerateQuizDto {
   @IsOptional()
   @IsEnum(QuestionType)
   questionType?: QuestionType = QuestionType.MULTIPLE_CHOICE
-
-  @IsOptional()
-  @IsIn(['en', 'vi'])
-  language?: 'en' | 'vi' = 'en'
 }
 
 export class QuizDistribution {
+  constructor(difficulty?: DifficultyLevel, bloomLevel?: BloomLevel, count: number = 1) {
+    this.difficulty = difficulty
+    this.bloomLevel = bloomLevel
+    this.count = count
+  }
   @IsOptional()
   @IsEnum(DifficultyLevel)
   difficulty?: DifficultyLevel
@@ -31,21 +32,20 @@ export class QuizDistribution {
 
   @IsNumber()
   @Min(1)
-  count?: number
+  count: number
 }
 
 export class GenerateBatchQuizzesDto {
+  constructor(count: number = 1, distribution: QuizDistribution[] = []) {
+    this.count = count
+    this.distribution = distribution
+  }
   @IsNumber()
   @Min(1)
-  count?: number
+  count: number
 
-  @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => QuizDistribution)
-  distribution?: QuizDistribution[]
-
-  @IsOptional()
-  @IsIn(['en', 'vi'])
-  language?: 'en' | 'vi' = 'en'
+  distribution: QuizDistribution[]
 }
