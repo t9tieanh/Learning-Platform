@@ -126,4 +126,56 @@ public class UserGrpcService extends UserServiceGrpc.UserServiceImplBase {
         responseObserver.onNext(responseBuilder.build());
         responseObserver.onCompleted();
     }
+
+    /**
+     * CheckIsVip - Checks if a user has active VIP subscription.
+     * 
+     * Used by assistant-service for quiz generation authorization.
+     * Returns whether user has VIP status and if VIP period is still valid.
+     * 
+     * @param request CheckIsVipRequest with user_id
+     * @param responseObserver StreamObserver for async response
+     */
+    @Override
+    public void checkIsVip(CheckIsVipRequest request, StreamObserver<CheckIsVipResponse> responseObserver) {
+        try {
+            String userId = request.getUserId();
+            
+            if (userId == null || userId.isEmpty()) {
+                throw new IllegalArgumentException("User ID cannot be empty");
+            }
+
+            UserEntity user = userRepo.findById(userId)
+                    .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại"));
+
+            // Check if user has VIP status
+            boolean isVip = user.getIsVip() != null && user.getIsVip();
+            
+            // If VIP is true, verify VIP period is still active (if updateVipAt exists)
+            if (isVip && user.getUpdateVipAt() != null && user.getDurationOfVip() != null) {
+                java.time.LocalDateTime vipExpiryTime = user.getUpdateVipAt()
+                        .plusDays(user.getDurationOfVip());
+                java.time.LocalDateTime now = java.time.LocalDateTime.now();
+                
+                // If VIP period has expired, set isVip to false
+                if (now.isAfter(vipExpiryTime)) {
+                    isVip = false;
+                }
+            }
+
+            CheckIsVipResponse response = CheckIsVipResponse.newBuilder()
+                    .setIsVip(isVip)
+                    .setMessage(isVip ? "User is VIP" : "User is not VIP")
+                    .build();
+
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+        } catch (Exception e) {
+            responseObserver.onError(
+                    io.grpc.Status.NOT_FOUND
+                            .withDescription(e.getMessage())
+                            .asRuntimeException()
+            );
+        }
+    }
 }

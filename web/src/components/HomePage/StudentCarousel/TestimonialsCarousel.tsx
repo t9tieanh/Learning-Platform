@@ -45,7 +45,9 @@ const testimonials = [
   }
 ]
 
-export const TestimonialsCarousel = () => {
+import HighGlossBackground from '@/components/common/HighGlossBackground'
+
+export const TestimonialsCarousel = ({className}: {className?: string}) => {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isAutoPlaying, setIsAutoPlaying] = useState(true)
 
@@ -79,11 +81,11 @@ export const TestimonialsCarousel = () => {
   }
 
   return (
-    <section className='py-6 bg-gradient-to-b from-background to-blue-500/30 px-4 md:px-0'>
-      <h4 className='font-bold bg-blue-500 text-white p-2 max-w-80 pl-4 md:pl-12 rounded-r-3xl'>Học viên nói gì</h4>
-      <div className='max-w-7xl mx-auto'>
+    <HighGlossBackground className={`py-16 px-4 md:px-0 ${className}`}>
+      <h4 className='font-bold bg-white text-blue-600 p-2 max-w-80 pl-4 md:pl-12 rounded-r-3xl shadow-lg'>Học viên nói gì</h4>
+      <div className='max-w-7xl mx-auto mt-12'>
         <div className='text-center mb-12 animate-fade-in'>
-          <p className='text-base md:text-lg text-muted-foreground max-w-2xl mx-auto'>
+          <p className='text-base md:text-lg text-blue-100/80 max-w-2xl mx-auto font-medium'>
             Hàng nghìn học viên đã tin tưởng và đạt được mục tiêu của mình cùng nền tảng của chúng tôi
           </p>
         </div>
@@ -102,7 +104,7 @@ export const TestimonialsCarousel = () => {
               variant='outline'
               size='icon'
               onClick={goToPrev}
-              className='rounded-full hover:bg-primary hover:text-primary-foreground transition-colors'
+              className='rounded-full bg-white/10 border-white/20 text-white hover:bg-white hover:text-blue-600 transition-all'
             >
               <ChevronLeft className='h-5 w-5' />
             </Button>
@@ -115,9 +117,8 @@ export const TestimonialsCarousel = () => {
                     setIsAutoPlaying(false)
                     setCurrentIndex(index)
                   }}
-                  className={`h-2 rounded-full transition-all duration-300 ${
-                    index === currentIndex ? 'w-8 bg-primary' : 'w-2 bg-muted hover:bg-muted-foreground'
-                  }`}
+                  className={`h-2 rounded-full transition-all duration-300 ${index === currentIndex ? 'w-8 bg-white' : 'w-2 bg-white/30 hover:bg-white/50'
+                    }`}
                   aria-label={`Go to testimonial ${index + 1}`}
                 />
               ))}
@@ -127,13 +128,13 @@ export const TestimonialsCarousel = () => {
               variant='outline'
               size='icon'
               onClick={goToNext}
-              className='rounded-full hover:bg-primary hover:text-primary-foreground transition-colors'
+              className='rounded-full bg-white/10 border-white/20 text-white hover:bg-white hover:text-blue-600 transition-all'
             >
               <ChevronRight className='h-5 w-5' />
             </Button>
           </div>
         </div>
       </div>
-    </section>
+    </HighGlossBackground>
   )
 }

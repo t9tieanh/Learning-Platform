@@ -3,14 +3,14 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Plus, Upload, RotateCw, X } from 'lucide-react'
+import { Plus, Upload, RotateCw, X, BookOpen } from 'lucide-react'
 import TitleComponent from '@/components/TC_CreateCourse/common/Title'
 import { Chapter, CreationLessonFormValues } from '@/utils/create-course/curriculum'
 import ChapterForm from './ChapterForm'
 import chapterService from '@/services/course/chapter.service'
 import { toast } from 'sonner'
 import UploadProgress from './UploadProgress'
-import useMultiUpload from '@/hooks/useMultiUpload'
+import { useChunkedUpload } from '@/hooks/useChunkedUpload.hook'
 import { useAuthStore } from '@/stores/useAuth.stores'
 import CustomButton from '@/components/common/Button'
 import CurriculumFormSkeleton from './Skeleton/CurriculumFormSkeleton'
@@ -62,12 +62,9 @@ const CurriculumForm: React.FC<{ id: string }> = ({ id }: { id: string }) => {
   }
 
   // hook must be called at top level of component
-  const { uploads, startUpload } = useMultiUpload({
-    accessToken: token,
-    callback: fetchChapters
-  })
+  const chunkedUpload = useChunkedUpload()
   const [showUpload, setShowUpload] = useState(true)
-  const isAnyUploading = uploads.some((u) => u.status === 'uploading')
+  const isAnyUploading = chunkedUpload.uploads.some((u) => u.status === 'uploading')
 
   const handleAddChapter = async () => {
     const data = await chapterService.addChapter({
@@ -126,78 +123,36 @@ const CurriculumForm: React.FC<{ id: string }> = ({ id }: { id: string }) => {
 
   const stats = getTotalStats()
 
-  // Handle form submission for save lesson
-  const handleAddLesson: HandleAddLesson = (
-    selectedFile: File,
-    chapterId: string,
-    setOpen: React.Dispatch<React.SetStateAction<boolean>>,
-    uri: string
-  ) => {
-    return async (newVideo: CreationLessonFormValues) => {
-      if (!selectedFile) {
-        toast.error('Vui lòng chọn file video trước khi lưu bài giảng')
-        return
-      }
-
-      // FormData cho cả video và lesson metadata
-      const formData = new FormData()
-      formData.append(
-        'lesson',
-        new Blob(
-          [
-            JSON.stringify({
-              title: newVideo.title,
-              content: newVideo.content,
-              isPublic: newVideo.isPublic,
-              duration: newVideo.duration,
-              chapterId: chapterId
-            })
-          ],
-          { type: 'application/json' }
-        )
-      )
-
-      try {
-        startUpload(selectedFile, formData, newVideo.title, uri)
-        // Close the modal add video -> start upload video
-        setOpen(false)
-      } catch (err) {
-        console.error(err)
-      }
-    }
-  }
-
   if (loading) {
     return <CurriculumFormSkeleton />
   }
 
   return (
-    <div className='max-w-6xl space-y-8 mx-auto'>
+    <div className='max-w-6xl mx-auto space-y-12 px-6 py-12 rounded-[48px] bg-[#f8fafc] border-2 border-white/60 shadow-sm'>
       <TitleComponent
         title='Chương trình học'
+        icon={<BookOpen className='h-6 w-6 text-white' />}
         description='Bắt đầu xây dựng khóa học bằng cách tạo các phần, bài giảng và hoạt động thực hành (quiz, bài tập, bài viết). Hãy sắp xếp nội dung rõ ràng, tổng thời lượng video miễn phí phải dưới 2 giờ.'
         children={
-          <>
-            <div className='flex space-x-6 mt-2 text-sm'>
-              <div className='flex items-center space-x-2'>
-                <span className='font-medium'>{Chapters.length}</span>
-                <span className='text-blue-300'>phần</span>
-              </div>
-              <div className='flex items-center space-x-2'>
-                <span className='font-medium'>{stats.totallessons}</span>
-                <span className='text-blue-300'>bài giảng</span>
-              </div>
-              <div className='flex items-center space-x-2'>
-                <span className='font-medium'>{stats.totalDuration}</span>
-                <span className='text-blue-300'>tổng thời lượng</span>
-              </div>
+          <div className='flex space-x-8 mt-4'>
+            <div className='flex items-center space-x-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-2xl border border-white/20'>
+              <span className='font-black text-[15px]'>{Chapters.length}</span>
+              <span className='text-blue-100 text-[11px] font-bold uppercase tracking-wider'>phần</span>
             </div>
-          </>
+            <div className='flex items-center space-x-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-2xl border border-white/20'>
+              <span className='font-black text-[15px]'>{stats.totallessons}</span>
+              <span className='text-blue-100 text-[11px] font-bold uppercase tracking-wider'>bài giảng</span>
+            </div>
+            <div className='flex items-center space-x-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-2xl border border-white/20'>
+              <span className='font-black text-[15px]'>{stats.totalDuration}</span>
+              <span className='text-blue-100 text-[11px] font-bold uppercase tracking-wider'>thời lượng</span>
+            </div>
+          </div>
         }
       />
 
       {/* Floating Upload Button */}
-      {uploads && (
+      {chunkedUpload.uploads && (
         <>
           <div className='fixed z-50 bottom-8 right-8'>
             {isAnyUploading && (
@@ -215,7 +170,7 @@ const CurriculumForm: React.FC<{ id: string }> = ({ id }: { id: string }) => {
                 <>
                   <Upload className={cn('w-7 h-7 text-white', isAnyUploading && 'animate-bounce')} />
                   <span className='absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full px-2 py-0.5 border-2 border-white'>
-                    {uploads.length}
+                    {chunkedUpload.uploads.length}
                   </span>
                 </>
               }
@@ -232,7 +187,7 @@ const CurriculumForm: React.FC<{ id: string }> = ({ id }: { id: string }) => {
                   <div>
                     <h4 className='text-sm font-semibold text-gray-800'>Trình quản lý tải lên</h4>
                     <p className='text-xs text-gray-500 font-medium'>
-                      {uploads.filter((u) => u.status === 'uploading').length} đang xử lý
+                      {chunkedUpload.uploads.filter((u) => u.status === 'uploading').length} đang xử lý
                     </p>
                   </div>
                 </div>
@@ -248,7 +203,7 @@ const CurriculumForm: React.FC<{ id: string }> = ({ id }: { id: string }) => {
 
               <div className='max-h-[320px] overflow-y-auto p-3 bg-gray-50/30 scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent'>
                 <div className='flex flex-col gap-2'>
-                  <UploadProgress progressLst={uploads} />
+                  <UploadProgress progressLst={chunkedUpload.uploads} />
                 </div>
               </div>
             </div>
@@ -256,10 +211,10 @@ const CurriculumForm: React.FC<{ id: string }> = ({ id }: { id: string }) => {
         </>
       )}
 
-      <Card className='border border-blue-200/60 shadow-lg bg-white'>
-        <CardHeader className='flex flex-row items-center justify-between pb-0'>
-          <CardTitle className='text-lg font-semibold text-gray-800'>
-            <span>Nội dung khóa học</span>
+      <Card className='border border-gray-200 shadow-sm bg-[#fafbfc] rounded-[32px] overflow-hidden'>
+        <CardHeader className='flex flex-row items-center justify-between pb-4 border-b border-gray-50'>
+          <CardTitle className='text-[15px] font-bold text-gray-900'>
+            Nội dung khóa học
           </CardTitle>
           <Button variant='ghost' size='icon' onClick={fetchChapters} title='Tải lại'>
             <RotateCw className='h-4 w-4' />
@@ -271,9 +226,7 @@ const CurriculumForm: React.FC<{ id: string }> = ({ id }: { id: string }) => {
               key={chapter.id}
               chapter={chapter}
               setChapters={setChapters}
-              handleAddLesson={handleAddLesson}
-              uploads={uploads}
-              startUpload={startUpload}
+              chunkedUpload={chunkedUpload}
               fetchChapters={fetchChapters}
             />
           ))}

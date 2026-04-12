@@ -1,5 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { Upload, ScanEye, Eye, Video, FileText, AlignLeft, ExternalLink, Trash2, Crown, Lock } from 'lucide-react'
+import {
+  Upload,
+  ScanEye,
+  Eye,
+  Video,
+  FileText,
+  AlignLeft,
+  ExternalLink,
+  Trash2,
+} from 'lucide-react'
 import AiSuggestion from './AiSuggestion'
 import LearnovaAISection from './LearnovaAISection'
 import learnovaLogo from '@/assets/images/logo1.png'
@@ -7,14 +16,17 @@ import { LoadingDots } from '@/components/common/Loading/LoadingDots'
 import CustomInput from '@/components/common/Input'
 import CustomButton from '@/components/common/Button'
 import QuillEditor from '@/components/common/Input/QuillEditor'
+import AssistantAnalysisService from '@/services/assistant/analysis.service'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { UseFormRegister, UseFormWatch, UseFormSetValue, FieldErrors, UseFormHandleSubmit } from 'react-hook-form'
 import { CreationLessonFormValues } from '@/utils/create-course/curriculum'
 import useLoading from '@/hooks/useLoading.hook'
 import { AnalysisState } from '@/hooks/useAnalysis.hook'
-import { useAuthStore } from '@/stores/useAuth.stores'
-import { useVipUpgrade } from '@/contexts/VipUpgradeContext'
+import { LessonChunk } from '@/types/ai'
+import { toast } from 'sonner'
+
+import LearnovaDetailedView from './LearnovaAIDetail/LearnovaDetailedView'
 
 interface Step2DetailsFormProps {
   videoSrc: string | null
@@ -32,7 +44,6 @@ interface Step2DetailsFormProps {
   handleUpdateLesson: (data: CreationLessonFormValues, startLoading?: () => void, stopLoading?: () => void) => void
   contentType: 'video' | 'document'
   handleDelLesson?: (lessonId: string) => Promise<void>
-  /** Lifted from parent so analysis persists between steps */
   analysisState: AnalysisState
   refetchAnalysis: () => void
 }
@@ -56,49 +67,110 @@ const Step2DetailsForm: React.FC<Step2DetailsFormProps> = ({
   analysisState,
   refetchAnalysis
 }) => {
+  const [isDetailedView, setIsDetailedView] = useState(false)
   const duration = watch('duration')
   const isPublic = watch('isPublic')
   const { loading, startLoading, stopLoading } = useLoading()
   const videoRef = useRef<HTMLVideoElement>(null)
-  // Global VIP State
-  const isVip = useAuthStore((state) => state.data?.isVip ?? false)
-  const { openVipDialog } = useVipUpgrade()
+  const detailedVideoRef = useRef<HTMLVideoElement>(null)
 
-  // Derived from injected analysis state
   const analysisData = analysisState.status === 'completed' ? analysisState.data : null
   const isAnalysisLoading = analysisState.status === 'loading' || analysisState.status === 'processing'
 
-  /** Parse "MM:SS", "HH:MM:SS" or SRT format "HH:MM:SS,mmm" into seconds */
-  const parseTimeToSeconds = (t: string): number => {
-    // SRT: "00:00:18,831" → strip milliseconds first
-    const clean = t.split(',')[0].trim()
-    const parts = clean.split(':').map(Number)
-    if (parts.length === 2) return parts[0] * 60 + parts[1]
-    if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2]
-    return 0
-  }
-
-  const handleSeek = (startTime: string | null) => {
-    if (!videoRef.current || !startTime) return
-    videoRef.current.currentTime = parseTimeToSeconds(startTime)
-    videoRef.current.play()
-  }
-
-  const [suggestions, setSuggestions] = useState<{ title: string; content: string } | null>(null)
-  const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false)
   const [isVideoLoading, setIsVideoLoading] = useState(true)
-
-  useEffect(() => {
-    setIsVideoLoading(true)
-  }, [videoSrc])
 
   const handleMediaLoad = () => {
     setIsVideoLoading(false)
   }
 
+  const [chunkQuestions, setChunkQuestions] = useState<Record<string, string[]>>({})
+  const [newQuestionInputs, setNewQuestionInputs] = useState<Record<string, string>>({})
+
+  const handleAddQuestion = (chunkId: string) => {
+    const q = newQuestionInputs[chunkId]?.trim()
+    if (!q) return
+    setChunkQuestions((prev) => ({
+      ...prev,
+      [chunkId]: [...(prev[chunkId] || []), q]
+    }))
+    setNewQuestionInputs((prev) => ({ ...prev, [chunkId]: '' }))
+    toast.success('Đã thêm câu hỏi')
+  }
+
+  const handleRemoveQuestion = (chunkId: string, index: number) => {
+    setChunkQuestions((prev) => ({
+      ...prev,
+      [chunkId]: prev[chunkId].filter((_, i) => i !== index)
+    }))
+  }
+
+  const handleSaveChunkSummary = async (chunkId: string, newSummary: string) => {
+    try {
+      if (analysisState.status === 'completed' && analysisState.data) {
+        const res = await AssistantAnalysisService.updateChunkSummary(
+          analysisState.data.lessonId,
+          chunkId,
+          newSummary
+        )
+        if (res.code === 200) {
+          toast.success(res.message || 'Đã cập nhật tóm tắt thành công')
+          refetchAnalysis()
+        } else {
+          throw new Error(res.message)
+        }
+      }
+    } catch (error: any) {
+      toast.error(error?.message || 'Không thể cập nhật tóm tắt')
+      throw error
+    }
+  }
+
+  const handleSeek = (startTime: string | null) => {
+    const targetVideo = detailedVideoRef.current
+    if (!targetVideo || !startTime) return
+
+    const clean = startTime.split(',')[0].trim()
+    const parts = clean.split(':').map(Number)
+    let seconds = 0
+    if (parts.length === 2) seconds = parts[0] * 60 + parts[1]
+    if (parts.length === 3) seconds = parts[0] * 3600 + parts[1] * 60 + parts[2]
+
+    targetVideo.currentTime = seconds
+    targetVideo.play()
+  }
+
+  const mainWrapperRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (mainWrapperRef.current) {
+      mainWrapperRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [isDetailedView])
+
+  const chunks: LessonChunk[] = analysisData?.chunks || []
+
+  if (isDetailedView) {
+    return (
+      <LearnovaDetailedView
+        analysisData={analysisData}
+        videoSrc={videoSrc}
+        onBack={() => setIsDetailedView(false)}
+        detailedVideoRef={detailedVideoRef}
+        chunkQuestions={chunkQuestions}
+        newQuestionInputs={newQuestionInputs}
+        handleAddQuestion={handleAddQuestion}
+        handleRemoveQuestion={handleRemoveQuestion}
+        setNewQuestionInputs={setNewQuestionInputs}
+        handleSeek={handleSeek}
+        mainWrapperRef={mainWrapperRef}
+        onSaveSummary={handleSaveChunkSummary}
+      />
+    )
+  }
+
   return (
-    <div className='grid grid-cols-1 lg:grid-cols-3 gap-8 animate-in fade-in slide-in-from-right-4 duration-300'>
-      {/* Left: Mini Preview */}
+    <div ref={mainWrapperRef} className='grid grid-cols-1 lg:grid-cols-3 gap-8 animate-in fade-in slide-in-from-right-4 duration-300'>
       <div className='lg:col-span-1 space-y-6 sticky top-4 self-start'>
         <div className='bg-white p-4 rounded-2xl shadow-sm border border-gray-100'>
           <h3 className='font-semibold text-gray-700 mb-3 text-sm flex items-center gap-2'>
@@ -129,7 +201,6 @@ const Step2DetailsForm: React.FC<Step2DetailsFormProps> = ({
               />
             )}
 
-            {/* Media Loading Overlay */}
             {isVideoLoading && !isUploading && (
               <div className='absolute inset-0 flex items-center justify-center bg-gray-50 z-20'>
                 <div className='flex flex-col items-center gap-3'>
@@ -144,28 +215,14 @@ const Step2DetailsForm: React.FC<Step2DetailsFormProps> = ({
               </div>
             )}
 
-            {/* View Detail Button */}
             <div className='absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10'>
               <CustomButton
                 type='button'
                 onClick={() => window.open(videoSrc || '', '_blank')}
                 className='bg-white/90 text-blue-600 hover:bg-white p-2 rounded-full h-8 w-8 flex items-center justify-center shadow-sm backdrop-blur-sm'
                 icon={<ExternalLink className='w-4 h-4' />}
-                title='Xem chi tiết'
               />
             </div>
-
-            {isUploading && (
-              <div className='absolute inset-0 bg-black/60 flex flex-col items-center justify-center text-white p-4'>
-                <div className='w-full max-w-[80%] h-2 bg-gray-700 rounded-full overflow-hidden mb-2'>
-                  <div
-                    className='h-full bg-blue-500 transition-all duration-300'
-                    style={{ width: `${uploadProgress}%` }}
-                  />
-                </div>
-                <p className='text-sm font-medium'>Đang tải lên {uploadProgress}%</p>
-              </div>
-            )}
           </div>
           <div className='mt-3 flex items-center justify-between text-xs text-gray-500'>
             <span className='truncate max-w-[150px]'>{selectedFile?.name}</span>
@@ -173,7 +230,6 @@ const Step2DetailsForm: React.FC<Step2DetailsFormProps> = ({
         </div>
       </div>
 
-      {/* Right: Form Fields */}
       <div className='lg:col-span-2 space-y-6'>
         <div className='bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-6'>
           <div>
@@ -192,30 +248,12 @@ const Step2DetailsForm: React.FC<Step2DetailsFormProps> = ({
             />
             {errors.title && <p className='text-red-500 text-sm mt-1'>{errors.title.message}</p>}
 
-            {/* AI Suggestion for Title – VIP only */}
-            {isVip ? (
-              <AiSuggestion
-                isLoading={isAnalysisLoading}
-                suggestion={analysisData?.suggestedTitle ?? undefined}
-                onApply={() => setValue('title', analysisData?.suggestedTitle || '')}
-                type='title'
-              />
-            ) : (
-              <div
-                className='mt-2 flex items-center gap-2 text-xs text-gray-400 bg-gray-50 hover:bg-yellow-50/50 cursor-pointer transition-colors border border-gray-200 px-3 py-2 rounded-lg'
-                onClick={openVipDialog}
-              >
-                <Lock className='w-3.5 h-3.5' />
-                <span className='inline-flex items-center gap-1 flex-wrap'>
-                  Gợi ý AI dành cho thành viên{' '}
-                  <span className='font-semibold text-yellow-600 inline-flex items-center gap-0.5'>
-                    <Crown className='w-3 h-3' />
-                    VIP
-                  </span>{' '}
-                  của <img src={learnovaLogo} alt='Learnova' className='h-3 w-auto object-contain' />
-                </span>
-              </div>
-            )}
+            <AiSuggestion
+              isLoading={isAnalysisLoading}
+              suggestion={analysisData?.suggestedTitle ?? undefined}
+              onApply={() => setValue('title', analysisData?.suggestedTitle || '')}
+              type='title'
+            />
           </div>
 
           <div>
@@ -234,34 +272,15 @@ const Step2DetailsForm: React.FC<Step2DetailsFormProps> = ({
             </div>
             {errors.content && <p className='text-red-500 text-sm mt-1'>{errors.content.message}</p>}
 
-            {/* AI Suggestion for Content – VIP only */}
-            {isVip ? (
-              <AiSuggestion
-                isLoading={isAnalysisLoading}
-                suggestion={analysisData?.summary ?? undefined}
-                onApply={() => setValue('content', analysisData?.summary || '')}
-                type='content'
-              />
-            ) : (
-              <div
-                className='mt-2 flex items-center gap-2 text-xs text-gray-400 bg-gray-50 hover:bg-yellow-50/50 cursor-pointer transition-colors border border-gray-200 px-3 py-2 rounded-lg'
-                onClick={openVipDialog}
-              >
-                <Lock className='w-3.5 h-3.5' />
-                <span className='inline-flex items-center gap-1 flex-wrap'>
-                  Gợi ý AI dành cho thành viên{' '}
-                  <span className='font-semibold text-yellow-600 inline-flex items-center gap-0.5'>
-                    <Crown className='w-3 h-3' />
-                    VIP
-                  </span>{' '}
-                  của <img src={learnovaLogo} alt='Learnova' className='h-3 w-auto object-contain' />
-                </span>
-              </div>
-            )}
+            <AiSuggestion
+              isLoading={isAnalysisLoading}
+              suggestion={analysisData?.summary ?? undefined}
+              onApply={() => setValue('content', analysisData?.summary || '')}
+              type='content'
+            />
           </div>
         </div>
 
-        {/* Options & Visibility */}
         <div className='bg-white p-6 rounded-2xl shadow-sm border border-gray-100'>
           <h3 className='flex items-center gap-2 font-semibold text-base text-gray-700 mb-4'>
             <ScanEye />
@@ -279,23 +298,21 @@ const Step2DetailsForm: React.FC<Step2DetailsFormProps> = ({
           </div>
         </div>
 
-        {/* LearnovaAI Analysis Section */}
         <LearnovaAISection
-          isVip={isVip}
           analysisState={analysisState}
           refetchAnalysis={refetchAnalysis}
           onSeek={contentType === 'video' ? handleSeek : undefined}
-          onUpgradeClick={openVipDialog}
+          onViewDetails={() => setIsDetailedView(true)}
         />
 
-        {/* Action Buttons */}
         <div className='flex justify-end pt-4 gap-3'>
           {handleDelLesson && lessonId && (
             <CustomButton
               type='button'
-              label='Xóa bài giảng'
-              className='bg-red-500 rounded-xl hover:bg-red-50 border border-red-200 shadow-sm px-6'
-              icon={<Trash2 className='w-4 h-4 mr-2' />}
+              label='Xóa bài'
+              variant='ghost'
+              className='text-gray-400 hover:text-red-500 hover:bg-red-50 px-4 h-7.5 text-[10.5px] font-bold transition-all'
+              icon={<Trash2 className='w-3.5 h-3.5 mr-2' />}
               onClick={async () => {
                 await handleDelLesson(lessonId)
                 if (handleClose) handleClose(false)
@@ -305,11 +322,9 @@ const Step2DetailsForm: React.FC<Step2DetailsFormProps> = ({
           <CustomButton
             type='button'
             label={loading ? 'Đang tải lên...' : contentType === 'video' ? 'Lưu bài giảng' : 'Lưu tài liệu'}
-            className={`rounded-xl px-8 shadow-lg shadow-blue-600/20 ${
-              isUploading ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white'
-            }`}
-            icon={!isUploading ? <Upload className='w-5 h-5 mr-2' /> : undefined}
-            disabled={isUploading}
+            className='bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-6 h-7.5 text-[10.5px] font-bold transition-all shadow-md shadow-blue-100 disabled:bg-gray-300'
+            icon={!isUploading ? <Upload className='w-4 h-4 mr-2' /> : undefined}
+            disabled={isUploading || loading}
             isLoader={loading}
             onClick={() => handleUpdateLesson(watch(), startLoading, stopLoading)}
           />

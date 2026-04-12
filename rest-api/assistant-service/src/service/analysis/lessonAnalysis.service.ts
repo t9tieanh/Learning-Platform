@@ -1,30 +1,21 @@
-import EventEmitter from 'events';
 import Logger from '~/utils/logger';
 import AssemblyAIService from '~/service/utils/assemblyai.service';
 import prismaService from '~/service/utils/prisma.service';
 import { DocumentService } from '~/service/utils/document.service';
 import { LessonTypeEnum } from '~/enums/lessonType.enum';
-import { LessonEvent } from '~/enums/lessonEvents.enum';
-import { LessonAnalysisEvents } from '~/service/events/lessonAnalysis.events';
-import { TranscriptSavedPayload } from '~/dto/event/lesson-analysis-events.dto';
-import { SemanticChunkingService } from '~/service/chunking/semanticChunking.service';
 import { LessonAnalysisEvent } from '~/dto/request/lesson-analysis.dto';
-import { SummaryService } from '~/service/analysis/summary.service';
+import { bullQueueService } from '~/service/utils/bullQueue.service';
+import { ChunkingJobData } from '~/service/jobs/chunkingJob.processor';
+import { BullJobType } from '~/enums/bullJobType.enum';
 
 class LessonAnalysisService {
     private static instance: LessonAnalysisService;
-
     private documentService: DocumentService;
-
-    /** Shared event bus for async, decoupled post-processing pipelines */
-    private emitter: EventEmitter;
+    // Track lessons being processed to prevent duplicate job enqueueing
+    private processingLessons = new Set<string>();
 
     private constructor() {
         this.documentService = new DocumentService();
-        this.emitter = new EventEmitter();
-
-        // Wire all lesson event listeners (chunking pipeline, summarization, logging, etc.)
-        new LessonAnalysisEvents(this.emitter, new SemanticChunkingService(), new SummaryService());
     }
 
     public static getInstance(): LessonAnalysisService {
@@ -110,13 +101,13 @@ class LessonAnalysisService {
 
         Logger.info(`Lesson ${event.lessonId} updated with content.`);
 
-        // 3. Emit TRANSCRIPT_SAVED → reuses the same chunking → summarization pipeline
-        //    as the video flow. processRawText() handles plain text as well as SRT.
-        this.emitter.emit(LessonEvent.TRANSCRIPT_SAVED, {
+        // 3. Enqueue chunking job → triggers chunking→summarization→embedding pipeline
+        //    via Bull queue. processRawText() handles plain text as well as SRT.
+        await this.enqueueChunkingJob({
             lessonId: event.lessonId,
             subtitles: content,
             isSrt: false,
-        } satisfies TranscriptSavedPayload);
+        });
     }
 
     private async createOrUpdateLessonFromTranscript(
@@ -141,11 +132,11 @@ class LessonAnalysisService {
                 },
             });
 
-            // Emit event → triggers chunking pipeline asynchronously
-            this.emitter.emit(LessonEvent.TRANSCRIPT_SAVED, {
+            // Enqueue chunking job → triggers chunking pipeline asynchronously
+            await this.enqueueChunkingJob({
                 lessonId: lesson.id,
                 subtitles,
-            } satisfies TranscriptSavedPayload);
+            });
 
             return;
         }
@@ -166,10 +157,10 @@ class LessonAnalysisService {
                 },
             });
 
-            this.emitter.emit(LessonEvent.TRANSCRIPT_SAVED, {
+            await this.enqueueChunkingJob({
                 lessonId: existingLessonByUrl.id,
                 subtitles,
-            } satisfies TranscriptSavedPayload);
+            });
 
             return;
         }
@@ -184,10 +175,77 @@ class LessonAnalysisService {
             },
         });
 
-        this.emitter.emit(LessonEvent.TRANSCRIPT_SAVED, {
+        await this.enqueueChunkingJob({
             lessonId: newLesson.id,
             subtitles,
-        } satisfies TranscriptSavedPayload);
+        });
+    }
+
+    // -----------------------------------------------------------------------
+    // Job Queueing Helpers
+    // -----------------------------------------------------------------------
+
+    /**
+     * Enqueue a chunking job to the Bull queue with deduplication
+     * 
+     * Prevents duplicate jobs for the same lesson from being enqueued multiple times
+     * (e.g., when webhooks arrive multiple times for the same transcript).
+     * 
+     * The chunking job will:
+     * 1. Semantically chunk the transcript/content
+     * 2. Persist chunks to database
+     * 3. Auto-enqueue a summarization job on completion
+     */
+    private async enqueueChunkingJob(jobData: ChunkingJobData): Promise<void> {
+        const lessonId = jobData.lessonId;
+
+        // Check if already processing this lesson
+        if (this.processingLessons.has(lessonId)) {
+            Logger.info(
+                `[LessonAnalysisService] Skipping duplicate chunking job for lessonId=${lessonId} (already processing)`
+            );
+            return;
+        }
+
+        try {
+            // Mark as processing
+            this.processingLessons.add(lessonId);
+
+            // Check if job already exists in queue (by jobId)
+            const existingJob = await bullQueueService.lessonChunkingQueue.getJob(
+                `chunking-${lessonId}`
+            );
+
+            if (existingJob && !existingJob.isCompleted() && !existingJob.isFailed()) {
+                Logger.info(
+                    `[LessonAnalysisService] Skipping duplicate chunking job for lessonId=${lessonId} (already in queue)`
+                );
+                return;
+            }
+
+            // Enqueue new job
+            await bullQueueService.lessonChunkingQueue.add(
+                BullJobType.LESSON_CHUNKING,
+                jobData,
+                {
+                    jobId: `chunking-${lessonId}`,
+                }
+            );
+
+            Logger.info(
+                `[LessonAnalysisService] Enqueued chunking job for lessonId=${lessonId}`
+            );
+        } catch (error) {
+            Logger.error(
+                `[LessonAnalysisService] Failed to enqueue chunking job for lessonId=${lessonId} – ${error}`
+            );
+            this.processingLessons.delete(lessonId);
+            throw error;
+        } finally {
+            setTimeout(() => {
+                this.processingLessons.delete(lessonId);
+            }, 5 * 60 * 1000);
+        }
     }
 
 }

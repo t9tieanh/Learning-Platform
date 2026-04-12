@@ -18,22 +18,17 @@ import CustomDialog from '@/components/common/Dialog'
 import AddVideoForm from './AddVideoUpdated'
 import { toast } from 'sonner'
 import { showConfirmToast } from '@/components/common/ShowConfirmToast'
-import { HandleAddLesson } from '@/components/TC_CreateCourse/CurriculumForm/index'
-import { MultiUploadItem } from '@/hooks/useMultiUpload'
+import { useChunkedUpload } from '@/hooks/useChunkedUpload.hook'
 
 const ChapterForm = ({
   chapter,
   setChapters,
-  handleAddLesson,
-  uploads,
-  startUpload,
+  chunkedUpload,
   fetchChapters
 }: {
   chapter: Chapter
   setChapters?: React.Dispatch<React.SetStateAction<Chapter[]>>
-  handleAddLesson: HandleAddLesson
-  uploads: MultiUploadItem[]
-  startUpload: (file: File, fd: FormData, titlePost: string, uri: string, isCallCallback: boolean) => string
+  chunkedUpload: ReturnType<typeof useChunkedUpload>
   fetchChapters: () => Promise<void>
 }) => {
   const [updateTitle, setUpdateTitle] = useState(false)
@@ -100,20 +95,22 @@ const ChapterForm = ({
   }
 
   return (
-    <div key={chapter.id} className='border border-blue-200 rounded-xl shadow-sm'>
+    <div key={chapter.id} className='border border-gray-200 shadow-md bg-white rounded-[32px] overflow-hidden mb-8 transition-all hover:border-blue-200'>
       <Collapsible open={chapter.isOpen} onOpenChange={() => toggleSection(chapter.id)}>
-        <CollapsibleTrigger className='w-full' asChild>
-          <div className='flex items-center justify-between p-4 hover:bg-blue-100/50 border-b border-blue-200 rounded-t-xl'>
-            <div className='flex items-center space-x-3'>
-              <GripVertical className='h-4 w-4 text-blue-400' />
+        <CollapsibleTrigger className='w-full outline-none' asChild>
+          <div className='flex items-center justify-between p-5 hover:bg-gray-50/50 border-b border-gray-50 transition-colors cursor-pointer group'>
+            <div className='flex items-center space-x-4'>
+              <div className='p-2 bg-gray-50 rounded-xl group-hover:bg-blue-50 transition-colors'>
+                <GripVertical className='h-3.5 w-3.5 text-gray-400 group-hover:text-blue-400' />
+              </div>
               <ChevronDown
                 className={cn(
-                  'h-5 w-5 text-blue-500 transition-transform duration-300 ease-in-out',
+                  'h-4 w-4 text-gray-400 transition-transform duration-500 ease-in-out',
                   chapter.isOpen ? 'rotate-0' : '-rotate-90'
                 )}
               />
-              <div className='group relative flex space-x-2 px-2 py-1 rounded-md'>
-                <span className='font-medium text-gray-800'>Phần {chapter.position}:</span>
+              <div className='group/title relative flex items-center space-x-2'>
+                <span className='text-[13px] font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap'>Phần {chapter.position}:</span>
 
                 {updateTitle ? (
                   <form
@@ -146,9 +143,7 @@ const ChapterForm = ({
                     </div>
                   </form>
                 ) : (
-                  <>
-                    <span className='font-medium text-gray-800'>{chapter.title}</span>
-                  </>
+                  <span className='text-[13px] font-black text-gray-900 line-clamp-1'>{chapter.title}</span>
                 )}
 
                 {!updateTitle && (
@@ -162,13 +157,13 @@ const ChapterForm = ({
                 )}
               </div>
             </div>
-            <div className='flex items-center space-x-2'>
-              <Badge variant='outline' className='border-blue-300 text-blue-600 bg-blue-50'>
-                {chapter.lessons.length} bài
+            <div className='flex items-center space-x-3'>
+              <Badge variant='outline' className='border-blue-100 text-blue-600 bg-blue-50/50 text-[10px] font-bold px-3 py-1 rounded-xl shadow-none'>
+                {chapter.lessons.length} bài học
               </Badge>
               <CustomButton
-                icon={<Trash2 className='h-4 w-4' />}
-                className='text-red-500 hover:bg-gray-60 bg-white'
+                icon={<Trash2 className='h-3.5 w-3.5' />}
+                className='text-gray-300 hover:text-red-500 hover:bg-red-50 transition-all rounded-xl h-8 w-8 p-0 flex items-center justify-center'
                 onClick={(e) => {
                   handleDeleteChapter(e)
                 }}
@@ -188,22 +183,21 @@ const ChapterForm = ({
                   key={index}
                   lesson={lesson}
                   setChapters={setChapters}
-                  uploads={uploads}
-                  startUpload={startUpload}
+                  chunkedUpload={chunkedUpload}
                   fetchChapters={fetchChapters}
                 />
               ))}
             </div>
 
-            <div className='flex space-x-2 mt-6'>
+            <div className='flex items-center space-x-2 mt-6'>
               <Button
                 variant='default'
                 size='sm'
                 onClick={() => setOpen(true)}
-                className='flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg transition-all duration-200 px-6 rounded-full'
+                className='flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-100 transition-all active:scale-95 px-6 rounded-2xl'
               >
-                <PlusCircle className='h-5 w-5' />
-                <span className='font-medium'>Thêm bài giảng mới</span>
+                <PlusCircle className='h-4 w-4' />
+                <span className='text-[11px] font-bold uppercase tracking-wider'>Thêm bài giảng mới</span>
               </Button>
             </div>
           </div>
@@ -226,9 +220,7 @@ const ChapterForm = ({
             <AddVideoForm
               setOpen={setOpen}
               chapterId={chapter.id}
-              handleAddLesson={handleAddLesson}
-              uploads={uploads}
-              startUpload={startUpload}
+              chunkedUpload={chunkedUpload}
               fetchChapters={fetchChapters}
             />
           </>

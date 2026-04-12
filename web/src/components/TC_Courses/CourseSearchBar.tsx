@@ -34,13 +34,11 @@ const CourseSearchBar: FC<CourseSearchBarProps> = ({ onSearch }) => {
       <CustomDialog
         open={open}
         setOpen={setOpen}
-        title={
-          <>
-            <IoAddCircle className='h-6 w-6' /> Tạo khóa học mới
-          </>
-        }
-        description='Hãy bắt đầu bằng cách chọn loại khóa học bạn muốn tạo.'
-        className='w-[90%] max-w-md'
+        title={<span className='sr-only'>Tạo khóa học mới</span>}
+        description=''
+        className='w-[95vw] max-w-5xl p-0 overflow-hidden bg-white border-0 shadow-2xl rounded-3xl gap-0 border-none'
+        contentClassName='p-0 m-0 w-full max-h-[85vh] overflow-y-auto'
+        size='xl'
       >
         <CreateCourseModal />
       </CustomDialog>

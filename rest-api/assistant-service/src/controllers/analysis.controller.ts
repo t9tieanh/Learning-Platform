@@ -3,6 +3,7 @@ import { StatusCodes } from 'http-status-codes'
 import sendResponse from '~/dto/response/send-response'
 import analysisService from '~/service/analysis/analysis.service'
 import { AnalysisOutcome } from '~/enums/analysisOutcome.enum'
+import { RAGResult, lessonRAGService } from '~/service/search/lesson.rag.service'
 
 class AnalysisController {
     /**
@@ -73,6 +74,52 @@ class AnalysisController {
             next(error)
         }
     }
+
+
+    /**
+     * Answer a question about lesson content using RAG (Retrieval-Augmented Generation).
+     *
+     * Request:
+     * POST /lessons/:lessonId/chat
+     * Body: { "question": "User's question about the lesson" }
+     *
+     * Response:
+     * {
+     *   "code": 200,
+     *   "message": "Answer generated successfully",
+     *   "result": {
+     *     "answer": "LLM-generated answer based on lesson content",
+     *     "sources": [
+     *       {
+     *         "chunkId": "chunk-id",
+     *         "title": "Chunk title",
+     *         "chunkIndex": 0,
+     *         "similarity": 0.95
+     *       }
+     *     ]
+     *   }
+     * }
+     */
+    answerQuestion = async (
+        req: Request,
+        res: Response,
+        next: NextFunction
+    ): Promise<void> => {
+        try {
+            const lessonId = String(req.params.lessonId);
+            const { question } = req.data;
+
+            const result: RAGResult = await lessonRAGService.answerQuestion(lessonId, question);
+
+            sendResponse(res, {
+                code: StatusCodes.OK,
+                message: 'Answer generated successfully',
+                result,
+            });
+        } catch (error) {
+            next(error);
+        }
+    };
 }
 
 export default new AnalysisController()

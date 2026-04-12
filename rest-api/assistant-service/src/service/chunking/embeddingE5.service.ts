@@ -1,11 +1,15 @@
 import { OpenAIEmbeddings } from "@langchain/openai";
 import { SentenceObject } from "./types";
+import Logger from "~/utils/logger";
 
 /**
  * Service class for generating and attaching embeddings to sentences using local e5-base-v2 model.
  */
 export class EmbeddingE5Service {
     private embeddings: OpenAIEmbeddings;
+
+    /** Batch size for embedding generation (optimized for e5-base-v2) */
+    private static readonly BATCH_SIZE = 32;
 
     constructor() {
         this.embeddings = new OpenAIEmbeddings({
@@ -68,5 +72,60 @@ export class EmbeddingE5Service {
         }
 
         return sentencesArrayCopy;
+    }
+
+    /**
+     * Generates embeddings for chunk contents and returns them as a mapping of index to embedding vector.
+     * Uses the local e5-base-v2 model with "passage: " prefix for document embeddings.
+     *
+     * @param {string[]} chunkContents - An array of chunk content strings to embed.
+     * @returns {Promise<Map<number, number[]>>} A promise resolving to a map of chunk index → embedding vector.
+     */
+    async generateEmbeddingsForChunkContents(
+        chunkContents: string[]
+    ): Promise<Map<number, number[]>> {
+        if (chunkContents.length === 0) {
+            return new Map();
+        }
+
+        Logger.info(
+            `[EmbeddingE5Service] Generating embeddings for ${chunkContents.length} chunk(s)`
+        );
+
+        // Prepare content strings with e5-base-v2 "passage: " prefix
+        const contentStringsWithPrefix: string[] = chunkContents.map(
+            (content) => `passage: ${content}`
+        );
+
+        // Generate embeddings in batches
+        const embeddingsArray: number[][] = [];
+
+        for (
+            let i = 0;
+            i < contentStringsWithPrefix.length;
+            i += EmbeddingE5Service.BATCH_SIZE
+        ) {
+            const batch = contentStringsWithPrefix.slice(
+                i,
+                i + EmbeddingE5Service.BATCH_SIZE
+            );
+            Logger.info(
+                `[EmbeddingE5Service] Processing batch: ${Math.floor(i / EmbeddingE5Service.BATCH_SIZE) + 1}`
+            );
+            const batchEmbeddings = await this.embeddings.embedDocuments(batch);
+            embeddingsArray.push(...batchEmbeddings);
+        }
+
+        // Create a map of chunk index → embedding vector
+        const embeddingMap = new Map<number, number[]>();
+        for (let i = 0; i < chunkContents.length; i++) {
+            embeddingMap.set(i, embeddingsArray[i]);
+        }
+
+        Logger.info(
+            `[EmbeddingE5Service] Embeddings generated successfully for ${chunkContents.length} chunk(s)`
+        );
+
+        return embeddingMap;
     }
 }

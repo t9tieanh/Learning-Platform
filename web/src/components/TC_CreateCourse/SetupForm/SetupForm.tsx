@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { CheckSquare } from 'lucide-react'
+import { CheckSquare, CheckCircle } from 'lucide-react'
 import TitleComponent from '@/components/TC_CreateCourse/common/Title'
 import { useEffect, useState } from 'react'
 import courseService from '@/services/course/course.service'
@@ -70,47 +70,49 @@ const SetupForm = ({ id }: { id: string }) => {
   }
 
   return (
-    <div className='max-w-6xl space-y-8 mx-auto'>
+    <div className='max-w-6xl mx-auto space-y-12 px-6 py-12 rounded-[48px] bg-[#f8fafc] border-2 border-white shadow-sm'>
       <TitleComponent
         title='Xem lại và hoàn tất'
-        description='Cấu hình cài đặt, chính sách và các tính năng tương tác cho khóa học. Hoàn thành mục này để có thể xuất bản
-          khóa học.'
+        icon={<CheckCircle className='h-6 w-6 text-white' />}
+        description='Kiểm tra lại toàn bộ nội dung, cấu hình chính sách và các bài giảng trước khi gửi yêu cầu kiểm duyệt để xuất bản khóa học lên hệ thống.'
       />
 
       <div className='gap-8'>
         <div className='space-y-6'>
-          <Card className='border border-blue-200 shadow-sm bg-blue-50'>
-            <CardHeader className='bg-blue-200/40 rounded-t-lg'>
-              <CardTitle className='text-lg font-medium text-blue-900 flex gap-2 items-center'>
-                <CheckSquare />
-                Tóm tắt khóa học
+          <Card className='border-2 border-white ring-1 ring-gray-100 shadow-sm bg-white rounded-[32px] overflow-hidden'>
+            <CardHeader className='pb-4 border-b border-gray-50/50'>
+              <CardTitle className='text-[15px] font-bold text-gray-900 flex gap-2.5 items-center'>
+                <div className='p-2 bg-blue-50/50 rounded-xl text-blue-600 border border-blue-50'>
+                  <CheckSquare className='h-4 w-4' />
+                </div>
+                <span>Tóm tắt khóa học</span>
               </CardTitle>
             </CardHeader>
-            <CardContent className='space-y-3'>
+            <CardContent className='space-y-6 pt-6'>
               <div className='grid grid-cols-3 gap-4'>
-                <div className='text-center p-3 bg-blue-100 rounded-lg'>
-                  <div className='text-lg font-bold text-blue-900'>{overviewCourse?.lessonNum}</div>
-                  <div className='text-xs text-blue-700'>Bài giảng</div>
+                <div className='text-center p-4 bg-gray-50/50 rounded-2xl border border-gray-100 transition-all hover:bg-white hover:border-blue-100 group'>
+                  <div className='text-xl font-black text-gray-900 group-hover:text-blue-600 transition-colors'>{overviewCourse?.lessonNum}</div>
+                  <div className='text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1'>Bài giảng</div>
                 </div>
 
-                <div className='text-center p-3 bg-blue-100 rounded-lg'>
-                  <div className='text-lg font-bold text-blue-900'>
+                <div className='text-center p-4 bg-gray-50/50 rounded-2xl border border-gray-100 transition-all hover:bg-white hover:border-blue-100 group'>
+                  <div className='text-xl font-black text-gray-900 group-hover:text-blue-600 transition-colors'>
                     {formatDuration(overviewCourse?.videoDuration || 0)}
                   </div>
-                  <div className='text-xs text-blue-700'>Thời lượng</div>
+                  <div className='text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1'>Thời lượng</div>
                 </div>
 
-                <div className='text-center p-3 bg-blue-100 rounded-lg'>
-                  <div className='text-lg font-bold text-blue-900'>{formatPrice(overviewCourse?.finalPrice)}</div>
-                  <div className='text-xs text-blue-700'>Giá</div>
+                <div className='text-center p-4 bg-gray-50/50 rounded-2xl border border-gray-100 transition-all hover:bg-white hover:border-blue-100 group'>
+                  <div className='text-xl font-black text-gray-900 group-hover:text-blue-600 transition-colors'>{formatPrice(overviewCourse?.finalPrice)}</div>
+                  <div className='text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1'>Mức giá</div>
                 </div>
               </div>
 
-              <div className='flex justify-end pt-2'>
+              <div className='flex justify-center pt-4'>
                 <CustomButton
-                  className='bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow'
-                  label='Gửi yêu cầu kiểm duyệt'
-                  icon={<BsSendCheckFill className='h-5 w-5 ml-2' />}
+                  className='bg-blue-600 hover:bg-blue-700 text-white rounded-xl px-12 h-11 font-bold shadow-xl shadow-blue-100 transition-all active:scale-95'
+                  label='Gửi yêu cầu kiểm duyệt ngay'
+                  icon={<BsSendCheckFill className='h-4 w-4 mr-2' />}
                   onClick={handleRequestApproval}
                   isLoader={loading}
                 />
