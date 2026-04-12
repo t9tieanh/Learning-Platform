@@ -10,27 +10,72 @@ import {
     X,
     ChevronLeft,
     ChevronRight,
-    Crown
+    Crown,
+    Settings
 } from 'lucide-react'
 import { Quiz, QuizChoice } from '@/types/ai'
+import { QuizDifficulty, BloomLevel, QuizBatchDistributionItem } from '@/types/quiz'
 import CustomButton from '@/components/common/Button'
 import CustomTextarea from '@/components/common/Textarea'
 import { cn } from '@/lib/utils'
+
+export const QUIZ_DISTRIBUTION_PRESETS = [
+    {
+        name: 'Cân bằng (Dễ - Trung bình - Trung bình)',
+        value: 'balanced',
+        distribution: [
+            { difficulty: QuizDifficulty.EASY, bloomLevel: BloomLevel.REMEMBER, count: 1 },
+            { difficulty: QuizDifficulty.MEDIUM, bloomLevel: BloomLevel.UNDERSTAND, count: 1 },
+            { difficulty: QuizDifficulty.MEDIUM, bloomLevel: BloomLevel.APPLY, count: 1 }
+        ]
+    },
+    {
+        name: 'Nâng cao (Trung bình - Khó - Khó)',
+        value: 'advanced',
+        distribution: [
+            { difficulty: QuizDifficulty.MEDIUM, bloomLevel: BloomLevel.APPLY, count: 1 },
+            { difficulty: QuizDifficulty.HARD, bloomLevel: BloomLevel.ANALYZE, count: 1 },
+            { difficulty: QuizDifficulty.HARD, bloomLevel: BloomLevel.EVALUATE, count: 1 }
+        ]
+    },
+    {
+        name: 'Cơ bản (Dễ - Dễ - Trung bình)',
+        value: 'basic',
+        distribution: [
+            { difficulty: QuizDifficulty.EASY, bloomLevel: BloomLevel.REMEMBER, count: 1 },
+            { difficulty: QuizDifficulty.EASY, bloomLevel: BloomLevel.UNDERSTAND, count: 1 },
+            { difficulty: QuizDifficulty.MEDIUM, bloomLevel: BloomLevel.UNDERSTAND, count: 1 }
+        ]
+    },
+    {
+        name: 'Sáng tạo (Nhiều mức độ)',
+        value: 'creative',
+        distribution: [
+            { difficulty: QuizDifficulty.MEDIUM, bloomLevel: BloomLevel.ANALYZE, count: 1 },
+            { difficulty: QuizDifficulty.HARD, bloomLevel: BloomLevel.CREATE, count: 1 },
+            { difficulty: QuizDifficulty.MEDIUM, bloomLevel: BloomLevel.EVALUATE, count: 1 }
+        ]
+    }
+]
 
 interface LearnovaQuizBuilderProps {
     chunkId: string
     initialQuizzes?: Quiz[]
     onSave: (quizzes: Quiz[]) => void
+    onGenerateAI?: (distribution: QuizBatchDistributionItem[]) => void
 }
 
 const LearnovaQuizBuilder: React.FC<LearnovaQuizBuilderProps> = ({
     chunkId,
     initialQuizzes = [],
-    onSave
+    onSave,
+    onGenerateAI
 }) => {
     const [quizzes, setQuizzes] = useState<Quiz[]>(initialQuizzes)
     const [activeIndex, setActiveIndex] = useState<number>(0)
     const [isEditing, setIsEditing] = useState(false)
+    const [showDistributionPicker, setShowDistributionPicker] = useState(false)
+    const [selectedPreset, setSelectedPreset] = useState<string>('balanced')
     const [draftQuiz, setDraftQuiz] = useState<Quiz>({
         question: '',
         choices: [],
@@ -43,6 +88,14 @@ const LearnovaQuizBuilder: React.FC<LearnovaQuizBuilderProps> = ({
         setActiveIndex(0)
         setIsEditing(false)
     }, [chunkId, initialQuizzes])
+
+    const handleGenerateWithPreset = () => {
+        const preset = QUIZ_DISTRIBUTION_PRESETS.find(p => p.value === selectedPreset)
+        if (preset && onGenerateAI) {
+            onGenerateAI(preset.distribution)
+            setShowDistributionPicker(false)
+        }
+    }
 
     const handleSelectQuestion = (index: number) => {
         setActiveIndex(index)
@@ -149,7 +202,15 @@ const LearnovaQuizBuilder: React.FC<LearnovaQuizBuilderProps> = ({
                             <div className='flex gap-2.5'>
                                 <CustomButton
                                     type='button'
-                                    label='Gợi ý từ AI'
+                                    onClick={() => setShowDistributionPicker(!showDistributionPicker)}
+                                    variant='outline'
+                                    icon={<Settings className='w-3.5 h-3.5' />}
+                                    className='h-7 px-3.5 text-[10px] font-medium border-gray-100 text-blue-600 bg-gray-50/50 hover:bg-white rounded-lg'
+                                    label='Cấu hình AI'
+                                />
+                                <CustomButton
+                                    type='button'
+                                    label='Gợi ý từ Learnova AI'
                                     variant='outline'
                                     icon={<Sparkles className='w-3.5 h-3.5' />}
                                     className='h-7 px-3.5 text-[10px] font-medium border-gray-100 text-blue-600 bg-gray-50/50 hover:bg-white rounded-lg'

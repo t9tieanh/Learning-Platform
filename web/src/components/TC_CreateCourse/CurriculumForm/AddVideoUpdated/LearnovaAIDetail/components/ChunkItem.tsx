@@ -1,10 +1,13 @@
 import React, { useState } from 'react'
-import { PlayCircle, Pencil, RefreshCw, Check, BookOpen, Brain, ChevronRight, Sparkles } from 'lucide-react'
+import { PlayCircle, Pencil, RefreshCw, Check, BookOpen, Brain, ChevronRight, Sparkles, Loader } from 'lucide-react'
 import { LessonChunk, Quiz } from '@/types/ai'
 import CustomButton from '@/components/common/Button'
 import { AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion'
 import LearnovaQuizBuilder from './QuizBuilder'
 import { cn } from '@/lib/utils'
+import quizService from '@/services/assistant/quiz.service'
+import { QuizDifficulty, BloomLevel, QuizBatchDistributionItem } from '@/types/quiz'
+import { toast } from 'sonner'
 
 interface ChunkItemProps {
     chunk: LessonChunk
@@ -33,9 +36,123 @@ const ChunkItem: React.FC<ChunkItemProps> = ({
 }) => {
     const [chunkQuizzes, setChunkQuizzes] = useState<Quiz[]>(chunk.quizzes || [])
     const [isQuizVisible, setIsQuizVisible] = useState(false)
+    const [isBulkGenerating, setIsBulkGenerating] = useState(false)
 
     const handleSaveQuizzes = (updatedQuizzes: Quiz[]) => {
         setChunkQuizzes(updatedQuizzes)
+    }
+
+    // Bulk quiz generation function
+    const handleBulkGenerateQuizzes = async () => {
+        if (isBulkGenerating) return
+        
+        try {
+            setIsBulkGenerating(true)
+            toast.loading('Đang tạo 3 câu hỏi từ AI...')
+
+            // Generate batch with equal distribution
+            // 3 quizzes total with 1 REMEMBER, 1 UNDERSTAND, 1 APPLY
+            const response = await quizService.generateBatchQuizzes(chunk.id, {
+                count: 3,
+                distribution: [
+                    {
+                        difficulty: QuizDifficulty.EASY,
+                        bloomLevel: BloomLevel.REMEMBER,
+                        count: 1
+                    },
+                    {
+                        difficulty: QuizDifficulty.MEDIUM,
+                        bloomLevel: BloomLevel.UNDERSTAND,
+                        count: 1
+                    },
+                    {
+                        difficulty: QuizDifficulty.MEDIUM,
+                        bloomLevel: BloomLevel.APPLY,
+                        count: 1
+                    }
+                ]
+            })
+
+            if (response.code === 201 && response.result?.quizzes) {
+                // Convert backend quiz format to frontend format
+                const generatedQuizzes: Quiz[] = response.result.quizzes.map(q => ({
+                    id: q.id,
+                    question: q.question,
+                    choices: q.choices.map(c => ({
+                        id: c.id,
+                        text: c.text,
+                        isCorrect: c.isCorrect
+                    })),
+                    explanation: q.explanation
+                }))
+
+                // Merge with existing quizzes
+                const mergedQuizzes = [...chunkQuizzes, ...generatedQuizzes]
+                setChunkQuizzes(mergedQuizzes)
+                setIsQuizVisible(true)
+
+                toast.dismiss()
+                toast.success(`✓ Đã tạo thành công 3 câu hỏi! Tổng cộng: ${mergedQuizzes.length} câu`)
+            } else {
+                toast.dismiss()
+                toast.error(response.message || 'Lỗi khi tạo câu hỏi')
+            }
+        } catch (error) {
+            toast.dismiss()
+            const errorMessage = error instanceof Error ? error.message : 'Lỗi khi tạo câu hỏi'
+            toast.error(errorMessage)
+            console.error('Bulk quiz generation error:', error)
+        } finally {
+            setIsBulkGenerating(false)
+        }
+    }
+
+    // Generate with custom distribution from preset
+    const handleGenerateWithDistribution = async (distribution: any[]) => {
+        if (isBulkGenerating) return
+        
+        try {
+            setIsBulkGenerating(true)
+            const count = distribution.reduce((sum, item) => sum + item.count, 0)
+            toast.loading(`Đang tạo ${count} câu hỏi từ AI...`)
+
+            const response = await quizService.generateBatchQuizzes(chunk.id, {
+                count,
+                distribution
+            })
+
+            if (response.code === 201 && response.result?.quizzes) {
+                // Convert backend quiz format to frontend format
+                const generatedQuizzes: Quiz[] = response.result.quizzes.map(q => ({
+                    id: q.id,
+                    question: q.question,
+                    choices: q.choices.map(c => ({
+                        id: c.id,
+                        text: c.text,
+                        isCorrect: c.isCorrect
+                    })),
+                    explanation: q.explanation
+                }))
+
+                // Merge with existing quizzes
+                const mergedQuizzes = [...chunkQuizzes, ...generatedQuizzes]
+                setChunkQuizzes(mergedQuizzes)
+                setIsQuizVisible(true)
+
+                toast.dismiss()
+                toast.success(`✓ Đã tạo thành công ${count} câu hỏi! Tổng cộng: ${mergedQuizzes.length} câu`)
+            } else {
+                toast.dismiss()
+                toast.error(response.message || 'Lỗi khi tạo câu hỏi')
+            }
+        } catch (error) {
+            toast.dismiss()
+            const errorMessage = error instanceof Error ? error.message : 'Lỗi khi tạo câu hỏi'
+            toast.error(errorMessage)
+            console.error('Quiz generation error:', error)
+        } finally {
+            setIsBulkGenerating(false)
+        }
     }
 
     return (
@@ -138,11 +255,12 @@ const ChunkItem: React.FC<ChunkItemProps> = ({
 
                 <div className='pt-2'>
                     <div className='flex items-center gap-3 px-1'>
-                        <button
+                        <CustomButton
                             type='button'
                             onClick={() => setIsQuizVisible(!isQuizVisible)}
+                            variant='ghost'
                             className={cn(
-                                'flex items-center gap-2.5 px-4 py-2.5 rounded-xl transition-all border group/quiz-btn bg-white',
+                                'h-auto flex items-center gap-2.5 px-4 py-2.5 rounded-xl transition-all border group/quiz-btn bg-white hover:bg-white',
                                 isQuizVisible
                                     ? 'border-blue-200 shadow-sm'
                                     : 'border-gray-100 text-gray-500 hover:border-blue-100 hover:shadow-sm'
@@ -167,18 +285,32 @@ const ChunkItem: React.FC<ChunkItemProps> = ({
                                 'w-4 h-4 ml-4 transition-transform duration-300',
                                 isQuizVisible ? 'rotate-90 text-blue-400' : 'text-gray-300'
                             )} />
-                        </button>
+                        </CustomButton>
 
-                        <button
+                        <CustomButton
                             type='button'
-                            className='flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-100 hover:shadow-lg hover:translate-y-[-1px] transition-all active:scale-95 group/ai-bulk'
+                            onClick={handleBulkGenerateQuizzes}
+                            disabled={isBulkGenerating}
+                            variant='ghost'
+                            className={cn(
+                                'h-auto flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-100 transition-all active:scale-95 group/ai-bulk',
+                                isBulkGenerating
+                                    ? 'opacity-75 cursor-not-allowed'
+                                    : 'hover:shadow-lg hover:translate-y-[-1px] hover:text-white'
+                            )}
                         >
-                            <Sparkles className='w-3.5 h-3.5 animate-pulse text-blue-200' />
+                            {isBulkGenerating ? (
+                                <Loader className='w-3.5 h-3.5 animate-spin text-blue-200' />
+                            ) : (
+                                <Sparkles className='w-3.5 h-3.5 animate-pulse text-blue-200' />
+                            )}
                             <div className='text-left'>
-                                <p className='text-[10.5px] font-bold leading-none'>Tự động tạo 3 câu hỏi</p>
+                                <p className='text-[10.5px] font-bold leading-none'>
+                                    {isBulkGenerating ? 'Đang tạo...' : 'Tự động tạo 3 câu hỏi'}
+                                </p>
                                 <p className='text-[8px] font-medium text-blue-100/80 mt-1'>Sức mạnh AI (Tối đa 3 câu/lần)</p>
                             </div>
-                        </button>
+                        </CustomButton>
                     </div>
 
                     <div className={cn(
@@ -190,6 +322,7 @@ const ChunkItem: React.FC<ChunkItemProps> = ({
                                 chunkId={chunk.id}
                                 initialQuizzes={chunkQuizzes}
                                 onSave={handleSaveQuizzes}
+                                onGenerateAI={handleGenerateWithDistribution}
                             />
                         </div>
                     </div>

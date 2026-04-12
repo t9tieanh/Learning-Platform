@@ -10,6 +10,8 @@ import Header from './components/Header'
 import VideoPreview from './components/VideoPreview'
 import ChunkItem from './components/ChunkItem'
 
+import HighGlossBackground from '@/components/common/HighGlossBackground'
+
 interface LearnovaDetailedViewProps {
     analysisData: AnalysisResult | null
     videoSrc: string | null
@@ -92,26 +94,28 @@ const LearnovaDetailedView: React.FC<LearnovaDetailedViewProps> = ({
 
             <div className='max-w-5xl mx-auto w-full px-4'>
                 <div className='space-y-6'>
-                    <div className='bg-gradient-to-r from-blue-50/80 to-transparent rounded-2xl shadow-sm flex items-center justify-between px-6 py-5'>
-                        <div className='flex items-center gap-4'>
-                            <div className='w-9 h-9 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 shadow-sm border border-blue-100'>
-                                <Brain className='w-4.5 h-4.5' />
+                    <HighGlossBackground className='rounded-2xl shadow-xl border border-blue-400/20 overflow-hidden'>
+                        <div className='px-6 py-5 md:py-6 flex items-center justify-between'>
+                            <div className='flex items-center gap-4 md:gap-5'>
+                                <div className='w-10 h-10 md:w-12 md:h-12 bg-white/10 rounded-2xl flex items-center justify-center text-white shadow-xl backdrop-blur-md border border-white/20 shrink-0'>
+                                    <Brain className='w-5 h-5 md:w-6 md:h-6' />
+                                </div>
+                                <div className='flex flex-col'>
+                                    <h2 className='text-white font-bold text-[15px] md:text-[16px] tracking-tight leading-tight'>
+                                        Cấu trúc nội dung bài giảng
+                                    </h2>
+                                    <p className='text-[10px] md:text-[11px] text-blue-100/60 mt-1 flex items-center gap-2 font-bold uppercase tracking-widest'>
+                                        <Sparkles className='w-3 h-3 text-blue-300 animate-pulse' /> Trợ lý AI phân tích
+                                    </p>
+                                </div>
                             </div>
-                            <div>
-                                <h2 className='text-gray-900 font-bold text-sm tracking-tight'>
-                                    Cấu trúc nội dung bài giảng
-                                </h2>
-                                <p className='text-[11px] text-gray-400 mt-0.5 flex items-center gap-1.5 font-medium'>
-                                    <Sparkles className='w-3 h-3 text-blue-500' /> Trợ lý AI phân tích
-                                </p>
+                            <div className='bg-white/15 px-4 py-2 rounded-xl border border-white/20 backdrop-blur-sm shadow-inner shrink-0 hidden sm:block'>
+                                <span className='text-[11px] md:text-[12px] text-white font-bold tracking-tight'>
+                                    {chunks.length} phân đoạn
+                                </span>
                             </div>
                         </div>
-                        <div className='bg-white px-3 py-1 rounded-full border border-blue-100'>
-                            <span className='text-[10px] text-blue-600 tracking-tight'>
-                                {chunks.length} phân đoạn
-                            </span>
-                        </div>
-                    </div>
+                    </HighGlossBackground>
 
                     <div className='w-full'>
                         <Accordion type='single' collapsible defaultValue='chunk-0' className='space-y-6'>
