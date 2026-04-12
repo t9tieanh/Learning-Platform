@@ -5,32 +5,33 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import { CreateCourseFormValues, CreateCourseSchema } from '@/utils/create-course/createCourse'
 import CustomInput from '../common/Input'
 import CustomButton from '../common/Button'
-import { Send, BookOpen, Sparkles, Users, BarChart3, Zap, GraduationCap } from 'lucide-react'
+import { Send, BookOpen, Sparkles, Users, BarChart3, Zap, GraduationCap, ArrowRight } from 'lucide-react'
 import CustomCombobox from '../common/Combobox'
 import useCategory from '@/hooks/useCategory.hook'
 import courseService from '@/services/course/course.service'
 import useLoading from '@/hooks/useLoading.hook'
 import { toast } from 'sonner'
 import learnovaLogo from '@/assets/images/logo1.png'
+import bgInspiration from '@/assets/images/cover-create-course-form.jpg'
 
 const courseFeatures = [
   {
-    icon: <BookOpen className='w-4 h-4' />,
+    icon: <BookOpen className='w-3 h-3' />,
     title: 'Quản lý nội dung',
     description: 'Tổ chức video, tài liệu và bài tập'
   },
   {
-    icon: <Sparkles className='w-4 h-4' />,
+    icon: <Sparkles className='w-3 h-3' />,
     title: 'AI phân tích tự động',
     description: 'Tạo tóm tắt và gợi ý tiêu đề'
   },
   {
-    icon: <Users className='w-4 h-4' />,
+    icon: <Users className='w-3 h-3' />,
     title: 'Tương tác học viên',
     description: 'Bài tập, câu hỏi, trực tiếp'
   },
   {
-    icon: <BarChart3 className='w-4 h-4' />,
+    icon: <BarChart3 className='w-3 h-3' />,
     title: 'Thống kê chi tiết',
     description: 'Theo dõi tiến độ học viên'
   }
@@ -73,95 +74,97 @@ const CreateCourseModal: React.FC = () => {
   }
 
   return (
-    <div className='flex flex-col md:flex-row w-full h-auto md:h-auto min-h-[480px] max-h-[85vh] overflow-y-auto md:overflow-hidden'>
-      {/* Left Pane - Features & Benefits */}
-      <div className='flex-1 p-6 sm:p-8 md:p-10 flex flex-col justify-center bg-gradient-to-br from-indigo-50/60 to-blue-50/40'>
-        {/* Logo */}
-        <div className='flex items-center gap-2 mb-6'>
-          <img src={learnovaLogo} alt='Learnova' className='h-6 md:h-7 w-auto object-contain' />
+    <div className='flex flex-col md:flex-row w-full h-full md:h-[780px] overflow-hidden bg-white relative'>
+      {/* Left Pane - Inspiration & Features */}
+      <div className='hidden md:flex w-1/2 relative bg-gray-100 overflow-hidden flex-col p-10 justify-between h-full group'>
+        {/* Background Image & Decor */}
+        <img
+          src={bgInspiration}
+          className='absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105'
+          alt='Inspiration'
+        />
+        <div className='absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent' />
+
+        {/* Top Logo - Keeping it minimal */}
+        <div className='relative z-10'>
+          <div className='bg-white/90 backdrop-blur-md w-fit p-2.5 rounded-xl shadow-lg shadow-black/5'>
+            <img src={learnovaLogo} alt='Learnova' className='h-5 w-auto' />
+          </div>
         </div>
 
-        {/* Title */}
-        <h2 className='text-2xl md:text-3xl font-extrabold text-gray-900 leading-tight mb-2 tracking-tight'>
-          Bắt đầu tạo{' '}
-          <span className='text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-blue-600'>khóa học</span>
-        </h2>
+        {/* Bottom Floating Console */}
+        <div className='relative z-10 space-y-6'>
+          <div className='p-8 bg-white/5 backdrop-blur-2xl border border-white/10 rounded-[2.5rem] shadow-2xl'>
+            <div className='mb-8'>
+              <h2 className='text-3xl lg:text-4xl font-black text-white leading-[1.1] tracking-tight mb-3'>
+                Kiến tạo <br />
+                Tri thức mới
+              </h2>
+              <p className='text-white/80 font-bold text-[13px] leading-relaxed'>
+                Xây dựng bài giảng chuyên nghiệp và tiếp cận hàng ngàn học viên.
+              </p>
+            </div>
 
-        {/* Subtitle */}
-        <p className='text-indigo-700 font-semibold text-base md:text-lg mb-6 flex items-center gap-2'>
-          <GraduationCap className='w-5 h-5' /> Trao kiến thức cho học viên
-        </p>
-
-        {/* Features List */}
-        <ul className='space-y-3 md:space-y-4'>
-          {courseFeatures.map((feature, index) => (
-            <li key={index} className='flex gap-3 md:gap-4'>
-              <div className='flex-shrink-0 mt-0.5'>
-                <div className='w-6 h-6 rounded-md bg-gradient-to-br from-indigo-600 to-blue-600 flex items-center justify-center text-white shadow-sm'>
-                  {feature.icon}
+            {/* Compact Feature Grid */}
+            <div className='grid grid-cols-2 gap-3 pb-2'>
+              {courseFeatures.map((feature, index) => (
+                <div key={index} className='flex items-center gap-3 p-3 rounded-xl bg-white/10 border border-white/5'>
+                  <div className='w-6 h-6 rounded-lg bg-blue-600 flex items-center justify-center text-white shrink-0 shadow-lg shadow-blue-500/20'>
+                    {feature.icon}
+                  </div>
+                  <span className='text-white font-bold text-[11px] leading-none tracking-tight'>{feature.title}</span>
                 </div>
-              </div>
-              <div className='flex-1'>
-                <h4 className='text-gray-900 font-semibold text-sm md:text-[15px] leading-snug'>{feature.title}</h4>
-                <p className='text-gray-600 text-xs md:text-sm leading-snug mt-0.5'>{feature.description}</p>
-              </div>
-            </li>
-          ))}
-        </ul>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Right Pane - Form */}
-      <div className='w-full md:w-[380px] bg-white p-6 sm:p-8 md:p-10 flex flex-col justify-between shadow-[-10px_0_30px_rgba(0,0,0,0.03)] z-10 relative'>
-        {/* Decorative background */}
-        <div className='absolute top-0 right-0 w-56 h-56 bg-gradient-to-br from-indigo-100/40 to-blue-100/30 rounded-bl-full -z-10 blur-3xl hidden md:block'></div>
-
-        <div className='space-y-5'>
-          {/* Form Header */}
-          <div className='space-y-1'>
-            <h3 className='text-lg md:text-xl font-bold text-gray-900 leading-tight'>Thông tin khóa học</h3>
-            <p className='text-xs md:text-sm text-gray-500'>Điền thông tin cơ bản để bắt đầu</p>
+      {/* Right Pane - The Form */}
+      <div className='flex-1 p-8 md:p-14 flex flex-col justify-between overflow-y-auto h-full bg-white'>
+        <div className='space-y-10'>
+          <div className='space-y-2'>
+            <div className='inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-600 border border-blue-100 mb-2'>
+              <Zap className='w-2.5 h-2.5 fill-blue-600' />
+              <span className='text-[9px] font-bold uppercase tracking-[0.2em]'>Bắt đầu ngay</span>
+            </div>
+            <h3 className='text-2xl md:text-3xl font-black text-gray-900 tracking-tight'>Thông tin khóa học</h3>
+            <p className='text-gray-400 text-xs font-semibold'>Hãy khởi đầu hành trình giảng dạy của bạn</p>
           </div>
 
-          {/* Form Fields */}
-          <form className='flex flex-col gap-3.5'>
-            <div className='flex flex-col gap-1.5'>
-              <label className='text-sm font-semibold text-gray-900'>Tiêu đề khóa học</label>
+          <form className='space-y-6'>
+            <div className='space-y-2'>
+              <label className='text-[10px] font-black text-gray-400 uppercase tracking-[0.15em]'>Tiêu đề khóa học</label>
               <CustomInput
-                placeholder='Vd: Lập trình React từ cơ bản'
+                placeholder='Vd: Mastering React with AI'
                 {...register('courseTitle')}
-                className='text-sm'
+                className='h-12 rounded-xl border-gray-100 focus:border-blue-500 focus:ring-0 text-[13px] font-semibold transition-all'
               />
               {errors.courseTitle && (
-                <p className='text-red-500 text-xs mt-1 flex items-center gap-1'>
-                  <span className='inline-block w-1 h-1 bg-red-500 rounded-full'></span>
-                  {errors.courseTitle.message}
-                </p>
+                <p className='text-red-500 text-[10px] mt-1 font-bold'>{errors.courseTitle.message}</p>
               )}
             </div>
 
-            <div className='flex flex-col gap-1.5'>
-              <label className='text-sm font-semibold text-gray-900'>Mô tả ngắn</label>
+            <div className='space-y-2'>
+              <label className='text-[10px] font-black text-gray-400 uppercase tracking-[0.15em]'>Mô tả nổi bật</label>
               <CustomInput
-                placeholder='Nội dung chính của khóa học'
+                placeholder='Tóm tắt nội dung hấp dẫn'
                 {...register('subtitle')}
-                className='text-sm'
+                className='h-12 rounded-xl border-gray-100 focus:border-blue-500 focus:ring-0 text-[13px] font-semibold transition-all'
               />
               {errors.subtitle && (
-                <p className='text-red-500 text-xs mt-1 flex items-center gap-1'>
-                  <span className='inline-block w-1 h-1 bg-red-500 rounded-full'></span>
-                  {errors.subtitle.message}
-                </p>
+                <p className='text-red-500 text-[10px] mt-1 font-bold'>{errors.subtitle.message}</p>
               )}
             </div>
 
-            <div className='flex flex-col gap-1.5'>
-              <label className='text-sm font-semibold text-gray-900'>Danh mục</label>
+            <div className='space-y-2'>
+              <label className='text-[10px] font-black text-gray-400 uppercase tracking-[0.15em]'>Lĩnh vực giảng dạy</label>
               <Controller
                 control={control}
                 name='categoryId'
                 render={({ field }) => (
                   <CustomCombobox
-                    className='text-sm w-full font-sm'
+                    className='h-12 rounded-xl border-gray-100 focus:border-blue-500 font-semibold'
                     label=''
                     items={categories?.map((category) => ({ value: category.id, label: category.name })) || []}
                     value={field.value || ''}
@@ -170,38 +173,29 @@ const CreateCourseModal: React.FC = () => {
                 )}
               />
               {errors.categoryId && (
-                <p className='text-red-500 text-xs mt-1 flex items-center gap-1'>
-                  <span className='inline-block w-1 h-1 bg-red-500 rounded-full'></span>
-                  {errors.categoryId.message}
-                </p>
+                <p className='text-red-500 text-[10px] mt-1 font-bold'>{errors.categoryId.message}</p>
               )}
             </div>
           </form>
         </div>
 
-        {/* CTA Section */}
-        <div className='mt-6 pt-5 border-t border-gray-100 space-y-3'>
-          {/* Highlight Card */}
-          <div className='bg-gradient-to-r from-indigo-600 to-blue-600 p-4 md:p-5 rounded-xl text-white shadow-md shadow-indigo-200/50 relative overflow-hidden'>
-            <div className='absolute top-1 right-1 p-2 opacity-10'>
-              <Zap className='w-12 h-12' />
+        <div className='pt-10 flex flex-col gap-4'>
+          <div className='p-3.5 rounded-xl border border-blue-100 bg-blue-50/30 flex items-center gap-4 mb-2'>
+            <div className='w-9 h-9 rounded-lg bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/20'>
+              <Sparkles className='w-4 h-4 text-white' />
             </div>
-            <div className='relative z-10'>
-              <p className='font-semibold text-sm md:text-base flex items-center gap-2'>
-                <Sparkles className='w-4 h-4 flex-shrink-0' />
-                Đa sử dụng AI ngay
-              </p>
-              <p className='text-indigo-100 text-xs md:text-sm mt-1'>Tự động phân tích và chia nhỏ bài học</p>
+            <div>
+              <p className='text-[11px] font-black text-gray-900 leading-none mb-1'>Hỗ trợ AI 100%</p>
+              <p className='text-[10px] font-bold text-gray-500 leading-none'>Tự động soạn khung chương trình</p>
             </div>
           </div>
 
-          {/* Submit Button */}
           <form onSubmit={handleSubmit(onSubmit)}>
             <CustomButton
               type='submit'
-              label='Tạo khóa học ngay'
-              className='w-full h-10 md:h-11 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white font-semibold rounded-lg shadow-md text-sm transition-all hover:shadow-lg hover:-translate-y-0.5'
-              icon={<Send className='h-4 w-4 flex-shrink-0' />}
+              label='Khởi tạo khóa học'
+              className='w-full h-14 bg-blue-600 hover:bg-black text-white rounded-xl text-[14px] font-black shadow-xl shadow-blue-100 transition-all hover:-translate-y-1 active:scale-[0.98]'
+              icon={<ArrowRight className='h-4 w-4' />}
               isLoader={loading}
             />
           </form>

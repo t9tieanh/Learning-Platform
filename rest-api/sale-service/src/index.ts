@@ -8,8 +8,8 @@ import { env } from './config/env';
 import indexRoute from '~/routes';
 import { initSagas } from './sagas/init/initSaga';
 import Logger from './utils/logger';
-import prismaService from './service/utils/prisma.service';
-import { DEFAULT_VIP_PACKAGE } from './config/vip.config';
+import { checkAndSeedData } from './utils/bootstrap';
+
 const { startGrpcServer } = require('./grpc/server/saleServer.grpc')
 
 const app = express();
@@ -18,14 +18,11 @@ app.use(session({
   secret: env.SESSION_SECRET,
   resave: false,
   saveUninitialized: true,
-  // cookie: { secure: true } -> production -> HTTPS
   cookie: {
     secure: false,
     httpOnly: true,
-    maxAge: 2 * 24 * 60 * 60 * 1000, // 2 days in milliseconds
-    // sameSite: 'none'
-  }, // -> development -> HTTP
-
+    maxAge: 2 * 24 * 60 * 60 * 1000,
+  },
 }));
 app.use(express.json());
 
@@ -36,7 +33,6 @@ app.get('/health', (_req, res) => {
 });
 
 app.use(indexRoute);
-
 app.use(errorHandlingMiddleware);
 
 startGrpcServer();
@@ -50,16 +46,8 @@ async function bootstrap() {
     Logger.info('Connected to RabbitMQ');
     initSagas();
 
-    // 2. Check and seed default VIP Package
-    const vipCount = await prismaService.vipPackage.count();
-    if (vipCount === 0) {
-      await prismaService.vipPackage.create({
-        data: DEFAULT_VIP_PACKAGE
-      });
-      Logger.info(`Seeded default VIP Package (${DEFAULT_VIP_PACKAGE.duration_months} month - ${DEFAULT_VIP_PACKAGE.price} VND)`);
-    } else {
-      Logger.info(`Found ${vipCount} VIP Package(s) in database`);
-    }
+    // 2. Check and Seed Data (VIP Packages & Discounts)
+    await checkAndSeedData();
 
     // 3. Start Express server
     app.listen(PORT, () => Logger.info(`Learnova:sale_service running at http://localhost:${PORT}`));
