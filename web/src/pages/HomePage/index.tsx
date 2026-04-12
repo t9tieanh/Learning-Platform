@@ -25,7 +25,7 @@ const HomePage = () => {
       <CourseList title='Khóa học bán chạy' fetcher={courseService.getBestSellerCourses} />
       <TrendingCategories />
       <WhyChooseUsSection />
-      <TestimonialsCarousel />
+      <TestimonialsCarousel className='mt-14' />
       <HighlightedArticles />
     </div>
   )
