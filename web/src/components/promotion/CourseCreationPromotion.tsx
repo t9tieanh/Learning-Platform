@@ -56,8 +56,8 @@ const CourseCreationPromotion: React.FC<CourseCreationPromotionProps> = ({ open,
                                 <Sparkles className='w-6 h-6 text-white' />
                             </div>
                             <div className='flex flex-col gap-0.5'>
-                                <span className='text-white font-extrabold text-[15px] tracking-tight'>AI Powered Tools</span>
-                                <span className='text-blue-100/60 text-[10px] font-bold uppercase tracking-widest'>Smart Content Builder</span>
+                                <span className='text-white font-extrabold text-[15px] tracking-tight'>Biên soạn bài giảng</span>
+                                <span className='text-blue-100/60 text-[10px] font-bold uppercase tracking-widest'>Thiết kế nội dung tinh gọn</span>
                             </div>
                         </div>
                     </div>
