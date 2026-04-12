@@ -14,14 +14,27 @@ class WebhookController {
             const { status, transcript_id } = req.body;
 
             if (status === 'completed') {
-                await LessonAnalysisService.getInstance().processTranscriptCompletion(transcript_id);
-            }
+                // ✅ FIXED: Respond immediately to AssemblyAI (it will retry on errors)
+                // Then process asynchronously in background to avoid timeout
+                sendResponse(res, {
+                    code: StatusCodes.OK,
+                    message: 'Webhook received successfully'
+                });
 
-            // Respond with 200 OK
-            sendResponse(res, {
-                code: StatusCodes.OK,
-                message: 'Webhook received successfully'
-            });
+                // ✅ Process in background WITHOUT blocking webhook response
+                LessonAnalysisService.getInstance()
+                    .processTranscriptCompletion(transcript_id)
+                    .catch((error) => {
+                        Logger.error(
+                            `[WebhookController] Background processing failed for transcript ${transcript_id}: ${error}`
+                        );
+                    });
+            } else {
+                sendResponse(res, {
+                    code: StatusCodes.OK,
+                    message: 'Webhook received successfully'
+                });
+            }
         } catch (error) {
             Logger.error(`Error handling webhook: ${error}`);
             next(error);

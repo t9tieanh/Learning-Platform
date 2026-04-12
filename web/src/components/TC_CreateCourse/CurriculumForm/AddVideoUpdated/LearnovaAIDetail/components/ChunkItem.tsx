@@ -1,9 +1,20 @@
 import React, { useState } from 'react'
-import { PlayCircle, Pencil, RefreshCw, Check, BookOpen, Brain, ChevronRight, Sparkles, Loader } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import {
+    PlayCircle,
+    Pencil,
+    RefreshCw,
+    BookOpen,
+    Brain,
+    ChevronRight,
+    Sparkles,
+    Loader
+} from 'lucide-react'
 import { LessonChunk, Quiz } from '@/types/ai'
 import CustomButton from '@/components/common/Button'
 import { AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion'
 import LearnovaQuizBuilder from './QuizBuilder'
+import SummaryEditor from './SummaryEditor'
 import { cn } from '@/lib/utils'
 import quizService from '@/services/assistant/quiz.service'
 import { QuizDifficulty, BloomLevel, QuizBatchDistributionItem } from '@/types/quiz'
@@ -42,55 +53,46 @@ const ChunkItem: React.FC<ChunkItemProps> = ({
         setChunkQuizzes(updatedQuizzes)
     }
 
-    // Bulk quiz generation function
+    const mapQuizzes = (quizzes: any[]): Quiz[] => {
+        return quizzes.map(q => ({
+            id: q.id,
+            question: q.question,
+            choices: q.choices.map((c: any) => ({
+                id: c.id,
+                text: c.text,
+                isCorrect: c.isCorrect,
+                feedback: c.feedback
+            })),
+            explanation: q.explanation,
+            difficulty: q.difficulty as QuizDifficulty,
+            bloomLevel: q.bloomLevel as BloomLevel,
+            aiGenerated: q.aiGenerated ?? true,
+            aiConfidence: q.aiConfidence,
+            isApproved: q.isApproved ?? false
+        }))
+    }
+
     const handleBulkGenerateQuizzes = async () => {
         if (isBulkGenerating) return
-        
+
         try {
             setIsBulkGenerating(true)
             toast.loading('Đang tạo 3 câu hỏi từ AI...')
 
-            // Generate batch with equal distribution
-            // 3 quizzes total with 1 REMEMBER, 1 UNDERSTAND, 1 APPLY
             const response = await quizService.generateBatchQuizzes(chunk.id, {
                 count: 3,
                 distribution: [
-                    {
-                        difficulty: QuizDifficulty.EASY,
-                        bloomLevel: BloomLevel.REMEMBER,
-                        count: 1
-                    },
-                    {
-                        difficulty: QuizDifficulty.MEDIUM,
-                        bloomLevel: BloomLevel.UNDERSTAND,
-                        count: 1
-                    },
-                    {
-                        difficulty: QuizDifficulty.MEDIUM,
-                        bloomLevel: BloomLevel.APPLY,
-                        count: 1
-                    }
+                    { difficulty: QuizDifficulty.EASY, bloomLevel: BloomLevel.REMEMBER, count: 1 },
+                    { difficulty: QuizDifficulty.MEDIUM, bloomLevel: BloomLevel.UNDERSTAND, count: 1 },
+                    { difficulty: QuizDifficulty.MEDIUM, bloomLevel: BloomLevel.APPLY, count: 1 }
                 ]
             })
 
             if (response.code === 201 && response.result?.quizzes) {
-                // Convert backend quiz format to frontend format
-                const generatedQuizzes: Quiz[] = response.result.quizzes.map(q => ({
-                    id: q.id,
-                    question: q.question,
-                    choices: q.choices.map(c => ({
-                        id: c.id,
-                        text: c.text,
-                        isCorrect: c.isCorrect
-                    })),
-                    explanation: q.explanation
-                }))
-
-                // Merge with existing quizzes
+                const generatedQuizzes = mapQuizzes(response.result.quizzes)
                 const mergedQuizzes = [...chunkQuizzes, ...generatedQuizzes]
                 setChunkQuizzes(mergedQuizzes)
                 setIsQuizVisible(true)
-
                 toast.dismiss()
                 toast.success(`✓ Đã tạo thành công 3 câu hỏi! Tổng cộng: ${mergedQuizzes.length} câu`)
             } else {
@@ -99,46 +101,27 @@ const ChunkItem: React.FC<ChunkItemProps> = ({
             }
         } catch (error) {
             toast.dismiss()
-            const errorMessage = error instanceof Error ? error.message : 'Lỗi khi tạo câu hỏi'
-            toast.error(errorMessage)
-            console.error('Bulk quiz generation error:', error)
+            toast.error(error instanceof Error ? error.message : 'Lỗi khi tạo câu hỏi')
         } finally {
             setIsBulkGenerating(false)
         }
     }
 
-    // Generate with custom distribution from preset
-    const handleGenerateWithDistribution = async (distribution: any[]) => {
+    const handleGenerateWithDistribution = async (distribution: QuizBatchDistributionItem[]) => {
         if (isBulkGenerating) return
-        
+
         try {
             setIsBulkGenerating(true)
             const count = distribution.reduce((sum, item) => sum + item.count, 0)
             toast.loading(`Đang tạo ${count} câu hỏi từ AI...`)
 
-            const response = await quizService.generateBatchQuizzes(chunk.id, {
-                count,
-                distribution
-            })
+            const response = await quizService.generateBatchQuizzes(chunk.id, { count, distribution })
 
             if (response.code === 201 && response.result?.quizzes) {
-                // Convert backend quiz format to frontend format
-                const generatedQuizzes: Quiz[] = response.result.quizzes.map(q => ({
-                    id: q.id,
-                    question: q.question,
-                    choices: q.choices.map(c => ({
-                        id: c.id,
-                        text: c.text,
-                        isCorrect: c.isCorrect
-                    })),
-                    explanation: q.explanation
-                }))
-
-                // Merge with existing quizzes
+                const generatedQuizzes = mapQuizzes(response.result.quizzes)
                 const mergedQuizzes = [...chunkQuizzes, ...generatedQuizzes]
                 setChunkQuizzes(mergedQuizzes)
                 setIsQuizVisible(true)
-
                 toast.dismiss()
                 toast.success(`✓ Đã tạo thành công ${count} câu hỏi! Tổng cộng: ${mergedQuizzes.length} câu`)
             } else {
@@ -147,9 +130,7 @@ const ChunkItem: React.FC<ChunkItemProps> = ({
             }
         } catch (error) {
             toast.dismiss()
-            const errorMessage = error instanceof Error ? error.message : 'Lỗi khi tạo câu hỏi'
-            toast.error(errorMessage)
-            console.error('Quiz generation error:', error)
+            toast.error(error instanceof Error ? error.message : 'Lỗi khi tạo câu hỏi')
         } finally {
             setIsBulkGenerating(false)
         }
@@ -157,40 +138,33 @@ const ChunkItem: React.FC<ChunkItemProps> = ({
 
     return (
         <AccordionItem
-            value={`chunk-${idx}`}
-            className='bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden transition-all duration-300 hover:shadow-md hover:border-blue-100/30'
+            value={chunk.id}
+            className='border border-gray-100 rounded-2xl overflow-hidden bg-white shadow-sm hover:shadow-md transition-all duration-300 mb-6'
         >
-            <AccordionTrigger className='px-6 py-5 hover:no-underline group/trigger data-[state=open]:bg-gray-50/30 transition-colors'>
-                <div className='flex items-center gap-4 flex-1 min-w-0 pr-4 text-left'>
-                    <div className='w-9 h-9 flex-shrink-0 rounded-xl bg-blue-600 flex items-center justify-center text-white font-bold text-base shadow-lg shadow-blue-100'>
-                        {idx + 1}
-                    </div>
-                    <div className='flex-1 min-w-0'>
-                        <h4 className='font-bold text-gray-900 text-[15px] tracking-tight truncate'>
-                            {chunk.title || `Phân đoạn ${idx + 1}`}
-                        </h4>
-                        <div className='flex items-center gap-3 text-[11px] font-medium text-gray-400 mt-0.5 tracking-wide'>
-                            <span className='flex items-center gap-1 bg-blue-50 text-blue-600 px-2 py-0.5 rounded-md font-bold'>
-                                {chunk.timestamp}
-                            </span>
-                            <CustomButton
-                                type='button'
-                                onClick={(e) => {
-                                    e.stopPropagation()
-                                    handleSeek(chunk.startTime)
-                                }}
-                                variant='link'
-                                size='sm'
-                                icon={<PlayCircle className='w-3.5 h-3.5' />}
-                                label='Xem ngay'
-                                className='h-auto p-0 font-bold text-blue-500 hover:text-blue-700 text-[11px]'
-                            />
+            <AccordionTrigger className='px-6 py-5 hover:no-underline group'>
+                <div className='flex items-center justify-between w-full pr-6'>
+                    <div className='flex items-center gap-4'>
+                        <div className='w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 font-extrabold shadow-sm border border-blue-100 group-hover:scale-105 transition-transform'>
+                            {idx + 1}
+                        </div>
+                        <div className='text-left space-y-1'>
+                            <h4 className='text-[16px] font-extrabold text-gray-900 tracking-tight group-hover:text-blue-600 transition-colors'>
+                                {chunk.title || `Phân đoạn ${idx + 1}`}
+                            </h4>
+                            <div className='flex items-center gap-3 text-[11px] text-gray-400 font-bold uppercase tracking-widest'>
+                                <span className='flex items-center gap-1.5 bg-gray-50 px-2 py-0.5 rounded-lg'>
+                                    <PlayCircle className='w-3.5 h-3.5 text-blue-500' /> {chunk.startTime}
+                                </span>
+                                <span className='w-1 h-1 bg-gray-200 rounded-full' />
+                                <span>{chunk.sentenceCount} Câu phát biểu</span>
+                            </div>
                         </div>
                     </div>
                 </div>
             </AccordionTrigger>
 
             <AccordionContent className='p-6 pt-2 space-y-6 border-t border-gray-50 bg-gray-50/10'>
+                {/* Summary Section */}
                 <div className='space-y-4'>
                     <div className='flex items-center justify-between px-1'>
                         <div className='flex items-center gap-2'>
@@ -215,32 +189,13 @@ const ChunkItem: React.FC<ChunkItemProps> = ({
                     </div>
 
                     {editingSummaryId === chunk.id ? (
-                        <div className='space-y-3 p-1 animate-in fade-in slide-in-from-top-1 duration-200'>
-                            <textarea
-                                value={draftSummary}
-                                onChange={(e) => setDraftSummary(e.target.value)}
-                                className='w-full text-sm text-gray-800 leading-relaxed bg-white p-5 rounded-2xl border border-blue-200 shadow-sm outline-none focus:border-blue-400 min-h-[140px] font-medium'
-                                autoFocus
-                            />
-                            <div className='flex justify-end gap-3'>
-                                <CustomButton
-                                    onClick={handleCancelEdit}
-                                    variant='ghost'
-                                    size='sm'
-                                    label='Hủy'
-                                    className='text-[11px] font-bold text-gray-400 px-5'
-                                />
-                                <CustomButton
-                                    onClick={() => handleSave(chunk.id)}
-                                    disabled={isSavingSummary}
-                                    variant='default'
-                                    size='sm'
-                                    icon={isSavingSummary ? <RefreshCw className='w-3.5 h-3.5 animate-spin' /> : <Check className='w-3.5 h-3.5' />}
-                                    label={isSavingSummary ? 'Lưu...' : 'Lưu tóm tắt'}
-                                    className='bg-blue-600 hover:bg-blue-700 text-white rounded-xl h-8.5 px-6 text-[11px] font-bold shadow-md shadow-blue-100 transition-all'
-                                />
-                            </div>
-                        </div>
+                        <SummaryEditor
+                            value={draftSummary}
+                            isSaving={isSavingSummary}
+                            onChange={setDraftSummary}
+                            onSave={() => handleSave(chunk.id)}
+                            onCancel={handleCancelEdit}
+                        />
                     ) : (
                         <div className='bg-white border border-gray-100 p-6 rounded-2xl relative shadow-sm group/summary'>
                             <div className='absolute -top-2.5 -left-2.5 p-1.5 bg-white rounded-xl border border-blue-100 shadow-sm'>
@@ -253,8 +208,9 @@ const ChunkItem: React.FC<ChunkItemProps> = ({
                     )}
                 </div>
 
+                {/* Quiz Header & Actions */}
                 <div className='pt-2'>
-                    <div className='flex items-center gap-3 px-1'>
+                    <div className='flex items-center justify-between gap-4'>
                         <CustomButton
                             type='button'
                             onClick={() => setIsQuizVisible(!isQuizVisible)}
@@ -278,7 +234,7 @@ const ChunkItem: React.FC<ChunkItemProps> = ({
                                     isQuizVisible ? 'text-blue-600' : 'text-gray-600'
                                 )}>Hệ thống câu hỏi ôn tập</p>
                                 <p className='text-[9px] font-medium text-gray-400 mt-1'>
-                                    {isQuizVisible ? 'Đóng trình chỉnh sửa' : `Có ${chunkQuizzes.length} câu hỏi đã tạo`}
+                                    {isQuizVisible ? 'Đóng trình chỉnh sửa' : `Đã tạo ${chunkQuizzes.length} câu hỏi`}
                                 </p>
                             </div>
                             <ChevronRight className={cn(
@@ -287,45 +243,39 @@ const ChunkItem: React.FC<ChunkItemProps> = ({
                             )} />
                         </CustomButton>
 
-                        <CustomButton
-                            type='button'
-                            onClick={handleBulkGenerateQuizzes}
-                            disabled={isBulkGenerating}
-                            variant='ghost'
-                            className={cn(
-                                'h-auto flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-100 transition-all active:scale-95 group/ai-bulk',
-                                isBulkGenerating
-                                    ? 'opacity-75 cursor-not-allowed'
-                                    : 'hover:shadow-lg hover:translate-y-[-1px] hover:text-white'
-                            )}
-                        >
-                            {isBulkGenerating ? (
-                                <Loader className='w-3.5 h-3.5 animate-spin text-blue-200' />
-                            ) : (
-                                <Sparkles className='w-3.5 h-3.5 animate-pulse text-blue-200' />
-                            )}
-                            <div className='text-left'>
-                                <p className='text-[10.5px] font-bold leading-none'>
-                                    {isBulkGenerating ? 'Đang tạo...' : 'Tự động tạo 3 câu hỏi'}
-                                </p>
-                                <p className='text-[8px] font-medium text-blue-100/80 mt-1'>Sức mạnh AI (Tối đa 3 câu/lần)</p>
+                        <div className='flex items-center gap-2'>
+                            <div className='relative'>
+                                <CustomButton
+                                    type='button'
+                                    onClick={handleBulkGenerateQuizzes}
+                                    disabled={isBulkGenerating}
+                                    variant='outline'
+                                    label='Gợi ý 3 câu hỏi (AI)'
+                                    icon={isBulkGenerating ? <Loader className='w-3 h-3 animate-spin' /> : <Sparkles className='w-3 h-3 text-blue-500' />}
+                                    className='h-8 px-4 text-[10px] font-bold border-blue-100 text-blue-600 bg-blue-50/30 hover:bg-blue-50 rounded-lg transition-all active:scale-95'
+                                />
+                                <div className='absolute -top-1 -right-1 w-2 h-2 bg-blue-500 rounded-full animate-pulse' />
                             </div>
-                        </CustomButton>
-                    </div>
-
-                    <div className={cn(
-                        'grid transition-all duration-300 ease-in-out',
-                        isQuizVisible ? 'grid-rows-[1fr] opacity-100 mt-5' : 'grid-rows-[0fr] opacity-0 mt-0'
-                    )}>
-                        <div className='overflow-hidden rounded-2xl'>
-                            <LearnovaQuizBuilder
-                                chunkId={chunk.id}
-                                initialQuizzes={chunkQuizzes}
-                                onSave={handleSaveQuizzes}
-                                onGenerateAI={handleGenerateWithDistribution}
-                            />
                         </div>
                     </div>
+
+                    <AnimatePresence>
+                        {isQuizVisible && (
+                            <motion.div
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: 'auto' }}
+                                exit={{ opacity: 0, height: 0 }}
+                                className='mt-6 overflow-hidden'
+                            >
+                                <LearnovaQuizBuilder
+                                    chunkId={chunk.id}
+                                    initialQuizzes={chunkQuizzes}
+                                    onSave={handleSaveQuizzes}
+                                    onGenerateAI={handleGenerateWithDistribution}
+                                />
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </div>
             </AccordionContent>
         </AccordionItem>

@@ -54,6 +54,9 @@ export interface GeneratedQuiz {
   question: string
   choices: QuizChoice[]
   explanation: string
+  aiGenerated?: boolean
+  aiConfidence?: number
+  isApproved?: boolean
   status: QuizStatus
   createdAt: string
   updatedAt: string
@@ -76,6 +79,9 @@ export interface GeneratedQuizResponse {
   question: string
   choices: QuizChoice[]
   explanation: string
+  aiGenerated?: boolean
+  aiConfidence?: number
+  isApproved?: boolean
   status: QuizStatus
   createdAt: string
   updatedAt: string
@@ -126,12 +132,12 @@ export const buildArrayDistribution = (
 ): QuizBatchDistributionItem[] => {
   const distribution: QuizBatchDistributionItem[] = []
   const countMap = new Map<string, number>()
-  
+
   quizzes.forEach(({ difficulty, bloomLevel }) => {
     const key = `${difficulty}_${bloomLevel}`
     countMap.set(key, (countMap.get(key) || 0) + 1)
   })
-  
+
   countMap.forEach((count, key) => {
     const [difficulty, bloomLevel] = key.split('_')
     distribution.push({
@@ -140,7 +146,7 @@ export const buildArrayDistribution = (
       count
     })
   })
-  
+
   return distribution
 }
 
