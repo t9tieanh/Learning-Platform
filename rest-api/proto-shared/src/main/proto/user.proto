@@ -71,3 +71,13 @@ message Certificate {
   string imageUrl = 4;
   string credentialUrl = 5;
 }
+
+// CheckIsVip request/response for quiz generation authorization
+message CheckIsVipRequest {
+  string user_id = 1;
+}
+
+message CheckIsVipResponse {
+  bool is_vip = 1;
+  string message = 2;
+}

@@ -10,4 +10,5 @@ service UserService {
   rpc GetUser (GetUserRequest) returns (GetUserResponse);
   rpc GetBulkTeachers (GetTeachersRequest) returns (GetTeachersResponse);
   rpc GetTeacherDetail (GetUserRequest) returns (TeacherDetail);
+  rpc CheckIsVip (CheckIsVipRequest) returns (CheckIsVipResponse);
 }
