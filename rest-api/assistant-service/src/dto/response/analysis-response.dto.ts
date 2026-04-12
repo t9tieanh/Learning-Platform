@@ -24,6 +24,7 @@ export interface AnalysisResponseDto {
     status: AnalysisStatus
     summary: string | null
     suggestedTitle: string | null
+    subtitles: string | null
     chunks: ChunkDto[]
 }
 
@@ -59,6 +60,7 @@ export function toAnalysisResponseDto(
         status: lesson.summary ? 'completed' : 'processing',
         summary: lesson.summary,
         suggestedTitle: lesson.suggestedTitle,
+        subtitles: lesson.subtitles,
         chunks: lesson.chunks
             .sort((a, b) => a.chunkIndex - b.chunkIndex)
             .map(toChunkDto),

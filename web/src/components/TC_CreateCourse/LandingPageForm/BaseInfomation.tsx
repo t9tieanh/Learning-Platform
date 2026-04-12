@@ -89,49 +89,49 @@ const BaseInfomation = ({
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className='space-y-6'>
-      <Card className='border border-blue-200 shadow-sm bg-blue-50'>
-        <CardHeader className='bg-blue-200/40 rounded-t-lg'>
-          <CardTitle className='text-lg font-medium text-blue-900 flex items-center gap-2'>
-            <BookOpen className='w-5 h-5 text-blue-700' />
+      <Card className='border-2 border-white ring-1 ring-gray-100 shadow-sm bg-white rounded-[32px] overflow-hidden'>
+        <CardHeader className='pb-4 border-b border-gray-50'>
+          <CardTitle className='text-[15px] font-bold text-gray-900 flex items-center gap-2'>
+            <BookOpen className='w-4.5 h-4.5 text-blue-600' />
             Thông tin khóa học
           </CardTitle>
         </CardHeader>
         <CardContent className='space-y-5'>
           <div>
-            <Label htmlFor='courseTitle' className='text-blue-900'>
+            <Label htmlFor='courseTitle' className='text-[11px] font-bold text-gray-400 mb-2 block px-1'>
               Tiêu đề khóa học *
             </Label>
             <Input
               id='courseTitle'
               {...register('courseTitle')}
-              placeholder='Nhập tiêu đề khóa học'
-              className='mt-2 border-blue-300 focus:ring-blue-300'
+              placeholder='Nhập tiêu đề khóa học...'
+              className='h-10 text-[13px] font-medium border-gray-100 bg-gray-50/20 focus:bg-white transition-all rounded-xl placeholder:text-gray-300'
             />
-            <div className='text-xs text-blue-700 mt-1'>{courseTitleLength}/60 ký tự</div>
-            {errors.courseTitle && <p className='text-red-500 text-xs'>{errors.courseTitle.message}</p>}
+            <div className='text-[10px] font-bold text-gray-300 mt-2 px-1'>{courseTitleLength}/60 ký tự</div>
+            {errors.courseTitle && <p className='text-red-500 text-[10px] mt-1 px-1'>{errors.courseTitle.message}</p>}
           </div>
 
           <div>
-            <Label htmlFor='subtitle' className='text-blue-900'>
+            <Label htmlFor='subtitle' className='text-[11px] font-bold text-gray-400 mb-2 block px-1'>
               Mô tả ngắn khóa học *
             </Label>
             <Textarea
               id='subtitle'
               {...register('subtitle')}
-              placeholder='Nhập phụ đề khóa học'
-              className='mt-2 border-blue-300 focus:ring-blue-300'
+              placeholder='Nhập phụ đề khóa học...'
+              className='text-[13px] font-medium border-gray-100 bg-gray-50/20 focus:bg-white transition-all rounded-xl placeholder:text-gray-300 min-h-[90px]'
               rows={3}
             />
-            <div className='text-xs text-blue-700 mt-1'>{subtitleLength}/120 ký tự</div>
-            {errors.subtitle && <p className='text-red-500 text-xs'>{errors.subtitle.message}</p>}
+            <div className='text-[10px] font-bold text-gray-300 mt-2 px-1'>{subtitleLength}/120 ký tự</div>
+            {errors.subtitle && <p className='text-red-500 text-[10px] mt-1 px-1'>{errors.subtitle.message}</p>}
           </div>
         </CardContent>
       </Card>
 
-      <Card className='border border-blue-200 shadow-sm bg-blue-50'>
-        <CardHeader className='bg-blue-200/40 rounded-t-lg'>
-          <CardTitle className='text-lg font-medium text-blue-900 flex items-center gap-2'>
-            <FileText className='w-5 h-5 text-blue-700' />
+      <Card className='border-2 border-white ring-1 ring-gray-100 shadow-sm bg-white rounded-[32px] overflow-hidden'>
+        <CardHeader className='pb-4 border-b border-gray-50'>
+          <CardTitle className='text-[15px] font-bold text-gray-900 flex items-center gap-2'>
+            <FileText className='w-4.5 h-4.5 text-blue-600' />
             Mô tả chi tiết khóa học
           </CardTitle>
         </CardHeader>
@@ -151,43 +151,43 @@ const BaseInfomation = ({
         </CardContent>
       </Card>
 
-      <Card className='border border-blue-200 shadow-sm bg-blue-50'>
-        <CardHeader className='bg-blue-200/40 rounded-t-lg'>
-          <CardTitle className='text-lg font-medium text-blue-900 flex items-center gap-2'>
-            <Info className='w-5 h-5 text-blue-700' />
+      <Card className='border-2 border-white ring-1 ring-gray-100 shadow-sm bg-white rounded-[32px] overflow-hidden'>
+        <CardHeader className='pb-4 border-b border-gray-50'>
+          <CardTitle className='text-[15px] font-bold text-gray-900 flex items-center gap-2'>
+            <Info className='w-4.5 h-4.5 text-blue-600' />
             Thông tin cơ bản
           </CardTitle>
         </CardHeader>
         <CardContent className='grid md:grid-cols-2 gap-6'>
-          <div>
-            <Label className='text-blue-900'>Danh mục *</Label>
+          <div className='space-y-2'>
+            <Label className='text-[11px] font-bold text-gray-400 px-1'>Danh mục *</Label>
             <Controller
               control={control}
               name='category'
               render={({ field }) => (
                 <Select value={field.value || ''} onValueChange={handleCategoryChange}>
-                  <SelectTrigger className='mt-2 border-blue-300 focus:ring-blue-300'>
+                  <SelectTrigger className='text-[13px] font-medium border-gray-100 bg-gray-50/20 focus:bg-white transition-all rounded-xl h-10'>
                     <SelectValue
                       placeholder={categories && categories.length > 0 ? 'Chọn danh mục' : 'Chưa có danh mục'}
                     />
                   </SelectTrigger>
-                  <SelectContent className='bg-blue-50'>
+                  <SelectContent className='bg-white border-gray-100 rounded-xl'>
                     {categories && categories.length > 0 ? (
                       categories.map((cat) => (
-                        <SelectItem key={cat.id} value={cat.name}>
+                        <SelectItem key={cat.id} value={cat.name} className='text-[13px]'>
                           {cat.name}
                         </SelectItem>
                       ))
                     ) : (
-                      <p className='text-red-500 text-xs'>
-                        Chưa có danh mục nào. Vui lòng thêm danh mục trong trang quản trị.
+                      <p className='text-red-500 text-[10px] p-2'>
+                        Chưa có danh mục nào.
                       </p>
                     )}
                   </SelectContent>
                 </Select>
               )}
             />
-            {errors.category && <p className='text-red-500 text-xs'>{errors.category.message}</p>}
+            {errors.category && <p className='text-red-500 text-[10px] px-1'>{errors.category.message}</p>}
           </div>
         </CardContent>
       </Card>
@@ -222,13 +222,15 @@ const BaseInfomation = ({
         )}
       />
 
-      <CustomButton
-        label='Lưu thông tin'
-        className='bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow mt-4'
-        icon={<Save className='h-5 w-5' />}
-        type='submit'
-        isLoader={loading}
-      />
+      <div className='flex justify-end pt-4 font-bold'>
+        <CustomButton
+          label='Lưu thông tin'
+          className='bg-blue-600 hover:bg-blue-700 text-white rounded-xl px-10 h-8.5 text-[11px] font-bold shadow-lg shadow-blue-100 transition-all active:scale-95'
+          icon={<Save className='h-4 w-4 mr-2' />}
+          type='submit'
+          isLoader={loading}
+        />
+      </div>
     </form>
   )
 }

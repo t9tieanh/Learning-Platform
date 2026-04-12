@@ -1,0 +1,140 @@
+import React, { useMemo } from 'react'
+import { Brain, Sparkles } from 'lucide-react'
+import { LessonChunk } from '@/types/ai'
+import { AnalysisResult } from '@/services/assistant/analysis.service'
+import { SubtitleEntry } from '@/components/common/Video/LearnovaVideoPlayer'
+import { parseSRT } from '@/utils/srtParser'
+import { Accordion } from '@/components/ui/accordion'
+
+import Header from './components/Header'
+import VideoPreview from './components/VideoPreview'
+import ChunkItem from './components/ChunkItem'
+
+import HighGlossBackground from '@/components/common/HighGlossBackground'
+
+interface LearnovaDetailedViewProps {
+    analysisData: AnalysisResult | null
+    videoSrc: string | null
+    onBack: () => void
+    detailedVideoRef: React.RefObject<HTMLVideoElement | null>
+    chunkQuestions: Record<string, string[]>
+    newQuestionInputs: Record<string, string>
+    handleAddQuestion: (chunkId: string) => void
+    handleRemoveQuestion: (chunkId: string, index: number) => void
+    setNewQuestionInputs: React.Dispatch<React.SetStateAction<Record<string, string>>>
+    handleSeek: (startTime: string | null) => void
+    mainWrapperRef?: React.RefObject<HTMLDivElement | null>
+    onSaveSummary: (chunkId: string, newSummary: string) => Promise<void>
+}
+
+const LearnovaDetailedView: React.FC<LearnovaDetailedViewProps> = ({
+    analysisData,
+    videoSrc,
+    onBack,
+    detailedVideoRef,
+    handleSeek,
+    mainWrapperRef,
+    onSaveSummary
+}) => {
+    const chunks: LessonChunk[] = analysisData?.chunks || []
+    const [editingSummaryId, setEditingSummaryId] = React.useState<string | null>(null)
+    const [draftSummary, setDraftSummary] = React.useState<string>('')
+    const [isSavingSummary, setIsSavingSummary] = React.useState(false)
+
+    const subtitles: SubtitleEntry[] = useMemo(() => {
+        if (analysisData?.subtitles && typeof analysisData.subtitles === 'string') {
+            try {
+                return parseSRT(analysisData.subtitles)
+            } catch (error) {
+                console.warn('Failed to parse SRT subtitles, using fallback:', error)
+            }
+        }
+
+        return []
+    }, [analysisData?.subtitles])
+
+    const handleStartEdit = (chunk: LessonChunk) => {
+        setEditingSummaryId(chunk.id)
+        setDraftSummary(chunk.summary || '')
+    }
+
+    const handleCancelEdit = () => {
+        setEditingSummaryId(null)
+        setDraftSummary('')
+    }
+
+    const handleSave = async (chunkId: string) => {
+        try {
+            setIsSavingSummary(true)
+            await onSaveSummary(chunkId, draftSummary)
+            setEditingSummaryId(null)
+        } catch (error) {
+            console.error('Failed to save summary:', error)
+        } finally {
+            setIsSavingSummary(false)
+        }
+    }
+
+    return (
+        <div ref={mainWrapperRef} className='animate-in fade-in slide-in-from-bottom-4 duration-700 space-y-8 pb-16 relative px-2 md:px-0'>
+            <Header onBack={onBack} />
+
+            <div className='max-w-6xl mx-auto w-full px-4'>
+                <VideoPreview
+                    videoSrc={videoSrc}
+                    detailedVideoRef={detailedVideoRef}
+                    subtitles={subtitles}
+                />
+            </div>
+
+            <div className='max-w-5xl mx-auto w-full px-4'>
+                <div className='space-y-6'>
+                    <HighGlossBackground className='rounded-2xl shadow-xl border border-blue-400/20 overflow-hidden'>
+                        <div className='px-6 py-5 md:py-6 flex items-center justify-between'>
+                            <div className='flex items-center gap-4 md:gap-5'>
+                                <div className='w-10 h-10 md:w-12 md:h-12 bg-white/10 rounded-2xl flex items-center justify-center text-white shadow-xl backdrop-blur-md border border-white/20 shrink-0'>
+                                    <Brain className='w-5 h-5 md:w-6 md:h-6' />
+                                </div>
+                                <div className='flex flex-col'>
+                                    <h2 className='text-white font-bold text-[15px] md:text-[16px] tracking-tight leading-tight'>
+                                        Cấu trúc nội dung bài giảng
+                                    </h2>
+                                    <p className='text-[10px] md:text-[11px] text-blue-100/60 mt-1 flex items-center gap-2 font-bold uppercase tracking-widest'>
+                                        <Sparkles className='w-3 h-3 text-blue-300 animate-pulse' /> Trợ lý AI phân tích
+                                    </p>
+                                </div>
+                            </div>
+                            <div className='bg-white/15 px-4 py-2 rounded-xl border border-white/20 backdrop-blur-sm shadow-inner shrink-0 hidden sm:block'>
+                                <span className='text-[11px] md:text-[12px] text-white font-bold tracking-tight'>
+                                    {chunks.length} phân đoạn
+                                </span>
+                            </div>
+                        </div>
+                    </HighGlossBackground>
+
+                    <div className='w-full'>
+                        <Accordion type='single' collapsible defaultValue={chunks[0]?.id} className='space-y-6'>
+                            {chunks.map((chunk, idx) => (
+                                <ChunkItem
+                                    key={chunk.id}
+                                    chunk={chunk}
+                                    idx={idx}
+                                    handleSeek={handleSeek}
+                                    editingSummaryId={editingSummaryId}
+                                    draftSummary={draftSummary}
+                                    setDraftSummary={setDraftSummary}
+                                    isSavingSummary={isSavingSummary}
+                                    handleStartEdit={handleStartEdit}
+                                    handleCancelEdit={handleCancelEdit}
+                                    handleSave={handleSave}
+                                />
+                            ))}
+                        </Accordion>
+                    </div>
+                </div>
+            </div>
+        </div>
+    )
+}
+
+export default LearnovaDetailedView

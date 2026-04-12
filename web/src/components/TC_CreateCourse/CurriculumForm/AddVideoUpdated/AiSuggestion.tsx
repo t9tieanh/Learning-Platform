@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Sparkles, Loader2, MousePointerClick, ChevronDown, ChevronUp } from 'lucide-react'
+import { Sparkles, MousePointerClick, ChevronDown, ChevronUp } from 'lucide-react'
 import learnovaLogo from '@/assets/images/logo1.png'
 import CustomButton from '@/components/common/Button'
 
@@ -12,48 +12,51 @@ interface AiSuggestionProps {
 
 const AiSuggestion: React.FC<AiSuggestionProps> = ({ isLoading, suggestion, onApply, type = 'title' }) => {
   const [isExpanded, setIsExpanded] = useState(false)
-  const shouldShowToggle = suggestion && suggestion.length > 100 && type === 'content'
+  const shouldShowToggle = suggestion && suggestion.length > 200 && type === 'content'
+
+  if (!suggestion && !isLoading) return null
+
   return (
-    <div className='mt-2 flex items-start gap-2 text-sm bg-blue-50 p-3 rounded-lg border border-blue-100 shadow-md'>
-      <Sparkles className='w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0' />
-      <div className='flex-1'>
-        <div className='flex items-center justify-between mb-1'>
-          <div className='flex items-center gap-1 font-medium text-blue-800 text-xs uppercase tracking-wide'>
-            <span>Gợi ý từ</span>
-            <img src={learnovaLogo} alt='Learnova AI' className='h-4 w-auto object-contain rounded-sm mb-1' />
+    <div className='mt-3 flex items-start gap-4 text-sm bg-gradient-to-br from-blue-100/50 to-cyan-100/50 p-5 rounded-2xl border border-blue-200/50 transition-all shadow-md shadow-blue-100/20'>
+      <div className='p-2 bg-white rounded-xl shadow-md border border-blue-50'>
+        <Sparkles className='w-4 h-4 text-blue-600' />
+      </div>
+
+      <div className='flex-1 min-w-0'>
+        <div className='flex items-center justify-between mb-3'>
+          <div className='flex items-center gap-2.5'>
+            <span className='text-[10px] font-medium text-blue-700 tracking-wide'>AI Learnova</span>
+            <div className='h-3 w-px bg-blue-200' />
+            <img src={learnovaLogo} alt='Logo Learnova' className='h-2.5 w-auto object-contain brightness-0 opacity-30' />
           </div>
-          {isLoading ? (
-            <Loader2 className='w-3 h-3 animate-spin text-blue-600' />
-          ) : (
-            <button
+          {!isLoading && (
+            <CustomButton
               type='button'
               onClick={onApply}
-              className='flex items-center text-xs bg-blue-600 text-white px-2 py-0.5 rounded hover:bg-blue-700 transition-colors'
-            >
-              <MousePointerClick className='w-3 h-3 mr-1' />
-              Áp dụng
-            </button>
+              variant='ghost'
+              size='sm'
+              label='Áp dụng'
+              icon={<MousePointerClick className='w-3 h-3' />}
+              className='h-7 text-[10px] font-bold text-blue-700 hover:bg-white hover:shadow-md px-3 rounded-lg border border-transparent hover:border-blue-100'
+            />
           )}
         </div>
+
         {isLoading ? (
-          type === 'title' ? (
-            <div className='h-4 w-3/4 bg-blue-200/50 rounded animate-pulse' />
-          ) : (
-            <div className='space-y-1'>
-              <div className='h-3 w-full bg-blue-200/50 rounded animate-pulse' />
-              <div className='h-3 w-5/6 bg-blue-200/50 rounded animate-pulse' />
-            </div>
-          )
+          <div className='space-y-3 animate-pulse'>
+            <div className='h-3 bg-blue-200/40 rounded-lg w-4/5' />
+            {type === 'content' && <div className='h-3 bg-blue-200/40 rounded-lg w-full' />}
+          </div>
         ) : (
-          <div>
-            <p className={`text-blue-900 ${isExpanded ? '' : type === 'title' ? 'line-clamp-1' : 'line-clamp-2'}`}>
-              {suggestion}
+          <div className='relative'>
+            <p className={`text-[13px] text-gray-800 leading-relaxed font-medium italic ${!isExpanded && type === 'content' ? 'line-clamp-2' : ''}`}>
+              "{suggestion}"
             </p>
             {shouldShowToggle && (
               <button
                 type='button'
                 onClick={() => setIsExpanded(!isExpanded)}
-                className='text-xs text-blue-600 hover:text-blue-800 font-medium mt-1 flex items-center gap-0.5'
+                className='text-[10px] font-medium text-blue-600 hover:text-blue-800 mt-2.5 flex items-center gap-1 tracking-wider'
               >
                 {isExpanded ? (
                   <>

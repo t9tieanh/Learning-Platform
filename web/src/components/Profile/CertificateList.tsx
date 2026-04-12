@@ -57,34 +57,34 @@ const CertificateList: FC<Props> = () => {
 
   useEffect(() => {
     let mounted = true
-    ;(async () => {
-      if (!currentUserId) {
-        setLoading(false)
-        return
-      }
-      try {
-        const res = await certificateService.getCertificates(String(currentUserId))
-        const items = Array.isArray(res?.result) ? res.result : []
-        const mapped: CertificateResponse[] = items.map((c: CreateCertRes & any) => ({
-          id: c.id || c._id || Math.random().toString(36).slice(2),
-          name: c.title,
-          issuer: c.organization,
-          credentialUrl: c.credentialUrl,
-          verified: false,
-          verificationSource: 'SYSTEM',
-          verifiedAt: c.issueDate,
-          imageUrl: c.imageUrl,
-          status: c.status,
-          reason: c.reason || ''
-        }))
-        if (mounted) setCertificates(mapped)
-      } catch (e) {
-        console.error(e)
-        if (mounted) toast.error('Không thể tải danh sách chứng chỉ')
-      } finally {
-        if (mounted) setLoading(false)
-      }
-    })()
+      ; (async () => {
+        if (!currentUserId) {
+          setLoading(false)
+          return
+        }
+        try {
+          const res = await certificateService.getCertificates(String(currentUserId))
+          const items = Array.isArray(res?.result) ? res.result : []
+          const mapped: CertificateResponse[] = items.map((c: CreateCertRes & any) => ({
+            id: c.id || c._id || Math.random().toString(36).slice(2),
+            name: c.title,
+            issuer: c.organization,
+            credentialUrl: c.credentialUrl,
+            verified: false,
+            verificationSource: 'SYSTEM',
+            verifiedAt: c.issueDate,
+            imageUrl: c.imageUrl,
+            status: c.status,
+            reason: c.reason || ''
+          }))
+          if (mounted) setCertificates(mapped)
+        } catch (e) {
+          console.error(e)
+          if (mounted) toast.error('Không thể tải danh sách chứng chỉ')
+        } finally {
+          if (mounted) setLoading(false)
+        }
+      })()
     return () => {
       mounted = false
     }

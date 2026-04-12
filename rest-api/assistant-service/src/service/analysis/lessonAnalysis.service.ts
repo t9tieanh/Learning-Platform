@@ -10,8 +10,9 @@ import { BullJobType } from '~/enums/bullJobType.enum';
 
 class LessonAnalysisService {
     private static instance: LessonAnalysisService;
-
     private documentService: DocumentService;
+    // Track lessons being processed to prevent duplicate job enqueueing
+    private processingLessons = new Set<string>();
 
     private constructor() {
         this.documentService = new DocumentService();
@@ -185,7 +186,10 @@ class LessonAnalysisService {
     // -----------------------------------------------------------------------
 
     /**
-     * Enqueue a chunking job to the Bull queue
+     * Enqueue a chunking job to the Bull queue with deduplication
+     * 
+     * Prevents duplicate jobs for the same lesson from being enqueued multiple times
+     * (e.g., when webhooks arrive multiple times for the same transcript).
      * 
      * The chunking job will:
      * 1. Semantically chunk the transcript/content
@@ -193,23 +197,54 @@ class LessonAnalysisService {
      * 3. Auto-enqueue a summarization job on completion
      */
     private async enqueueChunkingJob(jobData: ChunkingJobData): Promise<void> {
+        const lessonId = jobData.lessonId;
+
+        // Check if already processing this lesson
+        if (this.processingLessons.has(lessonId)) {
+            Logger.info(
+                `[LessonAnalysisService] Skipping duplicate chunking job for lessonId=${lessonId} (already processing)`
+            );
+            return;
+        }
+
         try {
+            // Mark as processing
+            this.processingLessons.add(lessonId);
+
+            // Check if job already exists in queue (by jobId)
+            const existingJob = await bullQueueService.lessonChunkingQueue.getJob(
+                `chunking-${lessonId}`
+            );
+
+            if (existingJob && !existingJob.isCompleted() && !existingJob.isFailed()) {
+                Logger.info(
+                    `[LessonAnalysisService] Skipping duplicate chunking job for lessonId=${lessonId} (already in queue)`
+                );
+                return;
+            }
+
+            // Enqueue new job
             await bullQueueService.lessonChunkingQueue.add(
                 BullJobType.LESSON_CHUNKING,
                 jobData,
                 {
-                    jobId: `chunking-${jobData.lessonId}`,
+                    jobId: `chunking-${lessonId}`,
                 }
             );
 
             Logger.info(
-                `[LessonAnalysisService] Enqueued chunking job for lessonId=${jobData.lessonId}`
+                `[LessonAnalysisService] Enqueued chunking job for lessonId=${lessonId}`
             );
         } catch (error) {
             Logger.error(
-                `[LessonAnalysisService] Failed to enqueue chunking job for lessonId=${jobData.lessonId} – ${error}`
+                `[LessonAnalysisService] Failed to enqueue chunking job for lessonId=${lessonId} – ${error}`
             );
+            this.processingLessons.delete(lessonId);
             throw error;
+        } finally {
+            setTimeout(() => {
+                this.processingLessons.delete(lessonId);
+            }, 5 * 60 * 1000);
         }
     }
 
