@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
     ChevronLeft,
     ChevronRight,
@@ -9,15 +9,28 @@ import {
     X,
     Sparkles,
     Brain,
-    Crown
+    Crown,
+    Loader
 } from 'lucide-react'
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover"
 import { Quiz, QuizChoice } from '@/types/ai'
 import CustomButton from '@/components/common/Button'
 import CustomTextarea from '@/components/common/Textarea'
 import CustomInput from '@/components/common/Input'
+import DistributionPicker, { QUIZ_DISTRIBUTION_PRESETS } from '../DistributionPicker'
+import { useAuthStore } from '@/stores/useAuth.stores'
+import { useVipUpgrade } from '@/contexts/VipUpgradeContext'
+import quizService, { SingleQuizGenerationRequest } from '@/services/assistant/quiz.service'
+import { QuizDifficulty, BloomLevel, QuestionType, QuizBatchDistributionItem } from '@/types/quiz'
 import { cn } from '@/lib/utils'
+import { toast } from 'sonner'
 
 interface QuizEditorProps {
+    chunkId: string
     quiz: Quiz
     index: number
     total: number
@@ -28,6 +41,7 @@ interface QuizEditorProps {
 }
 
 const QuizEditor: React.FC<QuizEditorProps> = ({
+    chunkId,
     quiz,
     index,
     total,
@@ -38,6 +52,12 @@ const QuizEditor: React.FC<QuizEditorProps> = ({
 }) => {
     const [draft, setDraft] = useState<Quiz>({ ...quiz })
     const [choiceInput, setChoiceInput] = useState('')
+    const [isPickerOpen, setIsPickerOpen] = useState(false)
+    const [isGenerating, setIsGenerating] = useState(false)
+
+    const { data: authData } = useAuthStore()
+    const isVip = authData?.isVip || false
+    const { openVipDialog } = useVipUpgrade()
 
     const handleAddChoice = () => {
         if (!choiceInput.trim()) return
@@ -75,6 +95,62 @@ const QuizEditor: React.FC<QuizEditorProps> = ({
             ...prev,
             choices: prev.choices.map(c => (c.id === choiceId ? { ...c, text } : c))
         }))
+    }
+
+    const handleGenerateAI = async () => {
+        if (!isVip) {
+            openVipDialog()
+            return
+        }
+        setIsPickerOpen(!isPickerOpen)
+    }
+
+    const handleExecuteGeneration = async (distribution: QuizBatchDistributionItem[]) => {
+        if (!distribution || distribution.length === 0) return
+
+        try {
+            setIsGenerating(true)
+            setIsPickerOpen(false)
+            toast.loading('AI đang gợi ý nội dung bài tập...')
+
+            // Use the first rule of the distribution to define settings for 1 question
+            const rule = distribution[0]
+            const response = await quizService.generateSingleQuiz(chunkId, {
+                difficulty: rule.difficulty,
+                bloomLevel: rule.bloomLevel,
+                questionType: QuestionType.MULTIPLE_CHOICE,
+                numberOfQuestions: 1
+            })
+
+            if (response.code === 201 && response.result) {
+                const q = response.result
+                setDraft(prev => ({
+                    ...prev,
+                    question: q.question,
+                    choices: q.choices.map(c => ({
+                        id: c.id,
+                        text: c.text,
+                        isCorrect: c.isCorrect,
+                        feedback: c.feedback
+                    })),
+                    explanation: q.explanation,
+                    difficulty: q.difficulty as QuizDifficulty,
+                    bloomLevel: q.bloomLevel as BloomLevel,
+                    aiGenerated: true,
+                    aiConfidence: q.aiConfidence
+                }))
+                toast.dismiss()
+                toast.success('✓ AI đã gợi ý nội dung mới cho câu hỏi này!')
+            } else {
+                toast.dismiss()
+                toast.error(response.message || 'Lỗi khi tạo câu hỏi')
+            }
+        } catch (error) {
+            toast.dismiss()
+            toast.error(error instanceof Error ? error.message : 'Lỗi khi tạo câu hỏi từ AI')
+        } finally {
+            setIsGenerating(false)
+        }
     }
 
     return (
@@ -125,13 +201,39 @@ const QuizEditor: React.FC<QuizEditorProps> = ({
                                 <ChevronRight className='w-4 h-4' />
                             </button>
                         </div>
-                        <CustomButton
-                            type='button'
-                            variant='outline'
-                            label='Gợi ý bài tập (VIP)'
-                            icon={<Crown className='w-3 h-3 text-amber-500' />}
-                            className='h-7.5 px-3.5 text-[10px] font-bold border-amber-200 text-amber-700 bg-amber-50/30 hover:bg-amber-50 rounded-lg transition-all'
-                        />
+
+                        <div className='relative'>
+                            <Popover open={isPickerOpen} onOpenChange={setIsPickerOpen}>
+                                <PopoverTrigger asChild>
+                                    <CustomButton
+                                        type='button'
+                                        onClick={(e) => {
+                                            if (!isVip) {
+                                                e.preventDefault()
+                                                e.stopPropagation()
+                                                openVipDialog()
+                                            }
+                                        }}
+                                        disabled={isGenerating}
+                                        variant='outline'
+                                        label={isGenerating ? 'Đang tạo...' : 'Gợi ý bài tập (VIP)'}
+                                        icon={isGenerating ? <Loader className='w-3 h-3 animate-spin' /> : <Crown className='w-3 h-3 text-amber-500' />}
+                                        className={cn(
+                                            'h-7.5 px-3.5 text-[10px] font-bold border-amber-200 text-amber-700 transition-all rounded-lg',
+                                            isPickerOpen ? 'bg-amber-100 shadow-inner' : 'bg-amber-50/30 hover:bg-amber-50'
+                                        )}
+                                    />
+                                </PopoverTrigger>
+                                {isVip && (
+                                    <PopoverContent className='p-0 bg-transparent border-none shadow-none z-[100]' align='end'>
+                                        <DistributionPicker
+                                            onGenerate={handleExecuteGeneration}
+                                        />
+                                    </PopoverContent>
+                                )}
+                            </Popover>
+                        </div>
+
                         <CustomButton
                             type='button'
                             onClick={onCancel}
@@ -184,7 +286,7 @@ const QuizEditor: React.FC<QuizEditorProps> = ({
                                     />
                                     <input
                                         value={choice.text}
-                                        onChange={(e) => handleUpdateChoiceText(choice.id, e.target.value)}
+                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleUpdateChoiceText(choice.id, e.target.value)}
                                         className={cn(
                                             'flex-1 bg-transparent border-none outline-none text-[14px] font-bold h-full',
                                             choice.isCorrect ? 'text-white placeholder:text-blue-100/50 placeholder:font-normal' : 'text-gray-700 placeholder:text-gray-300 placeholder:font-normal'
@@ -242,7 +344,10 @@ const QuizEditor: React.FC<QuizEditorProps> = ({
                             {draft.aiGenerated && (
                                 <div className='absolute bottom-3 right-3 flex items-center gap-1.5 px-2 py-1 bg-blue-50 rounded-lg border border-blue-100'>
                                     <Sparkles className='w-2.5 h-2.5 text-blue-500' />
-                                    <span className='text-[8px] font-bold text-blue-600 uppercase tracking-tighter'>AI Optimized</span>
+                                    <div className='flex flex-col'>
+                                        <span className='text-[8px] font-bold text-blue-600 uppercase tracking-tighter leading-none'>AI Optimized</span>
+                                        {draft.aiConfidence && <span className='text-[7px] text-blue-400 font-bold mt-0.5 leading-none'>{Math.round(draft.aiConfidence * 100)}% Confidence</span>}
+                                    </div>
                                 </div>
                             )}
                         </div>

@@ -3,16 +3,12 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
     Plus,
     BookOpen,
-    Sparkles,
-    Settings
 } from 'lucide-react'
 import { Quiz } from '@/types/ai'
-import { QuizDifficulty, BloomLevel, QuizBatchDistributionItem } from '@/types/quiz'
+import { QuizBatchDistributionItem } from '@/types/quiz'
 import CustomButton from '@/components/common/Button'
-import { cn } from '@/lib/utils'
 import QuizCard from './QuizCard'
 import QuizEditor from './QuizEditor'
-import DistributionPicker, { QUIZ_DISTRIBUTION_PRESETS } from './DistributionPicker'
 
 interface LearnovaQuizBuilderProps {
     chunkId: string
@@ -30,32 +26,12 @@ const LearnovaQuizBuilder: React.FC<LearnovaQuizBuilderProps> = ({
     const [quizzes, setQuizzes] = useState<Quiz[]>(initialQuizzes)
     const [activeIndex, setActiveIndex] = useState<number>(0)
     const [isEditing, setIsEditing] = useState(false)
-    const [showDistributionPicker, setShowDistributionPicker] = useState(false)
-    const [selectedPreset, setSelectedPreset] = useState<string>('balanced')
 
     useEffect(() => {
         setQuizzes(initialQuizzes)
         setActiveIndex(0)
         setIsEditing(false)
     }, [chunkId, initialQuizzes])
-
-    const handleGenerateSingleAI = () => {
-        if (onGenerateAI) {
-            onGenerateAI([{
-                difficulty: QuizDifficulty.MEDIUM,
-                bloomLevel: BloomLevel.UNDERSTAND,
-                count: 1
-            }])
-        }
-    }
-
-    const handleGenerateWithPreset = () => {
-        const preset = QUIZ_DISTRIBUTION_PRESETS.find(p => p.value === selectedPreset)
-        if (preset && onGenerateAI) {
-            onGenerateAI(preset.distribution)
-            setShowDistributionPicker(false)
-        }
-    }
 
     const handleSelectQuestion = (index: number) => {
         setActiveIndex(index)
@@ -123,28 +99,6 @@ const LearnovaQuizBuilder: React.FC<LearnovaQuizBuilderProps> = ({
                             </div>
 
                             <div className='flex gap-2.5'>
-                                <div className='flex items-center gap-2'>
-                                    <div className='relative'>
-                                        <CustomButton
-                                            type='button'
-                                            onClick={handleGenerateSingleAI}
-                                            label='Gợi ý từ Learnova AI'
-                                            variant='outline'
-                                            icon={<Sparkles className='w-3.5 h-3.5 text-blue-500' />}
-                                            className='h-7 px-3.5 text-[10px] font-bold border-blue-100 text-blue-600 bg-blue-50/30 hover:bg-blue-50 rounded-lg transition-all active:scale-95'
-                                        />
-                                        <div className='absolute -top-1 -right-1 w-2 h-2 bg-blue-500 rounded-full animate-ping' />
-                                    </div>
-                                    <CustomButton
-                                        type='button'
-                                        onClick={() => setShowDistributionPicker(!showDistributionPicker)}
-                                        variant='ghost'
-                                        size='icon'
-                                        icon={<Settings className={cn('w-4 h-4 transition-transform duration-500', showDistributionPicker ? 'rotate-90 text-blue-600' : 'text-gray-400')} />}
-                                        className={cn('h-7 w-7 rounded-lg transition-all', showDistributionPicker ? 'bg-blue-50' : 'hover:bg-gray-100')}
-                                    />
-                                </div>
-
                                 <CustomButton
                                     type='button'
                                     onClick={handleAddNewQuestion}
@@ -187,20 +141,10 @@ const LearnovaQuizBuilder: React.FC<LearnovaQuizBuilderProps> = ({
                                 </div>
                             )}
                         </div>
-
-                        {/* Distribution Picker Overlay */}
-                        <AnimatePresence>
-                            {showDistributionPicker && (
-                                <DistributionPicker
-                                    selectedPreset={selectedPreset}
-                                    onSelect={setSelectedPreset}
-                                    onGenerate={handleGenerateWithPreset}
-                                />
-                            )}
-                        </AnimatePresence>
                     </motion.div>
                 ) : (
                     <QuizEditor
+                        chunkId={chunkId}
                         quiz={quizzes[activeIndex]}
                         index={activeIndex}
                         total={quizzes.length}

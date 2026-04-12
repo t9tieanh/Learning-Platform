@@ -32,11 +32,6 @@ const LearnovaDetailedView: React.FC<LearnovaDetailedViewProps> = ({
     videoSrc,
     onBack,
     detailedVideoRef,
-    chunkQuestions,
-    newQuestionInputs,
-    handleAddQuestion,
-    handleRemoveQuestion,
-    setNewQuestionInputs,
     handleSeek,
     mainWrapperRef,
     onSaveSummary
@@ -118,7 +113,7 @@ const LearnovaDetailedView: React.FC<LearnovaDetailedViewProps> = ({
                     </HighGlossBackground>
 
                     <div className='w-full'>
-                        <Accordion type='single' collapsible defaultValue='chunk-0' className='space-y-6'>
+                        <Accordion type='single' collapsible defaultValue={chunks[0]?.id} className='space-y-6'>
                             {chunks.map((chunk, idx) => (
                                 <ChunkItem
                                     key={chunk.id}

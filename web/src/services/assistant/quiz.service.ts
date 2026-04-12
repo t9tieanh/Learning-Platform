@@ -18,6 +18,7 @@ import type {
 export interface SingleQuizGenerationRequest {
   difficulty: QuizDifficulty
   bloomLevel: BloomLevel
+  questionType: QuestionType
   numberOfQuestions: number
 }
 

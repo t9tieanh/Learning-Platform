@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
     PlayCircle,
@@ -8,13 +8,23 @@ import {
     Brain,
     ChevronRight,
     Sparkles,
-    Loader
+    Loader,
+    Settings,
+    Crown
 } from 'lucide-react'
 import { LessonChunk, Quiz } from '@/types/ai'
 import CustomButton from '@/components/common/Button'
 import { AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion'
 import LearnovaQuizBuilder from './QuizBuilder'
 import SummaryEditor from './SummaryEditor'
+import DistributionPicker, { QUIZ_DISTRIBUTION_PRESETS } from './DistributionPicker'
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover"
+import { useVipUpgrade } from '@/contexts/VipUpgradeContext'
+import { useAuthStore } from '@/stores/useAuth.stores'
 import { cn } from '@/lib/utils'
 import quizService from '@/services/assistant/quiz.service'
 import { QuizDifficulty, BloomLevel, QuizBatchDistributionItem } from '@/types/quiz'
@@ -48,12 +58,18 @@ const ChunkItem: React.FC<ChunkItemProps> = ({
     const [chunkQuizzes, setChunkQuizzes] = useState<Quiz[]>(chunk.quizzes || [])
     const [isQuizVisible, setIsQuizVisible] = useState(false)
     const [isBulkGenerating, setIsBulkGenerating] = useState(false)
+    const [isLoadingQuizzes, setIsLoadingQuizzes] = useState(false)
+    const [isPickerOpen, setIsPickerOpen] = useState(false)
+    const { openVipDialog } = useVipUpgrade()
+
+    const { data: authData } = useAuthStore()
+    const isVip = authData?.isVip || false
 
     const handleSaveQuizzes = (updatedQuizzes: Quiz[]) => {
         setChunkQuizzes(updatedQuizzes)
     }
 
-    const mapQuizzes = (quizzes: any[]): Quiz[] => {
+    const mapQuizzes = useCallback((quizzes: any[]): Quiz[] => {
         return quizzes.map(q => ({
             id: q.id,
             question: q.question,
@@ -70,48 +86,35 @@ const ChunkItem: React.FC<ChunkItemProps> = ({
             aiConfidence: q.aiConfidence,
             isApproved: q.isApproved ?? false
         }))
-    }
+    }, [])
 
-    const handleBulkGenerateQuizzes = async () => {
-        if (isBulkGenerating) return
-
+    const fetchQuizzes = useCallback(async () => {
         try {
-            setIsBulkGenerating(true)
-            toast.loading('Đang tạo 3 câu hỏi từ AI...')
-
-            const response = await quizService.generateBatchQuizzes(chunk.id, {
-                count: 3,
-                distribution: [
-                    { difficulty: QuizDifficulty.EASY, bloomLevel: BloomLevel.REMEMBER, count: 1 },
-                    { difficulty: QuizDifficulty.MEDIUM, bloomLevel: BloomLevel.UNDERSTAND, count: 1 },
-                    { difficulty: QuizDifficulty.MEDIUM, bloomLevel: BloomLevel.APPLY, count: 1 }
-                ]
-            })
-
-            if (response.code === 201 && response.result?.quizzes) {
-                const generatedQuizzes = mapQuizzes(response.result.quizzes)
-                const mergedQuizzes = [...chunkQuizzes, ...generatedQuizzes]
-                setChunkQuizzes(mergedQuizzes)
-                setIsQuizVisible(true)
-                toast.dismiss()
-                toast.success(`✓ Đã tạo thành công 3 câu hỏi! Tổng cộng: ${mergedQuizzes.length} câu`)
-            } else {
-                toast.dismiss()
-                toast.error(response.message || 'Lỗi khi tạo câu hỏi')
+            setIsLoadingQuizzes(true)
+            const response = await quizService.getChunkQuizzes(chunk.id)
+            if (response.code === 200 && response.result) {
+                setChunkQuizzes(mapQuizzes(response.result))
             }
         } catch (error) {
-            toast.dismiss()
-            toast.error(error instanceof Error ? error.message : 'Lỗi khi tạo câu hỏi')
+            console.error('Error fetching quizzes:', error)
+            toast.error('Không thể lấy danh sách bài tập')
         } finally {
-            setIsBulkGenerating(false)
+            setIsLoadingQuizzes(false)
         }
-    }
+    }, [chunk.id, mapQuizzes])
 
-    const handleGenerateWithDistribution = async (distribution: QuizBatchDistributionItem[]) => {
+    useEffect(() => {
+        if (isQuizVisible) {
+            fetchQuizzes()
+        }
+    }, [isQuizVisible, fetchQuizzes])
+
+    const handleGenerateBatch = async (distribution: QuizBatchDistributionItem[]) => {
         if (isBulkGenerating) return
 
         try {
             setIsBulkGenerating(true)
+            setIsPickerOpen(false)
             const count = distribution.reduce((sum, item) => sum + item.count, 0)
             toast.loading(`Đang tạo ${count} câu hỏi từ AI...`)
 
@@ -136,6 +139,15 @@ const ChunkItem: React.FC<ChunkItemProps> = ({
         }
     }
 
+    const handleTriggerAI = (e: React.MouseEvent) => {
+        e.stopPropagation()
+        if (!isVip) {
+            openVipDialog()
+            return
+        }
+        setIsPickerOpen(!isPickerOpen)
+    }
+
     return (
         <AccordionItem
             value={chunk.id}
@@ -148,7 +160,7 @@ const ChunkItem: React.FC<ChunkItemProps> = ({
                             {idx + 1}
                         </div>
                         <div className='text-left space-y-1'>
-                            <h4 className='text-[16px] font-extrabold text-gray-900 tracking-tight group-hover:text-blue-600 transition-colors'>
+                            <h4 className='text-[14px] font-extrabold text-gray-900 tracking-tight group-hover:text-blue-600 transition-colors'>
                                 {chunk.title || `Phân đoạn ${idx + 1}`}
                             </h4>
                             <div className='flex items-center gap-3 text-[11px] text-gray-400 font-bold uppercase tracking-widest'>
@@ -210,7 +222,7 @@ const ChunkItem: React.FC<ChunkItemProps> = ({
 
                 {/* Quiz Header & Actions */}
                 <div className='pt-2'>
-                    <div className='flex items-center justify-between gap-4'>
+                    <div className='flex items-center justify-between gap-4 flex-wrap'>
                         <CustomButton
                             type='button'
                             onClick={() => setIsQuizVisible(!isQuizVisible)}
@@ -226,7 +238,7 @@ const ChunkItem: React.FC<ChunkItemProps> = ({
                                 'p-1.5 rounded-lg transition-colors bg-gray-50',
                                 isQuizVisible ? 'text-blue-600' : 'text-gray-400'
                             )}>
-                                <BookOpen className='w-4 h-4' />
+                                {isLoadingQuizzes ? <Loader className='w-4 h-4 animate-spin' /> : <BookOpen className='w-4 h-4' />}
                             </div>
                             <div className='text-left'>
                                 <p className={cn(
@@ -234,7 +246,7 @@ const ChunkItem: React.FC<ChunkItemProps> = ({
                                     isQuizVisible ? 'text-blue-600' : 'text-gray-600'
                                 )}>Hệ thống câu hỏi ôn tập</p>
                                 <p className='text-[9px] font-medium text-gray-400 mt-1'>
-                                    {isQuizVisible ? 'Đóng trình chỉnh sửa' : `Đã tạo ${chunkQuizzes.length} câu hỏi`}
+                                    {isLoadingQuizzes ? 'Đang cập nhật...' : isQuizVisible ? 'Đóng trình chỉnh sửa' : `Đã tạo ${chunkQuizzes.length} câu hỏi`}
                                 </p>
                             </div>
                             <ChevronRight className={cn(
@@ -244,18 +256,54 @@ const ChunkItem: React.FC<ChunkItemProps> = ({
                         </CustomButton>
 
                         <div className='flex items-center gap-2'>
-                            <div className='relative'>
-                                <CustomButton
-                                    type='button'
-                                    onClick={handleBulkGenerateQuizzes}
-                                    disabled={isBulkGenerating}
-                                    variant='outline'
-                                    label='Gợi ý 3 câu hỏi (AI)'
-                                    icon={isBulkGenerating ? <Loader className='w-3 h-3 animate-spin' /> : <Sparkles className='w-3 h-3 text-blue-500' />}
-                                    className='h-8 px-4 text-[10px] font-bold border-blue-100 text-blue-600 bg-blue-50/30 hover:bg-blue-50 rounded-lg transition-all active:scale-95'
-                                />
-                                <div className='absolute -top-1 -right-1 w-2 h-2 bg-blue-500 rounded-full animate-pulse' />
-                            </div>
+                            <Popover open={isPickerOpen} onOpenChange={setIsPickerOpen}>
+                                <PopoverTrigger asChild>
+                                    <div className='relative'>
+                                        <CustomButton
+                                            type='button'
+                                            onClick={(e) => {
+                                                if (!isVip) {
+                                                    e.preventDefault()
+                                                    e.stopPropagation()
+                                                    openVipDialog()
+                                                }
+                                            }}
+                                            disabled={isBulkGenerating}
+                                            label={
+                                                isBulkGenerating
+                                                    ? 'Đang tạo...'
+                                                    : isVip
+                                                        ? 'Gợi ý từ Learnova AI'
+                                                        : 'Dành riêng cho VIP'
+                                            }
+                                            variant={isVip ? 'default' : 'outline'}
+                                            icon={
+                                                isBulkGenerating
+                                                    ? <Loader className='w-3 h-3 animate-spin' />
+                                                    : isVip
+                                                        ? <Sparkles className='w-3 h-3 text-yellow-400' />
+                                                        : <Crown className='w-3 h-3 text-amber-500' />
+                                            }
+                                            className={cn(
+                                                'h-8 px-5 text-[10px] font-bold transition-all rounded-lg active:scale-95',
+                                                isVip
+                                                    ? isPickerOpen
+                                                        ? 'bg-indigo-600 text-white shadow-indigo-100'
+                                                        : 'bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-50'
+                                                    : 'border-amber-200 text-amber-600 bg-amber-50/30 hover:bg-amber-50'
+                                            )}
+                                        />
+                                        {isVip && !isBulkGenerating && !isPickerOpen && <div className='absolute -top-1 -right-1 w-2 h-2 bg-blue-500 rounded-full animate-ping' />}
+                                    </div>
+                                </PopoverTrigger>
+                                {isVip && (
+                                    <PopoverContent className='p-0 bg-transparent border-none shadow-none z-[100]' align='end'>
+                                        <DistributionPicker
+                                            onGenerate={handleGenerateBatch}
+                                        />
+                                    </PopoverContent>
+                                )}
+                            </Popover>
                         </div>
                     </div>
 
@@ -271,7 +319,7 @@ const ChunkItem: React.FC<ChunkItemProps> = ({
                                     chunkId={chunk.id}
                                     initialQuizzes={chunkQuizzes}
                                     onSave={handleSaveQuizzes}
-                                    onGenerateAI={handleGenerateWithDistribution}
+                                    onGenerateAI={handleGenerateBatch}
                                 />
                             </motion.div>
                         )}
