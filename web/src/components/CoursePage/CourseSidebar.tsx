@@ -58,7 +58,7 @@ export const CourseSidebar = ({ sections, currentLectureId, onSelectLecture, onC
         <div className='flex px-4 gap-8 relative'>
           <button
             onClick={() => setActiveTab('content')}
-            className={`pb-4 text-[11px] font-black tracking-[0.1em] transition-all relative z-10 ${activeTab === 'content' ? 'text-blue-600' : 'text-gray-400 hover:text-gray-600'
+            className={`pb-4 text-[11px] font-bold tracking-[0.1em] transition-all relative z-10 ${activeTab === 'content' ? 'text-blue-600' : 'text-gray-400 hover:text-gray-600'
               }`}
           >
             Chương học
@@ -71,7 +71,7 @@ export const CourseSidebar = ({ sections, currentLectureId, onSelectLecture, onC
           </button>
           <button
             onClick={() => setActiveTab('ai')}
-            className={`pb-4 text-[11px] font-black tracking-[0.1em] transition-all relative z-10 flex items-center gap-2 ${activeTab === 'ai' ? 'text-blue-600' : 'text-gray-400 hover:text-gray-600'
+            className={`pb-4 text-[11px] font-bold tracking-[0.1em] transition-all relative z-10 flex items-center gap-2 ${activeTab === 'ai' ? 'text-blue-600' : 'text-gray-400 hover:text-gray-600'
               }`}
           >
             <Sparkles className={`w-3.5 h-3.5 ${activeTab === 'ai' ? 'animate-pulse text-blue-500' : ''}`} />

@@ -47,17 +47,17 @@ export const SectionList = ({ sections, currentLectureId, onSelectLecture }: Sec
             <button
               onClick={() => toggleSection(index)}
               className={`w-full p-4 flex items-center justify-between rounded-2xl border transition-all duration-300 ${isOpen
-                  ? 'bg-[#F8FAFF] border-blue-200 shadow-sm'
-                  : 'bg-white border-gray-100 hover:border-blue-100 hover:bg-blue-50/30'
+                ? 'bg-[#F8FAFF] border-blue-200 shadow-sm'
+                : 'bg-white border-gray-100 hover:border-blue-100 hover:bg-blue-50/30'
                 }`}
             >
               <div className='flex items-center gap-4 text-left'>
                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${isOpen ? 'bg-blue-600 text-white' : 'bg-gray-50 text-gray-500'
                   }`}>
-                  <span className='text-[13px] font-black'>{index + 1}</span>
+                  <span className='text-[13px] font-bold'>{index + 1}</span>
                 </div>
                 <div>
-                  <h3 className={`font-bold text-[14px] leading-tight transition-colors ${isOpen ? 'text-[#0C356A]' : 'text-gray-700 group-hover:text-blue-600'
+                  <h3 className={`font-semibold text-[14px] leading-tight transition-colors ${isOpen ? 'text-[#0C356A]' : 'text-gray-700 group-hover:text-blue-600'
                     }`}>
                     {section.title}
                   </h3>
@@ -68,13 +68,13 @@ export const SectionList = ({ sections, currentLectureId, onSelectLecture }: Sec
                       ) : (
                         <Circle className='w-3 h-3 text-gray-300' />
                       )}
-                      <span className={`text-[10px] font-black uppercase tracking-wider ${isFullyCompleted ? 'text-green-600' : 'text-gray-400'
+                      <span className={`text-[10px] font-bold uppercase tracking-wider ${isFullyCompleted ? 'text-green-600' : 'text-gray-400'
                         }`}>
                         {completedCount}/{totalCount} Bài học
                       </span>
                     </div>
                     <span className='text-[10px] text-gray-300 font-bold px-1'>•</span>
-                    <span className='text-[10px] text-blue-400 font-black uppercase tracking-wider'>
+                    <span className='text-[10px] text-blue-400 font-bold uppercase tracking-wider'>
                       {section.duration}
                     </span>
                   </div>
