@@ -50,19 +50,23 @@ const statusOptions: Array<'' | 'PUBLISHED' | 'DRAFT' | 'PENDING_REVIEW'> = ['',
 
 const EmptyState: FC = () => {
   return (
-    <div className='flex flex-col items-center justify-center py-24 px-6 bg-white rounded-3xl border border-dashed border-gray-200 shadow-sm'>
-      <div className='w-24 h-24 bg-blue-50 rounded-[2.5rem] flex items-center justify-center mb-6 relative group'>
-        <div className='absolute inset-0 bg-blue-100 rounded-[2.5rem] scale-90 blur-xl opacity-0 group-hover:opacity-100 transition-all duration-500' />
-        <BookOpen className='w-10 h-10 text-blue-500 relative z-10 transition-transform duration-500 group-hover:scale-110' />
-        <Rocket className='w-5 h-5 text-blue-400 absolute top-0 right-0 animate-bounce' />
+    <div className='flex flex-col items-center justify-center py-28 px-6 bg-white rounded-[2.5rem] border border-gray-100 shadow-sm'>
+      <div className='mb-8 relative flex items-center justify-center'>
+        <div className='w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center'>
+          <BookOpen className='w-10 h-10 text-blue-600' />
+        </div>
       </div>
-      <h3 className='text-xl font-black text-gray-900 mb-2 tracking-tight uppercase'>Chưa có khóa học nào</h3>
-      <p className='text-gray-400 text-sm font-medium max-w-sm text-center mb-8 leading-relaxed'>
-        Hãy bắt đầu hành trình giảng dạy của bạn bằng cách xây dựng bài giảng đầu tiên trên hệ thống.
-      </p>
+
+      <div className='text-center space-y-2 mb-8'>
+        <h3 className='text-xl font-bold text-gray-900 tracking-tight'>Chưa có khóa học nào</h3>
+        <p className='text-gray-500 text-sm font-medium max-w-[320px] mx-auto leading-relaxed'>
+          Hãy bắt đầu hành trình giảng dạy của bạn bằng cách xây dựng khóa học đầu tiên trên hệ thống.
+        </p>
+      </div>
+
       <button
         onClick={() => window.location.search = '?openCreate=true'}
-        className='inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-2xl font-black text-[13px] hover:bg-black transition-all shadow-xl shadow-blue-100 active:scale-[0.98]'
+        className='inline-flex items-center gap-2 px-8 py-3 bg-blue-600 text-white rounded-xl font-bold text-[14px] hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-100 transition-all active:scale-[0.98]'
       >
         <Plus className='w-4 h-4' />
         Tạo khóa học ngay

@@ -1,4 +1,4 @@
-import { FC, useState } from 'react'
+import { FC, useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -8,6 +8,10 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '
 import { toast } from 'sonner'
 import { blogService } from '@/services/blog/blog.service'
 import noPhoto from '@/assets/images/no-photo.avif'
+import CustomButton from '@/components/common/Button'
+import { IoAddCircle } from 'react-icons/io5'
+import courseUserService from '@/services/course/course-user.service'
+import { useAuthStore } from '@/stores/useAuth.stores'
 
 interface BlogItem {
   id: string
@@ -24,24 +28,71 @@ interface BlogTableProps {
 }
 
 const EmptyState: FC = () => {
+  const navigate = useNavigate()
+  const { data } = useAuthStore()
+  const instructorId = data?.userId || (data as any)?.id
+  const [courseCount, setCourseCount] = useState<number | null>(null)
+  const [loading, setLoading] = useState<boolean>(false)
+
+  useEffect(() => {
+    let mounted = true
+      ; (async () => {
+        if (!instructorId) return
+        try {
+          setLoading(true)
+          const res = await courseUserService.countInstructorCourseValid({ instructorId })
+          const count = typeof res?.result === 'number' ? res.result : res?.result?.count ?? 0
+          if (mounted) setCourseCount(count)
+        } catch (e) {
+          if (mounted) setCourseCount(0)
+        } finally {
+          if (mounted) setLoading(false)
+        }
+      })()
+    return () => {
+      mounted = false
+    }
+  }, [instructorId])
+
+  const canCreate = (courseCount ?? 0) >= 5
+  const tooltipMsg = !canCreate ? 'Cần tối thiểu 5 khóa học để viết bài' : undefined
+
   return (
-    <div className='flex flex-col items-center justify-center py-24 px-6 bg-white rounded-[2.5rem] border border-dashed border-gray-200 shadow-sm'>
-      <div className='w-24 h-24 bg-indigo-50 rounded-[2.5rem] flex items-center justify-center mb-6 relative group'>
-        <div className='absolute inset-0 bg-indigo-100 rounded-[2.5rem] scale-90 blur-xl opacity-0 group-hover:opacity-100 transition-all duration-500' />
-        <PenTool className='w-10 h-10 text-indigo-500 relative z-10 transition-transform duration-500 group-hover:scale-110' />
-        <Sparkles className='w-5 h-5 text-indigo-400 absolute top-0 right-0 animate-bounce' />
+    <div className='flex flex-col items-center justify-center py-28 px-6 bg-white rounded-[2.5rem] border border-gray-100 shadow-sm'>
+      <div className='mb-8 relative flex items-center justify-center'>
+        <div className='w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center'>
+          <PenTool className='w-10 h-10 text-blue-600' />
+        </div>
       </div>
-      <h3 className='text-xl font-black text-gray-900 mb-2 tracking-tight uppercase'>Chưa có bài viết nào</h3>
-      <p className='text-gray-400 text-sm font-medium max-w-sm text-center mb-8 leading-relaxed'>
-        Hãy chia sẻ kinh nghiệm và kiến thức của bạn thông qua những bài viết blog chất lượng.
-      </p>
-      <button
-        onClick={() => window.location.href = '/teacher/blog/create'}
-        className='inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-2xl font-black text-[13px] hover:bg-black transition-all shadow-xl shadow-indigo-100 active:scale-[0.98]'
-      >
-        <Plus className='w-4 h-4' />
-        Viết bài ngay
-      </button>
+
+      <div className='text-center space-y-2 mb-8'>
+        <h3 className='text-xl font-bold text-gray-900 tracking-tight'>Chưa có bài viết nào</h3>
+        <p className='text-gray-500 text-sm font-medium max-w-[320px] mx-auto leading-relaxed'>
+          Chia sẻ kiến thức chuyên môn của bạn với cộng đồng. Bài viết đầu tiên đang chờ bạn.
+        </p>
+      </div>
+
+      <div className='relative group'>
+        <CustomButton
+          className={`min-w-[180px] h-12 rounded-xl text-sm font-bold transition-all ${!canCreate
+            ? 'bg-gray-100 text-gray-400 cursor-not-allowed mx-auto'
+            : 'bg-blue-600 text-white hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-100 mx-auto'
+            }`}
+          label={loading ? 'Đang kiểm tra...' : 'Viết bài ngay'}
+          icon={!loading && <IoAddCircle className='h-5 w-5 mr-1.5' />}
+          onClick={() => {
+            if (!canCreate) return
+            navigate('/teacher/create-blog')
+          }}
+          disabled={!canCreate || loading}
+        />
+
+        {!canCreate && !loading && (
+          <div className='absolute top-full mt-3 left-1/2 -translate-x-1/2 whitespace-nowrap bg-gray-800 text-white text-[11px] font-medium px-4 py-2 rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-all pointer-events-none'>
+            {tooltipMsg}
+          </div>
+        )}
+      </div>
     </div>
   )
 }
