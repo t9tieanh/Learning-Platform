@@ -7,7 +7,6 @@ import userService from '@/services/user/user.service'
 import { useAuthStore } from '@/stores/useAuth.stores'
 import { toast } from 'sonner'
 
-import { Loader2 } from 'lucide-react'
 import learnovaLogo from '@/assets/images/logo1.png'
 
 interface SlidingLoginSignupProps {
