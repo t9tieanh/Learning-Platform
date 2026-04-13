@@ -87,6 +87,7 @@ services:
       USER_SERVICE_GRPC_ADDRESS: "static://host.docker.internal:50051"
       SALE_SERVICE_GRPC_ADDRESS: "static://host.docker.internal:50053"
       BLOG_SERVICE_GRPC_ADDRESS: "static://host.docker.internal:50052"
+      AWS_CLOUDFRONT_PRIVATE_KEY_PATH: "file:/app/cloudfront-private-key.pem"
     ports:
       - "${COURSE_SERVICE_PORT:-8081}:8081"
       - "${COURSE_SERVICE_GRPC_PORT:-50054}:50054"

@@ -5,13 +5,17 @@ import { searchService, SearchChunkResult } from '~/service/search/search.servic
 import openaiQueueService from '~/service/queue/openaiQueue.service';
 
 export interface RAGResult {
-    answer: string;
-    sources: Array<{
-        chunkId: string;
-        title: string | null;
-        chunkIndex: number;
-        similarity: number;
-    }>;
+  answer: string;
+  sources: Array<{
+    chunkId: string;
+    title: string | null;
+    summary: string | null;
+    chunkIndex: number;
+    startTime: string | null;
+    endTime: string | null;
+    timestamp: string | null;
+    similarity: number;
+  }>;
 }
 
 /**
@@ -26,8 +30,8 @@ export interface RAGResult {
  * This ensures answers are grounded in lesson content, reducing hallucinations.
  */
 export class LessonRAGService {
-  
-  constructor() {}
+
+  constructor() { }
 
   // -------------------------------------------------------------------------
   // Public API
@@ -81,7 +85,11 @@ export class LessonRAGService {
         sources: chunks.map((chunk) => ({
           chunkId: chunk.id,
           title: chunk.title,
+          summary: chunk.summary,
           chunkIndex: chunk.chunkIndex,
+          startTime: chunk.startTime,
+          endTime: chunk.endTime,
+          timestamp: chunk.timestamp,
           similarity: chunk.similarity,
         })),
       };
@@ -96,69 +104,69 @@ export class LessonRAGService {
     }
   }
 
-    // -------------------------------------------------------------------------
-    // Private Helpers
-    // -------------------------------------------------------------------------
+  // -------------------------------------------------------------------------
+  // Private Helpers
+  // -------------------------------------------------------------------------
 
-    /**
-     * Format retrieved chunks as context string.
-     *
-     * Format:
-     * ```
-     * [Chunk 0 - Title]
-     * Summary: ...
-     * Content: ...
-     *
-     * [Chunk 1 - Title]
-     * Summary: ...
-     * Content: ...
-     * ```
-     *
-     * @param chunks - Array of retrieved search results
-     * @returns Formatted context string for LLM
-     */
-    private formatContext(chunks: SearchChunkResult[]): string {
-        return chunks
-            .map((chunk, index) => {
-                const title = chunk.title ? `[Phần ${chunk.chunkIndex + 1}: ${chunk.title}]` : `[Phần ${chunk.chunkIndex + 1}]`;
+  /**
+   * Format retrieved chunks as context string.
+   *
+   * Format:
+   * ```
+   * [Chunk 0 - Title]
+   * Summary: ...
+   * Content: ...
+   *
+   * [Chunk 1 - Title]
+   * Summary: ...
+   * Content: ...
+   * ```
+   *
+   * @param chunks - Array of retrieved search results
+   * @returns Formatted context string for LLM
+   */
+  private formatContext(chunks: SearchChunkResult[]): string {
+    return chunks
+      .map((chunk, index) => {
+        const title = chunk.title ? `[Phần ${chunk.chunkIndex + 1}: ${chunk.title}]` : `[Phần ${chunk.chunkIndex + 1}]`;
 
-                const summary = chunk.summary
-                    ? `Tóm tắt: ${chunk.summary}\n`
-                    : '';
+        const summary = chunk.summary
+          ? `Tóm tắt: ${chunk.summary}\n`
+          : '';
 
-                return `${title}\n${summary}Nội dung: ${chunk.content}`;
-            })
-            .join('\n\n---\n\n');
+        return `${title}\n${summary}Nội dung: ${chunk.content}`;
+      })
+      .join('\n\n---\n\n');
+  }
+
+  /**
+   * Generate answer using LLM with RAG context (using Structured Outputs).
+   * 
+   * Uses OpenAiQueueService for:
+   * - Structured output guarantee (always returns valid JSON)
+   * - Reliable error handling
+   * - Future Bull Queue integration for retry logic
+   *
+   * @param context - Formatted chunks as context
+   * @param question - User's question
+   * @returns LLM-generated answer
+   */
+  private async generateAnswer(context: string, question: string): Promise<string> {
+    try {
+      Logger.info('[RAGService.generateAnswer] Calling OpenAI with Structured Outputs');
+
+      const answer = await openaiQueueService.queueRAGAnswer(
+        RAGPrompts.system(),
+        RAGPrompts.human(context, question)
+      );
+
+      Logger.info('[RAGService.generateAnswer] Answer generated successfully');
+      return answer;
+    } catch (error) {
+      Logger.error(`[RAGService.generateAnswer] LLM call failed – ${error}`);
+      throw error;
     }
-
-    /**
-     * Generate answer using LLM with RAG context (using Structured Outputs).
-     * 
-     * Uses OpenAiQueueService for:
-     * - Structured output guarantee (always returns valid JSON)
-     * - Reliable error handling
-     * - Future Bull Queue integration for retry logic
-     *
-     * @param context - Formatted chunks as context
-     * @param question - User's question
-     * @returns LLM-generated answer
-     */
-    private async generateAnswer(context: string, question: string): Promise<string> {
-        try {
-            Logger.info('[RAGService.generateAnswer] Calling OpenAI with Structured Outputs');
-            
-            const answer = await openaiQueueService.queueRAGAnswer(
-                RAGPrompts.system(),
-                RAGPrompts.human(context, question)
-            );
-
-            Logger.info('[RAGService.generateAnswer] Answer generated successfully');
-            return answer;
-        } catch (error) {
-            Logger.error(`[RAGService.generateAnswer] LLM call failed – ${error}`);
-            throw error;
-        }
-    }
+  }
 }
 
 // Export singleton instance

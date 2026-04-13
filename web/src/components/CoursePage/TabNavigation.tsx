@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from 'react'
-import { Search, Info, MessageCircleQuestionMark, NotebookPen, Sparkles } from 'lucide-react'
+import { Search, Info, MessageCircleQuestionMark, NotebookPen } from 'lucide-react'
 import { QASection } from './QASection/QASection'
 import { LectureInfo } from '@/components/CoursePage/LectureInfo'
 import { Lesson } from '@/types/course-student'
@@ -14,13 +14,15 @@ export const TabNavigation = ({
   thumbnailUri,
   currentLectureId,
   instructorId,
-  analysisData
+  analysisData,
+  onSeek
 }: {
   currentLecture: Lesson
   thumbnailUri: string
   currentLectureId: string
   instructorId: string
   analysisData?: AnalysisResult | null
+  onSeek?: (timestamp: string) => void
 }) => {
   const [activeTab, setActiveTab] = useState('Tổng quan')
   const [open, setOpen] = useState(false)
@@ -30,10 +32,6 @@ export const TabNavigation = ({
       {
         label: 'Tổng quan',
         icon: <Info className='w-5 h-5' />
-      },
-      {
-        label: 'Learnova AI',
-        icon: <Sparkles className='w-5 h-5 text-blue-600' />
       },
       {
         label: 'Hỏi đáp',
@@ -94,16 +92,18 @@ export const TabNavigation = ({
       <div className='px-0 md:px-6'>
         {activeTab === 'Hỏi đáp' && <QASection lessonId={String(currentLectureId)} instructorId={instructorId} />}
         {activeTab === 'Tổng quan' && (
-          <div className='mt-6 mx-auto w-full'>
+          <div className='mt-6 mx-auto w-full space-y-8'>
             <LectureInfo lesson={currentLecture} thumbnailUri={thumbnailUri} />
+            <div className='border-t border-gray-100 pt-8'>
+              <AILessonInsights
+                lessonId={currentLecture.id}
+                summary={analysisData?.summary || null}
+                chunks={analysisData?.chunks || []}
+                subtitles={analysisData?.subtitles || null}
+                onSeek={onSeek}
+              />
+            </div>
           </div>
-        )}
-        {activeTab === 'Learnova AI' && (
-          <AILessonInsights
-            summary={analysisData?.summary || null}
-            chunks={analysisData?.chunks || []}
-            subtitles={analysisData?.subtitles || null}
-          />
         )}
       </div>
       <NoteSection

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useImperativeHandle, forwardRef } f
 import { motion } from 'framer-motion'
 import { LoadingDots } from '@/components/common/Loading/LoadingDots'
 import learnovaLogo from '@/assets/images/logo1.png'
+import { cn } from '@/lib/utils'
 
 export interface SubtitleEntry {
     start: number
@@ -15,10 +16,12 @@ interface LearnovaVideoPlayerProps {
     isPiPEnabled?: boolean
     className?: string
     containerClassName?: string
+    onSeeking?: (e: React.SyntheticEvent<HTMLVideoElement>) => void
+    onTimeUpdate?: (e: React.SyntheticEvent<HTMLVideoElement>) => void
 }
 
 const LearnovaVideoPlayer = forwardRef<HTMLVideoElement | null, LearnovaVideoPlayerProps>(
-    ({ src, subtitles = [], isPiPEnabled = false, className = '', containerClassName = '' }, ref) => {
+    ({ src, subtitles = [], isPiPEnabled = false, className = '', containerClassName = '', onSeeking, onTimeUpdate }, ref) => {
         const [isVideoLoading, setIsVideoLoading] = useState(true)
         const [activeSubtitle, setActiveSubtitle] = useState<string | null>(null)
         const [isPiP, setIsPiP] = useState(false)
@@ -55,25 +58,30 @@ const LearnovaVideoPlayer = forwardRef<HTMLVideoElement | null, LearnovaVideoPla
             setIsVideoLoading(false)
         }
 
-        const handleTimeUpdate = (e: React.SyntheticEvent<HTMLVideoElement>) => {
+        const handleInternalTimeUpdate = (e: React.SyntheticEvent<HTMLVideoElement>) => {
             const time = e.currentTarget.currentTime
             const sub = subtitles.find((s) => time >= s.start && time <= s.end)
             if (sub?.text !== activeSubtitle) {
                 setActiveSubtitle(sub ? sub.text : null)
             }
+
+            if (onTimeUpdate) {
+                onTimeUpdate(e)
+            }
         }
 
         return (
-            <div ref={videoContainerRef} className={`bg-gray-50 pb-4 min-h-[300px] ${containerClassName}`}>
+            <div ref={videoContainerRef} className={cn('bg-gray-50 pb-4 min-h-[300px]', containerClassName)}>
                 <motion.div
                     drag={isPiP && isPiPEnabled}
                     dragMomentum={false}
                     animate={isPiP && isPiPEnabled ? undefined : { x: 0, y: 0 }}
                     transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                    className={`${isPiP && isPiPEnabled
-                        ? 'fixed bottom-6 left-6 w-80 z-[100] shadow-2xl scale-100 cursor-move'
-                        : 'relative w-full aspect-video scale-100 cursor-default'
-                        } ${className}`}
+                    className={cn(
+                        'relative w-full aspect-video scale-100 cursor-default',
+                        className,
+                        isPiP && isPiPEnabled && 'fixed bottom-6 left-6 w-80 z-[100] shadow-2xl scale-100 cursor-move h-auto max-w-[320px]'
+                    )}
                 >
                     <div className='relative w-full h-full bg-black rounded-2xl overflow-hidden shadow-2xl border-4 border-white group'>
                         <video
@@ -82,7 +90,8 @@ const LearnovaVideoPlayer = forwardRef<HTMLVideoElement | null, LearnovaVideoPla
                             className='w-full h-full object-contain pointer-events-auto'
                             controls
                             onLoadedData={handleMediaLoad}
-                            onTimeUpdate={handleTimeUpdate}
+                            onTimeUpdate={handleInternalTimeUpdate}
+                            onSeeking={onSeeking}
                         />
 
                         {isPiP && isPiPEnabled && (

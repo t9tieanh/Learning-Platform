@@ -6,6 +6,22 @@ import type { LessonChunk } from '@/types/ai'
 // Types
 // ---------------------------------------------------------------------------
 
+export interface RAGSource {
+  chunkId: string
+  title: string | null
+  summary: string | null
+  chunkIndex: number
+  startTime: string | null
+  endTime: string | null
+  timestamp: string | null
+  similarity: number
+}
+
+export interface RAGResult {
+  answer: string
+  sources: RAGSource[]
+}
+
 export interface AnalysisResult {
   lessonId: string
   status: 'completed' | 'processing' | 'not_found'
@@ -46,6 +62,17 @@ class AssistantAnalysisService {
       { summary }
     )
     return res.data as ApiResponse<LessonChunk>
+  }
+
+  /**
+   * Ask AI a question about the lesson.
+   */
+  async askAI(lessonId: string, question: string): Promise<ApiResponse<RAGResult>> {
+    const res = await axiosClient.axiosInstance.post(
+      `assistant/analysis/lessons/8c34e4ac-87a5-4ab2-955f-972749d18032/chat`,
+      { question }
+    )
+    return res.data as ApiResponse<RAGResult>
   }
 }
 

@@ -155,3 +155,37 @@
   color: #1d4ed8;
   font-weight: 600;
 }
+
+/* AI Chat Markdown Styles */
+.react-markdown-container {
+  line-height: 1.6;
+}
+
+.react-markdown-container p {
+  margin-bottom: 0.75rem;
+}
+
+.react-markdown-container p:last-child {
+  margin-bottom: 0;
+}
+
+.react-markdown-container ul, .react-markdown-container ol {
+  margin-bottom: 0.75rem;
+  padding-left: 1.25rem;
+}
+
+.react-markdown-container li {
+  margin-bottom: 0.25rem;
+}
+
+.react-markdown-container strong {
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.react-markdown-container h1, .react-markdown-container h2, .react-markdown-container h3 {
+  font-weight: 700;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  color: #0C356A;
+}

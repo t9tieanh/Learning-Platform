@@ -4,7 +4,7 @@ import { Lesson } from '@/types/course-student'
 
 export const LectureInfo = ({ lesson, thumbnailUri }: { lesson: Lesson; thumbnailUri: string }) => {
   return (
-    <div className='space-y-3 min-h-[300px]'>
+    <div className='space-y-3'>
       <h2 className='text-xl flex items-center gap-2 font-semibold mb-2'>
         <Avatar>
           <AvatarImage src={thumbnailUri} />
