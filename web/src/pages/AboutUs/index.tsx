@@ -20,11 +20,10 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { useNavigate } from 'react-router-dom'
-import heroImage from '@/assets/images/aboutus2.png'
+import heroImage from '@/assets/images/cover-aboutus.jpg'
 import missionImage from '@/assets/images/aboutus1.png'
 import valuesBgImage from '@/assets/images/aboutus3.png'
 
-/* ── Animation variants ── */
 const fadeIn = {
   initial: { opacity: 0, y: 24 },
   animate: { opacity: 1, y: 0 },
