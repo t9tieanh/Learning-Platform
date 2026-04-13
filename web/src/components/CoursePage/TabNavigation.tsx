@@ -1,22 +1,26 @@
 import { useMemo, useState, useEffect } from 'react'
-import { Search, Info, MessageCircleQuestionMark, NotebookPen } from 'lucide-react'
+import { Search, Info, MessageCircleQuestionMark, NotebookPen, Sparkles } from 'lucide-react'
 import { QASection } from './QASection/QASection'
 import { LectureInfo } from '@/components/CoursePage/LectureInfo'
 import { Lesson } from '@/types/course-student'
 import CustomButton from '@/components/common/Button'
 import NoteSection from './NoteSection'
 import lessonStudentService from '@/services/course/lesson-student.service'
+import { AILessonInsights } from './AILessonInsights'
+import { AnalysisResult } from '@/services/assistant/analysis.service'
 
 export const TabNavigation = ({
   currentLecture,
   thumbnailUri,
   currentLectureId,
-  instructorId
+  instructorId,
+  analysisData
 }: {
   currentLecture: Lesson
   thumbnailUri: string
   currentLectureId: string
   instructorId: string
+  analysisData?: AnalysisResult | null
 }) => {
   const [activeTab, setActiveTab] = useState('Tổng quan')
   const [open, setOpen] = useState(false)
@@ -26,6 +30,10 @@ export const TabNavigation = ({
       {
         label: 'Tổng quan',
         icon: <Info className='w-5 h-5' />
+      },
+      {
+        label: 'Learnova AI',
+        icon: <Sparkles className='w-5 h-5 text-blue-600' />
       },
       {
         label: 'Hỏi đáp',
@@ -67,9 +75,8 @@ export const TabNavigation = ({
           <CustomButton
             key={tab.label}
             onClick={() => (tab.onClick ? tab.onClick() : setActiveTab(tab.label))}
-            className={`py-3 md:py-4 px-2 md:px-4 text-xs md:text-sm font-medium bg-white transition-colors relative whitespace-nowrap flex-shrink-0 ${
-              activeTab === tab.label ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
-            }`}
+            className={`py-3 md:py-4 px-2 md:px-4 text-xs md:text-sm font-bold bg-white transition-colors relative whitespace-nowrap flex-shrink-0 ${activeTab === tab.label ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
+              }`}
             label={
               <>
                 {tab.label}
@@ -84,12 +91,19 @@ export const TabNavigation = ({
         ))}
       </div>
 
-      <div className='px-3 md:px-6'>
+      <div className='px-0 md:px-6'>
         {activeTab === 'Hỏi đáp' && <QASection lessonId={String(currentLectureId)} instructorId={instructorId} />}
         {activeTab === 'Tổng quan' && (
           <div className='mt-6 mx-auto w-full'>
             <LectureInfo lesson={currentLecture} thumbnailUri={thumbnailUri} />
           </div>
+        )}
+        {activeTab === 'Learnova AI' && (
+          <AILessonInsights
+            summary={analysisData?.summary || null}
+            chunks={analysisData?.chunks || []}
+            subtitles={analysisData?.subtitles || null}
+          />
         )}
       </div>
       <NoteSection
