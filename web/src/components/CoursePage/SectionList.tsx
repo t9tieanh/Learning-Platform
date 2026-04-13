@@ -57,7 +57,7 @@ export const SectionList = ({ sections, currentLectureId, onSelectLecture }: Sec
                   <span className='text-[13px] font-bold'>{index + 1}</span>
                 </div>
                 <div>
-                  <h3 className={`font-semibold text-[14px] leading-tight transition-colors ${isOpen ? 'text-[#0C356A]' : 'text-gray-700 group-hover:text-blue-600'
+                  <h3 className={`font-semibold text-[13px] leading-tight transition-colors ${isOpen ? 'text-[#0C356A]' : 'text-gray-700 group-hover:text-blue-600'
                     }`}>
                     {section.title}
                   </h3>

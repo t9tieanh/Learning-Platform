@@ -22,7 +22,7 @@ export const AILessonInsights = ({ summary, subtitles, chunks }: AILessonInsight
                             <Brain className='w-6 h-6' />
                         </div>
                         <div className='flex flex-col'>
-                            <h2 className='text-white font-bold text-[16px] tracking-tight leading-tight'>
+                            <h2 className='text-white font-bold text-[15px] tracking-tight leading-tight'>
                                 Phân tích bài giảng chuyên sâu
                             </h2>
                             <p className='text-[11px] text-blue-100/60 mt-1 flex items-center gap-2 font-bold uppercase tracking-widest'>
@@ -66,7 +66,7 @@ export const AILessonInsights = ({ summary, subtitles, chunks }: AILessonInsight
             <div className='bg-white rounded-[2rem] border border-gray-100 p-8 shadow-sm'>
                 {activeSubTab === 'summary' && (
                     <div className='prose prose-blue max-w-none'>
-                        <p className='text-gray-700 leading-[1.8] text-[15px] font-medium'>
+                        <p className='text-gray-700 leading-[1.8] text-[14px] font-medium'>
                             {summary || 'Đang cập nhật nội dung tóm tắt từ hệ thống AI...'}
                         </p>
                     </div>
@@ -88,7 +88,7 @@ export const AILessonInsights = ({ summary, subtitles, chunks }: AILessonInsight
                                                     {idx + 1}
                                                 </span>
                                                 <div className='flex flex-col'>
-                                                    <span className='text-[14px] font-bold text-gray-800 tracking-tight'>{chunk.title}</span>
+                                                    <span className='text-[13px] font-bold text-gray-800 tracking-tight'>{chunk.title}</span>
                                                     <span className='text-[10px] text-blue-600 font-bold uppercase mt-0.5 tracking-wider'>
                                                         Bắt đầu từ: {chunk.startTime}
                                                     </span>
@@ -97,7 +97,7 @@ export const AILessonInsights = ({ summary, subtitles, chunks }: AILessonInsight
                                         </AccordionTrigger>
                                         <AccordionContent className='pb-6 pt-2'>
                                             <div className='pl-12'>
-                                                <p className='text-[13px] text-gray-600 leading-relaxed font-medium bg-white p-4 rounded-xl border border-gray-100'>
+                                                <p className='text-[12px] text-gray-600 leading-relaxed font-medium bg-white p-4 rounded-xl border border-gray-100'>
                                                     {chunk.summary}
                                                 </p>
                                             </div>
@@ -112,7 +112,7 @@ export const AILessonInsights = ({ summary, subtitles, chunks }: AILessonInsight
                 )}
 
                 {activeSubTab === 'srt' && (
-                    <div className='bg-gray-900 rounded-2xl p-6 font-mono text-[13px] text-gray-300 max-h-[500px] overflow-y-auto leading-relaxed shadow-inner'>
+                    <div className='bg-gray-900 rounded-2xl p-6 font-mono text-[12px] text-gray-300 max-h-[500px] overflow-y-auto leading-relaxed shadow-inner'>
                         <pre className='whitespace-pre-wrap break-words'>
                             {subtitles || 'Đang tải kịch bản AI...'}
                         </pre>

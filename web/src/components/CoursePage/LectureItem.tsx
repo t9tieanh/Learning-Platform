@@ -37,7 +37,7 @@ export const LectureItem = ({ lecture, isActive, onSelect }: LectureItemProps) =
 
       <div className='flex-1 min-w-0'>
         <div className='flex items-center gap-2'>
-          <p className={`text-[13.5px] font-semibold leading-tight truncate transition-colors ${isActive ? 'text-white' : 'text-gray-700'
+          <p className={`text-[12.5px] font-semibold leading-tight truncate transition-colors ${isActive ? 'text-white' : 'text-gray-700'
             }`}>
             {lecture.title}
           </p>
