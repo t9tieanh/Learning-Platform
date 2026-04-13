@@ -85,10 +85,10 @@ const CreateCourseModal: React.FC = () => {
         />
         <div className='absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent' />
 
-        {/* Top Logo - Keeping it minimal */}
+        {/* Top Indicator - Keeping it minimal */}
         <div className='relative z-10'>
-          <div className='bg-white/90 backdrop-blur-md w-fit p-2.5 rounded-xl shadow-lg shadow-black/5'>
-            <img src={learnovaLogo} alt='Learnova' className='h-5 w-auto' />
+          <div className='bg-white/10 backdrop-blur-md w-fit p-3 rounded-xl border border-white/20 shadow-xl'>
+            <GraduationCap className='w-5 h-5 text-white' />
           </div>
         </div>
 
@@ -130,6 +130,10 @@ const CreateCourseModal: React.FC = () => {
             </div>
             <h3 className='text-2xl md:text-3xl font-black text-gray-900 tracking-tight'>Thông tin khóa học</h3>
             <p className='text-gray-400 text-xs font-semibold'>Hãy khởi đầu hành trình giảng dạy của bạn</p>
+
+            <div className='pt-2 opacity-50'>
+              <img src={learnovaLogo} alt='Learnova' className='h-4 w-auto object-contain' />
+            </div>
           </div>
 
           <form className='space-y-6'>
