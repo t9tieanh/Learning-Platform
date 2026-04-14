@@ -18,6 +18,7 @@ const analysisRouter: Router = express.Router()
  * and resolved as soon as summarization completes via Redis pub/sub.
  */
 analysisRouter.get('/lessons/:lessonId', Authentication(true), checkLessonOwnership, analysisController.getAnalysis)
+analysisRouter.get('/lessons/:lessonId/detail', Authentication(true), checkViewLesson, analysisController.getLessonIntelligence)
 
 /**
  * PATCH /assistant/lessons/:lessonId/chunks/:chunkId/summary

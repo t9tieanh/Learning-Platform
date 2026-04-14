@@ -4,6 +4,7 @@ import sendResponse from '~/dto/response/send-response'
 import analysisService from '~/service/analysis/analysis.service'
 import { AnalysisOutcome } from '~/enums/analysisOutcome.enum'
 import { RAGResult, lessonRAGService } from '~/service/search/lesson.rag.service'
+import { CHATBOT_ERROR_MESSAGE } from '~/utils/constants'
 
 class AnalysisController {
     /**
@@ -77,6 +78,41 @@ class AnalysisController {
 
 
     /**
+     * GET /lessons/:lessonId/detail
+     *
+     * Directly returns the complete AI intelligence bundle for a lesson.
+     * Unlike the main /analysis endpoint, this does not long-poll; it simply returns
+     * what's currently in the DB or null if not processed.
+     */
+    getLessonIntelligence = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            const lessonId = String(req.params.lessonId)
+            const result = await analysisService.getLessonAnalysis(lessonId)
+
+            if (!result) {
+                sendResponse(res, {
+                    code: StatusCodes.OK,
+                    message: 'Bài học chưa có dữ liệu phân tích AI',
+                    result: null,
+                })
+                return
+            }
+
+            sendResponse(res, {
+                code: StatusCodes.OK,
+                message: 'Lấy thông tin AI hoàn tất',
+                result,
+            })
+        } catch (error) {
+            sendResponse(res, {
+                code: StatusCodes.INTERNAL_SERVER_ERROR,
+                message: CHATBOT_ERROR_MESSAGE,
+                result: null
+            })
+        }
+    }
+
+    /**
      * Answer a question about lesson content using RAG (Retrieval-Augmented Generation).
      *
      * Request:
@@ -117,7 +153,11 @@ class AnalysisController {
                 result,
             });
         } catch (error) {
-            next(error);
+            sendResponse(res, {
+                code: StatusCodes.OK,
+                message: CHATBOT_ERROR_MESSAGE,
+                result: null
+            })
         }
     };
 }
