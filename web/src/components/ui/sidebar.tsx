@@ -76,10 +76,14 @@ export function SidebarContent({ children }: { children?: React.ReactNode }) {
   )
 }
 
-export function SidebarGroup({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="mt-4 space-y-2">{children}</div>
-  )
+export function SidebarGroup({
+  children,
+  className,
+}: {
+  children: React.ReactNode
+  className?: string
+}) {
+  return <div className={cn("mt-4 space-y-2", className)}>{children}</div>
 }
 
 export function SidebarGroupLabel({
@@ -106,8 +110,14 @@ export function SidebarGroupContent({ children }: { children: React.ReactNode })
   return <div className="space-y-1">{children}</div>
 }
 
-export function SidebarMenu({ children }: { children: React.ReactNode }) {
-  return <ul className="space-y-1">{children}</ul>
+export function SidebarMenu({
+  children,
+  className,
+}: {
+  children: React.ReactNode
+  className?: string
+}) {
+  return <ul className={cn("space-y-1", className)}>{children}</ul>
 }
 
 export function SidebarMenuItem({ children }: { children: React.ReactNode }) {
@@ -132,9 +142,11 @@ export function SidebarMenuButton({
       onClick={onClick}
       className={cn(
         "flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-        active
-          ? "bg-blue-100 text-blue-700"
-          : "text-gray-700 hover:bg-gray-100 focus:bg-gray-100",
+        asChild
+          ? "bg-transparent text-inherit hover:bg-transparent focus:bg-transparent"
+          : active
+            ? "bg-blue-100 text-blue-700"
+            : "text-gray-700 hover:bg-gray-100 focus:bg-gray-100",
         className
       )}
     >

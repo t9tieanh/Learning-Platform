@@ -9,12 +9,12 @@ const AdminLayout: React.FC = () => {
   const { data } = useAuthStore()
   const navigate = useNavigate()
 
-  useEffect(() => {
-    if (!data || data.role !== 'admin') {
-      toast.error('Bạn không có quyền truy cập trang này.')
-      navigate('/auth')
-    }
-  }, [])
+  // useEffect(() => {
+  //   if (!data || data.role !== 'admin') {
+  //     toast.error('Bạn không có quyền truy cập trang này.')
+  //     navigate('/auth')
+  //   }
+  // }, [])
 
   return (
     <SidebarProvider>
