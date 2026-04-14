@@ -309,7 +309,7 @@ const LearnovaVideoPlayer = forwardRef<HTMLVideoElement | null, LearnovaVideoPla
                             }}
                         >
                             {/* Hover Tooltip - Large Screen */}
-                            {!isPiP && hoverSegment && hoverTime !== null && (
+                            {!isPiP && chunks.length > 0 && hoverSegment && hoverTime !== null && (
                                 <motion.div
                                     style={{ x: xSmooth, left: -144 }} // Centering by subtracting half width
                                     className='absolute bottom-full mb-4 z-40 w-72 pointer-events-none'
@@ -326,7 +326,7 @@ const LearnovaVideoPlayer = forwardRef<HTMLVideoElement | null, LearnovaVideoPla
                                                     Bắt đầu: {formatVideoTime(hoverSegment.start)}
                                                 </span>
                                                 <span className='text-[9px] text-white/40 font-bold uppercase tracking-wider'>
-                                                 {formatVideoTime(hoverTime || 0)}
+                                                    {formatVideoTime(hoverTime || 0)}
                                                 </span>
                                             </div>
                                         </div>
