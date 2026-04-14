@@ -72,15 +72,15 @@ export const TabNavigation = ({
 
   return (
     <div className='border-b border-border'>
-      <div className='flex items-center gap-1 overflow-x-auto'>
+      <div className='flex items-center overflow-x-auto'>
         {tabs.map((tab) => (
           <CustomButton
             key={tab.label}
             onClick={() => (tab.onClick ? tab.onClick() : setActiveTab(tab.label))}
-            className={`py-4 md:py-5 px-3 md:px-5 text-[10.5px] font-black uppercase tracking-widest bg-white transition-all relative whitespace-nowrap flex-shrink-0 ${activeTab === tab.label ? 'text-blue-600' : 'text-muted-foreground hover:text-foreground'
+            className={`py-3 md:py-4 px-3 md:px-5 text-[10px] font-black uppercase tracking-widest bg-white transition-all relative whitespace-nowrap flex-shrink-0 ${activeTab === tab.label ? 'text-blue-600' : 'text-muted-foreground hover:text-foreground'
               }`}
             label={
-              <div className='flex items-center gap-2'>
+              <div className='flex items-center'>
                 {tab.label}
                 {activeTab === tab.label && <div className='absolute bottom-0 left-0 right-0 h-[3px] bg-blue-600 rounded-full mx-2' />}
                 {tab.label === 'Notes' && noteContent && noteContent?.trim() !== '' && (

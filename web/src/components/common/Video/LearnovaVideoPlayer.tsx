@@ -261,7 +261,7 @@ const LearnovaVideoPlayer = forwardRef<HTMLVideoElement | null, LearnovaVideoPla
                                 className='absolute inset-0 flex items-center justify-center z-40 bg-black/10'
                             >
                                 <div className='bg-black/40 backdrop-blur-md p-4 rounded-full border border-white/10'>
-                                    <Bot className='w-10 h-10 text-blue-400 animate-pulse' />
+                                    <img src={learnovaLogo} alt="Learnova" className='w-10 h-10 object-contain filter drop-shadow-sm' />
                                 </div>
                             </motion.div>
                         )}
@@ -326,7 +326,7 @@ const LearnovaVideoPlayer = forwardRef<HTMLVideoElement | null, LearnovaVideoPla
                                                     Bắt đầu: {formatVideoTime(hoverSegment.start)}
                                                 </span>
                                                 <span className='text-[9px] text-white/40 font-bold uppercase tracking-wider'>
-                                                    Đang rà: {formatVideoTime(hoverTime || 0)}
+                                                 {formatVideoTime(hoverTime || 0)}
                                                 </span>
                                             </div>
                                         </div>

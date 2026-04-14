@@ -1,10 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { Send, Bot, User, Play, Loader2, Sparkles, Clock, TextQuote } from 'lucide-react'
+import learnovaLogo from '@/assets/images/logo1.png'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import assistantAnalysisService, { RAGResult, RAGSource } from '@/services/assistant/analysis.service'
 import { motion, AnimatePresence } from 'framer-motion'
 import ReactMarkdown from 'react-markdown'
+import { useAuthStore } from '@/stores/useAuth.stores'
+import { PremiumLockedState } from './PremiumLockedState'
 
 interface Message {
     role: 'user' | 'assistant'
@@ -18,7 +21,10 @@ interface AIChatSectionProps {
     onSeek?: (timestamp: string) => void
 }
 
-export const AIChatSection = ({ lessonId, onSeek }: AIChatSectionProps) => {
+
+
+export const AIChatSection: React.FC<AIChatSectionProps> = ({ lessonId, onSeek }) => {
+    const { data: user } = useAuthStore()
     const [messages, setMessages] = useState<Message[]>([])
     const [input, setInput] = useState('')
     const [isLoading, setIsLoading] = useState(false)
@@ -84,8 +90,12 @@ export const AIChatSection = ({ lessonId, onSeek }: AIChatSectionProps) => {
         }
     }
 
+    if (!user?.isVip) {
+        return <PremiumLockedState />
+    }
+
     return (
-        <div className='flex flex-col h-full bg-white overflow-hidden relative'>
+        <div className='flex flex-col h-full bg-white relative overflow-hidden'>
             {/* Messages Area */}
             <div
                 ref={scrollRef}
@@ -93,8 +103,8 @@ export const AIChatSection = ({ lessonId, onSeek }: AIChatSectionProps) => {
             >
                 {messages.length === 0 ? (
                     <div className='h-full flex flex-col items-center justify-center text-center px-8 space-y-4'>
-                        <div className='w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-500 shadow-inner'>
-                            <Bot className='w-8 h-8' />
+                        <div className='w-16 h-16 bg-blue-50/50 rounded-2xl flex items-center justify-center p-3 shadow-inner'>
+                            <img src={learnovaLogo} alt="Learnova" className='w-full h-full object-contain filter drop-shadow-sm' />
                         </div>
                         <div className='space-y-2'>
                             <h3 className='text-[15px] font-bold text-gray-800'>Hỏi đáp cùng trợ lý AI</h3>
