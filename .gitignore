@@ -22,5 +22,6 @@ key
 n8n/workflows
 *.bson
 
+.idea
 
 Semantic-Chunking-Typescript
