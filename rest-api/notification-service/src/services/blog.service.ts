@@ -10,6 +10,8 @@ interface GetAllParams {
 
 interface CreateBlogParams {
   instructor_id: string
+  instructor_name?: string
+  instructor_image?: string
   title: string
   image_url: string
   content: string
@@ -23,36 +25,94 @@ interface UpdateBlogParams {
   markdown_file_url?: string[]
 }
 
-const getAllBlogs = async ({ page, limit, search = '', instructorId }: GetAllParams) => {
+interface BlogListItem {
+  _id: string
+  instructor_id: string
+  instructor_name: string
+  instructor_image: string
+  title: string
+  image_url: string
+  content: string
+  markdown_file_url: string[]
+  createdAt: Date
+  updatedAt: Date
+}
+
+interface BlogListResult {
+  items: BlogListItem[]
+  page: number
+  limit: number
+  total: number
+  totalPages: number
+}
+
+interface BlogLeanDocument {
+  _id: unknown
+  instructor_id: unknown
+  instructor_name?: string
+  instructor_image?: string
+  title: string
+  image_url: string
+  content: string
+  markdown_file_url?: string[]
+  createdAt: Date
+  updatedAt: Date
+}
+
+const toBlogListItem = (b: BlogLeanDocument): BlogListItem => {
+  return {
+    _id: String(b._id),
+    instructor_id: String(b.instructor_id),
+    instructor_name: typeof b.instructor_name === 'string' ? b.instructor_name : '',
+    instructor_image: typeof b.instructor_image === 'string' ? b.instructor_image : '',
+    title: b.title,
+    image_url: b.image_url,
+    content: b.content,
+    markdown_file_url: Array.isArray(b.markdown_file_url) ? b.markdown_file_url : [],
+    createdAt: b.createdAt,
+    updatedAt: b.updatedAt
+  }
+}
+
+const getAllBlogs = async ({ page, limit, search = '', instructorId }: GetAllParams): Promise<BlogListResult> => {
   const skip = (page - 1) * limit
+  const trimmedSearch = search.trim()
+  const hasSearch = trimmedSearch.length > 0
 
   const query: FilterQuery<IBlog> = {}
-  if (search && search.trim()) {
-    const regex = new RegExp(search.trim(), 'i')
-    query.$or = [{ title: regex }, { content: regex }]
+
+  if (hasSearch) {
+    query.$text = { $search: trimmedSearch }
   }
 
-  if (instructorId) {
-    query.instructor_id = instructorId
+  if (typeof instructorId === 'string' && instructorId.trim().length > 0) {
+    query.instructor_id = instructorId.trim()
   }
 
-  const [items, total] = await Promise.all([
-    BlogModel.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
+  let findQuery = BlogModel.find(query)
+
+  if (hasSearch) {
+    findQuery = findQuery.select({ score: { $meta: 'textScore' } }).sort({
+      score: { $meta: 'textScore' },
+      createdAt: -1
+    })
+  } else {
+    findQuery = findQuery.sort({ createdAt: -1 })
+  }
+
+  const [itemsRaw, total] = await Promise.all([
+    findQuery.skip(skip).limit(limit).lean(),
     BlogModel.countDocuments(query)
   ])
 
+  const items: BlogListItem[] = []
+  for (let i = 0; i < itemsRaw.length; i += 1) {
+    items.push(toBlogListItem(itemsRaw[i] as BlogLeanDocument))
+  }
+
   const totalPages = Math.ceil(total / limit) || 1
   return {
-    items: items.map((b) => ({
-      _id: String(b._id),
-      instructor_id: String(b.instructor_id),
-      title: b.title,
-      image_url: b.image_url,
-      content: b.content,
-      markdown_file_url: b.markdown_file_url || [],
-      createdAt: b.createdAt,
-      updatedAt: b.updatedAt
-    })),
+    items,
     page,
     limit,
     total,
@@ -62,71 +122,52 @@ const getAllBlogs = async ({ page, limit, search = '', instructorId }: GetAllPar
 
 const getNew = async (limit = 3) => {
   const items = await BlogModel.find({}).sort({ createdAt: -1 }).limit(limit).lean()
-  return items.map((b) => ({
-    _id: String(b._id),
-    instructor_id: String(b.instructor_id),
-    title: b.title,
-    image_url: b.image_url,
-    content: b.content,
-    markdown_file_url: b.markdown_file_url || [],
-    createdAt: b.createdAt,
-    updatedAt: b.updatedAt
-  }))
+  const data: BlogListItem[] = []
+  for (let i = 0; i < items.length; i += 1) {
+    data.push(toBlogListItem(items[i] as BlogLeanDocument))
+  }
+  return data
 }
 
 const getTrending = async (limit = 3) => {
-  // Assumption: trending by updatedAt desc due to lack of view/like fields
   const items = await BlogModel.find({}).sort({ updatedAt: -1 }).limit(limit).lean()
-  return items.map((b) => ({
-    _id: String(b._id),
-    instructor_id: String(b.instructor_id),
-    title: b.title,
-    image_url: b.image_url,
-    content: b.content,
-    markdown_file_url: b.markdown_file_url || [],
-    createdAt: b.createdAt,
-    updatedAt: b.updatedAt
-  }))
+  const data: BlogListItem[] = []
+  for (let i = 0; i < items.length; i += 1) {
+    data.push(toBlogListItem(items[i] as BlogLeanDocument))
+  }
+  return data
 }
 
 const getDetails = async (id: string) => {
   const b = await BlogModel.findById(id).lean()
   if (!b) return null
-  return {
-    _id: String(b._id),
-    instructor_id: String(b.instructor_id),
-    title: b.title,
-    image_url: b.image_url,
-    content: b.content,
-    markdown_file_url: b.markdown_file_url || [],
-    createdAt: b.createdAt,
-    updatedAt: b.updatedAt
-  }
+  return toBlogListItem(b as BlogLeanDocument)
 }
 
 const create = async (params: CreateBlogParams) => {
-  const doc = await BlogModel.create({
+  const createdDoc = await BlogModel.create({
     instructor_id: params.instructor_id,
+    instructor_name: params.instructor_name || '',
+    instructor_image: params.instructor_image || '',
     title: params.title,
     image_url: params.image_url,
     content: params.content,
-    markdown_file_url: params.markdown_file_url || []
+    markdown_file_url: Array.isArray(params.markdown_file_url) ? params.markdown_file_url : []
   })
-  const b = await doc.toObject()
-  return {
-    _id: String(b._id),
-    instructor_id: String(b.instructor_id),
-    title: b.title,
-    image_url: b.image_url,
-    content: b.content,
-    markdown_file_url: b.markdown_file_url || [],
-    createdAt: (doc as any).createdAt,
-    updatedAt: (doc as any).updatedAt
-  }
+
+  const created = await BlogModel.findById(createdDoc._id).lean()
+  if (!created) return null
+  return toBlogListItem(created as BlogLeanDocument)
 }
 
 const update = async (id: string, params: UpdateBlogParams) => {
-  const updateData: any = {}
+  const updateData: {
+    title?: string
+    image_url?: string
+    content?: string
+    markdown_file_url?: string[]
+  } = {}
+
   if (typeof params.title === 'string') updateData.title = params.title
   if (typeof params.image_url === 'string') updateData.image_url = params.image_url
   if (typeof params.content === 'string') updateData.content = params.content
@@ -134,16 +175,7 @@ const update = async (id: string, params: UpdateBlogParams) => {
 
   const b = await BlogModel.findByIdAndUpdate(id, updateData, { new: true }).lean()
   if (!b) return null
-  return {
-    _id: String(b._id),
-    instructor_id: String(b.instructor_id),
-    title: b.title,
-    image_url: b.image_url,
-    content: b.content,
-    markdown_file_url: b.markdown_file_url || [],
-    createdAt: b.createdAt,
-    updatedAt: b.updatedAt
-  }
+  return toBlogListItem(b as BlogLeanDocument)
 }
 
 const remove = async (id: string) => {
