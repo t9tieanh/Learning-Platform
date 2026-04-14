@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from 'react'
+import { FC, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Search } from 'lucide-react'
 import CustomButton from '@/components/common/Button'
@@ -17,6 +17,8 @@ const BlogSearchBar: FC<BlogSearchBarProps> = ({ onSearch, hideCreateButton }) =
   const instructorId = data?.userId || (data as any)?.id
   const [courseCount, setCourseCount] = useState<number | null>(null)
   const [loading, setLoading] = useState<boolean>(false)
+  const [searchValue, setSearchValue] = useState('')
+  const isFirstSearchRender = useRef(true)
 
   useEffect(() => {
     let mounted = true
@@ -39,6 +41,19 @@ const BlogSearchBar: FC<BlogSearchBarProps> = ({ onSearch, hideCreateButton }) =
     }
   }, [instructorId])
 
+  useEffect(() => {
+    if (isFirstSearchRender.current) {
+      isFirstSearchRender.current = false
+      return
+    }
+
+    const timer = setTimeout(() => {
+      onSearch?.(searchValue.trim())
+    }, 500)
+
+    return () => clearTimeout(timer)
+  }, [searchValue, onSearch])
+
   const canCreate = (courseCount ?? 0) >= 5
   const tooltipMsg = !canCreate ? 'Bạn phải tạo ít nhất 5 khóa học mới được đăng bài viết' : undefined
 
@@ -50,7 +65,8 @@ const BlogSearchBar: FC<BlogSearchBarProps> = ({ onSearch, hideCreateButton }) =
           type='text'
           placeholder='Tìm kiếm bài viết...'
           className='peer w-full pl-10 pr-3 py-2.5 rounded-xl border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-sm transition'
-          onChange={(e) => onSearch?.(e.target.value)}
+          value={searchValue}
+          onChange={(e) => setSearchValue(e.target.value)}
         />
       </div>
       {!hideCreateButton && (

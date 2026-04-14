@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect, useRef } from 'react'
-import { ChevronLeft, Brain, Sparkles } from 'lucide-react'
+import { ChevronLeft } from 'lucide-react'
 import { LessonViewer } from '@/components/CoursePage/LessonViewer'
 import { TabNavigation } from '@/components/CoursePage/TabNavigation'
 import { CourseSidebar } from '@/components/CoursePage/CourseSidebar'
@@ -12,8 +12,8 @@ import { CourseSkeleton } from '@/components/CoursePage/CourseSkeleton'
 import { TabNavigationSkeleton } from '@/components/CoursePage/TabNavigationSkeleton'
 import { CourseSidebarSkeleton } from '@/components/CoursePage/CourseSidebarSkeleton'
 import { AnalysisResult } from '@/services/assistant/analysis.service'
+import assistantAnalysisService from '@/services/assistant/analysis.service'
 import HighGlossBackground from '@/components/common/HighGlossBackground'
-import aiMockData from '@/assets/mock/ai-mock-data.json'
 
 const CoursePage = () => {
   type UILecture = {
@@ -35,8 +35,8 @@ const CoursePage = () => {
   const navigate = useNavigate()
   const viewerRef = useRef<import('@/components/CoursePage/VideoPlayer').VideoPlayerRef>(null)
 
-  // MOCK AI DATA from JSON file
-  const mockAnalysisData: AnalysisResult = aiMockData.result as any
+  const [analysisData, setAnalysisData] = useState<AnalysisResult | null>(null)
+  const [isLoadingAnalysis, setIsLoadingAnalysis] = useState(false)
 
   const handleSeek = (timestamp: string) => {
     if (!viewerRef.current) return
@@ -82,11 +82,9 @@ const CoursePage = () => {
             completionStatus: 'COMPLETED',
             thumbnailUrl: response.result.thumbnailUrl as string
           })
-        } else {
-          console.log(response.message || 'Failed to fetch course details')
         }
       } catch (error) {
-        console.log('Failed to fetch course details')
+        console.error('Failed to fetch course details', error)
       } finally {
         setIsLoading(false)
       }
@@ -94,6 +92,31 @@ const CoursePage = () => {
 
     fetchCourseInfo()
   }, [courseId])
+
+  useEffect(() => {
+    const fetchAnalysis = async () => {
+      if (!currentLecture?.id || currentLecture.id === 'introduction') {
+        setAnalysisData(null)
+        return
+      }
+
+      setIsLoadingAnalysis(true)
+      try {
+        const response = await assistantAnalysisService.getAnalysisDetail(currentLecture.id)
+        if (response && response.code === 200 && response.result) {
+          setAnalysisData(response.result)
+        } else {
+          setAnalysisData(null)
+        }
+      } catch (error) {
+        setAnalysisData(null)
+      } finally {
+        setIsLoadingAnalysis(false)
+      }
+    }
+
+    fetchAnalysis()
+  }, [currentLecture?.id])
 
   // Map CourseDetail.chapters -> UI sections expected by CourseSidebar
   type UISection = { title: string; duration: string; lectures: UILecture[] }
@@ -198,8 +221,8 @@ const CoursePage = () => {
               <LessonViewer
                 ref={viewerRef}
                 lesson={currentLecture!}
-                subtitlesRaw={mockAnalysisData?.subtitles ?? undefined}
-                chunks={mockAnalysisData?.chunks ?? []}
+                subtitlesRaw={analysisData?.subtitles ?? undefined}
+                chunks={analysisData?.chunks ?? []}
                 onShowChunkDetails={handleShowChunkDetails}
               />
               <div className='mt-2 mx-auto w-full'>
@@ -208,7 +231,7 @@ const CoursePage = () => {
                   thumbnailUri={courseData?.thumbnailUrl as string}
                   currentLectureId={currentLecture!.id}
                   instructorId={(courseData?.instructor as any)?.id || ''}
-                  analysisData={mockAnalysisData}
+                  analysisData={analysisData}
                   onSeek={handleSeek}
                   activeTab={activeTab}
                   onTabChange={setActiveTab}

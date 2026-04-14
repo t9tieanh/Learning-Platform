@@ -84,6 +84,17 @@ Imports the normalized CSV files into the MySQL databases (`user_service` and `c
     *   MongoDB running (or configured via `.env`).
     *   `pip install pymongo` for the MongoDB import script.
 
+### 5. AI Assistant Synchronization (Supabase)
+Synchronizes lesson analysis data (transcripts, summaries, segments, quizzes) from the primary course database (MySQL) to the AI Assistant service (Supabase/Postgres).
+*   **Script:** `scripts/supabase/import-data/sync_assistant_to_supabase.py`
+*   **Functionality:** 
+    *   Queries video lessons from `course_service` MySQL.
+    *   Maps lesson IDs to maintain consistency across services.
+    *   Upserts AI-generated insights, chunks, and quizzes to Supabase.
+*   **Requirements:** 
+    *   Supabase connection string configured in `.env`.
+    *   `pip install mysql-connector-python psycopg2-binary`
+
 ## Usage
 
 ### 1. Setup Environment
@@ -91,7 +102,7 @@ Imports the normalized CSV files into the MySQL databases (`user_service` and `c
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
-pip install pymongo
+pip install pymongo mysql-connector-python psycopg2-binary
 ```
 
 ### 2. Configure Database
@@ -106,6 +117,11 @@ DB_PORT=3306
 # MongoDB Config
 MONGO_URI=mongodb://localhost:27017
 MONGO_DB_NAME=blog-service
+
+# Supabase Config (Assistant Service)
+SUPABASE_URL=your_supabase_url
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+DB_CONNECTION_STRING=postgresql://postgres:password@db.supabase.co:5432/postgres
 
 # Deepl Translation (used in clean_online_courses)
 DEEPL_API_KEY=your_deepl_api_key
@@ -131,6 +147,9 @@ python scripts/normalize/normalize_feedbacks.py
 python scripts/import-data/import_to_mysql.py
 python scripts/import-data/import_blogs.py
 python scripts/import-data/import_feedbacks.py
+
+# 4. Sync AI Assistant Data (Supabase)
+python scripts/supabase/import-data/sync_assistant_to_supabase.py
 ```
 
 ### One-Liner Command
@@ -143,5 +162,9 @@ python scripts/normalize/normalize_blogs.py && \
 python scripts/normalize/normalize_feedbacks.py && \
 python scripts/import-data/import_to_mysql.py && \
 python scripts/import-data/import_blogs.py && \
-python scripts/import-data/import_feedbacks.py
+python scripts/import-data/import_feedbacks.py 
+```
+
+``` bash
+python scripts/supabase/import-data/sync_assistant_to_supabase.py
 ```
