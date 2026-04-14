@@ -104,7 +104,7 @@ def normalize_tags_and_add_ids(input_courses_file, output_courses_file, output_t
                             'position': 1,
                             'title': f"Các khái niệm về {tag_name}",
                             'type': 'video',
-                            'url': "https://core-learnova.t9tieanh.io.vn/api/v1/learning/storage/1774779780632-YTDown.com_YouTube_The-Only-Docker-Tutorial-You-Need-To-Get_Media_DQdB7wFEygo_001_1080p.mp4",
+                            'url': "https://core-learnova.t9tieanh.io.vn/api/v1/learning/storage/1775985533610-YTDown.com_YouTube_Tam-Ly-Khung-Hoang-1-4-Cuoc-Doi-Ban-Be-A_Media_SEhxLnaesKo_003_480p.mp4",
                             'chapter_id': chapter_id
                         })
 

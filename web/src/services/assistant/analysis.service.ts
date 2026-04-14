@@ -54,6 +54,16 @@ class AssistantAnalysisService {
   }
 
   /**
+   * Directly get the analysis document from DB. No long-polling.
+   */
+  async getAnalysisDetail(lessonId: string): Promise<ApiResponse<AnalysisResult | null>> {
+    const res = await axiosClient.axiosInstance.get(
+      `assistant/analysis/lessons/${lessonId}/detail`
+    )
+    return res.data as ApiResponse<AnalysisResult | null>
+  }
+
+  /**
    * Updates the summary of a specific chunk.
    */
   async updateChunkSummary(lessonId: string, chunkId: string, summary: string): Promise<ApiResponse<LessonChunk>> {
@@ -69,7 +79,7 @@ class AssistantAnalysisService {
    */
   async askAI(lessonId: string, question: string): Promise<ApiResponse<RAGResult>> {
     const res = await axiosClient.axiosInstance.post(
-      `assistant/analysis/lessons/8c34e4ac-87a5-4ab2-955f-972749d18032/chat`,
+      `assistant/analysis/lessons/${lessonId}/chat`,
       { question }
     )
     return res.data as ApiResponse<RAGResult>
