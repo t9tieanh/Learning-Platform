@@ -13,9 +13,12 @@ import {
 import { Textarea } from '@/components/ui/textarea'
 import { Certificate } from '@/types/mockData'
 import certificateService from '@/services/certificate/certificate.service'
-import { Check, X } from 'lucide-react'
+import { Award, Check, Clock3, ExternalLink, ShieldCheck, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+
+const statCardClass =
+  'rounded-[26px] border border-slate-200/80 bg-white/95 p-5 shadow-[0_18px_40px_-30px_rgba(15,23,42,0.2)]'
 
 export default function CertificatesPage() {
   const [certificates, setCertificates] = useState<Certificate[]>([])
@@ -93,7 +96,6 @@ export default function CertificatesPage() {
     if (!selectedCert) return
     const newStatus = actionType === 'confirmed' ? 'confirmed' : 'rejected'
 
-    // Determine reason to send
     const effectiveReason =
       newStatus === 'rejected' ? (rejectOption === 'Khác' ? rejectReason.trim() : rejectOption || '').trim() : ''
 
@@ -104,7 +106,6 @@ export default function CertificatesPage() {
         throw new Error(res.message || 'Cập nhật chứng chỉ thất bại')
       }
 
-      // Update local state
       setCertificates(
         certificates.map((c) =>
           c.id === selectedCert.id
@@ -129,13 +130,13 @@ export default function CertificatesPage() {
     switch (status) {
       case 'pending':
         return (
-          <Badge variant='outline' className='bg-yellow-100 text-yellow-800 border-yellow-300'>
+          <Badge variant='outline' className='rounded-full border-amber-200 bg-amber-50 px-3 py-1 text-amber-700'>
             Chờ duyệt
           </Badge>
         )
       case 'confirmed':
         return (
-          <Badge variant='outline' className='bg-green-100 text-green-800 border-green-300'>
+          <Badge variant='outline' className='rounded-full border-emerald-200 bg-emerald-50 px-3 py-1 text-emerald-700'>
             Đã xác nhận
           </Badge>
         )
@@ -144,11 +145,14 @@ export default function CertificatesPage() {
           <TooltipProvider delayDuration={200}>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Badge variant='outline' className='bg-red-100 text-red-800 border-red-300 cursor-help'>
+                <Badge
+                  variant='outline'
+                  className='cursor-help rounded-full border-rose-200 bg-rose-50 px-3 py-1 text-rose-700'
+                >
                   Từ chối
                 </Badge>
               </TooltipTrigger>
-              <TooltipContent>
+              <TooltipContent className='max-w-xs rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 shadow-lg'>
                 <p>{reason?.trim() ? reason : 'Không có lý do'}</p>
               </TooltipContent>
             </Tooltip>
@@ -157,192 +161,319 @@ export default function CertificatesPage() {
     }
   }
 
+  const stats = {
+    total: certificates.length,
+    pending: certificates.filter((cert) => cert.status === 'pending').length,
+    confirmed: certificates.filter((cert) => cert.status === 'confirmed').length,
+    rejected: certificates.filter((cert) => cert.status === 'rejected').length
+  }
+
   return (
-    <div className='space-y-8 p-6 bg-gray-50 min-h-full'>
-      {/* Header */}
-      <div className='space-y-2'>
-        <h2 className='text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent'>
-          Xác nhận chứng chỉ
-        </h2>
-        <p className='text-muted-foreground mt-2'>Danh sách chứng chỉ cần xác nhận từ người dùng</p>
-      </div>
+    <div className='space-y-8'>
+      <section className='relative overflow-hidden rounded-[32px] border border-slate-200/80 bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950 px-6 py-7 text-white shadow-[0_24px_60px_-34px_rgba(15,23,42,0.55)]'>
+        <div className='absolute right-0 top-0 h-40 w-40 rounded-full bg-emerald-400/15 blur-3xl' />
+        <div className='absolute bottom-0 left-12 h-28 w-28 rounded-full bg-sky-300/10 blur-3xl' />
+        <div className='relative flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between'>
+          <div className='max-w-2xl'>
+            <p className='text-xs font-semibold uppercase tracking-[0.28em] text-emerald-200/80'>Verification center</p>
+            <h1 className='mt-3 text-3xl font-semibold tracking-tight'>Xác nhận chứng chỉ</h1>
+            <p className='mt-2 text-sm leading-6 text-slate-300'>
+              Kiểm tra, duyệt và theo dõi trạng thái chứng chỉ trong một giao diện gọn gàng, dễ ra quyết định hơn.
+            </p>
+          </div>
 
-      {/* Table container */}
-      <div className='overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-sm'>
+          <div className='grid gap-3 sm:grid-cols-2 xl:grid-cols-4'>
+            <div className='rounded-2xl border border-white/10 bg-white/5 px-4 py-3 backdrop-blur-sm'>
+              <p className='text-xs uppercase tracking-[0.18em] text-slate-300'>Tổng yêu cầu</p>
+              <p className='mt-3 text-2xl font-semibold'>{stats.total}</p>
+            </div>
+            <div className='rounded-2xl border border-white/10 bg-white/5 px-4 py-3 backdrop-blur-sm'>
+              <p className='text-xs uppercase tracking-[0.18em] text-amber-200'>Chờ duyệt</p>
+              <p className='mt-3 text-2xl font-semibold'>{stats.pending}</p>
+            </div>
+            <div className='rounded-2xl border border-white/10 bg-white/5 px-4 py-3 backdrop-blur-sm'>
+              <p className='text-xs uppercase tracking-[0.18em] text-emerald-200'>Đã xác nhận</p>
+              <p className='mt-3 text-2xl font-semibold'>{stats.confirmed}</p>
+            </div>
+            <div className='rounded-2xl border border-white/10 bg-white/5 px-4 py-3 backdrop-blur-sm'>
+              <p className='text-xs uppercase tracking-[0.18em] text-rose-200'>Từ chối</p>
+              <p className='mt-3 text-2xl font-semibold'>{stats.rejected}</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className='grid gap-4 md:grid-cols-3 xl:grid-cols-4'>
+        <div className={statCardClass}>
+          <div className='flex items-center gap-3'>
+            <div className='flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-50 text-sky-600'>
+              <Award className='h-5 w-5' />
+            </div>
+            <div>
+              <p className='text-sm font-medium text-slate-500'>Tổng chứng chỉ</p>
+              <p className='mt-1 text-2xl font-semibold text-slate-950'>{stats.total}</p>
+            </div>
+          </div>
+        </div>
+        <div className={statCardClass}>
+          <div className='flex items-center gap-3'>
+            <div className='flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 text-amber-600'>
+              <Clock3 className='h-5 w-5' />
+            </div>
+            <div>
+              <p className='text-sm font-medium text-slate-500'>Đang chờ duyệt</p>
+              <p className='mt-1 text-2xl font-semibold text-slate-950'>{stats.pending}</p>
+            </div>
+          </div>
+        </div>
+        <div className={statCardClass}>
+          <div className='flex items-center gap-3'>
+            <div className='flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600'>
+              <ShieldCheck className='h-5 w-5' />
+            </div>
+            <div>
+              <p className='text-sm font-medium text-slate-500'>Đã xác nhận</p>
+              <p className='mt-1 text-2xl font-semibold text-slate-950'>{stats.confirmed}</p>
+            </div>
+          </div>
+        </div>
+        <div className={statCardClass}>
+          <div className='flex items-center gap-3'>
+            <div className='flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-50 text-rose-600'>
+              <X className='h-5 w-5' />
+            </div>
+            <div>
+              <p className='text-sm font-medium text-slate-500'>Bị từ chối</p>
+              <p className='mt-1 text-2xl font-semibold text-slate-950'>{stats.rejected}</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className='overflow-hidden rounded-[30px] border border-slate-200/80 bg-white/95 shadow-[0_22px_55px_-36px_rgba(15,23,42,0.24)]'>
+        <div className='border-b border-slate-200/80 bg-slate-50/80 px-6 py-5'>
+          <h2 className='text-lg font-semibold tracking-tight text-slate-950'>Danh sách chứng chỉ</h2>
+          <p className='mt-1 text-sm text-slate-500'>Xem nhanh trạng thái và xử lý từng yêu cầu ngay trong bảng.</p>
+        </div>
+
         {loading ? (
-          <div className='p-8 text-center text-muted-foreground'>Đang tải danh sách chứng chỉ...</div>
+          <div className='flex min-h-[320px] items-center justify-center px-6 text-sm font-medium text-slate-500'>
+            Đang tải danh sách chứng chỉ...
+          </div>
         ) : error ? (
-          <div className='p-8 text-center text-red-500'>{error}</div>
+          <div className='flex min-h-[320px] items-center justify-center px-6 text-sm font-medium text-rose-600'>
+            {error}
+          </div>
         ) : (
-          <Table className='min-w-full'>
-            <TableHeader className='bg-blue-50'>
-              <TableRow>
-                <TableHead className='text-left text-gray-700 uppercase text-xs font-semibold tracking-wider py-3 px-4'>
-                  Tên người dùng
-                </TableHead>
-                <TableHead className='text-left text-gray-700 uppercase text-xs font-semibold tracking-wider py-3 px-4'>
-                  Khóa học
-                </TableHead>
-                <TableHead className='text-left text-gray-700 uppercase text-xs font-semibold tracking-wider py-3 px-4'>
-                  Ngày gửi
-                </TableHead>
-                <TableHead className='text-left text-gray-700 uppercase text-xs font-semibold tracking-wider py-3 px-4'>
-                  Trạng thái
-                </TableHead>
-                <TableHead className='text-left text-gray-700 uppercase text-xs font-semibold tracking-wider py-3 px-4'>
-                  Đường dẫn
-                </TableHead>
-                <TableHead className='text-right text-gray-700 uppercase text-xs font-semibold tracking-wider py-3 px-4'>
-                  Hành động
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-
-            <TableBody>
-              {certificates.map((cert) => (
-                <TableRow
-                  key={cert.id}
-                  className='hover:bg-blue-50/20 transition-colors border-b border-gray-100 last:border-0'
-                >
-                  <TableCell className='py-4 px-4 font-medium text-gray-900'>
-                    {cert.userName} ({cert.userEmail})
-                  </TableCell>
-                  <TableCell className='py-4 px-4 text-gray-700'>{cert.courseName}</TableCell>
-                  <TableCell className='py-4 px-4 text-gray-500'>
-                    {new Date(cert.submittedAt).toLocaleDateString('vi-VN')}
-                  </TableCell>
-                  <TableCell className='py-4 px-4'>{getStatusBadge(cert.status, cert.reason)}</TableCell>
-                  <TableCell className='py-4 px-4 text-left'>
-                    {cert.certificateUrl ? (
-                      <a
-                        href={cert.certificateUrl}
-                        target='_blank'
-                        rel='noopener noreferrer'
-                        className='text-blue-600 hover:underline text-sm'
-                      >
-                        Xem chứng chỉ
-                      </a>
-                    ) : (
-                      <span className='text-gray-400 text-sm'>Không có</span>
-                    )}
-                  </TableCell>
-                  <TableCell className='py-4 px-4 text-right'>
-                    <div className='flex justify-end gap-2'>
-                      {cert.status === 'pending' && (
-                        <>
-                          <Button
-                            size='sm'
-                            className='flex items-center gap-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-sm transition-all'
-                            onClick={() => handleAction(cert, 'confirmed')}
-                          >
-                            <Check className='h-4 w-4' />
-                            Duyệt
-                          </Button>
-                          <Button
-                            variant='destructive'
-                            size='sm'
-                            className='flex items-center gap-1 rounded-lg shadow-sm transition-all'
-                            onClick={() => handleAction(cert, 'reject')}
-                          >
-                            <X className='h-4 w-4' />
-                            Từ chối
-                          </Button>
-                        </>
-                      )}
-                    </div>
-                  </TableCell>
+          <div className='overflow-x-auto'>
+            <Table className='min-w-full'>
+              <TableHeader>
+                <TableRow className='border-b border-slate-200 bg-slate-50/70 hover:bg-slate-50/70'>
+                  <TableHead className='px-6 py-4 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500'>
+                    Người dùng
+                  </TableHead>
+                  <TableHead className='px-6 py-4 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500'>
+                    Khóa học
+                  </TableHead>
+                  <TableHead className='px-6 py-4 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500'>
+                    Ngày gửi
+                  </TableHead>
+                  <TableHead className='px-6 py-4 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500'>
+                    Trạng thái
+                  </TableHead>
+                  <TableHead className='px-6 py-4 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500'>
+                    Liên kết
+                  </TableHead>
+                  <TableHead className='px-6 py-4 text-right text-xs font-semibold uppercase tracking-[0.2em] text-slate-500'>
+                    Hành động
+                  </TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        )}
-      </div>
+              </TableHeader>
 
-      {/* Dialog */}
+              <TableBody>
+                {certificates.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className='px-6 py-16 text-center text-sm text-slate-500'>
+                      Chưa có chứng chỉ nào cần xử lý.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  certificates.map((cert) => (
+                    <TableRow key={cert.id} className='border-b border-slate-100 transition-colors hover:bg-sky-50/40'>
+                      <TableCell className='px-6 py-4'>
+                        <div className='space-y-1'>
+                          <p className='font-medium text-slate-900'>{cert.userName}</p>
+                          <p className='text-sm text-slate-500'>{cert.userEmail}</p>
+                        </div>
+                      </TableCell>
+                      <TableCell className='px-6 py-4'>
+                        <div className='space-y-1'>
+                          <p className='font-medium text-slate-800'>{cert.courseName}</p>
+                          <p className='text-sm text-slate-500'>{cert.organization || 'Không có tổ chức cấp'}</p>
+                        </div>
+                      </TableCell>
+                      <TableCell className='px-6 py-4 text-sm text-slate-500'>
+                        {new Date(cert.submittedAt).toLocaleDateString('vi-VN')}
+                      </TableCell>
+                      <TableCell className='px-6 py-4'>{getStatusBadge(cert.status, cert.reason)}</TableCell>
+                      <TableCell className='px-6 py-4'>
+                        {cert.certificateUrl ? (
+                          <a
+                            href={cert.certificateUrl}
+                            target='_blank'
+                            rel='noopener noreferrer'
+                            className='inline-flex items-center gap-2 rounded-full border border-sky-200 bg-sky-50 px-3 py-1.5 text-sm font-medium text-sky-700 transition-colors hover:bg-sky-100'
+                          >
+                            <ExternalLink className='h-3.5 w-3.5' />
+                            Xem chứng chỉ
+                          </a>
+                        ) : (
+                          <span className='text-sm text-slate-400'>Không có</span>
+                        )}
+                      </TableCell>
+                      <TableCell className='px-6 py-4 text-right'>
+                        <div className='flex justify-end gap-2'>
+                          {cert.status === 'pending' && (
+                            <>
+                              <Button
+                                size='sm'
+                                className='rounded-xl bg-slate-950 px-4 text-white shadow-sm hover:bg-slate-800'
+                                onClick={() => handleAction(cert, 'confirmed')}
+                              >
+                                <Check className='mr-2 h-4 w-4' />
+                                Duyệt
+                              </Button>
+                              <Button
+                                variant='outline'
+                                size='sm'
+                                className='rounded-xl border-rose-200 bg-rose-50 px-4 text-rose-700 hover:bg-rose-100 hover:text-rose-800'
+                                onClick={() => handleAction(cert, 'reject')}
+                              >
+                                <X className='mr-2 h-4 w-4' />
+                                Từ chối
+                              </Button>
+                            </>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        )}
+      </section>
+
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className='max-w-lg rounded-xl p-6 bg-white shadow-lg'>
-          <DialogHeader>
-            <DialogTitle className='text-lg font-bold text-gray-900'>
+        <DialogContent className='max-w-3xl rounded-[28px] border border-slate-200/80 bg-white p-0 shadow-[0_24px_60px_-30px_rgba(15,23,42,0.28)]'>
+          <DialogHeader className='border-b border-slate-200/80 px-6 py-5'>
+            <DialogTitle className='text-xl font-semibold tracking-tight text-slate-950'>
               {actionType === 'confirmed' ? 'Xác nhận chứng chỉ?' : 'Từ chối chứng chỉ?'}
             </DialogTitle>
-            <DialogDescription className='text-gray-600 mt-2 text-sm space-y-3'>
-              {selectedCert && (
-                <div className='space-y-2'>
-                  <p>
-                    <strong>Tên người dùng:</strong> {selectedCert.userName}
-                  </p>
-                  <p>
-                    <strong>Khóa học:</strong> {selectedCert.courseName}
-                  </p>
-                  <p>
-                    <strong>Ngày gửi:</strong> {new Date(selectedCert.submittedAt).toLocaleDateString('vi-VN')}
-                  </p>
-                  <p className='flex items-center gap-2'>
-                    <strong>Trạng thái:</strong> {getStatusBadge(selectedCert.status, selectedCert.reason)}
-                  </p>
-                  {selectedCert.organization && (
-                    <p>
-                      <strong>Nơi cấp:</strong> {selectedCert.organization}
+            <DialogDescription className='mt-1 text-sm leading-6 text-slate-500'>
+              Kiểm tra nhanh thông tin trước khi thực hiện hành động.
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedCert && (
+            <div className='grid gap-6 px-6 py-6 lg:grid-cols-[1.15fr_0.85fr]'>
+              <div className='space-y-5'>
+                <div className='grid gap-3 sm:grid-cols-2'>
+                  <div className='rounded-2xl border border-slate-200 bg-slate-50/80 p-4'>
+                    <p className='text-xs font-semibold uppercase tracking-[0.18em] text-slate-500'>Người dùng</p>
+                    <p className='mt-2 font-medium text-slate-950'>{selectedCert.userName}</p>
+                    <p className='mt-1 text-sm text-slate-500'>{selectedCert.userEmail}</p>
+                  </div>
+                  <div className='rounded-2xl border border-slate-200 bg-slate-50/80 p-4'>
+                    <p className='text-xs font-semibold uppercase tracking-[0.18em] text-slate-500'>Khóa học</p>
+                    <p className='mt-2 font-medium text-slate-950'>{selectedCert.courseName}</p>
+                    <p className='mt-1 text-sm text-slate-500'>
+                      {new Date(selectedCert.submittedAt).toLocaleDateString('vi-VN')}
                     </p>
-                  )}
+                  </div>
+                </div>
 
-                  {/* Hình ảnh chứng chỉ */}
-                  {selectedCert.imageUrl ? (
-                    <img
-                      src={selectedCert.imageUrl}
-                      alt='Chứng chỉ'
-                      className='w-full rounded-lg border border-gray-200 shadow-sm mt-2'
-                    />
-                  ) : (
-                    <p className='text-gray-400 text-sm'>Không có ảnh</p>
-                  )}
+                <div className='rounded-2xl border border-slate-200 bg-white p-4'>
+                  <div className='flex flex-wrap items-center gap-3'>
+                    <div>
+                      <p className='text-xs font-semibold uppercase tracking-[0.18em] text-slate-500'>
+                        Trạng thái hiện tại
+                      </p>
+                      <div className='mt-2'>{getStatusBadge(selectedCert.status, selectedCert.reason)}</div>
+                    </div>
+                    {selectedCert.organization && (
+                      <div>
+                        <p className='text-xs font-semibold uppercase tracking-[0.18em] text-slate-500'>Nơi cấp</p>
+                        <p className='mt-2 text-sm font-medium text-slate-700'>{selectedCert.organization}</p>
+                      </div>
+                    )}
+                  </div>
 
-                  {/* Link chứng chỉ */}
                   {selectedCert.certificateUrl && (
                     <a
                       href={selectedCert.certificateUrl}
                       target='_blank'
                       rel='noopener noreferrer'
-                      className='block text-blue-600 hover:underline mt-2 text-sm'
+                      className='mt-4 inline-flex items-center gap-2 rounded-full border border-sky-200 bg-sky-50 px-3 py-1.5 text-sm font-medium text-sky-700 transition-colors hover:bg-sky-100'
                     >
+                      <ExternalLink className='h-3.5 w-3.5' />
                       Mở liên kết chứng chỉ
                     </a>
                   )}
-
-                  {/* Nếu từ chối thì textarea */}
-                  {actionType === 'reject' && (
-                    <div className='mt-2 space-y-3'>
-                      <div className='flex flex-wrap gap-2'>
-                        {REJECT_PRESETS.map((opt) => (
-                          <Button
-                            key={opt}
-                            type='button'
-                            variant={rejectOption === opt ? 'default' : 'outline'}
-                            className={rejectOption === opt ? 'bg-red-600 hover:bg-red-700 text-white' : ''}
-                            onClick={() => setRejectOption(opt)}
-                          >
-                            {opt}
-                          </Button>
-                        ))}
-                      </div>
-                      {rejectOption === 'Khác' && (
-                        <Textarea
-                          placeholder='Nhập lý do...'
-                          value={rejectReason}
-                          onChange={(e) => setRejectReason(e.target.value)}
-                          rows={4}
-                          className='border-gray-300 focus:ring-2 focus:ring-red-400 focus:border-red-400'
-                        />
-                      )}
-                    </div>
-                  )}
                 </div>
-              )}
-            </DialogDescription>
-          </DialogHeader>
 
-          <DialogFooter className='mt-4 flex justify-end gap-2'>
-            <Button variant='outline' onClick={() => setShowDialog(false)}>
+                {actionType === 'reject' && (
+                  <div className='rounded-2xl border border-rose-200 bg-rose-50/60 p-4'>
+                    <p className='text-sm font-medium text-rose-900'>Lý do từ chối</p>
+                    <div className='mt-3 flex flex-wrap gap-2'>
+                      {REJECT_PRESETS.map((opt) => (
+                        <Button
+                          key={opt}
+                          type='button'
+                          variant={rejectOption === opt ? 'default' : 'outline'}
+                          className={
+                            rejectOption === opt
+                              ? 'rounded-full bg-rose-600 text-white hover:bg-rose-700'
+                              : 'rounded-full border-rose-200 bg-white text-rose-700 hover:bg-rose-100'
+                          }
+                          onClick={() => setRejectOption(opt)}
+                        >
+                          {opt}
+                        </Button>
+                      ))}
+                    </div>
+                    {rejectOption === 'Khác' && (
+                      <Textarea
+                        placeholder='Nhập lý do...'
+                        value={rejectReason}
+                        onChange={(e) => setRejectReason(e.target.value)}
+                        rows={4}
+                        className='mt-4 rounded-2xl border-rose-200 bg-white focus:border-rose-300 focus:ring-rose-200'
+                      />
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <div className='rounded-[24px] border border-slate-200 bg-slate-50/70 p-4'>
+                {selectedCert.imageUrl ? (
+                  <img
+                    src={selectedCert.imageUrl}
+                    alt='Chứng chỉ'
+                    className='h-full w-full rounded-[20px] border border-slate-200 object-cover shadow-sm'
+                  />
+                ) : (
+                  <div className='flex h-full min-h-[320px] items-center justify-center rounded-[20px] border border-dashed border-slate-200 bg-white text-sm text-slate-400'>
+                    Không có ảnh chứng chỉ
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          <DialogFooter className='border-t border-slate-200/80 px-6 py-5'>
+            <Button variant='outline' onClick={() => setShowDialog(false)} className='rounded-xl'>
               Hủy
             </Button>
             <Button
@@ -351,7 +482,7 @@ export default function CertificatesPage() {
                 confirmLoading ||
                 (actionType === 'reject' && (!rejectOption || (rejectOption === 'Khác' && !rejectReason.trim())))
               }
-              className='bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50'
+              className='rounded-xl bg-slate-950 px-5 text-white hover:bg-slate-800 disabled:opacity-50'
             >
               {confirmLoading ? 'Đang xử lý...' : 'Xác nhận'}
             </Button>

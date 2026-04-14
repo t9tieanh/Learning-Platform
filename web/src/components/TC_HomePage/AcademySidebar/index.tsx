@@ -1,25 +1,24 @@
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback, AvatarImage } from '@radix-ui/react-avatar'
 import { BookOpen, Home, MessageSquare, FileText, LogOut, ChartColumn } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useAuthStore } from '@/stores/useAuth.stores'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import logo from '@/assets/images/logo1.png'
 import { toast } from 'sonner'
 import { showConfirmToast } from '@/components/common/ShowConfirmToast'
-import { cn } from '@/lib/utils'
 
 const sidebarItems = [
   {
     category: 'TỔNG QUAN',
-    items: [{ name: 'Thống kê', icon: ChartColumn, path: '/teacher' }]
+    items: [{ name: 'Trang chủ', icon: Home, active: false }]
   },
   {
     category: 'DANH MỤC',
     items: [
-      { name: 'Khóa học', icon: BookOpen, path: '/teacher/course' },
-      { name: 'Tin nhắn', icon: MessageSquare, path: '/teacher/chat/me' },
-      { name: 'Bài viết', icon: FileText, path: '/teacher/blogs' },
-      { name: 'Trang chủ', icon: Home, path: '/' }
+      { name: 'Khóa học', icon: BookOpen, active: true },
+      { name: 'Tin nhắn', icon: MessageSquare, active: true },
+      { name: 'Bài viết', icon: FileText, active: true },
+      { name: 'Thống kê', icon: ChartColumn, active: true }
     ]
   }
 ]
@@ -27,8 +26,6 @@ const sidebarItems = [
 const AcademySidebar = () => {
   const { data, setData } = useAuthStore()
   const navigate = useNavigate()
-  const location = useLocation()
-
   const displayName = data?.name || 'Giảng viên'
   const initials = (data?.name || 'GV')
     .split(' ')
@@ -48,43 +45,40 @@ const AcademySidebar = () => {
     }
   }
   return (
-    <div className='w-full h-full bg-[#1D1D2A] flex flex-col min-w-[260px] border-r border-white/5'>
-      <div className='p-8 mb-4'>
-        <button onClick={() => navigate('/teacher')} className='p-0 border-none bg-transparent cursor-pointer transition-transform hover:scale-105 active:scale-95'>
-          <img src={logo} alt='LEARNOVA logo' className='h-10 md:h-10 w-auto select-none object-contain' />
+    <div className='w-full h-full bg-[#1D1D2A] text-sidebar-foreground flex flex-col min-w-[220px]'>
+      <div className='flex p-4 md:p-6 items-center gap-3'>
+        <button onClick={() => navigate('/teacher')} className='p-0 border-none bg-transparent cursor-pointer'>
+          <img src={logo} alt='LEARNOVA logo' className='h-12 md:h-8 w-auto select-none object-contain' />
         </button>
       </div>
 
-      <nav className='flex-1 px-4 text-white overflow-y-auto custom-scrollbar'>
+      <nav className='flex-1 px-2 md:px-4 text-white'>
         {sidebarItems.map((section, sectionIndex) => (
-          <div key={sectionIndex} className='mb-10'>
-            <h3 className='text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-4 px-3 opacity-60'>{section.category}</h3>
-            <div className='space-y-2'>
+          <div key={sectionIndex} className='mb-6'>
+            <h3 className='text-xs font-semibold text-sidebar-foreground/60 mb-3 px-2'>{section.category}</h3>
+            <div className='space-y-1'>
               {section.items.map((item, itemIndex) => {
                 const Icon = item.icon
-                const isActive = (item.path === '/' || item.path === '/teacher')
-                  ? location.pathname === item.path
-                  : location.pathname.startsWith(item.path)
-
-                const onClick = () => navigate(item.path)
-
+                let onClick = undefined
+                if (item.name === 'Trang chủ') onClick = () => navigate('/teacher')
+                if (item.name === 'Quay lại') onClick = () => navigate('/')
+                if (item.name === 'Khóa học') onClick = () => navigate('/teacher/course')
+                if (item.name === 'Tin nhắn') onClick = () => navigate('/teacher/chat/:id')
+                if (item.name === 'Bài viết') onClick = () => navigate('/teacher/blogs')
+                if (item.name === 'Thống kê') onClick = () => navigate('/teacher/statistics')
                 return (
                   <Button
                     key={itemIndex}
-                    variant='ghost'
-                    className={cn(
-                      'w-full justify-start h-12 px-4 rounded-[20px] transition-all duration-300 group',
-                      isActive
-                        ? 'bg-blue-600 text-white shadow-xl shadow-blue-500/10'
-                        : 'text-gray-400 hover:bg-white/5 hover:text-white'
-                    )}
+                    variant={item.active ? 'secondary' : 'ghost'}
+                    className={`w-full justify-start h-11 px-3 ${
+                      item.active
+                        ? 'bg-sidebar-accent text-sidebar-accent-foreground hover:bg-[#ababaf]'
+                        : 'text-sidebar-foreground/80 hover:bg-[#afafb3] hover:text-sidebar-accent-foreground'
+                    }`}
                     onClick={onClick}
                   >
-                    <Icon className={cn('w-4.5 h-4.5 mr-3.5 transition-colors', isActive ? 'text-white' : 'group-hover:text-blue-400')} />
-                    <span className='text-[13px] font-bold tracking-tight'>{item.name}</span>
-                    {isActive && (
-                      <div className='ml-auto w-1.5 h-1.5 bg-white rounded-full shadow-[0_0_10px_rgba(255,255,255,0.8)]' />
-                    )}
+                    <Icon className='w-5 h-5 mr-3' />
+                    {item.name}
                   </Button>
                 )
               })}
@@ -93,28 +87,27 @@ const AcademySidebar = () => {
         ))}
       </nav>
 
-      <div className='p-6 mt-auto border-t border-white/5 bg-white/[0.02]'>
-        <div className='flex items-center gap-4 group cursor-pointer p-2 rounded-2xl hover:bg-white/5 transition-all'>
-          <div className='relative'>
-            <Avatar className='h-11 w-11 rounded-2xl overflow-hidden border-2 border-white/10 flex items-center justify-center bg-gray-800'>
-              <AvatarImage src={data?.avatarUrl} className='object-cover h-full w-full' />
-              <AvatarFallback className='bg-blue-600 text-white text-[10px] font-black uppercase p-2'>{initials}</AvatarFallback>
-            </Avatar>
-            <div className='absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-emerald-500 border-2 border-[#1D1D2A] rounded-full shadow-lg shadow-emerald-500/20' />
+      <div className='p-2 md:p-4 border-t border-sidebar-border text-white'>
+        <div className='flex items-center gap-2 md:gap-3'>
+          <Avatar>
+            <AvatarImage className='rounded-full h-10 w-10 md:h-12 md:w-12' src={data?.avatarUrl} />
+            <AvatarFallback className='text-white'>{initials}</AvatarFallback>
+          </Avatar>
+
+          <div className='flex-1'>
+            <p className='text-base font-semibold truncate'>{displayName}</p>
+            <p className='text-xs md:text-sm text-sidebar-foreground/60'>Giảng viên</p>
           </div>
 
-          <div className='flex-1 min-w-0'>
-            <p className='text-[13px] font-black text-white truncate'>{displayName}</p>
-            <p className='text-[9px] font-black text-gray-500 uppercase tracking-widest mt-0.5 opacity-60'>Giảng viên Premium</p>
-          </div>
-
-          <button
+          <Button
+            variant='ghost'
+            size='icon'
             onClick={handleLogout}
-            className='p-2 text-gray-500 hover:text-red-400 hover:bg-red-400/10 rounded-xl transition-all group-hover:bg-red-500/10'
+            className='text-red-400 hover:bg-red-500/10 hover:text-red-500'
             title='Đăng xuất'
           >
-            <LogOut className='w-4.5 h-4.5' />
-          </button>
+            <LogOut className='w-5 h-5' />
+          </Button>
         </div>
       </div>
     </div>

@@ -69,6 +69,7 @@
     "react-hook-form": "^7.62.0",
     "react-router-dom": "^7.7.1",
     "react-toastify": "^11.0.5",
+    "recharts": "^3.8.0",
     "rsuite": "^6.1.2",
     "socket.io-client": "^4.8.1",
     "sonner": "^2.0.7",

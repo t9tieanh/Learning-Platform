@@ -30,6 +30,7 @@ import TC_Blog from './pages/TC_Blog'
 import TC_CreateBlog from './pages/TC_CreateBlog'
 import TC_BlogDetails from './pages/TC_BlogDetails'
 import TC_UpdateBlog from './pages/TC_UpdateBlog'
+import TC_Statistics from './pages/TC_Statistics'
 import AD_HomePage from './pages/AD_HomePage'
 import AD_Courses from './pages/AD_Courses'
 import AD_CourseDetails from './pages/AD_CourseDetails'
@@ -89,7 +90,8 @@ const router = createBrowserRouter([
           { path: 'create-blog', element: <TC_CreateBlog /> },
           { path: 'course-details', element: <NotFound /> },
           { path: 'blog/:id', element: <TC_BlogDetails /> },
-          { path: 'update-blog/:id', element: <TC_UpdateBlog /> }
+          { path: 'update-blog/:id', element: <TC_UpdateBlog /> },
+          { path: 'statistics', element: <TC_Statistics />}
         ]
       },
       {
