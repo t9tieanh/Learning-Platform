@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useImperativeHandle, forwardRef, useCallback, useMemo } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence, useMotionValue, useSpring } from 'framer-motion'
 import { LoadingDots } from '@/components/common/Loading/LoadingDots'
 import learnovaLogo from '@/assets/images/logo1.png'
 import { cn } from '@/lib/utils'
@@ -41,6 +41,15 @@ const LearnovaVideoPlayer = forwardRef<HTMLVideoElement | null, LearnovaVideoPla
         const [isPiP, setIsPiP] = useState(false)
         const [isBuffering, setIsBuffering] = useState(false)
         const [lastAction, setLastAction] = useState<'play' | 'pause' | null>(null)
+
+        // Tooltip States
+        const [hoverTime, setHoverTime] = useState<number | null>(null)
+        const [hoverSegment, setHoverSegment] = useState<any | null>(null)
+
+        // Motion values for ultra-smooth tracking
+        const xRaw = useMotionValue(0)
+        const xSmooth = useSpring(xRaw, { stiffness: 1000, damping: 50, restDelta: 0.001 })
+
         const actionTimerRef = useRef<NodeJS.Timeout | null>(null)
 
         const videoContainerRef = useRef<HTMLDivElement>(null)
@@ -122,7 +131,7 @@ const LearnovaVideoPlayer = forwardRef<HTMLVideoElement | null, LearnovaVideoPla
         // Timeline Segments Calculation
         const segments = useMemo(() => {
             if (chunks.length === 0 || duration === 0) {
-                return [{ start: 0, end: duration, title: 'Bài học', summary: null }]
+                return [{ id: 'default', start: 0, end: duration, title: 'Bài học', summary: null }]
             }
 
             return chunks.map((chunk, index) => {
@@ -272,10 +281,61 @@ const LearnovaVideoPlayer = forwardRef<HTMLVideoElement | null, LearnovaVideoPla
                         }}
                     >
                         {/* Timeline with Chapters */}
-                        <div className={cn(
-                            'w-full mb-5 relative h-3 flex items-end group/timeline',
-                            !isSeekingAllowed && 'opacity-90'
-                        )}>
+                        <div
+                            className={cn(
+                                'w-full mb-5 relative h-3 flex items-end group/timeline',
+                                !isSeekingAllowed && 'opacity-90'
+                            )}
+                            onMouseMove={(e) => {
+                                if (isPiP) return
+                                const rect = e.currentTarget.getBoundingClientRect()
+                                const x = e.clientX - rect.left
+                                const pct = Math.max(0, Math.min(1, x / rect.width))
+                                const time = pct * duration
+
+                                // 1. Update motion value (Zero-lag position)
+                                xRaw.set(x)
+
+                                // 2. Only update state (re-render) if segment changes or time significantly changes
+                                const seg = segments.find(s => time >= s.start && time < s.end) || segments[0]
+                                if (seg.id !== hoverSegment?.id) {
+                                    setHoverSegment(seg)
+                                }
+                                setHoverTime(time)
+                            }}
+                            onMouseLeave={() => {
+                                setHoverTime(null)
+                                setHoverSegment(null)
+                            }}
+                        >
+                            {/* Hover Tooltip - Large Screen */}
+                            {!isPiP && hoverSegment && hoverTime !== null && (
+                                <motion.div
+                                    style={{ x: xSmooth, left: -144 }} // Centering by subtracting half width
+                                    className='absolute bottom-full mb-4 z-40 w-72 pointer-events-none'
+                                >
+                                    <div className='bg-[#111]/90 backdrop-blur-2xl border border-white/10 shadow-3xl p-4 rounded-2xl'>
+                                        <div className='flex flex-col gap-2'>
+                                            <div className='flex items-center gap-2'>
+                                                <div className='w-1.5 h-4 bg-blue-500 rounded-full' />
+                                                <span className='font-bold text-white text-[13px] tracking-tight leading-none'>{hoverSegment.title}</span>
+                                            </div>
+                                            {hoverSegment.summary && <p className='text-[11px] text-white/90 leading-relaxed font-normal'>{hoverSegment.summary}</p>}
+                                            <div className='flex items-center justify-between gap-2 mt-2 pt-2 border-t border-white/5'>
+                                                <span className='px-2 py-0.5 rounded-md bg-white/5 text-[9px] text-blue-400 font-bold uppercase tracking-wider'>
+                                                    Bắt đầu: {formatVideoTime(hoverSegment.start)}
+                                                </span>
+                                                <span className='text-[9px] text-white/40 font-bold uppercase tracking-wider'>
+                                                    Đang rà: {formatVideoTime(hoverTime || 0)}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {/* Tooltip Arrow */}
+                                    <div className='absolute left-1/2 -bottom-2 -translate-x-1/2 w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-t-[8px] border-t-white/10' />
+                                </motion.div>
+                            )}
+
                             <div className='absolute inset-0 flex gap-0.5 items-end'>
                                 {segments.map((seg: any, i: number) => {
                                     const startPct = (seg.start / duration) * 100
@@ -286,55 +346,29 @@ const LearnovaVideoPlayer = forwardRef<HTMLVideoElement | null, LearnovaVideoPla
                                     const playedPct = isCurrent ? ((currentTime - seg.start) / (seg.end - seg.start)) * 100 : (isPlayed ? 100 : 0)
 
                                     return (
-                                        <TooltipProvider key={i}>
-                                            <Tooltip delayDuration={0} open={isPiP ? false : undefined}>
-                                                <TooltipTrigger asChild>
-                                                    <div
-                                                        className={cn(
-                                                            'h-1 grow hover:h-2 transition-all duration-200 rounded-full bg-white/20 relative overflow-hidden',
-                                                            isSeekingAllowed ? 'cursor-pointer' : 'cursor-default'
-                                                        )}
-                                                        style={{ width: `${widthPct}%` }}
-                                                        onClick={(e) => {
-                                                            e.stopPropagation()
-                                                            if (isSeekingAllowed) {
-                                                                const rect = e.currentTarget.getBoundingClientRect()
-                                                                const x = e.clientX - rect.left
-                                                                const clickedPct = x / rect.width
-                                                                const seekTime = seg.start + (clickedPct * (seg.end - seg.start))
-                                                                handleSeek(seekTime)
-                                                            }
-                                                        }}
-                                                    >
-                                                        <div
-                                                            className='absolute top-0 left-0 h-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.6)]'
-                                                            style={{ width: `${playedPct}%` }}
-                                                        />
-                                                    </div>
-                                                </TooltipTrigger>
-                                                <TooltipContent className='bg-[#111] backdrop-blur-2xl border border-white/10 shadow-3xl p-4 rounded-2xl w-72'>
-                                                    <div className='flex flex-col gap-2'>
-                                                        <div className='flex items-center gap-2'>
-                                                            <div className='w-1.5 h-4 bg-blue-500 rounded-full' />
-                                                            <span className='font-bold text-white text-[13px] tracking-tight leading-none'>{seg.title}</span>
-                                                        </div>
-                                                        {seg.summary && <p className='text-[11px] text-white/90 leading-relaxed font-normal'>{seg.summary}</p>}
-                                                        <div className='flex items-center justify-between gap-2 mt-2 pt-2 border-t border-white/5'>
-                                                            <span className='px-2 py-0.5 rounded-md bg-white/5 text-[9px] text-blue-400 font-bold uppercase tracking-wider'>Bắt đầu: {formatVideoTime(seg.start)}</span>
-                                                            <button
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation()
-                                                                    if (onShowChunkDetails) onShowChunkDetails(seg.id)
-                                                                }}
-                                                                className='text-[9px] text-white/50 hover:text-blue-400 font-bold uppercase tracking-wider transition-colors'
-                                                            >
-                                                                Xem chi tiết
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                </TooltipContent>
-                                            </Tooltip>
-                                        </TooltipProvider>
+                                        <div
+                                            key={i}
+                                            className={cn(
+                                                'h-1 grow hover:h-2 transition-all duration-200 rounded-full bg-white/20 relative overflow-hidden',
+                                                isSeekingAllowed ? 'cursor-pointer' : 'cursor-default'
+                                            )}
+                                            style={{ width: `${widthPct}%` }}
+                                            onClick={(e) => {
+                                                e.stopPropagation()
+                                                if (isSeekingAllowed) {
+                                                    const rect = e.currentTarget.getBoundingClientRect()
+                                                    const x = e.clientX - rect.left
+                                                    const clickedPct = x / rect.width
+                                                    const seekTime = seg.start + (clickedPct * (seg.end - seg.start))
+                                                    handleSeek(seekTime)
+                                                }
+                                            }}
+                                        >
+                                            <div
+                                                className='absolute top-0 left-0 h-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.6)]'
+                                                style={{ width: `${playedPct}%` }}
+                                            />
+                                        </div>
                                     )
                                 })}
                             </div>
