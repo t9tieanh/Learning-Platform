@@ -12,10 +12,27 @@ interface AILessonInsightsProps {
     subtitles: string | null
     chunks: LessonChunk[]
     onSeek?: (timestamp: string) => void
+    defaultOpenChunkId?: string | null
 }
 
-export const AILessonInsights = ({ lessonId, summary, subtitles, chunks, onSeek }: AILessonInsightsProps) => {
+export const AILessonInsights = ({ lessonId, summary, subtitles, chunks, onSeek, defaultOpenChunkId }: AILessonInsightsProps) => {
     const [activeSubTab, setActiveSubTab] = React.useState<'summary' | 'chunks' | 'srt' | 'chat'>('summary')
+    const [openChunkId, setOpenChunkId] = React.useState<string | undefined>(undefined)
+
+    React.useEffect(() => {
+        if (defaultOpenChunkId) {
+            setActiveSubTab('chunks')
+            setOpenChunkId(defaultOpenChunkId)
+
+            // Minimal delay to ensure tab has switched and DOM is ready
+            setTimeout(() => {
+                const element = document.getElementById(`chunk-${defaultOpenChunkId}`)
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                }
+            }, 100)
+        }
+    }, [defaultOpenChunkId])
 
     return (
         <div className='mt-8 space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700'>
@@ -79,11 +96,18 @@ export const AILessonInsights = ({ lessonId, summary, subtitles, chunks, onSeek 
                 {activeSubTab === 'chunks' && (
                     <div className='space-y-4'>
                         {chunks.length > 0 ? (
-                            <Accordion type='single' collapsible className='w-full space-y-4'>
+                            <Accordion
+                                type='single'
+                                collapsible
+                                className='w-full space-y-4'
+                                value={openChunkId}
+                                onValueChange={setOpenChunkId}
+                            >
                                 {chunks.map((chunk, idx) => (
                                     <AccordionItem
                                         key={chunk.id}
                                         value={chunk.id}
+                                        id={`chunk-${chunk.id}`}
                                         className='border border-gray-100 rounded-2xl px-6 bg-gray-50/50 overflow-hidden'
                                     >
                                         <AccordionTrigger className='hover:no-underline py-4'>

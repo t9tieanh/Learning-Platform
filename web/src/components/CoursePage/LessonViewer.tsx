@@ -6,8 +6,15 @@ import { useCallback, forwardRef } from 'react'
 import lessonStudentService from '@/services/course/lesson-student.service'
 import { toast } from 'sonner'
 
-export const LessonViewer = forwardRef<VideoPlayerRef, { lesson: Lesson; subtitlesRaw?: string | null }>(
-  ({ lesson, subtitlesRaw }, ref) => {
+import { LessonChunk } from '@/types/ai'
+
+export const LessonViewer = forwardRef<VideoPlayerRef, {
+  lesson: Lesson;
+  subtitlesRaw?: string | null;
+  chunks?: LessonChunk[];
+  onShowChunkDetails?: (chunkId: string) => void;
+}>(
+  ({ lesson, subtitlesRaw, chunks = [], onShowChunkDetails }, ref) => {
     const { id } = lesson
 
     const markDoneLesson = useCallback(async () => {
@@ -31,9 +38,9 @@ export const LessonViewer = forwardRef<VideoPlayerRef, { lesson: Lesson; subtitl
     }
 
     return (
-      <div className='w-full px-3 aspect-video bg-video-bg rounded-lg overflow-hidden relative group'>
+      <div className='w-full aspect-video bg-black rounded-[2rem] overflow-hidden relative group shadow-2xl'>
         {lesson.type === 'video' ? (
-          <VideoPlayer ref={ref} lesson={lesson} markDoneVideo={markDoneLesson} subtitlesRaw={subtitlesRaw || undefined} />
+          <VideoPlayer ref={ref} lesson={lesson} markDoneVideo={markDoneLesson} subtitlesRaw={subtitlesRaw || undefined} chunks={chunks} />
         ) : lesson.type === 'article' ? (
           <PDFViewer lesson={lesson} markDoneVideo={markDoneLesson} />
         ) : (

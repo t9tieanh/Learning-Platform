@@ -30,6 +30,8 @@ const CoursePage = () => {
   const [isLoading, setIsLoading] = useState(true)
 
   const [currentLecture, setCurrentLecture] = useState<Lesson>()
+  const [activeTab, setActiveTab] = useState('Tổng quan')
+  const [selectedChunkId, setSelectedChunkId] = useState<string | null>(null)
   const navigate = useNavigate()
   const viewerRef = useRef<import('@/components/CoursePage/VideoPlayer').VideoPlayerRef>(null)
 
@@ -52,6 +54,11 @@ const CoursePage = () => {
     }
 
     viewerRef.current.seekTo(seconds)
+  }
+
+  const handleShowChunkDetails = (chunkId: string) => {
+    setSelectedChunkId(chunkId)
+    setActiveTab('AI Phân tích')
   }
 
   useEffect(() => {
@@ -192,6 +199,8 @@ const CoursePage = () => {
                 ref={viewerRef}
                 lesson={currentLecture!}
                 subtitlesRaw={mockAnalysisData?.subtitles ?? undefined}
+                chunks={mockAnalysisData?.chunks ?? []}
+                onShowChunkDetails={handleShowChunkDetails}
               />
               <div className='mt-2 mx-auto w-full'>
                 <TabNavigation
@@ -201,6 +210,9 @@ const CoursePage = () => {
                   instructorId={(courseData?.instructor as any)?.id || ''}
                   analysisData={mockAnalysisData}
                   onSeek={handleSeek}
+                  activeTab={activeTab}
+                  onTabChange={setActiveTab}
+                  selectedChunkId={selectedChunkId}
                 />
               </div>
             </div>

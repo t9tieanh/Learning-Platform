@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from 'react'
-import { Search, Info, MessageCircleQuestionMark, NotebookPen } from 'lucide-react'
+import { Search, Info, MessageCircleQuestionMark, NotebookPen, Brain } from 'lucide-react'
 import { QASection } from './QASection/QASection'
 import { LectureInfo } from '@/components/CoursePage/LectureInfo'
 import { Lesson } from '@/types/course-student'
@@ -15,7 +15,10 @@ export const TabNavigation = ({
   currentLectureId,
   instructorId,
   analysisData,
-  onSeek
+  onSeek,
+  activeTab: externalActiveTab,
+  onTabChange,
+  selectedChunkId
 }: {
   currentLecture: Lesson
   thumbnailUri: string
@@ -23,26 +26,30 @@ export const TabNavigation = ({
   instructorId: string
   analysisData?: AnalysisResult | null
   onSeek?: (timestamp: string) => void
+  activeTab: string
+  onTabChange: (tab: string) => void
+  selectedChunkId?: string | null
 }) => {
-  const [activeTab, setActiveTab] = useState('Tổng quan')
-  const [open, setOpen] = useState(false)
+  const activeTab = externalActiveTab
+  const setActiveTab = onTabChange
   const [noteContent, setNoteContent] = useState('')
-  const tabs = useMemo(
+  const tabs: { label: string; icon: React.ReactNode; onClick?: () => void }[] = useMemo(
     () => [
       {
         label: 'Tổng quan',
-        icon: <Info className='w-5 h-5' />
+        icon: <Info className='w-3.5 h-3.5' />
+      },
+      {
+        label: 'AI Phân tích',
+        icon: <Brain className='w-3.5 h-3.5 text-blue-500' />
       },
       {
         label: 'Hỏi đáp',
-        icon: <MessageCircleQuestionMark className='w-5 h-5' />
+        icon: <MessageCircleQuestionMark className='w-3.5 h-3.5' />
       },
       {
         label: 'Ghi chú',
-        icon: <NotebookPen className='w-5 h-5' />,
-        onClick: () => {
-          setOpen(true)
-        }
+        icon: <NotebookPen className='w-3.5 h-3.5' />
       }
     ],
     []
@@ -66,53 +73,55 @@ export const TabNavigation = ({
   return (
     <div className='border-b border-border'>
       <div className='flex items-center gap-1 overflow-x-auto'>
-        <button className='p-3 md:p-4 text-muted-foreground hover:text-foreground transition-colors flex-shrink-0'>
-          <Search className='w-4 md:w-5 h-4 md:h-5' />
-        </button>
         {tabs.map((tab) => (
           <CustomButton
             key={tab.label}
             onClick={() => (tab.onClick ? tab.onClick() : setActiveTab(tab.label))}
-            className={`py-3 md:py-4 px-2 md:px-4 text-xs md:text-sm font-bold bg-white transition-colors relative whitespace-nowrap flex-shrink-0 ${activeTab === tab.label ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
+            className={`py-4 md:py-5 px-3 md:px-5 text-[10.5px] font-black uppercase tracking-widest bg-white transition-all relative whitespace-nowrap flex-shrink-0 ${activeTab === tab.label ? 'text-blue-600' : 'text-muted-foreground hover:text-foreground'
               }`}
             label={
-              <>
+              <div className='flex items-center gap-2'>
                 {tab.label}
-                {activeTab === tab.label && <div className='absolute bottom-0 left-0 right-0 h-0.5 bg-primary' />}
+                {activeTab === tab.label && <div className='absolute bottom-0 left-0 right-0 h-[3px] bg-blue-600 rounded-full mx-2' />}
                 {tab.label === 'Notes' && noteContent && noteContent?.trim() !== '' && (
-                  <span className='ml-1 inline-block w-2 h-2 bg-red-500 rounded-full'></span>
+                  <span className='ml-1 inline-block w-1.5 h-1.5 bg-red-500 rounded-full'></span>
                 )}
-              </>
+              </div>
             }
             icon={tab.icon}
           />
         ))}
       </div>
 
-      <div className='px-0 md:px-6'>
+      <div className='px-0 md:px-6 min-h-[600px]'>
         {activeTab === 'Hỏi đáp' && <QASection lessonId={String(currentLectureId)} instructorId={instructorId} />}
         {activeTab === 'Tổng quan' && (
           <div className='mt-6 mx-auto w-full space-y-8'>
             <LectureInfo lesson={currentLecture} thumbnailUri={thumbnailUri} />
-            <div className='border-t border-gray-100 pt-8'>
-              <AILessonInsights
-                lessonId={currentLecture.id}
-                summary={analysisData?.summary || null}
-                chunks={analysisData?.chunks || []}
-                subtitles={analysisData?.subtitles || null}
-                onSeek={onSeek}
-              />
-            </div>
+          </div>
+        )}
+        {activeTab === 'AI Phân tích' && (
+          <div className='mt-2 mx-auto w-full'>
+            <AILessonInsights
+              lessonId={currentLecture.id}
+              summary={analysisData?.summary || null}
+              chunks={analysisData?.chunks || []}
+              subtitles={analysisData?.subtitles || null}
+              onSeek={onSeek}
+              defaultOpenChunkId={selectedChunkId}
+            />
+          </div>
+        )}
+        {activeTab === 'Ghi chú' && (
+          <div className='mt-2 mx-auto w-full'>
+            <NoteSection
+              lessonId={currentLecture.id}
+              note={noteContent}
+              setNote={setNoteContent}
+            />
           </div>
         )}
       </div>
-      <NoteSection
-        lessonId={currentLecture.id}
-        open={open}
-        setOpen={setOpen}
-        note={noteContent}
-        setNote={setNoteContent}
-      />
     </div>
   )
 }

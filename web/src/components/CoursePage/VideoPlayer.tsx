@@ -5,6 +5,8 @@ import { toast } from 'sonner'
 import LearnovaVideoPlayer from '@/components/common/Video/LearnovaVideoPlayer'
 import { parseSRT } from '@/utils/srtParser'
 
+import { LessonChunk } from '@/types/ai'
+
 export interface VideoPlayerRef {
   seekTo: (time: number) => void
 }
@@ -13,10 +15,14 @@ const VideoPlayer = forwardRef<VideoPlayerRef, {
   lesson: Lesson
   markDoneVideo: () => Promise<void>
   subtitlesRaw?: string
+  chunks?: LessonChunk[]
+  onShowChunkDetails?: (chunkId: string) => void
 }>(({
   lesson,
   markDoneVideo,
-  subtitlesRaw
+  subtitlesRaw,
+  chunks = [],
+  onShowChunkDetails
 }, ref) => {
   const backEndUri = import.meta.env.VITE_BACKEND_URI as string
   const { data } = useAuthStore()
@@ -144,11 +150,14 @@ const VideoPlayer = forwardRef<VideoPlayerRef, {
           src={videoSrc}
           ref={videoRef}
           subtitles={parsedSubtitles}
+          chunks={chunks}
+          isSeekingAllowed={isSeekingAllowed}
           className='w-full h-full shadow-lg'
           isPiPEnabled={true}
           containerClassName='h-full'
           onSeeking={handleSeeking}
           onTimeUpdate={handleTimeUpdate}
+          onShowChunkDetails={onShowChunkDetails}
         />
       )}
     </div>
