@@ -105,7 +105,7 @@ const AcademySidebar = () => {
 
           <div className='flex-1 min-w-0'>
             <p className='text-[13px] font-black text-white truncate'>{displayName}</p>
-            <p className='text-[9px] font-black text-gray-500 uppercase tracking-widest mt-0.5 opacity-60'>Giảng viên Premium</p>
+            <p className='text-[9px] font-black text-gray-500 uppercase tracking-widest mt-0.5 opacity-60'>Giảng viên Vip</p>
           </div>
 
           <button

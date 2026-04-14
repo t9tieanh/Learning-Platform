@@ -42,6 +42,21 @@ class DiscountService {
 
         return { discountedTotal, discount };
     }
+
+    async getAllValidDiscounts(): Promise<Discount[]> {
+        const now = new Date();
+        const discounts = await prismaService.discount.findMany({
+            where: {
+                startDate: { lte: now },
+                endDate: { gte: now }
+            },
+            orderBy: [
+                { type: 'asc' }, // Percent usually comes before Amount if we want to prioritize
+                { value: 'desc' }
+            ]
+        });
+        return discounts;
+    }
 }
 
 export default new DiscountService();

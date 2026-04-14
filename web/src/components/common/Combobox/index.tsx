@@ -43,14 +43,16 @@ export default function CustomCombobox({
             variant='outline'
             role='combobox'
             aria-expanded={open}
-            className={`w-[200px] justify-between ${className}`}
+            className={cn('w-full justify-between', className)}
           >
-            {value ? items.find((item) => item.value === value)?.label : `Chọn ${label}...`}
+            <span className='truncate'>
+              {value ? items.find((item) => item.value === value)?.label : `Chọn ${label}...`}
+            </span>
             <ChevronsUpDownIcon className='ml-2 h-4 w-4 shrink-0 opacity-50' />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className='w-[200px] p-0 flex flex-col' align='start'>
-          <Command>
+        <PopoverContent className='w-[var(--radix-popover-trigger-width)] p-0 flex flex-col' align='start'>
+          <Command className='w-full'>
             <CommandInput placeholder={`Tìm kiếm ${label}...`} className='border-none' />
             <CommandList>
               <CommandEmpty>Vui lòng chọn {label}.</CommandEmpty>
@@ -60,7 +62,9 @@ export default function CustomCombobox({
                     key={item.value}
                     value={item.value}
                     onSelect={(currentValue) => {
-                      setValue(currentValue === value ? '' : currentValue)
+                      // Note: currentValue is usually lowercased by Command, but our value is ID
+                      // Radix/CMDK onSelect returns the 'value' prop of CommandItem
+                      setValue(item.value === value ? '' : item.value)
                       setOpen(false)
                     }}
                   >

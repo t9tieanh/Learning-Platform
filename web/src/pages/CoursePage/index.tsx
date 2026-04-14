@@ -1,7 +1,5 @@
-/* eslint-disable jsx-a11y/no-static-element-interactions */
-/* eslint-disable jsx-a11y/click-events-have-key-events */
-import { useState, useEffect, useMemo } from 'react'
-import { ChevronLeft } from 'lucide-react'
+import { useMemo, useState, useEffect, useRef } from 'react'
+import { ChevronLeft, Brain, Sparkles } from 'lucide-react'
 import { LessonViewer } from '@/components/CoursePage/LessonViewer'
 import { TabNavigation } from '@/components/CoursePage/TabNavigation'
 import { CourseSidebar } from '@/components/CoursePage/CourseSidebar'
@@ -13,6 +11,9 @@ import Button from '@/components/common/Button'
 import { CourseSkeleton } from '@/components/CoursePage/CourseSkeleton'
 import { TabNavigationSkeleton } from '@/components/CoursePage/TabNavigationSkeleton'
 import { CourseSidebarSkeleton } from '@/components/CoursePage/CourseSidebarSkeleton'
+import { AnalysisResult } from '@/services/assistant/analysis.service'
+import HighGlossBackground from '@/components/common/HighGlossBackground'
+import aiMockData from '@/assets/mock/ai-mock-data.json'
 
 const CoursePage = () => {
   type UILecture = {
@@ -29,8 +30,36 @@ const CoursePage = () => {
   const [isLoading, setIsLoading] = useState(true)
 
   const [currentLecture, setCurrentLecture] = useState<Lesson>()
-  const [currentLectureId, setCurrentLectureId] = useState<string>()
+  const [activeTab, setActiveTab] = useState('Tổng quan')
+  const [selectedChunkId, setSelectedChunkId] = useState<string | null>(null)
   const navigate = useNavigate()
+  const viewerRef = useRef<import('@/components/CoursePage/VideoPlayer').VideoPlayerRef>(null)
+
+  // MOCK AI DATA from JSON file
+  const mockAnalysisData: AnalysisResult = aiMockData.result as any
+
+  const handleSeek = (timestamp: string) => {
+    if (!viewerRef.current) return
+
+    // Convert "00:01:23,456" or "01:23" to seconds
+    const parts = timestamp.split(/[: ,]/).map(parseFloat)
+    let seconds = 0
+    if (parts.length >= 3) {
+      // hh:mm:ss
+      seconds = parts[0] * 3600 + parts[1] * 60 + parts[2]
+      if (parts[3] && timestamp.includes(',')) seconds += parts[3] / 1000
+    } else if (parts.length === 2) {
+      // mm:ss
+      seconds = parts[0] * 60 + parts[1]
+    }
+
+    viewerRef.current.seekTo(seconds)
+  }
+
+  const handleShowChunkDetails = (chunkId: string) => {
+    setSelectedChunkId(chunkId)
+    setActiveTab('AI Phân tích')
+  }
 
   useEffect(() => {
     const fetchCourseInfo = async () => {
@@ -41,7 +70,7 @@ const CoursePage = () => {
         if (response && response.code === 200 && response.result) {
           setCourseData(response.result)
 
-          // select lecture introdution
+          // select lecture introduction
           setCurrentLecture({
             id: 'introduction',
             title: 'Giới thiệu khóa học',
@@ -98,7 +127,6 @@ const CoursePage = () => {
       type: lecture.type === 'article' ? 'article' : 'video',
       completionStatus: lecture.completionStatus || 'NOT_STARTED'
     })
-    setCurrentLectureId(lecture.id)
   }
 
   // Initialize the first lecture as current
@@ -114,36 +142,44 @@ const CoursePage = () => {
         type: first.type === 'article' ? 'article' : 'video',
         completionStatus: first.completionStatus || 'NOT_STARTED'
       })
-      setCurrentLectureId(first.id)
     }
   }, [currentLecture, uiSections])
 
   return (
-    <div className='min-h-screen flex flex-col'>
+    <div className='h-screen flex flex-col bg-[#fafafa] overflow-hidden'>
       {/* Header */}
-      <header className='bg-[#0C356A] shadow-lg text-white border-b border-border px-3 md:px-6 py-2 md:py-3 flex items-center justify-between'>
-        <div className='flex items-center gap-2 md:gap-4 min-w-0'>
-          <button
-            className='ml-1 md:ml-2 flex items-center gap-2 text-white hover:text-primary transition-colors flex-shrink-0'
-            onClick={() => navigate(-1)}
-          >
-            <ChevronLeft className='w-4 md:w-5 h-4 md:h-5' />
-            <span className='text-xs md:text-sm cursor-pointer hover:underline hidden sm:inline'>Trở lại</span>
-          </button>
-          <div className='hidden sm:block w-px h-6 bg-border' />
-          <Button
-            className='!bg-transparent !hover:bg-transparent !shadow-none !p-0 !hover:bg-blue-800 min-w-0 flex-1'
-            onClick={() => navigate('/course/' + courseId)}
-          >
-            <div className='text-xs md:text-sm font-medium flex gap-2 items-center min-w-0'>
-              <Avatar className='h-8 w-8 md:h-10 md:w-10 flex-shrink-0'>
-                <AvatarImage src={courseData?.thumbnailUrl} />
-                <AvatarFallback>CN</AvatarFallback>
-              </Avatar>
-              <span className='truncate'>{courseData?.title}</span>
+      <header className='z-50 sticky top-0'>
+        <HighGlossBackground className='shadow-lg text-white border-b border-white/10 px-3 md:px-6 py-2 md:py-3 overflow-hidden'>
+          <div className='flex items-center justify-between w-full h-full relative z-10'>
+            <div className='flex items-center gap-2 md:gap-4 min-w-0'>
+              <button
+                className='ml-1 md:ml-2 flex items-center gap-2 text-white hover:text-blue-300 transition-colors flex-shrink-0'
+                onClick={() => navigate(-1)}
+              >
+                <ChevronLeft className='w-4 md:w-5 h-4 md:h-5' />
+                <span className='text-xs md:text-sm cursor-pointer font-bold tracking-tight uppercase hidden sm:inline'>
+                  Trở lại
+                </span>
+              </button>
+              <div className='hidden sm:block w-px h-6 bg-white/20' />
+              <Button
+                className='!bg-transparent !hover:bg-white/10 !shadow-none !p-2 !rounded-xl transition-all min-w-0 flex-1'
+                onClick={() => navigate('/course/' + courseId)}
+              >
+                <div className='text-xs md:text-sm font-bold flex gap-3 items-center min-w-0'>
+                  <Avatar className='h-8 w-8 md:h-9 md:w-9 flex-shrink-0 animate-in zoom-in-50 duration-500 shadow-inner'>
+                    <AvatarImage src={courseData?.thumbnailUrl} />
+                    <AvatarFallback>LN</AvatarFallback>
+                  </Avatar>
+                  <div className='flex flex-col items-start min-w-0'>
+                    <span className='truncate w-full tracking-tight'>{courseData?.title}</span>
+                    <span className='text-[9px] text-blue-200/60 uppercase tracking-widest'>Đang trong lộ trình học</span>
+                  </div>
+                </div>
+              </Button>
             </div>
-          </Button>
-        </div>
+          </div>
+        </HighGlossBackground>
       </header>
 
       {/* Main Content */}
@@ -158,42 +194,55 @@ const CoursePage = () => {
               </div>
             </>
           ) : currentLecture ? (
-            <>
-              <LessonViewer lesson={currentLecture} />
+            <div className='animate-in fade-in slide-in-from-bottom-2 duration-500'>
+              <LessonViewer
+                ref={viewerRef}
+                lesson={currentLecture!}
+                subtitlesRaw={mockAnalysisData?.subtitles ?? undefined}
+                chunks={mockAnalysisData?.chunks ?? []}
+                onShowChunkDetails={handleShowChunkDetails}
+              />
               <div className='mt-2 mx-auto w-full'>
                 <TabNavigation
-                  currentLecture={currentLecture}
+                  currentLecture={currentLecture!}
                   thumbnailUri={courseData?.thumbnailUrl as string}
-                  currentLectureId={currentLectureId as string}
+                  currentLectureId={currentLecture!.id}
                   instructorId={(courseData?.instructor as any)?.id || ''}
+                  analysisData={mockAnalysisData}
+                  onSeek={handleSeek}
+                  activeTab={activeTab}
+                  onTabChange={setActiveTab}
+                  selectedChunkId={selectedChunkId}
                 />
               </div>
-            </>
+            </div>
           ) : null}
         </div>
 
-        {/* Mobile Sidebar (Below video on mobile, beside on desktop) */}
-        <div className='w-full lg:hidden lg:w-96 flex-shrink-0 border-t lg:border-l lg:border-t-0 border-border overflow-y-auto'>
+        {/* Right Column - Course Sidebar (Desktop) */}
+        <div className='hidden lg:flex lg:flex-col lg:w-96 flex-shrink-0 border-l border-border'>
           {isLoading ? (
             <CourseSidebarSkeleton />
           ) : (
             <CourseSidebar
               sections={uiSections}
-              currentLectureId={currentLectureId as string}
+              currentLectureId={currentLecture?.id || ''}
               onSelectLecture={handleSelectLecture}
+              onSeek={handleSeek}
             />
           )}
         </div>
 
-        {/* Right Column - Course Sidebar (Desktop) */}
-        <div className='hidden lg:flex lg:flex-col lg:w-96 flex-shrink-0 border-l border-border overflow-y-auto'>
+        {/* Mobile Sidebar (Below video on mobile, beside on desktop) */}
+        <div className='w-full lg:hidden lg:w-96 flex-shrink-0 border-t lg:border-l lg:border-t-0 border-border'>
           {isLoading ? (
             <CourseSidebarSkeleton />
           ) : (
             <CourseSidebar
               sections={uiSections}
-              currentLectureId={currentLectureId as string}
+              currentLectureId={currentLecture?.id || ''}
               onSelectLecture={handleSelectLecture}
+              onSeek={handleSeek}
             />
           )}
         </div>

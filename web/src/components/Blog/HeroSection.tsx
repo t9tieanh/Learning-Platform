@@ -41,10 +41,6 @@ export const HeroSection = () => {
                   <img src={slide.image} alt={`Hero slide ${index + 1}`} className='w-full h-full object-cover rounded-3xl' />
                   {/* Gradient overlay */}
                   <div className='absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent rounded-3xl' />
-                  {/* Logo */}
-                  <div className='absolute top-4 md:top-6 left-4 md:left-6 z-10'>
-                    <img src={learnovaLogo} alt='Learnova' className='h-8 md:h-10 w-auto object-contain' />
-                  </div>
                   {/* Text content */}
                   <div className='absolute inset-0 flex flex-col items-start justify-end p-6 md:p-10 rounded-3xl'>
                     <h2 className='text-2xl md:text-4xl font-bold text-white mb-2 leading-tight'>

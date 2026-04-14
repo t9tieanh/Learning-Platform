@@ -7,6 +7,8 @@ import userService from '@/services/user/user.service'
 import { useAuthStore } from '@/stores/useAuth.stores'
 import { toast } from 'sonner'
 
+import learnovaLogo from '@/assets/images/logo1.png'
+
 interface SlidingLoginSignupProps {
   isSignUpMode: boolean
   setIsSignUpMode: (value: boolean) => void
@@ -16,7 +18,7 @@ const AuthPage: React.FC<SlidingLoginSignupProps> = ({ isSignUpMode, setIsSignUp
   // handle redirect oauth2 google
   const { loading, startLoading, stopLoading } = useLoading()
   const navigator = useNavigate()
-
+  // ... (rest of the component logic)
   const [searchParams] = useSearchParams()
   const code = searchParams.get('code')
 
@@ -107,23 +109,47 @@ const AuthPage: React.FC<SlidingLoginSignupProps> = ({ isSignUpMode, setIsSignUp
   const signUpMode = isSignUpMode ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-20 pointer-events-none'
 
   return (
-    <div className={`${containerBase} ${containerMode}`}>
-      {/* Desktop with animation, Mobile with conditional rendering */}
-      <div style={{ transition: 'all 1500ms ease-in-out' }} className={`${formBase} ${signInMode} hidden lg:flex`}>
-        <SignInForm handleLoginWithGoogle={handleLoginWithGoogle} setIsSignUpMode={setIsSignUpMode} />
-      </div>
-      <div style={{ transition: 'all 1500ms ease-in-out' }} className={`${formBase} ${signUpMode} hidden lg:flex`}>
-        <SignUpForm setIsSignUpMode={setIsSignUpMode} handleLoginWithGoogle={handleLoginWithGoogle} />
+    <>
+      <div className={`${containerBase} ${containerMode}`}>
+        {/* Desktop with animation, Mobile with conditional rendering */}
+        <div style={{ transition: 'all 1500ms ease-in-out' }} className={`${formBase} ${signInMode} hidden lg:flex`}>
+          <SignInForm handleLoginWithGoogle={handleLoginWithGoogle} setIsSignUpMode={setIsSignUpMode} />
+        </div>
+        <div style={{ transition: 'all 1500ms ease-in-out' }} className={`${formBase} ${signUpMode} hidden lg:flex`}>
+          <SignUpForm setIsSignUpMode={setIsSignUpMode} handleLoginWithGoogle={handleLoginWithGoogle} />
+        </div>
+
+        {/* Mobile version - conditional rendering */}
+        <div className='w-full lg:hidden'>
+          {!isSignUpMode && (
+            <SignInForm handleLoginWithGoogle={handleLoginWithGoogle} setIsSignUpMode={setIsSignUpMode} />
+          )}
+          {isSignUpMode && <SignUpForm setIsSignUpMode={setIsSignUpMode} handleLoginWithGoogle={handleLoginWithGoogle} />}
+        </div>
       </div>
 
-      {/* Mobile version - conditional rendering */}
-      <div className='w-full lg:hidden'>
-        {!isSignUpMode && (
-          <SignInForm handleLoginWithGoogle={handleLoginWithGoogle} setIsSignUpMode={setIsSignUpMode} />
-        )}
-        {isSignUpMode && <SignUpForm setIsSignUpMode={setIsSignUpMode} handleLoginWithGoogle={handleLoginWithGoogle} />}
-      </div>
-    </div>
+      {/* Minimal & Elegant Loading Overlay */}
+      {loading && (
+        <div className='fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-white/40 backdrop-blur-xl animate-in fade-in duration-700'>
+          <div className='flex flex-col items-center gap-6'>
+            <div className='relative flex items-center justify-center'>
+              <div className='absolute w-20 h-20 bg-blue-400 rounded-full blur-2xl opacity-20 animate-pulse' />
+              <div className='bg-white p-4 rounded-2xl shadow-xl border border-white'>
+                <img src={learnovaLogo} alt='Learnova' className='h-8 w-auto animate-pulse' />
+              </div>
+            </div>
+            <div className='text-center space-y-1.5'>
+              <p className='text-sm font-bold text-gray-800 tracking-tight transition-all animate-pulse'>
+                Đang xác thực thông tin...
+              </p>
+              <p className='text-[10px] font-black text-blue-500/50 uppercase tracking-[0.2em]'>
+                Chờ Learnova một tí nhé
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   )
 }
 

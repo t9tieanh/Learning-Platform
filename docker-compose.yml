@@ -87,6 +87,7 @@ services:
       USER_SERVICE_GRPC_ADDRESS: "static://host.docker.internal:50051"
       SALE_SERVICE_GRPC_ADDRESS: "static://host.docker.internal:50053"
       BLOG_SERVICE_GRPC_ADDRESS: "static://host.docker.internal:50052"
+      AWS_CLOUDFRONT_PRIVATE_KEY_PATH: "file:/app/cloudfront-private-key.pem"
     ports:
       - "${COURSE_SERVICE_PORT:-8081}:8081"
       - "${COURSE_SERVICE_GRPC_PORT:-50054}:50054"
@@ -212,6 +213,25 @@ services:
   #     timeout: 10s
   #     retries: 3
   #     start_period: 10s
+
+  # ============================================
+  # RabbitMQ (Message Broker)
+  # ============================================
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: learning-rabbitmq
+    ports:
+      - "5672:5672"     # AMQP protocol port
+      - "15672:15672"   # Management UI
+    networks:
+      - learning-platform-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
 
 networks:
   learning-platform-network:

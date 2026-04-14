@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import { useBlogPostStore } from '@/stores/blogPostStore'
 import { Separator } from '@/components/ui/separator'
-import { Upload } from 'lucide-react'
+import { Upload, BookOpen } from 'lucide-react'
 // Ensure Quill content styles (lists, headings, indents) also apply in preview
 import 'quill/dist/quill.snow.css'
 import './blog-preview.css'
@@ -14,6 +14,7 @@ import { useAuthStore } from '@/stores/useAuth.stores'
 import userService from '@/services/user/user.service'
 import useLoading from '@/hooks/useLoading.hook'
 import type { Profile } from '@/types/profile'
+import noPhoto from '@/assets/images/no-photo.avif'
 
 type BlogPreviewSubmitProps = {
   contentHtml?: string
@@ -31,15 +32,15 @@ export default function BlogPreviewSubmit({ contentHtml, blogId }: BlogPreviewSu
 
   useEffect(() => {
     let mounted = true
-    ;(async () => {
-      try {
-        const res = await userService.getProfile()
-        if (!mounted) return
-        if (res?.result) setProfile(res.result)
-      } catch (_) {
-        // ignore, show fallback avatar/name
-      }
-    })()
+      ; (async () => {
+        try {
+          const res = await userService.getProfile()
+          if (!mounted) return
+          if (res?.result) setProfile(res.result)
+        } catch (_) {
+          // ignore, show fallback avatar/name
+        }
+      })()
     return () => {
       mounted = false
     }
@@ -115,87 +116,86 @@ export default function BlogPreviewSubmit({ contentHtml, blogId }: BlogPreviewSu
   }, [])
 
   return (
-    <Card className='border-border mt-8 p-2 py-8'>
-      <CardHeader className='pb-6'>
-        <CardTitle className='text-2xl font-semibold'>Xem trước & Đăng bài</CardTitle>
-        <CardDescription>Xem cách bài viết hiển thị và nhấn Đăng để gửi</CardDescription>
-      </CardHeader>
-      <CardContent className='space-y-8'>
-        {!title && !hasContent ? (
-          <div className='text-center py-12 text-muted-foreground'>
-            <p>Nội dung xem trước sẽ hiển thị tại đây khi bạn nhập bài viết</p>
-          </div>
-        ) : (
-          <>
-            {/* Hero Section */}
-            <section className='grid grid-cols-1 lg:grid-cols-12 gap-6 items-start !mb-0'>
-              <div className='lg:col-span-7'>
-                <div className='rounded-lg overflow-hidden border border-border bg-muted/10'>
+    <Card className='border-gray-100 mt-8 rounded-[2rem] shadow-md shadow-gray-200/20 overflow-hidden'>
+      <div className='p-8 md:p-10'>
+        <div className='flex items-center gap-2 mb-8'>
+          <h3 className='text-[11px] font-black text-gray-400 uppercase tracking-[0.2em]'>Xem trước & Xuất bản</h3>
+          <div className='h-px flex-1 bg-gray-100' />
+        </div>
+
+        <CardContent className='p-0 space-y-10'>
+          {!title && !hasContent && !image ? (
+            <div className='text-center py-20 bg-gray-50/50 rounded-3xl border border-dashed border-gray-200'>
+              <BookOpen className='w-10 h-10 text-gray-200 mx-auto mb-4' />
+              <p className='text-gray-400 text-sm font-medium'>Nội dung xem trước sẽ hiển thị tại đây khi bạn nhập bài viết</p>
+            </div>
+          ) : (
+            <div className='space-y-12 animate-in fade-in duration-700'>
+              {/* Hero Section */}
+              <section className='grid grid-cols-1 lg:grid-cols-2 gap-10 items-center'>
+                <div className='aspect-video rounded-[2rem] overflow-hidden border border-gray-100 bg-gray-50 shadow-inner group relative'>
                   <img
-                    src={
-                      image ||
-                      'https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?w=1200&q=80&auto=format&fit=crop'
-                    }
+                    src={image || noPhoto}
                     alt={title || 'preview cover'}
-                    className='w-full h-[240px] object-cover'
+                    className={`w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 ${!image && 'opacity-40 grayscale'}`}
                   />
                 </div>
-              </div>
-              <div className='lg:col-span-5 flex flex-col gap-4'>
-                {title && <h1 className='text-3xl font-extrabold leading-tight tracking-tight'>{title}</h1>}
-                <div className='flex items-center gap-3 mt-1'>
-                  {profile?.image ? (
-                    <img
-                      src={profile.image}
-                      alt={profile.name}
-                      className='h-12 w-12 rounded-full object-cover border'
-                    />
-                  ) : (
-                    <div className='h-12 w-12 rounded-full bg-muted flex items-center justify-center border text-base font-semibold'>
-                      {initials}
-                    </div>
+
+                <div className='space-y-6'>
+                  {title && (
+                    <h1 className='text-3xl lg:text-4xl font-black text-gray-900 leading-[1.1] tracking-tight'>
+                      {title}
+                    </h1>
                   )}
-                  <div className='text-sm text-muted-foreground'>
-                    <div className='text-lg font-semibold text-foreground'>{profile?.name || 'Blogger'}</div>
-                    <div className='flex flex-col gap-0'>
-                      <span>
-                        <span className='font-medium text-foreground'>Đăng ngày:</span> {today}
-                      </span>
-                      <span>
-                        <span className='font-medium text-foreground'>Cập nhật:</span> {today}
-                      </span>
+
+                  <div className='flex items-center gap-4 p-4 rounded-2xl bg-gray-50/50 border border-gray-100 w-fit'>
+                    {profile?.image ? (
+                      <img src={profile.image} alt={profile.name} className='h-12 w-12 rounded-full object-cover border-2 border-white shadow-sm' />
+                    ) : (
+                      <div className='h-12 w-12 rounded-full bg-white flex items-center justify-center border border-gray-100 text-[13px] font-black'>
+                        {initials}
+                      </div>
+                    )}
+                    <div>
+                      <div className='text-[14px] font-black text-gray-900'>{profile?.name || 'Tác giả'}</div>
+                      <div className='text-[10px] font-black text-gray-400 uppercase tracking-widest mt-0.5'>
+                        Đăng ngày {today.split(' ')[1]}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </section>
+              </section>
 
-            <Separator />
+              {/* Content area with more whitespace and better typography */}
+              {hasContent && (
+                <div className='max-w-none pt-10 border-t border-gray-100'>
+                  <div className='ql-editor !p-0 !text-gray-700 !leading-relaxed !text-[16px]' dangerouslySetInnerHTML={{ __html: contentHtml as string }} />
+                </div>
+              )}
+            </div>
+          )}
 
-            {/* Content */}
-            {hasContent && (
-              <div className='prose prose-slate max-w-none blog-preview !mt-0'>
-                {/* Quill-compatible wrapper so lists/heading/indent styles render */}
-                <div className='ql-editor !px-0 !py-0' dangerouslySetInnerHTML={{ __html: contentHtml as string }} />
-              </div>
-            )}
-          </>
-        )}
-
-        <Separator />
-        <div className='flex justify-center items-center mt-0'>
-          <Button onClick={handleSubmit} disabled={submitting} className='w-fit px-10 py-4'>
-            <Upload className='mr-2 h-5 w-5' />
-            {submitting
-              ? blogId
-                ? 'Đang cập nhật...'
-                : 'Đang tạo...'
-              : blogId
-              ? 'Cập nhật Bài Viết'
-              : 'Đăng Bài Viết'}
-          </Button>
-        </div>
-      </CardContent>
+          <div className='flex justify-center pt-10 border-t border-gray-100'>
+            <Button
+              onClick={handleSubmit}
+              disabled={submitting}
+              className='rounded-2xl text-white hover:bg-blue-600 transition-all font-sm !text-sm font-bold uppercase tracking-widest shadow-xl shadow-gray-200'
+            >
+              {submitting ? (
+                <span className='flex items-center gap-2'>
+                  <div className='w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin' />
+                  Đang xử lý...
+                </span>
+              ) : (
+                <span className='flex items-center gap-2'>
+                  <Upload className='w-4 h-4' />
+                  {blogId ? 'Cập nhật ngay' : 'Xuất bản ngay'}
+                </span>
+              )}
+            </Button>
+          </div>
+        </CardContent>
+      </div>
     </Card>
   )
 }

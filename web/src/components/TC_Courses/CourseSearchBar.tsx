@@ -1,9 +1,10 @@
-import { FC, useState } from 'react'
+import { FC, useState, useEffect } from 'react'
 import { Search } from 'lucide-react'
 import CustomButton from '@/components/common/Button'
 import { IoAddCircle } from 'react-icons/io5'
 import CustomDialog from '@/components/common/Dialog'
 import CreateCourseModal from './createCourseModal'
+import { useSearchParams } from 'react-router-dom'
 
 interface CourseSearchBarProps {
   onSearch?: (value: string) => void
@@ -12,6 +13,16 @@ interface CourseSearchBarProps {
 
 const CourseSearchBar: FC<CourseSearchBarProps> = ({ onSearch }) => {
   const [open, setOpen] = useState(false)
+  const [searchParams, setSearchParams] = useSearchParams()
+
+  useEffect(() => {
+    if (searchParams.get('openCreate') === 'true') {
+      setOpen(true)
+      const newParams = new URLSearchParams(searchParams)
+      newParams.delete('openCreate')
+      setSearchParams(newParams, { replace: true })
+    }
+  }, [searchParams, setSearchParams])
 
   return (
     <div className='flex flex-col sm:flex-row justify-between items-center gap-4'>
@@ -34,10 +45,12 @@ const CourseSearchBar: FC<CourseSearchBarProps> = ({ onSearch }) => {
       <CustomDialog
         open={open}
         setOpen={setOpen}
-        title={<span className='sr-only'>Tạo khóa học mới</span>}
+        title='Tạo khóa học mới'
+        hideHeader
+        noPadding
         description=''
-        className='w-[95vw] max-w-5xl p-0 overflow-hidden bg-white border-0 shadow-2xl rounded-3xl gap-0 border-none'
-        contentClassName='p-0 m-0 w-full max-h-[85vh] overflow-y-auto'
+        className='w-[95vw] max-w-5xl p-0 overflow-hidden border-0 shadow-2xl rounded-3xl gap-0 border-none'
+        contentClassName='p-0 m-0 w-full max-h-[95vh] overflow-y-auto'
         size='xl'
       >
         <CreateCourseModal />

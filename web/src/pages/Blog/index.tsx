@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom'
+import { motion, AnimatePresence } from 'framer-motion'
 import { HeroSection } from '@/components/Blog/HeroSection'
 import { ArticleCard } from '@/components/Blog/ArticleCard'
 import { FeaturedCard } from '@/components/Blog/FeaturedCard'
@@ -13,28 +14,40 @@ const BlogPage = () => {
   const [latest, setLatest] = useState<BlogItem[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [featuredIndex, setFeaturedIndex] = useState(0)
   const navigate = useNavigate()
 
   useEffect(() => {
     let mounted = true
-    ;(async () => {
-      try {
-        setLoading(true)
-        const [tr, nw] = await Promise.all([blogService.getTrending(), blogService.getNew()])
-        if (!mounted) return
-        setTrending(tr)
-        setLatest(nw)
-      } catch (e) {
-        console.error(e)
-        if (mounted) setError('Không thể tải dữ liệu blog')
-      } finally {
-        if (mounted) setLoading(false)
-      }
-    })()
+      ; (async () => {
+        try {
+          setLoading(true)
+          const [tr, nw] = await Promise.all([blogService.getTrending(), blogService.getNew()])
+          if (!mounted) return
+          setTrending(tr)
+          setLatest(nw)
+        } catch (e) {
+          console.error(e)
+          if (mounted) setError('Không thể tải dữ liệu blog')
+        } finally {
+          if (mounted) setLoading(false)
+        }
+      })()
     return () => {
       mounted = false
     }
   }, [])
+
+  // 5s Rotation Logic for FeaturedCard
+  useEffect(() => {
+    if (trending.length <= 1) return
+
+    const interval = setInterval(() => {
+      setFeaturedIndex((prev) => (prev + 1) % trending.length)
+    }, 5000)
+
+    return () => clearInterval(interval)
+  }, [trending.length])
 
   return (
     <div className='min-h-screen bg-gradient-subtle'>
@@ -63,13 +76,46 @@ const BlogPage = () => {
             </section>
           </div>
 
-          {/* Cột 2 - Bài viết đặc biệt / FeaturedCard */}
+          {/* Cột 2 - Bài viết đặc biệt / FeaturedCard - Autoslide Carousel */}
           <aside className='space-y-6'>
-            <FeaturedCard
-              title='Khám phá Learnova – Nền tảng học trực tuyến toàn diện'
-              description='Learnova mang đến trải nghiệm học tập hiện đại với hàng trăm khóa học chất lượng cao từ các chuyên gia hàng đầu. Học viên có thể học mọi lúc, mọi nơi và theo dõi tiến trình học tập của mình dễ dàng.'
-              date='15/09/2025'
-            />
+            {!loading && trending.length > 0 ? (
+              <div className='relative overflow-hidden rounded-3xl h-full min-h-[300px]'>
+                <AnimatePresence mode='wait'>
+                  <motion.div
+                    key={trending[featuredIndex]?._id}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    transition={{ duration: 0.5, ease: 'easeInOut' }}
+                    className='h-full'
+                  >
+                    <FeaturedCard
+                      title={trending[featuredIndex]?.title}
+                      description={
+                        trending[featuredIndex]?.content
+                          ? trending[featuredIndex].content.replace(/<[^>]*>/g, '').substring(0, 160) + '...'
+                          : 'Khám phá kiến thức mới cùng Learnova.'
+                      }
+                      date='Học ngay'
+                      slug={trending[featuredIndex]?._id}
+                      image={trending[featuredIndex]?.image_url}
+                    />
+                  </motion.div>
+                </AnimatePresence>
+
+                {/* Indicators */}
+                <div className='absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-1.5 z-20'>
+                  {trending.map((_, i) => (
+                    <div
+                      key={i}
+                      className={`h-1 rounded-full transition-all duration-500 ${i === featuredIndex ? 'w-6 bg-white' : 'w-2 bg-white/30'}`}
+                    />
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className='w-full h-[300px] bg-slate-100 rounded-3xl animate-pulse' />
+            )}
           </aside>
         </div>
 
