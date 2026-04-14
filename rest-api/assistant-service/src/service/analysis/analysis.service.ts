@@ -1,7 +1,7 @@
 import prismaService from '~/service/utils/prisma.service'
 import redisService from '~/service/utils/redis.service'
 import Logger from '~/utils/logger'
-import { toAnalysisResponseDto, AnalysisResponseDto } from '~/dto/response/analysis-response.dto'
+import { toAnalysisResponseDto, AnalysisResponseDto, FullLessonWithIntelligence } from '~/dto/response/analysis-response.dto'
 import { AnalysisOutcome } from '~/enums/analysisOutcome.enum'
 
 /** Max ms to hold a long-poll subscription open */
@@ -25,8 +25,19 @@ export class AnalysisService {
     async getLessonAnalysis(lessonId: string): Promise<AnalysisResponseDto | null> {
         const lesson = await prismaService.lesson.findUnique({
             where: { id: lessonId },
-            include: { chunks: true },
-        })
+            include: {
+                chunks: {
+                    include: {
+                        quizzes: {
+                            include: {
+                                choices: true
+                            }
+                        }
+                    }
+                }
+            },
+        }) as FullLessonWithIntelligence | null
+
         return lesson ? toAnalysisResponseDto(lesson) : null
     }
 

@@ -4,14 +4,35 @@ import HighGlossBackground from '@/components/common/HighGlossBackground'
 import { LessonChunk } from '@/types/ai'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 
+import { AIChatSection } from './AIChatSection'
+
 interface AILessonInsightsProps {
+    lessonId: string
     summary: string | null
     subtitles: string | null
     chunks: LessonChunk[]
+    onSeek?: (timestamp: string) => void
+    defaultOpenChunkId?: string | null
 }
 
-export const AILessonInsights = ({ summary, subtitles, chunks }: AILessonInsightsProps) => {
-    const [activeSubTab, setActiveSubTab] = React.useState<'summary' | 'chunks' | 'srt'>('summary')
+export const AILessonInsights = ({ lessonId, summary, subtitles, chunks, onSeek, defaultOpenChunkId }: AILessonInsightsProps) => {
+    const [activeSubTab, setActiveSubTab] = React.useState<'summary' | 'chunks' | 'srt' | 'chat'>('summary')
+    const [openChunkId, setOpenChunkId] = React.useState<string | undefined>(undefined)
+
+    React.useEffect(() => {
+        if (defaultOpenChunkId) {
+            setActiveSubTab('chunks')
+            setOpenChunkId(defaultOpenChunkId)
+
+            // Minimal delay to ensure tab has switched and DOM is ready
+            setTimeout(() => {
+                const element = document.getElementById(`chunk-${defaultOpenChunkId}`)
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                }
+            }, 100)
+        }
+    }, [defaultOpenChunkId])
 
     return (
         <div className='mt-8 space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700'>
@@ -32,10 +53,10 @@ export const AILessonInsights = ({ summary, subtitles, chunks }: AILessonInsight
                     </div>
                 </div>
 
-                <div className='flex bg-white/5 px-4 gap-4 border-t border-white/10'>
+                <div className='flex bg-white/5 px-4 gap-4 border-t border-white/10 overflow-x-auto scrollbar-none'>
                     <button
                         onClick={() => setActiveSubTab('summary')}
-                        className={`py-4 px-4 text-xs font-bold uppercase tracking-widest transition-all relative flex items-center gap-2 ${activeSubTab === 'summary' ? 'text-white' : 'text-blue-100/40 hover:text-blue-100'
+                        className={`py-4 px-4 text-xs font-bold uppercase tracking-widest transition-all relative flex items-center gap-2 shrink-0 ${activeSubTab === 'summary' ? 'text-white' : 'text-blue-100/40 hover:text-blue-100'
                             }`}
                     >
                         <FileText className='w-3.5 h-3.5' />
@@ -44,7 +65,7 @@ export const AILessonInsights = ({ summary, subtitles, chunks }: AILessonInsight
                     </button>
                     <button
                         onClick={() => setActiveSubTab('chunks')}
-                        className={`py-4 px-4 text-xs font-bold uppercase tracking-widest transition-all relative flex items-center gap-2 ${activeSubTab === 'chunks' ? 'text-white' : 'text-blue-100/40 hover:text-blue-100'
+                        className={`py-4 px-4 text-xs font-bold uppercase tracking-widest transition-all relative flex items-center gap-2 shrink-0 ${activeSubTab === 'chunks' ? 'text-white' : 'text-blue-100/40 hover:text-blue-100'
                             }`}
                     >
                         <LayoutList className='w-3.5 h-3.5' />
@@ -53,7 +74,7 @@ export const AILessonInsights = ({ summary, subtitles, chunks }: AILessonInsight
                     </button>
                     <button
                         onClick={() => setActiveSubTab('srt')}
-                        className={`py-4 px-4 text-xs font-bold uppercase tracking-widest transition-all relative flex items-center gap-2 ${activeSubTab === 'srt' ? 'text-white' : 'text-blue-100/40 hover:text-blue-100'
+                        className={`py-4 px-4 text-xs font-bold uppercase tracking-widest transition-all relative flex items-center gap-2 shrink-0 ${activeSubTab === 'srt' ? 'text-white' : 'text-blue-100/40 hover:text-blue-100'
                             }`}
                     >
                         <MessageSquareText className='w-3.5 h-3.5' />
@@ -75,11 +96,18 @@ export const AILessonInsights = ({ summary, subtitles, chunks }: AILessonInsight
                 {activeSubTab === 'chunks' && (
                     <div className='space-y-4'>
                         {chunks.length > 0 ? (
-                            <Accordion type='single' collapsible className='w-full space-y-4'>
+                            <Accordion
+                                type='single'
+                                collapsible
+                                className='w-full space-y-4'
+                                value={openChunkId}
+                                onValueChange={setOpenChunkId}
+                            >
                                 {chunks.map((chunk, idx) => (
                                     <AccordionItem
                                         key={chunk.id}
                                         value={chunk.id}
+                                        id={`chunk-${chunk.id}`}
                                         className='border border-gray-100 rounded-2xl px-6 bg-gray-50/50 overflow-hidden'
                                     >
                                         <AccordionTrigger className='hover:no-underline py-4'>

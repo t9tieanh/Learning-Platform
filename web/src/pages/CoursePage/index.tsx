@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from 'react'
+import { useMemo, useState, useEffect, useRef } from 'react'
 import { ChevronLeft, Brain, Sparkles } from 'lucide-react'
 import { LessonViewer } from '@/components/CoursePage/LessonViewer'
 import { TabNavigation } from '@/components/CoursePage/TabNavigation'
@@ -13,6 +13,7 @@ import { TabNavigationSkeleton } from '@/components/CoursePage/TabNavigationSkel
 import { CourseSidebarSkeleton } from '@/components/CoursePage/CourseSidebarSkeleton'
 import { AnalysisResult } from '@/services/assistant/analysis.service'
 import HighGlossBackground from '@/components/common/HighGlossBackground'
+import aiMockData from '@/assets/mock/ai-mock-data.json'
 
 const CoursePage = () => {
   type UILecture = {
@@ -29,48 +30,35 @@ const CoursePage = () => {
   const [isLoading, setIsLoading] = useState(true)
 
   const [currentLecture, setCurrentLecture] = useState<Lesson>()
-  const [currentLectureId, setCurrentLectureId] = useState<string>()
+  const [activeTab, setActiveTab] = useState('Tổng quan')
+  const [selectedChunkId, setSelectedChunkId] = useState<string | null>(null)
   const navigate = useNavigate()
+  const viewerRef = useRef<import('@/components/CoursePage/VideoPlayer').VideoPlayerRef>(null)
 
-  // MOCK AI DATA for the demo
-  const mockAnalysisData: AnalysisResult = {
-    lessonId: 'mock-lesson-id',
-    status: 'completed',
-    summary: 'Trong bài giảng này, chúng ta sẽ tìm hiểu về các khái niệm cơ bản của phát triển web hiện đại. Chúng ta sẽ bắt đầu bằng việc tìm hiểu cách trình duyệt hoạt động, sau đó là cấu trúc của một ứng dụng React và cách quản lý state hiệu quả. Cuối cùng, chúng ta sẽ xem xét cách tối ưu hóa hiệu suất cho các ứng dụng quy mô lớn.',
-    suggestedTitle: 'Phát triển Web Hiện đại: Từ Cơ bản đến Nâng cao',
-    subtitles: `1\n00:00:00,000 --> 00:00:05,000\nChào mừng các bạn đến với khóa học phát triển web hiện đại.\n\n2\n00:00:05,000 --> 00:00:10,000\nHôm nay chúng ta sẽ bắt đầu với bài học đầu tiên về kiến trúc trình duyệt.\n\n3\n00:00:10,000 --> 00:00:15,000\nViệc hiểu cách trình duyệt render trang web là cực kỳ quan trọng...`,
-    chunks: [
-      {
-        id: 'c1',
-        chunkIndex: 1,
-        title: 'Giới thiệu về kiến trúc trình duyệt',
-        startTime: '00:00:00',
-        endTime: null,
-        timestamp: null,
-        sentenceCount: null,
-        summary: 'Tổng quan về cách trình duyệt nhận dữ liệu và bắt đầu quá trình phân tích HTML/CSS để xây dựng DOM và CSSOM tree.'
-      },
-      {
-        id: 'c2',
-        chunkIndex: 2,
-        title: 'Cơ chế Rendering và Paint',
-        startTime: '00:02:15',
-        endTime: null,
-        timestamp: null,
-        sentenceCount: null,
-        summary: 'Đi sâu vào quá trình Layout, Paint và Composite. Giải thích tại sao một số thuộc tính CSS lại hiệu quả hơn về mặt hiệu năng so với các thuộc tính khác.'
-      },
-      {
-        id: 'c3',
-        chunkIndex: 3,
-        title: 'Tối ưu hóa Critical Rendering Path',
-        startTime: '00:05:45',
-        endTime: null,
-        timestamp: null,
-        sentenceCount: null,
-        summary: 'Các kỹ thuật để giảm thời gian load trang và cải thiện Core Web Vitals thông qua việc tối ưu hóa chuỗi render quan trọng.'
-      }
-    ]
+  // MOCK AI DATA from JSON file
+  const mockAnalysisData: AnalysisResult = aiMockData.result as any
+
+  const handleSeek = (timestamp: string) => {
+    if (!viewerRef.current) return
+
+    // Convert "00:01:23,456" or "01:23" to seconds
+    const parts = timestamp.split(/[: ,]/).map(parseFloat)
+    let seconds = 0
+    if (parts.length >= 3) {
+      // hh:mm:ss
+      seconds = parts[0] * 3600 + parts[1] * 60 + parts[2]
+      if (parts[3] && timestamp.includes(',')) seconds += parts[3] / 1000
+    } else if (parts.length === 2) {
+      // mm:ss
+      seconds = parts[0] * 60 + parts[1]
+    }
+
+    viewerRef.current.seekTo(seconds)
+  }
+
+  const handleShowChunkDetails = (chunkId: string) => {
+    setSelectedChunkId(chunkId)
+    setActiveTab('AI Phân tích')
   }
 
   useEffect(() => {
@@ -139,7 +127,6 @@ const CoursePage = () => {
       type: lecture.type === 'article' ? 'article' : 'video',
       completionStatus: lecture.completionStatus || 'NOT_STARTED'
     })
-    setCurrentLectureId(lecture.id)
   }
 
   // Initialize the first lecture as current
@@ -155,12 +142,11 @@ const CoursePage = () => {
         type: first.type === 'article' ? 'article' : 'video',
         completionStatus: first.completionStatus || 'NOT_STARTED'
       })
-      setCurrentLectureId(first.id)
     }
   }, [currentLecture, uiSections])
 
   return (
-    <div className='min-h-screen flex flex-col bg-[#fafafa]'>
+    <div className='h-screen flex flex-col bg-[#fafafa] overflow-hidden'>
       {/* Header */}
       <header className='z-50 sticky top-0'>
         <HighGlossBackground className='shadow-lg text-white border-b border-white/10 px-3 md:px-6 py-2 md:py-3 overflow-hidden'>
@@ -209,14 +195,24 @@ const CoursePage = () => {
             </>
           ) : currentLecture ? (
             <div className='animate-in fade-in slide-in-from-bottom-2 duration-500'>
-              <LessonViewer lesson={currentLecture} />
+              <LessonViewer
+                ref={viewerRef}
+                lesson={currentLecture!}
+                subtitlesRaw={mockAnalysisData?.subtitles ?? undefined}
+                chunks={mockAnalysisData?.chunks ?? []}
+                onShowChunkDetails={handleShowChunkDetails}
+              />
               <div className='mt-2 mx-auto w-full'>
                 <TabNavigation
-                  currentLecture={currentLecture}
+                  currentLecture={currentLecture!}
                   thumbnailUri={courseData?.thumbnailUrl as string}
-                  currentLectureId={currentLectureId as string}
+                  currentLectureId={currentLecture!.id}
                   instructorId={(courseData?.instructor as any)?.id || ''}
                   analysisData={mockAnalysisData}
+                  onSeek={handleSeek}
+                  activeTab={activeTab}
+                  onTabChange={setActiveTab}
+                  selectedChunkId={selectedChunkId}
                 />
               </div>
             </div>
@@ -224,27 +220,29 @@ const CoursePage = () => {
         </div>
 
         {/* Right Column - Course Sidebar (Desktop) */}
-        <div className='hidden lg:flex lg:flex-col lg:w-96 flex-shrink-0 border-l border-border overflow-y-auto'>
+        <div className='hidden lg:flex lg:flex-col lg:w-96 flex-shrink-0 border-l border-border'>
           {isLoading ? (
             <CourseSidebarSkeleton />
           ) : (
             <CourseSidebar
               sections={uiSections}
-              currentLectureId={currentLectureId as string}
+              currentLectureId={currentLecture?.id || ''}
               onSelectLecture={handleSelectLecture}
+              onSeek={handleSeek}
             />
           )}
         </div>
 
         {/* Mobile Sidebar (Below video on mobile, beside on desktop) */}
-        <div className='w-full lg:hidden lg:w-96 flex-shrink-0 border-t lg:border-l lg:border-t-0 border-border overflow-y-auto'>
+        <div className='w-full lg:hidden lg:w-96 flex-shrink-0 border-t lg:border-l lg:border-t-0 border-border'>
           {isLoading ? (
             <CourseSidebarSkeleton />
           ) : (
             <CourseSidebar
               sections={uiSections}
-              currentLectureId={currentLectureId as string}
+              currentLectureId={currentLecture?.id || ''}
               onSelectLecture={handleSelectLecture}
+              onSeek={handleSeek}
             />
           )}
         </div>
