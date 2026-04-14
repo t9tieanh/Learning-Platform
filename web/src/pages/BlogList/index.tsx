@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { SearchBar } from '@/components/BlogList/SearchBar'
 import { ArticleCard, type Article } from '@/components/BlogList/ArticleCard'
 import ArticleCardSkeleton from '@/components/BlogList/ArticleCardSkeleton'
@@ -7,9 +7,11 @@ import { blogService } from '@/services/blog/blog.service'
 import { formatDate } from '@/utils/common/formattDate'
 
 const ITEMS_PER_PAGE = 6
+const SEARCH_DEBOUNCE_MS = 500
 
 const BlogPage = () => {
   const [searchQuery, setSearchQuery] = useState('')
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
   const [articles, setArticles] = useState<Article[]>([])
   const [totalPages, setTotalPages] = useState(1)
@@ -17,14 +19,28 @@ const BlogPage = () => {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery)
+    }, SEARCH_DEBOUNCE_MS)
+
+    return () => {
+      window.clearTimeout(timeoutId)
+    }
+  }, [searchQuery])
+
+  useEffect(() => {
     let mounted = true
     ;(async () => {
       try {
         setLoading(true)
         setError(null)
-        const res = await blogService.getAll({ page: currentPage, limit: ITEMS_PER_PAGE, search: searchQuery })
+        const res = await blogService.getAll({
+          page: currentPage,
+          limit: ITEMS_PER_PAGE,
+          search: debouncedSearchQuery
+        })
         if (!mounted) return
-        const mapped: Article[] = (res.data || []).map((b) => ({
+        const mapped: Article[] = (res.items || []).map((b) => ({
           id: b._id,
           title: b.title,
           image: b.image_url,
@@ -44,7 +60,7 @@ const BlogPage = () => {
     return () => {
       mounted = false
     }
-  }, [currentPage, searchQuery])
+  }, [currentPage, debouncedSearchQuery])
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page)
