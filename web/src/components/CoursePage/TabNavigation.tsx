@@ -34,25 +34,32 @@ export const TabNavigation = ({
   const setActiveTab = onTabChange
   const [noteContent, setNoteContent] = useState('')
   const tabs: { label: string; icon: React.ReactNode; onClick?: () => void }[] = useMemo(
-    () => [
-      {
-        label: 'Tổng quan',
-        icon: <Info className='w-3.5 h-3.5' />
-      },
-      {
-        label: 'AI Phân tích',
-        icon: <Brain className='w-3.5 h-3.5 text-blue-500' />
-      },
-      {
-        label: 'Hỏi đáp',
-        icon: <MessageCircleQuestionMark className='w-3.5 h-3.5' />
-      },
-      {
-        label: 'Ghi chú',
-        icon: <NotebookPen className='w-3.5 h-3.5' />
+    () => {
+      const baseTabs = [
+        {
+          label: 'Tổng quan',
+          icon: <Info className='w-3.5 h-3.5' />
+        },
+        {
+          label: 'AI Phân tích',
+          icon: <Brain className='w-3.5 h-3.5 text-blue-500' />
+        },
+        {
+          label: 'Hỏi đáp',
+          icon: <MessageCircleQuestionMark className='w-3.5 h-3.5' />
+        },
+        {
+          label: 'Ghi chú',
+          icon: <NotebookPen className='w-3.5 h-3.5' />
+        }
+      ]
+
+      if (!analysisData) {
+        return baseTabs.filter((t) => t.label !== 'AI Phân tích')
       }
-    ],
-    []
+      return baseTabs
+    },
+    [analysisData]
   )
 
   useEffect(() => {
@@ -69,6 +76,12 @@ export const TabNavigation = ({
 
     fetchNoteContent()
   }, [currentLectureId])
+
+  useEffect(() => {
+    if (!analysisData && activeTab === 'AI Phân tích') {
+      setActiveTab('Tổng quan')
+    }
+  }, [analysisData, activeTab, setActiveTab])
 
   return (
     <div className='border-b border-border'>
