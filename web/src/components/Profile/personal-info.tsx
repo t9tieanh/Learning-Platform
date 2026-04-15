@@ -1,5 +1,6 @@
 import QuillEditor from '@/components/common/Input/QuillEditor'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import type Quill from 'quill'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import CustomButton from '@/components/common/Button'
 import { Mail, Phone, Calendar, User, Camera, Send, Crown, Sparkles } from 'lucide-react'
@@ -15,11 +16,14 @@ import { Separator } from '@radix-ui/react-dropdown-menu'
 import { useVipUpgrade } from '@/contexts/VipUpgradeContext'
 import HighGlossBackground from '@/components/common/HighGlossBackground'
 
+const DESCRIPTION_MAX_LENGTH = 100
+
 const PersonalInfo = () => {
   const [userInfo, setUserInfo] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [descriptionLimitError, setDescriptionLimitError] = useState(false)
   const [form, setForm] = useState<{
     name?: string
     email?: string
@@ -62,10 +66,33 @@ const PersonalInfo = () => {
 
   // Trigger file picker and handle avatar change (logic to be implemented later)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const descriptionEditorRef = useRef<Quill | null>(null)
+  const hasShownDescriptionLimitToastRef = useRef(false)
   const handleAvatarChange = (e?: React.ChangeEvent<HTMLInputElement>) => {
     const file = e?.target?.files?.[0]
     if (!file) return
     setForm((prev) => ({ ...prev, imageFile: file }))
+  }
+
+  const handleDescriptionChange = (html: string) => {
+    const quill = descriptionEditorRef.current
+    if (quill) {
+      const textLength = quill.getLength() - 1
+      if (textLength > DESCRIPTION_MAX_LENGTH) {
+        quill.deleteText(DESCRIPTION_MAX_LENGTH, textLength - DESCRIPTION_MAX_LENGTH)
+        setDescriptionLimitError(true)
+        if (!hasShownDescriptionLimitToastRef.current) {
+          hasShownDescriptionLimitToastRef.current = true
+        }
+        setForm((p) => ({ ...p, description: quill.root.innerHTML }))
+        return
+      }
+      if (textLength < DESCRIPTION_MAX_LENGTH) {
+        setDescriptionLimitError(false)
+        hasShownDescriptionLimitToastRef.current = false
+      }
+    }
+    setForm((p) => ({ ...p, description: html }))
   }
 
   const hasChanges = useMemo(() => {
@@ -338,11 +365,17 @@ const PersonalInfo = () => {
                   )}
                 </div>
               ) : (
-                <QuillEditor
-                  initialHtml={form.description || ''}
-                  onChange={(html) => setForm((p) => ({ ...p, description: html }))}
-                  className='min-h-[300px] bg-white rounded-lg border-2 p-2'
-                />
+                <>
+                  <QuillEditor
+                    ref={descriptionEditorRef}
+                    initialHtml={form.description || ''}
+                    onChange={handleDescriptionChange}
+                    className='min-h-[300px] bg-white rounded-lg border-2 p-2'
+                  />
+                  {descriptionLimitError && (
+                    <p className='mt-2 text-sm text-red-500'>Mô tả tối đa 100 ký tự, không thể nhập thêm.</p>
+                  )}
+                </>
               )}
 
               <div className='flex justify-end mt-8 gap-3'>
