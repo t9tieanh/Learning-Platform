@@ -17,7 +17,7 @@ except ImportError:
     load_dotenv()
 
 # Configuration
-TARGET_COURSE_ID = "fb8b8c2f-e42c-4d12-892e-6f72be7a74ab"
+TARGET_COURSE_ID = "007f2de4-ade5-4db6-a755-4cc388b453c0"
 
 # MySQL Database Configuration
 MYSQL_HOST = os.getenv('DB_HOST', 'localhost')

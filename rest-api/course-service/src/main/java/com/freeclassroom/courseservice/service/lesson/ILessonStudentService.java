@@ -3,6 +3,7 @@ package com.freeclassroom.courseservice.service.lesson;
 import com.freeclassroom.courseservice.dto.request.lesson.MakeNoteForLessonRequest;
 import com.freeclassroom.courseservice.dto.response.ApiResponse;
 import com.freeclassroom.courseservice.dto.response.common.CreationResponse;
+import com.freeclassroom.courseservice.dto.response.course.CloudFrontCookieResponse;
 import com.freeclassroom.courseservice.dto.response.course.LessonInfoResponse;
 import com.freeclassroom.courseservice.dto.response.course.student.LessonOverviewResponse;
 import org.springframework.core.io.Resource;
@@ -15,4 +16,7 @@ public interface ILessonStudentService {
     ApiResponse<LessonInfoResponse> getLessonInfo(String id, String userId);
     ApiResponse<CreationResponse> markDone(String lessonId, String userId);
     ApiResponse<CreationResponse> makeNote(String lessonId, String userId, MakeNoteForLessonRequest request);
+    ApiResponse<String> getPresignedUrl(String lessonId, String ipAddress);
+    ApiResponse<String> getPresignedUrlNoIp(String lessonId);
+    ApiResponse<CloudFrontCookieResponse> getPresignedCookies(String lessonId, String ipAddress);
 }

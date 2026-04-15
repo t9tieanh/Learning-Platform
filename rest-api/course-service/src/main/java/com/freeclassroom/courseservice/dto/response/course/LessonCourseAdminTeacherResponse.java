@@ -1,5 +1,6 @@
 package com.freeclassroom.courseservice.dto.response.course;
 
+import com.freeclassroom.courseservice.service.utils.cloudfront.SignedUrl;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -14,6 +15,8 @@ public class LessonCourseAdminTeacherResponse {
     String title;
     String content;
     Long duration;
+
+    @SignedUrl
     String url;
     Long position;
     Boolean isPublic;

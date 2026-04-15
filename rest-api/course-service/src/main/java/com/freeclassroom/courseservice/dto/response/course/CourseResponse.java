@@ -1,5 +1,6 @@
 package com.freeclassroom.courseservice.dto.response.course;
 
+import com.freeclassroom.courseservice.service.utils.cloudfront.SignedUrl;
 import com.freeclassroom.courseservice.dto.response.member.EnrollmentResponse;
 import com.freeclassroom.courseservice.dto.response.user.InstructorResponse;
 import com.freeclassroom.courseservice.enums.entity.EnumCourseProgressStep;
@@ -23,6 +24,8 @@ public class CourseResponse {
     String shortDescription;
     String longDescription;
     String thumbnailUrl;
+
+    @SignedUrl
     String introductoryVideo;
     String language;
     Double originalPrice;

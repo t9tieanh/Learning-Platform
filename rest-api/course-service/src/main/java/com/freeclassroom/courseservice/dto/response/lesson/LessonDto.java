@@ -1,5 +1,6 @@
 package com.freeclassroom.courseservice.dto.response.lesson;
 
+import com.freeclassroom.courseservice.service.utils.cloudfront.SignedUrl;
 import com.freeclassroom.courseservice.enums.entity.EnumLessonType;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -21,5 +22,7 @@ public class LessonDto {
 
     @Enumerated(EnumType.STRING)
     EnumLessonType type;
+
+    @SignedUrl
     String url;
 }
