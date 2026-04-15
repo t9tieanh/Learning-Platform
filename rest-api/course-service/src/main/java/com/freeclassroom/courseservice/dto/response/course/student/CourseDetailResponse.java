@@ -1,4 +1,6 @@
 package com.freeclassroom.courseservice.dto.response.course.student;
+
+import com.freeclassroom.courseservice.service.utils.cloudfront.SignedUrl;
 import com.freeclassroom.courseservice.dto.response.user.InstructorResponse;
 import com.freeclassroom.courseservice.enums.entity.EnumCourseStatus;
 import lombok.*;
@@ -20,6 +22,7 @@ public class CourseDetailResponse {
     String thumbnailUrl;
     String language;
     Double rating;
+    @SignedUrl
     String introductoryVideo;
 
     EnumCourseStatus status;

@@ -1,5 +1,7 @@
 package com.freeclassroom.courseservice.dto.response.course;
 
+import com.freeclassroom.courseservice.service.utils.cloudfront.SignedUrl;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -18,6 +20,7 @@ public class MyCourseResponse {
     Double rating;
     Double progress;
 
+    @SignedUrl
     String introductoryVideo;
     String language;
 

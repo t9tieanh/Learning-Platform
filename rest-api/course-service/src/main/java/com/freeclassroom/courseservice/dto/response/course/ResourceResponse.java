@@ -1,5 +1,6 @@
 package com.freeclassroom.courseservice.dto.response.course;
 
+import com.freeclassroom.courseservice.service.utils.cloudfront.SignedUrl;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -11,5 +12,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ResourceResponse {
     String type;
+
+    @SignedUrl
     String url;
 }
