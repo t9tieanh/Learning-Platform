@@ -1,5 +1,7 @@
 package com.freeclassroom.courseservice.dto.response.course;
 
+import com.freeclassroom.courseservice.service.utils.cloudfront.SignedUrl;
+
 import com.freeclassroom.courseservice.enums.entity.EnumCourseProgressStep;
 import com.freeclassroom.courseservice.enums.entity.EnumCourseStatus;
 import jakarta.persistence.EnumType;
@@ -26,6 +28,7 @@ public class CourseInfoResponse {
     Double finalPrice;
     Set<String> outcomes;
     Set<String> requirements;
+    @SignedUrl
     String introductoryVideo;
 
     @Enumerated(EnumType.STRING)

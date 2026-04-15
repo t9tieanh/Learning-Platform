@@ -6,12 +6,15 @@ import com.freeclassroom.courseservice.entity.course.ChapterEntity;
 import com.freeclassroom.courseservice.exception.CustomExeption;
 import com.freeclassroom.courseservice.exception.ErrorCode;
 import com.freeclassroom.courseservice.mapper.ChapterMapper;
+import com.freeclassroom.courseservice.mapper.LessonMapper;
 import com.freeclassroom.courseservice.repository.entity.ChapterRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.util.Collections;
 
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -22,6 +25,8 @@ public class ChapterUserService implements IChapterUserService {
 
     ChapterMapper chapterMapper;
 
+    LessonMapper lessonMapper;
+
     @Override
     public ApiResponse<ChapterUserResponse> getChapterPublic(String id) {
         ChapterEntity chapter = chapterRepo.findById(id).orElseThrow(
@@ -29,10 +34,12 @@ public class ChapterUserService implements IChapterUserService {
         );
 
         ChapterUserResponse response = chapterMapper.toUserResponse(chapter);
+        response.setLessons(chapter.getLessons() == null
+                ? Collections.emptyList()
+                : chapter.getLessons().stream().map(lessonMapper::toDto).toList());
 
-        //filter public lesson
         response.getLessons().forEach(lesson -> {
-            if (lesson.getIsPublic() == null || lesson.getIsPublic() == false) {
+            if (lesson.getIsPublic() == null || !lesson.getIsPublic()) {
                 lesson.setUrl(null);
             }
         });

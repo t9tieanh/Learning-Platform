@@ -1,5 +1,6 @@
 package com.freeclassroom.courseservice.service.utils.cloudfront;
 
+import com.freeclassroom.courseservice.dto.response.course.CloudFrontCookieResponse;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -18,7 +19,10 @@ import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import software.amazon.awssdk.services.cloudfront.CloudFrontUtilities;
 import software.amazon.awssdk.services.cloudfront.model.CannedSignerRequest;
+import software.amazon.awssdk.services.cloudfront.model.CustomSignerRequest;
 import software.amazon.awssdk.services.cloudfront.url.SignedUrl;
+import software.amazon.awssdk.services.cloudfront.cookie.CookiesForCannedPolicy;
+import software.amazon.awssdk.services.cloudfront.cookie.CookiesForCustomPolicy;
 
 import java.net.URI;
 import java.nio.file.Path;
@@ -51,9 +55,9 @@ public class CloudFrontService implements ICloudFrontService {
     @NonFinal
     private String keyPairId;
 
-    @Value("${aws.cloudfront.defaultExpireDays:7}")
+    @Value("${aws.cloudfront.defaultExpireHours:2}")
     @NonFinal
-    private long defaultExpireDays;
+    private long defaultExpireHours;
 
     StringRedisTemplate redisTemplate;
 
@@ -67,7 +71,7 @@ public class CloudFrontService implements ICloudFrontService {
         String normalizedPath = safePath.startsWith("/") ? safePath : "/" + safePath;
         String fullUrl = "https://" + distributionDomainName + "/" + keyStore + normalizedPath;
 
-        Instant expiration = Instant.now().plus(defaultExpireDays, ChronoUnit.DAYS);
+        Instant expiration = Instant.now().plus(defaultExpireHours, ChronoUnit.HOURS);
         Path privateKey = privateKeyResource.getFile().toPath();
 
         CannedSignerRequest req = CannedSignerRequest.builder()
@@ -84,20 +88,90 @@ public class CloudFrontService implements ICloudFrontService {
 
     @Override
     public String getSignedUrl(String resourcePath) throws Exception {
-        // String redisKey = "cloudfront:signedUrl:" + resourcePath;
-
-        // String cachedUrl = redisTemplate.opsForValue().get(redisKey);
-        // if (cachedUrl != null) {
-        //     return cachedUrl;
-        // }
-
         SignedUrl signedUrl = this.generateSignedUrlCanned(resourcePath);
-        String url = signedUrl.url();
+        return signedUrl.url();
+    }
 
-        long ttlSeconds = Duration.ofDays(defaultExpireDays).toSeconds();
-        // redisTemplate.opsForValue().set(redisKey, url, Duration.ofSeconds(ttlSeconds));
+    @Override
+    public String getSignedUrlWithIp(String resourcePath, String ipAddress) throws Exception {
+        SignedUrl signedUrl = this.generateSignedUrlCustom(resourcePath, ipAddress);
+        return signedUrl.url();
+    }
 
-        return url;
+    private SignedUrl generateSignedUrlCustom(String resourcePath, String ipAddress) throws Exception {
+        String safePath = resourcePath.replace(" ", "%20");
+        String normalizedPath = safePath.startsWith("/") ? safePath : "/" + safePath;
+        String fullUrl = "https://" + distributionDomainName + "/" + keyStore + normalizedPath;
+
+        Instant expiration = Instant.now().plus(defaultExpireHours, ChronoUnit.HOURS);
+        Path privateKeyPath = privateKeyResource.getFile().toPath();
+
+        CustomSignerRequest req = CustomSignerRequest.builder()
+                .resourceUrl(fullUrl)
+                .privateKey(privateKeyPath)
+                .keyPairId(keyPairId)
+                .expirationDate(expiration)
+                .ipRange(ipAddress + "/32")
+                .build();
+
+        SignedUrl signed = cloudFrontUtilities.getSignedUrlWithCustomPolicy(req);
+        log.info("Generated signed URL with IP restriction ({}): {}", ipAddress, signed.url());
+        return signed;
+    }
+
+    @Override
+    public CloudFrontCookieResponse getSignedCookies(String resourcePath) throws Exception {
+        String safePath = resourcePath.replace(" ", "%20");
+        String normalizedPath = safePath.startsWith("/") ? safePath : "/" + safePath;
+        String fullUrl = "https://" + distributionDomainName + "/" + keyStore + normalizedPath;
+
+        Instant expiration = Instant.now().plus(defaultExpireHours, ChronoUnit.HOURS);
+        Path privateKey = privateKeyResource.getFile().toPath();
+
+        CannedSignerRequest req = CannedSignerRequest.builder()
+                .resourceUrl(fullUrl)
+                .privateKey(privateKey)
+                .keyPairId(keyPairId)
+                .expirationDate(expiration)
+                .build();
+
+        CookiesForCannedPolicy cookies = cloudFrontUtilities.getCookiesForCannedPolicy(req);
+        
+        return CloudFrontCookieResponse.builder()
+                .expires(cookies.expiresHeaderValue())
+                .signature(cookies.signatureHeaderValue())
+                .keyPairId(cookies.keyPairIdHeaderValue())
+                .domain(distributionDomainName)
+                .url(fullUrl)
+                .build();
+    }
+
+    @Override
+    public CloudFrontCookieResponse getSignedCookiesWithIp(String resourcePath, String ipAddress) throws Exception {
+        String safePath = resourcePath.replace(" ", "%20");
+        String normalizedPath = safePath.startsWith("/") ? safePath : "/" + safePath;
+        String fullUrl = "https://" + distributionDomainName + "/" + keyStore + normalizedPath;
+
+        Instant expiration = Instant.now().plus(defaultExpireHours, ChronoUnit.HOURS);
+        Path privateKeyPath = privateKeyResource.getFile().toPath();
+
+        CustomSignerRequest req = CustomSignerRequest.builder()
+                .resourceUrl(fullUrl)
+                .privateKey(privateKeyPath)
+                .keyPairId(keyPairId)
+                .expirationDate(expiration)
+                .ipRange(ipAddress + "/32")
+                .build();
+
+        CookiesForCustomPolicy cookies = cloudFrontUtilities.getCookiesForCustomPolicy(req);
+
+        return CloudFrontCookieResponse.builder()
+                .policy(cookies.policyHeaderValue())
+                .signature(cookies.signatureHeaderValue())
+                .keyPairId(cookies.keyPairIdHeaderValue())
+                .domain(distributionDomainName)
+                .url(fullUrl)
+                .build();
     }
 
     @Override
@@ -111,7 +185,7 @@ public class CloudFrontService implements ICloudFrontService {
 
         HttpEntity<Void> entity = new HttpEntity<>(headers);
 
-        URI uri = new URI(signedUrl); // Không dùng new URL()
+        URI uri = new URI(signedUrl);
 
         ResponseEntity<byte[]> response = restTemplate.exchange(uri, HttpMethod.GET, entity, byte[].class);
         return response.getBody();
@@ -152,5 +226,4 @@ public class CloudFrontService implements ICloudFrontService {
                 .headers(responseHeaders)
                 .body(new ByteArrayResource(response.getBody()));
     }
-
 }
