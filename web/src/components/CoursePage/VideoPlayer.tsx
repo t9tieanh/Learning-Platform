@@ -62,25 +62,37 @@ const VideoPlayer = forwardRef<VideoPlayerRef, {
 
       if (lesson.id && data?.accessToken) {
         try {
-          // Switch to Signed Cookies as requested
+          // Senior Logic: Detect if we can use Cookies or must fallback to Signed URL
+          const currentHost = window.location.hostname
+
+          // Call cookie API first to get domain info
           const response = await lessonStudentService.getPresignedCookies(lesson.id)
+
           if (response.code === 200 && response.result) {
             const { policy, signature, keyPairId, expires, domain, url } = response.result
 
-            // Senior Note: Setting cookies for .cloudfront.net domains might be blocked by browsers.
-            // This works best with Custom Domains (e.g., .learnova.io.vn)
-            const cookieSettings = `; domain=.${domain}; path=/; Secure; SameSite=None`
+            // Check if we can realistically set cookies (must share a base domain and not be a public suffix)
+            const canUseCookies = !domain.endsWith('.cloudfront.net') &&
+              (currentHost.endsWith(domain.split('.').slice(-2).join('.')) || currentHost === 'localhost')
 
-            if (policy) document.cookie = `CloudFront-Policy=${policy}${cookieSettings}`
-            if (expires) document.cookie = `CloudFront-Expires=${expires}${cookieSettings}`
-            document.cookie = `CloudFront-Signature=${signature}${cookieSettings}`
-            document.cookie = `CloudFront-Key-Pair-Id=${keyPairId}${cookieSettings}`
-
-            setActualVideoUrl(url)
+            if (canUseCookies && currentHost !== 'localhost') {
+              const cookieSettings = `; domain=.${domain}; path=/; Secure; SameSite=None`
+              if (policy) document.cookie = `CloudFront-Policy=${policy}${cookieSettings}`
+              if (expires) document.cookie = `CloudFront-Expires=${expires}${cookieSettings}`
+              document.cookie = `CloudFront-Signature=${signature}${cookieSettings}`
+              document.cookie = `CloudFront-Key-Pair-Id=${keyPairId}${cookieSettings}`
+              setActualVideoUrl(url)
+            } else {
+              // Fallback to Signed URL for .cloudfront.net or localhost
+              const urlResponse = await lessonStudentService.getPresignedUrl(lesson.id)
+              if (urlResponse.code === 200) {
+                setActualVideoUrl(urlResponse.result || '')
+              }
+            }
           }
         } catch (error) {
-          console.error('Failed to fetch presigned cookies:', error)
-          toast.error('Không thể xác thực quyền xem video bằng Cookie.')
+          console.error('Video access error:', error)
+          toast.error('Không thể xác thực quyền truy cập video.')
         }
       }
     }
