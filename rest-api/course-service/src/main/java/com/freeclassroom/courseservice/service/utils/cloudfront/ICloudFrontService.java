@@ -1,5 +1,6 @@
 package com.freeclassroom.courseservice.service.utils.cloudfront;
 
+import com.freeclassroom.courseservice.dto.response.course.CloudFrontCookieResponse;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 

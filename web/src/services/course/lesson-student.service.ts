@@ -41,13 +41,20 @@ class LessonStudentService {
     const response = await axiosClient.axiosInstance.get(`/learning/lesson-student/${lessonId}/info`)
     return response.data
   }
-  async getPresignedUrl(lessonId: string, token: string): Promise<ApiResponse<string>> {
-    const response = await axiosClient.axiosInstance.get(`/learning/lesson-student/${lessonId}/presigned-url`, {
-      params: {
-        token,
-        noIp: true // Senior Note: Bypass IP restriction for local/docker dev
-      }
-    })
+  async getPresignedUrl(lessonId: string): Promise<ApiResponse<string>> {
+    const response = await axiosClient.axiosInstance.get(`/learning/lesson-student/${lessonId}/presigned-url`)
+    return response.data
+  }
+
+  async getPresignedCookies(lessonId: string): Promise<ApiResponse<{
+    policy: string
+    signature: string
+    keyPairId: string
+    expires: string
+    domain: string
+    url: string
+  }>> {
+    const response = await axiosClient.axiosInstance.get(`/learning/lesson-student/${lessonId}/presigned-cookies`)
     return response.data
   }
 }

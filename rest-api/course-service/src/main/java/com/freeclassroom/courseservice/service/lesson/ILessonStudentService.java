@@ -3,6 +3,7 @@ package com.freeclassroom.courseservice.service.lesson;
 import com.freeclassroom.courseservice.dto.request.lesson.MakeNoteForLessonRequest;
 import com.freeclassroom.courseservice.dto.response.ApiResponse;
 import com.freeclassroom.courseservice.dto.response.common.CreationResponse;
+import com.freeclassroom.courseservice.dto.response.course.CloudFrontCookieResponse;
 import com.freeclassroom.courseservice.dto.response.course.LessonInfoResponse;
 import com.freeclassroom.courseservice.dto.response.course.student.LessonOverviewResponse;
 import org.springframework.core.io.Resource;

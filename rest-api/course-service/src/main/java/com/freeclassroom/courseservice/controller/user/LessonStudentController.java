@@ -25,10 +25,9 @@ public class LessonStudentController {
     ILessonStudentService lessonStudentService;
 
     @GetMapping("/{id}/presigned-url")
-    @PreAuthorize("@lessonStudentService.canViewLessonByAccessToken(#id, #token)")
+    @PreAuthorize("@lessonStudentService.canViewLesson(#id, authentication.name)")
     public ApiResponse<String> getPresignedUrl(
             @PathVariable String id,
-            @RequestParam(name = "token", required = true) String token,
             @RequestParam(name = "noIp", defaultValue = "false") boolean noIp,
             HttpServletRequest request) {
         
@@ -40,7 +39,6 @@ public class LessonStudentController {
         }
 
         if (noIp) {
-            // Fallback for testing without IP restriction
             return lessonStudentService.getPresignedUrlNoIp(id);
         }
 
@@ -48,10 +46,9 @@ public class LessonStudentController {
     }
 
     @GetMapping("/{id}/presigned-cookies")
-    @PreAuthorize("@lessonStudentService.canViewLessonByAccessToken(#id, #token)")
+    @PreAuthorize("@lessonStudentService.canViewLesson(#id, authentication.name)")
     public ApiResponse<CloudFrontCookieResponse> getPresignedCookies(
             @PathVariable String id,
-            @RequestParam(name = "token", required = true) String token,
             HttpServletRequest request) {
         
         String clientIp = request.getHeader("X-Forwarded-For");
@@ -65,10 +62,9 @@ public class LessonStudentController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("@lessonStudentService.canViewLessonByAccessToken(#id, #token)")
+    @PreAuthorize("@lessonStudentService.canViewLesson(#id, authentication.name)")
     public ResponseEntity<Resource> getLesson(
             @PathVariable String id,
-            @RequestParam(name = "token", required = true) String token,
             @RequestHeader(value = "Range", required = false) String rangeHeader) {
         try {
             return lessonStudentService.getLesson(id, rangeHeader);

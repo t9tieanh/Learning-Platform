@@ -13,5 +13,7 @@ public class CloudFrontCookieResponse {
     String policy;
     String signature;
     String keyPairId;
+    String expires;
     String domain;
+    String url;
 }

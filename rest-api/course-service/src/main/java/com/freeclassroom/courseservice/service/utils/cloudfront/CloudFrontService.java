@@ -1,5 +1,6 @@
 package com.freeclassroom.courseservice.service.utils.cloudfront;
 
+import com.freeclassroom.courseservice.dto.response.course.CloudFrontCookieResponse;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -54,9 +55,9 @@ public class CloudFrontService implements ICloudFrontService {
     @NonFinal
     private String keyPairId;
 
-    @Value("${aws.cloudfront.defaultExpireDays:7}")
+    @Value("${aws.cloudfront.defaultExpireHours:2}")
     @NonFinal
-    private long defaultExpireDays;
+    private long defaultExpireHours;
 
     StringRedisTemplate redisTemplate;
 
@@ -70,7 +71,7 @@ public class CloudFrontService implements ICloudFrontService {
         String normalizedPath = safePath.startsWith("/") ? safePath : "/" + safePath;
         String fullUrl = "https://" + distributionDomainName + "/" + keyStore + normalizedPath;
 
-        Instant expiration = Instant.now().plus(defaultExpireDays, ChronoUnit.DAYS);
+        Instant expiration = Instant.now().plus(defaultExpireHours, ChronoUnit.HOURS);
         Path privateKey = privateKeyResource.getFile().toPath();
 
         CannedSignerRequest req = CannedSignerRequest.builder()
@@ -102,7 +103,7 @@ public class CloudFrontService implements ICloudFrontService {
         String normalizedPath = safePath.startsWith("/") ? safePath : "/" + safePath;
         String fullUrl = "https://" + distributionDomainName + "/" + keyStore + normalizedPath;
 
-        Instant expiration = Instant.now().plus(defaultExpireDays, ChronoUnit.DAYS);
+        Instant expiration = Instant.now().plus(defaultExpireHours, ChronoUnit.HOURS);
         Path privateKeyPath = privateKeyResource.getFile().toPath();
 
         CustomSignerRequest req = CustomSignerRequest.builder()
@@ -124,7 +125,7 @@ public class CloudFrontService implements ICloudFrontService {
         String normalizedPath = safePath.startsWith("/") ? safePath : "/" + safePath;
         String fullUrl = "https://" + distributionDomainName + "/" + keyStore + normalizedPath;
 
-        Instant expiration = Instant.now().plus(defaultExpireDays, ChronoUnit.DAYS);
+        Instant expiration = Instant.now().plus(defaultExpireHours, ChronoUnit.HOURS);
         Path privateKey = privateKeyResource.getFile().toPath();
 
         CannedSignerRequest req = CannedSignerRequest.builder()
@@ -137,10 +138,11 @@ public class CloudFrontService implements ICloudFrontService {
         CookiesForCannedPolicy cookies = cloudFrontUtilities.getCookiesForCannedPolicy(req);
         
         return CloudFrontCookieResponse.builder()
-                .policy(cookies.policyHeaderValue())
+                .expires(cookies.expiresHeaderValue())
                 .signature(cookies.signatureHeaderValue())
                 .keyPairId(cookies.keyPairIdHeaderValue())
                 .domain(distributionDomainName)
+                .url(fullUrl)
                 .build();
     }
 
@@ -150,7 +152,7 @@ public class CloudFrontService implements ICloudFrontService {
         String normalizedPath = safePath.startsWith("/") ? safePath : "/" + safePath;
         String fullUrl = "https://" + distributionDomainName + "/" + keyStore + normalizedPath;
 
-        Instant expiration = Instant.now().plus(defaultExpireDays, ChronoUnit.DAYS);
+        Instant expiration = Instant.now().plus(defaultExpireHours, ChronoUnit.HOURS);
         Path privateKeyPath = privateKeyResource.getFile().toPath();
 
         CustomSignerRequest req = CustomSignerRequest.builder()
@@ -168,6 +170,7 @@ public class CloudFrontService implements ICloudFrontService {
                 .signature(cookies.signatureHeaderValue())
                 .keyPairId(cookies.keyPairIdHeaderValue())
                 .domain(distributionDomainName)
+                .url(fullUrl)
                 .build();
     }
 

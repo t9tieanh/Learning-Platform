@@ -52,9 +52,9 @@ const VideoPlayer = forwardRef<VideoPlayerRef, {
     }
   }))
 
-  // Fetch presigned URL when lesson changes
+  // Fetch presigned data when lesson changes
   useEffect(() => {
-    const fetchVideoUrl = async () => {
+    const fetchVideoData = async () => {
       if (lesson.introductionVideo) {
         setActualVideoUrl(lesson.introductionVideo || '')
         return
@@ -62,18 +62,30 @@ const VideoPlayer = forwardRef<VideoPlayerRef, {
 
       if (lesson.id && data?.accessToken) {
         try {
-          const response = await lessonStudentService.getPresignedUrl(lesson.id, data.accessToken)
-          if (response.code === 200) {
-            setActualVideoUrl(response.result as string)
+          // Switch to Signed Cookies as requested
+          const response = await lessonStudentService.getPresignedCookies(lesson.id)
+          if (response.code === 200 && response.result) {
+            const { policy, signature, keyPairId, expires, domain, url } = response.result
+
+            // Senior Note: Setting cookies for .cloudfront.net domains might be blocked by browsers.
+            // This works best with Custom Domains (e.g., .learnova.io.vn)
+            const cookieSettings = `; domain=.${domain}; path=/; Secure; SameSite=None`
+
+            if (policy) document.cookie = `CloudFront-Policy=${policy}${cookieSettings}`
+            if (expires) document.cookie = `CloudFront-Expires=${expires}${cookieSettings}`
+            document.cookie = `CloudFront-Signature=${signature}${cookieSettings}`
+            document.cookie = `CloudFront-Key-Pair-Id=${keyPairId}${cookieSettings}`
+
+            setActualVideoUrl(url)
           }
         } catch (error) {
-          console.error('Failed to fetch presigned URL:', error)
-          toast.error('Không thể tải link video bài học. Vui lòng thử lại sau.')
+          console.error('Failed to fetch presigned cookies:', error)
+          toast.error('Không thể xác thực quyền xem video bằng Cookie.')
         }
       }
     }
 
-    fetchVideoUrl()
+    fetchVideoData()
   }, [lesson.id, lesson.introductionVideo, data?.accessToken])
 
   // Parse subtitles if available

@@ -4,6 +4,7 @@ import com.freeclassroom.courseservice.configuration.CustomJwtDecoder;
 import com.freeclassroom.courseservice.dto.request.lesson.MakeNoteForLessonRequest;
 import com.freeclassroom.courseservice.dto.response.ApiResponse;
 import com.freeclassroom.courseservice.dto.response.common.CreationResponse;
+import com.freeclassroom.courseservice.dto.response.course.CloudFrontCookieResponse;
 import com.freeclassroom.courseservice.dto.response.course.LessonInfoResponse;
 import com.freeclassroom.courseservice.dto.response.course.student.LessonOverviewResponse;
 import com.freeclassroom.courseservice.entity.course.LessonEntity;
@@ -256,6 +257,8 @@ public class LessonStudentService implements ILessonStudentService {
             log.error("Lỗi khi tạo signed URL (No IP) cho lesson {}: {}", lessonId, e.getMessage());
             throw new CustomExeption(ErrorCode.UNAUTHORIZED);
         }
+    }
+
     @Override
     public ApiResponse<CloudFrontCookieResponse> getPresignedCookies(String lessonId, String ipAddress) {
         LessonEntity lesson = lessonRepo.findById(lessonId).orElseThrow(
