@@ -138,9 +138,9 @@ public class CloudFrontService implements ICloudFrontService {
         CookiesForCannedPolicy cookies = cloudFrontUtilities.getCookiesForCannedPolicy(req);
         
         return CloudFrontCookieResponse.builder()
-                .expires(cookies.expiresHeaderValue())
-                .signature(cookies.signatureHeaderValue())
-                .keyPairId(cookies.keyPairIdHeaderValue())
+                .expires(extractCookieValue(cookies.expiresHeaderValue()))
+                .signature(extractCookieValue(cookies.signatureHeaderValue()))
+                .keyPairId(extractCookieValue(cookies.keyPairIdHeaderValue()))
                 .domain(distributionDomainName)
                 .url(fullUrl)
                 .build();
@@ -166,12 +166,18 @@ public class CloudFrontService implements ICloudFrontService {
         CookiesForCustomPolicy cookies = cloudFrontUtilities.getCookiesForCustomPolicy(req);
 
         return CloudFrontCookieResponse.builder()
-                .policy(cookies.policyHeaderValue())
-                .signature(cookies.signatureHeaderValue())
-                .keyPairId(cookies.keyPairIdHeaderValue())
+                .policy(extractCookieValue(cookies.policyHeaderValue()))
+                .signature(extractCookieValue(cookies.signatureHeaderValue()))
+                .keyPairId(extractCookieValue(cookies.keyPairIdHeaderValue()))
                 .domain(distributionDomainName)
                 .url(fullUrl)
                 .build();
+    }
+
+    private String extractCookieValue(String fullCookieString) {
+        if (fullCookieString == null) return null;
+        int eqPos = fullCookieString.indexOf("=");
+        return (eqPos != -1) ? fullCookieString.substring(eqPos + 1) : fullCookieString;
     }
 
     @Override
