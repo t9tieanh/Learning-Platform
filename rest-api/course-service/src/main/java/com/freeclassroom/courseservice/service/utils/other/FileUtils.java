@@ -52,4 +52,21 @@ public class FileUtils {
                 .replace("*", "%2A")
                 .replace("%7E", "~");
     }
+
+    public String extractObjectKey(String rawUrl) {
+        if (rawUrl == null || rawUrl.isBlank()) {
+            return null;
+        }
+
+        String value = rawUrl.trim();
+        int queryIndex = value.indexOf('?');
+        if (queryIndex >= 0) {
+            value = value.substring(0, queryIndex);
+        }
+
+        int lastSlash = value.lastIndexOf('/');
+        String objectKey = lastSlash >= 0 ? value.substring(lastSlash + 1) : value;
+
+        return objectKey.isBlank() ? null : objectKey;
+    }
 }

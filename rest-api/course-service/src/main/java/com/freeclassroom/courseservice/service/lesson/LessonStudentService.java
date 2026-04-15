@@ -209,4 +209,81 @@ public class LessonStudentService implements ILessonStudentService {
                 .message("Lưu ghi chú thành công !")
                 .build();
     }
+    @Override
+    public ApiResponse<String> getPresignedUrl(String lessonId, String ipAddress) {
+        LessonEntity lesson = lessonRepo.findById(lessonId).orElseThrow(
+                () -> new CustomExeption(ErrorCode.LESSON_NOT_FOUND)
+        );
+
+        String objectKey = fileUtils.extractObjectKey(lesson.getUrl());
+        if (objectKey == null) {
+            throw new CustomExeption(ErrorCode.LESSON_NOT_FOUND);
+        }
+
+        try {
+            String signedUrl = cloudFrontService.getSignedUrlWithIp(objectKey, ipAddress);
+            return ApiResponse.<String>builder()
+                    .code(200)
+                    .message("Lấy URL thành công !")
+                    .result(signedUrl)
+                    .build();
+        } catch (Exception e) {
+            log.error("Lỗi khi tạo signed URL cho lesson {}: {}", lessonId, e.getMessage());
+            throw new CustomExeption(ErrorCode.UNAUTHORIZED);
+        }
+    }
+
+    @Override
+    public ApiResponse<String> getPresignedUrlNoIp(String lessonId) {
+        LessonEntity lesson = lessonRepo.findById(lessonId).orElseThrow(
+                () -> new CustomExeption(ErrorCode.LESSON_NOT_FOUND)
+        );
+
+        String objectKey = fileUtils.extractObjectKey(lesson.getUrl());
+        if (objectKey == null) {
+            throw new CustomExeption(ErrorCode.LESSON_NOT_FOUND);
+        }
+
+        try {
+            // Use standard signed URL (Canned Policy) without IP restriction
+            String signedUrl = cloudFrontService.getSignedUrl(objectKey);
+            return ApiResponse.<String>builder()
+                    .code(200)
+                    .message("Lấy URL thành công (No IP) !")
+                    .result(signedUrl)
+                    .build();
+        } catch (Exception e) {
+            log.error("Lỗi khi tạo signed URL (No IP) cho lesson {}: {}", lessonId, e.getMessage());
+            throw new CustomExeption(ErrorCode.UNAUTHORIZED);
+        }
+    @Override
+    public ApiResponse<CloudFrontCookieResponse> getPresignedCookies(String lessonId, String ipAddress) {
+        LessonEntity lesson = lessonRepo.findById(lessonId).orElseThrow(
+                () -> new CustomExeption(ErrorCode.LESSON_NOT_FOUND)
+        );
+
+        String objectKey = fileUtils.extractObjectKey(lesson.getUrl());
+        if (objectKey == null) {
+            throw new CustomExeption(ErrorCode.LESSON_NOT_FOUND);
+        }
+
+        try {
+            CloudFrontCookieResponse cookies;
+            // Senior Logic: If IP is internal or not provided, use Canned Policy (No IP)
+            if (ipAddress == null || ipAddress.startsWith("127.") || ipAddress.startsWith("172.") || ipAddress.startsWith("192.168.")) {
+                cookies = cloudFrontService.getSignedCookies(objectKey);
+            } else {
+                cookies = cloudFrontService.getSignedCookiesWithIp(objectKey, ipAddress);
+            }
+
+            return ApiResponse.<CloudFrontCookieResponse>builder()
+                    .code(200)
+                    .message("Lấy Cookie thành công !")
+                    .result(cookies)
+                    .build();
+        } catch (Exception e) {
+            log.error("Lỗi khi tạo signed cookies cho lesson {}: {}", lessonId, e.getMessage());
+            throw new CustomExeption(ErrorCode.UNAUTHORIZED);
+        }
+    }
 }

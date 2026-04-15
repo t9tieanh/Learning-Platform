@@ -41,6 +41,15 @@ class LessonStudentService {
     const response = await axiosClient.axiosInstance.get(`/learning/lesson-student/${lessonId}/info`)
     return response.data
   }
+  async getPresignedUrl(lessonId: string, token: string): Promise<ApiResponse<string>> {
+    const response = await axiosClient.axiosInstance.get(`/learning/lesson-student/${lessonId}/presigned-url`, {
+      params: {
+        token,
+        noIp: true // Senior Note: Bypass IP restriction for local/docker dev
+      }
+    })
+    return response.data
+  }
 }
 
 export default new LessonStudentService()

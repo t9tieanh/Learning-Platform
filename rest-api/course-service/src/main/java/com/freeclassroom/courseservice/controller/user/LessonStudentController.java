@@ -3,12 +3,14 @@ package com.freeclassroom.courseservice.controller.user;
 import com.freeclassroom.courseservice.dto.request.lesson.MakeNoteForLessonRequest;
 import com.freeclassroom.courseservice.dto.response.ApiResponse;
 import com.freeclassroom.courseservice.dto.response.common.CreationResponse;
+import com.freeclassroom.courseservice.dto.response.course.CloudFrontCookieResponse;
 import com.freeclassroom.courseservice.dto.response.course.LessonInfoResponse;
 import com.freeclassroom.courseservice.dto.response.course.student.LessonOverviewResponse;
 import com.freeclassroom.courseservice.service.lesson.ILessonStudentService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -21,6 +23,46 @@ import org.springframework.web.bind.annotation.*;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class LessonStudentController {
     ILessonStudentService lessonStudentService;
+
+    @GetMapping("/{id}/presigned-url")
+    @PreAuthorize("@lessonStudentService.canViewLessonByAccessToken(#id, #token)")
+    public ApiResponse<String> getPresignedUrl(
+            @PathVariable String id,
+            @RequestParam(name = "token", required = true) String token,
+            @RequestParam(name = "noIp", defaultValue = "false") boolean noIp,
+            HttpServletRequest request) {
+        
+        String clientIp = request.getHeader("X-Forwarded-For");
+        if (clientIp == null || clientIp.isEmpty()) {
+            clientIp = request.getRemoteAddr();
+        } else {
+            clientIp = clientIp.split(",")[0].trim();
+        }
+
+        if (noIp) {
+            // Fallback for testing without IP restriction
+            return lessonStudentService.getPresignedUrlNoIp(id);
+        }
+
+        return lessonStudentService.getPresignedUrl(id, clientIp);
+    }
+
+    @GetMapping("/{id}/presigned-cookies")
+    @PreAuthorize("@lessonStudentService.canViewLessonByAccessToken(#id, #token)")
+    public ApiResponse<CloudFrontCookieResponse> getPresignedCookies(
+            @PathVariable String id,
+            @RequestParam(name = "token", required = true) String token,
+            HttpServletRequest request) {
+        
+        String clientIp = request.getHeader("X-Forwarded-For");
+        if (clientIp == null || clientIp.isEmpty()) {
+            clientIp = request.getRemoteAddr();
+        } else {
+            clientIp = clientIp.split(",")[0].trim();
+        }
+
+        return lessonStudentService.getPresignedCookies(id, clientIp);
+    }
 
     @GetMapping("/{id}")
     @PreAuthorize("@lessonStudentService.canViewLessonByAccessToken(#id, #token)")

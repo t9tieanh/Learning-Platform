@@ -15,4 +15,7 @@ public interface ILessonStudentService {
     ApiResponse<LessonInfoResponse> getLessonInfo(String id, String userId);
     ApiResponse<CreationResponse> markDone(String lessonId, String userId);
     ApiResponse<CreationResponse> makeNote(String lessonId, String userId, MakeNoteForLessonRequest request);
+    ApiResponse<String> getPresignedUrl(String lessonId, String ipAddress);
+    ApiResponse<String> getPresignedUrlNoIp(String lessonId);
+    ApiResponse<CloudFrontCookieResponse> getPresignedCookies(String lessonId, String ipAddress);
 }

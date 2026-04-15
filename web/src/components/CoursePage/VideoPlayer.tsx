@@ -1,9 +1,10 @@
-import { useRef, useCallback, useState, useMemo, forwardRef, useImperativeHandle } from 'react'
+import { useRef, useCallback, useState, useMemo, forwardRef, useImperativeHandle, useEffect } from 'react'
 import { Lesson } from '@/types/course-student'
 import { useAuthStore } from '@/stores/useAuth.stores'
 import { toast } from 'sonner'
 import LearnovaVideoPlayer from '@/components/common/Video/LearnovaVideoPlayer'
 import { parseSRT } from '@/utils/srtParser'
+import lessonStudentService from '@/services/course/lesson-student.service'
 
 import { LessonChunk } from '@/types/ai'
 
@@ -24,9 +25,9 @@ const VideoPlayer = forwardRef<VideoPlayerRef, {
   chunks = [],
   onShowChunkDetails
 }, ref) => {
-  const backEndUri = import.meta.env.VITE_BACKEND_URI as string
   const { data } = useAuthStore()
   const videoRef = useRef<HTMLVideoElement>(null)
+  const [actualVideoUrl, setActualVideoUrl] = useState<string>('')
 
   const seekTimestamps = useRef<number[]>([])
   const skipWarningShown = useRef(false)
@@ -50,6 +51,30 @@ const VideoPlayer = forwardRef<VideoPlayerRef, {
       }
     }
   }))
+
+  // Fetch presigned URL when lesson changes
+  useEffect(() => {
+    const fetchVideoUrl = async () => {
+      if (lesson.introductionVideo) {
+        setActualVideoUrl(lesson.introductionVideo || '')
+        return
+      }
+
+      if (lesson.id && data?.accessToken) {
+        try {
+          const response = await lessonStudentService.getPresignedUrl(lesson.id, data.accessToken)
+          if (response.code === 200) {
+            setActualVideoUrl(response.result as string)
+          }
+        } catch (error) {
+          console.error('Failed to fetch presigned URL:', error)
+          toast.error('Không thể tải link video bài học. Vui lòng thử lại sau.')
+        }
+      }
+    }
+
+    fetchVideoUrl()
+  }, [lesson.id, lesson.introductionVideo, data?.accessToken])
 
   // Parse subtitles if available
   const parsedSubtitles = useMemo(() => {
@@ -107,9 +132,8 @@ const VideoPlayer = forwardRef<VideoPlayerRef, {
   }, [markDoneVideo])
 
   const videoSrc = useMemo(() => {
-    if (lesson.introductionVideo) return lesson.introductionVideo
-    return `${backEndUri}learning/lesson-student/${lesson.id}?token=${data?.accessToken}`
-  }, [lesson, backEndUri, data])
+    return actualVideoUrl
+  }, [actualVideoUrl])
 
   return (
     <div className='w-full h-full'>
