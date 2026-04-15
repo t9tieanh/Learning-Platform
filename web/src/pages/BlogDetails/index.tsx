@@ -60,7 +60,7 @@ const BlogDetails = () => {
           <Button
             variant={undefined}
             className='inline-flex items-center gap-2 bg-transparent text-foreground hover:bg-gray-50 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary transition rounded-md px-2 py-1'
-            onClick={() => navigate('/blogs')}
+            onClick={() => navigate(-1)}
             aria-label='Trở lại'
           >
             <ArrowLeft className='h-4 w-4 text-foreground' />
@@ -127,11 +127,11 @@ const BlogDetails = () => {
                     <AvatarFallback className='bg-muted text-muted-foreground'>
                       {blog.userName
                         ? blog.userName
-                            .split(' ')
-                            .filter(Boolean)
-                            .slice(0, 2)
-                            .map((word) => word[0].toUpperCase())
-                            .join('')
+                          .split(' ')
+                          .filter(Boolean)
+                          .slice(0, 2)
+                          .map((word) => word[0].toUpperCase())
+                          .join('')
                         : 'U'}
                     </AvatarFallback>
                   </Avatar>

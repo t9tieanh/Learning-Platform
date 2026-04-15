@@ -443,12 +443,6 @@ export const ChatArea = ({
         </p>
       )}
 
-      {enrolledCourses.length > 0 && (
-        <p className='text-base pl-1 font-semibold bg-gradient-to-r from-cyan-500 to-blue-500 bg-clip-text text-transparent'>
-          {tooltipTitle}
-        </p>
-      )}
-
       {enrolledCourses.map((course) => (
         // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
         <div
