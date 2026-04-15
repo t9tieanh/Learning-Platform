@@ -23,5 +23,10 @@ export interface OrderDto {
         instructor_id: string;
         image: string;
     }[];
+    vip_package?: {
+        name: string;
+        duration_months: number;
+        description?: string;
+    };
     ttl?: number;
 }

@@ -3,6 +3,7 @@ import 'dotenv/config';
 import express from 'express';
 import { errorHandlingMiddleware } from './middleware/error-handler.midleware'
 import RabbitMQService from './service/utils/rabbitmq.service';
+import initializeBullProcessors from '~/service/jobs/bullProcessorInit';
 import { env } from './config/env';
 import indexRoute from '~/routes';
 import cookieParser from 'cookie-parser';
@@ -30,4 +31,10 @@ RabbitMQService.getInstance().then(async (rabbitClient) => {
     Logger.error(`Failed to connect to RabbitMQ: ${error}`);
 });
 
-app.listen(PORT, () => Logger.info(`Learnova:assistant_service running http://localhost:${PORT}`));
+// Initialize Bull job processors for lesson analysis pipeline
+initializeBullProcessors().catch((error) => {
+    Logger.error(`Failed to initialize Bull processors: ${error}`);
+    process.exit(1);
+});
+
+app.listen(PORT, () => Logger.info(`Learnova:assistant_service running at http://localhost:${PORT}`));

@@ -16,14 +16,12 @@ yarn.lock
 
 key
 
-
+.idea
 .agent
 
-data
-
 n8n/workflows
-data/
 *.bson
 
+.idea
 
 Semantic-Chunking-Typescript

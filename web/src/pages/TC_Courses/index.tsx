@@ -87,23 +87,30 @@ class TC_Course extends Component<Record<string, never>, State> {
     })
 
     return (
-      <div className='flex-1 p-6 space-y-6 pt-16 lg:pt-6'>
-        <CourseSearchBar onSearch={(v) => this.setState({ search: v })} />
-        {this.state.loading ? (
-          <CoursesTableSkeleton />
-        ) : (
-          <CoursesTable
-            courses={filtered}
-            statusFilter={this.state.statusFilter}
-            onChangeStatusFilter={(s) => this.setState({ statusFilter: s as State['statusFilter'] })}
-            fetchCourses={this.fetchCourses}
-          />
+      <div className='flex flex-col min-h-[calc(100vh-100px)] p-6 pt-16 lg:pt-6'>
+        <div className='flex-1 flex flex-col space-y-6'>
+          <CourseSearchBar onSearch={(v) => this.setState({ search: v })} />
+          {this.state.loading ? (
+            <CoursesTableSkeleton />
+          ) : (
+            <CoursesTable
+              courses={filtered}
+              statusFilter={this.state.statusFilter}
+              onChangeStatusFilter={(s) => this.setState({ statusFilter: s as State['statusFilter'] })}
+              fetchCourses={this.fetchCourses}
+            />
+          )}
+        </div>
+
+        {courses.length > 0 && (
+          <div className='mt-8 pt-4 border-t border-gray-100'>
+            <CoursePagination
+              pages={this.state.totalPages}
+              current={this.state.page}
+              onChange={(p) => this.fetchCourses(p)}
+            />
+          </div>
         )}
-        <CoursePagination
-          pages={this.state.totalPages}
-          current={this.state.page}
-          onChange={(p) => this.fetchCourses(p)}
-        />
       </div>
     )
   }

@@ -9,7 +9,18 @@ import { useAuthStore } from '@/stores/useAuth.stores'
 import { useCartStore } from '@/stores/useCart.stores'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
-import { LogIn, UserPlus, House, BookOpen, Building2, StickyNote, ShoppingCart, Menu as MenuIcon, Crown, ChevronRight } from 'lucide-react'
+import {
+  LogIn,
+  UserPlus,
+  House,
+  BookOpen,
+  Building2,
+  StickyNote,
+  ShoppingCart,
+  Menu as MenuIcon,
+  Crown,
+  ChevronRight
+} from 'lucide-react'
 import Menu from './menu'
 import logo from '@/assets/images/logo1.png'
 import { useVipUpgrade } from '@/contexts/VipUpgradeContext'
@@ -25,7 +36,7 @@ const Header: FC = () => {
   const { openVipDialog } = useVipUpgrade()
 
   useEffect(() => {
-    refresh().catch(() => { })
+    refresh().catch(() => {})
   }, [refresh])
 
   useEffect(() => {
@@ -120,7 +131,11 @@ const Header: FC = () => {
                         <span className='text-red-500 italic font-base'>Xin chào</span> {data.name}
                       </p>
                       <div className='relative'>
-                        <Avatar className={`rounded-3xl w-8 h-8 md:w-10 md:h-10 transition-transform hover:scale-105 ${data.isVip ? 'ring-2 ring-yellow-400 ring-offset-2' : ''}`}>
+                        <Avatar
+                          className={`rounded-3xl w-8 h-8 md:w-10 md:h-10 transition-transform hover:scale-105 ${
+                            data.isVip ? 'ring-2 ring-yellow-400 ring-offset-2' : ''
+                          }`}
+                        >
                           <AvatarImage src={data.avatarUrl} alt='avatar' />
                           <AvatarFallback>{data.name?.charAt(0)}</AvatarFallback>
                         </Avatar>
@@ -202,7 +217,10 @@ const Header: FC = () => {
                       {/* VIP upgrade CTA in mobile menu */}
                       {!data.isVip && (
                         <button
-                          onClick={() => { openVipDialog(); setIsOpen(false) }}
+                          onClick={() => {
+                            openVipDialog()
+                            setIsOpen(false)
+                          }}
                           className='w-full flex items-center justify-between px-4 py-2.5 text-sm font-semibold text-yellow-700 bg-gradient-to-r from-yellow-50 to-amber-100 hover:from-yellow-100 hover:to-amber-200 border border-yellow-200 rounded-xl transition-all shadow-sm'
                         >
                           <span className='flex items-center gap-2'>
@@ -220,13 +238,19 @@ const Header: FC = () => {
                         label='Đăng nhập'
                         icon={<LogIn className='w-4 h-4' />}
                         className='w-full btn-primary shadow-lg login-btn bg-blue-600 hover:bg-blue-800 font-medium text-sm rounded-xl py-2.5'
-                        onClick={() => { navigate('/auth'); setIsOpen(false) }}
+                        onClick={() => {
+                          navigate('/auth')
+                          setIsOpen(false)
+                        }}
                       />
                       <CustomButton
                         label='Đăng ký'
                         icon={<UserPlus className='w-4 h-4' />}
                         className='w-full signup-btn shadow-sm bg-white text-blue-700 border border-blue-200 hover:text-white hover:bg-blue-800 rounded-xl font-medium text-sm py-2.5'
-                        onClick={() => { navigate('/auth?mode=signup'); setIsOpen(false) }}
+                        onClick={() => {
+                          navigate('/auth?mode=signup')
+                          setIsOpen(false)
+                        }}
                       />
                     </div>
                   )}
@@ -236,12 +260,13 @@ const Header: FC = () => {
                     {menuItems.map((item) => (
                       <button
                         key={item.value}
-                        onClick={() => { navigate(item.path); setIsOpen(false) }}
+                        onClick={() => {
+                          navigate(item.path)
+                          setIsOpen(false)
+                        }}
                         className='flex items-center gap-3 px-4 py-3 hover:bg-blue-50 rounded-xl transition-colors text-sm font-medium hover:text-blue-600 text-left w-full'
                       >
-                        <span className='w-5 h-5 flex items-center justify-center text-gray-500'>
-                          {item.icon}
-                        </span>
+                        <span className='w-5 h-5 flex items-center justify-center text-gray-500'>{item.icon}</span>
                         <span>{item.label}</span>
                       </button>
                     ))}

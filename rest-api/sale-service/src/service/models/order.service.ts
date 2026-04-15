@@ -279,6 +279,18 @@ class OrderService {
             }
         })
 
+        let vipPackageData = undefined;
+        if (order.type === 'VIP_SUBSCRIPTION') {
+            const vipPackage = await prismaService.vipPackage.findFirst();
+            if (vipPackage) {
+                vipPackageData = {
+                    name: vipPackage.name,
+                    duration_months: vipPackage.duration_months,
+                    description: vipPackage.description || undefined
+                };
+            }
+        }
+
         const result: OrderDto = {
             user_id: order.user_id,
             customer_name: order.customer_name,
@@ -293,6 +305,7 @@ class OrderService {
                 maxDiscount: order.discount.maxDiscount ?? 0
             } : undefined,
             items,
+            vip_package: vipPackageData
         }
 
         return result

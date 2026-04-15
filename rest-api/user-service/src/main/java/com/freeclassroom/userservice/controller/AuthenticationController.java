@@ -10,6 +10,7 @@ import com.freeclassroom.userservice.dto.response.user.UserResponse;
 import com.freeclassroom.userservice.service.auth.IAuthenticationService;
 import com.freeclassroom.userservice.service.user.IUserService;
 import com.nimbusds.jose.JOSEException;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -27,8 +28,10 @@ public class AuthenticationController {
     IUserService userService;
 
     @PostMapping
-    ApiResponse<AuthResponse> login (@RequestBody AuthRequest request) throws JOSEException {
-        return authenticationService.authentication(request);
+    ApiResponse<AuthResponse> login (@RequestBody AuthRequest authRequest, HttpServletRequest request) throws JOSEException {
+        Identity identity = (Identity) request.getAttribute("IDENTITY");
+
+        return authenticationService.authentication(authRequest, identity);
     }
 
     @PostMapping("/logout")
@@ -48,8 +51,10 @@ public class AuthenticationController {
     }
 
     @PostMapping("oauth2/google")
-    ApiResponse<AuthResponse> outBoundAuthentication(@RequestParam("code") String code) throws JOSEException {
-        return authenticationService.oauth2GoogleAuth(code);
+    ApiResponse<AuthResponse> outBoundAuthentication(@RequestParam("code") String code, HttpServletRequest request) throws JOSEException {
+        Identity identity = (Identity) request.getAttribute("IDENTITY");
+
+        return authenticationService.oauth2GoogleAuth(code, identity);
     }
 
     @PostMapping("forgot-password")

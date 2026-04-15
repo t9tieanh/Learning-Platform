@@ -1,5 +1,7 @@
 package com.freeclassroom.userservice.service.user;
 
+import com.freeclassroom.userservice.dto.request.auth.Identity;
+import com.freeclassroom.userservice.dto.request.personal.TrackingEventRequest;
 import com.freeclassroom.userservice.dto.request.user.CreationUserRequest;
 import com.freeclassroom.userservice.dto.request.user.UpdateUserRequest;
 import com.freeclassroom.userservice.dto.response.ApiResponse;
@@ -21,4 +23,5 @@ public interface IUserService {
     ApiResponse<GetUserResponse> updateUser(String id, UpdateUserRequest request);
     ApiResponse<DataAdminHome> getAdminData();
     ApiResponse<VipStatusResponse> getVipStatus(String userId);
+    ApiResponse<Void> trackingEvent(Identity identity, TrackingEventRequest request);
 }

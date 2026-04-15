@@ -1,5 +1,6 @@
 import QuillEditor from '@/components/common/Input/QuillEditor'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import type Quill from 'quill'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import CustomButton from '@/components/common/Button'
 import { Mail, Phone, Calendar, User, Camera, Send, Crown, Sparkles } from 'lucide-react'
@@ -13,11 +14,16 @@ import CertificateList from './CertificateList'
 import PersonalInfoSkeleton from './PersonalInfoSkeleton'
 import { Separator } from '@radix-ui/react-dropdown-menu'
 import { useVipUpgrade } from '@/contexts/VipUpgradeContext'
+import HighGlossBackground from '@/components/common/HighGlossBackground'
+
+const DESCRIPTION_MAX_LENGTH = 100
+
 const PersonalInfo = () => {
   const [userInfo, setUserInfo] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [descriptionLimitError, setDescriptionLimitError] = useState(false)
   const [form, setForm] = useState<{
     name?: string
     email?: string
@@ -31,7 +37,6 @@ const PersonalInfo = () => {
   const { openVipDialog } = useVipUpgrade()
 
   useEffect(() => {
-    // Fetch additional user info if needed
     const fetchUserInfo = async () => {
       try {
         setLoading(true)
@@ -61,10 +66,33 @@ const PersonalInfo = () => {
 
   // Trigger file picker and handle avatar change (logic to be implemented later)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const descriptionEditorRef = useRef<Quill | null>(null)
+  const hasShownDescriptionLimitToastRef = useRef(false)
   const handleAvatarChange = (e?: React.ChangeEvent<HTMLInputElement>) => {
     const file = e?.target?.files?.[0]
     if (!file) return
     setForm((prev) => ({ ...prev, imageFile: file }))
+  }
+
+  const handleDescriptionChange = (html: string) => {
+    const quill = descriptionEditorRef.current
+    if (quill) {
+      const textLength = quill.getLength() - 1
+      if (textLength > DESCRIPTION_MAX_LENGTH) {
+        quill.deleteText(DESCRIPTION_MAX_LENGTH, textLength - DESCRIPTION_MAX_LENGTH)
+        setDescriptionLimitError(true)
+        if (!hasShownDescriptionLimitToastRef.current) {
+          hasShownDescriptionLimitToastRef.current = true
+        }
+        setForm((p) => ({ ...p, description: quill.root.innerHTML }))
+        return
+      }
+      if (textLength < DESCRIPTION_MAX_LENGTH) {
+        setDescriptionLimitError(false)
+        hasShownDescriptionLimitToastRef.current = false
+      }
+    }
+    setForm((p) => ({ ...p, description: html }))
   }
 
   const hasChanges = useMemo(() => {
@@ -125,7 +153,7 @@ const PersonalInfo = () => {
         <div className='space-y-6 shadow-sm rounded-xl'>
           <Card className='hover:bg-profile-card-hover transition-colors rounded-xl shadow-md'>
             <CardContent className='px-8'>
-              <div className='flex gap-3 md:gap-4 items-center text-center mb-8 px-4 py-6 rounded-xl bg-[#0C356A] flex-col md:flex-row'>
+              <HighGlossBackground className='flex gap-3 md:gap-4 items-center text-center mb-8 px-6 py-8 md:px-10 md:py-12 rounded-xl flex-col md:flex-row mt-6'>
                 <div className='relative flex-shrink-0'>
                   {editing ? (
                     <>
@@ -135,7 +163,10 @@ const PersonalInfo = () => {
                         onClick={() => fileInputRef.current?.click()}
                         aria-label='Chọn ảnh đại diện mới'
                       >
-                        <Avatar className={`h-20 md:h-28 w-20 md:w-28 shadow-lg cursor-pointer ${userInfo?.isVip ? 'ring-4 ring-yellow-400 ring-offset-4 ring-offset-[#0C356A]' : ''}`}>
+                        <Avatar
+                          className={`h-20 md:h-28 w-20 md:w-28 shadow-lg cursor-pointer ${userInfo?.isVip ? 'ring-4 ring-yellow-400 ring-offset-4 ring-offset-[#0C356A]' : ''
+                            }`}
+                        >
                           <AvatarImage
                             src={form.imageFile ? URL.createObjectURL(form.imageFile) : userInfo?.image}
                             alt={userInfo?.name}
@@ -165,7 +196,10 @@ const PersonalInfo = () => {
                     </>
                   ) : (
                     <div className='relative'>
-                      <Avatar className={`h-20 md:h-28 w-20 md:w-28 shadow-lg ${userInfo?.isVip ? 'ring-4 ring-yellow-400 ring-offset-4 ring-offset-[#0C356A]' : ''}`}>
+                      <Avatar
+                        className={`h-20 md:h-28 w-20 md:w-28 shadow-lg ${userInfo?.isVip ? 'ring-4 ring-yellow-400 ring-offset-4 ring-offset-[#0C356A]' : ''
+                          }`}
+                      >
                         <AvatarImage src={userInfo?.image} alt={userInfo?.name} className='object-cover' />
                         <AvatarFallback className='text-lg font-semibold bg-primary text-primary-foreground'>
                           <User className='h-6 w-6' />
@@ -183,8 +217,8 @@ const PersonalInfo = () => {
                   <h3 className='text-lg md:text-3xl font-bold text-white mb-1 truncate text-center md:text-start flex items-center gap-3 w-full justify-center md:justify-start'>
                     {userInfo?.name}
                     {userInfo?.isVip && (
-                      <span className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-white text-xs md:text-sm uppercase font-bold px-2 py-0.5 rounded-md shadow-sm flex items-center gap-1.5 flex-shrink-0">
-                        <Crown className="w-3 h-3 md:w-4 md:h-4" /> VIP
+                      <span className='bg-gradient-to-r from-yellow-400 to-yellow-600 text-white text-xs md:text-sm uppercase font-bold px-2 py-0.5 rounded-md shadow-sm flex items-center gap-1.5 flex-shrink-0'>
+                        <Crown className='w-3 h-3 md:w-4 md:h-4' /> VIP
                       </span>
                     )}
                   </h3>
@@ -198,11 +232,11 @@ const PersonalInfo = () => {
                       icon={<Crown className='w-4 h-4 mr-1.5 text-yellow-600' />}
                       className='border-none bg-gradient-to-r from-yellow-100 to-amber-100 hover:from-yellow-200 hover:to-amber-200 text-yellow-800 font-semibold rounded-full px-4 text-xs shadow-sm h-8 mt-1 md:mt-2 transition-transform hover:scale-105'
                       onClick={openVipDialog}
-                      type="button"
+                      type='button'
                     />
                   )}
                 </div>
-              </div>
+              </HighGlossBackground>
 
               {/* Info Grid */}
               <h2 className='font-semibold text-base my-4'>Thông tin cơ bản</h2>
@@ -331,11 +365,17 @@ const PersonalInfo = () => {
                   )}
                 </div>
               ) : (
-                <QuillEditor
-                  initialHtml={form.description || ''}
-                  onChange={(html) => setForm((p) => ({ ...p, description: html }))}
-                  className='min-h-[300px] bg-white rounded-lg border-2 p-2'
-                />
+                <>
+                  <QuillEditor
+                    ref={descriptionEditorRef}
+                    initialHtml={form.description || ''}
+                    onChange={handleDescriptionChange}
+                    className='min-h-[300px] bg-white rounded-lg border-2 p-2'
+                  />
+                  {descriptionLimitError && (
+                    <p className='mt-2 text-sm text-red-500'>Mô tả tối đa 100 ký tự, không thể nhập thêm.</p>
+                  )}
+                </>
               )}
 
               <div className='flex justify-end mt-8 gap-3'>

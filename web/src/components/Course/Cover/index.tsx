@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import PreviewPublicLesson from '../CourseContent/detail/Sections/previewPublicLesson'
 import AvatarNotFound from '@/assets/images/avatar-not-found.png'
 import { useNavigate } from 'react-router-dom'
+import { cn } from '@/lib/utils'
 
 interface CoverProps {
   showSmallHeader: boolean
@@ -59,28 +60,32 @@ const Cover = ({ video, image, title, shortDescription, teacher, tags, showSmall
 
   return (
     <>
-      {showSmallHeader && (
-        <div
-          className='fixed shadow-lg left-0 right-0 z-40 bg-[#0C356A] backdrop-blur-sm'
-          style={{ top: 'var(--main-header-height, 100px)' }}
-        >
-          <div className='max-w-6xl mx-auto px-3 md:px-6 py-2 md:py-3 flex items-center justify-between min-h-[48px] md:min-h-[56px]'>
-            <div className='text-xs md:text-sm flex items-center text-white font-bold text-center text-ellipsis overflow-hidden whitespace-nowrap max-w-[95%] md:max-w-[60%]'>
-              <div className='flex flex-row justify-left items-center gap-1 md:gap-2 rounded-xl md:rounded-2xl bg-white text-black py-1 px-2 md:px-4 shadow-xl'>
-                <span className='truncate'>{title}</span>
-                <span className='flex items-center gap-1 bg-white px-1 md:px-2 py-0.5 text-black'>
-                  <Avatar className='w-5 h-5 md:w-6 md:h-6'>
-                    <AvatarImage src={teacher.avatar || AvatarNotFound} />
-                    <AvatarFallback>{teacher.name.charAt(0)}</AvatarFallback>
-                  </Avatar>
-                  <span className='hidden md:inline text-xs md:text-sm'>{teacher.name}</span>
-                </span>
-              </div>
+      <div
+        className={cn(
+          'fixed shadow-lg left-0 right-0 z-40 bg-gradient-to-r from-blue-600 to-blue-700 backdrop-blur-sm transition-all duration-500 transform',
+          showSmallHeader ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0 pointer-events-none'
+        )}
+        style={{ top: 'var(--main-header-height, 100px)' }}
+      >
+        <div className='max-w-6xl mx-auto px-3 md:px-6 py-2 md:py-3 flex items-center justify-between min-h-[48px] md:min-h-[56px]'>
+          <div className='text-xs md:text-sm flex items-center text-white font-bold text-center text-ellipsis overflow-hidden whitespace-nowrap max-w-[95%] md:max-w-[60%]'>
+            <div className='flex flex-row justify-left items-center gap-1 md:gap-2 rounded-xl md:rounded-2xl bg-white text-black py-1 px-2 md:px-4 shadow-xl'>
+              <span className='truncate'>{title}</span>
+              <span className='flex items-center gap-1 bg-white px-1 md:px-2 py-0.5 text-black'>
+                <Avatar className='w-5 h-5 md:w-6 md:h-6'>
+                  <AvatarImage src={teacher.avatar || AvatarNotFound} />
+                  <AvatarFallback>{teacher.name.charAt(0)}</AvatarFallback>
+                </Avatar>
+                <span className='hidden md:inline text-xs md:text-sm'>{teacher.name}</span>
+              </span>
             </div>
           </div>
         </div>
-      )}
-      <div className='relative group cover-container min-h-96 bg-[#0C356A] flex flex-col md:flex-row items-center justify-center mx-auto w-full py-8 md:py-16 px-4 md:px-0'>
+      </div>
+      <div className='relative group cover-container min-h-96 bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-950 flex flex-col md:flex-row items-center justify-center mx-auto w-full py-8 md:py-16 px-4 md:px-0 overflow-hidden'>
+        <div className='absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_50%_-20%,#ffffff,transparent)]' />
+        <div className='absolute inset-0 opacity-10 bg-[url("https://www.transparenttextures.com/patterns/cubes.png")]' />
+        <div className='absolute bottom-0 right-0 w-96 h-96 bg-blue-400/10 rounded-full -mr-32 -mb-32 blur-3xl' />
         <div
           className='absolute left-4 z-20 invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-opacity duration-200'
           style={{ top: showSmallHeader ? 'calc(var(--main-header-height, 100px) + 1rem)' : '1rem' }}

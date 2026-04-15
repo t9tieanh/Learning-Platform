@@ -1,5 +1,4 @@
-import { TvMinimalPlay, File } from 'lucide-react'
-import { IoCheckmarkDoneCircle } from 'react-icons/io5'
+import { PlayCircle, FileText, CheckCircle2 } from 'lucide-react'
 
 interface LectureItemProps {
   lecture: {
@@ -16,49 +15,50 @@ interface LectureItemProps {
 }
 
 export const LectureItem = ({ lecture, isActive, onSelect }: LectureItemProps) => {
+  const isCompleted = lecture.completionStatus === 'COMPLETED'
+
   return (
-    <div
-      role='button'
-      tabIndex={0}
-      aria-pressed={isActive}
-      className={`group flex items-start gap-3 p-3 rounded-lg cursor-pointer transition-all ${
-        isActive ? 'bg-primary/10 border border-primary/30' : 'hover:bg-sidebar-hover'
-      }`}
+    <button
       onClick={onSelect}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          onSelect?.()
-        }
-      }}
+      className={`w-full group flex items-start gap-4 p-3.5 rounded-xl transition-all duration-300 text-left ${isActive
+        ? 'bg-blue-600 shadow-lg shadow-blue-200'
+        : 'hover:bg-blue-50/50'
+        }`}
     >
-      <div className='flex-1 min-w-0'>
-        <div className='flex items-start gap-2 mb-1'>
-          {lecture?.type === 'video' ? (
-            <TvMinimalPlay
-              className={`w-4 h-4 text-muted-foreground flex-shrink-0 mt-0.5 ${
-                isActive ? 'text-primary font-medium' : 'text-foreground'
-              }}`}
-            />
-          ) : (
-            <File
-              className={`w-4 h-4 text-muted-foreground flex-shrink-0 mt-0.5 ${
-                isActive ? 'text-primary font-medium' : 'text-foreground'
-              }}`}
-            />
-          )}
-          <p className={`text-sm leading-snug ${isActive ? 'text-primary font-medium' : 'text-foreground'}`}>
-            {lecture.title}{' '}
-            {lecture.completionStatus === 'COMPLETED' ? (
-              <IoCheckmarkDoneCircle className='inline-block w-4 h-4 text-primary' />
-            ) : (
-              ''
-            )}
-          </p>
-        </div>
-        <p className='text-xs text-muted-foreground ml-6'>
-          {lecture.type === 'video' ? lecture.duration : lecture?.content?.slice(0, 10)}
-        </p>
+      <div className='mt-0.5 shrink-0'>
+        {lecture.type === 'video' ? (
+          <PlayCircle className={`w-4 h-4 transition-colors ${isActive ? 'text-white' : 'text-blue-500 group-hover:text-blue-600'
+            }`} />
+        ) : (
+          <FileText className={`w-4 h-4 transition-colors ${isActive ? 'text-white' : 'text-gray-400 group-hover:text-blue-500'
+            }`} />
+        )}
       </div>
-    </div>
+
+      <div className='flex-1 min-w-0'>
+        <div className='flex items-center gap-2'>
+          <p className={`text-[12.5px] font-semibold leading-tight truncate transition-colors ${isActive ? 'text-white' : 'text-gray-700'
+            }`}>
+            {lecture.title}
+          </p>
+          {isCompleted && !isActive && (
+            <CheckCircle2 className='w-3.5 h-3.5 text-green-500 shrink-0' />
+          )}
+        </div>
+
+        <div className='flex items-center gap-2 mt-1'>
+          <span className={`text-[10px] font-bold uppercase tracking-wider ${isActive ? 'text-blue-100' : 'text-gray-400'
+            }`}>
+            {lecture.type === 'video' ? 'Video' : 'Bài viết'}
+          </span>
+          <span className={`text-[10px] font-bold ${isActive ? 'text-blue-200/50' : 'text-gray-300'
+            }`}>•</span>
+          <span className={`text-[10px] font-bold uppercase tracking-wider ${isActive ? 'text-blue-100' : 'text-blue-400/80'
+            }`}>
+            {lecture.duration || '0:00'}
+          </span>
+        </div>
+      </div>
+    </button>
   )
 }

@@ -29,6 +29,11 @@ export interface Order {
     value: number
     maxDiscount: number
   }
+  vip_package?: {
+    name: string
+    duration_months: number
+    description?: string
+  }
 }
 
 export interface OrderResponse {

@@ -4,6 +4,7 @@ import uuid
 import datetime
 import random
 import time
+from mock_data import VIETNAMESE_NAMES, POSITIONS
 
 def normalize_users(input_courses_file, output_courses_file, output_users_file):
     """
@@ -13,20 +14,29 @@ def normalize_users(input_courses_file, output_courses_file, output_users_file):
     4. Generates random user data (username, email, password, phone, position).
     """
     timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
-    
-    # Predefined positions
-    positions = [
-        "Software Engineer", "Senior Software Engineer", "Tech Lead",
-        "Engineering Manager", "Product Owner", "Business Analyst",
-        "System Administrator", "Data Engineer", "Solution Architect", "CTO"
-    ]
-    
+
     users_map = {} # instructor_name -> user_id
     updated_courses = []
     course_fieldnames = []
     
     # Store user objects to write later
     users_data = []
+
+
+    # 0. Generate 10 feedback users
+    for i in range(10):
+        users_data.append({
+            'id': str(uuid.uuid4()),
+            'description': f'Người học nhiệt huyết và tích cực số {i+1}',
+            'email': f'student_feedback_{i+1}@gmail.com',
+            'image': f'https://i.pravatar.cc/300?u=feedback_user_{i+1}',
+            'name': VIETNAMESE_NAMES[i],
+            'password': '$2a$10$K0xpqJczfZaDhN.eh9ZyQuMkyUZkWzj2qzi8nd0AQyeyNAkGnHYES', # password hash
+            'phone': f'09876543{(i+1):02d}',
+            'position': 'Learner',
+            'status': 'ACTIVE',
+            'username': f'student_feedback_{i+1}'
+        })
 
     try:
         with open(input_courses_file, 'r', encoding='utf-8') as infile:
@@ -57,7 +67,7 @@ def normalize_users(input_courses_file, output_courses_file, output_users_file):
                         email = f"{username}@example.com"
                         password = "$2a$10$K0xpqJczfZaDhN.eh9ZyQuMkyUZkWzj2qzi8nd0AQyeyNAkGnHYES"
                         phone = f"09{random.randint(10000000, 99999999)}"
-                        position = random.choice(positions)
+                        position = random.choice(POSITIONS)
                         status = "ACTIVE"
                         
                         users_data.append({

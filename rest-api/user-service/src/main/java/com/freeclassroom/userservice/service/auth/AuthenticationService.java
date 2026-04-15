@@ -1,14 +1,12 @@
 package com.freeclassroom.userservice.service.auth;
 
-import com.freeclassroom.userservice.dto.request.auth.IntrospectRequest;
-import com.freeclassroom.userservice.dto.request.auth.LogoutRequest;
+import com.freeclassroom.userservice.dto.request.auth.*;
 import com.freeclassroom.userservice.dto.request.outbound.oauth2.GoogleExchanceTokenRequest;
 import com.freeclassroom.userservice.dto.response.ApiResponse;
 import com.freeclassroom.userservice.dto.response.auth.IntrospectResponse;
 import com.freeclassroom.userservice.dto.response.outbound.oauth2.GoogleGetUserInfo;
 import com.freeclassroom.userservice.entity.role.RoleEntity;
 import com.freeclassroom.userservice.enums.role.TokenEnum;
-import com.freeclassroom.userservice.dto.request.auth.AuthRequest;
 import com.freeclassroom.userservice.dto.response.user.AuthResponse;
 import com.freeclassroom.userservice.entity.user.UserEntity;
 import com.freeclassroom.userservice.enums.entity.EnumAccountStatus;
@@ -17,9 +15,10 @@ import com.freeclassroom.userservice.exception.ErrorCode;
 import com.freeclassroom.userservice.repository.entity.UserRepository;
 import com.freeclassroom.userservice.repository.httpclient.oauth2.GoogleOutboundAuthenticateClient;
 import com.freeclassroom.userservice.repository.httpclient.oauth2.GoogleOutboundUserInfoClient;
+import com.freeclassroom.userservice.service.event.EventService;
 import com.freeclassroom.userservice.service.token.RefreshTokenService;
 import com.freeclassroom.userservice.service.token.TokenBlacklistService;
-import com.freeclassroom.userservice.dto.request.auth.RefreshTokenRequest;
+import com.freeclassroom.userservice.service.user.UserService;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.jose.JOSEException;
 import lombok.AccessLevel;
@@ -53,6 +52,9 @@ public class AuthenticationService implements IAuthenticationService {
     GoogleOutboundUserInfoClient googleGetUserInfoClient;
     GoogleOutboundAuthenticateClient googleAuthClient;
 
+    UserService userService;
+    EventService eventService;
+
     @NonFinal
     @Value("${spring.jwt.signerKey}")
     protected String SIGNER_KEY;
@@ -78,7 +80,7 @@ public class AuthenticationService implements IAuthenticationService {
     protected String REDIRECT_URL;
 
     // login with username password
-    public ApiResponse<AuthResponse> authentication (AuthRequest request) throws JOSEException {
+    public ApiResponse<AuthResponse> authentication (AuthRequest request, Identity identity) throws JOSEException {
         UserEntity account = userRepository.findFirstByEmailOrUsername(request.getUsername()).orElseThrow(
                 () -> new CustomExeption(ErrorCode.USER_NOT_FOUND)
         );
@@ -108,6 +110,14 @@ public class AuthenticationService implements IAuthenticationService {
                     )
                     .isVip(account.getIsVip())
                     .build();
+
+            if (identity != null && "GUEST".equals(identity.getType())) {
+                try {
+                    eventService.mergeGuestEventsToUser(identity.getId(), account.getId());
+                } catch (Exception e) {
+                    log.warn("Failed to merge guest features into user", e);
+                }
+            }
 
             return ApiResponse.<AuthResponse>builder()
                     .code(200)
@@ -159,7 +169,7 @@ public class AuthenticationService implements IAuthenticationService {
     }
 
     @Override
-    public ApiResponse<AuthResponse> oauth2GoogleAuth(String authorizationCode) throws JOSEException {
+    public ApiResponse<AuthResponse> oauth2GoogleAuth(String authorizationCode, Identity identity) throws JOSEException {
         // verify authorization code
         var response = googleAuthClient.exchanceToken(
                 GoogleExchanceTokenRequest.builder()
@@ -189,6 +199,14 @@ public class AuthenticationService implements IAuthenticationService {
 
         String refreshToken = jwtService.generateToken(account, TokenEnum.REFRESH_TOKEN);
         saveRefreshTokenToRedis(refreshToken, account.getId());
+
+        if (identity != null && "GUEST".equals(identity.getType())) {
+            try {
+                eventService.mergeGuestEventsToUser(identity.getId(), account.getId());
+            } catch (Exception e) {
+                log.warn("Failed to merge guest features into user", e);
+            }
+        }
 
         return ApiResponse.<AuthResponse>builder()
                 .code(200)

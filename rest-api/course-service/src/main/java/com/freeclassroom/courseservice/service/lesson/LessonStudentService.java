@@ -17,6 +17,7 @@ import com.freeclassroom.courseservice.repository.entity.EnrollmentRepository;
 import com.freeclassroom.courseservice.repository.entity.LessonProgressRepository;
 import com.freeclassroom.courseservice.repository.entity.LessonRepository;
 import com.freeclassroom.courseservice.service.utils.cloudfront.ICloudFrontService;
+import com.freeclassroom.courseservice.service.utils.other.FileUtils;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -43,6 +44,7 @@ public class LessonStudentService implements ILessonStudentService {
     ICloudFrontService cloudFrontService;
     CustomJwtDecoder customJwtDecoder;
     LessonStudentMapper lessonMapper;
+    FileUtils fileUtils;
 
     @Value("${server.backendUri}")
     @NonFinal
@@ -93,7 +95,7 @@ public class LessonStudentService implements ILessonStudentService {
         ByteArrayResource resource = new ByteArrayResource(fileBytes);
 
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + fileName + "\"")
+                .header(HttpHeaders.CONTENT_DISPOSITION, fileUtils.buildInlineContentDisposition(fileName))
                 .contentType(mediaType)
                 .contentLength(fileBytes.length)
                 .body(resource);

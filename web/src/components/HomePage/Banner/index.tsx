@@ -3,8 +3,9 @@
 import './style.scss'
 import CustomButton from '@/components/common/Button'
 import { motion, easeOut } from 'framer-motion'
-import { useNavigate } from 'react-router-dom'
 import { Send } from 'lucide-react'
+import { useState } from 'react'
+import ExplorePreferencesModal, { type ExplorePreferencesPayload } from '@/components/HomePage/ExplorePreferencesModal'
 
 const container = {
   hidden: { opacity: 0, y: 50 },
@@ -31,40 +32,60 @@ const item = {
   }
 }
 
-const Banner = () => {
-  const navigate = useNavigate()
+type BannerProps = {
+  onPreferencesSaved?: () => void
+}
+
+const Banner = ({ onPreferencesSaved }: BannerProps) => {
+  const [open, setOpen] = useState(false)
+
+  const handleSave = (payload: ExplorePreferencesPayload) => {
+    console.log(JSON.stringify(payload, null, 2))
+    onPreferencesSaved?.()
+  }
+
   return (
-    <div className='banner-container p-32'>
-      <motion.div variants={container} initial='hidden' animate='show'>
-        {' '}
-        <div className="absolute inset-0 -z-10 bg-[url('/bg.jpg')] bg-cover" />
-        <motion.h2 variants={item} className='text-2xl mt-32 flex items-center gap-2'>
-          <motion.span
-            animate={{ rotate: [0, 20, -10, 20, 0] }}
-            transition={{
-              duration: 1.5,
-              repeat: Infinity,
-              repeatDelay: 2
-            }}
-            style={{ display: 'inline-block', transformOrigin: '70% 70%' }}
+    <div className='banner-container p-6 md:p-32 flex items-center min-h-[500px] md:min-h-[600px]'>
+      <div className='w-full pl-0 md:pl-28'>
+        <motion.div variants={container} initial='hidden' animate='show' className='relative z-10'>
+          {' '}
+          <div className="absolute inset-0 -z-10 bg-[url('/bg.jpg')] bg-cover opacity-0 pointer-events-none" />
+          <motion.h2 variants={item} className='text-xl md:text-2xl mt-12 md:mt-32 flex items-center gap-2 font-semibold'>
+            <motion.span
+              animate={{ rotate: [0, 20, -10, 20, 0] }}
+              transition={{
+                duration: 1.5,
+                repeat: Infinity,
+                repeatDelay: 2
+              }}
+              style={{ display: 'inline-block', transformOrigin: '70% 70%' }}
+            >
+              👋
+            </motion.span>
+            Chào mừng bạn đến với Learnova
+          </motion.h2>
+          <motion.h1
+            className='scroll-m-20 text-2xl md:text-4xl mt-4 font-extrabold tracking-tight text-start max-w-4xl leading-[1.2] md:leading-[1.1]'
+            variants={item}
           >
-            👋
-          </motion.span>
-          Chào mừng bạn đến với Learnova
-        </motion.h2>
-        <motion.h1 className='scroll-m-20 text-4xl mt-4 font-extrabold tracking-tight text-start' variants={item}>
-          Nền tảng học tập trực tuyến dành cho thế hệ mới
-        </motion.h1>
-        <motion.blockquote className='mt-6 border-l-2 pl-6 italic text-lg' variants={item}>
-          &quot;Cùng công nghệ, học tập trở nên dễ dàng hơn.&quot;
-        </motion.blockquote>
-      </motion.div>
-      <CustomButton
-        className='mt-10'
-        label='Khám phá ngay'
-        onClick={() => navigate('/course/f4018410-e6eb-4687-bb94-61ceb1ed4493')}
-        icon={<Send size={16} />}
-      />
+            Nền tảng học tập trực tuyến hàng đầu để kiến tạo sự nghiệp tương lai cho thế hệ mới
+          </motion.h1>
+          <motion.blockquote
+            className='mt-6 border-l-2 border-white/30 pl-6 italic text-base md:text-lg text-white/90'
+            variants={item}
+          >
+            &quot;Cùng công nghệ, học tập trở nên dễ dàng hơn.&quot;
+          </motion.blockquote>
+        </motion.div>
+
+        <CustomButton
+          className='mt-10 md:mt-12 !px-8 !py-6 rounded-[2rem] bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 text-white font-black tracking-tight shadow-2xl shadow-blue-500/30 hover:shadow-blue-500/50 hover:-translate-y-1 hover:scale-[1.02] transition-all group'
+          label='Khám phá ngay'
+          onClick={() => setOpen(true)}
+          icon={<Send className='w-5 h-5 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform' />}
+        />
+        <ExplorePreferencesModal open={open} onOpenChange={setOpen} onSave={handleSave} />
+      </div>
     </div>
   )
 }

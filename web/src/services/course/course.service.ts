@@ -95,9 +95,7 @@ class CourseService {
     return response.data
   }
 
-  async getTeacherCourses(
-    options?: { page?: number; limit?: number }
-  ): Promise<ApiResponse<Paginated<any>>> {
+  async getTeacherCourses(options?: { page?: number; limit?: number }): Promise<ApiResponse<Paginated<any>>> {
     const params = {
       page: options?.page ?? 1,
       limit: options?.limit ?? 10

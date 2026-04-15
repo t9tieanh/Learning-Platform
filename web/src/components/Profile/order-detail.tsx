@@ -87,10 +87,14 @@ const OrderDetail = ({ orderId }: { orderId: string }) => {
                   <Crown className='w-6 h-6 text-white' />
                 </div>
                 <div>
-                  <h3 className='font-bold text-yellow-900 text-lg'>Gói Hội Viên VIP</h3>
-                  <p className='text-sm text-yellow-700 font-medium'>Truy cập tất cả khóa học với mức giá ưu đãi</p>
+                  <h3 className='font-bold text-yellow-900 text-base'>
+                    {order.vip_package?.name || 'Gói Hội Viên VIP'}
+                  </h3>
+                  <p className='text-sm text-yellow-700 font-medium'>
+                    {order.vip_package?.description || `Thời hạn: ${order.vip_package?.duration_months || 1} tháng`}
+                  </p>
                 </div>
-                <div className='ml-auto font-bold text-lg text-yellow-800'>{formatPrice(order.total)}</div>
+                <div className='ml-auto font-bold text-base text-yellow-800'>{formatPrice(order.total)}</div>
               </div>
             ) : (
               <div className='items order-items'>

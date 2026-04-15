@@ -124,11 +124,7 @@ const PreviewTeacherLesson = ({
           {isVideo && lesson.url && (
             <div className='w-full'>
               <p className='text-xs font-medium text-gray-300 uppercase mb-2'>Video</p>
-              <video
-                src={`${lesson.url}` || undefined}
-                controls
-                className='w-full h-[480px] rounded-md bg-black'
-              >
+              <video src={`${lesson.url}` || undefined} controls className='w-full h-[480px] rounded-md bg-black'>
                 <track kind='captions' srcLang='en' label='English captions' src={`${lesson.url || ''}.vtt`} />
               </video>
             </div>
@@ -138,11 +134,7 @@ const PreviewTeacherLesson = ({
           {isArticle && lesson.url && (
             <div className='w-full'>
               <p className='text-xs font-medium text-gray-300 uppercase mb-2'>Nội dung bài viết</p>
-              <iframe
-                src={`${lesson.url}`}
-                className='w-full h-[600px] rounded-md bg-white'
-                title='Article Content'
-              />
+              <iframe src={`${lesson.url}`} className='w-full h-[600px] rounded-md bg-white' title='Article Content' />
             </div>
           )}
 

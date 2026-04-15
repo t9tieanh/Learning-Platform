@@ -69,6 +69,44 @@ class UserGrpcClient {
         })
     }
 
+    /**
+     * Checks if a user has VIP status.
+     * 
+     * REQUIRES: Proto-shared team to add RPC method checkIsVip to userService.proto:
+     * ```proto
+     * rpc CheckIsVip (CheckIsVipRequest) returns (CheckIsVipResponse);
+     * 
+     * message CheckIsVipRequest {
+     *   string user_id = 1;
+     * }
+     * 
+     * message CheckIsVipResponse {
+     *   bool is_vip = 1;
+     *   string message = 2;
+     * }
+     * ```
+     * 
+     * Then user-service implements the handler.
+     * 
+     * @param userId - The user ID to check
+     * @returns { isVip: boolean } response
+     */
+    async checkIsVip(userId: string): Promise<{ isVip: boolean; message?: string }> {
+        return new Promise<{ isVip: boolean; message?: string }>((resolve, reject) => {
+            const req = { user_id: userId }
+            this.userClient.checkIsVip(req, (err: any, response: any) => {
+                if (err) {
+                    Logger.error(`grpc checkIsVip error: ${err}`)
+                    return reject(err)
+                }
+                resolve({
+                    isVip: response.is_vip || false,
+                    message: response.message
+                })
+            })
+        })
+    }
+
     // optional helper to await readiness from elsewhere
     async isReady(timeoutMs = 5000): Promise<boolean> {
         return new Promise((resolve) => {

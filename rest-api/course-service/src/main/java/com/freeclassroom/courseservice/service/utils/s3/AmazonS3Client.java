@@ -1,5 +1,7 @@
 package com.freeclassroom.courseservice.service.utils.s3;
 
+import com.freeclassroom.courseservice.dto.utils.MultipartUploadSession;
+import com.freeclassroom.courseservice.dto.utils.PresignedPart;
 import com.freeclassroom.courseservice.dto.utils.UploadProgressEvent;
 import com.freeclassroom.courseservice.exception.CustomExeption;
 import com.freeclassroom.courseservice.exception.ErrorCode;
@@ -16,8 +18,18 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
 import software.amazon.awssdk.core.async.AsyncRequestBody;
 import software.amazon.awssdk.services.s3.S3AsyncClient;
+import software.amazon.awssdk.services.s3.model.AbortMultipartUploadRequest;
+import software.amazon.awssdk.services.s3.model.CompleteMultipartUploadRequest;
+import software.amazon.awssdk.services.s3.model.CompletedMultipartUpload;
+import software.amazon.awssdk.services.s3.model.CompletedPart;
+import software.amazon.awssdk.services.s3.model.CreateMultipartUploadRequest;
+import software.amazon.awssdk.services.s3.model.CreateMultipartUploadResponse;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectResponse;
+import software.amazon.awssdk.services.s3.model.UploadPartRequest;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.s3.presigner.model.PresignedUploadPartRequest;
+import software.amazon.awssdk.services.s3.presigner.model.UploadPartPresignRequest;
 import software.amazon.awssdk.transfer.s3.S3TransferManager;
 import software.amazon.awssdk.transfer.s3.model.FileUpload;
 import software.amazon.awssdk.transfer.s3.model.UploadFileRequest;
@@ -25,8 +37,12 @@ import software.amazon.awssdk.transfer.s3.progress.LoggingTransferListener;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -34,6 +50,7 @@ import java.util.concurrent.CompletableFuture;
 @Slf4j
 public class AmazonS3Client {
     S3AsyncClient s3client;
+    S3Presigner s3Presigner;
     FileUtils fileUtils;
 
     @Value("${aws.bucketName}")
@@ -49,7 +66,11 @@ public class AmazonS3Client {
     String backendUri;
 
     private String generateFileName(MultipartFile multiPart) {
-        return new Date().getTime() + "-" + multiPart.getOriginalFilename().replace(" ", "_");
+        return generateFileName(multiPart.getOriginalFilename());
+    }
+
+    private String generateFileName(String originalFileName) {
+        return new Date().getTime() + "-" + fileUtils.toAsciiFileName(originalFileName);
     }
 
     private CompletableFuture<PutObjectResponse> uploadFileTos3bucket(String key, File file) {
@@ -69,6 +90,98 @@ public class AmazonS3Client {
                 System.out.println("Upload thành công. ETag = " + resp.eTag());
             }
         });
+    }
+
+    private String buildFileUrl(String key) {
+        String fileName = key.contains("/") ? key.substring(key.lastIndexOf('/') + 1) : key;
+        return backendUri + "/" + fileName;
+    }
+
+    public MultipartUploadSession initMultipartUpload(String originalFileName, String contentType) {
+        try {
+            String fileName = generateFileName(originalFileName);
+            String key = keyStore + "/" + fileName;
+            CreateMultipartUploadResponse response = s3client.createMultipartUpload(CreateMultipartUploadRequest.builder()
+                    .bucket(bucketName)
+                    .key(key)
+                    .contentType(contentType)
+                    .build()).join();
+
+            return MultipartUploadSession.builder()
+                    .uploadId(response.uploadId())
+                    .objectKey(key)
+                    .fileUrl(buildFileUrl(key))
+                    .fileName(fileName)
+                    .build();
+        } catch (Exception exception) {
+            log.error("Init multipart upload failed", exception);
+            throw new CustomExeption(ErrorCode.UPLOAD_NOT_COMPLETED);
+        }
+    }
+
+    public List<PresignedPart> generatePresignedUrls(String objectKey, String uploadId, List<Integer> partNumbers, long expirySeconds) {
+        try {
+            Instant expiresAt = Instant.now().plus(expirySeconds, ChronoUnit.SECONDS);
+            return partNumbers.stream()
+                    .map(partNumber -> {
+                        UploadPartRequest uploadPartRequest = UploadPartRequest.builder()
+                                .bucket(bucketName)
+                                .key(objectKey)
+                                .partNumber(partNumber)
+                                .uploadId(uploadId)
+                                .build();
+
+                        UploadPartPresignRequest presignRequest = UploadPartPresignRequest.builder()
+                                .signatureDuration(java.time.Duration.ofSeconds(expirySeconds))
+                                .uploadPartRequest(uploadPartRequest)
+                                .build();
+
+                        PresignedUploadPartRequest presignedRequest = s3Presigner.presignUploadPart(presignRequest);
+
+                        return PresignedPart.builder()
+                                .partNumber(partNumber)
+                                .url(presignedRequest.url().toExternalForm())
+                                .expiresAt(expiresAt.toEpochMilli())
+                                .build();
+                    })
+                    .collect(Collectors.toList());
+        } catch (Exception exception) {
+            log.error("Generate presigned urls failed", exception);
+            throw new CustomExeption(ErrorCode.UPLOAD_NOT_COMPLETED);
+        }
+    }
+
+    public String completeMultipartUpload(String objectKey, String uploadId, List<CompletedPart> parts) {
+        try {
+            CompletedMultipartUpload completedMultipartUpload = CompletedMultipartUpload.builder()
+                    .parts(parts)
+                    .build();
+
+            s3client.completeMultipartUpload(CompleteMultipartUploadRequest.builder()
+                    .bucket(bucketName)
+                    .key(objectKey)
+                    .uploadId(uploadId)
+                    .multipartUpload(completedMultipartUpload)
+                    .build()).join();
+
+            return buildFileUrl(objectKey);
+        } catch (Exception exception) {
+            log.error("Complete multipart upload failed", exception);
+            throw new CustomExeption(ErrorCode.UPLOAD_NOT_COMPLETED);
+        }
+    }
+
+    public void abortMultipartUpload(String objectKey, String uploadId) {
+        try {
+            s3client.abortMultipartUpload(AbortMultipartUploadRequest.builder()
+                    .bucket(bucketName)
+                    .key(objectKey)
+                    .uploadId(uploadId)
+                    .build()).join();
+        } catch (Exception exception) {
+            log.error("Abort multipart upload failed", exception);
+            throw new CustomExeption(ErrorCode.UPLOAD_NOT_COMPLETED);
+        }
     }
 
     public void uploadWithProgress(String key, File file) {

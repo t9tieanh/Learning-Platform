@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import CustomInput from '@/components/common/Input'
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
 import { useBlogPostStore } from '@/stores/blogPostStore'
+import noPhoto from '@/assets/images/no-photo.avif'
 
 interface BlogPost {
   title: string
@@ -66,60 +66,77 @@ const BlogPostEditor = ({ initialTitle = '', initialImage = '' }: BlogPostEditor
 
   return (
     <div className='mb-6'>
-      <Card className='p-2 py-8 border-border'>
-        <CardContent>
+      <div className='bg-white rounded-[2rem] border border-gray-100 shadow-md shadow-gray-200/20 overflow-hidden'>
+        <div className='p-8 md:p-10'>
           {/* Layout hai cột */}
-          <div className='grid grid-cols-1 md:grid-cols-2 gap-6 items-center'>
+          <div className='grid grid-cols-1 lg:grid-cols-2 gap-10 items-start'>
             {/* Cột trái */}
-            <div className='space-y-5 max-w-xl'>
-              {/* Tiêu đề */}
-              <CardHeader className='px-0'>
-                <CardTitle className='text-2xl font-semibold'>Thông tin bài viết</CardTitle>
-                <CardDescription>Nhập tiêu đề và tải ảnh đại diện cho bài viết của bạn</CardDescription>
-              </CardHeader>
+            <div className='space-y-8'>
               <div className='space-y-2'>
-                <Label htmlFor='title' className='text-sm font-medium'>
-                  Tiêu đề <span className='text-destructive'>*</span>
-                </Label>
-                <CustomInput
-                  id='title'
-                  placeholder='Nhập tiêu đề bài viết...'
-                  value={post.title}
-                  onChange={(e) => setPost({ ...post, title: e.target.value })}
-                  className='text-base'
-                />
-              </div>
+                <h3 className='text-[11px] font-black text-gray-400 uppercase tracking-[0.2em] mb-4 flex items-center gap-2'>
+                  Thông tin bài viết
+                  <div className='h-px flex-1 bg-gray-50' />
+                </h3>
 
-              {/* Ảnh tiêu đề */}
-              <div className='space-y-2'>
-                <Label htmlFor='image' className='text-sm font-medium'>
-                  Ảnh tiêu đề
-                </Label>
-                <CustomInput
-                  id='image'
-                  type='file'
-                  accept='image/*'
-                  onChange={handleImageUpload}
-                  // className='h-12 cursor-pointer file:cursor-pointer file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-secondary file:text-secondary-foreground hover:file:bg-secondary/80'
-                />
+                <div className='space-y-6'>
+                  <div className='space-y-2'>
+                    <Label htmlFor='title' className='text-[12px] font-black text-gray-800 uppercase tracking-tight opacity-70'>
+                      Tiêu đề bài viết <span className='text-blue-500'>*</span>
+                    </Label>
+                    <CustomInput
+                      id='title'
+                      placeholder='Nhập tiêu đề tại đây...'
+                      value={post.title}
+                      onChange={(e) => setPost({ ...post, title: e.target.value })}
+                      className='h-12 bg-white border-gray-200 rounded-xl focus:ring-blue-50 transition-all text-base font-bold'
+                    />
+                  </div>
+
+                  <div className='space-y-2'>
+                    <Label htmlFor='image' className='text-[12px] font-black text-gray-800 uppercase tracking-tight opacity-70'>
+                      Ảnh đại diện
+                    </Label>
+                    <CustomInput
+                      id='image'
+                      type='file'
+                      accept='image/*'
+                      onChange={handleImageUpload}
+                      className='relative z-10 h-12 bg-white border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition-all file:bg-gray-100 file:text-gray-600 file:border-none file:rounded-lg file:px-3 file:py-0.5 file:mt-2 file:mr-3 file:text-[10px] file:font-black file:uppercase'
+                    />
+                  </div>
+                </div>
               </div>
             </div>
 
-            {/* Cột phải */}
-            <div className='flex justify-center md:justify-end'>
-              {imagePreview ? (
-                <div className='relative rounded-lg overflow-hidden border border-border w-full max-w-sm'>
-                  <img src={imagePreview} alt='Preview' className='w-full h-48 object-cover rounded-md' />
-                </div>
-              ) : (
-                <div className='w-full max-w-sm h-48 flex items-center justify-center border border-dashed border-border rounded-md text-muted-foreground text-sm'>
-                  Xem trước ảnh sau khi chọn
-                </div>
-              )}
+            {/* Cột phải - Conditional Preview */}
+            <div className='space-y-2'>
+              <h3 className='text-[11px] font-black text-gray-400 uppercase tracking-[0.2em] mb-4 flex items-center gap-2'>
+                Xem trước ảnh
+                <div className='h-px flex-1 bg-gray-50' />
+              </h3>
+
+              <div className='relative aspect-video rounded-[1.5rem] overflow-hidden border border-gray-100 bg-gray-50 flex items-center justify-center group'>
+                <img
+                  src={imagePreview || noPhoto}
+                  alt='Preview'
+                  className={`w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 ${!imagePreview && 'opacity-40 grayscale'}`}
+                />
+
+                {
+                  <>
+                    <div className='absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent' />
+                    <div className='absolute bottom-4 left-4 right-4'>
+                      <h4 className='text-white font-black text-sm line-clamp-2 leading-tight drop-shadow-sm'>
+                        {post.title || 'Tiêu đề bài viết'}
+                      </h4>
+                    </div>
+                  </>
+                }
+              </div>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   )
 }

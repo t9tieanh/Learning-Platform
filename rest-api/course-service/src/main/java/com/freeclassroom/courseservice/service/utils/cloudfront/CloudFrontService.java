@@ -84,18 +84,18 @@ public class CloudFrontService implements ICloudFrontService {
 
     @Override
     public String getSignedUrl(String resourcePath) throws Exception {
-        String redisKey = "cloudfront:signedUrl:" + resourcePath;
+        // String redisKey = "cloudfront:signedUrl:" + resourcePath;
 
-        String cachedUrl = redisTemplate.opsForValue().get(redisKey);
-        if (cachedUrl != null) {
-            return cachedUrl;
-        }
+        // String cachedUrl = redisTemplate.opsForValue().get(redisKey);
+        // if (cachedUrl != null) {
+        //     return cachedUrl;
+        // }
 
         SignedUrl signedUrl = this.generateSignedUrlCanned(resourcePath);
         String url = signedUrl.url();
 
         long ttlSeconds = Duration.ofDays(defaultExpireDays).toSeconds();
-        redisTemplate.opsForValue().set(redisKey, url, Duration.ofSeconds(ttlSeconds));
+        // redisTemplate.opsForValue().set(redisKey, url, Duration.ofSeconds(ttlSeconds));
 
         return url;
     }

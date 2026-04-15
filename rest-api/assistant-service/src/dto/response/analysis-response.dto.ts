@@ -1,4 +1,27 @@
-import { Lesson, LessonChunk } from '@prisma/client'
+import { Lesson, LessonChunk, Quiz, QuizChoice } from '@prisma/client'
+
+// ---------------------------------------------------------------------------
+// Quiz Choice DTO
+// ---------------------------------------------------------------------------
+export interface QuizChoiceDto {
+    id: string
+    text: string
+    isCorrect: boolean
+    feedback: string | null
+}
+
+// ---------------------------------------------------------------------------
+// Quiz DTO
+// ---------------------------------------------------------------------------
+export interface QuizDto {
+    id: string
+    question: string
+    explanation: string
+    type: string
+    difficulty: string
+    bloomLevel: string
+    choices: QuizChoiceDto[]
+}
 
 // ---------------------------------------------------------------------------
 // Chunk DTO – fields exposed to the client
@@ -12,6 +35,7 @@ export interface ChunkDto {
     startTime: string | null
     endTime: string | null
     sentenceCount: number | null
+    quizzes: QuizDto[]
 }
 
 // ---------------------------------------------------------------------------
@@ -24,6 +48,8 @@ export interface AnalysisResponseDto {
     status: AnalysisStatus
     summary: string | null
     suggestedTitle: string | null
+    transcript: string | null
+    subtitles: string | null
     chunks: ChunkDto[]
 }
 
@@ -32,10 +58,21 @@ export interface AnalysisResponseDto {
 // ---------------------------------------------------------------------------
 
 /**
- * Maps a Prisma LessonChunk to a client-facing ChunkDto,
- * omitting internal fields (content, subtitleIndex, sentence indexes …).
+ * Full Lesson type with all nested AI information – used primarily for Intelligence Bundle.
  */
-export function toChunkDto(chunk: LessonChunk): ChunkDto {
+export type FullLessonWithIntelligence = Lesson & {
+    chunks: (LessonChunk & {
+        quizzes: (Quiz & {
+            choices: QuizChoice[]
+        })[]
+    })[]
+}
+
+/**
+ * Maps a Prisma LessonChunk to a client-facing ChunkDto,
+ * omitting internal fields.
+ */
+export function toChunkDto(chunk: LessonChunk & { quizzes?: (Quiz & { choices: QuizChoice[] })[] }): ChunkDto {
     return {
         id: chunk.id,
         chunkIndex: chunk.chunkIndex,
@@ -45,22 +82,38 @@ export function toChunkDto(chunk: LessonChunk): ChunkDto {
         startTime: chunk.startTime,
         endTime: chunk.endTime,
         sentenceCount: chunk.sentenceCount,
+        quizzes: (chunk.quizzes || []).map((quiz: Quiz & { choices: QuizChoice[] }) => ({
+            id: quiz.id,
+            question: quiz.question,
+            explanation: quiz.explanation,
+            type: quiz.type,
+            difficulty: quiz.difficulty,
+            bloomLevel: quiz.bloomLevel,
+            choices: (quiz.choices || []).map((choice: QuizChoice) => ({
+                id: choice.id,
+                text: choice.text,
+                isCorrect: choice.isCorrect,
+                feedback: choice.feedback
+            }))
+        }))
     }
 }
 
 /**
- * Builds the full AnalysisResponseDto from a Lesson + its chunks.
+ * Builds the full AnalysisResponseDto from a Lesson + its chunks and quizzes.
  */
 export function toAnalysisResponseDto(
-    lesson: Lesson & { chunks: LessonChunk[] }
+    lesson: FullLessonWithIntelligence
 ): AnalysisResponseDto {
     return {
         lessonId: lesson.id,
         status: lesson.summary ? 'completed' : 'processing',
         summary: lesson.summary,
         suggestedTitle: lesson.suggestedTitle,
+        transcript: lesson.transcript,
+        subtitles: lesson.subtitles,
         chunks: lesson.chunks
-            .sort((a, b) => a.chunkIndex - b.chunkIndex)
+            .sort((a: LessonChunk, b: LessonChunk) => a.chunkIndex - b.chunkIndex)
             .map(toChunkDto),
     }
 }

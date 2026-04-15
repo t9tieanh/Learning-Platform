@@ -10,9 +10,7 @@ import { showConfirmToast } from '@/components/common/ShowConfirmToast'
 const sidebarItems = [
   {
     category: 'TỔNG QUAN',
-    items: [
-      { name: 'Thống kê', icon: ChartColumn, active: true }
-    ]
+    items: [{ name: 'Trang chủ', icon: Home, active: false }]
   },
   {
     category: 'DANH MỤC',
@@ -20,7 +18,7 @@ const sidebarItems = [
       { name: 'Khóa học', icon: BookOpen, active: true },
       { name: 'Tin nhắn', icon: MessageSquare, active: true },
       { name: 'Bài viết', icon: FileText, active: true },
-      { name: 'Trang chủ', icon: Home, active: false }
+      { name: 'Thống kê', icon: ChartColumn, active: true }
     ]
   }
 ]
@@ -47,9 +45,7 @@ const AcademySidebar = () => {
     }
   }
   return (
-    <div
-      className='w-full h-full bg-[#1D1D2A] text-sidebar-foreground flex flex-col min-w-[220px]'
-    >
+    <div className='w-full h-full bg-[#1D1D2A] text-sidebar-foreground flex flex-col min-w-[220px]'>
       <div className='flex p-4 md:p-6 items-center gap-3'>
         <button onClick={() => navigate('/teacher')} className='p-0 border-none bg-transparent cursor-pointer'>
           <img src={logo} alt='LEARNOVA logo' className='h-12 md:h-8 w-auto select-none object-contain' />
@@ -64,11 +60,12 @@ const AcademySidebar = () => {
               {section.items.map((item, itemIndex) => {
                 const Icon = item.icon
                 let onClick = undefined
-                if (item.name === 'Thống kê') onClick = () => navigate('/teacher')
+                if (item.name === 'Trang chủ') onClick = () => navigate('/teacher')
                 if (item.name === 'Quay lại') onClick = () => navigate('/')
                 if (item.name === 'Khóa học') onClick = () => navigate('/teacher/course')
                 if (item.name === 'Tin nhắn') onClick = () => navigate('/teacher/chat/:id')
                 if (item.name === 'Bài viết') onClick = () => navigate('/teacher/blogs')
+                if (item.name === 'Thống kê') onClick = () => navigate('/teacher/statistics')
                 return (
                   <Button
                     key={itemIndex}
@@ -101,15 +98,20 @@ const AcademySidebar = () => {
             <p className='text-xs md:text-sm text-sidebar-foreground/60'>Giảng viên</p>
           </div>
 
-          <Button
-            variant='ghost'
-            size='icon'
+          <div className='flex-1 min-w-0'>
+            <p className='text-[13px] font-black text-white truncate'>{displayName}</p>
+            <p className='text-[9px] font-black text-gray-500 uppercase tracking-widest mt-0.5 opacity-60'>
+              Giảng viên Vip
+            </p>
+          </div>
+
+          <button
             onClick={handleLogout}
-            className='text-red-400 hover:bg-red-500/10 hover:text-red-500'
+            className='p-2 text-gray-500 hover:text-red-400 hover:bg-red-400/10 rounded-xl transition-all group-hover:bg-red-500/10'
             title='Đăng xuất'
           >
-            <LogOut className='w-5 h-5' />
-          </Button>
+            <LogOut className='w-4.5 h-4.5' />
+          </button>
         </div>
       </div>
     </div>

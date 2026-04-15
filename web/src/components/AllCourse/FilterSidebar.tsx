@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Search, ChevronDown, ChevronUp, BookOpen, Star, Wallet } from 'lucide-react'
+import { TagPicker } from 'rsuite'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Slider } from '@/components/ui/slider'
 import categoryService from '@/services/course/category.service'
-import { Loader } from '../ui/loader'
 
 interface FilterSidebarProps {
   selectedCategories: string[]
@@ -30,7 +30,6 @@ export const FilterSidebar = ({
 }: FilterSidebarProps) => {
   const [categoryOpen, setCategoryOpen] = useState(true)
   const [ratingOpen, setRatingOpen] = useState(true)
-  const [showAllCategories, setShowAllCategories] = useState(false)
   const [categories, setCategories] = useState<{ id: string; name: string; description: string }[]>([])
   const [loadingCategories, setLoadingCategories] = useState(false)
 
@@ -55,10 +54,10 @@ export const FilterSidebar = ({
     }
   }, [])
 
-  const displayedCategories = useMemo(() => {
-    const names = categories.map((c) => c.name)
-    return showAllCategories ? names : names.slice(0, 5)
-  }, [categories, showAllCategories])
+  const categoryOptions = useMemo(
+    () => categories.map((category) => ({ label: category.name, value: category.name })),
+    [categories]
+  )
 
   return (
     <div className='hidden md:block w-80 bg-white border-r border-gray-200 p-6 overflow-y-auto h-screen sticky top-0'>
@@ -94,53 +93,18 @@ export const FilterSidebar = ({
         </button>
         {categoryOpen && (
           <div className='space-y-3'>
-            {loadingCategories && <Loader />}
-            <label
-              key={'__all__'}
-              htmlFor={'__all__'}
-              className='flex items-center space-x-2 cursor-pointer p-2 rounded-lg hover:bg-blue-50 transition-colors'
-            >
-              <Checkbox
-                id={'__all__'}
-                checked={selectedCategories.length === 0}
-                onCheckedChange={(checked) => {
-                  if (checked === true) onCategoriesChange([])
-                }}
-                className='w-5 h-5 border-blue-300 data-[state=checked]:bg-blue-500 data-[state=checked]:border-blue-500'
-              />
-              <span className='text-sm text-gray-700'>Tất cả</span>
-            </label>
-            {displayedCategories.map((category) => (
-              <label
-                key={category}
-                htmlFor={category}
-                className='flex items-center space-x-2 cursor-pointer p-2 rounded-lg hover:bg-blue-50 transition-colors'
-              >
-                <Checkbox
-                  id={category}
-                  checked={selectedCategories.includes(category)}
-                  onCheckedChange={(checked) => {
-                    if (checked === true) {
-                      const next = Array.from(new Set([...(selectedCategories || []), category]))
-                      onCategoriesChange(next)
-                    } else if (checked === false) {
-                      const next = (selectedCategories || []).filter((c) => c !== category)
-                      onCategoriesChange(next)
-                    }
-                  }}
-                  className='w-5 h-5 border-blue-300 data-[state=checked]:bg-blue-500 data-[state=checked]:border-blue-500'
-                />
-                <span className='text-sm text-gray-700'>{category}</span>
-              </label>
-            ))}
-            {categories.length > 5 && (
-              <button
-                onClick={() => setShowAllCategories(!showAllCategories)}
-                className='text-sm text-blue-500 font-medium hover:underline mt-2'
-              >
-                {showAllCategories ? 'Thu gọn' : `Xem thêm ${categories.length - 5} danh mục`}
-              </button>
-            )}
+            <TagPicker
+              data={categoryOptions}
+              value={selectedCategories}
+              onChange={(value) => onCategoriesChange(value ?? [])}
+              loading={loadingCategories}
+              placeholder='Chọn danh mục'
+              block
+              cleanable
+              searchable
+              className='w-full category-tag-picker'
+              popupClassName='category-tag-picker-popup text-sm'
+            />
           </div>
         )}
       </div>

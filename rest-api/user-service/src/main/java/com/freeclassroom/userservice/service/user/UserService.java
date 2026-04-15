@@ -2,7 +2,11 @@ package com.freeclassroom.userservice.service.user;
 
 import com.example.grpc.course.GetCourseAdminDataResponse;
 import com.example.grpc.course.TotalBlogResponse;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.freeclassroom.userservice.configuration.RabbitMQConfig;
+import com.freeclassroom.userservice.dto.request.auth.Identity;
+import com.freeclassroom.userservice.dto.request.personal.TrackingEventRequest;
 import com.freeclassroom.userservice.dto.request.user.CreationUserRequest;
 import com.freeclassroom.userservice.dto.request.user.UpdateUserRequest;
 import com.freeclassroom.userservice.dto.response.ApiResponse;
@@ -27,24 +31,33 @@ import com.freeclassroom.userservice.repository.entity.CertificateRepository;
 import com.freeclassroom.userservice.repository.entity.UserRepository;
 import com.freeclassroom.userservice.repository.redis.OTPForgetPasswordRepository;
 import com.freeclassroom.userservice.repository.redis.PendingUserRepository;
+import com.freeclassroom.userservice.service.event.EventService;
 import com.freeclassroom.userservice.service.file.UploadFileService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Range;
+import org.springframework.data.redis.connection.stream.MapRecord;
+import org.springframework.data.redis.connection.stream.RecordId;
 import org.springframework.data.redis.core.RedisOperations;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.connection.DataType;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.time.Duration;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+
+import static com.freeclassroom.userservice.enums.RedisStreamEnum.EVENT_USER;
 
 @Service
 @RequiredArgsConstructor
@@ -54,6 +67,7 @@ public class UserService implements IUserService {
     OTPForgetPasswordRepository otpForgetPasswordRepo;
     UserMapper userMapper;
     UploadFileService uploadFileService;
+    EventService eventService;
 
     CourseGrpcClient courseGrpcClient;
     BlogGrpcClient blogGrpcClient;
@@ -318,6 +332,29 @@ public class UserService implements IUserService {
                     .result(data)
                     .build();
         }
+    }
+
+    @Override
+    public ApiResponse<Void> trackingEvent(Identity identity, TrackingEventRequest trackingEvent) {
+        if (identity == null) {
+            return ApiResponse.<Void>builder()
+                    .code(401)
+                    .message("Missing identity")
+                    .build();
+        }
+
+        RecordId recordId = eventService.saveEventToRedis(identity, trackingEvent);
+
+        if (recordId == null) {
+            return ApiResponse.<Void>builder()
+                    .code(500)
+                    .message("Failed to write event to redis stream")
+                    .build();
+        }
+
+        return ApiResponse.<Void>builder()
+                .message("Personal event tracked successfully")
+                .build();
     }
 
     public ApiResponse<UserResponse> verifyForgotPassword(String code, String newPassword) {

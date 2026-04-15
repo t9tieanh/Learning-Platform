@@ -1,5 +1,6 @@
 import App from './App'
 import ReactDOM from 'react-dom/client'
+import 'rsuite/dist/rsuite-no-reset.min.css'
 import { RouterProvider, createBrowserRouter } from 'react-router-dom'
 import HomePage from './pages/HomePage'
 import DefaultLayout from './layouts/DefaultLayout'
@@ -29,6 +30,7 @@ import TC_Blog from './pages/TC_Blog'
 import TC_CreateBlog from './pages/TC_CreateBlog'
 import TC_BlogDetails from './pages/TC_BlogDetails'
 import TC_UpdateBlog from './pages/TC_UpdateBlog'
+import TC_Statistics from './pages/TC_Statistics'
 import AD_HomePage from './pages/AD_HomePage'
 import AD_Courses from './pages/AD_Courses'
 import AD_CourseDetails from './pages/AD_CourseDetails'
@@ -41,6 +43,9 @@ import { SocketProvider } from '@/api/socket/socket.context'
 import DiscountsAdmin from './pages/AD_Discounts'
 import AuthenticationGate from '@/components/auth-gate/AuthenticationGate'
 import VipSuccess from './pages/VipSuccess'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+
+const queryClient = new QueryClient()
 
 const router = createBrowserRouter([
   {
@@ -85,7 +90,8 @@ const router = createBrowserRouter([
           { path: 'create-blog', element: <TC_CreateBlog /> },
           { path: 'course-details', element: <NotFound /> },
           { path: 'blog/:id', element: <TC_BlogDetails /> },
-          { path: 'update-blog/:id', element: <TC_UpdateBlog /> }
+          { path: 'update-blog/:id', element: <TC_UpdateBlog /> },
+          { path: 'statistics', element: <TC_Statistics />}
         ]
       },
       {
@@ -119,8 +125,10 @@ const router = createBrowserRouter([
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <>
-    <SocketProvider>
-      <RouterProvider router={router} />
-    </SocketProvider>
+    <QueryClientProvider client={queryClient}>
+      <SocketProvider>
+        <RouterProvider router={router} />
+      </SocketProvider>
+    </QueryClientProvider>
   </>
 )

@@ -1,13 +1,12 @@
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
 import CustomButton from '../common/Button'
-import { LogOut, GraduationCap, MessageCircle, User } from 'lucide-react'
+import { LogOut, GraduationCap, MessageCircle, User, Crown } from 'lucide-react'
 import { useAuthStore } from '@/stores/useAuth.stores'
 import { useNavigate } from 'react-router-dom'
 import { showConfirmToast } from '../common/ShowConfirmToast'
 import userService from '@/services/user/user.service'
 import { toast } from 'sonner'
 import useLoading from '@/hooks/useLoading.hook'
-import { Crown } from 'lucide-react'
 import { useVipUpgrade } from '@/contexts/VipUpgradeContext'
 
 const Menu = ({
@@ -90,7 +89,11 @@ const Menu = ({
           <div>
             <p className='text-gray-900 text-sm font-bold flex items-center gap-1.5'>
               {name}
-              {data?.isVip && <span className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white text-[10px] uppercase font-bold px-1.5 py-0.5 rounded shadow-sm leading-none">VIP</span>}
+              {data?.isVip && (
+                <span className='bg-gradient-to-r from-yellow-500 to-yellow-600 text-white text-[10px] uppercase font-bold px-1.5 py-0.5 rounded shadow-sm leading-none'>
+                  VIP
+                </span>
+              )}
             </p>
             <p className='text-muted-foreground text-xs'>@{username}</p>
           </div>
