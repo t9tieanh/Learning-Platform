@@ -5,21 +5,23 @@ interface FeaturedCardProps {
   title: string
   description: string
   date: string
+  slug: string
+  image?: string
 }
 
-export const FeaturedCard = ({ title, description, date }: FeaturedCardProps) => {
+export const FeaturedCard = ({ title, description, date, slug, image }: FeaturedCardProps) => {
   return (
-    <Link to={`/blog-details/690a0cf610380836bc82f2f2`}>
+    <Link to={`/blog-details/${slug}`}>
       <article
-        className='relative rounded-3xl overflow-hidden shadow-sm p-8 text-white hover:scale-[1.02] transition-transform'
+        className='relative rounded-3xl overflow-hidden shadow-sm p-8 text-white hover:scale-[1.02] transition-transform h-full min-h-[300px]'
         style={{
-          backgroundImage: `url(${blogBg})`,
+          backgroundImage: `url(${image || blogBg})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center'
         }}
       >
         {/* Overlay mờ để dễ đọc chữ */}
-        <div className='absolute inset-0 bg-black/50 z-0' />
+        <div className='absolute inset-0 bg-black/60 z-0' />
 
         {/* SVG trang trí */}
         <div className='absolute top-4 right-4 opacity-20 z-10'>

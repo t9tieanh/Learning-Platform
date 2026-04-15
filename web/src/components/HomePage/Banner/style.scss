@@ -1,7 +1,7 @@
 .banner-container {
     // background-image: url('https://images.unsplash.com/photo-1495465798138-718f86d1a4bc?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
     //background-image: url('https://res.cloudinary.com/df8780mba/image/upload/v1754644127/banner_ou5ree.jpg');
-    background-image: url('../../../assets/images/banner-homepage.avif');
+    background-image: url('../../../assets/images/banner-home-page.jpg');
     background-size: cover;
     background-repeat: no-repeat;
     background-attachment: fixed;
@@ -14,7 +14,7 @@
 
     h1,
     blockquote {
-        max-width: 600px !important;
+        max-width: 700px !important;
     }
 
     color: white;
@@ -28,7 +28,7 @@
         position: absolute;
     }
 
-    > * {
+    >* {
         position: relative;
         z-index: 2;
     }

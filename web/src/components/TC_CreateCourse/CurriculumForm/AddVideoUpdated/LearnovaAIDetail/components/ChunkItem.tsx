@@ -139,15 +139,6 @@ const ChunkItem: React.FC<ChunkItemProps> = ({
         }
     }
 
-    const handleTriggerAI = (e: React.MouseEvent) => {
-        e.stopPropagation()
-        if (!isVip) {
-            openVipDialog()
-            return
-        }
-        setIsPickerOpen(!isPickerOpen)
-    }
-
     return (
         <AccordionItem
             value={chunk.id}
@@ -164,8 +155,14 @@ const ChunkItem: React.FC<ChunkItemProps> = ({
                                 {chunk.title || `Phân đoạn ${idx + 1}`}
                             </h4>
                             <div className='flex items-center gap-3 text-[11px] text-gray-400 font-bold uppercase tracking-widest'>
-                                <span className='flex items-center gap-1.5 bg-gray-50 px-2 py-0.5 rounded-lg'>
-                                    <PlayCircle className='w-3.5 h-3.5 text-blue-500' /> {chunk.startTime}
+                                <span
+                                    className='flex items-center gap-1.5 bg-gray-50 px-2 py-0.5 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors cursor-pointer group/time'
+                                    onClick={(e) => {
+                                        e.stopPropagation()
+                                        handleSeek(chunk.startTime)
+                                    }}
+                                >
+                                    <PlayCircle className='w-3.5 h-3.5 text-blue-500 group-hover/time:scale-110 transition-transform' /> {chunk.startTime}
                                 </span>
                                 <span className='w-1 h-1 bg-gray-200 rounded-full' />
                                 <span>{chunk.sentenceCount} Câu phát biểu</span>

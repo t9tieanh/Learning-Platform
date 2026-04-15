@@ -1,6 +1,7 @@
 import Logger from '~/utils/logger';
 import prismaService from '~/service/utils/prisma.service';
 import { EmbeddingE5Service } from '~/service/embedding/embeddingE5.service';
+import { SearchChunkResponseDto } from '~/dto/response/search-response.dto';
 
 export interface SearchChunkResult {
     id: string;
@@ -9,6 +10,9 @@ export interface SearchChunkResult {
     title: string | null;
     summary: string | null;
     chunkIndex: number;
+    startTime: string | null;
+    endTime: string | null;
+    timestamp: string | null;
     similarity: number;
 }
 
@@ -65,16 +69,10 @@ export class SearchService {
             );
 
             // Step 2: Call the Supabase PL/pgSQL function to search similar chunks
-            // Function: search_lesson_chunks_by_embedding_v2(lessonId TEXT, queryEmbedding vector(768), limit INT)
-            // pgvector can parse JSON array as vector
-            const results = await prismaService.$queryRaw<SearchChunkResult[]>`
+            // We only fetch ID and similarity here to avoid column name mismatches in raw SQL
+            const searchResults = await prismaService.$queryRaw<any[]>`
                 SELECT 
                     chunk_id as id,
-                    lesson_id as "lessonId",
-                    content,
-                    title,
-                    summary,
-                    chunk_index as "chunkIndex",
                     similarity
                     FROM search_lesson_chunks_by_embedding_v2(
                     ${lessonId},
@@ -83,11 +81,25 @@ export class SearchService {
                 )
             `;
 
+            if (searchResults.length === 0) return [];
+
+            // Step 3: Fetch full chunk details using Prisma Client (Type-safe mapping)
+            const chunkIds = searchResults.map(r => r.id);
+            const chunksFromDb = await prismaService.lessonChunk.findMany({
+                where: { id: { in: chunkIds } }
+            });
+
+            // Step 4: Map back to SearchChunkResult and restore similarity scores
+            const finalResults: SearchChunkResult[] = searchResults.map(searchResult => {
+                const dbChunk = chunksFromDb.find(c => c.id === searchResult.id);
+                return dbChunk ? new SearchChunkResponseDto(dbChunk, searchResult.similarity) : null;
+            }).filter((res): res is SearchChunkResult => res !== null);
+
             Logger.info(
-                `[SearchService] Found ${results.length} similar chunk(s) for lessonId=${lessonId}`
+                `[SearchService] Found ${finalResults.length} similar chunk(s) for lessonId=${lessonId}`
             );
 
-            return results;
+            return finalResults;
         } catch (error) {
             Logger.error(
                 `[SearchService.searchChunks] Error searching chunks – lessonId=${lessonId}, query="${query}" – ${error}`

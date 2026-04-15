@@ -14,6 +14,7 @@ import { useChunkedUpload } from '@/hooks/useChunkedUpload.hook'
 import { useAuthStore } from '@/stores/useAuth.stores'
 import CustomButton from '@/components/common/Button'
 import CurriculumFormSkeleton from './Skeleton/CurriculumFormSkeleton'
+import useLoading from '@/hooks/useLoading.hook'
 
 export type HandleAddLesson = (
   selectedFile: File,
@@ -29,6 +30,7 @@ const CurriculumForm: React.FC<{ id: string }> = ({ id }: { id: string }) => {
   const token = data?.accessToken
 
   const [loading, setLoading] = useState(true)
+  const { loading: isAddingChapter, startLoading: startAddingChapter, stopLoading: stopAddingChapter } = useLoading()
 
   useEffect(() => {
     fetchChapters()
@@ -67,28 +69,35 @@ const CurriculumForm: React.FC<{ id: string }> = ({ id }: { id: string }) => {
   const isAnyUploading = chunkedUpload.uploads.some((u) => u.status === 'uploading')
 
   const handleAddChapter = async () => {
-    const data = await chapterService.addChapter({
-      courseId: id,
-      title: 'Phần mới',
-      position: Chapters.length + 1
-    })
-    if (!data || data.code !== 200 || !data.result) {
-      toast.error(data?.message || 'Có lỗi xảy ra, vui lòng thử lại')
-      return
-    }
-
-    const result = data.result!
-
-    setChapters((prev) => [
-      ...prev,
-      {
-        id: result.id,
+    try {
+      startAddingChapter()
+      const data = await chapterService.addChapter({
+        courseId: id,
         title: 'Phần mới',
-        position: prev.length + 1,
-        lessons: [],
-        isOpen: true
+        position: Chapters.length + 1
+      })
+      if (!data || data.code !== 200 || !data.result) {
+        toast.error(data?.message || 'Có lỗi xảy ra, vui lòng thử lại')
+        return
       }
-    ])
+
+      const result = data.result!
+
+      setChapters((prev) => [
+        ...prev,
+        {
+          id: result.id,
+          title: 'Phần mới',
+          position: prev.length + 1,
+          lessons: [],
+          isOpen: true
+        }
+      ])
+    } catch (error) {
+      console.error(error)
+    } finally {
+      stopAddingChapter()
+    }
   }
 
   const getTotalStats = () => {
@@ -231,14 +240,14 @@ const CurriculumForm: React.FC<{ id: string }> = ({ id }: { id: string }) => {
             />
           ))}
 
-          <Button
+          <CustomButton
             variant='outline'
             onClick={handleAddChapter}
+            isLoader={isAddingChapter}
             className='w-full border-dashed border-2 border-blue-300 py-8 rounded-xl text-blue-600 hover:bg-blue-50'
-          >
-            <Plus className='h-4 w-4 mr-2' />
-            Thêm chương
-          </Button>
+            label='Thêm chương'
+            icon={<Plus className='h-4 w-4' />}
+          />
         </CardContent>
       </Card>
     </div>

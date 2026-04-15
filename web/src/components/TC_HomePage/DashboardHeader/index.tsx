@@ -70,24 +70,41 @@ const DashboardHeader = () => {
               </Avatar>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align='end'>
-            <DropdownMenuItem className='!bg-transparent hover:!bg-white hover:!text-primary transition-colors'>
-              <CustomButton
-                label='Tài khoản học viên'
-                className='w-full text-white rounded-md hover:bg-blue-700'
-                type='button'
-                onClick={() => navigate('/')}
-                icon={<User className='h-4 w-4 ml-1 text-white' />}
-              />
+          <DropdownMenuContent align='end' className='w-64 p-2 rounded-2xl border-slate-100 shadow-2xl'>
+            <div className='px-3 py-4 mb-1'>
+              <p className='text-[10px] font-bold text-slate-400 uppercase tracking-widest'>Tài khoản hiện tại</p>
+              <div className='mt-2 flex items-center gap-3'>
+                <Avatar className='w-9 h-9 border border-slate-100'>
+                  <AvatarImage src={data?.avatarUrl} alt='Avatar' />
+                  <AvatarFallback className='text-slate-400 font-bold bg-slate-50 text-[11px]'>{initials}</AvatarFallback>
+                </Avatar>
+                <div className='flex flex-col min-w-0'>
+                  <p className='text-sm font-bold text-slate-800 truncate'>{displayName}</p>
+                  <p className='text-[11px] text-slate-400 font-medium truncate'>Giảng viên hệ thống</p>
+                </div>
+              </div>
+            </div>
+
+            <div className='h-[1px] bg-slate-50 mx-1 mb-1' />
+
+            <DropdownMenuItem
+              onClick={() => navigate('/')}
+              className='flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 hover:text-blue-600 hover:bg-blue-50/50 transition-all cursor-pointer group'
+            >
+              <div className='w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center group-hover:bg-blue-100 transition-colors'>
+                <User className='h-4 w-4' />
+              </div>
+              <span className='text-[13px] font-semibold'>Tài khoản học viên</span>
             </DropdownMenuItem>
-            <DropdownMenuItem className='!bg-transparent hover:!bg-white hover:!text-primary transition-colors'>
-              <CustomButton
-                label='Đăng xuất'
-                className='w-full bg-red-600 text-white hover:bg-red-700 rounded-md'
-                type='button'
-                onClick={handleLogout}
-                icon={<LogOut className='h-4 w-4 ml-1 text-white' />}
-              />
+
+            <DropdownMenuItem
+              onClick={handleLogout}
+              className='flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-500 hover:text-red-600 hover:bg-red-50/50 transition-all cursor-pointer group'
+            >
+              <div className='w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center group-hover:bg-red-100 transition-colors'>
+                <LogOut className='h-4 w-4' />
+              </div>
+              <span className='text-[13px] font-semibold'>Đăng xuất khỏi hệ thống</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

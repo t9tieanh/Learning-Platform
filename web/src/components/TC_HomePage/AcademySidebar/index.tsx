@@ -70,11 +70,10 @@ const AcademySidebar = () => {
                   <Button
                     key={itemIndex}
                     variant={item.active ? 'secondary' : 'ghost'}
-                    className={`w-full justify-start h-11 px-3 ${
-                      item.active
+                    className={`w-full justify-start h-11 px-3 ${item.active
                         ? 'bg-sidebar-accent text-sidebar-accent-foreground hover:bg-[#ababaf]'
                         : 'text-sidebar-foreground/80 hover:bg-[#afafb3] hover:text-sidebar-accent-foreground'
-                    }`}
+                      }`}
                     onClick={onClick}
                   >
                     <Icon className='w-5 h-5 mr-3' />
@@ -99,15 +98,20 @@ const AcademySidebar = () => {
             <p className='text-xs md:text-sm text-sidebar-foreground/60'>Giảng viên</p>
           </div>
 
-          <Button
-            variant='ghost'
-            size='icon'
+          <div className='flex-1 min-w-0'>
+            <p className='text-[13px] font-black text-white truncate'>{displayName}</p>
+            <p className='text-[9px] font-black text-gray-500 uppercase tracking-widest mt-0.5 opacity-60'>
+              Giảng viên Vip
+            </p>
+          </div>
+
+          <button
             onClick={handleLogout}
-            className='text-red-400 hover:bg-red-500/10 hover:text-red-500'
+            className='p-2 text-gray-500 hover:text-red-400 hover:bg-red-400/10 rounded-xl transition-all group-hover:bg-red-500/10'
             title='Đăng xuất'
           >
-            <LogOut className='w-5 h-5' />
-          </Button>
+            <LogOut className='w-4.5 h-4.5' />
+          </button>
         </div>
       </div>
     </div>

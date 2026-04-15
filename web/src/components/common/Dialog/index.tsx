@@ -9,6 +9,8 @@ interface CustomDialogProps {
   children?: React.ReactNode
   className?: string
   contentClassName?: string
+  hideHeader?: boolean
+  noPadding?: boolean
   size?: 'sm' | 'md' | 'lg' | 'xl' | 'full'
 }
 
@@ -20,6 +22,8 @@ export default function CustomDialog({
   children,
   className,
   contentClassName,
+  hideHeader = false,
+  noPadding = false,
   size = 'md'
 }: CustomDialogProps) {
   const sizeClassMap: Record<NonNullable<CustomDialogProps['size']>, string> = {
@@ -35,12 +39,14 @@ export default function CustomDialog({
   return (
     <>
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className={`${className ?? ''} ${sizeClass}`}>
-          <DialogHeader>
-            <DialogTitle className='flex items-center gap-1'>{title}</DialogTitle>
-            <DialogDescription>{description}</DialogDescription>
-          </DialogHeader>
-          <div className={cn('my-4', contentClassName)}> {children}</div>
+        <DialogContent className={`${className ?? ''} ${sizeClass} ${noPadding ? 'p-0' : ''}`}>
+          {!hideHeader && (
+            <DialogHeader>
+              <DialogTitle className='flex items-center gap-1'>{title}</DialogTitle>
+              <DialogDescription>{description}</DialogDescription>
+            </DialogHeader>
+          )}
+          <div className={cn(!noPadding && 'my-4', contentClassName)}> {children}</div>
         </DialogContent>
       </Dialog>
     </>

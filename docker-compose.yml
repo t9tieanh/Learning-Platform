@@ -11,12 +11,20 @@ services:
     environment:
       SERVER_PORT: 8888
       SPRING_PROFILES_ACTIVE: prod
+      # Microservices URIs
+      USER_SERVICE_URI: "http://host.docker.internal:8080"
+      COURSE_SERVICE_URI: "http://host.docker.internal:8081"
+      SALE_SERVICE_URI: "http://host.docker.internal:8083"
+      NOTIFY_SERVICE_URI: "http://host.docker.internal:8082"
+      ASSISTANT_SERVICE_URI: "http://host.docker.internal:8084"
     ports:
       - "${API_GATEWAY_PORT:-8888}:8888"
     volumes:
       - ./rest-api/api-gateway/src/main/resources/application.yaml:/app/application.yaml
     networks:
       - learning-platform-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8888/actuator/health"]
@@ -38,6 +46,11 @@ services:
       SERVER_PORT: 8080
       SPRING_PROFILES_ACTIVE: prod
       GRPC_SERVER_PORT: 50051
+      # Localhost overrides
+      DATABASE_URL: "jdbc:mysql://host.docker.internal:3306/user_service"
+      RABBITMQ_HOST: "host.docker.internal"
+      COURSE_SERVICE_GRPC_ADDRESS: "static://host.docker.internal:50054"
+      BLOG_SERVICE_GRPC_ADDRESS: "static://host.docker.internal:50052"
     ports:
       - "${USER_SERVICE_PORT:-8080}:8080"
       - "${USER_SERVICE_GRPC_PORT:-50051}:50051"
@@ -45,6 +58,8 @@ services:
       - ./rest-api/user-service/src/main/resources/application.yaml:/app/application.yaml
     networks:
       - learning-platform-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/actuator/health"]
@@ -66,6 +81,13 @@ services:
       SERVER_PORT: 8081
       SPRING_PROFILES_ACTIVE: prod
       GRPC_SERVER_PORT: 50054
+      # Localhost overrides
+      DATABASE_URL: "jdbc:mysql://host.docker.internal:3306/course_service"
+      RABBITMQ_HOST: "host.docker.internal"
+      USER_SERVICE_GRPC_ADDRESS: "static://host.docker.internal:50051"
+      SALE_SERVICE_GRPC_ADDRESS: "static://host.docker.internal:50053"
+      BLOG_SERVICE_GRPC_ADDRESS: "static://host.docker.internal:50052"
+      AWS_CLOUDFRONT_PRIVATE_KEY_PATH: "file:/app/cloudfront-private-key.pem"
     ports:
       - "${COURSE_SERVICE_PORT:-8081}:8081"
       - "${COURSE_SERVICE_GRPC_PORT:-50054}:50054"
@@ -74,6 +96,8 @@ services:
       - ./rest-api/course-service/src/main/resources/cloudfront-private-key.pem:/app/cloudfront-private-key.pem
     networks:
       - learning-platform-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8081/actuator/health"]
@@ -82,9 +106,9 @@ services:
       retries: 3
       start_period: 40s
 
-  # # ============================================
-  # # Sale Service (Node.js)
-  # # ============================================
+  # ============================================
+  # Sale Service (Node.js)
+  # ============================================
   # sale-service:
   #   build:
   #     context: ./rest-api
@@ -136,9 +160,9 @@ services:
   #     retries: 3
   #     start_period: 10s
 
-  # # ============================================
-  # # Notification Service (Node.js)
-  # # ============================================
+  # ============================================
+  # Notification Service (Node.js)
+  # ============================================
   # notification-service:
   #   build:
   #     context: ./rest-api
@@ -189,6 +213,25 @@ services:
   #     timeout: 10s
   #     retries: 3
   #     start_period: 10s
+
+  # ============================================
+  # RabbitMQ (Message Broker)
+  # ============================================
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: learning-rabbitmq
+    ports:
+      - "5672:5672"     # AMQP protocol port
+      - "15672:15672"   # Management UI
+    networks:
+      - learning-platform-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
 
 networks:
   learning-platform-network:
