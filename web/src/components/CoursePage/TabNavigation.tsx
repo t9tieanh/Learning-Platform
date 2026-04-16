@@ -54,7 +54,7 @@ export const TabNavigation = ({
         }
       ]
 
-      if (!analysisData) {
+      if (!analysisData || analysisData.status?.toLowerCase() === 'failed') {
         return baseTabs.filter((t) => t.label !== 'AI Phân tích')
       }
       return baseTabs
@@ -78,7 +78,8 @@ export const TabNavigation = ({
   }, [currentLectureId])
 
   useEffect(() => {
-    if (!analysisData && activeTab === 'AI Phân tích') {
+    const isAnalysisUnavailable = !analysisData || analysisData.status?.toLowerCase() === 'failed'
+    if (isAnalysisUnavailable && activeTab === 'AI Phân tích') {
       setActiveTab('Tổng quan')
     }
   }, [analysisData, activeTab, setActiveTab])

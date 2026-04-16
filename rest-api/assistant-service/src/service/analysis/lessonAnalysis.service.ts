@@ -7,11 +7,13 @@ import { LessonAnalysisEvent } from '~/dto/request/lesson-analysis.dto';
 import { bullQueueService } from '~/service/utils/bullQueue.service';
 import { ChunkingJobData } from '~/service/jobs/chunkingJob.processor';
 import { BullJobType } from '~/enums/bullJobType.enum';
+import redisService from '~/service/utils/redis.service';
+import { AnalysisOutcome } from '~/enums/analysisOutcome.enum';
+import { AnalysisStatus } from '@prisma/client';
 
 class LessonAnalysisService {
     private static instance: LessonAnalysisService;
     private documentService: DocumentService;
-    // Track lessons being processed to prevent duplicate job enqueueing
     private processingLessons = new Set<string>();
 
     private constructor() {
@@ -25,10 +27,9 @@ class LessonAnalysisService {
         return LessonAnalysisService.instance;
     }
 
-    // -----------------------------------------------------------------------
-    // Public API
-    // -----------------------------------------------------------------------
-
+    /**
+     * Entry point for lesson analysis events.
+     */
     public async handleLessonAnalysisEvent(event: LessonAnalysisEvent): Promise<void> {
         Logger.info(
             `Received lesson analysis event for lessonId: ${event.lessonId}, type: ${event.fileType}`
@@ -45,30 +46,62 @@ class LessonAnalysisService {
         }
     }
 
+    /**
+     * Processes completion of external transcription.
+     */
     public async processTranscriptCompletion(transcriptId: string): Promise<void> {
         const transcript = await AssemblyAIService.getTranscript(transcriptId);
-        if (transcript && transcript.text) {
-            const subtitles = await AssemblyAIService.getSubtitles(transcriptId, 'srt');
-            await this.createOrUpdateLessonFromTranscript(
-                transcriptId,
-                transcript.text,
-                subtitles,
-                transcript.audio_url
-            );
+
+        if (!transcript || !transcript.text || transcript.text.trim().split(/\s+/).length < 5) {
+            const reason = !transcript || !transcript.text
+                ? 'No audio/text detected'
+                : 'Content too short for quality standards';
+
+            await this.markLessonAsInvalid(transcriptId, reason);
+            Logger.warn(`Lesson quality check failed for transcript ${transcriptId}: ${reason}`);
+            return;
+        }
+
+        const subtitles = await AssemblyAIService.getSubtitles(transcriptId, 'srt');
+        await this.createOrUpdateLessonFromTranscript(
+            transcriptId,
+            transcript.text,
+            subtitles,
+            transcript.audio_url
+        );
+    }
+
+    /**
+     * Marks a lesson as failed in quality check.
+     */
+    public async markLessonAsInvalid(transcriptId: string, reason: string): Promise<void> {
+        try {
+            const lesson = await prismaService.lesson.update({
+                where: { transcriptId: transcriptId },
+                data: {
+                    isQualityValid: false,
+                    qualityReason: reason,
+                    status: AnalysisStatus.FAILED
+                }
+            });
+            Logger.info(`Marked lesson with transcriptId ${transcriptId} (lessonId: ${lesson.id}) as invalid. Reason: ${reason}`);
+
+            await redisService.publish(`analysis:${lesson.id}`, {
+                lessonId: lesson.id,
+                status: AnalysisStatus.FAILED,
+                reason: reason
+            });
+        } catch (error) {
+            Logger.error(`Error marking lesson as invalid for transcriptId ${transcriptId}: ${error}`);
         }
     }
 
-    // -----------------------------------------------------------------------
-    // Private Handlers
-    // -----------------------------------------------------------------------
     private async handleVideoAnalysis(event: LessonAnalysisEvent): Promise<void> {
         Logger.info('Starting video analysis flow...');
 
-        // 1. Submit video for transcription
         const transcript = await AssemblyAIService.transcribeVideo(event.fileUrl);
         Logger.info(`Transcription submitted. Id: ${transcript.id}`);
 
-        // 2. Save / update lesson with transcriptId
         await prismaService.lesson.upsert({
             where: { id: event.lessonId },
             update: {
@@ -88,11 +121,9 @@ class LessonAnalysisService {
     private async handleArticleAnalysis(event: LessonAnalysisEvent): Promise<void> {
         Logger.info('Starting article analysis flow...');
 
-        // 1. Extract content from PDF / document
         const content = await this.documentService.getPdfContentFromUrl(event.fileUrl);
         Logger.info(`Content extracted for lesson ${event.lessonId}`);
 
-        // 2. Save to DB
         await prismaService.lesson.upsert({
             where: { id: event.lessonId },
             update: { url: event.fileUrl, transcript: content },
@@ -101,8 +132,6 @@ class LessonAnalysisService {
 
         Logger.info(`Lesson ${event.lessonId} updated with content.`);
 
-        // 3. Enqueue chunking job → triggers chunking→summarization→embedding pipeline
-        //    via Bull queue. processRawText() handles plain text as well as SRT.
         await this.enqueueChunkingJob({
             lessonId: event.lessonId,
             subtitles: content,
@@ -116,7 +145,6 @@ class LessonAnalysisService {
         subtitles: string,
         audioUrl: string
     ): Promise<void> {
-        // Try to find by transcriptId first
         let lesson = await prismaService.lesson.findUnique({
             where: { transcriptId },
         });
@@ -132,7 +160,6 @@ class LessonAnalysisService {
                 },
             });
 
-            // Enqueue chunking job → triggers chunking pipeline asynchronously
             await this.enqueueChunkingJob({
                 lessonId: lesson.id,
                 subtitles,
@@ -141,7 +168,6 @@ class LessonAnalysisService {
             return;
         }
 
-        // Try to find by URL
         const existingLessonByUrl = await prismaService.lesson.findFirst({
             where: { url: audioUrl },
         });
@@ -181,25 +207,12 @@ class LessonAnalysisService {
         });
     }
 
-    // -----------------------------------------------------------------------
-    // Job Queueing Helpers
-    // -----------------------------------------------------------------------
-
     /**
-     * Enqueue a chunking job to the Bull queue with deduplication
-     * 
-     * Prevents duplicate jobs for the same lesson from being enqueued multiple times
-     * (e.g., when webhooks arrive multiple times for the same transcript).
-     * 
-     * The chunking job will:
-     * 1. Semantically chunk the transcript/content
-     * 2. Persist chunks to database
-     * 3. Auto-enqueue a summarization job on completion
+     * Enqueue a chunking job to the Bull queue with deduplication.
      */
     private async enqueueChunkingJob(jobData: ChunkingJobData): Promise<void> {
         const lessonId = jobData.lessonId;
 
-        // Check if already processing this lesson
         if (this.processingLessons.has(lessonId)) {
             Logger.info(
                 `[LessonAnalysisService] Skipping duplicate chunking job for lessonId=${lessonId} (already processing)`
@@ -208,10 +221,8 @@ class LessonAnalysisService {
         }
 
         try {
-            // Mark as processing
             this.processingLessons.add(lessonId);
 
-            // Check if job already exists in queue (by jobId)
             const existingJob = await bullQueueService.lessonChunkingQueue.getJob(
                 `chunking-${lessonId}`
             );
@@ -223,7 +234,6 @@ class LessonAnalysisService {
                 return;
             }
 
-            // Enqueue new job
             await bullQueueService.lessonChunkingQueue.add(
                 BullJobType.LESSON_CHUNKING,
                 jobData,

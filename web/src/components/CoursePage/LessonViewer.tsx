@@ -1,4 +1,4 @@
-import { Play } from 'lucide-react'
+import { Play, AlertTriangle } from 'lucide-react'
 import { Lesson } from '@/types/course-student'
 import VideoPlayer, { VideoPlayerRef } from './VideoPlayer'
 import PDFViewer from './PDFViewer'
@@ -12,9 +12,11 @@ export const LessonViewer = forwardRef<VideoPlayerRef, {
   lesson: Lesson;
   subtitlesRaw?: string | null;
   chunks?: LessonChunk[];
+  isInvalid?: boolean;
+  qualityReason?: string | null;
   onShowChunkDetails?: (chunkId: string) => void;
 }>(
-  ({ lesson, subtitlesRaw, chunks = [], onShowChunkDetails }, ref) => {
+  ({ lesson, subtitlesRaw, chunks = [], isInvalid, qualityReason, onShowChunkDetails }, ref) => {
     const { id } = lesson
 
     const markDoneLesson = useCallback(async () => {
@@ -33,6 +35,20 @@ export const LessonViewer = forwardRef<VideoPlayerRef, {
       return (
         <div className='w-full aspect-video flex items-center justify-center bg-gradient-to-br from-muted/30 to-background rounded-lg'>
           <div className='text-muted-foreground text-sm'>File không có sẵn</div>
+        </div>
+      )
+    }
+
+    if (isInvalid) {
+      return (
+        <div className='w-full aspect-video bg-slate-900 rounded-[2rem] flex flex-col items-center justify-center p-8 text-center shadow-2xl border border-red-500/20'>
+          <div className='w-20 h-20 rounded-full bg-red-500/10 flex items-center justify-center mb-6 animate-pulse'>
+            <AlertTriangle className='w-10 h-10 text-red-500' />
+          </div>
+          <h3 className='text-2xl font-bold text-white mb-2'>Nội dung không đạt yêu cầu</h3>
+          <p className='text-slate-400 max-w-md'>
+            {qualityReason || 'Rất tiếc, bài học này hiện không đáp ứng đủ tiêu chuẩn chất lượng AI để xử lý nội dung. Vui lòng liên hệ quản trị viên.'}
+          </p>
         </div>
       )
     }
