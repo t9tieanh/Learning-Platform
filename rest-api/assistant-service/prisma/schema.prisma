@@ -1,170 +1,182 @@
-// Prisma schema for ASSISTANT SERVICE (PostgreSQL)
-
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
   previewFeatures = ["postgresqlExtensions"]
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-  extensions = [vector]
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [uuid_ossp(map: "uuid-ossp", schema: "extensions"), vector]
+}
+
+model CourseEmbedding {
+  id          String                 @id @db.VarChar
+  name        String
+  description String
+  tags        String[]
+  createdAt   DateTime?              @default(now()) @map("created_at") @db.Timestamp(6)
+  link        String?
+  content     String?
+  metadata    Json?
+  check       Boolean                @default(false)
+  embedding   Unsupported("vector")?
+
+  @@map("course_embeddings")
+}
+
+model LessonChunk {
+  id                 String                 @id @default(uuid())
+  lessonId           String
+  content            String                 @db.Text
+  chunkIndex         Int
+  subtitleIndex      Int?
+  startTime          String?
+  endTime            String?
+  timestamp          String?
+  sentenceCount      Int?
+  startSentenceIndex Int?
+  endSentenceIndex   Int?
+  createdAt          DateTime               @default(now())
+  updatedAt          DateTime               @updatedAt
+  summary            String?                @db.Text
+  embedding          Unsupported("vector")?
+  title              String?                @db.Text
+
+  lesson            Lesson                @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  quizzes            Quiz[]
+
+  @@index([embedding], map: "idx_lesson_chunks_embedding_hnsw")
+  @@map("lesson_chunks")
 }
 
 model Lesson {
-  id        String   @id @default(uuid())
-  title     String?
-  content   String?  @db.Text
-  duration  Int?
-  position  Int?
-  isPublic  Boolean? @default(false)
-  type      String?
-  url       String?
-  chapterId String?
-
-  // AI Context
-  transcriptId String? @unique
-  transcript   String? @db.Text
-  subtitles    String? @db.Text
-  summary        String? @db.Text
-  suggestedTitle  String?
-
-  chunks    LessonChunk[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  deleted   Boolean  @default(false)
+  id             String          @id @default(uuid())
+  title          String?
+  content        String?         @db.Text
+  duration       Int?
+  position       Int?
+  isPublic       Boolean?        @default(false)
+  type           String?
+  url            String?
+  chapterId      String?
+  status         AnalysisStatus  @default(PROCESSING)
+  
+  transcriptId   String?         @unique
+  transcript     String?         @db.Text
+  summary        String?         @db.Text
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  deleted        Boolean         @default(false)
+  subtitles      String?         @db.Text
+  suggestedTitle String?
+  isQualityValid Boolean?        @default(true)
+  qualityReason  String?         @db.Text
+  
+  chunks         LessonChunk[]
 
   @@map("lessons")
 }
 
-model LessonChunk {
-  id       String @id @default(uuid())
-  lessonId String
+model NavigatorEmbedding {
+  id          String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  category    String
+  subcategory String?
+  title       String?
+  content     String
+  metadata    Json?
+  createdAt   DateTime?              @default(now()) @map("created_at") @db.Timestamptz(6)
+  check       Boolean?               @default(true)
+  embedding   Unsupported("vector")?
 
-  // Text content of the chunk
-  content  String @db.Text
-
-  // AI-generated title and summary for this chunk (Map step of Map-Reduce summarization)
-  title    String? @db.Text
-  summary  String? @db.Text
-
-  // Vector embedding of the chunk content (768-dim from e5-base-v2), native pgvector type
-  embedding Unsupported("vector(768)")?
-
-  // Position of the chunk within the lesson (0-based)
-  chunkIndex Int
-
-  // Metadata derived from SemanticChunk (subtitle & sentence boundaries)
-  subtitleIndex      Int?    // Index of the first subtitle in this chunk
-  startTime          String? // Start timestamp of the first subtitle
-  endTime            String? // End timestamp of the last subtitle
-  timestamp          String? // Full timestamp range (startTime → endTime)
-  sentenceCount      Int?    // Number of sentences in this chunk
-  startSentenceIndex Int?    // Index of the first sentence in this chunk
-  endSentenceIndex   Int?    // Index of the last sentence in this chunk
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
-  quizzes Quiz[]
-
-  @@map("lesson_chunks")
+  @@map("navigator_embeddings")
 }
 
-// Quiz model - stores quiz questions
-model Quiz {
-  id               String @id @default(uuid())
-  chunkId          String
-  
-  // Question content and metadata
-  question         String @db.Text
-  explanation      String @db.Text
-  type             QuestionType @default(MULTIPLE_CHOICE)
-  difficulty       DifficultyLevel @default(MEDIUM)
-  bloomLevel       BloomLevel @default(REMEMBER)
-  
-  // AI generation tracking
-  aiGenerated      Boolean @default(false)
-  aiModel          String?
-  aiConfidence     Float?
-  
-  // Approval workflow
-  createdBy        String
-  isApproved       Boolean @default(false)
-  status           QuizStatus @default(ACTIVE)
-  
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-  
-  chunk            LessonChunk @relation(fields: [chunkId], references: [id], onDelete: Cascade)
-  choices          QuizChoice[]
-  answers          QuizAnswer[]
-  
-  @@index([chunkId])
-  @@index([createdBy])
-  @@index([aiGenerated])
-  @@index([isApproved])
-  @@map("quizzes")
-}
-
-// QuizChoice model - stores answer choices for quizzes
-model QuizChoice {
-  id               String @id @default(uuid())
-  quizId           String
-  
-  // Choice content
-  text             String @db.Text
-  isCorrect        Boolean @default(false)
-  order            Int
-  feedback         String? @db.Text
-  
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-  
-  quiz             Quiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
-  answers          QuizAnswer[]
-  
-  @@index([quizId])
-  @@map("quiz_choices")
-}
-
-// QuizAnswer model - tracks user answers to quizzes
 model QuizAnswer {
-  id               String @id @default(uuid())
+  id               String       @id @default(uuid())
   userId           String
   quizId           String
   selectedChoiceId String
-  
-  // Answer result
   isCorrect        Boolean
-  timeSpent        Int? // in seconds
-  
-  answeredAt       DateTime @default(now())
-  createdAt        DateTime @default(now())
-  
-  quiz             Quiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
-  choice           QuizChoice @relation(fields: [selectedChoiceId], references: [id], onDelete: Restrict)
-  
-  @@index([userId])
-  @@index([quizId])
+  timeSpent        Int?
+  answeredAt       DateTime     @default(now())
+  createdAt        DateTime     @default(now())
+
+  quiz             Quiz         @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  choice           QuizChoice   @relation(fields: [selectedChoiceId], references: [id])
+
   @@index([answeredAt])
+  @@index([quizId])
+  @@index([userId])
   @@index([userId, quizId])
   @@map("quiz_answers")
 }
 
-// Enums for Quiz model
-enum QuestionType {
-  MULTIPLE_CHOICE
-  TRUE_FALSE
-  SHORT_ANSWER
+model QuizChoice {
+  id           String         @id @default(uuid())
+  quizId       String
+  text         String         @db.Text
+  isCorrect    Boolean        @default(false)
+  order        Int
+  feedback     String?        @db.Text
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  quiz         Quiz           @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  answers      QuizAnswer[]
+
+  @@index([quizId])
+  @@map("quiz_choices")
 }
 
-enum DifficultyLevel {
-  EASY
-  MEDIUM
-  HARD
+model Quiz {
+  id            String          @id @default(uuid())
+  chunkId       String
+  question      String          @db.Text
+  explanation   String          @db.Text
+  type          QuestionType    @default(MULTIPLE_CHOICE)
+  difficulty    DifficultyLevel @default(MEDIUM)
+  bloomLevel    BloomLevel      @default(REMEMBER)
+  aiGenerated   Boolean         @default(false)
+  aiModel       String?
+  aiConfidence  Float?
+  createdBy     String
+  isApproved    Boolean         @default(false)
+  status        QuizStatus      @default(ACTIVE)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  answers       QuizAnswer[]
+  choices       QuizChoice[]
+  chunk         LessonChunk     @relation(fields: [chunkId], references: [id], onDelete: Cascade)
+
+  @@index([aiGenerated])
+  @@index([chunkId])
+  @@index([createdBy])
+  @@index([isApproved])
+  @@map("quizzes")
+}
+
+model SystemProfileEmbedding {
+  id          String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  category    String
+  subcategory String?
+  title       String?
+  content     String
+  metadata    Json?
+  createdAt   DateTime?              @default(now()) @map("created_at") @db.Timestamptz(6)
+  check       Boolean?
+  embedding   Unsupported("vector")?
+
+  @@map("system_profile_embeddings")
+}
+
+model UserPurchasedCourse {
+  id           BigInt    @id
+  userId       String    @map("user_id")
+  courseId     String    @map("course_id")
+  purchasedAt  DateTime? @default(now()) @map("purchased_at") @db.Timestamp(6)
+
+  @@map("user_purchased_courses")
 }
 
 enum BloomLevel {
@@ -176,8 +188,26 @@ enum BloomLevel {
   CREATE
 }
 
+enum DifficultyLevel {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum QuestionType {
+  MULTIPLE_CHOICE
+  TRUE_FALSE
+  SHORT_ANSWER
+}
+
 enum QuizStatus {
   ACTIVE
   ARCHIVED
   FLAGGED
+}
+
+enum AnalysisStatus {
+  PROCESSING
+  COMPLETED
+  FAILED
 }

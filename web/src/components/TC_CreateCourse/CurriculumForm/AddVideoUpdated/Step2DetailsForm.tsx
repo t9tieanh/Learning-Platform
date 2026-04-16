@@ -74,7 +74,8 @@ const Step2DetailsForm: React.FC<Step2DetailsFormProps> = ({
   const videoRef = useRef<HTMLVideoElement>(null)
   const detailedVideoRef = useRef<HTMLVideoElement>(null)
 
-  const analysisData = analysisState.status === 'completed' ? analysisState.data : null
+  const isAnalysisFailed = analysisState.status === 'failed'
+  const analysisData = (analysisState.status === 'completed' || analysisState.status === 'failed') ? (analysisState as any).data : null
   const isAnalysisLoading = analysisState.status === 'loading' || analysisState.status === 'processing'
 
   const [isVideoLoading, setIsVideoLoading] = useState(true)
@@ -281,22 +282,24 @@ const Step2DetailsForm: React.FC<Step2DetailsFormProps> = ({
           </div>
         </div>
 
-        <div className='bg-white p-6 rounded-2xl shadow-sm border border-gray-100'>
-          <h3 className='flex items-center gap-2 font-semibold text-base text-gray-700 mb-4'>
-            <ScanEye />
-            Hiển thị
-          </h3>
-          <div className='flex items-center justify-between'>
-            <div className='flex items-center gap-2'>
-              <Eye className='w-5 h-5 text-gray-500' />
-              <div>
-                <p className='font-medium text-sm text-gray-700'>Xem trước miễn phí</p>
-                <p className='text-sm text-gray-500'>Cho phép học viên xem thử</p>
+        {!isAnalysisFailed && (
+          <div className='bg-white p-6 rounded-2xl shadow-sm border border-gray-100'>
+            <h3 className='flex items-center gap-2 font-semibold text-base text-gray-700 mb-4'>
+              <ScanEye />
+              Hiển thị
+            </h3>
+            <div className='flex items-center justify-between'>
+              <div className='flex items-center gap-2'>
+                <Eye className='w-5 h-5 text-gray-500' />
+                <div>
+                  <p className='font-medium text-sm text-gray-700'>Xem trước miễn phí</p>
+                  <p className='text-sm text-gray-500'>Cho phép học viên xem thử</p>
+                </div>
               </div>
+              <Switch checked={isPublic} onCheckedChange={(checked: boolean) => setValue('isPublic', checked)} />
             </div>
-            <Switch checked={isPublic} onCheckedChange={(checked: boolean) => setValue('isPublic', checked)} />
           </div>
-        </div>
+        )}
 
         <LearnovaAISection
           analysisState={analysisState}
@@ -321,10 +324,10 @@ const Step2DetailsForm: React.FC<Step2DetailsFormProps> = ({
           )}
           <CustomButton
             type='button'
-            label={loading ? 'Đang tải lên...' : contentType === 'video' ? 'Lưu bài giảng' : 'Lưu tài liệu'}
+            label={loading ? 'Đang tải lên...' : isAnalysisFailed ? 'Không thể lưu bài giảng lỗi' : contentType === 'video' ? 'Lưu bài giảng' : 'Lưu tài liệu'}
             className='bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-6 h-7.5 text-[10.5px] font-bold transition-all shadow-md shadow-blue-100 disabled:bg-gray-300'
             icon={!isUploading ? <Upload className='w-4 h-4 mr-2' /> : undefined}
-            disabled={isUploading || loading}
+            disabled={isUploading || loading || isAnalysisFailed}
             isLoader={loading}
             onClick={() => handleUpdateLesson(watch(), startLoading, stopLoading)}
           />

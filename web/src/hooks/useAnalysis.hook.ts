@@ -5,6 +5,7 @@ export type AnalysisState =
   | { status: 'idle' }
   | { status: 'loading' }
   | { status: 'completed'; data: AnalysisResult }
+  | { status: 'failed'; data: AnalysisResult }
   | { status: 'processing'; message: string }
   | { status: 'not_found'; message: string }
   | { status: 'error'; message: string }
@@ -73,9 +74,15 @@ export function useAnalysis(lessonId: string | undefined, isVip: boolean) {
           return
         }
 
-        // 200 — completed
-        if (res.code === 200 && res.result?.status === 'completed') {
-          setState({ status: 'completed', data: res.result })
+        const status = res.result?.status?.toLowerCase()
+
+        if (res.code === 200 && status === 'completed') {
+          setState({ status: 'completed', data: res.result as AnalysisResult })
+          return
+        }
+
+        if (res.code === 200 && status === 'failed') {
+          setState({ status: 'failed', data: res.result as AnalysisResult })
           return
         }
 
