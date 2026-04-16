@@ -1,10 +1,9 @@
-'use client'
-
-import './style.scss'
-import CustomButton from '@/components/common/Button'
+import { useState } from 'react'
 import { motion, easeOut } from 'framer-motion'
 import { Send } from 'lucide-react'
-import { useState } from 'react'
+import heroStudents from '@/assets/images/hero.png'
+import logo from '@/assets/images/logo.png'
+import CustomButton from '@/components/common/Button'
 import ExplorePreferencesModal, { type ExplorePreferencesPayload } from '@/components/HomePage/ExplorePreferencesModal'
 
 const container = {
@@ -43,50 +42,66 @@ const Banner = ({ onPreferencesSaved }: BannerProps) => {
     console.log(JSON.stringify(payload, null, 2))
     onPreferencesSaved?.()
   }
-
   return (
-    <div className='banner-container p-6 md:p-32 flex items-center min-h-[500px] md:min-h-[600px]'>
-      <div className='w-full pl-0 md:pl-28'>
-        <motion.div variants={container} initial='hidden' animate='show' className='relative z-10'>
-          {' '}
-          <div className="absolute inset-0 -z-10 bg-[url('/bg.jpg')] bg-cover opacity-0 pointer-events-none" />
-          <motion.h2 variants={item} className='text-xl md:text-2xl mt-12 md:mt-32 flex items-center gap-2 font-semibold'>
-            <motion.span
-              animate={{ rotate: [0, 20, -10, 20, 0] }}
-              transition={{
-                duration: 1.5,
-                repeat: Infinity,
-                repeatDelay: 2
-              }}
-              style={{ display: 'inline-block', transformOrigin: '70% 70%' }}
-            >
-              👋
-            </motion.span>
-            Chào mừng bạn đến với Learnova
-          </motion.h2>
+    <section className='relative min-h-[600px] overflow-hidden bg-banner'>
+      {/* Background gradient blob */}
+      <div className='absolute -right-32 -top-32 h-[600px] w-[600px] rounded-full bg-gradient-to-r from-[#2dd4bf]/20 to-[#3b82f6]/10 blur-3xl' />
+      <div className='absolute -left-20 bottom-0 h-[400px] w-[400px] rounded-full bg-gradient-to-r from-[#2dd4bf]/20 to-[#3b82f6]/10 blur-3xl' />
+
+      <div className='container relative mx-auto flex flex-col items-center gap-8 px-6 py-16 lg:flex-row lg:gap-12 lg:py-24'>
+        {/* Left content */}
+        <motion.div
+          className='flex flex-1 flex-col items-start gap-6'
+          variants={container}
+          initial='hidden'
+          animate='show'
+        >
           <motion.h1
-            className='scroll-m-20 text-2xl md:text-4xl mt-4 font-extrabold tracking-tight text-start max-w-4xl leading-[1.2] md:leading-[1.1]'
+            className='text-4xl font-bold leading-tight tracking-tight text-foreground md:text-5xl lg:text-[3.25rem]'
             variants={item}
           >
-            Nền tảng học tập trực tuyến hàng đầu để kiến tạo sự nghiệp tương lai cho thế hệ mới
+            Sẵn sàng học hỏi?{' '}
+            <span className='bg-gradient-to-r from-[#2dd4bf] to-[#3b82f6] bg-clip-text text-transparent'>
+              Bắt đầu hành trình
+            </span>{' '}
+            cùng chúng tôi.
           </motion.h1>
-          <motion.blockquote
-            className='mt-6 border-l-2 border-white/30 pl-6 italic text-base md:text-lg text-white/90'
-            variants={item}
-          >
-            &quot;Cùng công nghệ, học tập trở nên dễ dàng hơn.&quot;
-          </motion.blockquote>
+
+          <motion.p className='max-w-lg text-lg leading-relaxed text-muted-foreground' variants={item}>
+            Chúng tôi tin rằng mỗi người đều xứng đáng có cơ hội phát triển thông qua công nghệ — kiến tạo kỹ năng và sự
+            nghiệp tương lai.
+          </motion.p>
+
+          <motion.div variants={item}>
+            <CustomButton
+              className='mt-10 md:mt-12 !px-8 !py-6 rounded-[1rem] bg-gradient-to-r from-[#2dd4bf] to-[#3b82f6] text-white font-black tracking-tight shadow-2xl shadow-blue-500/30 hover:shadow-blue-500/50 hover:-translate-y-1 hover:scale-[1.01] transition-all group'
+              label='Khám phá ngay'
+              onClick={() => setOpen(true)}
+              icon={
+                <Send className='w-5 h-5 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform' />
+              }
+            />
+            <ExplorePreferencesModal open={open} onOpenChange={setOpen} onSave={handleSave} />
+          </motion.div>
         </motion.div>
 
-        <CustomButton
-          className='mt-10 md:mt-12 !px-8 !py-6 rounded-[2rem] bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 text-white font-black tracking-tight shadow-2xl shadow-blue-500/30 hover:shadow-blue-500/50 hover:-translate-y-1 hover:scale-[1.02] transition-all group'
-          label='Khám phá ngay'
-          onClick={() => setOpen(true)}
-          icon={<Send className='w-5 h-5 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform' />}
-        />
-        <ExplorePreferencesModal open={open} onOpenChange={setOpen} onSave={handleSave} />
+        {/* Right image */}
+        <motion.div
+          className='flex flex-1 items-center justify-center'
+          initial={{ opacity: 0, x: 60 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 1, ease: easeOut, delay: 0.4 }}
+        >
+          <img
+            src={heroStudents}
+            alt='Học viên đang háo hức học tập với Learnova'
+            width={1024}
+            height={1024}
+            className='w-full max-w-lg drop-shadow-2xl'
+          />
+        </motion.div>
       </div>
-    </div>
+    </section>
   )
 }
 
