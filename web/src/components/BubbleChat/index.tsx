@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
-import { MessageCircle, X, Send, BotMessageSquare, Bot, Sparkles, User } from 'lucide-react'
+import { X, Send, Bot, Sparkles, User } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { Card } from '@/components/ui/card'
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/components/ui/tooltip'
 import chatBotService from '@/services/chat-bot/ai.service'
@@ -14,8 +13,69 @@ import { ConversationMessage } from '@/types/ai'
 import ChatBubbleSkeleton from './ChatBubbleSkeleton'
 import useLoading from '@/hooks/useLoading.hook'
 
+const bubbleMorphTimes = [0, 0.16, 0.32, 0.5, 0.66, 0.82, 1]
+
+const bubbleMorphRadiusFlow = [
+  '50% 50% 50% 50% / 50% 50% 50% 50%',
+  '57% 43% 59% 41% / 45% 41% 59% 55%',
+  '64% 36% 60% 40% / 34% 30% 70% 66%',
+  '54% 46% 52% 48% / 52% 49% 51% 48%',
+  '48% 52% 49% 51% / 53% 52% 48% 47%',
+  '30% 30% 36% 36% / 24% 24% 44% 44%',
+  '50% 50% 50% 50% / 50% 50% 50% 50%'
+]
+
+const bubbleMorphMainColors = [
+  '#3B82F6', // blue-500
+  '#4C8EF7',
+  '#5A9AF7',
+  '#4AA6F7',
+  '#38BDF8',
+  '#2EC8F2',
+  '#22D3EE',
+  '#28D1DA',
+  '#2DD4BF',
+  '#26CEC0',
+  '#20C7C0',
+  '#1EC4BA',
+  '#19C2B4', // teal Learnova
+  '#1EC4BA',
+  '#20C7C0',
+  '#26CEC0',
+  '#2DD4BF',
+  '#28D1DA',
+  '#22D3EE',
+  '#2EC8F2',
+  '#38BDF8',
+  '#4AA6F7',
+  '#5A9AF7',
+  '#4C8EF7',
+  '#3B82F6'  // back to blue-500
+]
+
+const bubbleMorphGlowColors = [
+  'rgba(59, 130, 246, 0.32)',
+  'rgba(59, 130, 246, 0.42)',
+  'rgba(139, 92, 246, 0.46)',
+  'rgba(99, 102, 241, 0.4)',
+  'rgba(56, 189, 248, 0.42)',
+  'rgba(59, 130, 246, 0.46)',
+  'rgba(59, 130, 246, 0.32)'
+]
+
+const bubbleMorphShadowFlow = [
+  '0 10px 30px rgba(37, 99, 235, 0.45)',
+  '0 12px 34px rgba(56, 119, 241, 0.48)',
+  '0 14px 38px rgba(129, 140, 248, 0.52)',
+  '0 12px 35px rgba(109, 143, 241, 0.5)',
+  '0 13px 36px rgba(74, 144, 244, 0.5)',
+  '0 16px 40px rgba(59, 130, 246, 0.54)',
+  '0 10px 30px rgba(37, 99, 235, 0.45)'
+]
+
 const ChatBubble = () => {
   const [isOpen, setIsOpen] = useState(false)
+  const [isBubbleHovered, setIsBubbleHovered] = useState(false)
   const [messages, setMessages] = useState<ConversationMessage[]>([])
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -112,13 +172,102 @@ const ChatBubble = () => {
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button
-                    onClick={() => setIsOpen(true)}
-                    size='lg'
-                    className='h-14 w-14 sm:h-16 sm:w-16 rounded-full bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-950 shadow-[0_8px_30px_rgba(37,99,235,0.4)] hover:shadow-[0_8px_35px_rgba(37,99,235,0.6)] flex items-center justify-center transition-all duration-500 hover:scale-110 active:scale-95 border-2 border-white/20'
+                  <motion.div
+                    className='relative h-14 w-14 sm:h-16 sm:w-16'
+                    onHoverStart={() => setIsBubbleHovered(true)}
+                    onHoverEnd={() => setIsBubbleHovered(false)}
+                    onFocusCapture={() => setIsBubbleHovered(true)}
+                    onBlurCapture={() => setIsBubbleHovered(false)}
+                    animate={{ scale: isBubbleHovered ? 1.08 : 1 }}
+                    transition={{ type: 'spring', stiffness: 260, damping: 22, mass: 0.6 }}
                   >
-                    <BotMessageSquare className='h-7 w-7 sm:h-8 sm:w-8 text-white' />
-                  </Button>
+                    <Button
+                      onClick={() => setIsOpen(true)}
+                      aria-label='Mở Nova Copilot'
+                      variant='ghost'
+                      size='lg'
+                      className='relative z-10 h-14 w-14 sm:h-16 sm:w-16 bg-transparent hover:bg-transparent focus-visible:bg-transparent flex items-center justify-center active:scale-95 border-0 shadow-none overflow-visible rounded-full focus-visible:ring-0 focus-visible:ring-offset-0'
+                    >
+                      <motion.div
+                        className='absolute inset-0'
+                        animate={
+                          isBubbleHovered
+                            ? {
+                              borderRadius: bubbleMorphRadiusFlow,
+                              rotate: [0, -2, 1, -1, 1.5, 0.5, 0],
+                              scale: [1, 1.02, 1.01, 1.03, 1.02, 1.04, 1],
+                              backgroundColor: bubbleMorphMainColors,
+                              boxShadow: bubbleMorphShadowFlow
+                            }
+                            : {
+                              borderRadius: '9999px',
+                              rotate: 0,
+                              scale: 1,
+                              backgroundColor: '#2f95f8',
+                              boxShadow: '0 10px 30px rgba(37, 99, 235, 0.45)'
+                            }
+                        }
+                        transition={
+                          isBubbleHovered
+                            ? {
+                              duration: 4.8,
+                              times: bubbleMorphTimes,
+                              ease: 'linear',
+                              repeat: Infinity
+                            }
+                            : { duration: 0.45, ease: 'easeOut' }
+                        }
+                      />
+
+                      <motion.div
+                        className='pointer-events-none absolute inset-0 rounded-full bg-[radial-gradient(circle_at_22%_20%,rgba(255,255,255,0.32),transparent_45%)]'
+                        animate={
+                          isBubbleHovered
+                            ? {
+                              opacity: [0.65, 0.92, 0.76, 0.88, 0.7],
+                              borderRadius: bubbleMorphRadiusFlow
+                            }
+                            : {
+                              opacity: 0.65,
+                              borderRadius: '9999px'
+                            }
+                        }
+                        transition={
+                          isBubbleHovered
+                            ? {
+                              duration: 2.1,
+                              ease: 'easeInOut',
+                              repeat: Infinity
+                            }
+                            : { duration: 0.35, ease: 'easeOut' }
+                        }
+                      />
+
+                      <motion.div
+                        className='relative z-10'
+                        animate={
+                          isBubbleHovered
+                            ? {
+                              scale: [1, 0.96, 1.08, 1],
+                              rotate: [0, -4, 3, 0],
+                              opacity: [1, 0.9, 1]
+                            }
+                            : { scale: 1, rotate: 0, opacity: 1 }
+                        }
+                        transition={
+                          isBubbleHovered
+                            ? {
+                              duration: 1.6,
+                              ease: 'easeInOut',
+                              repeat: Infinity
+                            }
+                            : { duration: 0.3, ease: 'easeOut' }
+                        }
+                      >
+                        <Sparkles className='h-7 w-7 sm:h-8 sm:w-8 text-white fill-white' />
+                      </motion.div>
+                    </Button>
+                  </motion.div>
                 </TooltipTrigger>
                 <TooltipContent className='bg-gray-900/90 backdrop-blur-md text-white px-4 py-2 rounded-2xl shadow-xl' side='left' sideOffset={15}>
                   Chào bạn! Tôi là Nova trợ giúp
