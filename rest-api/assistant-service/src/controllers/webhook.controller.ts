@@ -27,7 +27,22 @@ class WebhookController {
                         Logger.error(
                             `[WebhookController] Background processing failed for transcript ${transcript_id}: ${error}`
                         );
+                        // Mark as invalid if background processing fails completely
+                        LessonAnalysisService.getInstance()
+                            .markLessonAsInvalid(transcript_id, `Background processing error: ${error.message || error}`)
+                            .catch(e => Logger.error(`Failed to mark lesson as invalid: ${e}`));
                     });
+            } else if (status === 'error') {
+                // If AssemblyAI fails at their end
+                Logger.error(`AssemblyAI reported error for transcript ${transcript_id}`);
+                LessonAnalysisService.getInstance()
+                    .markLessonAsInvalid(transcript_id, 'AssemblyAI processing failed')
+                    .catch(e => Logger.error(`Failed to mark lesson as invalid for AI error: ${e}`));
+
+                sendResponse(res, {
+                    code: StatusCodes.OK,
+                    message: 'Webhook received and error logged'
+                });
             } else {
                 sendResponse(res, {
                     code: StatusCodes.OK,

@@ -1,9 +1,10 @@
-import { useRef, useCallback, useState, useMemo, forwardRef, useImperativeHandle } from 'react'
+import { useRef, useCallback, useState, useMemo, forwardRef, useImperativeHandle, useEffect } from 'react'
 import { Lesson } from '@/types/course-student'
 import { useAuthStore } from '@/stores/useAuth.stores'
 import { toast } from 'sonner'
 import LearnovaVideoPlayer from '@/components/common/Video/LearnovaVideoPlayer'
 import { parseSRT } from '@/utils/srtParser'
+import lessonStudentService from '@/services/course/lesson-student.service'
 
 import { LessonChunk } from '@/types/ai'
 
@@ -24,9 +25,9 @@ const VideoPlayer = forwardRef<VideoPlayerRef, {
   chunks = [],
   onShowChunkDetails
 }, ref) => {
-  const backEndUri = import.meta.env.VITE_BACKEND_URI as string
   const { data } = useAuthStore()
   const videoRef = useRef<HTMLVideoElement>(null)
+  const [actualVideoUrl, setActualVideoUrl] = useState<string>('')
 
   const seekTimestamps = useRef<number[]>([])
   const skipWarningShown = useRef(false)
@@ -50,6 +51,54 @@ const VideoPlayer = forwardRef<VideoPlayerRef, {
       }
     }
   }))
+
+  // Fetch presigned data when lesson changes
+  useEffect(() => {
+    const fetchVideoData = async () => {
+      if (lesson.introductionVideo) {
+        setActualVideoUrl(lesson.introductionVideo || '')
+        return
+      }
+
+      if (lesson.id && data?.accessToken) {
+        try {
+          // Senior Logic: Detect if we can use Cookies or must fallback to Signed URL
+          const currentHost = window.location.hostname
+
+          // Call cookie API first to get domain info
+          const response = await lessonStudentService.getPresignedCookies(lesson.id)
+
+          if (response.code === 200 && response.result) {
+            const { policy, signature, keyPairId, expires, domain, url } = response.result
+
+            // Check if we can realistically set cookies (must share a base domain and not be a public suffix)
+            const canUseCookies = !domain.endsWith('.cloudfront.net') &&
+              (currentHost.endsWith(domain.split('.').slice(-2).join('.')) || currentHost === 'localhost')
+
+            if (canUseCookies && currentHost !== 'localhost') {
+              const cookieSettings = `; domain=.${domain}; path=/; Secure; SameSite=None`
+              if (policy) document.cookie = `CloudFront-Policy=${policy}${cookieSettings}`
+              if (expires) document.cookie = `CloudFront-Expires=${expires}${cookieSettings}`
+              document.cookie = `CloudFront-Signature=${signature}${cookieSettings}`
+              document.cookie = `CloudFront-Key-Pair-Id=${keyPairId}${cookieSettings}`
+              setActualVideoUrl(url)
+            } else {
+              // Fallback to Signed URL for .cloudfront.net or localhost
+              const urlResponse = await lessonStudentService.getPresignedUrl(lesson.id)
+              if (urlResponse.code === 200) {
+                setActualVideoUrl(urlResponse.result || '')
+              }
+            }
+          }
+        } catch (error) {
+          console.error('Video access error:', error)
+          toast.error('Không thể xác thực quyền truy cập video.')
+        }
+      }
+    }
+
+    fetchVideoData()
+  }, [lesson.id, lesson.introductionVideo, data?.accessToken])
 
   // Parse subtitles if available
   const parsedSubtitles = useMemo(() => {
@@ -107,9 +156,8 @@ const VideoPlayer = forwardRef<VideoPlayerRef, {
   }, [markDoneVideo])
 
   const videoSrc = useMemo(() => {
-    if (lesson.introductionVideo) return lesson.introductionVideo
-    return `${backEndUri}learning/lesson-student/${lesson.id}?token=${data?.accessToken}`
-  }, [lesson, backEndUri, data])
+    return actualVideoUrl
+  }, [actualVideoUrl])
 
   return (
     <div className='w-full h-full'>

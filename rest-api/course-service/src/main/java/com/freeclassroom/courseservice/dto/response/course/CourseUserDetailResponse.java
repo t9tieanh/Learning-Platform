@@ -1,5 +1,6 @@
 package com.freeclassroom.courseservice.dto.response.course;
 
+import com.freeclassroom.courseservice.service.utils.cloudfront.SignedUrl;
 import com.freeclassroom.courseservice.dto.grpc.FeedbackDto;
 import com.freeclassroom.courseservice.dto.response.category.CategoryResponse;
 import com.freeclassroom.courseservice.dto.response.category.TagResponse;
@@ -24,6 +25,7 @@ public class CourseUserDetailResponse {
     String thumbnailUrl;
     Double rating;
 
+    @SignedUrl
     String introductoryVideo;
     String language;
     Double originalPrice;

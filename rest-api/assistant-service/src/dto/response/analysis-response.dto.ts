@@ -1,4 +1,4 @@
-import { Lesson, LessonChunk, Quiz, QuizChoice } from '@prisma/client'
+import { Lesson, LessonChunk, Quiz, QuizChoice, AnalysisStatus } from '@prisma/client'
 
 // ---------------------------------------------------------------------------
 // Quiz Choice DTO
@@ -41,11 +41,13 @@ export interface ChunkDto {
 // ---------------------------------------------------------------------------
 // Analysis response DTO
 // ---------------------------------------------------------------------------
-export type AnalysisStatus = 'completed' | 'processing' | 'not_found'
+export type AnalysisStatusExtended = AnalysisStatus | 'NOT_FOUND'
 
 export interface AnalysisResponseDto {
     lessonId: string
-    status: AnalysisStatus
+    status: AnalysisStatusExtended
+    isQualityValid: boolean
+    qualityReason: string | null
     summary: string | null
     suggestedTitle: string | null
     transcript: string | null
@@ -107,7 +109,9 @@ export function toAnalysisResponseDto(
 ): AnalysisResponseDto {
     return {
         lessonId: lesson.id,
-        status: lesson.summary ? 'completed' : 'processing',
+        status: lesson.status,
+        isQualityValid: lesson.isQualityValid ?? true,
+        qualityReason: lesson.qualityReason,
         summary: lesson.summary,
         suggestedTitle: lesson.suggestedTitle,
         transcript: lesson.transcript,

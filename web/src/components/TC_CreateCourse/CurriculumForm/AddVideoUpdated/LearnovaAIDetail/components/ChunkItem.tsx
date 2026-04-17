@@ -109,7 +109,7 @@ const ChunkItem: React.FC<ChunkItemProps> = ({
         }
     }, [isQuizVisible, fetchQuizzes])
 
-    const handleGenerateBatch = async (distribution: QuizBatchDistributionItem[]) => {
+    const handleGenerateBatch = async (distribution: QuizBatchDistributionItem[], userPrompt?: string) => {
         if (isBulkGenerating) return
 
         try {
@@ -118,7 +118,7 @@ const ChunkItem: React.FC<ChunkItemProps> = ({
             const count = distribution.reduce((sum, item) => sum + item.count, 0)
             toast.loading(`Đang tạo ${count} câu hỏi từ AI...`)
 
-            const response = await quizService.generateBatchQuizzes(chunk.id, { count, distribution })
+            const response = await quizService.generateBatchQuizzes(chunk.id, { count, distribution, userPrompt })
 
             if (response.code === 201 && response.result?.quizzes) {
                 const generatedQuizzes = mapQuizzes(response.result.quizzes)

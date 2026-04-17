@@ -3,4 +3,5 @@ export enum AnalysisOutcome {
     PROCESSING = 'processing',
     NOT_FOUND = 'not_found',
     ABORTED = 'aborted',
+    FAILED = 'failed',
 }

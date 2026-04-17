@@ -20,11 +20,13 @@ export interface SingleQuizGenerationRequest {
   bloomLevel: BloomLevel
   questionType: QuestionType
   numberOfQuestions: number
+  userPrompt?: string
 }
 
 export interface BatchQuizGenerationRequest {
   count: number
   distribution: QuizBatchDistributionItem[]
+  userPrompt?: string
 }
 
 export interface BatchQuizGenerationRequestLegacy {

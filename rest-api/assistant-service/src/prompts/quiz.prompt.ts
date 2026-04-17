@@ -113,7 +113,8 @@ export const QuizPrompts = {
     '  * ĐÁNH GIÁ: đưa ra phán xét dựa trên tiêu chí\n' +
     '  * TẠO: kết hợp các phần tử để tạo ra cái gì đó mới\n' +
     '- Loại câu hỏi: Trắc nghiệm với 4 tùy chọn\n' +
-    '- Đảm bảo phù hợp với mục tiêu bài học và nội dung phần\n\n' +
+    '- Đảm bảo phù hợp với mục tiêu bài học và nội dung phần\n' +
+    '{customIdea}\n\n' +
     '**VIẾT TẤT CẢ BẰNG TIẾNG VIỆT: CÂU HỎI, CÁC ĐÁP ÁN, VÀ GIẢI THÍCH ĐỀU PHẢI BẰNG TIẾNG VIỆT.**\n\n' +
     'ĐỊNH DẠNG PHẢN HỒI (JSON hợp lệ hoàn toàn, TẤT CẢ BẰNG TIẾNG VIỆT):\n' +
     '{\n' +
@@ -224,7 +225,8 @@ export const QuizPrompts = {
     '- Tạo các câu hỏi khớp với phân bố chính xác ở trên\n' +
     '- Đảm bảo tính đa dạng: bao gồm các khía cạnh khác nhau của nội dung\n' +
     '- Căn chỉnh mỗi câu hỏi với mức độ khó và mức Bloom được chỉ định\n' +
-    '- Mỗi câu hỏi phải liên quan đến nội dung phần và mục tiêu bài học\n\n' +
+    '- Mỗi câu hỏi phải liên quan đến nội dung phần và mục tiêu bài học\n' +
+    '{customIdea}\n\n' +
     '**VIẾT TẤT CẢ BẰNG TIẾNG VIỆT: CÁC CÂU HỎI, ĐÁP ÁN, VÀ GIẢI THÍCH ĐỀU PHẢI BẰNG TIẾNG VIỆT.**\n\n' +
     'ĐỊNH DẠNG PHẢN HỒI (Mảng JSON hợp lệ hoàn toàn, TẤT CẢ BẰNG TIẾNG VIỆT):\n' +
     '[\n' +
@@ -243,65 +245,65 @@ export const QuizPrompts = {
     ']\n\n' +
     'Tạo các câu hỏi ngay bây giờ (VIẾT TOÀN BỘ BẰNG TIẾNG VIỆT):',
 
-   /**
-    * Helper function to build single quiz prompt (always Vietnamese)
-    */
-   buildSingleQuizPrompt: (
-     chunkContent: string,
-     chunkSummary: string,
-     lessonSummary: string,
-     options: { difficulty: string; bloomLevel: string; questionType: string },
-     language: QuizLanguage = 'vi'
-   ) => {
-     // Always use Vietnamese
-     const systemPrompt = QuizPrompts.singleSystemVi();
-     const userPromptTemplate = QuizPrompts.singleUserVi();
+  /**
+   * Helper function to build single quiz prompt (always Vietnamese)
+   */
+  buildSingleQuizPrompt: (
+    chunkContent: string,
+    chunkSummary: string,
+    lessonSummary: string,
+    options: { difficulty: string; bloomLevel: string; questionType: string; userPrompt?: string },
+    language: QuizLanguage = 'vi'
+  ) => {
+    const systemPrompt = QuizPrompts.singleSystemVi();
+    const userPromptTemplate = QuizPrompts.singleUserVi();
 
-     const userPrompt = userPromptTemplate
-       .replace('{difficulty}', options.difficulty || 'MEDIUM')
-       .replace('{bloomLevel}', options.bloomLevel || 'UNDERSTAND')
-       .replace('{lessonSummary}', lessonSummary || 'Không có tóm tắt bài học')
-       .replace('{chunkSummary}', chunkSummary || 'Không có tóm tắt phần')
-       .replace('{chunkContent}', chunkContent || 'Không có nội dung phần');
+    const userPrompt = userPromptTemplate
+      .replace('{difficulty}', options.difficulty || 'MEDIUM')
+      .replace('{bloomLevel}', options.bloomLevel || 'UNDERSTAND')
+      .replace('{lessonSummary}', lessonSummary || 'Không có tóm tắt bài học')
+      .replace('{chunkSummary}', chunkSummary || 'Không có tóm tắt phần')
+      .replace('{chunkContent}', chunkContent || 'Không có nội dung phần')
+      .replace('{customIdea}', options.userPrompt ? `- Ý TƯỞNG CỦA NGƯỜI DÙNG CẦN LỒNG GHÉP: ${options.userPrompt}` : '');
 
-     return {
-       systemPrompt,
-       userPrompt,
-     };
-   },
+    return {
+      systemPrompt,
+      userPrompt,
+    };
+  },
 
-   /**
-    * Helper function to build batch quiz prompt (always Vietnamese)
-    */
-   buildBatchQuizPrompt: (
-     chunkContent: string,
-     chunkSummary: string,
-     lessonSummary: string,
-     options: { count: number; distribution: Array<{ difficulty?: string; bloomLevel?: string; count?: number }> },
-     language: QuizLanguage = 'vi'
-   ) => {
-     // Always use Vietnamese
-     const systemPrompt = QuizPrompts.batchSystemVi();
-     const userPromptTemplate = QuizPrompts.batchUserVi();
+  /**
+   * Helper function to build batch quiz prompt (always Vietnamese)
+   */
+  buildBatchQuizPrompt: (
+    chunkContent: string,
+    chunkSummary: string,
+    lessonSummary: string,
+    options: { count: number; distribution: Array<{ difficulty?: string; bloomLevel?: string; count?: number }>; userPrompt?: string },
+    language: QuizLanguage = 'vi'
+  ) => {
+    const systemPrompt = QuizPrompts.batchSystemVi();
+    const userPromptTemplate = QuizPrompts.batchUserVi();
 
-     const distributionJson = options.distribution
-       .map(
-         d =>
-           `${d.count || 1} câu hỏi ở mức độ khó ${d.difficulty || 'MEDIUM'}, mức độ Bloom ${d.bloomLevel || 'UNDERSTAND'}`
-       )
-       .join('\n');
+    const distributionJson = options.distribution
+      .map(
+        d =>
+          `${d.count || 1} câu hỏi ở mức độ khó ${d.difficulty || 'MEDIUM'}, mức độ Bloom ${d.bloomLevel || 'UNDERSTAND'}`
+      )
+      .join('\n');
 
-     const userPrompt = userPromptTemplate
-       .replace('{lessonSummary}', lessonSummary || 'Không có tóm tắt bài học')
-       .replace('{chunkSummary}', chunkSummary || 'Không có tóm tắt phần')
-       .replace('{chunkContent}', chunkContent || 'Không có nội dung phần')
-       .replace('{distributionJson}', distributionJson);
+    const userPrompt = userPromptTemplate
+      .replace('{lessonSummary}', lessonSummary || 'Không có tóm tắt bài học')
+      .replace('{chunkSummary}', chunkSummary || 'Không có tóm tắt phần')
+      .replace('{chunkContent}', chunkContent || 'Không có nội dung phần')
+      .replace('{distributionJson}', distributionJson)
+      .replace('{customIdea}', options.userPrompt ? `- Ý TƯỞNG CỦA NGƯỜI DÙNG CẦN LỒNG GHÉP: ${options.userPrompt}` : '');
 
-     return {
-       systemPrompt,
-       userPrompt,
-     };
-   },
+    return {
+      systemPrompt,
+      userPrompt,
+    };
+  },
 } as const
 
 export interface ParsedQuizChoice {

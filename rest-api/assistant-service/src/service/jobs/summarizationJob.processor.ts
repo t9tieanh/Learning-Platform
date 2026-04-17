@@ -8,6 +8,7 @@ import { bullQueueService } from '~/service/utils/bullQueue.service';
 import { AnalysisOutcome } from '~/enums/analysisOutcome.enum';
 import { BullJobType } from '~/enums/bullJobType.enum';
 import { BullJobDTO } from '~/dto/job/bulljob.dto';
+import { AnalysisStatus } from '@prisma/client';
 
 export interface SummarizationJobData {
     lessonId: string;
@@ -35,7 +36,7 @@ export class SummarizationJobProcessor {
     }
 
     /**
-     * Process summarization job
+     * Process summarization job.
      */
     async process(job: BullJobDTO<SummarizationJobData>): Promise<void> {
         const { lessonId, chunkCount } = job.data as SummarizationJobData;
@@ -45,14 +46,12 @@ export class SummarizationJobProcessor {
         );
 
         try {
-            // Step 1: Run Map-Reduce summarization
             await this.summaryService.summarizeLesson(lessonId);
 
             Logger.info(
                 `[SummarizationJobProcessor] Completed summarization for lessonId=${lessonId}`
             );
 
-            // Step 2: Fetch all chunks for embedding generation
             Logger.info(
                 `[SummarizationJobProcessor] Fetching chunks for embedding generation – lessonId=${lessonId}`
             );
@@ -63,13 +62,11 @@ export class SummarizationJobProcessor {
             });
 
             if (chunks.length > 0) {
-                // Step 3: Generate embeddings for all chunk contents
                 const chunkContents = chunks.map((chunk) => chunk.content);
                 const embeddingMap = await this.embeddingService.generateEmbeddingsForChunkContents(
                     chunkContents
                 );
 
-                // Step 4: Update chunks with their embeddings in bulk
                 Logger.info(
                     `[SummarizationJobProcessor] Updating ${chunks.length} chunk(s) with embeddings – lessonId=${lessonId}`
                 );
@@ -90,14 +87,18 @@ export class SummarizationJobProcessor {
                 );
             }
 
-            // Step 5: Notify long-polling HTTP subscribers via Redis pub/sub
             Logger.info(
                 `[SummarizationJobProcessor] Publishing completion event for lessonId=${lessonId}`
             );
 
+            await prismaService.lesson.update({
+                where: { id: lessonId },
+                data: { status: AnalysisStatus.COMPLETED }
+            });
+
             await redisService.publish(`analysis:${lessonId}`, {
                 lessonId,
-                status: AnalysisOutcome.COMPLETED,
+                status: AnalysisStatus.COMPLETED,
             });
 
             Logger.info(
@@ -112,14 +113,14 @@ export class SummarizationJobProcessor {
     }
 
     /**
-     * Register the summarization job processor with Bull
+     * Register the summarization job processor with Bull.
      */
     register(): void {
         const processor = new SummarizationJobProcessor();
-        
+
         bullQueueService.lessonSummarizationQueue.process(
             BullJobType.LESSON_SUMMARIZATION,
-            2, // 2 concurrent jobs (LLM calls are heavy)
+            2,
             async (job: BullJobDTO<SummarizationJobData>) => {
                 return await processor.process(job);
             }

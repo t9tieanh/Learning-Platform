@@ -47,6 +47,15 @@ class AnalysisController {
                     })
                     break
 
+                case AnalysisOutcome.FAILED:
+                    const failedResult = await analysisService.getLessonAnalysis(lessonId)
+                    sendResponse(res, {
+                        code: StatusCodes.OK,
+                        message: `Bài học không đạt yêu cầu: ${result.reason}`,
+                        result: failedResult,
+                    })
+                    break
+
                 case AnalysisOutcome.ABORTED:
                     // Client ngắt kết nối — không cần gửi response
                     break
