@@ -102,16 +102,9 @@ const CoursePage = () => {
 
       setIsLoadingAnalysis(true)
       try {
-        const response = await assistantAnalysisService.getAnalysis(currentLecture.id)
-        if (response && (response.code === 200 || response.code === 202) && response.result) {
+        const response = await assistantAnalysisService.getAnalysisDetail(currentLecture.id)
+        if (response && response.code === 200 && response.result) {
           setAnalysisData(response.result)
-        } else if (response.code === 422) {
-          // Explicitly handled failed state
-          setAnalysisData({
-            status: 'failed',
-            qualityReason: response.message,
-            // ... fill with dummy data if needed
-          } as any)
         } else {
           setAnalysisData(null)
         }

@@ -54,7 +54,7 @@ export const TabNavigation = ({
         }
       ]
 
-      if (!analysisData || analysisData.status?.toLowerCase() === 'failed') {
+      if (!analysisData) {
         return baseTabs.filter((t) => t.label !== 'AI Phân tích')
       }
       return baseTabs
