@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -82,8 +84,14 @@
 }
 
 @keyframes blink {
-  0%, 80%, 100% { opacity: 0; }
-  40% { opacity: 1; }
+  0%,
+  80%,
+  100% {
+    opacity: 0;
+  }
+  40% {
+    opacity: 1;
+  }
 }
 
 .category-tag-picker .rs-picker-toggle {
@@ -159,6 +167,7 @@
 /* AI Chat Markdown Styles */
 .react-markdown-container {
   line-height: 1.6;
+  word-break: break-word;
 }
 
 .react-markdown-container p {
@@ -169,7 +178,8 @@
   margin-bottom: 0;
 }
 
-.react-markdown-container ul, .react-markdown-container ol {
+.react-markdown-container ul,
+.react-markdown-container ol {
   margin-bottom: 0.75rem;
   padding-left: 1.25rem;
 }
@@ -183,9 +193,68 @@
   color: #1a1a1a;
 }
 
-.react-markdown-container h1, .react-markdown-container h2, .react-markdown-container h3 {
+.react-markdown-container h1,
+.react-markdown-container h2,
+.react-markdown-container h3 {
   font-weight: 700;
   margin-top: 1rem;
   margin-bottom: 0.5rem;
-  color: #0C356A;
+  color: #0c356a;
+}
+
+.chat-markdown-bot strong,
+.chat-markdown-bot h1,
+.chat-markdown-bot h2,
+.chat-markdown-bot h3 {
+  color: #0c356a;
+}
+
+.chat-markdown-user strong,
+.chat-markdown-user h1,
+.chat-markdown-user h2,
+.chat-markdown-user h3 {
+  color: #ffffff;
+}
+
+.chat-markdown-bot a,
+.chat-markdown-user a {
+  color: #2563eb;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+@keyframes gradientWave {
+  0% {
+    background-position: 0% 50%;
+  }
+  25% {
+    background-position: 50% 100%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  75% {
+    background-position: 50% 0%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-gradientWave {
+  animation: gradientWave 8s ease-in-out infinite;
+}
+
+.chatbot-shell {
+  font-family: 'Manrope', sans-serif;
+}
+
+.chatbot-heading {
+  font-family: 'Space Grotesk', sans-serif;
+  letter-spacing: -0.02em;
+}
+
+.chatbot-body {
+  font-family: 'Manrope', sans-serif;
+  letter-spacing: -0.01em;
 }
