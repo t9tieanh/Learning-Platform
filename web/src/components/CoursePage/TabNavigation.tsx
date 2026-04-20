@@ -107,7 +107,7 @@ export const TabNavigation = ({
         ))}
       </div>
 
-      <div className='px-0 md:px-6 min-h-[600px]'>
+      <div className='px-0 min-h-[600px]'>
         {activeTab === 'Hỏi đáp' && <QASection lessonId={String(currentLectureId)} instructorId={instructorId} />}
         {activeTab === 'Tổng quan' && (
           <div className='mt-6 mx-auto w-full space-y-8'>

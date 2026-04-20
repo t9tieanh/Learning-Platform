@@ -3,6 +3,8 @@ import { Brain, Sparkles, FileText, LayoutList, MessageSquareText } from 'lucide
 import HighGlossBackground from '@/components/common/HighGlossBackground'
 import { LessonChunk } from '@/types/ai'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
+import CustomButton from '@/components/common/Button'
+import { motion } from 'framer-motion'
 
 import { AIChatSection } from './AIChatSection'
 
@@ -35,7 +37,7 @@ export const AILessonInsights = ({ lessonId, summary, subtitles, chunks, onSeek,
     }, [defaultOpenChunkId])
 
     return (
-        <div className='mt-8 space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700'>
+        <div className='mt-4 space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700'>
             <HighGlossBackground className='rounded-2xl shadow-xl border border-blue-400/20 overflow-hidden'>
                 <div className='px-6 py-5 flex items-center justify-between'>
                     <div className='flex items-center gap-4'>
@@ -53,34 +55,54 @@ export const AILessonInsights = ({ lessonId, summary, subtitles, chunks, onSeek,
                     </div>
                 </div>
 
-                <div className='flex bg-white/5 px-4 gap-4 border-t border-white/10 overflow-x-auto scrollbar-none'>
-                    <button
+                <div className='flex bg-white/5 px-4 gap-2 border-t border-white/10 overflow-x-auto scrollbar-none'>
+                    <CustomButton
+                        variant='ghost'
                         onClick={() => setActiveSubTab('summary')}
-                        className={`py-4 px-4 text-xs font-bold uppercase tracking-widest transition-all relative flex items-center gap-2 shrink-0 ${activeSubTab === 'summary' ? 'text-white' : 'text-blue-100/40 hover:text-blue-100'
+                        className={`py-6 px-5 h-auto text-[11px] font-bold uppercase tracking-widest transition-all relative flex items-center gap-2.5 rounded-none border-none hover:bg-transparent ${activeSubTab === 'summary' ? 'text-white' : 'text-blue-100/40 hover:text-blue-100'
                             }`}
+                        label='Tóm tắt'
+                        icon={<FileText className='w-3.5 h-3.5' />}
                     >
-                        <FileText className='w-3.5 h-3.5' />
-                        Tóm tắt
-                        {activeSubTab === 'summary' && <div className='absolute bottom-0 left-0 right-0 h-0.5 bg-blue-400 rounded-full' />}
-                    </button>
-                    <button
+                        {activeSubTab === 'summary' && (
+                            <motion.div
+                                layoutId='subtab-indicator'
+                                className='absolute bottom-0 left-0 right-0 h-0.5 bg-blue-400'
+                            />
+                        )}
+                    </CustomButton>
+
+                    <CustomButton
+                        variant='ghost'
                         onClick={() => setActiveSubTab('chunks')}
-                        className={`py-4 px-4 text-xs font-bold uppercase tracking-widest transition-all relative flex items-center gap-2 shrink-0 ${activeSubTab === 'chunks' ? 'text-white' : 'text-blue-100/40 hover:text-blue-100'
+                        className={`py-6 px-5 h-auto text-[11px] font-bold uppercase tracking-widest transition-all relative flex items-center gap-2.5 rounded-none border-none hover:bg-transparent ${activeSubTab === 'chunks' ? 'text-white' : 'text-blue-100/40 hover:text-blue-100'
                             }`}
+                        label='Phân đoạn'
+                        icon={<LayoutList className='w-3.5 h-3.5' />}
                     >
-                        <LayoutList className='w-3.5 h-3.5' />
-                        Phân đoạn
-                        {activeSubTab === 'chunks' && <div className='absolute bottom-0 left-0 right-0 h-0.5 bg-blue-400 rounded-full' />}
-                    </button>
-                    <button
+                        {activeSubTab === 'chunks' && (
+                            <motion.div
+                                layoutId='subtab-indicator'
+                                className='absolute bottom-0 left-0 right-0 h-0.5 bg-blue-400'
+                            />
+                        )}
+                    </CustomButton>
+
+                    <CustomButton
+                        variant='ghost'
                         onClick={() => setActiveSubTab('srt')}
-                        className={`py-4 px-4 text-xs font-bold uppercase tracking-widest transition-all relative flex items-center gap-2 shrink-0 ${activeSubTab === 'srt' ? 'text-white' : 'text-blue-100/40 hover:text-blue-100'
+                        className={`py-6 px-5 h-auto text-[11px] font-bold uppercase tracking-widest transition-all relative flex items-center gap-2.5 rounded-none border-none hover:bg-transparent ${activeSubTab === 'srt' ? 'text-white' : 'text-blue-100/40 hover:text-blue-100'
                             }`}
+                        label='Kịch bản'
+                        icon={<MessageSquareText className='w-3.5 h-3.5' />}
                     >
-                        <MessageSquareText className='w-3.5 h-3.5' />
-                        Kịch bản
-                        {activeSubTab === 'srt' && <div className='absolute bottom-0 left-0 right-0 h-0.5 bg-blue-400 rounded-full' />}
-                    </button>
+                        {activeSubTab === 'srt' && (
+                            <motion.div
+                                layoutId='subtab-indicator'
+                                className='absolute bottom-0 left-0 right-0 h-0.5 bg-blue-400'
+                            />
+                        )}
+                    </CustomButton>
                 </div>
             </HighGlossBackground>
 
@@ -108,26 +130,55 @@ export const AILessonInsights = ({ lessonId, summary, subtitles, chunks, onSeek,
                                         key={chunk.id}
                                         value={chunk.id}
                                         id={`chunk-${chunk.id}`}
-                                        className='border border-gray-100 rounded-2xl px-6 bg-gray-50/50 overflow-hidden'
+                                        className='border border-gray-100 rounded-2xl px-6 bg-gray-50/50 overflow-hidden group/item hover:bg-white transition-colors'
                                     >
-                                        <AccordionTrigger className='hover:no-underline py-4'>
-                                            <div className='flex items-center gap-4 text-left'>
-                                                <span className='w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center text-[11px] font-black shrink-0 shadow-lg shadow-blue-100'>
-                                                    {idx + 1}
-                                                </span>
-                                                <div className='flex flex-col'>
-                                                    <span className='text-[13px] font-bold text-gray-800 tracking-tight'>{chunk.title}</span>
-                                                    <span className='text-[10px] text-blue-600 font-bold uppercase mt-0.5 tracking-wider'>
-                                                        Bắt đầu từ: {chunk.startTime}
+                                        <div className='flex items-center w-full'>
+                                            <AccordionTrigger className='flex-1 hover:no-underline py-5'>
+                                                <div className='flex items-center gap-4 text-left'>
+                                                    <span className='w-9 h-9 rounded-[0.9rem] bg-blue-600 text-white flex items-center justify-center text-[11px] font-black shrink-0 shadow-lg shadow-blue-500/20 group-hover/item:scale-110 transition-transform'>
+                                                        {idx + 1}
                                                     </span>
+                                                    <div className='flex flex-col'>
+                                                        <span className='text-[14px] font-bold text-gray-800 tracking-tight group-hover/item:text-blue-600 transition-colors'>
+                                                            {chunk.title}
+                                                        </span>
+                                                        <div className='flex items-center gap-3 mt-1'>
+                                                            <span className='text-[10px] text-slate-400 font-bold uppercase tracking-wider flex items-center gap-1'>
+                                                                Thời điểm: <span className='text-blue-600'>{chunk.startTime}</span>
+                                                            </span>
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </AccordionTrigger>
-                                        <AccordionContent className='pb-6 pt-2'>
-                                            <div className='pl-12'>
-                                                <p className='text-[12px] text-gray-600 leading-relaxed font-medium bg-white p-4 rounded-xl border border-gray-100'>
-                                                    {chunk.summary}
-                                                </p>
+                                            </AccordionTrigger>
+
+                                            <CustomButton
+                                                variant='ghost'
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    onSeek?.(chunk.startTime || '00:00');
+                                                }}
+                                                className='h-9 w-9 p-0 rounded-xl hover:bg-blue-50 text-blue-600 shrink-0'
+                                                icon={<Sparkles className='w-4 h-4' />}
+                                            />
+                                        </div>
+
+                                        <AccordionContent className='pb-6 pt-0'>
+                                            <div className='pl-13'>
+                                                <div className='bg-white p-5 rounded-2xl border border-gray-100 shadow-sm'>
+                                                    <p className='text-[12px] text-gray-600 leading-relaxed font-medium'>
+                                                        {chunk.summary}
+                                                    </p>
+                                                    <div className='mt-4 flex justify-end'>
+                                                        <CustomButton
+                                                            variant='default'
+                                                            size='sm'
+                                                            onClick={() => onSeek?.(chunk.startTime || '00:00')}
+                                                            label='Đi tới đoạn này'
+                                                            className='bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-[10px] uppercase tracking-wider px-5 h-8 shadow-lg shadow-blue-500/20'
+                                                            icon={<Brain className='w-3 h-3' />}
+                                                        />
+                                                    </div>
+                                                </div>
                                             </div>
                                         </AccordionContent>
                                     </AccordionItem>
