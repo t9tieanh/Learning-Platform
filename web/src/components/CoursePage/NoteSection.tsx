@@ -35,13 +35,13 @@ const NoteSection = ({
   }
 
   return (
-    <div className='py-8 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700'>
+    <div className='py-4 animate-in fade-in slide-in-from-bottom-4 duration-700'>
       <div className='relative group'>
         <div className='absolute -inset-1 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-[2.5rem] blur opacity-25 group-hover:opacity-40 transition duration-1000'></div>
         <div className='relative bg-white rounded-[2.5rem] border border-gray-100 p-10 shadow-sm space-y-8'>
           <div className='flex items-center justify-between'>
             <div className='flex items-center gap-5'>
-              <div className='w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 shadow-inner border border-blue-100/50'>
+              <div className='w-14 h-14 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 shadow-inner border border-blue-100/50'>
                 <NotebookPen className='w-6 h-6' />
               </div>
               <div className='flex flex-col'>

@@ -58,7 +58,7 @@ export const QASection = ({ lessonId, instructorId }: QASectionProps) => {
   }
 
   return (
-    <div className='py-8 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700'>
+    <div className='py-4 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700'>
       {/* New Comment Section */}
       <HighGlossBackground className='rounded-[2.5rem] shadow-sm border border-blue-400/20 overflow-hidden'>
         <div className='p-8 space-y-6'>
