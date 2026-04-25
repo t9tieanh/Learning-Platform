@@ -4,7 +4,7 @@ PYTHON_VENV = venv
 PYTHON = $(PYTHON_VENV)/bin/python
 PIP = $(PYTHON_VENV)/bin/pip
 
-.PHONY: bootstrap clean-env pipeline clean-all normalize import sync help clean-supabase
+.PHONY: bootstrap clean-env pipeline clean-all normalize import sync help clean-supabase translate-description
 
 help:
 	@echo "Available commands:"
@@ -17,6 +17,7 @@ help:
 	@echo "  sync-supabase     - Sync lesson analysis to Supabase"
 	@echo "  import-supabase   - Import normalized courses to Supabase embeddings table"
 	@echo "  clean-supabase    - Clear all course data from Supabase"
+	@echo "  translate-description - Translate course short descriptions using DeepL"
 
 bootstrap:
 	python3 -m venv $(PYTHON_VENV)
@@ -31,6 +32,9 @@ clean-env:
 
 clean-data:
 	$(PYTHON) scripts/clean/clean_online_courses.py
+
+translate-description:
+	$(PYTHON) scripts/clean/translate_short_descriptions.py
 
 normalize:
 	$(PYTHON) scripts/normalize/normalize_categories.py
@@ -56,7 +60,7 @@ clean-supabase:
 
 # --- Full Pipeline ---
 
-pipeline: clean-data normalize import
+pipeline: clean-data translate-description normalize import
 	@echo "✅ Full pipeline completed."
 
 all: bootstrap pipeline sync-supabase
