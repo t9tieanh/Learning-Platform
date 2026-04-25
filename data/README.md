@@ -98,12 +98,11 @@ Synchronizes lesson analysis data (transcripts, summaries, segments, quizzes) fr
 ## Usage
 
 ### 1. Setup Environment
+To prepare the virtual environment and install all dependencies (including Supabase and MySQL drivers), simply run:
 ```bash
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-pip install pymongo mysql-connector-python psycopg2-binary
+make bootstrap
 ```
+This is equivalent to running `python3 -m venv venv`, activating it, and installing `requirements.txt`.
 
 ### 2. Configure Database
 Create a `.env` file in the `data/` directory based on `.env.example`:
@@ -125,35 +124,30 @@ DB_CONNECTION_STRING=postgresql://postgres:password@db.supabase.co:5432/postgres
 
 # Deepl Translation (used in clean_online_courses)
 DEEPL_API_KEY=your_deepl_api_key
-# or alternatively
-# DEEPL_AUTH_KEY=your_deepl_api_key
 ```
 
 ### 3. Run Full Pipeline
-Run the scripts in the following order to clean, normalize, and import data:
-
+You can run the full processing pipeline (Clean -> Normalize -> Import) with a single command:
 ```bash
-# 1. Clean Data
-python scripts/clean/clean_online_courses.py
-
-# 2. Normalize Data (Order matters!)
-python scripts/normalize/normalize_categories.py
-python scripts/normalize/normalize_users.py
-python scripts/normalize/normalize_tags.py
-python scripts/normalize/normalize_blogs.py
-python scripts/normalize/normalize_feedbacks.py
-
-# 3. Import to MySQL & MongoDB
-python scripts/import-data/import_to_mysql.py
-python scripts/import-data/import_blogs.py
-python scripts/import-data/import_feedbacks.py
-
-# 4. Sync AI Assistant Data (Supabase)
-python scripts/supabase/import-data/sync_assistant_to_supabase.py
+make pipeline
 ```
 
-### One-Liner Command
+Alternatively, you can run individual steps:
+
+| Step | Command | Description |
+| :--- | :--- | :--- |
+| **All-in-one** | `make pipeline` | Runs Clean, Normalize, and Import steps. |
+| **Clean** | `make clean-data` | Initial data cleaning from raw CSVs. |
+| **Normalize** | `make normalize` | Relational splitting and UUID generation. |
+| **Import (Local)** | `make import` | Import into MySQL and MongoDB. |
+| **Sync Supabase** | `make sync-supabase` | Sync AI analysis data to Supabase. |
+| **Import Supabase** | `make import-supabase`| Import course metadata to Supabase embeddings table. |
+| **Clean Supabase** | `make clean-supabase` | Clear all course data from Supabase. |
+
+### Manual Alternative
+If you prefer not to use `make`, you can still run scripts manually:
 ```bash
+source venv/bin/activate
 python scripts/clean/clean_online_courses.py && \
 python scripts/normalize/normalize_categories.py && \
 python scripts/normalize/normalize_users.py && \
@@ -162,9 +156,6 @@ python scripts/normalize/normalize_blogs.py && \
 python scripts/normalize/normalize_feedbacks.py && \
 python scripts/import-data/import_to_mysql.py && \
 python scripts/import-data/import_blogs.py && \
-python scripts/import-data/import_feedbacks.py 
+python scripts/import-data/import_feedbacks.py
 ```
 
-``` bash
-python scripts/supabase/import-data/sync_assistant_to_supabase.py
-```
