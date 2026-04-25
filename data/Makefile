@@ -4,20 +4,22 @@ PYTHON_VENV = venv
 PYTHON = $(PYTHON_VENV)/bin/python
 PIP = $(PYTHON_VENV)/bin/pip
 
-.PHONY: bootstrap clean-env pipeline clean-all normalize import sync help clean-supabase translate-description
+.PHONY: bootstrap clean-env pipeline clean-all normalize import sync help clean-supabase clean-courses translate-titles translate-descriptions
 
 help:
 	@echo "Available commands:"
 	@echo "  bootstrap         - Create virtual environment and install requirements"
 	@echo "  clean-env         - Remove virtual environment"
-	@echo "  pipeline          - Run the full data processing pipeline (Clean -> Normalize -> Import)"
-	@echo "  clean-data        - Run initial data cleaning script"
+	@echo "  pipeline          - Run full pipeline: Clean-All -> Normalize -> Import"
+	@echo "  clean-all         - Run all cleaning & translation steps (Clean -> Title -> Desc)"
+	@echo "  clean-courses     - Run pure data cleaning script"
+	@echo "  translate-titles  - Translate course titles"
+	@echo "  translate-descriptions - Translate course descriptions"
 	@echo "  normalize         - Run all normalization scripts"
 	@echo "  import            - Import data to MySQL and MongoDB"
 	@echo "  sync-supabase     - Sync lesson analysis to Supabase"
 	@echo "  import-supabase   - Import normalized courses to Supabase embeddings table"
 	@echo "  clean-supabase    - Clear all course data from Supabase"
-	@echo "  translate-description - Translate course short descriptions using DeepL"
 
 bootstrap:
 	python3 -m venv $(PYTHON_VENV)
@@ -30,11 +32,14 @@ clean-env:
 
 # --- Individual Pipeline Steps ---
 
-clean-data:
-	$(PYTHON) scripts/clean/clean_online_courses.py
+clean-courses:
+	$(PYTHON) scripts/clean/clean_courses.py
 
-translate-description:
-	$(PYTHON) scripts/clean/translate_short_descriptions.py
+translate-titles:
+	$(PYTHON) scripts/clean/translate_titles.py
+
+translate-descriptions:
+	$(PYTHON) scripts/clean/translate_descriptions.py
 
 normalize:
 	$(PYTHON) scripts/normalize/normalize_categories.py
@@ -60,7 +65,10 @@ clean-supabase:
 
 # --- Full Pipeline ---
 
-pipeline: clean-data translate-description normalize import
+# The full cleaning process is now modular: Clean -> Translate Titles -> Translate Descriptions
+clean-all: clean-courses translate-titles translate-descriptions
+
+pipeline: clean-all normalize import
 	@echo "✅ Full pipeline completed."
 
 all: bootstrap pipeline sync-supabase
