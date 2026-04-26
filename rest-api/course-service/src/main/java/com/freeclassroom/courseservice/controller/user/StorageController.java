@@ -29,34 +29,34 @@ public class StorageController {
         return this.uploadFileService.uploadFile(file);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Resource> getFile(
-            @PathVariable String id,
-            @RequestHeader(value = "Range", required = false) String rangeHeader) {
-
-        try {
-            if (rangeHeader != null && rangeHeader.startsWith("bytes=")) {
-                return cloudFrontService.streamFile(id, rangeHeader);
-            }
-
-            byte[] fileBytes = cloudFrontService.getFile(id);
-            String fileName = id.substring(id.lastIndexOf('/') + 1);
-
-            MediaType mediaType = MediaTypeFactory
-                    .getMediaType(fileName)
-                    .orElse(MediaType.APPLICATION_OCTET_STREAM);
-
-            ByteArrayResource resource = new ByteArrayResource(fileBytes);
-
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, fileUtils.buildInlineContentDisposition(fileName))
-                    .contentType(mediaType)
-                    .contentLength(fileBytes.length)
-                    .body(resource);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.internalServerError().build();
-        }
-    }
+//    @GetMapping("/{id}")
+//    public ResponseEntity<Resource> getFile(
+//            @PathVariable String id,
+//            @RequestHeader(value = "Range", required = false) String rangeHeader) {
+//
+//        try {
+//            if (rangeHeader != null && rangeHeader.startsWith("bytes=")) {
+//                return cloudFrontService.streamFile(id, rangeHeader);
+//            }
+//
+//            byte[] fileBytes = cloudFrontService.getFile(id);
+//            String fileName = id.substring(id.lastIndexOf('/') + 1);
+//
+//            MediaType mediaType = MediaTypeFactory
+//                    .getMediaType(fileName)
+//                    .orElse(MediaType.APPLICATION_OCTET_STREAM);
+//
+//            ByteArrayResource resource = new ByteArrayResource(fileBytes);
+//
+//            return ResponseEntity.ok()
+//                    .header(HttpHeaders.CONTENT_DISPOSITION, fileUtils.buildInlineContentDisposition(fileName))
+//                    .contentType(mediaType)
+//                    .contentLength(fileBytes.length)
+//                    .body(resource);
+//
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return ResponseEntity.internalServerError().build();
+//        }
+//    }
 }

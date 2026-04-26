@@ -24,7 +24,9 @@ export interface RAGResult {
 
 export interface AnalysisResult {
   lessonId: string
-  status: 'completed' | 'processing' | 'not_found'
+  status: 'completed' | 'processing' | 'not_found' | 'failed' | 'COMPLETED' | 'PROCESSING' | 'FAILED' | 'NOT_FOUND'
+  isQualityValid: boolean
+  qualityReason: string | null
   summary: string | null
   suggestedTitle: string | null
   subtitles: string | null

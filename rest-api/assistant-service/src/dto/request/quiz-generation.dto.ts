@@ -14,6 +14,9 @@ export class GenerateQuizDto {
   @IsOptional()
   @IsEnum(QuestionType)
   questionType?: QuestionType = QuestionType.MULTIPLE_CHOICE
+
+  @IsOptional()
+  userPrompt?: string
 }
 
 export class QuizDistribution {
@@ -48,4 +51,7 @@ export class GenerateBatchQuizzesDto {
   @ValidateNested({ each: true })
   @Type(() => QuizDistribution)
   distribution: QuizDistribution[]
+
+  @IsOptional()
+  userPrompt?: string
 }

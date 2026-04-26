@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils'
 interface CustomDialogProps {
   open: boolean
   setOpen: (open: boolean) => void
-  title: React.ReactNode
+  title?: React.ReactNode
   description?: string
   children?: React.ReactNode
   className?: string
@@ -24,8 +24,9 @@ export default function CustomDialog({
   contentClassName,
   hideHeader = false,
   noPadding = false,
-  size = 'md'
-}: CustomDialogProps) {
+  size = 'md',
+  showCloseButton = true
+}: CustomDialogProps & { showCloseButton?: boolean }) {
   const sizeClassMap: Record<NonNullable<CustomDialogProps['size']>, string> = {
     sm: 'max-w-md sm:max-w-md',
     md: 'max-w-lg sm:max-w-lg',
@@ -39,7 +40,14 @@ export default function CustomDialog({
   return (
     <>
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className={`${className ?? ''} ${sizeClass} ${noPadding ? 'p-0' : ''}`}>
+        <DialogContent
+          showCloseButton={showCloseButton}
+          className={cn(
+            sizeClass,
+            noPadding ? 'p-0' : '',
+            className
+          )}
+        >
           {!hideHeader && (
             <DialogHeader>
               <DialogTitle className='flex items-center gap-1'>{title}</DialogTitle>

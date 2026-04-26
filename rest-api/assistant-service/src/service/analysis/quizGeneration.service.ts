@@ -1,12 +1,12 @@
 import Logger from '~/utils/logger';
-import { 
-  GenerateQuizDto, 
+import {
+  GenerateQuizDto,
   GenerateBatchQuizzesDto,
 } from '~/dto/request/quiz-generation.dto';
 import { DifficultyLevel, BloomLevel, QuestionType } from '~/enums/quizStatus.enum';
-import { 
+import {
   GeneratedQuizResponse,
-  BatchGeneratedQuizzesResponse 
+  BatchGeneratedQuizzesResponse
 } from '~/dto/response/quiz-response.dto';
 import { QuizPrompts, QuizLanguage } from '~/prompts/quiz.prompt';
 import openaiQueueService from '~/service/queue/openaiQueue.service';
@@ -57,6 +57,7 @@ export class QuizGenerationService {
         difficulty: options.difficulty || DifficultyLevel.MEDIUM,
         bloomLevel: options.bloomLevel || BloomLevel.UNDERSTAND,
         questionType: options.questionType || QuestionType.MULTIPLE_CHOICE,
+        userPrompt: options.userPrompt,
       },
       language
     );
@@ -147,7 +148,7 @@ export class QuizGenerationService {
     // Map distribution for defaults
     const distributionMap = new Map<number, any>();
     let distIndex = 0;
-    
+
     for (const dist of batchOptions.distribution) {
       const count = dist.count || 1;
       for (let i = 0; i < count; i++) {
