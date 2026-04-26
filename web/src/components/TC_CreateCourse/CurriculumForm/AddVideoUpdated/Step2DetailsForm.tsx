@@ -166,6 +166,7 @@ const Step2DetailsForm: React.FC<Step2DetailsFormProps> = ({
         handleSeek={handleSeek}
         mainWrapperRef={mainWrapperRef}
         onSaveSummary={handleSaveChunkSummary}
+        onAfterExamGenerate={refetchAnalysis}
       />
     )
   }

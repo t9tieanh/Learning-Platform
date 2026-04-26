@@ -9,6 +9,7 @@ import { Accordion } from '@/components/ui/accordion'
 import Header from './components/Header'
 import VideoPreview from './components/VideoPreview'
 import ChunkItem from './components/ChunkItem'
+import LessonExamBlueprintSection from './components/LessonExamBlueprintSection'
 
 import HighGlossBackground from '@/components/common/HighGlossBackground'
 
@@ -25,6 +26,7 @@ interface LearnovaDetailedViewProps {
     handleSeek: (startTime: string | null) => void
     mainWrapperRef?: React.RefObject<HTMLDivElement | null>
     onSaveSummary: (chunkId: string, newSummary: string) => Promise<void>
+    onAfterExamGenerate?: () => void
 }
 
 const LearnovaDetailedView: React.FC<LearnovaDetailedViewProps> = ({
@@ -34,7 +36,8 @@ const LearnovaDetailedView: React.FC<LearnovaDetailedViewProps> = ({
     detailedVideoRef,
     handleSeek,
     mainWrapperRef,
-    onSaveSummary
+    onSaveSummary,
+    onAfterExamGenerate
 }) => {
     const chunks: LessonChunk[] = analysisData?.chunks || []
     const [editingSummaryId, setEditingSummaryId] = React.useState<string | null>(null)
@@ -133,6 +136,15 @@ const LearnovaDetailedView: React.FC<LearnovaDetailedViewProps> = ({
                     </div>
                 </div>
             </div>
+
+            {chunks.length > 0 && (
+                <div className='max-w-5xl mx-auto w-full px-4 pt-2'>
+                    <LessonExamBlueprintSection
+                        chunks={chunks}
+                        onAfterGenerate={onAfterExamGenerate}
+                    />
+                </div>
+            )}
         </div>
     )
 }
