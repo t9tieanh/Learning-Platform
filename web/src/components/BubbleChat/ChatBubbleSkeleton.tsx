@@ -3,24 +3,32 @@ import { Skeleton } from '@/components/ui/skeleton'
 const ChatBubbleSkeleton = () => {
   return (
     <div className='space-y-4 p-1'>
-      {/* AI Message Skeleton */}
       <div className='flex justify-start'>
-        <Skeleton className='h-12 w-3/4 rounded-2xl rounded-bl-md bg-gray-200' />
+        <div className='flex items-end gap-2.5'>
+          <Skeleton className='h-9 w-9 rounded-2xl bg-blue-100' />
+          <Skeleton className='h-14 w-[75vw] max-w-[280px] rounded-[1.6rem] rounded-bl-md border border-blue-100 bg-white' />
+        </div>
       </div>
 
-      {/* User Message Skeleton */}
       <div className='flex justify-end'>
-        <Skeleton className='h-10 w-1/2 rounded-2xl rounded-br-md bg-gray-200' />
+        <div className='flex items-end gap-2.5'>
+          <Skeleton className='h-10 w-[48vw] max-w-[220px] rounded-[1.6rem] rounded-br-md bg-blue-400/25' />
+          <Skeleton className='h-9 w-9 rounded-2xl bg-blue-100' />
+        </div>
       </div>
 
-      {/* AI Message Skeleton */}
       <div className='flex justify-start'>
-        <Skeleton className='h-16 w-4/5 rounded-2xl rounded-bl-md bg-gray-200' />
+        <div className='flex items-end gap-2.5'>
+          <Skeleton className='h-9 w-9 rounded-2xl bg-blue-100' />
+          <Skeleton className='h-20 w-[82vw] max-w-[320px] rounded-[1.6rem] rounded-bl-md border border-blue-100 bg-white' />
+        </div>
       </div>
 
-      {/* User Message Skeleton */}
       <div className='flex justify-end'>
-        <Skeleton className='h-10 w-1/3 rounded-2xl rounded-br-md bg-gray-200' />
+        <div className='flex items-end gap-2.5'>
+          <Skeleton className='h-10 w-[34vw] max-w-[160px] rounded-[1.6rem] rounded-br-md bg-blue-400/25' />
+          <Skeleton className='h-9 w-9 rounded-2xl bg-blue-100' />
+        </div>
       </div>
     </div>
   )

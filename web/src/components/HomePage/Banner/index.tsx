@@ -73,6 +73,33 @@ const waveRings = [
   }
 ]
 
+const ambientWaveRings = [
+  {
+    id: 'ambient-wave-1',
+    className: '-left-20 top-16 h-[520px] w-[520px]',
+    borderClass: 'border-white/45',
+    delay: 0,
+    fromScale: 0.72,
+    opacity: 0.46
+  },
+  {
+    id: 'ambient-wave-2',
+    className: 'left-12 top-36 h-[380px] w-[380px]',
+    borderClass: 'border-cyan-200/45',
+    delay: 0.9,
+    fromScale: 0.78,
+    opacity: 0.4
+  },
+  {
+    id: 'ambient-wave-3',
+    className: '-bottom-32 right-20 h-[340px] w-[340px]',
+    borderClass: 'border-sky-200/40',
+    delay: 1.8,
+    fromScale: 0.82,
+    opacity: 0.34
+  }
+]
+
 type BannerProps = {
   onPreferencesSaved?: () => void
 }
@@ -88,12 +115,20 @@ const Banner = ({ onPreferencesSaved }: BannerProps) => {
   return (
     <HighGlossBackground>
       <section className='relative overflow-hidden'>
-        <div className='absolute inset-0 bg-[radial-gradient(circle_at_12%_18%,rgba(255,255,255,0.2),transparent_38%),radial-gradient(circle_at_90%_5%,rgba(125,211,252,0.22),transparent_30%)]' />
-        <div className='absolute -left-20 top-16 h-[520px] w-[520px] rounded-full border border-white/20' />
-        <div className='absolute left-12 top-36 h-[380px] w-[380px] rounded-full border border-blue-200/25' />
-        <div className='absolute -bottom-32 right-20 h-[340px] w-[340px] rounded-full border border-blue-200/20' />
+        <div className='pointer-events-none absolute inset-0 z-10'>
+          <div className='absolute inset-0 bg-[radial-gradient(circle_at_12%_18%,rgba(255,255,255,0.2),transparent_38%),radial-gradient(circle_at_90%_5%,rgba(125,211,252,0.22),transparent_30%)]' />
+          {ambientWaveRings.map((ring) => (
+            <motion.div
+              key={ring.id}
+              className={`absolute rounded-full border-2 ${ring.borderClass} ${ring.className}`}
+              initial={{ scale: ring.fromScale, opacity: 0 }}
+              animate={{ scale: [ring.fromScale, 1.35], opacity: [0, ring.opacity, 0] }}
+              transition={{ duration: 6.5, ease: easeOut, repeat: Infinity, delay: ring.delay }}
+            />
+          ))}
+        </div>
 
-        <div className='container relative mx-auto flex min-h-[680px] flex-col items-center gap-10 px-6 py-16 lg:flex-row lg:gap-14 lg:py-24'>
+        <div className='container relative z-20 mx-auto flex min-h-[680px] flex-col items-center gap-10 px-6 py-16 lg:flex-row lg:gap-14 lg:py-24'>
           <motion.div
             className='flex flex-1 flex-col items-start gap-7'
             variants={container}
