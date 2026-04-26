@@ -5,7 +5,6 @@ import {
   Hash,
   Layers,
   LayoutList,
-  Lightbulb,
   Loader2,
   PenLine,
   Plus,
@@ -28,6 +27,8 @@ import {
 } from '@/components/ui/collapsible'
 import { showConfirmToast } from '@/components/common/ShowConfirmToast'
 import { cn } from '@/lib/utils'
+import LessonExamBlueprintHelpPanel from './LessonExamBlueprintHelpPanel'
+import LessonExamBlueprintTargetTotalCard from './LessonExamBlueprintTargetTotalCard'
 import quizService from '@/services/assistant/quiz.service'
 import { toast } from 'sonner'
 import { useVipUpgrade } from '@/contexts/VipUpgradeContext'
@@ -38,10 +39,13 @@ import {
   buildDefaultExamBlueprintRows,
   buildLessonChunkMultiSelectOptions,
   clampQuestionCount,
+  clampTargetTotalForGroups,
+  getDefaultTargetTotalQuestionCount,
   getLessonChunksInSelectionOrder,
   getValidExamBlueprintRows,
   makeEmptyExamBlueprintRow,
   normalizeExamBlueprintRowsWhenChunksChange,
+  redistributeQuestionCountsToMatchTotal,
   resolveExamBlueprintChunkIds,
   splitQuestionCountAcrossChunks,
 } from '../utils/lessonExamBlueprint.utils'
@@ -53,6 +57,7 @@ interface LessonExamBlueprintSectionProps {
   onAfterGenerate?: () => void
 }
 
+/** Section: map chunks to config groups, target total, then batch-generate quizzes per group (VIP). */
 const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
   chunks,
   onAfterGenerate,
@@ -69,16 +74,37 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
   const [rows, setRows] = useState<ExamBlueprintRow[]>(() =>
     buildDefaultExamBlueprintRows(chunks)
   )
+  const [targetTotal, setTargetTotal] = useState(() =>
+    getDefaultTargetTotalQuestionCount(chunks)
+  )
   const [isGenerating, setIsGenerating] = useState(false)
-  /** Mỗi nhóm: phân đoạn đang xem tóm tắt (một chunk trong nhóm đã chọn). */
+  /** Per group row: which chunk’s summary is shown in the preview (must be in that row’s selected chunks). */
   const [previewChunkIdByRow, setPreviewChunkIdByRow] = useState<Record<string, string>>({})
-  /** Mở/đóng từng nhóm cấu hình; key thiếu → ưu tiên mở nhóm đầu tiên. */
+  /** Whether each config group card is expanded; missing key → first group defaults to open. */
   const [rowOpen, setRowOpen] = useState<Record<string, boolean>>({})
-  const [helpIntroOpen, setHelpIntroOpen] = useState(false)
 
   useEffect(() => {
-    setRows((prev) => normalizeExamBlueprintRowsWhenChunksChange(prev, chunks))
+    setRows((prev) => {
+      const next = normalizeExamBlueprintRowsWhenChunksChange(prev, chunks)
+      if (!prev.length && next.length) {
+        const sum = next.reduce((s, r) => s + r.questionCount, 0)
+        queueMicrotask(() => {
+          setTargetTotal(
+            clampTargetTotalForGroups(sum, next.length)
+          )
+        })
+      }
+      return next
+    })
   }, [chunks])
+
+  const sumRowQuestionCounts = useMemo(
+    () => rows.reduce((s, r) => s + r.questionCount, 0),
+    [rows]
+  )
+  const countsMatchTarget = sumRowQuestionCounts === targetTotal
+  const minTotalForLayout = rows.length
+  const maxTotalForLayout = 50 * Math.max(1, rows.length)
 
   useEffect(() => {
     setRowOpen((prev) => {
@@ -124,6 +150,23 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
     []
   )
 
+  const applyTargetTotal = useCallback((raw: number) => {
+    setRows((prev) => {
+      if (prev.length === 0) {
+        return prev
+      }
+      const t = clampTargetTotalForGroups(raw, prev.length)
+      setTargetTotal(t)
+      return redistributeQuestionCountsToMatchTotal(prev, t)
+    })
+  }, [])
+
+  const syncTargetTotalToGroupSums = useCallback(() => {
+    setTargetTotal(
+      clampTargetTotalForGroups(sumRowQuestionCounts, Math.max(1, rows.length))
+    )
+  }, [rows.length, sumRowQuestionCounts])
+
   const setRowChunkIds = useCallback(
     (rowId: string, nextIds: string[]) => {
       if (nextIds.length === 0 && chunks[0]) {
@@ -136,12 +179,28 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
   )
 
   const addRow = useCallback(() => {
-    setRows((prev) => [...prev, makeEmptyExamBlueprintRow(chunks)])
-  }, [chunks])
+    setRows((prev) => {
+      const withNew = [...prev, makeEmptyExamBlueprintRow(chunks)]
+      const t = clampTargetTotalForGroups(targetTotal, withNew.length)
+      setTargetTotal(t)
+      return redistributeQuestionCountsToMatchTotal(withNew, t)
+    })
+  }, [chunks, targetTotal])
 
   const removeRow = useCallback((id: string) => {
-    setRows((prev) => (prev.length <= 1 ? prev : prev.filter((r) => r.id !== id)))
-  }, [])
+    setRows((prev) => {
+      if (prev.length <= 1) {
+        return prev
+      }
+      const next = prev.filter((r) => r.id !== id)
+      if (next.length === 0) {
+        return prev
+      }
+      const t = clampTargetTotalForGroups(targetTotal, next.length)
+      setTargetTotal(t)
+      return redistributeQuestionCountsToMatchTotal(next, t)
+    })
+  }, [targetTotal])
 
   const runGenerate = useCallback(async () => {
     if (!isVip) {
@@ -150,6 +209,13 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
     }
     if (!chunks.length) {
       toast.error('Chưa có phân đoạn nội dung. Hãy đợi phân tích xong trước.')
+      return
+    }
+
+    if (!countsMatchTarget) {
+      toast.error(
+        `Tổng số câu ở các nhóm hiện là ${sumRowQuestionCounts} — cần khớp tổng câu cần tạo (${targetTotal}). Bấm "Đồng bộ tổng theo nhóm" bên tổng các nhóm hoặc chỉnh lại số.`
+      )
       return
     }
 
@@ -210,7 +276,16 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
     )
     onAfterGenerate?.()
     setIsGenerating(false)
-  }, [chunks, isVip, onAfterGenerate, openVipDialog, rows])
+  }, [
+    chunks,
+    countsMatchTarget,
+    isVip,
+    onAfterGenerate,
+    openVipDialog,
+    rows,
+    sumRowQuestionCounts,
+    targetTotal,
+  ])
 
   if (!chunks.length) {
     return null
@@ -229,8 +304,8 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
                 Bài kiểm tra theo từng mảng nội dung
                 <Sparkles className='w-3 h-3 text-amber-200/90 shrink-0' aria-hidden />
               </h2>
-              <p className='text-[10px] md:text-[11px] text-blue-100/60 mt-1 font-bold uppercase tracking-widest leading-snug'>
-                Chọn nhóm phân đoạn → số câu → cách ra đề (bảng chuẩn đầu ra)
+              <p className='text-[10px] md:text-[11px] text-blue-100/70 mt-1 font-medium leading-snug'>
+                Tổng câu toàn bài trước → nhóm phân đoạn → cách ra đề (bảng chuẩn đầu ra)
               </p>
             </div>
           </div>
@@ -238,41 +313,19 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
       </HighGlossBackground>
 
       <div className='rounded-2xl border border-gray-100 bg-white/80 backdrop-blur-sm shadow-sm p-4 md:p-6 space-y-4'>
-        <div className='px-0.5 flex items-start gap-2.5 rounded-xl border border-amber-100/60 bg-amber-50/15 p-2.5 md:p-3'>
-          <span className='mt-0.5 p-1.5 rounded-md bg-amber-50 text-amber-600 border border-amber-100/80 shrink-0'>
-            <Lightbulb className='w-4 h-4' strokeWidth={2.25} />
-          </span>
-          <div className='min-w-0 flex-1 space-y-2'>
-            <p
-              className={cn(
-                'text-[13px] md:text-[14px] text-gray-600 leading-relaxed font-medium',
-                !helpIntroOpen && 'line-clamp-3'
-              )}
-            >
-              Mỗi <strong className='font-bold text-gray-700'>nhóm nội dung</strong> tương ứng{' '}
-              <strong className='font-bold text-gray-700'>một cấu hình sinh câu</strong>: bạn gắn{' '}
-              <strong className='font-bold text-gray-700'>một hoặc nhiều phân đoạn nội dung</strong>, nhập
-              <strong className='font-bold text-gray-700'> tổng số câu</strong> cần tạo cho cả nhóm. Nhiều phân
-              đoạn trong cùng một nhóm thì tổng câu được{' '}
-              <strong className='font-bold text-gray-700'>phân bổ tương ứng</strong> từng phân đoạn. Mục
-              &quot;Cách ra đề&quot; phía dưới mỗi nhóm là tùy chọn — dùng khi bạn muốn gợi ý rõ cách ra đề (dạng
-              câu, mức độ, gắn mục tiêu…). Bạn có thể thu gọn/mở từng nhóm cấu hình để gọn màn hình.
-            </p>
-            <button
-              type='button'
-              onClick={() => setHelpIntroOpen((o) => !o)}
-              className='inline-flex items-center gap-1.5 text-[12px] md:text-[13px] font-bold text-blue-600 hover:text-blue-700 transition-colors'
-              aria-expanded={helpIntroOpen}
-            >
-              {helpIntroOpen ? 'Thu gọn' : 'Xem thêm hướng dẫn'}
-              <ChevronDown
-                className={cn('h-4 w-4 shrink-0 transition-transform duration-200', helpIntroOpen && 'rotate-180')}
-                strokeWidth={2.25}
-                aria-hidden
-              />
-            </button>
-          </div>
-        </div>
+        <LessonExamBlueprintHelpPanel />
+
+        <LessonExamBlueprintTargetTotalCard
+          chunkCount={chunks.length}
+          targetTotal={targetTotal}
+          onTargetTotalChange={applyTargetTotal}
+          minTotal={minTotalForLayout}
+          maxTotal={maxTotalForLayout}
+          sumRowQuestionCounts={sumRowQuestionCounts}
+          countsMatchTarget={countsMatchTarget}
+          isGenerating={isGenerating}
+          onSyncTargetToGroupSums={syncTargetTotalToGroupSums}
+        />
 
         <div className='space-y-4 md:space-y-5'>
           {rows.map((row, index) => {
@@ -342,7 +395,7 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
                           aria-hidden
                         />
                         <div className='min-w-0 flex-1'>
-                          <span className='text-[12px] md:text-[13px] font-bold text-gray-800 uppercase tracking-wide flex items-center gap-2 min-w-0'>
+                          <span className='text-[12px] md:text-[13px] font-semibold text-gray-800 flex items-center gap-2 min-w-0'>
                             <LayoutList
                               className='w-4 h-4 shrink-0 text-blue-600'
                               strokeWidth={2.25}
@@ -388,7 +441,7 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
                     <div className='space-y-3 border-t border-blue-100/70 px-3 md:px-4 pb-3 md:pb-4 pt-2'>
                 <div className='grid grid-cols-1 lg:grid-cols-2 gap-4 items-stretch'>
                   <div className='space-y-1.5 min-w-0 flex flex-col'>
-                    <Label className='text-[11px] md:text-[12px] font-bold text-gray-500 uppercase tracking-tight flex items-center gap-1.5'>
+                    <Label className='text-[11px] md:text-[12px] font-semibold text-gray-600 flex items-center gap-1.5'>
                       <Layers className='w-3.5 h-3.5 text-blue-500' strokeWidth={2.5} />
                       Nhóm phân đoạn
                     </Label>
@@ -403,15 +456,15 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
                       className='space-y-2 [&_button]:min-h-10 [&_button]:text-[13px] md:[&_button]:text-[14px] [&_button]:px-3.5 [&_button]:py-2.5 [&_button]:rounded-xl'
                     />
                     <p className='text-[11px] md:text-[12px] text-gray-500 font-medium leading-snug pl-0.5'>
-                      Nhiều phân đoạn: tổng số câu được chia tự động cho từng phân đoạn.
+                      Nhiều phân đoạn: số câu nhóm được chia tự động cho từng phân đoạn.
                     </p>
                     <div className='space-y-1.5 pt-2 max-w-full sm:max-w-[200px]'>
                       <Label
                         htmlFor={`count-${row.id}`}
-                        className='text-[11px] md:text-[12px] font-bold text-gray-500 uppercase tracking-tight flex items-center gap-1.5'
+                        className='text-[11px] md:text-[12px] font-semibold text-gray-600 flex items-center gap-1.5'
                       >
                         <Hash className='w-3.5 h-3.5 text-violet-500' strokeWidth={2.5} />
-                        Tổng số câu
+                        Số câu nhóm này
                       </Label>
                       <Input
                         id={`count-${row.id}`}
@@ -434,7 +487,7 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
 
                   {selectedChunks.length > 0 && previewChunk && (
                     <div className='flex flex-col min-h-0 min-w-0 rounded-xl border border-sky-100/90 bg-sky-50/40 p-3 md:p-3.5 shadow-sm'>
-                      <p className='text-[11px] md:text-[12px] font-bold text-sky-800/90 uppercase tracking-tight flex items-center gap-1.5 shrink-0 mb-2'>
+                      <p className='text-[11px] md:text-[12px] font-semibold text-sky-800/90 flex items-center gap-1.5 shrink-0 mb-2'>
                         <ScrollText className='w-3.5 h-3.5 shrink-0' strokeWidth={2.5} />
                         Xem tóm tắt
                       </p>
@@ -498,7 +551,7 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
                 <div className='space-y-1.5 pt-0.5 border-t border-blue-100/60'>
                   <Label
                     htmlFor={`hint-${row.id}`}
-                    className='text-[11px] md:text-[12px] font-bold text-gray-500 uppercase tracking-tight flex items-center gap-1.5'
+                    className='text-[11px] md:text-[12px] font-semibold text-gray-600 flex items-center gap-1.5'
                   >
                     <PenLine className='w-3.5 h-3.5 text-emerald-500' strokeWidth={2.5} />
                     Cách ra đề (gợi ý cho AI)
@@ -549,7 +602,7 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
             }
             className='font-bold bg-blue-600 hover:bg-blue-700 text-white rounded-xl px-6 shadow-md shadow-blue-100'
             onClick={runGenerate}
-            disabled={isGenerating}
+            disabled={isGenerating || !countsMatchTarget}
           />
         </div>
       </div>

@@ -130,10 +130,12 @@ const CourseSidebar: FC<CourseSidebarProps> = ({ activeSection = CourseProgressS
                     )}>
                       {item.label}
                     </span>
-                    <span className={cn(
-                      'text-[10px] font-medium mt-0.5 leading-tight block transition-all',
-                      isActive ? 'text-white/60 opacity-100' : 'text-gray-500 opacity-0 group-hover:opacity-100'
-                    )}>
+                    <span
+                      className={cn(
+                        'text-[10px] font-medium mt-0.5 leading-tight block transition-colors',
+                        isActive ? 'text-white/70' : 'text-gray-500'
+                      )}
+                    >
                       {item.description}
                     </span>
                   </div>
@@ -158,7 +160,9 @@ const CourseSidebar: FC<CourseSidebarProps> = ({ activeSection = CourseProgressS
             </div>
             <div className='flex-1 min-w-0'>
               <span className='text-[13px] font-black text-red-500 transition-colors'>Thoát khóa học</span>
-              <span className='text-[10px] font-medium text-gray-500 mt-0.5 leading-tight block opacity-0 group-hover:opacity-100 transition-opacity'>Quay về bảng điều khiển</span>
+              <span className='text-[10px] font-medium text-gray-500 mt-0.5 leading-tight block'>
+                Quay về bảng điều khiển
+              </span>
             </div>
           </div>
         </button>

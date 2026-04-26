@@ -142,19 +142,37 @@ const ChunkItem: React.FC<ChunkItemProps> = ({
     return (
         <AccordionItem
             value={chunk.id}
-            className='border border-gray-100 rounded-2xl overflow-hidden bg-white shadow-sm hover:shadow-md transition-all duration-300 mb-6'
+            className={cn(
+                'border-b-0 rounded-xl border border-blue-200/50 shadow-md shadow-blue-100/20',
+                'border-l-[4px] border-l-blue-600 ring-1 ring-blue-100/40',
+                'overflow-hidden bg-gradient-to-b from-blue-50/45 via-white to-indigo-50/20',
+                'transition-shadow duration-300 hover:shadow-lg hover:shadow-blue-100/30'
+            )}
         >
-            <AccordionTrigger className='px-6 py-5 hover:no-underline group'>
-                <div className='flex items-center justify-between w-full pr-6'>
-                    <div className='flex items-center gap-4'>
-                        <div className='w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 font-extrabold shadow-sm border border-blue-100 group-hover:scale-105 transition-transform'>
+            <AccordionTrigger
+                className={cn(
+                    'px-3 py-3 md:px-4 md:py-4 hover:no-underline group rounded-none w-full',
+                    'bg-blue-50/50 data-[state=open]:border-b data-[state=open]:border-blue-100/80',
+                    '[&>svg]:shrink-0 [&>svg]:text-blue-600 [&>svg]:mt-0.5'
+                )}
+            >
+                <div className='flex items-center justify-between w-full pr-2'>
+                    <div className='flex items-center gap-3 md:gap-4 min-w-0'>
+                        <div
+                            className={cn(
+                                'w-9 h-9 md:w-10 md:h-10 shrink-0 rounded-2xl flex items-center justify-center',
+                                'bg-white/95 text-blue-700 font-bold text-[13px] md:text-[14px] tabular-nums',
+                                'border border-blue-200/80 shadow-sm ring-1 ring-blue-100/30',
+                                'group-hover:scale-[1.02] transition-transform'
+                            )}
+                        >
                             {idx + 1}
                         </div>
-                        <div className='text-left space-y-1'>
-                            <h4 className='text-[14px] font-extrabold text-gray-900 tracking-tight group-hover:text-blue-600 transition-colors'>
+                        <div className='text-left space-y-1 min-w-0'>
+                            <h4 className='text-[12px] md:text-[13px] font-semibold text-gray-800 tracking-tight group-hover:text-blue-700 transition-colors [overflow-wrap:anywhere]'>
                                 {chunk.title || `Phân đoạn ${idx + 1}`}
                             </h4>
-                            <div className='flex items-center gap-3 text-[11px] text-gray-400 font-bold uppercase tracking-widest'>
+                            <div className='flex items-center flex-wrap gap-x-3 gap-y-0.5 text-[11px] text-gray-500 font-medium'>
                                 <span
                                     className='flex items-center gap-1.5 bg-gray-50 px-2 py-0.5 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors cursor-pointer group/time'
                                     onClick={(e) => {
@@ -172,7 +190,7 @@ const ChunkItem: React.FC<ChunkItemProps> = ({
                 </div>
             </AccordionTrigger>
 
-            <AccordionContent className='p-6 pt-2 space-y-6 border-t border-gray-50 bg-gray-50/10'>
+            <AccordionContent className='px-3 md:px-4 pt-2 md:pt-3 pb-2 md:pb-3 space-y-6 border-t border-blue-100/70 bg-gradient-to-b from-white/90 to-slate-50/40'>
                 {/* Summary Section */}
                 <div className='space-y-4'>
                     <div className='flex items-center justify-between px-1'>

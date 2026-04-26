@@ -24,12 +24,12 @@ const QuizCard: React.FC<QuizCardProps> = ({ quiz, index, onEdit, onDelete }) =>
                         {index + 1}
                     </span>
                     {quiz.aiGenerated && (
-                        <div className='flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-blue-50 text-blue-600 text-[8px] font-bold uppercase tracking-wider border border-blue-100'>
+                        <div className='flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-blue-50 text-blue-600 text-[8px] font-semibold border border-blue-100'>
                             <Sparkles className='w-2 h-2' /> AI {quiz.aiConfidence ? `• ${Math.round(quiz.aiConfidence * 100)}%` : ''}
                         </div>
                     )}
                     {!quiz.isApproved && quiz.aiGenerated && (
-                        <div className='px-1.5 py-0.5 rounded-md bg-amber-50 text-amber-600 text-[8px] font-bold uppercase tracking-wider border border-amber-100'>
+                        <div className='px-1.5 py-0.5 rounded-md bg-amber-50 text-amber-600 text-[8px] font-semibold border border-amber-100'>
                             Chờ duyệt
                         </div>
                     )}

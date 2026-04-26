@@ -102,7 +102,7 @@ const LearnovaDetailedView: React.FC<LearnovaDetailedViewProps> = ({
                                     <h2 className='text-white font-bold text-[15px] md:text-[16px] tracking-tight leading-tight'>
                                         Cấu trúc nội dung bài giảng
                                     </h2>
-                                    <p className='text-[10px] md:text-[11px] text-blue-100/60 mt-1 flex items-center gap-2 font-bold uppercase tracking-widest'>
+                                    <p className='text-[10px] md:text-[11px] text-blue-100/70 mt-1 flex items-center gap-2 font-medium'>
                                         <Sparkles className='w-3 h-3 text-blue-300 animate-pulse' /> Trợ lý AI phân tích
                                     </p>
                                 </div>
@@ -115,8 +115,13 @@ const LearnovaDetailedView: React.FC<LearnovaDetailedViewProps> = ({
                         </div>
                     </HighGlossBackground>
 
-                    <div className='w-full'>
-                        <Accordion type='single' collapsible defaultValue={chunks[0]?.id} className='space-y-6'>
+                    <div className='w-full rounded-2xl border border-gray-100 bg-white/80 backdrop-blur-sm shadow-sm p-4 md:p-6'>
+                        <Accordion
+                            type='single'
+                            collapsible
+                            defaultValue={chunks[0]?.id}
+                            className='space-y-4 md:space-y-5'
+                        >
                             {chunks.map((chunk, idx) => (
                                 <ChunkItem
                                     key={chunk.id}
