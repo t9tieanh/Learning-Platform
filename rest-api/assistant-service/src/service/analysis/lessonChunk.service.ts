@@ -1,19 +1,9 @@
 import Logger from '~/utils/logger';
 import prismaService from '~/service/utils/prisma.service';
 
-/**
- * LessonChunkService handles operations on lesson chunks including
- * embedding generation and persistence.
- */
+const EMBEDDING_UPDATE_CONCURRENCY = 3;
+
 export class LessonChunkService {
-    /**
-     * Update a chunk's embedding vector in the database.
-     *
-     * Uses raw SQL since embedding is an Unsupported pgvector type in Prisma schema.
-     *
-     * @param chunkId - The chunk ID to update
-     * @param embeddingVector - The embedding vector (number[] or null)
-     */
     public async updateEmbedding(
         chunkId: string,
         embeddingVector: number[] | null
@@ -40,20 +30,18 @@ export class LessonChunkService {
         }
     }
 
-    /**
-     * Bulk update embeddings for multiple chunks.
-     *
-     * @param updates - Array of { chunkId, embeddingVector } pairs
-     */
     public async updateEmbeddingsBatch(
         updates: Array<{ chunkId: string; embeddingVector: number[] | null }>
     ): Promise<void> {
         try {
-            const updatePromises = updates.map(({ chunkId, embeddingVector }) =>
-                this.updateEmbedding(chunkId, embeddingVector)
-            );
-
-            await Promise.all(updatePromises);
+            for (let i = 0; i < updates.length; i += EMBEDDING_UPDATE_CONCURRENCY) {
+                const window = updates.slice(i, i + EMBEDDING_UPDATE_CONCURRENCY);
+                await Promise.all(
+                    window.map(({ chunkId, embeddingVector }) =>
+                        this.updateEmbedding(chunkId, embeddingVector)
+                    )
+                );
+            }
 
             Logger.info(
                 `[LessonChunkService.updateEmbeddingsBatch] Successfully updated embeddings for ${updates.length} chunk(s)`
@@ -67,5 +55,4 @@ export class LessonChunkService {
     }
 }
 
-// Export singleton instance
 export const lessonChunkService = new LessonChunkService();
