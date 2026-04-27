@@ -29,7 +29,7 @@ export const TestimonialCard = ({ name, role, image, content, rating }: Testimon
         ))}
       </div>
 
-      <p className='text-card-foreground/80 leading-relaxed flex-1 text-sm'>"{content}"</p>
+      <p className='text-card-foreground/80 leading-relaxed flex-1 text-sm text-justify'>"{content}"</p>
     </Card>
   )
 }

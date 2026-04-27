@@ -50,8 +50,8 @@ const WhyChooseUsSection = () => {
       {/* headline pill aligned to the left edge of the page (homepage pattern) */}
       <div className='flex items-center mt-2 md:mt-0'>
         <div className='shrink-0'>
-          <h4 className='font-bold bg-blue-500 text-white p-2 rounded-r-3xl pl-4 md:pl-12 inline-block'>
-            Chúng tôi khác biệt như thế nào
+          <h4 className='font-bold bg-blue-500 text-white p-2 rounded-r-3xl pl-4 md:pl-12 min-w-80'>
+            Vì sao chọn chúng tôi
           </h4>
         </div>
       </div>
