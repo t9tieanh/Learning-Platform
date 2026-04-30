@@ -205,7 +205,7 @@ export class QuizPersistenceService {
   }
 
   /**
-   * Deletes a quiz and all its related choices and answers (cascade handled by DB).
+   * Deletes a quiz and all its related choices (cascade handled by DB).
    * 
    * @param quizId - The quiz ID to delete
    */
