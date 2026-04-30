@@ -32,8 +32,8 @@ const CustomPagination = ({ currentPage, totalPages, onPageChange, loading = fal
   }
 
   return (
-    <Pagination>
-      <PaginationContent>
+    <Pagination className='py-2'>
+      <PaginationContent className='gap-1.5 rounded-full border border-blue-100 bg-white/90 p-1.5 shadow-[0_12px_30px_rgba(15,23,42,0.06)] backdrop-blur'>
         <PaginationItem>
           <PaginationPrevious
             href='#'
@@ -42,14 +42,16 @@ const CustomPagination = ({ currentPage, totalPages, onPageChange, loading = fal
               if (!loading) onPageChange(Math.max(1, currentPage - 1))
             }}
             aria-disabled={currentPage === 1 || loading}
-            className={currentPage === 1 || loading ? 'pointer-events-none opacity-50' : ''}
+            className={`h-9 rounded-full px-3 text-sm font-semibold transition-all duration-200 hover:bg-blue-50 hover:text-blue-600 focus-visible:ring-4 focus-visible:ring-blue-100 ${
+              currentPage === 1 || loading ? 'pointer-events-none opacity-45' : 'text-slate-600'
+            }`}
           />
         </PaginationItem>
 
         {renderPaginationItems().map((page, idx) =>
           page === 'ellipsis' ? (
             <PaginationItem key={`ellipsis-${idx}`}>
-              <PaginationEllipsis />
+              <PaginationEllipsis className='size-9 text-slate-400' />
             </PaginationItem>
           ) : (
             <PaginationItem key={page}>
@@ -60,6 +62,11 @@ const CustomPagination = ({ currentPage, totalPages, onPageChange, loading = fal
                   e.preventDefault()
                   if (!loading) onPageChange(page as number)
                 }}
+                className={`size-9 rounded-full text-sm font-semibold transition-all duration-200 focus-visible:ring-4 focus-visible:ring-blue-100 ${
+                  currentPage === page
+                    ? 'border-blue-600 bg-blue-600 text-white shadow-[0_8px_18px_rgba(37,99,235,0.28)] hover:bg-blue-700 hover:text-white'
+                    : 'text-slate-600 hover:bg-blue-50 hover:text-blue-600'
+                } ${loading ? 'pointer-events-none opacity-60' : ''}`}
               >
                 {page}
               </PaginationLink>
@@ -75,7 +82,9 @@ const CustomPagination = ({ currentPage, totalPages, onPageChange, loading = fal
               if (!loading) onPageChange(Math.min(totalPages, currentPage + 1))
             }}
             aria-disabled={currentPage === totalPages || loading}
-            className={currentPage === totalPages || loading ? 'pointer-events-none opacity-50' : ''}
+            className={`h-9 rounded-full px-3 text-sm font-semibold transition-all duration-200 hover:bg-blue-50 hover:text-blue-600 focus-visible:ring-4 focus-visible:ring-blue-100 ${
+              currentPage === totalPages || loading ? 'pointer-events-none opacity-45' : 'text-slate-600'
+            }`}
           />
         </PaginationItem>
       </PaginationContent>

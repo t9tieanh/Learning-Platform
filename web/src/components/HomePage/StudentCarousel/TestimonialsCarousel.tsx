@@ -6,12 +6,16 @@ import student1 from '@/assets/images/user1.jpg'
 import student2 from '@/assets/images/user2.jpg'
 import student3 from '@/assets/images/user3.jpg'
 import student4 from '@/assets/images/user4.jpg'
+import student5 from '@/assets/images/user5.jpeg'
+import student6 from '@/assets/images/user6.jpeg'
+import student7 from '@/assets/images/user7.jpeg'
+
 const testimonials = [
   {
     id: 1,
     name: 'Nguyễn Minh Khôi',
     role: 'Nhân viên Marketing',
-    image: student1,
+    image: student5,
     content:
       'Nền tảng học trực tuyến rất dễ sử dụng, giao diện trực quan. Khóa học Marketing được thiết kế bài bản, giúp tôi áp dụng hiệu quả vào công việc hằng ngày.',
     rating: 5
@@ -20,7 +24,7 @@ const testimonials = [
     id: 2,
     name: 'Trần Ngọc Ánh',
     role: 'Nhà thiết kế đồ họa',
-    image: student2,
+    image: student7,
     content:
       'Các khóa học thiết kế rất thực tế, bài tập đa dạng và sát với nhu cầu doanh nghiệp. Giảng viên hỗ trợ tận tình, giúp tôi nâng cao kỹ năng và mở rộng tư duy sáng tạo.',
     rating: 5
@@ -29,7 +33,7 @@ const testimonials = [
     id: 3,
     name: 'Lê Hoàng Nam',
     role: 'Chuyên viên kinh doanh',
-    image: student3,
+    image: student2,
     content:
       'Tôi rất hài lòng với chất lượng khóa học kinh doanh. Nội dung dễ hiểu, có nhiều ví dụ thực tế. Hệ thống học linh hoạt giúp tôi vừa làm việc vừa nâng cao kiến thức.',
     rating: 5
@@ -38,7 +42,7 @@ const testimonials = [
     id: 4,
     name: 'Phạm Thu Trang',
     role: 'Giáo viên tiếng Anh',
-    image: student4,
+    image: student1,
     content:
       'Nền tảng này giúp tôi cải thiện phương pháp giảng dạy đáng kể. Nội dung bài học phong phú, dễ áp dụng và mang lại hiệu quả rõ rệt cho học sinh của tôi.',
     rating: 5
@@ -54,31 +58,13 @@ const testimonials = [
   },
   {
     id: 6,
-    name: 'Nguyễn Thị Mai',
-    role: 'Chủ quán ăn',
-    image: student4,
-    content:
-      'Tôi rất thích các khóa học nấu ăn trên nền tảng này. Hướng dẫn chi tiết, dễ làm theo và phù hợp với nhu cầu thực tế, giúp tôi cải thiện chất lượng món ăn tại quán.',
-    rating: 5
-  },
-  {
-    id: 7,
-    name: 'Võ Thành Đạt',
+    name: 'Võ Hải Lam',
     role: 'Sinh viên năm 3',
-    image: student4,
+    image: student3,
     content:
       'Là sinh viên, tôi thấy nền tảng này rất hữu ích để học thêm kỹ năng ngoài chương trình chính. Nội dung đa dạng, dễ tiếp cận và giúp tôi tự tin hơn khi đi thực tập.',
     rating: 5
   },
-  {
-    id: 8,
-    name: 'Bùi Thanh Tâm',
-    role: 'Nhân viên nhân sự',
-    image: student4,
-    content:
-      'Các khóa học kỹ năng mềm rất thiết thực, giúp tôi cải thiện giao tiếp và làm việc nhóm. Nội dung gần gũi với thực tế và có thể áp dụng ngay trong công việc.',
-    rating: 5
-  }
 ]
 
 import HighGlossBackground from '@/components/common/HighGlossBackground'
@@ -121,7 +107,7 @@ export const TestimonialsCarousel = ({ className }: { className?: string }) => {
       <h4 className='font-bold bg-white text-blue-600 p-2 max-w-80 pl-4 md:pl-12 rounded-r-3xl shadow-lg'>
         Học viên nói gì
       </h4>
-      <div className='max-w-7xl mx-auto mt-12'>
+      <div className='max-w-7xl mx-auto mt-6'>
         <div className='text-center mb-12 animate-fade-in'>
           <p className='text-base md:text-lg text-blue-100/80 max-w-2xl mx-auto font-medium'>
             Hàng nghìn học viên đã tin tưởng và đạt được mục tiêu của mình cùng nền tảng của chúng tôi
@@ -159,9 +145,8 @@ export const TestimonialsCarousel = ({ className }: { className?: string }) => {
                     setIsAutoPlaying(false)
                     setCurrentIndex(index)
                   }}
-                  className={`h-2 rounded-full transition-all duration-300 ${
-                    index === currentIndex ? 'w-8 bg-white' : 'w-2 bg-white/30 hover:bg-white/50'
-                  }`}
+                  className={`h-2 rounded-full transition-all duration-300 ${index === currentIndex ? 'w-8 bg-white' : 'w-2 bg-white/30 hover:bg-white/50'
+                    }`}
                   aria-label={`Go to testimonial ${index + 1}`}
                 />
               ))}
