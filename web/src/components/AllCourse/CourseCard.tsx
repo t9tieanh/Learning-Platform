@@ -1,4 +1,4 @@
-import { Star, Clock, BookOpen } from 'lucide-react'
+import { ClockIcon, ReaderIcon, StarIcon } from '@radix-ui/react-icons'
 import { Card } from '@/components/ui/card'
 import { useNavigate } from 'react-router-dom'
 
@@ -16,10 +16,12 @@ interface CourseCardProps {
   reviewCount: number
   duration: string
   lectures: number
+  category?: string
   level: string
   isBestseller?: boolean
   thumbnail: string
   onViewCourse?: (courseId: string) => void | Promise<void>
+  layout?: 'list' | 'grid'
 }
 
 export const CourseCard = ({
@@ -33,11 +35,16 @@ export const CourseCard = ({
   reviewCount,
   duration,
   lectures,
+  category,
   level,
+  isBestseller,
   thumbnail,
-  onViewCourse
+  onViewCourse,
+  layout = 'list'
 }: CourseCardProps) => {
   const navigate = useNavigate()
+  const isGrid = layout === 'grid'
+  const formatPrice = (price: number) => `${price.toLocaleString('vi-VN')}đ`
 
   const handleClickCourse = () => {
     const courseId = String(id)
@@ -47,60 +54,80 @@ export const CourseCard = ({
 
   return (
     <Card
-      className='overflow-hidden group border border-border/60 bg-card/60 backdrop-blur-sm cursor-pointer p-0'
+      className='group cursor-pointer overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_10px_24px_rgba(15,23,42,0.04)] transition-all duration-200 ease-in-out hover:-translate-y-0.5 hover:shadow-[0_16px_36px_rgba(15,23,42,0.08)]'
       onClick={handleClickCourse}
     >
-      <div className='flex flex-col md:flex-row items-stretch md:h-40'>
-        <div className='w-full md:w-72 h-40 md:h-full flex-shrink-0 overflow-hidden'>
-          <img src={thumbnail} alt={title} className='w-full h-full object-cover object-center' />
+      <div className={isGrid ? 'flex flex-col' : 'flex flex-col md:flex-row md:items-stretch md:min-h-[200px]'}>
+        <div
+          className={`relative overflow-hidden bg-blue-100 ${isGrid ? 'w-full aspect-[4/3]' : 'h-52 w-full md:h-auto md:w-[18rem] lg:w-[19rem]'
+            }`}
+        >
+          <img
+            src={thumbnail}
+            alt={title}
+            className='h-full w-full object-cover object-center transition-transform duration-300 group-hover:scale-[1.03]'
+          />
+          {isBestseller && (
+            <span className='absolute left-3 top-3 rounded-full bg-amber-400 px-2.5 py-1 text-[10px] font-bold text-slate-900 shadow-sm'>
+              Bestseller
+            </span>
+          )}
         </div>
-        {/* Content */}
-        <div className='flex-1 flex flex-col justify-between p-3 md:pl-5'>
-          <div className='flex-1 pb-5'>
-            <h3 className='text-base md:text-lg font-semibold mb-2 line-clamp-2 text-foreground group-hover:text-primary transition-colors duration-200'>
-              {title}
-            </h3>
 
-            <p className='text-xs md:text-sm text-muted-foreground/80 mb-2 line-clamp-2'>{description}</p>
-            <p className='text-xs text-muted-foreground italic mb-2'>{instructor.name}</p>
-
-            <div className='flex items-center gap-2 mb-2'>
-              <span className='text-xs md:text-sm font-semibold text-yellow-500'>{rating}</span>
-              <div className='flex items-center gap-0.5'>
-                {[...Array(5)].map((_, i) => (
-                  <Star
-                    key={i}
-                    className={`w-3 h-3 md:w-3.5 md:h-3.5 ${
-                      i < Math.floor(rating)
-                        ? 'fill-yellow-400 text-yellow-400 drop-shadow-sm'
-                        : 'text-muted-foreground/20'
-                    }`}
-                  />
-                ))}
-              </div>
-              <span className='text-xs text-muted-foreground/70'>({reviewCount.toLocaleString('vi-VN')})</span>
+        <div className={`flex min-w-0 flex-1 flex-col justify-between ${isGrid ? 'gap-4 p-5' : 'gap-3 p-5 md:p-6'}`}>
+          <div className='space-y-3'>
+            <div>
+              <h3 className='line-clamp-2 text-base font-bold leading-snug text-slate-900 transition-colors duration-200 group-hover:text-blue-600 md:text-lg'>
+                {title}
+              </h3>
+              <p className='mt-2 line-clamp-2 text-sm leading-6 text-slate-500'>{description}</p>
             </div>
 
-            <div className='flex items-center gap-3 text-xs text-muted-foreground/80'>
+            <div className='flex flex-wrap items-center gap-x-3 gap-y-2 text-xs text-slate-500'>
+              <div className='flex items-center gap-2'>
+                <img
+                  src={instructor.avatar}
+                  alt={instructor.name}
+                  className='h-6 w-6 rounded-full object-cover ring-2 ring-white shadow-sm'
+                />
+                <span className='font-semibold text-slate-700'>{instructor.name}</span>
+              </div>
+
+              <div className='flex items-center gap-1 text-amber-500'>
+                <StarIcon className='h-3.5 w-3.5' />
+                <span className='font-semibold text-slate-700'>{rating}</span>
+              </div>
+
+              {category && (
+                <span className='rounded-full bg-blue-100 px-2.5 py-1 font-semibold text-blue-600'>{category}</span>
+              )}
               <div className='flex items-center gap-1'>
-                <Clock className='w-3 h-3 md:w-3.5 md:h-3.5 text-blue-500/80' />
+                <ClockIcon className='h-3.5 w-3.5 text-slate-400' />
                 <span>{duration}</span>
               </div>
-              <span className='text-muted-foreground/50'>•</span>
               <div className='flex items-center gap-1'>
-                <BookOpen className='w-3 h-3 md:w-3.5 md:h-3.5 text-green-500/80' />
-                <span>{lectures} bài giảng</span>
+                <ReaderIcon className='h-3.5 w-3.5 text-slate-400' />
+                <span>{lectures} bài</span>
               </div>
-              <span className='text-muted-foreground/50'>•</span>
-              <span className='capitalize'>{level}</span>
             </div>
           </div>
-        </div>
-        <div className='w-full md:w-32 flex-shrink-0 flex flex-col md:flex-row md:flex-col items-start md:items-end justify-between md:justify-start p-3'>
-          <p className='text-xl font-bold text-orange-500/90'>₫{salePrice.toLocaleString('vi-VN')}</p>
-          {originalPrice > salePrice && (
-            <p className='text-sm text-muted-foreground line-through'>₫{originalPrice.toLocaleString('vi-VN')}</p>
-          )}
+
+          <div className='h-px w-full bg-slate-100' />
+
+          <div className={`flex items-center justify-between ${isGrid ? 'pt-1' : ''}`}>
+            <div>
+              <p className={`font-bold text-orange-500/80 ${isGrid ? 'text-lg' : 'text-xl'}`}>{formatPrice(salePrice)}</p>
+              {originalPrice > salePrice && (
+                <p className='text-xs font-medium text-slate-400 line-through'>{formatPrice(originalPrice)}</p>
+              )}
+            </div>
+            <button
+              type='button'
+              className='inline-flex h-10 min-w-[118px] items-center justify-center rounded-full border border-blue-100 bg-white px-4 text-xs font-semibold text-blue-600 shadow-[0_6px_18px_rgba(15,23,42,0.06)] transition-all duration-200 ease-in-out hover:border-blue-200 hover:bg-blue-50 hover:shadow-[0_10px_24px_rgba(37,99,235,0.12)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-100 active:scale-95'
+            >
+              Xem chi tiết
+            </button>
+          </div>
         </div>
       </div>
     </Card>

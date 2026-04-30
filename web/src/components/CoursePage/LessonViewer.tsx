@@ -1,6 +1,7 @@
 import { Play, AlertTriangle } from 'lucide-react'
 import { Lesson } from '@/types/course-student'
-import VideoPlayer, { VideoPlayerRef } from './VideoPlayer'
+import ModernVideoPlayer from './ModernVideoPlayer'
+import { VideoPlayerRef } from './VideoPlayer'
 import PDFViewer from './PDFViewer'
 import { useCallback, forwardRef } from 'react'
 import lessonStudentService from '@/services/course/lesson-student.service'
@@ -56,7 +57,7 @@ export const LessonViewer = forwardRef<VideoPlayerRef, {
     return (
       <div className='w-full aspect-video bg-black rounded-[2rem] overflow-hidden relative group shadow-2xl'>
         {lesson.type === 'video' ? (
-          <VideoPlayer ref={ref} lesson={lesson} markDoneVideo={markDoneLesson} subtitlesRaw={subtitlesRaw || undefined} chunks={chunks} />
+          <ModernVideoPlayer ref={ref} lesson={lesson} markDoneVideo={markDoneLesson} subtitlesRaw={subtitlesRaw || undefined} chunks={chunks} onShowChunkDetails={onShowChunkDetails} />
         ) : lesson.type === 'article' ? (
           <PDFViewer lesson={lesson} markDoneVideo={markDoneLesson} />
         ) : (
