@@ -1,0 +1,16 @@
+---
+description: Use TypeScript enums (not raw strings) for wire/cache/job status comparisons and API payloads where values are fixed sets.
+globs: "**/*.ts"
+alwaysApply: true
+---
+
+# Status fields — prefer enums over string literals
+
+When comparing or emitting **fixed vocabulary** statuses (Redis payloads, Bull job outcomes, HTTP JSON `status` fields, etc.):
+
+1. **Define or reuse a string enum** (or shared `const` object + union type) in `**/enums/*.enum.ts` (or domain-local enums).
+2. **Do not** scatter literals such as `cached?.status === 'FAILED'` or `status: 'COMPLETED'` unless the value is truly dynamic/external with no closed set.
+3. **Reuse** an existing enum if the wire format matches (e.g. Redis job result uses the same tokens as long-poll outcomes).
+4. **Document** new enums briefly (comment): consumer (which API / cache key) and allowed values.
+
+This reduces drift between writers (processors) and readers (controllers, wait services, snapshots).

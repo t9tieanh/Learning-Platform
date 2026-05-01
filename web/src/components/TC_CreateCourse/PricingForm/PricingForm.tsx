@@ -36,7 +36,7 @@ const PricingForm = () => {
   const earnings = calculateEarnings(coursePrice)
 
   return (
-    <div className='max-w-6xl space-y-8 mx-auto'>
+    <div className='max-w-7xl w-full space-y-8 mx-auto'>
       <TitleComponent
         title='Đặt giá khóa học'
         description='Đặt giá cho khóa học của bạn hoặc làm cho nó miễn phí. Bạn có thể thay đổi giá bất kỳ lúc nào, nhưng lưu ý

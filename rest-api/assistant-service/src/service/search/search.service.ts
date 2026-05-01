@@ -76,7 +76,7 @@ export class SearchService {
                     similarity
                     FROM search_lesson_chunks_by_embedding_v2(
                     ${lessonId},
-                    ${JSON.stringify(queryEmbedding)}::vector,
+                    ${queryEmbedding}::vector(768),
                     ${limit}::int
                 )
             `;

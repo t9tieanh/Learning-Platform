@@ -178,7 +178,7 @@ const QuizEditor: React.FC<QuizEditorProps> = ({
                             <h4 className='text-[16px] font-bold text-gray-900 tracking-tight'>Câu hỏi {index + 1}</h4>
                             <div className='flex items-center gap-2 mt-0.5'>
                                 <Sparkles className='w-3 h-3 text-blue-500' />
-                                <p className='text-[10px] text-blue-500 font-medium tracking-wide'>Trình soạn thảo AI</p>
+                                <p className='text-[10px] text-blue-500 font-medium'>Trình soạn thảo AI</p>
                             </div>
                         </div>
                     </div>
@@ -248,7 +248,7 @@ const QuizEditor: React.FC<QuizEditorProps> = ({
                 <div className='flex flex-col gap-7'>
                     {/* Question Content */}
                     <div className='flex flex-col gap-2.5'>
-                        <label className='text-[11px] font-medium text-gray-400 px-1 uppercase tracking-wide'>Nội dung đề bài</label>
+                        <label className='text-[11px] font-medium text-gray-500 px-1'>Nội dung đề bài</label>
                         <CustomTextarea
                             value={draft.question}
                             onChange={(e) => setDraft({ ...draft, question: e.target.value })}
@@ -261,7 +261,7 @@ const QuizEditor: React.FC<QuizEditorProps> = ({
                     {/* Choices */}
                     <div className='flex flex-col gap-2.5'>
                         <div className='flex items-center justify-between px-1'>
-                            <label className='text-[11px] font-medium text-gray-400 uppercase tracking-wide'>Các phương án trả lời</label>
+                            <label className='text-[11px] font-medium text-gray-500'>Các phương án trả lời</label>
                             <span className='text-[10px] text-gray-300 italic font-medium'>Chọn đáp án đúng nhất</span>
                         </div>
                         <div className='flex flex-col gap-3'>
@@ -330,7 +330,7 @@ const QuizEditor: React.FC<QuizEditorProps> = ({
                     {/* Explanation */}
                     <div className='flex flex-col gap-2.5'>
                         <div className='flex items-center gap-2 px-1'>
-                            <label className='text-[11px] font-medium text-gray-400 uppercase tracking-wide'>Giải thích chi tiết kiến thức</label>
+                            <label className='text-[11px] font-medium text-gray-500'>Giải thích chi tiết kiến thức</label>
                             <Brain className='w-3 h-3 text-gray-300' />
                         </div>
                         <div className='relative'>
@@ -345,8 +345,8 @@ const QuizEditor: React.FC<QuizEditorProps> = ({
                                 <div className='absolute bottom-3 right-3 flex items-center gap-1.5 px-2 py-1 bg-blue-50 rounded-lg border border-blue-100'>
                                     <Sparkles className='w-2.5 h-2.5 text-blue-500' />
                                     <div className='flex flex-col'>
-                                        <span className='text-[8px] font-bold text-blue-600 uppercase tracking-tighter leading-none'>AI Optimized</span>
-                                        {draft.aiConfidence && <span className='text-[7px] text-blue-400 font-bold mt-0.5 leading-none'>{Math.round(draft.aiConfidence * 100)}% Confidence</span>}
+                                        <span className='text-[8px] font-semibold text-blue-600 leading-none'>Tối ưu AI</span>
+                                        {draft.aiConfidence && <span className='text-[7px] text-blue-400 font-medium mt-0.5 leading-none'>{Math.round(draft.aiConfidence * 100)}% độ tin cậy</span>}
                                     </div>
                                 </div>
                             )}
