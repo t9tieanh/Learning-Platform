@@ -39,6 +39,7 @@ const Cover = ({ video, image, title, shortDescription, teacher, tags, showSmall
 
   // State to control showing image or video
   const [showVideo, setShowVideo] = useState(false)
+  const [isExpanded, setIsExpanded] = useState(false)
 
   useEffect(() => {
     setPreview((prev) => ({
@@ -148,7 +149,7 @@ const Cover = ({ video, image, title, shortDescription, teacher, tags, showSmall
 
         <PreviewPublicLesson preview={preview} setPreview={setPreview} />
 
-        <div className='title-container text-left text-white w-full md:w-auto'>
+        <div className='title-container text-left text-white w-full md:w-auto relative z-10'>
           <h1 className='text-xl md:text-4xl font-bold mb-4 max-w-xl text-justify'>Khóa học {title}</h1>
           <div className='flex items-center gap-2 mb-4'>
             <Avatar>
@@ -157,9 +158,26 @@ const Cover = ({ video, image, title, shortDescription, teacher, tags, showSmall
             </Avatar>
             <div className='text-base md:text-lg text-white-200'>{teacher.name}</div>
           </div>
-          <p className='text-sm md:text-base max-w-xl text-justify text-gray-200'>{shortDescription}</p>
+          <div className='description-wrapper max-w-xl'>
+            <p className={cn('text-sm md:text-base text-justify text-gray-200 transition-all duration-300', !isExpanded && 'line-clamp-3')}>
+              {shortDescription}
+            </p>
+            {shortDescription && shortDescription.length > 150 && (
+              <button
+                type='button'
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  setIsExpanded(!isExpanded)
+                }}
+                className='text-blue-400 hover:text-blue-300 text-xs md:text-sm font-semibold mt-1 transition-colors cursor-pointer relative z-20'
+              >
+                {isExpanded ? 'Thu gọn' : 'Xem thêm'}
+              </button>
+            )}
+          </div>
           <div className='flex flex-wrap gap-2 mt-4 w-full max-w-[640px] break-words'>
-            {tags?.map((tag) => (
+            {tags?.slice(0, 8).map((tag) => (
               <Badge
                 key={tag.id}
                 variant='outline'
