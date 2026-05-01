@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import {
+  ArrowLeft,
   Eye,
   GraduationCap,
   Loader2,
@@ -31,6 +32,7 @@ export interface LessonExamBlueprintTestPreviewPanelProps {
   loading: boolean
   quizzes: GeneratedQuiz[]
   testTitle?: string | null
+  onBack?: () => void
 }
 
 type PreviewMode = 'student' | 'teacher'
@@ -293,14 +295,14 @@ const QuizTeacherInlineEditor: React.FC<QuizTeacherInlineEditorProps> = ({
           variant='outline'
           label='Hủy'
           icon={<X className='w-3.5 h-3.5' strokeWidth={2.25} />}
-          className='h-9 text-[11px] md:text-[12px] font-semibold border-gray-200 text-gray-700'
+          className='h-8 text-[11px] md:text-[12px] font-semibold border-gray-200 text-gray-700'
           onClick={onCancel}
           disabled={saving}
         />
         <CustomButton
           type='button'
           label={saving ? 'Đang lưu…' : 'Lưu'}
-          className='h-9 text-[11px] md:text-[12px] font-bold bg-amber-600 hover:bg-amber-700 text-white rounded-lg px-4 min-w-[88px]'
+          className='h-8 text-[11px] md:text-[12px] font-bold bg-amber-600 hover:bg-amber-700 text-white rounded-lg px-4 min-w-[88px]'
           onClick={() => void handleSave()}
           disabled={saving}
           isLoader={saving}
@@ -315,8 +317,8 @@ const QuizTeacherInlineEditor: React.FC<QuizTeacherInlineEditorProps> = ({
  */
 const LessonExamBlueprintTestPreviewPanel: React.FC<
   LessonExamBlueprintTestPreviewPanelProps
-> = ({ visible, loading, quizzes, testTitle }) => {
-  const [mode, setMode] = useState<PreviewMode>('student')
+> = ({ visible, loading, quizzes, testTitle, onBack }) => {
+  const [mode, setMode] = useState<PreviewMode>('teacher')
   const [localQuizzes, setLocalQuizzes] = useState<GeneratedQuiz[]>(quizzes)
   const [selectionByQuizId, setSelectionByQuizId] = useState<Record<string, string>>({})
   const [revealedByQuizId, setRevealedByQuizId] = useState<Record<string, boolean>>({})
@@ -380,10 +382,35 @@ const LessonExamBlueprintTestPreviewPanel: React.FC<
             </div>
           </div>
           {!loading && localQuizzes.length > 0 ? (
-            <span className='text-[10px] md:text-[11px] font-semibold tabular-nums text-violet-700 bg-violet-100/80 border border-violet-200/90 px-2 py-0.5 rounded-full shrink-0'>
-              {localQuizzes.length} câu
-            </span>
-          ) : null}
+            <div className='flex items-center gap-2 shrink-0 ml-auto'>
+              <span className='text-[10px] md:text-[11px] font-semibold tabular-nums text-violet-700 bg-violet-100/80 border border-violet-200/90 px-2 py-0.5 rounded-full'>
+                {localQuizzes.length} câu
+              </span>
+              {onBack && (
+                <CustomButton
+                  type='button'
+                  variant='outline'
+                  label='Quay lại'
+                  icon={<ArrowLeft className='w-3 h-3' />}
+                  className='h-7.5 text-[11px] font-bold border-violet-200 text-violet-700 bg-white hover:bg-violet-50 rounded-lg px-2.5'
+                  onClick={onBack}
+                />
+              )}
+            </div>
+          ) : (
+            onBack && (
+              <div className='ml-auto shrink-0'>
+                <CustomButton
+                  type='button'
+                  variant='outline'
+                  label='Quay lại'
+                  icon={<ArrowLeft className='w-3 h-3' />}
+                  className='h-7.5 text-[11px] font-bold border-violet-200 text-violet-700 bg-white hover:bg-violet-50 rounded-lg px-2.5'
+                  onClick={onBack}
+                />
+              </div>
+            )
+          )}
         </div>
 
         <div
@@ -391,6 +418,21 @@ const LessonExamBlueprintTestPreviewPanel: React.FC<
           role='tablist'
           aria-label='Chế độ xem'
         >
+          <button
+            type='button'
+            role='tab'
+            aria-selected={mode === 'teacher'}
+            onClick={() => setMode('teacher')}
+            className={cn(
+              'inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[10px] md:text-[11px] font-bold transition-colors',
+              mode === 'teacher'
+                ? 'bg-white text-violet-900 shadow-sm'
+                : 'text-violet-800/80 hover:text-violet-950'
+            )}
+          >
+            <Eye className='w-3.5 h-3.5 shrink-0' strokeWidth={2.25} aria-hidden />
+            Giáo viên & chỉnh sửa
+          </button>
           <button
             type='button'
             role='tab'
@@ -408,21 +450,6 @@ const LessonExamBlueprintTestPreviewPanel: React.FC<
           >
             <GraduationCap className='w-3.5 h-3.5 shrink-0' strokeWidth={2.25} aria-hidden />
             Góc nhìn học viên
-          </button>
-          <button
-            type='button'
-            role='tab'
-            aria-selected={mode === 'teacher'}
-            onClick={() => setMode('teacher')}
-            className={cn(
-              'inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[10px] md:text-[11px] font-bold transition-colors',
-              mode === 'teacher'
-                ? 'bg-white text-violet-900 shadow-sm'
-                : 'text-violet-800/80 hover:text-violet-950'
-            )}
-          >
-            <Eye className='w-3.5 h-3.5 shrink-0' strokeWidth={2.25} aria-hidden />
-            Giáo viên & chỉnh sửa
           </button>
         </div>
       </div>

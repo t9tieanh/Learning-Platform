@@ -114,9 +114,11 @@ const renderMarqueeIcons = (icons: string[], rowKey: 'row1' | 'row2') => {
 const TrendingCategories = () => {
   return (
     <div className='trending-categories-container py-6 space-y-12 mt-6 px-4 md:px-0'>
-      <h4 className='text-center text-2xl md:text-3xl title-categories font-extrabold tracking-tight mt-4'>
-        Kiến thức và kỹ năng nổi bật hiện nay
-      </h4>
+      <div className='flex justify-center mt-2 md:mt-0'>
+        <h4 className='font-bold bg-blue-500 text-white p-2 px-10 rounded-full text-center min-w-[20rem]'>
+          Kiến thức và kỹ năng nổi bật hiện nay
+        </h4>
+      </div>
 
       {/* Marquee icons - Row 1 */}
       <div className='marquee-shell overflow-hidden w-full relative max-w-5xl mx-auto select-none mt-6'>
