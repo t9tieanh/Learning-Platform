@@ -9,6 +9,9 @@ import { Quiz, QuizChoice } from '@prisma/client';
 import type { QuizWithChoices } from '~/service/quizz/quizPersistence.service';
 
 import { QuestionType, DifficultyLevel, BloomLevel, QuizStatus } from '~/enums/quizStatus.enum';
+import ApiError from '~/middleware/ApiError';
+import { StatusCodes } from 'http-status-codes';
+import { UpdateQuizPersistPayload } from '~/dto/request/quiz-update.dto';
 
 /**
  * QuizService orchestrates quiz generation and persistence.
@@ -23,20 +26,24 @@ export class QuizService {
   private mapQuizRowsToListResponse(quizzes: QuizWithChoices[]): ListQuizzesResponse {
     return quizzes.map((quiz) => ({
       id: quiz.id,
+      chunkId: quiz.chunkId ?? undefined,
       question: quiz.question,
       explanation: quiz.explanation,
       type: quiz.type as unknown as QuestionType,
       difficulty: quiz.difficulty as unknown as DifficultyLevel,
       bloomLevel: quiz.bloomLevel as unknown as BloomLevel,
-      choices: quiz.choices.map((choice) => ({
-        id: choice.id,
-        text: choice.text,
-        isCorrect: choice.isCorrect,
-        feedback: choice.feedback || undefined,
-      })),
+      choices: [...quiz.choices]
+        .sort((a, b) => a.order - b.order)
+        .map((choice) => ({
+          id: choice.id,
+          text: choice.text,
+          isCorrect: choice.isCorrect,
+          feedback: choice.feedback || undefined,
+        })),
       isApproved: quiz.isApproved,
       status: quiz.status as unknown as QuizStatus,
       createdAt: quiz.createdAt,
+      updatedAt: quiz.updatedAt,
     }));
   }
 
@@ -186,6 +193,20 @@ export class QuizService {
   }
 
   /**
+   * Flat list of LESSON_TEST quizzes for the whole lesson (student-facing order).
+   */
+  async getQuizzesForLessonTestLesson(lessonId: string): Promise<ListQuizzesResponse> {
+    const quizzes =
+      await quizPersistenceService.getAllLessonTestQuizzesForLessonOrdered(lessonId);
+
+    Logger.info(
+      `[QuizService] Flat LESSON_TEST list for lessonId=${lessonId}: ${quizzes.length} quizzes`
+    );
+
+    return this.mapQuizRowsToListResponse(quizzes);
+  }
+
+  /**
    * Retrieves a single quiz by ID with all choices.
    * 
    * @param quizId - The quiz ID
@@ -212,16 +233,45 @@ export class QuizService {
       type: quiz.type as unknown as QuestionType,
       difficulty: quiz.difficulty as unknown as DifficultyLevel,
       bloomLevel: quiz.bloomLevel as unknown as BloomLevel,
-      choices: quiz.choices.map(choice => ({
-        id: choice.id,
-        text: choice.text,
-        isCorrect: choice.isCorrect,
-        feedback: choice.feedback || undefined,
-      })),
+      choices: [...quiz.choices]
+        .sort((a, b) => a.order - b.order)
+        .map((choice) => ({
+          id: choice.id,
+          text: choice.text,
+          isCorrect: choice.isCorrect,
+          feedback: choice.feedback || undefined,
+        })),
       isApproved: quiz.isApproved,
       status: quiz.status as unknown as QuizStatus,
       createdAt: quiz.createdAt,
+      updatedAt: quiz.updatedAt,
     };
+  }
+
+  /**
+   * Persists instructor edits (choices already validated + normalized in controller).
+   */
+  async updateQuizById(quizId: string, payload: UpdateQuizPersistPayload) {
+    const existing = await quizPersistenceService.getQuizById(quizId);
+    if (!existing) {
+      throw new ApiError(StatusCodes.NOT_FOUND, `Quiz not found: id=${quizId}`);
+    }
+
+    const saved = await quizPersistenceService.updateQuizWithChoicesReplace(quizId, {
+      question: payload.question,
+      explanation: payload.explanation,
+      type: payload.type,
+      difficulty: payload.difficulty,
+      bloomLevel: payload.bloomLevel ?? existing.bloomLevel as BloomLevel,
+      choices: payload.choices,
+    });
+
+    const mapped = this.mapQuizRowsToListResponse([saved]);
+    const row = mapped[0];
+    if (!row) {
+      throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, 'Failed to map updated quiz');
+    }
+    return row;
   }
 
   /**

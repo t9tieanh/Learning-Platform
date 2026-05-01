@@ -5,6 +5,7 @@ import sendResponse from '~/dto/response/send-response';
 import ApiError from '~/middleware/ApiError';
 import lessonTestService from '~/service/lessonTest/lessonTest.service';
 import lessonTestGenerationService from '~/service/lessonTest/lessonTestGeneration.service';
+import analysisQuizService from '~/service/analysis/quiz.service';
 import {
   BulkGenerateLessonTestDto,
   CreateLessonTestChunkGroupDto,
@@ -49,6 +50,8 @@ class LessonTestController {
         };
       });
 
+      const quizzes = await analysisQuizService.getQuizzesForLessonTestLesson(lessonId);
+
       sendResponse(res, {
         code: StatusCodes.OK,
         message: 'OK',
@@ -64,6 +67,7 @@ class LessonTestController {
             updatedAt: bundle.updatedAt.toISOString(),
           },
           chunkGroups,
+          quizzes,
         },
       });
     } catch (e) {

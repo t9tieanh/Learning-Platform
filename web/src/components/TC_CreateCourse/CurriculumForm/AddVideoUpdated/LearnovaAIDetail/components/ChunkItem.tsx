@@ -156,34 +156,39 @@ const ChunkItem: React.FC<ChunkItemProps> = ({
                     '[&>svg]:shrink-0 [&>svg]:text-blue-600 [&>svg]:mt-0.5'
                 )}
             >
-                <div className='flex items-center justify-between w-full pr-2'>
-                    <div className='flex items-center gap-3 md:gap-4 min-w-0'>
+                <div className='flex items-start justify-between w-full pr-2'>
+                    <div className='flex items-start gap-3 md:gap-4 min-w-0 flex-1'>
                         <div
                             className={cn(
-                                'w-9 h-9 md:w-10 md:h-10 shrink-0 rounded-2xl flex items-center justify-center',
-                                'bg-white/95 text-blue-700 font-bold text-[13px] md:text-[14px] tabular-nums',
+                                'w-9 h-9 md:w-10 md:h-10 shrink-0 mt-0.5 rounded-2xl flex items-center justify-center',
+                                'bg-white/95 text-blue-700 font-bold text-[13px] md:text-[14px] tabular-nums leading-none',
                                 'border border-blue-200/80 shadow-sm ring-1 ring-blue-100/30',
                                 'group-hover:scale-[1.02] transition-transform'
                             )}
                         >
                             {idx + 1}
                         </div>
-                        <div className='text-left space-y-1 min-w-0'>
-                            <h4 className='text-[12px] md:text-[13px] font-semibold text-gray-800 tracking-tight group-hover:text-blue-700 transition-colors [overflow-wrap:anywhere]'>
+                        <div className='text-left min-w-0 flex-1'>
+                            <h4 className='text-[12px] md:text-[13px] font-semibold text-gray-800 tracking-tight leading-snug group-hover:text-blue-700 transition-colors [overflow-wrap:anywhere]'>
                                 {chunk.title || `Phân đoạn ${idx + 1}`}
                             </h4>
-                            <div className='flex items-center flex-wrap gap-x-3 gap-y-0.5 text-[11px] text-gray-500 font-medium'>
+                            <div className='mt-1 flex items-center flex-wrap gap-x-2 gap-y-1 text-[11px] text-gray-500 font-medium'>
                                 <span
-                                    className='flex items-center gap-1.5 bg-gray-50 px-2 py-0.5 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors cursor-pointer group/time'
+                                    className='inline-flex items-center gap-1.5 bg-gray-50 px-2 py-0.5 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors cursor-pointer group/time'
                                     onClick={(e) => {
                                         e.stopPropagation()
                                         handleSeek(chunk.startTime)
                                     }}
                                 >
-                                    <PlayCircle className='w-3.5 h-3.5 text-blue-500 group-hover/time:scale-110 transition-transform' /> {chunk.startTime}
+                                    <PlayCircle className='w-3.5 h-3.5 shrink-0 text-blue-500 group-hover/time:scale-110 transition-transform' />{' '}
+                                    <span className='tabular-nums'>{chunk.startTime}</span>
                                 </span>
-                                <span className='w-1 h-1 bg-gray-200 rounded-full' />
-                                <span>{chunk.sentenceCount} Câu phát biểu</span>
+                                <span className='text-gray-300 select-none' aria-hidden>
+                                    ·
+                                </span>
+                                <span className='tabular-nums'>
+                                    {chunk.sentenceCount} Câu phát biểu
+                                </span>
                             </div>
                         </div>
                     </div>

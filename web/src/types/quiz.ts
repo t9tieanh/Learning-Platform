@@ -88,6 +88,23 @@ export interface GeneratedQuizResponse {
   updatedAt: string
 }
 
+/** PATCH `assistant/quizzes/quiz/:quizId` — replaces all choices server-side */
+export interface UpdateQuizChoicePayload {
+  text: string
+  isCorrect: boolean
+  feedback?: string | null
+}
+
+export interface UpdateQuizPayload {
+  question: string
+  explanation: string
+  type: QuestionType
+  difficulty: QuizDifficulty
+  /** Omitted from instructor UI — backend keeps existing Bloom or default. */
+  bloomLevel?: BloomLevel
+  choices: UpdateQuizChoicePayload[]
+}
+
 /**
  * Response from batch quiz generation endpoint
  * Returns multiple quizzes organized by distribution

@@ -222,8 +222,92 @@ export class QuizPersistenceService {
   }
 
   /**
+   * All LESSON_TEST quizzes for a lesson, in learner-facing order: chunk groups by `createdAt` asc,
+   * then quizzes in each group by `createdAt` asc.
+   *
+   * Single round-trip: load quizzes + choices + parent group timestamps, sort in memory (no N+1).
+   */
+  async getAllLessonTestQuizzesForLessonOrdered(lessonId: string): Promise<QuizWithChoices[]> {
+    const rows = await prismaService.quiz.findMany({
+      where: {
+        quizScope: QuizScope.LESSON_TEST,
+        lessonTestChunkGroup: { lessonId },
+      },
+      include: {
+        choices: true,
+        lessonTestChunkGroup: { select: { createdAt: true } },
+      },
+    });
+
+    rows.sort((a, b) => {
+      const ga = a.lessonTestChunkGroup?.createdAt.getTime() ?? 0;
+      const gb = b.lessonTestChunkGroup?.createdAt.getTime() ?? 0;
+      if (ga !== gb) return ga - gb;
+      return a.createdAt.getTime() - b.createdAt.getTime();
+    });
+
+    const out: QuizWithChoices[] = rows.map((row) => {
+      const { lessonTestChunkGroup: _g, choices, ...quiz } = row;
+      const sortedChoices = [...choices].sort((x, y) => x.order - y.order);
+      return { ...quiz, choices: sortedChoices } as QuizWithChoices;
+    });
+
+    Logger.info(
+      `[QuizPersistenceService] Flat LESSON_TEST quiz list for lessonId=${lessonId}: ${out.length} items`
+    );
+
+    return out;
+  }
+
+  /**
+   * Replace quiz stem/meta and all choices (transaction). Keeps same quiz id / chunk / lesson-test links.
+   */
+  async updateQuizWithChoicesReplace(
+    quizId: string,
+    data: {
+      question: string;
+      explanation: string;
+      type: QuestionType;
+      difficulty: DifficultyLevel;
+      bloomLevel: BloomLevel;
+      choices: Array<{ text: string; isCorrect: boolean; feedback?: string | null }>;
+    }
+  ): Promise<QuizWithChoices> {
+    Logger.info(`[QuizPersistenceService] Replacing content for quiz id=${quizId}`);
+
+    return prismaService.$transaction(async (tx) => {
+      await tx.quizChoice.deleteMany({ where: { quizId } });
+
+      const updated = await tx.quiz.update({
+        where: { id: quizId },
+        data: {
+          question: data.question,
+          explanation: data.explanation,
+          type: data.type,
+          difficulty: data.difficulty,
+          bloomLevel: data.bloomLevel,
+          choices: {
+            create: data.choices.map((c, index) => ({
+              text: c.text,
+              isCorrect: c.isCorrect,
+              order: index,
+              feedback: c.feedback ?? null,
+            })),
+          },
+        },
+        include: { choices: true },
+      });
+
+      updated.choices.sort((a, b) => a.order - b.order);
+
+      Logger.info(`[QuizPersistenceService] Updated quiz id=${quizId} choices=${updated.choices.length}`);
+      return updated as QuizWithChoices;
+    });
+  }
+
+  /**
    * Retrieves a single quiz by ID with all its choices.
-   * 
+   *
    * @param quizId - The quiz ID
    * @returns Quiz with choices, or null if not found
    */

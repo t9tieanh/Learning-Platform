@@ -1,4 +1,4 @@
-import type { QuizBatchDistributionItem } from '@/types/quiz'
+import type { GeneratedQuiz, QuizBatchDistributionItem } from '@/types/quiz'
 
 // ---------------------------------------------------------------------------
 // Enumerations — align with assistant-service Prisma / job snapshots
@@ -66,6 +66,8 @@ export interface LessonTestChunkGroupBundleDto {
 export interface LessonTestBundleResponse {
   lessonTest: LessonTestHeaderDto
   chunkGroups: LessonTestChunkGroupBundleDto[]
+  /** Flat list in learner order (chunk groups asc, then questions asc). */
+  quizzes: GeneratedQuiz[]
 }
 
 export interface CreateLessonTestChunkGroupPayload {
@@ -74,6 +76,15 @@ export interface CreateLessonTestChunkGroupPayload {
   label?: string | null
   distribution?: QuizBatchDistributionItem[] | unknown
   batchUserPrompt?: string | null
+}
+
+/** Body for PATCH `assistant/analysis/lesson-test/chunk-groups/:groupId` */
+export interface PatchLessonTestChunkGroupPayload {
+  chunkIds?: string[]
+  questionCount?: number
+  label?: string | null
+  batchUserPrompt?: string | null
+  distribution?: QuizBatchDistributionItem[] | unknown
 }
 
 export interface LessonTestChunkGroupCreatedDto {

@@ -8,7 +8,8 @@ import type {
   QuizBatchDistributionItem,
   QuizDifficulty,
   QuestionType,
-  BloomLevel
+  BloomLevel,
+  UpdateQuizPayload,
 } from '@/types/quiz'
 
 // ---------------------------------------------------------------------------
@@ -87,6 +88,14 @@ class QuizService {
     const res = await axiosClient.axiosInstance.get(
       `assistant/quizzes/chunks/${chunkId}/quizzes/${quizId}`
     )
+    return res.data as ApiResponse<GeneratedQuiz>
+  }
+
+  /**
+   * Instructor edit — full choice replace; works for chunk quizzes and LESSON_TEST rows.
+   */
+  async updateQuiz(quizId: string, body: UpdateQuizPayload): Promise<ApiResponse<GeneratedQuiz>> {
+    const res = await axiosClient.axiosInstance.patch(`assistant/quizzes/quiz/${quizId}`, body)
     return res.data as ApiResponse<GeneratedQuiz>
   }
 }

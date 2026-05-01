@@ -16,6 +16,8 @@ export type ExamBlueprintRow = {
   chunkIds: string[]
   questionCount: number
   instruction: string
+  /** Maps to server `LessonTestChunkGroup.label` (tiêu đề nhóm). */
+  groupTitle: string
 }
 
 /** Base difficulty and Bloom for batch quiz items when not overridden. */
@@ -146,6 +148,7 @@ export function buildDefaultExamBlueprintRows(chunks: LessonChunk[]): ExamBluepr
     chunkIds,
     questionCount: perGroup[i] ?? DEFAULT_EXAM_QUESTIONS_PER_GROUP,
     instruction: '',
+    groupTitle: '',
   }))
 }
 
@@ -157,6 +160,7 @@ export function makeEmptyExamBlueprintRow(chunks: LessonChunk[]): ExamBlueprintR
       chunkIds: [],
       questionCount: DEFAULT_EXAM_QUESTIONS_PER_GROUP,
       instruction: '',
+      groupTitle: '',
     }
   }
   const take = Math.min(MAX_CHUNKS_PER_LESSON_TEST_GROUP, chunks.length)
@@ -165,6 +169,7 @@ export function makeEmptyExamBlueprintRow(chunks: LessonChunk[]): ExamBlueprintR
     chunkIds: chunks.slice(0, take).map((c) => c.id),
     questionCount: DEFAULT_EXAM_QUESTIONS_PER_GROUP,
     instruction: '',
+    groupTitle: '',
   }
 }
 
@@ -220,11 +225,12 @@ export function normalizeExamBlueprintRowsWhenChunksChange(
   }
   const ids = new Set(chunks.map((c) => c.id))
   return prev.map((r) => {
-    const keep = r.chunkIds.filter((id) => ids.has(id))
+    const base = { ...r, groupTitle: r.groupTitle ?? '' }
+    const keep = base.chunkIds.filter((id) => ids.has(id))
     if (keep.length > 0) {
-      return { ...r, chunkIds: keep }
+      return { ...base, chunkIds: keep }
     }
-    return { ...r, chunkIds: [chunks[0].id] }
+    return { ...base, chunkIds: [chunks[0].id] }
   })
 }
 
@@ -255,7 +261,7 @@ export function blueprintSyncSignature(
   return valid
     .map(
       (r) =>
-        `${r.id}:${r.chunkIds.join(',')}:${r.questionCount}:${r.instruction.trim()}`
+        `${r.id}:${r.chunkIds.join(',')}:${r.questionCount}:${r.instruction.trim()}:${r.groupTitle.trim()}`
     )
     .join('|')
 }

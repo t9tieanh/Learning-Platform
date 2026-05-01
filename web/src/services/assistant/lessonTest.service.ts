@@ -13,6 +13,7 @@ import {
   type LessonTestChunkGroupCreatedDto,
   type LessonTestHeaderDto,
   type LessonTestJobSnapshotItemDto,
+  type PatchLessonTestChunkGroupPayload,
   type PutLessonTestPayload,
 } from '@/types/lesson-test.type'
 
@@ -37,7 +38,11 @@ class LessonTestService {
       if (body.code === 404 || body.result == null) {
         return null
       }
-      return body.result
+      const r = body.result
+      return {
+        ...r,
+        quizzes: Array.isArray(r.quizzes) ? r.quizzes : [],
+      }
     } catch (e) {
       const err = e as AxiosError<{ message?: string }>
       if (err.response?.status === 404) {
@@ -58,6 +63,10 @@ class LessonTestService {
     return res.data as ApiResponse<LessonTestHeaderDto>
   }
 
+  /**
+   * Xóa một chunk group trên assistant-service.
+   * DELETE `assistant/analysis/lesson-test/chunk-groups/:groupId`
+   */
   async deleteChunkGroup(groupId: string): Promise<void> {
     try {
       await axiosClient.axiosInstance.delete(
@@ -70,6 +79,21 @@ class LessonTestService {
       }
       throw e
     }
+  }
+
+  /**
+   * Cập nhật một chunk group (tiêu đề, gợi ý AI, số câu, phân đoạn…).
+   * PATCH `assistant/analysis/lesson-test/chunk-groups/:groupId`
+   */
+  async patchChunkGroup(
+    groupId: string,
+    body: PatchLessonTestChunkGroupPayload
+  ): Promise<ApiResponse<LessonTestChunkGroupCreatedDto>> {
+    const res = await axiosClient.axiosInstance.patch(
+      `assistant/analysis/lesson-test/chunk-groups/${groupId}`,
+      body
+    )
+    return res.data as ApiResponse<LessonTestChunkGroupCreatedDto>
   }
 
   async createChunkGroup(

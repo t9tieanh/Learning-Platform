@@ -1,13 +1,12 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { AxiosError } from 'axios'
 import {
+  ArrowLeft,
   ChevronDown,
   ClipboardList,
-  Hash,
   Layers,
   LayoutList,
   Loader2,
-  PenLine,
   Plus,
   RefreshCw,
   ScrollText,
@@ -19,8 +18,6 @@ import HighGlossBackground from '@/components/common/HighGlossBackground'
 import CustomButton from '@/components/common/Button'
 import MultiSelectSearch from '@/components/common/MultiSelectSearch'
 import { Label } from '@/components/ui/label'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
   Collapsible,
@@ -31,6 +28,8 @@ import { showConfirmToast } from '@/components/common/ShowConfirmToast'
 import { cn } from '@/lib/utils'
 import LessonExamBlueprintHelpPanel from './LessonExamBlueprintHelpPanel'
 import LessonExamBlueprintTargetTotalCard from './LessonExamBlueprintTargetTotalCard'
+import LessonExamBlueprintGroupMetaPanel from './LessonExamBlueprintGroupMetaPanel'
+import LessonExamBlueprintTestPreviewPanel from './LessonExamBlueprintTestPreviewPanel'
 import lessonTestService from '@/services/assistant/lessonTest.service'
 import type {
   AnalysisLessonTestChunkGroupSnapshot,
@@ -68,6 +67,8 @@ interface LessonExamBlueprintSectionProps {
   persistedLessonTest?: AnalysisLessonTestHeaderSnapshot | null
   persistedLessonTestChunkGroups?: AnalysisLessonTestChunkGroupSnapshot[]
   onAfterGenerate?: () => void
+  /** When set, shows a back control inside the blue header (e.g. return to lecture structure). */
+  onBackToStructure?: () => void
 }
 
 /** Section: map chunks to config groups, target total, then batch-generate quizzes per group (VIP). */
@@ -77,6 +78,7 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
   persistedLessonTest = null,
   persistedLessonTestChunkGroups = [],
   onAfterGenerate,
+  onBackToStructure,
 }) => {
   const { openVipDialog } = useVipUpgrade()
   const { data: authData } = useAuthStore()
@@ -98,6 +100,7 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
         q: x.questionCount,
         c: [...x.chunkIds].sort(),
         b: x.batchUserPrompt ?? '',
+        l: x.label ?? '',
       }))
     )
   }, [persistedLessonTestChunkGroups])
@@ -129,6 +132,56 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
   const [previewChunkIdByRow, setPreviewChunkIdByRow] = useState<Record<string, string>>({})
   /** Whether each config group card is expanded; missing key → first group defaults to open. */
   const [rowOpen, setRowOpen] = useState<Record<string, boolean>>({})
+  /** Chunk-group PATCH save in flight (`PATCH …/lesson-test/chunk-groups/:groupId`). */
+  const [savingGroupRowId, setSavingGroupRowId] = useState<string | null>(null)
+  const rowOpsLocked = singleGroupRowId !== null || savingGroupRowId !== null
+
+  const hasServerChunkGroups = useMemo(
+    () => Object.keys(groupIdsByRowId).length > 0,
+    [groupIdsByRowId]
+  )
+
+  /** Bump to refetch flat learner-order quizzes from GET …/lesson-test */
+  const [flatLessonTestPreviewTick, setFlatLessonTestPreviewTick] = useState(0)
+  const refreshFlatLessonTestPreview = useCallback(() => {
+    setFlatLessonTestPreviewTick((t) => t + 1)
+  }, [])
+
+  const [flatLessonTestQuizzes, setFlatLessonTestQuizzes] = useState<GeneratedQuiz[]>([])
+  const [flatLessonTestPreviewLoading, setFlatLessonTestPreviewLoading] = useState(false)
+  const [flatLessonTestTitleFromApi, setFlatLessonTestTitleFromApi] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!lessonId || !hasServerChunkGroups) {
+      setFlatLessonTestQuizzes([])
+      setFlatLessonTestTitleFromApi(null)
+      setFlatLessonTestPreviewLoading(false)
+      return
+    }
+
+    let cancelled = false
+    setFlatLessonTestPreviewLoading(true)
+
+    lessonTestService
+      .fetchLessonTestBundle(lessonId)
+      .then((bundle) => {
+        if (cancelled) return
+        setFlatLessonTestQuizzes(bundle?.quizzes ?? [])
+        setFlatLessonTestTitleFromApi(bundle?.lessonTest?.title ?? null)
+      })
+      .catch(() => {
+        if (cancelled) return
+        toast.error('Không tải được bài kiểm tra đầy đủ để xem trước.')
+        setFlatLessonTestQuizzes([])
+      })
+      .finally(() => {
+        if (!cancelled) setFlatLessonTestPreviewLoading(false)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [lessonId, hasServerChunkGroups, flatLessonTestPreviewTick])
 
   useEffect(() => {
     setLessonTestQuizzesByRowId({})
@@ -189,6 +242,7 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
           chunkIds: g.chunkIds.filter((id) => chunkIdSet.has(id)),
           questionCount: clampQuestionCount(g.questionCount),
           instruction: g.batchUserPrompt?.trim() ?? '',
+          groupTitle: g.label?.trim() ?? '',
         }))
         .filter((r) => r.chunkIds.length > 0)
 
@@ -362,6 +416,58 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
     })
   }, [targetTotal])
 
+  const commitGroupMeta = useCallback(
+    async (
+      rowId: string,
+      patch: Pick<ExamBlueprintRow, 'groupTitle' | 'instruction' | 'questionCount'>
+    ) => {
+      const prevRow = rows.find((r) => r.id === rowId)
+      if (!prevRow) return
+
+      const merged: ExamBlueprintRow = {
+        ...prevRow,
+        ...patch,
+        questionCount: clampQuestionCount(patch.questionCount),
+      }
+
+      updateRow(rowId, {
+        groupTitle: merged.groupTitle,
+        instruction: merged.instruction,
+        questionCount: merged.questionCount,
+      })
+
+      const gid = groupIdsByRowId[rowId]
+      if (!gid) {
+        return
+      }
+
+      setSavingGroupRowId(rowId)
+      try {
+        const res = await lessonTestService.patchChunkGroup(gid, {
+          label: merged.groupTitle.trim() || null,
+          batchUserPrompt: merged.instruction.trim() || null,
+          questionCount: merged.questionCount,
+          chunkIds: resolveExamBlueprintChunkIds(merged, chunks),
+        })
+        if (res.code !== 200) {
+          toast.error(res.message || 'Không lưu được nhóm.')
+          throw new Error('patch_failed')
+        }
+        const nextRows = rows.map((r) => (r.id === rowId ? merged : r))
+        setBulkSyncSignature(blueprintSyncSignature(nextRows, chunks))
+        toast.success('Đã lưu thông tin nhóm.')
+      } catch (e) {
+        if (!(e instanceof Error && e.message === 'patch_failed')) {
+          toast.error('Không lưu được nhóm.')
+        }
+        throw e
+      } finally {
+        setSavingGroupRowId(null)
+      }
+    },
+    [chunks, groupIdsByRowId, rows, updateRow]
+  )
+
   const runGenerate = useCallback(async () => {
     if (!isVip) {
       openVipDialog()
@@ -427,7 +533,7 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
         const created = await lessonTestService.createChunkGroup(lessonId, {
           chunkIds: row.chunkIds,
           questionCount: row.questionCount,
-          label: `Nhóm nội dung ${i + 1}`,
+          label: row.groupTitle.trim() || `Nhóm nội dung ${i + 1}`,
           distribution: buildBatchDistributionForCount(row.questionCount),
           batchUserPrompt: row.instruction.trim() || null,
         })
@@ -485,6 +591,7 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
               const labelIdx = valid.findIndex((v) => v.id === rowId) + 1
               toast.success(`Nhóm ${labelIdx}: đã sinh ${list.length} câu — hiển thị ngay bên dưới nhóm.`)
               onAfterGenerate?.()
+              refreshFlatLessonTestPreview()
             } catch {
               bulkHandledCompletedGroupIdsRef.current.delete(item.groupId)
             }
@@ -516,6 +623,7 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
       onAfterGenerate?.()
     } finally {
       setIsGenerating(false)
+      refreshFlatLessonTestPreview()
     }
   }, [
     chunks,
@@ -524,6 +632,7 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
     lessonId,
     onAfterGenerate,
     openVipDialog,
+    refreshFlatLessonTestPreview,
     rows,
     sumRowQuestionCounts,
     targetTotal,
@@ -586,9 +695,18 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
         toast.error(msg)
       } finally {
         setSingleGroupRowId(null)
+        refreshFlatLessonTestPreview()
       }
     },
-    [groupIdsByRowId, isVip, lessonId, onAfterGenerate, openVipDialog, rows]
+    [
+      groupIdsByRowId,
+      isVip,
+      lessonId,
+      onAfterGenerate,
+      openVipDialog,
+      refreshFlatLessonTestPreview,
+      rows,
+    ]
   )
 
   if (!chunks.length) {
@@ -598,21 +716,39 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
   return (
     <div className='space-y-4'>
       <HighGlossBackground className='rounded-2xl shadow-xl border border-blue-400/20 overflow-hidden'>
-        <div className='px-6 py-5 md:py-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3'>
-          <div className='flex items-center gap-4 md:gap-5 min-w-0'>
-            <div className='w-10 h-10 md:w-12 md:h-12 bg-white/10 rounded-2xl flex items-center justify-center text-white shadow-xl backdrop-blur-md border border-white/20 shrink-0'>
+        <div className='px-6 py-5 md:py-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
+          <div className='flex items-start gap-4 md:gap-5 min-w-0'>
+            <div className='w-10 h-10 md:w-12 md:h-12 mt-0.5 shrink-0 bg-white/10 rounded-2xl flex items-center justify-center text-white shadow-xl backdrop-blur-md border border-white/20'>
               <ClipboardList className='w-5 h-5 md:w-6 md:h-6' strokeWidth={2.25} />
             </div>
-            <div className='min-w-0 flex flex-col'>
-              <h2 className='text-white font-bold text-[15px] md:text-[16px] tracking-tight leading-tight flex items-center gap-2 flex-wrap'>
+            <div className='min-w-0 flex flex-col pt-0.5'>
+              <h2 className='text-white font-bold text-[15px] md:text-[16px] tracking-tight leading-snug flex items-center gap-2 flex-wrap'>
                 Bài kiểm tra theo từng mảng nội dung
                 <Sparkles className='w-3 h-3 text-amber-200/90 shrink-0' aria-hidden />
               </h2>
-              <p className='text-[10px] md:text-[11px] text-blue-100/70 mt-1 font-medium leading-snug'>
+              <p className='text-[10px] md:text-[11px] text-blue-100/80 mt-1.5 font-medium leading-snug'>
                 Tổng câu toàn bài trước → nhóm phân đoạn → cách ra đề (bảng chuẩn đầu ra)
               </p>
             </div>
           </div>
+          {onBackToStructure ? (
+            <div className='flex shrink-0 sm:justify-end'>
+              <CustomButton
+                type='button'
+                size='lg'
+                variant='ghost'
+                label='Quay lại cấu trúc bài giảng'
+                icon={<ArrowLeft className='w-3.5 h-3.5 shrink-0' strokeWidth={2.25} />}
+                className={[
+                  'h-10 min-h-10 max-h-10 py-0 box-border rounded-xl px-4',
+                  'text-[12px] leading-none font-bold whitespace-nowrap',
+                  'bg-white/15 border border-white/25 text-white hover:bg-white/25 hover:text-white',
+                  'shadow-none gap-2 [&_span:first-child]:!mr-0',
+                ].join(' ')}
+                onClick={onBackToStructure}
+              />
+            </div>
+          ) : null}
         </div>
       </HighGlossBackground>
 
@@ -705,7 +841,7 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
                               className='w-4 h-4 shrink-0 text-blue-600'
                               strokeWidth={2.25}
                             />
-                            Nhóm nội dung {labelIdx}
+                            {row.groupTitle.trim() || `Nhóm nội dung ${labelIdx}`}
                           </span>
                           {!isRowOpen && (
                             <p className='mt-1.5 text-[12px] leading-snug text-gray-600'>
@@ -729,18 +865,39 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
                         e.stopPropagation()
                         const ok = await showConfirmToast({
                           title: 'Xóa nhóm cấu hình?',
-                          description: `Bạn có chắc muốn xóa nhóm nội dung ${labelIdx} (cấu hình số câu và phân đoạn)? Bạn vẫn có thể thêm nhóm mới sau đó.`,
+                          description: `Bạn có chắc muốn xóa nhóm nội dung ${labelIdx}? Nếu nhóm đã đồng bộ máy chủ, dữ liệu nhóm đó cũng sẽ bị xóa.`,
                           confirmLabel: 'Có, xóa',
                           cancelLabel: 'Hủy',
                         })
-                        if (ok) {
-                          removeRow(row.id)
+                        if (!ok) return
+                        const gid = groupIdsByRowId[row.id]
+                        if (gid) {
+                          try {
+                            await lessonTestService.deleteChunkGroup(gid)
+                            toast.success('Đã xóa nhóm trên máy chủ.')
+                            setBulkSyncSignature(null)
+                            onAfterGenerate?.()
+                          } catch {
+                            toast.error('Không xóa được nhóm trên máy chủ.')
+                            return
+                          }
                         }
+                        setGroupIdsByRowId((p) => {
+                          const n = { ...p }
+                          delete n[row.id]
+                          return n
+                        })
+                        setLessonTestQuizzesByRowId((p) => {
+                          const n = { ...p }
+                          delete n[row.id]
+                          return n
+                        })
+                        removeRow(row.id)
                       }}
                       disabled={
                         rows.length <= 1 ||
                         isGenerating ||
-                        singleGroupRowId !== null
+                        rowOpsLocked
                       }
                       aria-label='Xóa nhóm cấu hình'
                     />
@@ -748,6 +905,20 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
 
                   <CollapsibleContent>
                     <div className='space-y-3 border-t border-blue-100/70 px-3 md:px-4 pb-3 md:pb-4 pt-2'>
+                <LessonExamBlueprintGroupMetaPanel
+                  rowId={row.id}
+                  labelIdx={labelIdx}
+                  meta={{
+                    groupTitle: row.groupTitle,
+                    instruction: row.instruction,
+                    questionCount: row.questionCount,
+                  }}
+                  hasServerGroup={Boolean(groupIdsByRowId[row.id])}
+                  disabled={isGenerating || rowOpsLocked}
+                  isSaving={savingGroupRowId === row.id}
+                  onCommit={(rid, next) => commitGroupMeta(rid, next)}
+                />
+
                 <div className='grid grid-cols-1 lg:grid-cols-2 gap-4 items-stretch'>
                   <div className='space-y-1.5 min-w-0 flex flex-col'>
                     <Label className='text-[11px] md:text-[12px] font-semibold text-gray-600 flex items-center gap-1.5'>
@@ -761,37 +932,13 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
                       placeholder='Chọn một hoặc nhiều phân đoạn…'
                       searchPlaceholder='Tìm phân đoạn…'
                       emptyText='Không tìm thấy phân đoạn.'
-                      disabled={isGenerating || singleGroupRowId !== null}
+                      disabled={isGenerating || rowOpsLocked}
                       className='space-y-2 [&_button]:min-h-10 [&_button]:text-[13px] md:[&_button]:text-[14px] [&_button]:px-3.5 [&_button]:py-2.5 [&_button]:rounded-xl'
                     />
                     <p className='text-[11px] md:text-[12px] text-gray-500 font-medium leading-snug pl-0.5'>
-                      Tối đa 3 phân đoạn mỗi nhóm; AI gộp ngữ cảnh và sinh câu theo đúng số câu nhóm.
+                      Tối đa 3 phân đoạn mỗi nhóm; AI gộp ngữ cảnh và sinh câu theo đúng số câu nhóm. Số câu chỉnh trong{' '}
+                      <span className='font-semibold text-gray-600'>Thông tin nhóm</span>.
                     </p>
-                    <div className='space-y-1.5 pt-2 max-w-full sm:max-w-[200px]'>
-                      <Label
-                        htmlFor={`count-${row.id}`}
-                        className='text-[11px] md:text-[12px] font-semibold text-gray-600 flex items-center gap-1.5'
-                      >
-                        <Hash className='w-3.5 h-3.5 text-violet-500' strokeWidth={2.5} />
-                        Số câu nhóm này
-                      </Label>
-                      <Input
-                        id={`count-${row.id}`}
-                        type='number'
-                        min={1}
-                        max={50}
-                        value={row.questionCount}
-                        onChange={(e) => {
-                          const n = parseInt(e.target.value, 10)
-                          if (Number.isNaN(n)) {
-                            return
-                          }
-                          updateRow(row.id, { questionCount: clampQuestionCount(n) })
-                        }}
-                        disabled={isGenerating || singleGroupRowId !== null}
-                        className='h-10 text-[13px] md:text-[14px] font-semibold border-gray-200 bg-white w-full'
-                      />
-                    </div>
                   </div>
 
                   {selectedChunks.length > 0 && previewChunk && (
@@ -813,7 +960,7 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
                             onValueChange={(v) =>
                               setPreviewChunkIdByRow((m) => ({ ...m, [row.id]: v }))
                             }
-                            disabled={isGenerating || singleGroupRowId !== null}
+                            disabled={isGenerating || rowOpsLocked}
                           >
                             <SelectTrigger
                               id={`preview-${row.id}`}
@@ -855,25 +1002,6 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
                       </div>
                     </div>
                   )}
-                </div>
-
-                <div className='space-y-1.5 pt-0.5 border-t border-blue-100/60'>
-                  <Label
-                    htmlFor={`hint-${row.id}`}
-                    className='text-[11px] md:text-[12px] font-semibold text-gray-600 flex items-center gap-1.5'
-                  >
-                    <PenLine className='w-3.5 h-3.5 text-emerald-500' strokeWidth={2.5} />
-                    Cách ra đề (gợi ý cho AI)
-                  </Label>
-                  <Textarea
-                    id={`hint-${row.id}`}
-                    rows={3}
-                    placeholder='Ví dụ: ưu tiên trắc nghiệm; cô đọng; gắn mục tiêu [G1.1]…'
-                    value={row.instruction}
-                    onChange={(e) => updateRow(row.id, { instruction: e.target.value })}
-                    disabled={isGenerating || singleGroupRowId !== null}
-                    className='w-full min-h-[88px] text-[13px] md:text-[14px] leading-relaxed border-gray-200 bg-white resize-y placeholder:text-gray-400'
-                  />
                 </div>
 
                 {quizFetchLoadingRowIds[row.id] ? (
@@ -927,7 +1055,8 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
                       onClick={() => void runRegenerateOneGroup(row.id)}
                       disabled={
                         isGenerating ||
-                        (singleGroupRowId !== null && singleGroupRowId !== row.id)
+                        (singleGroupRowId !== null && singleGroupRowId !== row.id) ||
+                        (savingGroupRowId !== null && savingGroupRowId !== row.id)
                       }
                       isLoader={singleGroupRowId === row.id}
                     />
@@ -952,7 +1081,7 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
             icon={<Plus className='w-3.5 h-3.5' strokeWidth={2.5} />}
             className='h-10 text-[12px] md:text-[13px] font-bold border-dashed border-gray-200 text-gray-600 bg-gray-50/50 hover:bg-white rounded-xl'
             onClick={addRow}
-            disabled={isGenerating || singleGroupRowId !== null}
+            disabled={isGenerating || rowOpsLocked}
           />
           <CustomButton
             type='button'
@@ -975,11 +1104,18 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
             disabled={
               isGenerating ||
               !countsMatchTarget ||
-              singleGroupRowId !== null
+              rowOpsLocked
             }
           />
         </div>
       </div>
+
+      <LessonExamBlueprintTestPreviewPanel
+        visible={hasServerChunkGroups}
+        loading={flatLessonTestPreviewLoading}
+        quizzes={flatLessonTestQuizzes}
+        testTitle={flatLessonTestTitleFromApi ?? persistedLessonTest?.title ?? null}
+      />
     </div>
   )
 }
