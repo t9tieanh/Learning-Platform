@@ -106,6 +106,37 @@ def import_tags(cursor, file_path):
         cursor.executemany(sql, data)
         print(f"Inserted {cursor.rowcount} tags.")
 
+def import_expertise(cursor, file_path):
+    print(f"Importing Expertise from {file_path}...")
+    with open(file_path, 'r', encoding='utf-8') as f:
+        reader = csv.DictReader(f)
+        sql = """
+        INSERT INTO expertise (id, image, name) 
+        VALUES (%s, %s, %s)
+        ON DUPLICATE KEY UPDATE name=VALUES(name)
+        """
+        data = []
+        for row in reader:
+            data.append((row['id'], row['image'], row['name']))
+        
+        cursor.executemany(sql, data)
+        print(f"Inserted {cursor.rowcount} expertise.")
+
+def import_user_expertise(cursor, file_path):
+    print(f"Importing User Expertise from {file_path}...")
+    with open(file_path, 'r', encoding='utf-8') as f:
+        reader = csv.DictReader(f)
+        sql = """
+        INSERT IGNORE INTO user_expertise (user_id, expertise_id) 
+        VALUES (%s, %s)
+        """
+        data = []
+        for row in reader:
+            data.append((row['user_id'], row['expertise_id']))
+        
+        cursor.executemany(sql, data)
+        print(f"Inserted {cursor.rowcount} user-expertise relations.")
+
 def import_courses(cursor, file_path):
     print(f"Importing Courses from {file_path}...")
     with open(file_path, 'r', encoding='utf-8') as f:
@@ -256,6 +287,8 @@ def main():
     course_requirements_csv = os.path.join(data_root, 'data', 'normalized', 'course_requirements.csv')
     chapters_csv = os.path.join(data_root, 'data', 'normalized', 'chapters.csv')
     lessons_csv = os.path.join(data_root, 'data', 'normalized', 'lessons.csv')
+    expertise_csv = os.path.join(data_root, 'data', 'normalized', 'expertise.csv')
+    user_expertise_csv = os.path.join(data_root, 'data', 'normalized', 'user_expertise.csv')
     
     # Schemas
     user_schema = os.path.join(data_root, 'backup', 'user_service_schema.sql')
@@ -277,6 +310,8 @@ def main():
         
         # Import Users
         import_users(cursor, users_csv)
+        import_expertise(cursor, expertise_csv)
+        import_user_expertise(cursor, user_expertise_csv)
         conn.commit()
         
         # 2. Setup Course Service
