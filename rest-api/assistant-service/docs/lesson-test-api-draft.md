@@ -65,7 +65,7 @@ This is the **first generation endpoint to implement** for authoring (see **§9*
 | Field | Meaning |
 |-------|---------|
 | **`groupIds`** | If **omitted** or empty → enqueue **all** chunk groups under this lesson test (each gets **one** job). If **set** → only those **`groupId`** values (must belong to **`lessonId`**; **400** on unknown / foreign ids). |
-| **`distribution?`**, **`userPrompt?`** | Optional defaults applied **per group** where the group row does not already override (product choice: prefer DB **`distribution`** / **`batch_user_prompt`** on each row over body). |
+| *(per group)* | **`question_count`**, **`distribution`**, **`batch_user_prompt`** come from each **`lesson_test_chunk_groups`** row (edit via chunk-group **PATCH** / **POST**). Bulk body does **not** override them or supply a shared `userPrompt`. |
 
 **Behaviour:**
 

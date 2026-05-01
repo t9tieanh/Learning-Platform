@@ -35,4 +35,8 @@ export const env = {
   TEST_API_USERNAME: process.env.TEST_API_USERNAME || 'admin',
   TEST_API_PASSWORD: process.env.TEST_API_PASSWORD || 'password',
   OPENAI_API_KEY: process.env.OPENAI_API_KEY || '',
+  LESSON_TEST_GROUP_CONTEXT_MAX_TOKENS: parseInt(
+    process.env.LESSON_TEST_GROUP_CONTEXT_MAX_TOKENS || '12000',
+    10
+  ),
 }

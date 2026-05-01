@@ -1,6 +1,7 @@
 import Logger from '~/utils/logger';
 import { registerChunkingProcessor } from '~/service/jobs/chunkingJob.processor';
 import { registerSummarizationProcessor } from '~/service/jobs/summarizationJob.processor';
+import { registerLessonTestGroupQuizProcessor } from '~/service/jobs/lessonTestGroupQuizJob.processor';
 import { bullQueueService } from '~/service/utils/bullQueue.service';
 
 /**
@@ -15,6 +16,7 @@ export async function initializeBullProcessors(): Promise<void> {
         // Register all processors
         registerChunkingProcessor();
         registerSummarizationProcessor();
+        registerLessonTestGroupQuizProcessor();
 
         Logger.info('[BullProcessorInitializer] All Bull processors registered successfully');
 

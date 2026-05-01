@@ -1,8 +1,11 @@
 import prismaService from '~/service/utils/prisma.service';
 import Logger from '~/utils/logger';
 import { GeneratedQuizResponse, BatchGeneratedQuizzesResponse } from '~/dto/response/quiz-response.dto';
-import { Quiz, QuizChoice } from '@prisma/client';
+import { Prisma, Quiz, QuizChoice, QuizScope } from '@prisma/client';
 import { QuestionType, DifficultyLevel, BloomLevel } from '~/enums/quizStatus.enum';
+
+/** Quiz row including nested choices (matches Prisma `include: { choices: true }`). */
+export type QuizWithChoices = Prisma.QuizGetPayload<{ include: { choices: true } }>;
 
 /**
  * QuizPersistenceService handles database operations for quizzes.
@@ -31,7 +34,7 @@ export class QuizPersistenceService {
     chunkId: string,
     userId: string,
     quiz: GeneratedQuizResponse
-  ): Promise<Quiz & { choices: QuizChoice[] }> {
+  ): Promise<QuizWithChoices> {
     Logger.info(
       `[QuizPersistenceService] Saving single quiz for chunkId=${chunkId}, userId=${userId}`
     );
@@ -81,42 +84,91 @@ export class QuizPersistenceService {
     chunkId: string,
     userId: string,
     batchQuizzes: BatchGeneratedQuizzesResponse
-  ): Promise<(Quiz & { choices: QuizChoice[] })[]> {
+  ): Promise<QuizWithChoices[]> {
     Logger.info(
       `[QuizPersistenceService] Batch saving ${batchQuizzes.quizzes.length} quizzes for chunkId=${chunkId}`
     );
 
-    // Create all quizzes in a transaction
-    const savedQuizzes = await Promise.all(
-      batchQuizzes.quizzes.map(quiz =>
-        prismaService.quiz.create({
-          data: {
-            chunkId,
-            question: quiz.question,
-            explanation: quiz.explanation,
-            type: quiz.type as QuestionType,
-            difficulty: quiz.difficulty as DifficultyLevel,
-            bloomLevel: quiz.bloomLevel as BloomLevel,
-            createdBy: userId,
-            aiGenerated: true,
-            aiModel: 'gpt-4-turbo',
-            aiConfidence: 0.85,
-            choices: {
-              create: quiz.choices.map((choice, index) => ({
-                text: choice.text,
-                isCorrect: choice.isCorrect,
-                order: index,
-                feedback: choice.feedback,
-              })),
-            },
+    const savedQuizzes: QuizWithChoices[] = [];
+    for (const quiz of batchQuizzes.quizzes) {
+      const row = await prismaService.quiz.create({
+        data: {
+          chunkId,
+          question: quiz.question,
+          explanation: quiz.explanation,
+          type: quiz.type as QuestionType,
+          difficulty: quiz.difficulty as DifficultyLevel,
+          bloomLevel: quiz.bloomLevel as BloomLevel,
+          createdBy: userId,
+          aiGenerated: true,
+          aiModel: 'gpt-4-turbo',
+          aiConfidence: 0.85,
+          choices: {
+            create: quiz.choices.map((choice, index) => ({
+              text: choice.text,
+              isCorrect: choice.isCorrect,
+              order: index,
+              feedback: choice.feedback,
+            })),
           },
-          include: { choices: true },
-        })
-      )
-    );
+        },
+        include: { choices: true },
+      });
+      savedQuizzes.push(row);
+    }
 
     Logger.info(
       `[QuizPersistenceService] Successfully batch saved ${savedQuizzes.length} quizzes`
+    );
+
+    return savedQuizzes;
+  }
+
+  /**
+   * Saves batch quizzes for lesson-test scope (merged chunk-group generation).
+   * `chunkId` is null; linkage is `lessonTestChunkGroupId` (+ optional group JSON chunk list on the group row).
+   */
+  async saveLessonTestBatchQuizzes(
+    lessonTestChunkGroupId: string,
+    userId: string,
+    batchQuizzes: BatchGeneratedQuizzesResponse
+  ): Promise<QuizWithChoices[]> {
+    Logger.info(
+      `[QuizPersistenceService] Batch saving ${batchQuizzes.quizzes.length} LESSON_TEST quizzes for groupId=${lessonTestChunkGroupId}`
+    );
+
+    const savedQuizzes: QuizWithChoices[] = [];
+    for (const quiz of batchQuizzes.quizzes) {
+      const row = await prismaService.quiz.create({
+        data: {
+          chunkId: null,
+          quizScope: QuizScope.LESSON_TEST,
+          lessonTestChunkGroupId,
+          question: quiz.question,
+          explanation: quiz.explanation,
+          type: quiz.type as QuestionType,
+          difficulty: quiz.difficulty as DifficultyLevel,
+          bloomLevel: quiz.bloomLevel as BloomLevel,
+          createdBy: userId,
+          aiGenerated: true,
+          aiModel: 'gpt-4-turbo',
+          aiConfidence: 0.85,
+          choices: {
+            create: quiz.choices.map((choice, index) => ({
+              text: choice.text,
+              isCorrect: choice.isCorrect,
+              order: index,
+              feedback: choice.feedback,
+            })),
+          },
+        },
+        include: { choices: true },
+      });
+      savedQuizzes.push(row);
+    }
+
+    Logger.info(
+      `[QuizPersistenceService] Successfully saved ${savedQuizzes.length} LESSON_TEST quizzes`
     );
 
     return savedQuizzes;

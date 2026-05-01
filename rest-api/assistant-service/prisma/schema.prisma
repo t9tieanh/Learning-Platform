@@ -142,7 +142,8 @@ model QuizChoice {
 
 model Quiz {
   id                      String                @id @default(uuid())
-  chunkId                 String
+  /// Nullable when `quizScope === LESSON_TEST` (group grounded via `lessonTestChunkGroupId`).
+  chunkId                 String?
   quizScope               QuizScope             @default(CHUNK_STANDALONE) @map("quiz_scope")
   lessonTestChunkGroupId  String?               @map("lesson_test_chunk_group_id")
   question                String
@@ -159,7 +160,7 @@ model Quiz {
   createdAt               DateTime              @default(now())
   updatedAt               DateTime              @updatedAt
   choices                 QuizChoice[]
-  chunk                   LessonChunk           @relation(fields: [chunkId], references: [id], onDelete: Cascade)
+  chunk                   LessonChunk?          @relation(fields: [chunkId], references: [id], onDelete: Cascade)
   lessonTestChunkGroup    LessonTestChunkGroup? @relation(fields: [lessonTestChunkGroupId], references: [id], onDelete: SetNull)
 
   @@index([aiGenerated])
