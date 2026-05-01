@@ -9,7 +9,7 @@ import {
   type QuizBatchDistributionItem,
 } from '@/types/quiz'
 
-/** One blueprint row: one or more video chunks; `questionCount` is split per chunk at generate time. */
+/** One blueprint row: one or more lesson chunks (≤ `MAX_CHUNKS_PER_LESSON_TEST_GROUP` merged); `questionCount` is for the whole group. */
 export type ExamBlueprintRow = {
   id: string
   /** One or more chunk ids in this group. */
@@ -38,6 +38,26 @@ export function newExamBlueprintRowId(): string {
 /** Per-group default when not deriving from a global total (e.g. newly added row). */
 export const DEFAULT_EXAM_QUESTIONS_PER_GROUP = 1
 
+/** UI + assistant-service cap on chunks merged into one lesson-test group. */
+export const MAX_CHUNKS_PER_LESSON_TEST_GROUP = 3
+
+/**
+ * Consecutive chunks → bucket ids in lesson order, at most `size` per bucket.
+ */
+export function partitionChunksIntoLessonTestGroups(
+  chunks: LessonChunk[],
+  size: number = MAX_CHUNKS_PER_LESSON_TEST_GROUP
+): string[][] {
+  if (!chunks.length || size < 1) {
+    return []
+  }
+  const out: string[][] = []
+  for (let i = 0; i < chunks.length; i += size) {
+    out.push(chunks.slice(i, i + size).map((c) => c.id))
+  }
+  return out
+}
+
 /**
  * Split `total` questions across `partCount` parts; remainder goes to the first parts.
  * Examples: 5 / 2 → [3, 2]. 2 / 3 → [1, 1, 0].
@@ -65,7 +85,8 @@ export function splitQuestionCountAcrossChunks(
 }
 
 /**
- * Default target total = chunk count (even split yields 1+1+…+1). Same as `buildDefaultExamBlueprintRows`.
+ * Default target total questions = number of chunks, split across default groups in
+ * `buildDefaultExamBlueprintRows` (groups of up to `MAX_CHUNKS_PER_LESSON_TEST_GROUP`).
  */
 export function getDefaultTargetTotalQuestionCount(chunks: LessonChunk[]): number {
   if (!chunks.length) {
@@ -109,28 +130,39 @@ export function redistributeQuestionCountsToMatchTotal(
 }
 
 /**
- * Default: one row per chunk, in chunk order, total questions = `chunks.length` (split as 1+1+…+1).
+ * Default: each row groups up to 3 consecutive chunks (lesson order); total questions = chunk count,
+ * split evenly across rows (same algorithm as `splitQuestionCountAcrossChunks`).
  */
 export function buildDefaultExamBlueprintRows(chunks: LessonChunk[]): ExamBlueprintRow[] {
   if (!chunks.length) {
     return []
   }
+  const chunkGroups = partitionChunksIntoLessonTestGroups(chunks)
+  const groupCount = chunkGroups.length
   const targetTotal = getDefaultTargetTotalQuestionCount(chunks)
-  const perGroup = splitQuestionCountAcrossChunks(targetTotal, chunks.length)
-  return chunks.map((c, i) => ({
+  const perGroup = splitQuestionCountAcrossChunks(targetTotal, groupCount)
+  return chunkGroups.map((chunkIds, i) => ({
     id: newExamBlueprintRowId(),
-    chunkIds: [c.id],
+    chunkIds,
     questionCount: perGroup[i] ?? DEFAULT_EXAM_QUESTIONS_PER_GROUP,
     instruction: '',
   }))
 }
 
-/** New row: first chunk selected, `DEFAULT_EXAM_QUESTIONS_PER_GROUP` questions, empty instruction. */
+/** New row: first up-to-3 chunks selected, `DEFAULT_EXAM_QUESTIONS_PER_GROUP` questions, empty instruction. */
 export function makeEmptyExamBlueprintRow(chunks: LessonChunk[]): ExamBlueprintRow {
-  const first = chunks[0]
+  if (!chunks.length) {
+    return {
+      id: newExamBlueprintRowId(),
+      chunkIds: [],
+      questionCount: DEFAULT_EXAM_QUESTIONS_PER_GROUP,
+      instruction: '',
+    }
+  }
+  const take = Math.min(MAX_CHUNKS_PER_LESSON_TEST_GROUP, chunks.length)
   return {
     id: newExamBlueprintRowId(),
-    chunkIds: first ? [first.id] : [],
+    chunkIds: chunks.slice(0, take).map((c) => c.id),
     questionCount: DEFAULT_EXAM_QUESTIONS_PER_GROUP,
     instruction: '',
   }
@@ -209,6 +241,23 @@ export function getValidExamBlueprintRows(
         r.questionCount >= 1 &&
         r.questionCount <= 50
     )
+}
+
+/**
+ * Fingerprint of the current valid blueprint rows after a successful lesson-test sync.
+ * If the user edits chunks/counts/instructions, this changes and per-group “regenerate” is cleared.
+ */
+export function blueprintSyncSignature(
+  rows: ExamBlueprintRow[],
+  chunks: LessonChunk[]
+): string {
+  const valid = getValidExamBlueprintRows(rows, chunks)
+  return valid
+    .map(
+      (r) =>
+        `${r.id}:${r.chunkIds.join(',')}:${r.questionCount}:${r.instruction.trim()}`
+    )
+    .join('|')
 }
 
 /** Single distribution entry for a batch generate call (one difficulty/Bloom, `count` questions). */

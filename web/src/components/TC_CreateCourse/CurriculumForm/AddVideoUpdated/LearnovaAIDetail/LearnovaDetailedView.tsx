@@ -142,14 +142,19 @@ const LearnovaDetailedView: React.FC<LearnovaDetailedViewProps> = ({
                 </div>
             </div>
 
-            {chunks.length > 0 && (
+            {chunks.length > 0 && analysisData?.lessonId ? (
                 <div className='max-w-5xl mx-auto w-full px-4 pt-2'>
                     <LessonExamBlueprintSection
+                        lessonId={analysisData.lessonId}
                         chunks={chunks}
+                        persistedLessonTest={analysisData.lessonTest ?? null}
+                        persistedLessonTestChunkGroups={
+                          analysisData.lessonTestChunkGroups ?? []
+                        }
                         onAfterGenerate={onAfterExamGenerate}
                     />
                 </div>
-            )}
+            ) : null}
         </div>
     )
 }

@@ -199,6 +199,29 @@ export class QuizPersistenceService {
   }
 
   /**
+   * All LESSON_TEST quizzes linked to a blueprint chunk group (`chunkId` null).
+   */
+  async getQuizzesForLessonTestChunkGroup(
+    lessonTestChunkGroupId: string
+  ): Promise<(Quiz & { choices: QuizChoice[] })[]> {
+    Logger.info(
+      `[QuizPersistenceService] Fetching LESSON_TEST quizzes for lessonTestChunkGroupId=${lessonTestChunkGroupId}`
+    );
+
+    const quizzes = await prismaService.quiz.findMany({
+      where: { lessonTestChunkGroupId },
+      include: { choices: true },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    Logger.info(
+      `[QuizPersistenceService] Found ${quizzes.length} quizzes for lessonTestChunkGroupId=${lessonTestChunkGroupId}`
+    );
+
+    return quizzes;
+  }
+
+  /**
    * Retrieves a single quiz by ID with all its choices.
    * 
    * @param quizId - The quiz ID

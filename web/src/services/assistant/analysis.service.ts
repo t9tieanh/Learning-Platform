@@ -22,6 +22,28 @@ export interface RAGResult {
   sources: RAGSource[]
 }
 
+/** Mirrors assistant-service `AnalysisLessonTestHeaderDto` */
+export interface AnalysisLessonTestHeaderSnapshot {
+  lessonId: string
+  title: string | null
+  status: string
+  targetTotalQuestions: number | null
+  notes: string | null
+}
+
+/** Mirrors assistant-service `AnalysisLessonTestChunkGroupDto` */
+export interface AnalysisLessonTestChunkGroupSnapshot {
+  id: string
+  lessonId: string
+  chunkIds: string[]
+  questionCount: number
+  label: string | null
+  batchUserPrompt: string | null
+  distribution?: unknown
+  createdAt?: string
+  updatedAt?: string
+}
+
 export interface AnalysisResult {
   lessonId: string
   status: 'completed' | 'processing' | 'not_found' | 'failed' | 'COMPLETED' | 'PROCESSING' | 'FAILED' | 'NOT_FOUND'
@@ -31,6 +53,10 @@ export interface AnalysisResult {
   suggestedTitle: string | null
   subtitles: string | null
   chunks: LessonChunk[]
+  /** Lesson-test blueprint header when a row exists in `lesson_tests` */
+  lessonTest?: AnalysisLessonTestHeaderSnapshot | null
+  /** Persisted chunk groups for lesson-test UI (non-empty → hydrate blueprint from DB) */
+  lessonTestChunkGroups?: AnalysisLessonTestChunkGroupSnapshot[]
 }
 
 // ---------------------------------------------------------------------------

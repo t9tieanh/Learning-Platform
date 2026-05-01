@@ -47,7 +47,8 @@ export interface QuizChoice {
 
 export interface GeneratedQuiz {
   id: string
-  chunkId: string
+  /** Present for chunk-scoped quizzes; null/absent for `LESSON_TEST` rows */
+  chunkId?: string | null
   type: QuestionType
   difficulty: QuizDifficulty
   bloomLevel: BloomLevel

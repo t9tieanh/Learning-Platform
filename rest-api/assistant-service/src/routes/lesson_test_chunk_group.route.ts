@@ -18,6 +18,12 @@ const groupScoped = [
   checkLessonOwnership,
 ] as const;
 
+lessonTestChunkGroupRouter.get(
+  '/lesson-test/chunk-groups/:groupId/quizzes',
+  ...groupScoped,
+  lessonTestChunkGroupController.getChunkGroupQuizzes
+);
+
 lessonTestChunkGroupRouter.patch(
   '/lesson-test/chunk-groups/:groupId',
   ...groupScoped,

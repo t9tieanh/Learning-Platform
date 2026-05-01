@@ -2,9 +2,11 @@ import Logger from '~/utils/logger';
 import prismaService from '~/service/utils/prisma.service';
 import quizGenerationService from '~/service/analysis/quizGeneration.service';
 import quizPersistenceService from '~/service/quizz/quizPersistence.service';
+import lessonTestService from '~/service/lessonTest/lessonTest.service';
 import { GenerateQuizDto, GenerateBatchQuizzesDto } from '~/dto/request/quiz-generation.dto';
 import { ListQuizzesResponse } from '~/dto/response/quiz-response.dto';
 import { Quiz, QuizChoice } from '@prisma/client';
+import type { QuizWithChoices } from '~/service/quizz/quizPersistence.service';
 
 import { QuestionType, DifficultyLevel, BloomLevel, QuizStatus } from '~/enums/quizStatus.enum';
 
@@ -18,6 +20,25 @@ import { QuestionType, DifficultyLevel, BloomLevel, QuizStatus } from '~/enums/q
  * - Provide high-level quiz operations
  */
 export class QuizService {
+  private mapQuizRowsToListResponse(quizzes: QuizWithChoices[]): ListQuizzesResponse {
+    return quizzes.map((quiz) => ({
+      id: quiz.id,
+      question: quiz.question,
+      explanation: quiz.explanation,
+      type: quiz.type as unknown as QuestionType,
+      difficulty: quiz.difficulty as unknown as DifficultyLevel,
+      bloomLevel: quiz.bloomLevel as unknown as BloomLevel,
+      choices: quiz.choices.map((choice) => ({
+        id: choice.id,
+        text: choice.text,
+        isCorrect: choice.isCorrect,
+        feedback: choice.feedback || undefined,
+      })),
+      isApproved: quiz.isApproved,
+      status: quiz.status as unknown as QuizStatus,
+      createdAt: quiz.createdAt,
+    }));
+  }
 
   /**
    * Generates a single quiz for a lesson chunk with full context.
@@ -136,31 +157,32 @@ export class QuizService {
       throw new Error(`Chunk not found=${chunkId}`);
     }
 
-    // Fetch all quizzes for this chunk
     const quizzes = await quizPersistenceService.getQuizzesForChunk(chunkId);
 
     Logger.info(
       `[QuizService] Found ${quizzes.length} quizzes for chunkId=${chunkId}`
     );
 
-    // Return as array (no pagination wrapper)
-    return quizzes.map(quiz => ({
-      id: quiz.id,
-      question: quiz.question,
-      explanation: quiz.explanation,
-      type: quiz.type as unknown as QuestionType,
-      difficulty: quiz.difficulty as unknown as DifficultyLevel,
-      bloomLevel: quiz.bloomLevel as unknown as BloomLevel,
-      choices: quiz.choices.map(choice => ({
-        id: choice.id,
-        text: choice.text,
-        isCorrect: choice.isCorrect,
-        feedback: choice.feedback || undefined,
-      })),
-      isApproved: quiz.isApproved,
-      status: quiz.status as unknown as QuizStatus,
-      createdAt: quiz.createdAt,
-    }));
+    return this.mapQuizRowsToListResponse(quizzes);
+  }
+
+  /**
+   * LESSON_TEST quizzes for a blueprint chunk group (`chunkId` null on rows).
+   */
+  async getQuizzesForLessonTestChunkGroup(
+    lessonId: string,
+    groupId: string
+  ): Promise<ListQuizzesResponse> {
+    await lessonTestService.assertChunkGroupExists(lessonId, groupId);
+
+    const quizzes =
+      await quizPersistenceService.getQuizzesForLessonTestChunkGroup(groupId);
+
+    Logger.info(
+      `[QuizService] Found ${quizzes.length} LESSON_TEST quizzes for groupId=${groupId}`
+    );
+
+    return this.mapQuizRowsToListResponse(quizzes);
   }
 
   /**

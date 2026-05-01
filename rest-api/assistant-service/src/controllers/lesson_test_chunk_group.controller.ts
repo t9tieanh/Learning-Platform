@@ -6,6 +6,7 @@ import ApiError from '~/middleware/ApiError';
 import lessonTestService from '~/service/lessonTest/lessonTest.service';
 import lessonTestGenerationService from '~/service/lessonTest/lessonTestGeneration.service';
 import lessonTestJobWaitService from '~/service/lessonTest/lessonTestJobWait.service';
+import analysisQuizService from '~/service/analysis/quiz.service';
 import { LessonTestGenWaitOutcomeKind } from '~/enums/lessonTestGenWaitOutcome.enum';
 import {
   GenerateLessonTestGroupQuizzesDto,
@@ -64,6 +65,29 @@ class LessonTestChunkGroupController {
       const groupId = String(req.params.groupId);
       await lessonTestService.deleteChunkGroup(lessonId, groupId);
       res.sendStatus(StatusCodes.NO_CONTENT);
+    } catch (e) {
+      next(e);
+    }
+  };
+
+  getChunkGroupQuizzes = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    try {
+      const lessonId = String(req.params.lessonId);
+      const groupId = String(req.params.groupId);
+      const quizzes = await analysisQuizService.getQuizzesForLessonTestChunkGroup(
+        lessonId,
+        groupId
+      );
+
+      sendResponse(res, {
+        code: StatusCodes.OK,
+        message: 'OK',
+        result: quizzes,
+      });
     } catch (e) {
       next(e);
     }
