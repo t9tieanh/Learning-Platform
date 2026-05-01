@@ -177,6 +177,7 @@ class LessonTestService {
     const maxWaitMs = opts?.maxWaitMs ?? 600_000
     const deadline = Date.now() + maxWaitMs
 
+    let currentInterval = intervalMs
     while (Date.now() < deadline) {
       const res = await this.getBulkGenerationStatus(lessonId, jobIds)
       if (res.code !== 200 || !res.result?.items || res.result.items.length !== jobIds.length) {
@@ -207,7 +208,8 @@ class LessonTestService {
         return { allOk: allCompleted }
       }
 
-      await new Promise((r) => setTimeout(r, intervalMs))
+      await new Promise((r) => setTimeout(r, currentInterval))
+      currentInterval = Math.min(currentInterval * 1.5, 15000)
     }
 
     return { allOk: false, failedReason: 'Hết thời gian chờ sinh câu.' }
@@ -224,11 +226,13 @@ class LessonTestService {
     const maxWaitMs = opts?.maxWaitMs ?? 600_000
     const deadline = Date.now() + maxWaitMs
 
+    let currentInterval = 500
     while (Date.now() < deadline) {
       const res = await this.getGroupGenerationStatus(groupId, jobId)
       const payload = res.result
       if (!payload || typeof payload !== 'object' || !('status' in payload)) {
-        await new Promise((r) => setTimeout(r, 600))
+        await new Promise((r) => setTimeout(r, currentInterval))
+        currentInterval = Math.min(currentInterval * 1.5, 10000)
         continue
       }
 
@@ -239,7 +243,8 @@ class LessonTestService {
         return { ok: false, message: payload.reason }
       }
 
-      await new Promise((r) => setTimeout(r, 400))
+      await new Promise((r) => setTimeout(r, currentInterval))
+      currentInterval = Math.min(currentInterval * 1.5, 10000)
     }
 
     return { ok: false, message: 'Hết thời gian chờ sinh câu cho nhóm này.' }
