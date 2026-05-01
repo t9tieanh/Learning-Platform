@@ -136,7 +136,8 @@ const SignInForm = ({
               <CustomButton
                 onClick={handleLoginWithGoogle}
                 icon={<FcGoogle />}
-                className='bg-inherit w-full border-2 border-solid hover:bg-red-600'
+                label='Đăng nhập với Google'
+                className='bg-inherit w-full rounded-md border-2 border-gray-300 shadow-lg hover:bg-blue-100 text-blue-600'
               />
             </div>
 
