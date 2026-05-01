@@ -127,7 +127,8 @@ const Step2DetailsForm: React.FC<Step2DetailsFormProps> = ({
   }
 
   const handleSeek = (startTime: string | null) => {
-    const targetVideo = detailedVideoRef.current
+    // Step-2 main layout uses `videoRef`; full detail view uses `detailedVideoRef`.
+    const targetVideo = videoRef.current ?? detailedVideoRef.current
     if (!targetVideo || !startTime) return
 
     const clean = startTime.split(',')[0].trim()
@@ -166,6 +167,7 @@ const Step2DetailsForm: React.FC<Step2DetailsFormProps> = ({
         handleSeek={handleSeek}
         mainWrapperRef={mainWrapperRef}
         onSaveSummary={handleSaveChunkSummary}
+        onAfterExamGenerate={refetchAnalysis}
       />
     )
   }

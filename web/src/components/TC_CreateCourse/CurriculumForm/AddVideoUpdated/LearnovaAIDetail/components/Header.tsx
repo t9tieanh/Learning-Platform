@@ -26,7 +26,7 @@ const Header: React.FC<HeaderProps> = ({ onBack }) => {
                             </h2>
                             <img src={learnovaLogo} alt='Logo' className='h-3.5 w-auto object-contain' />
                         </div>
-                        <p className='text-[10px] text-blue-100/60 font-bold uppercase tracking-widest mt-0.5 leading-none'>
+                        <p className='text-[10px] text-blue-100/70 font-medium mt-0.5 leading-snug'>
                             Trình soạn thảo bài học AI
                         </p>
                     </div>

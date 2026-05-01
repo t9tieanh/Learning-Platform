@@ -44,6 +44,7 @@ import DiscountsAdmin from './pages/AD_Discounts'
 import AuthenticationGate from '@/components/auth-gate/AuthenticationGate'
 import VipSuccess from './pages/VipSuccess'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { VipUpgradeProvider } from '@/contexts/VipUpgradeContext'
 
 const queryClient = new QueryClient()
 
@@ -127,7 +128,9 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <>
     <QueryClientProvider client={queryClient}>
       <SocketProvider>
-        <RouterProvider router={router} />
+        <VipUpgradeProvider>
+          <RouterProvider router={router} />
+        </VipUpgradeProvider>
       </SocketProvider>
     </QueryClientProvider>
   </>

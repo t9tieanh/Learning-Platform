@@ -47,7 +47,8 @@ export interface QuizChoice {
 
 export interface GeneratedQuiz {
   id: string
-  chunkId: string
+  /** Present for chunk-scoped quizzes; null/absent for `LESSON_TEST` rows */
+  chunkId?: string | null
   type: QuestionType
   difficulty: QuizDifficulty
   bloomLevel: BloomLevel
@@ -85,6 +86,23 @@ export interface GeneratedQuizResponse {
   status: QuizStatus
   createdAt: string
   updatedAt: string
+}
+
+/** PATCH `assistant/quizzes/quiz/:quizId` — replaces all choices server-side */
+export interface UpdateQuizChoicePayload {
+  text: string
+  isCorrect: boolean
+  feedback?: string | null
+}
+
+export interface UpdateQuizPayload {
+  question: string
+  explanation: string
+  type: QuestionType
+  difficulty: QuizDifficulty
+  /** Omitted from instructor UI — backend keeps existing Bloom or default. */
+  bloomLevel?: BloomLevel
+  choices: UpdateQuizChoicePayload[]
 }
 
 /**

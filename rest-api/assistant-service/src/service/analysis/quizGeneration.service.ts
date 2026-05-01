@@ -9,6 +9,7 @@ import {
   BatchGeneratedQuizzesResponse
 } from '~/dto/response/quiz-response.dto';
 import { QuizPrompts, QuizLanguage } from '~/prompts/quiz.prompt';
+import { LessonTestQuizPrompts } from '~/prompts/lessonTest.quiz.prompt';
 import openaiQueueService from '~/service/queue/openaiQueue.service';
 
 /**
@@ -174,6 +175,27 @@ export class QuizGenerationService {
       }),
       count: quizzes.length,
     };
+  }
+
+  /**
+   * Batch generation for a merged lesson-test chunk group context (multiple chunks in one prompt).
+   */
+  async generateLessonTestGroupBatch(
+    mergedContext: string,
+    lessonSummary: string,
+    batchOptions: GenerateBatchQuizzesDto,
+    language: QuizLanguage = 'vi'
+  ): Promise<BatchGeneratedQuizzesResponse> {
+    const mergedChunkTopic =
+      language === 'vi' ? LessonTestQuizPrompts.mergedChunkTopicVi() : LessonTestQuizPrompts.mergedChunkTopicEn();
+
+    return this.generateBatchQuizzes(
+      mergedContext,
+      mergedChunkTopic,
+      lessonSummary || '',
+      batchOptions,
+      language
+    );
   }
 }
 

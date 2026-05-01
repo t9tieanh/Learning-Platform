@@ -31,7 +31,14 @@ export class AnalysisService {
                             }
                         }
                     }
-                }
+                },
+                lessonTest: {
+                    include: {
+                        chunkGroups: {
+                            orderBy: { createdAt: 'asc' },
+                        },
+                    },
+                },
             },
         }) as FullLessonWithIntelligence | null
 

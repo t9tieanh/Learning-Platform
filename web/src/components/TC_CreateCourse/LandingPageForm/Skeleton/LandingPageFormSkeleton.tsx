@@ -5,7 +5,7 @@ import TitleSkeleton from '../../common/TitleSkeleton'
 
 const LandingPageFormSkeleton = () => {
   return (
-    <div className='max-w-6xl mx-auto space-y-10 px-4'>
+    <div className='max-w-7xl w-full mx-auto space-y-10 px-4'>
       {/* Title Skeleton */}
       <TitleSkeleton />
 

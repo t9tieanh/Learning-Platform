@@ -8,4 +8,5 @@ export enum BullJobType {
     // Lesson analysis queues
     LESSON_CHUNKING = 'lesson-chunking',
     LESSON_SUMMARIZATION = 'lesson-summarization',
+    LESSON_TEST_GROUP_QUIZ = 'lesson-test-group-quiz',
 }

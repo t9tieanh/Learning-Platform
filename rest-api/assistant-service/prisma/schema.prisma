@@ -21,13 +21,14 @@ model CourseEmbedding {
   check       Boolean                @default(false)
   embedding   Unsupported("vector")?
 
+  @@index([embedding])
   @@map("course_embeddings")
 }
 
 model LessonChunk {
   id                 String                 @id @default(uuid())
   lessonId           String
-  content            String                 @db.Text
+  content            String
   chunkIndex         Int
   subtitleIndex      Int?
   startTime          String?
@@ -38,41 +39,74 @@ model LessonChunk {
   endSentenceIndex   Int?
   createdAt          DateTime               @default(now())
   updatedAt          DateTime               @updatedAt
-  summary            String?                @db.Text
+  summary            String?
   embedding          Unsupported("vector")?
-  title              String?                @db.Text
-
-  lesson            Lesson                @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  title              String?
+  lesson             Lesson                 @relation(fields: [lessonId], references: [id], onDelete: Cascade)
   quizzes            Quiz[]
 
-  @@index([embedding], map: "idx_lesson_chunks_embedding_hnsw")
   @@map("lesson_chunks")
 }
 
+/// Lesson-level test blueprint — optional 1:1 with Lesson (PK/FK `lesson_id`).
+model LessonTest {
+  lessonId             String           @id @map("lesson_id")
+  title                String?
+  status               LessonTestStatus @default(DRAFT)
+  targetTotalQuestions Int?             @map("target_total_questions")
+  notes                String?
+  createdBy            String           @map("created_by")
+  createdAt            DateTime         @default(now()) @map("created_at")
+  updatedAt            DateTime         @updatedAt @map("updated_at")
+
+  lesson      Lesson                   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  chunkGroups LessonTestChunkGroup[]
+
+  @@map("lesson_tests")
+}
+
+/// Chunk group within a lesson test blueprint (`chunk_ids`: JSON array of `lesson_chunks.id`).
+model LessonTestChunkGroup {
+  id               String   @id @default(uuid())
+  lessonId         String   @map("lesson_id")
+  chunkIds         Json     @map("chunk_ids")
+  label            String?
+  questionCount    Int      @map("question_count")
+  distribution     Json?
+  batchUserPrompt  String?  @map("batch_user_prompt")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  lessonTest LessonTest @relation(fields: [lessonId], references: [lessonId], onDelete: Cascade)
+  quizzes    Quiz[]
+
+  @@index([lessonId])
+  @@map("lesson_test_chunk_groups")
+}
+
 model Lesson {
-  id             String          @id @default(uuid())
+  id             String         @id @default(uuid())
   title          String?
-  content        String?         @db.Text
+  content        String?
   duration       Int?
   position       Int?
-  isPublic       Boolean?        @default(false)
+  isPublic       Boolean?       @default(false)
   type           String?
   url            String?
   chapterId      String?
-  status         AnalysisStatus  @default(PROCESSING)
-  
-  transcriptId   String?         @unique
-  transcript     String?         @db.Text
-  summary        String?         @db.Text
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
-  deleted        Boolean         @default(false)
-  subtitles      String?         @db.Text
+  transcriptId   String?        @unique
+  transcript     String?
+  summary        String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  deleted        Boolean        @default(false)
+  subtitles      String?
   suggestedTitle String?
-  isQualityValid Boolean?        @default(true)
-  qualityReason  String?         @db.Text
-  
+  isQualityValid Boolean?       @default(true)
+  qualityReason  String?
+  status         AnalysisStatus @default(PROCESSING)
   chunks         LessonChunk[]
+  lessonTest     LessonTest?
 
   @@map("lessons")
 }
@@ -91,68 +125,50 @@ model NavigatorEmbedding {
   @@map("navigator_embeddings")
 }
 
-model QuizAnswer {
-  id               String       @id @default(uuid())
-  userId           String
-  quizId           String
-  selectedChoiceId String
-  isCorrect        Boolean
-  timeSpent        Int?
-  answeredAt       DateTime     @default(now())
-  createdAt        DateTime     @default(now())
-
-  quiz             Quiz         @relation(fields: [quizId], references: [id], onDelete: Cascade)
-  choice           QuizChoice   @relation(fields: [selectedChoiceId], references: [id])
-
-  @@index([answeredAt])
-  @@index([quizId])
-  @@index([userId])
-  @@index([userId, quizId])
-  @@map("quiz_answers")
-}
-
 model QuizChoice {
   id           String         @id @default(uuid())
   quizId       String
-  text         String         @db.Text
+  text         String
   isCorrect    Boolean        @default(false)
   order        Int
-  feedback     String?        @db.Text
+  feedback     String?
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
-
   quiz         Quiz           @relation(fields: [quizId], references: [id], onDelete: Cascade)
-  answers      QuizAnswer[]
 
   @@index([quizId])
   @@map("quiz_choices")
 }
 
 model Quiz {
-  id            String          @id @default(uuid())
-  chunkId       String
-  question      String          @db.Text
-  explanation   String          @db.Text
-  type          QuestionType    @default(MULTIPLE_CHOICE)
-  difficulty    DifficultyLevel @default(MEDIUM)
-  bloomLevel    BloomLevel      @default(REMEMBER)
-  aiGenerated   Boolean         @default(false)
-  aiModel       String?
-  aiConfidence  Float?
-  createdBy     String
-  isApproved    Boolean         @default(false)
-  status        QuizStatus      @default(ACTIVE)
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
-
-  answers       QuizAnswer[]
-  choices       QuizChoice[]
-  chunk         LessonChunk     @relation(fields: [chunkId], references: [id], onDelete: Cascade)
+  id                      String                @id @default(uuid())
+  /// Nullable when `quizScope === LESSON_TEST` (group grounded via `lessonTestChunkGroupId`).
+  chunkId                 String?
+  quizScope               QuizScope             @default(CHUNK_STANDALONE) @map("quiz_scope")
+  lessonTestChunkGroupId  String?               @map("lesson_test_chunk_group_id")
+  question                String
+  explanation             String
+  type                    QuestionType          @default(MULTIPLE_CHOICE)
+  difficulty              DifficultyLevel       @default(MEDIUM)
+  bloomLevel              BloomLevel            @default(REMEMBER)
+  aiGenerated             Boolean               @default(false)
+  aiModel                 String?
+  aiConfidence            Float?
+  createdBy               String
+  isApproved              Boolean               @default(false)
+  status                  QuizStatus            @default(ACTIVE)
+  createdAt               DateTime              @default(now())
+  updatedAt               DateTime              @updatedAt
+  choices                 QuizChoice[]
+  chunk                   LessonChunk?          @relation(fields: [chunkId], references: [id], onDelete: Cascade)
+  lessonTestChunkGroup    LessonTestChunkGroup? @relation(fields: [lessonTestChunkGroupId], references: [id], onDelete: SetNull)
 
   @@index([aiGenerated])
   @@index([chunkId])
   @@index([createdBy])
   @@index([isApproved])
+  @@index([quizScope])
+  @@index([lessonTestChunkGroupId])
   @@map("quizzes")
 }
 
@@ -171,12 +187,18 @@ model SystemProfileEmbedding {
 }
 
 model UserPurchasedCourse {
-  id           BigInt    @id
-  userId       String    @map("user_id")
-  courseId     String    @map("course_id")
-  purchasedAt  DateTime? @default(now()) @map("purchased_at") @db.Timestamp(6)
+  id          BigInt    @id
+  userId      String    @map("user_id")
+  courseId    String    @map("course_id")
+  purchasedAt DateTime? @default(now()) @map("purchased_at") @db.Timestamp(6)
 
   @@map("user_purchased_courses")
+}
+
+model n8n_chat_histories {
+  id         Int    @id @default(autoincrement())
+  session_id String @db.VarChar(255)
+  message    Json
 }
 
 enum BloomLevel {
@@ -210,4 +232,15 @@ enum AnalysisStatus {
   PROCESSING
   COMPLETED
   FAILED
+}
+
+enum LessonTestStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum QuizScope {
+  CHUNK_STANDALONE
+  LESSON_TEST
 }

@@ -124,17 +124,19 @@ const LearnovaAISection: React.FC<LearnovaAISectionProps> = ({
           </div>
         )}
 
-        <div className='flex items-center gap-3 text-xs text-gray-400 bg-gray-50/50 px-4 py-2.5 rounded-xl border border-gray-100'>
-          <FileSearch className='w-3.5 h-3.5 text-blue-500' />
-          <span className='font-medium'>
-            {chunks.length} phân đoạn kiến thức
-          </span>
-        </div>
+        <div className='rounded-2xl border border-gray-100 bg-white/80 backdrop-blur-sm shadow-sm p-4 md:p-6 space-y-4 md:space-y-5'>
+          <div className='flex items-center gap-3 text-xs text-slate-500 bg-blue-50/40 px-3 py-2.5 rounded-xl border border-blue-100/60'>
+            <FileSearch className='w-3.5 h-3.5 text-blue-500 shrink-0' />
+            <span className='font-medium'>
+              {chunks.length} phân đoạn kiến thức
+            </span>
+          </div>
 
-        <div className='space-y-4'>
-          {chunks.map((chunk) => (
-            <ChunkCard key={chunk.id} chunk={chunk} onSaveSummary={handleSaveSummary} onSeek={onSeek} />
-          ))}
+          <div className='space-y-4 md:space-y-5'>
+            {chunks.map((chunk) => (
+              <ChunkCard key={chunk.id} chunk={chunk} onSaveSummary={handleSaveSummary} onSeek={onSeek} />
+            ))}
+          </div>
         </div>
 
         {onViewDetails && (

@@ -64,7 +64,7 @@ const DistributionPicker: React.FC<DistributionPickerProps> = ({
             <div className='space-y-5'>
                 <div className='p-5 bg-gray-50/50 rounded-2xl border border-gray-100 flex flex-col gap-5'>
                     <div className='space-y-2'>
-                        <label className='text-[10px] font-bold text-gray-400 uppercase tracking-tight ml-1'>Độ khó bài tập</label>
+                        <label className='text-[10px] font-semibold text-gray-500 ml-1'>Độ khó bài tập</label>
                         <ToggleGroup
                             type='single'
                             value={rule.difficulty}
@@ -105,7 +105,7 @@ const DistributionPicker: React.FC<DistributionPickerProps> = ({
 
                 <div className='space-y-2'>
                     <div className='flex items-center justify-between px-1'>
-                        <label className='text-[10px] font-bold text-gray-400 uppercase tracking-tight'>Ý tưởng của bạn (Tối đa 100 ký tự)</label>
+                        <label className='text-[10px] font-semibold text-gray-500'>Ý tưởng của bạn (tối đa 100 ký tự)</label>
                         <span className={cn('text-[9px] font-bold', userPrompt.length > 90 ? 'text-red-500' : 'text-gray-300')}>
                             {userPrompt.length}/100
                         </span>

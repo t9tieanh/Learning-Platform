@@ -5,6 +5,7 @@ import Authentication from '~/middleware/auth.midleware';
 import checkQuizGenerationVip from '~/middleware/checkQuizGenerationVip.middleware';
 import validateDto from '~/middleware/validateDto.midleware';
 import { GenerateQuizDto, GenerateBatchQuizzesDto } from '~/dto/request/quiz-generation.dto';
+import { UpdateQuizDto } from '~/dto/request/quiz-update.dto';
 
 const quizRouter: Router = express.Router();
 
@@ -138,6 +139,18 @@ quizRouter.get(
   '/chunks/:chunkId/quizzes/:quizId',
   Authentication(true),
   quizController.getQuiz
+);
+
+/**
+ * PATCH /assistant/quizzes/quiz/:quizId
+ *
+ * Instructor update: question, explanation, type, difficulty/bloom, choices (full replace).
+ */
+quizRouter.patch(
+  '/quiz/:quizId',
+  Authentication(true),
+  validateDto(UpdateQuizDto),
+  quizController.updateQuiz
 );
 
 export default quizRouter;
