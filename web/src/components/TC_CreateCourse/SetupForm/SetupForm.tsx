@@ -70,7 +70,7 @@ const SetupForm = ({ id }: { id: string }) => {
   }
 
   return (
-    <div className='max-w-6xl mx-auto space-y-12 px-6 py-12 rounded-[48px] bg-[#f8fafc] border-2 border-white shadow-sm'>
+    <div className='max-w-7xl w-full mx-auto space-y-12 px-4 sm:px-6 md:px-8 py-10 md:py-12 rounded-[48px] bg-[#f8fafc] border-2 border-white shadow-sm'>
       <TitleComponent
         title='Xem lại và hoàn tất'
         icon={<CheckCircle className='h-6 w-6 text-white' />}

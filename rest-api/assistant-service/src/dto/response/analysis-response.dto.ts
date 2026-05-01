@@ -1,4 +1,13 @@
-import { Lesson, LessonChunk, Quiz, QuizChoice, AnalysisStatus } from '@prisma/client'
+import {
+    Lesson,
+    LessonChunk,
+    Quiz,
+    QuizChoice,
+    AnalysisStatus,
+    LessonTest,
+    LessonTestChunkGroup,
+} from '@prisma/client'
+import lessonTestMergedContextService from '~/service/lessonTest/lessonTestMergedContext.service'
 
 // ---------------------------------------------------------------------------
 // Quiz Choice DTO
@@ -43,6 +52,28 @@ export interface ChunkDto {
 // ---------------------------------------------------------------------------
 export type AnalysisStatusExtended = AnalysisStatus | 'NOT_FOUND'
 
+/** Lesson-test blueprint header (optional 1:1 with lesson). */
+export interface AnalysisLessonTestHeaderDto {
+    lessonId: string
+    title: string | null
+    status: string
+    targetTotalQuestions: number | null
+    notes: string | null
+}
+
+/** Persisted lesson-test chunk groups for instructor UI (merged-context quiz blueprint). */
+export interface AnalysisLessonTestChunkGroupDto {
+    id: string
+    lessonId: string
+    chunkIds: string[]
+    questionCount: number
+    label: string | null
+    batchUserPrompt: string | null
+    distribution: unknown
+    createdAt: string
+    updatedAt: string
+}
+
 export interface AnalysisResponseDto {
     lessonId: string
     status: AnalysisStatusExtended
@@ -53,6 +84,10 @@ export interface AnalysisResponseDto {
     transcript: string | null
     subtitles: string | null
     chunks: ChunkDto[]
+    /** Present when a `lesson_tests` row exists for this lesson */
+    lessonTest: AnalysisLessonTestHeaderDto | null
+    /** Ordered chunk groups from DB (empty if no blueprint or no groups yet) */
+    lessonTestChunkGroups: AnalysisLessonTestChunkGroupDto[]
 }
 
 // ---------------------------------------------------------------------------
@@ -68,6 +103,11 @@ export type FullLessonWithIntelligence = Lesson & {
             choices: QuizChoice[]
         })[]
     })[]
+    lessonTest:
+        | (LessonTest & {
+              chunkGroups: LessonTestChunkGroup[]
+          })
+        | null
 }
 
 /**
@@ -101,12 +141,35 @@ export function toChunkDto(chunk: LessonChunk & { quizzes?: (Quiz & { choices: Q
     }
 }
 
+function mapLessonTestChunkGroups(
+    lessonTest: LessonTest & { chunkGroups: LessonTestChunkGroup[] }
+): AnalysisLessonTestChunkGroupDto[] {
+    return [...lessonTest.chunkGroups]
+        .sort(
+            (a, b) =>
+                new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+        )
+        .map((g) => ({
+            id: g.id,
+            lessonId: g.lessonId,
+            chunkIds: lessonTestMergedContextService.parseChunkIds(g.chunkIds),
+            questionCount: g.questionCount,
+            label: g.label,
+            batchUserPrompt: g.batchUserPrompt,
+            distribution: g.distribution,
+            createdAt: g.createdAt.toISOString(),
+            updatedAt: g.updatedAt.toISOString(),
+        }))
+}
+
 /**
  * Builds the full AnalysisResponseDto from a Lesson + its chunks and quizzes.
  */
 export function toAnalysisResponseDto(
     lesson: FullLessonWithIntelligence
 ): AnalysisResponseDto {
+    const lt = lesson.lessonTest ?? null
+
     return {
         lessonId: lesson.id,
         status: lesson.status,
@@ -119,5 +182,15 @@ export function toAnalysisResponseDto(
         chunks: lesson.chunks
             .sort((a: LessonChunk, b: LessonChunk) => a.chunkIndex - b.chunkIndex)
             .map(toChunkDto),
+        lessonTest: lt
+            ? {
+                  lessonId: lt.lessonId,
+                  title: lt.title,
+                  status: lt.status,
+                  targetTotalQuestions: lt.targetTotalQuestions,
+                  notes: lt.notes,
+              }
+            : null,
+        lessonTestChunkGroups: lt ? mapLessonTestChunkGroups(lt) : [],
     }
 }

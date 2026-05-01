@@ -88,8 +88,8 @@ const LearnovaQuizBuilder: React.FC<LearnovaQuizBuilderProps> = ({
                             <div className='space-y-1.5'>
                                 <div className='flex items-center gap-2'>
                                     <h3 className='text-[18px] font-extrabold text-gray-900 tracking-tight'>Câu hỏi ôn tập</h3>
-                                    <div className='px-2 py-0.5 bg-blue-50 text-blue-600 rounded-full text-[9px] font-bold uppercase tracking-wider border border-blue-100'>
-                                        {quizzes.length} Câu hỏi
+                                    <div className='px-2 py-0.5 bg-blue-50 text-blue-600 rounded-full text-[9px] font-semibold border border-blue-100'>
+                                        {quizzes.length} câu hỏi
                                     </div>
                                 </div>
                                 <div className='flex items-center gap-2'>

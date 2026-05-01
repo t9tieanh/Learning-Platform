@@ -33,10 +33,24 @@ export const VipUpgradeProvider: React.FC<{ children: ReactNode }> = ({ children
   )
 }
 
+const noopVip: VipUpgradeContextType = {
+  openVipDialog: () => {
+    if (import.meta.env.DEV) {
+      // eslint-disable-next-line no-console
+      console.warn('[useVipUpgrade] VipUpgradeProvider is missing; openVipDialog is a no-op.')
+    }
+  },
+  closeVipDialog: () => {},
+}
+
+/**
+ * Mặc định yêu cầu VipUpgradeProvider; nếu thiếu (HMR, test, lỗi cấu trúc cây) trả về no-op
+ * thay vì throw để không làm sập cả ứng dụng.
+ */
 export const useVipUpgrade = (): VipUpgradeContextType => {
   const context = useContext(VipUpgradeContext)
   if (!context) {
-    throw new Error('useVipUpgrade must be used within a VipUpgradeProvider')
+    return noopVip
   }
   return context
 }

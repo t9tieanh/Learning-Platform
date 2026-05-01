@@ -4,7 +4,7 @@ import TitleSkeleton from '../../common/TitleSkeleton'
 
 const SetupFormSkeleton = () => {
   return (
-    <div className='max-w-6xl space-y-8 mx-auto'>
+    <div className='max-w-7xl w-full space-y-8 mx-auto'>
       {/* Title Component Skeleton */}
       <TitleSkeleton />
 

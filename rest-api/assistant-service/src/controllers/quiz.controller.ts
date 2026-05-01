@@ -3,7 +3,9 @@ import { StatusCodes } from 'http-status-codes';
 import sendResponse from '~/dto/response/send-response';
 import quizService from '~/service/analysis/quiz.service';
 import { GenerateQuizDto, GenerateBatchQuizzesDto } from '~/dto/request/quiz-generation.dto';
+import { UpdateQuizDto, NormalizedQuizChoiceInput, UpdateQuizPersistPayload } from '~/dto/request/quiz-update.dto';
 import ApiError from '~/middleware/ApiError';
+import { QuestionType } from '~/enums/quizStatus.enum';
 
 /**
  * QuizController handles quiz-related HTTP endpoints.
@@ -251,6 +253,67 @@ class QuizController {
     }
   };
 
+  /**
+   * PATCH /assistant/quizzes/quiz/:quizId
+   */
+  updateQuiz = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    try {
+      const quizId = String(req.params.quizId);
+      const body = req.data as UpdateQuizDto;
+
+      const choicesNorm: NormalizedQuizChoiceInput[] = (body.choices ?? []).map((c) => ({
+        text: c.text.trim(),
+        isCorrect: c.isCorrect,
+        feedback: c.feedback ?? null,
+      }));
+
+      if (body.type !== QuestionType.SHORT_ANSWER) {
+        QuizController.assertObjectiveQuizChoices(choicesNorm);
+      }
+
+      const persistPayload: UpdateQuizPersistPayload = {
+        question: body.question.trim(),
+        explanation: (body.explanation ?? '').trim(),
+        type: body.type,
+        difficulty: body.difficulty,
+        choices: body.type === QuestionType.SHORT_ANSWER ? [] : choicesNorm,
+      };
+      if (body.bloomLevel !== undefined) {
+        persistPayload.bloomLevel = body.bloomLevel;
+      }
+
+      const quiz = await quizService.updateQuizById(quizId, persistPayload);
+
+      sendResponse(res, {
+        code: StatusCodes.OK,
+        message: 'Quiz updated successfully',
+        result: quiz,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * Trắc nghiệm / đúng-sai: ít nhất 2 lựa chọn và đúng một đáp án đúng.
+   */
+  private static assertObjectiveQuizChoices(choices: NormalizedQuizChoiceInput[]): void {
+    if (choices.length < 2) {
+      throw new ApiError(
+        StatusCodes.BAD_REQUEST,
+        'Cần ít nhất 2 lựa chọn cho câu trắc nghiệm / đúng-sai.'
+      );
+    }
+    const correctCount = choices.filter((c) => c.isCorrect).length;
+    if (correctCount !== 1) {
+      throw new ApiError(StatusCodes.BAD_REQUEST, 'Phải có đúng một đáp án đúng.');
+    }
+  }
+
   // -------------------------------------------------------------------------
   // Private Helpers
   // -------------------------------------------------------------------------
@@ -267,7 +330,9 @@ class QuizController {
       type: quiz.type,
       difficulty: quiz.difficulty,
       bloomLevel: quiz.bloomLevel,
-      choices: quiz.choices.map((choice: any) => ({
+      choices: [...quiz.choices]
+        .sort((a: { order: number }, b: { order: number }) => a.order - b.order)
+        .map((choice: any) => ({
         id: choice.id,
         text: choice.text,
         isCorrect: choice.isCorrect,
@@ -276,6 +341,7 @@ class QuizController {
       isApproved: quiz.isApproved,
       status: quiz.status,
       createdAt: quiz.createdAt.toISOString(),
+      updatedAt: quiz.updatedAt.toISOString(),
     };
   }
 }
