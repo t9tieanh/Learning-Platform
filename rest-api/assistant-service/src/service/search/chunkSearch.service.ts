@@ -46,8 +46,8 @@ export class ChunkSearchService {
                     start_time as "startTime",
                     end_time as "endTime",
                     distance
-                FROM search_lesson_chunks_by_embedding(
-                    ${lessonId}::uuid,
+                FROM search_lesson_chunks_by_embedding_v2(
+                    ${lessonId},
                     ${queryEmbedding}::vector(768),
                     ${limit}::int
                 )

@@ -12,7 +12,7 @@ export class LessonChunkService {
             if (embeddingVector) {
                 await prismaService.$executeRaw`
                     UPDATE "lesson_chunks" 
-                    SET embedding = ${embeddingVector}::vector
+                    SET embedding = ${embeddingVector}::vector(768)
                     WHERE id = ${chunkId}
                 `;
             } else {

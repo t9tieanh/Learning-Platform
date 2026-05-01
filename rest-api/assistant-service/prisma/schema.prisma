@@ -45,8 +45,43 @@ model LessonChunk {
   lesson             Lesson                 @relation(fields: [lessonId], references: [id], onDelete: Cascade)
   quizzes            Quiz[]
 
-  @@index([embedding], map: "idx_lesson_chunks_embedding_hnsw")
   @@map("lesson_chunks")
+}
+
+/// Lesson-level test blueprint — optional 1:1 with Lesson (PK/FK `lesson_id`).
+model LessonTest {
+  lessonId             String           @id @map("lesson_id")
+  title                String?
+  status               LessonTestStatus @default(DRAFT)
+  targetTotalQuestions Int?             @map("target_total_questions")
+  notes                String?
+  createdBy            String           @map("created_by")
+  createdAt            DateTime         @default(now()) @map("created_at")
+  updatedAt            DateTime         @updatedAt @map("updated_at")
+
+  lesson      Lesson                   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  chunkGroups LessonTestChunkGroup[]
+
+  @@map("lesson_tests")
+}
+
+/// Chunk group within a lesson test blueprint (`chunk_ids`: JSON array of `lesson_chunks.id`).
+model LessonTestChunkGroup {
+  id               String   @id @default(uuid())
+  lessonId         String   @map("lesson_id")
+  chunkIds         Json     @map("chunk_ids")
+  label            String?
+  questionCount    Int      @map("question_count")
+  distribution     Json?
+  batchUserPrompt  String?  @map("batch_user_prompt")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  lessonTest LessonTest @relation(fields: [lessonId], references: [lessonId], onDelete: Cascade)
+  quizzes    Quiz[]
+
+  @@index([lessonId])
+  @@map("lesson_test_chunk_groups")
 }
 
 model Lesson {
@@ -71,6 +106,7 @@ model Lesson {
   qualityReason  String?
   status         AnalysisStatus @default(PROCESSING)
   chunks         LessonChunk[]
+  lessonTest     LessonTest?
 
   @@map("lessons")
 }
@@ -105,28 +141,33 @@ model QuizChoice {
 }
 
 model Quiz {
-  id           String          @id @default(uuid())
-  chunkId      String
-  question     String
-  explanation  String
-  type         QuestionType    @default(MULTIPLE_CHOICE)
-  difficulty   DifficultyLevel @default(MEDIUM)
-  bloomLevel   BloomLevel      @default(REMEMBER)
-  aiGenerated  Boolean         @default(false)
-  aiModel      String?
-  aiConfidence Float?
-  createdBy    String
-  isApproved   Boolean         @default(false)
-  status       QuizStatus      @default(ACTIVE)
-  createdAt    DateTime        @default(now())
-  updatedAt    DateTime        @updatedAt
-  choices      QuizChoice[]
-  chunk        LessonChunk     @relation(fields: [chunkId], references: [id], onDelete: Cascade)
+  id                      String                @id @default(uuid())
+  chunkId                 String
+  quizScope               QuizScope             @default(CHUNK_STANDALONE) @map("quiz_scope")
+  lessonTestChunkGroupId  String?               @map("lesson_test_chunk_group_id")
+  question                String
+  explanation             String
+  type                    QuestionType          @default(MULTIPLE_CHOICE)
+  difficulty              DifficultyLevel       @default(MEDIUM)
+  bloomLevel              BloomLevel            @default(REMEMBER)
+  aiGenerated             Boolean               @default(false)
+  aiModel                 String?
+  aiConfidence            Float?
+  createdBy               String
+  isApproved              Boolean               @default(false)
+  status                  QuizStatus            @default(ACTIVE)
+  createdAt               DateTime              @default(now())
+  updatedAt               DateTime              @updatedAt
+  choices                 QuizChoice[]
+  chunk                   LessonChunk           @relation(fields: [chunkId], references: [id], onDelete: Cascade)
+  lessonTestChunkGroup    LessonTestChunkGroup? @relation(fields: [lessonTestChunkGroupId], references: [id], onDelete: SetNull)
 
   @@index([aiGenerated])
   @@index([chunkId])
   @@index([createdBy])
   @@index([isApproved])
+  @@index([quizScope])
+  @@index([lessonTestChunkGroupId])
   @@map("quizzes")
 }
 
@@ -190,4 +231,15 @@ enum AnalysisStatus {
   PROCESSING
   COMPLETED
   FAILED
+}
+
+enum LessonTestStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum QuizScope {
+  CHUNK_STANDALONE
+  LESSON_TEST
 }
