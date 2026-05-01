@@ -30,8 +30,8 @@ const CourseCardListSkeleton = ({ layout = 'list' }: CourseCardListSkeletonProps
 
   return (
     <div className='overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm'>
-      <div className='flex min-h-[200px] flex-row items-stretch'>
-        <div className='w-[19rem] flex-shrink-0 bg-slate-200/80 animate-pulse' />
+      <div className='flex md:h-[240px] flex-col md:flex-row items-stretch'>
+        <div className='w-full h-48 md:h-full md:w-[20rem] flex-shrink-0 bg-slate-200/80 animate-pulse' />
 
         <div className='flex flex-1 flex-col justify-between p-6'>
           <div className='flex-1 space-y-3'>

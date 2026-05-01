@@ -82,6 +82,7 @@ DROP TABLE IF EXISTS `user_expertise`;
 CREATE TABLE `user_expertise` (
   `user_id` varchar(255) NOT NULL,
   `expertise_id` varchar(255) NOT NULL,
+  PRIMARY KEY (`user_id`,`expertise_id`),
   KEY `FKdw281y9ir7ihl2sqw6decjo9b` (`expertise_id`),
   KEY `FKsx97uyb1hsrfhn4ew2latu8hr` (`user_id`),
   CONSTRAINT `FKdw281y9ir7ihl2sqw6decjo9b` FOREIGN KEY (`expertise_id`) REFERENCES `expertise` (`id`),

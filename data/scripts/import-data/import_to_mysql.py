@@ -133,8 +133,8 @@ def import_courses(cursor, file_path):
             language = 'en'
             progress_step = 'COMPLETED'
             status = 'PUBLISHED'
-            long_description = row['short_description'][:255] if row['short_description'] else None # Default long to short, truncated
-            short_description = row['short_description'][:255] if row['short_description'] else None
+            long_description = row['short_description'] if row['short_description'] else None # Default long to short
+            short_description = row['short_description'] if row['short_description'] else None
 
             data.append((
                 row['id'], row['created_at'], deleted, row['updated_at'], 
