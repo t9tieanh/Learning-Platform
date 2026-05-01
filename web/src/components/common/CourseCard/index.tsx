@@ -153,10 +153,11 @@ const CourseCard = ({ course, className, onViewCourse }: CourseCardProps) => {
                 e.stopPropagation()
                 void handleAddToCart()
               }}
-              className='hidden group-hover:flex items-center justify-center absolute top-2 right-2 bg-white rounded-full p-2 shadow-md hover:scale-105 transition-transform'
+              className='hidden group-hover:flex group/cart items-center justify-center absolute top-2 right-2 bg-white border border-blue-200/60 rounded-full
+               p-2 shadow-md hover:bg-orange-500/80 hover:border-white hover:scale-105 transition-all duration-200'
               aria-label='Thêm vào giỏ hàng'
             >
-              <ShoppingCart className='w-4 h-4 text-gray-700 hover:text-white' />
+              <ShoppingCart className='w-4 h-4 text-orange-500/80 transition-colors group-hover/cart:text-white' />
             </Button>
           </div>
         </CardHeader>

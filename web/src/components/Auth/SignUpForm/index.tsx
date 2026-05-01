@@ -68,7 +68,7 @@ const SignUpForm: FC<{ setIsSignUpMode: (value: boolean) => void; handleLoginWit
             </button>
           </CardTitle>
           <CardDescription className='text-[#2DD4BF] text-base font-semibold mt-2'>
-            Bắt đầu để khám phá tri thức cùng Learnova.
+            Bắt đầu để khám phá tri thức cùng Learnova
           </CardDescription>
           <CardContent className='mt-5'>
             <form onSubmit={handleSubmit(onSubmit)}>
@@ -76,19 +76,19 @@ const SignUpForm: FC<{ setIsSignUpMode: (value: boolean) => void; handleLoginWit
                 <CustomInput placeholder='Email' type='email' {...register('email')} />
                 {errors.email && <span className='text-red-500 text-xs text-left'>{errors.email.message}</span>}
 
-                <CustomInput placeholder='Username' type='text' {...register('username')} />
+                <CustomInput placeholder='Tên đăng nhập' type='text' {...register('username')} />
                 {errors.username && <span className='text-red-500 text-xs text-left'>{errors.username.message}</span>}
 
-                <CustomInput placeholder='Nhập tên của bạn !' type='text' {...register('name')} />
+                <CustomInput placeholder='Họ và tên' type='text' {...register('name')} />
                 {errors.name && <span className='text-red-500 text-xs text-left'>{errors.name.message}</span>}
 
-                <CustomInput placeholder='Nhập số điện thoại của bạn !' type='tel' {...register('phone')} />
+                <CustomInput placeholder='Số điện thoại' type='tel' {...register('phone')} />
                 {errors.phone && <span className='text-red-500 text-xs text-left'>{errors.phone.message}</span>}
 
-                <CustomInput placeholder='Password' type='password' {...register('password')} />
+                <CustomInput placeholder='Mật khẩu' type='password' {...register('password')} />
                 {errors.password && <span className='text-red-500 text-xs text-left'>{errors.password.message}</span>}
 
-                <CustomInput placeholder='Xác nhận lại password' type='password' {...register('confirmPassword')} />
+                <CustomInput placeholder='Nhập lại mật khẩu' type='password' {...register('confirmPassword')} />
                 {errors.confirmPassword && (
                   <span className='text-red-500 text-xs text-left'>{errors.confirmPassword.message}</span>
                 )}
@@ -123,16 +123,6 @@ const SignUpForm: FC<{ setIsSignUpMode: (value: boolean) => void; handleLoginWit
                   icon={<Send size={16} />}
                 />
               </div>
-              <p className='text-center text-sm text-gray-500 mt-5'>
-                Bạn đã có tài khoản?{' '}
-                <button
-                  type='button'
-                  onClick={() => setIsSignUpMode(false)}
-                  className='text-blue-500 font-bold hover:underline'
-                >
-                  Đăng nhập
-                </button>
-              </p>
               {/* Divider */}
               <div className='relative mt-5'>
                 <div className='absolute inset-0 flex items-center'>
@@ -143,29 +133,24 @@ const SignUpForm: FC<{ setIsSignUpMode: (value: boolean) => void; handleLoginWit
                 </div>
               </div>
               {/* login with other providers */}
-              <div className='mt-5 flex items-center justify-center gap-3 w-full'>
+              <div className='mt-5 flex items-center justify-center gap-3 w-full mb-2'>
                 <CustomButton
                   icon={<FcGoogle />}
-                  className='bg-inherit w-1/2 border-2 border-solid hover:bg-red-600'
+                  className='bg-inherit w-full border-2 border-solid hover:bg-red-600'
                   onClick={handleLoginWithGoogle}
                 />
-                <CustomButton
-                  icon={<FaSquareFacebook className='text-white' />}
-                  className='bg-blue-600 w-1/2 border-2 border-solid hover:bg-blue-700'
-                />
               </div>
+              <CustomButton
+                type='button'
+                onClick={() => navigate('/')}
+                label='Về trang chủ'
+                icon={<ArrowLeft size={16} />}
+                className='w-full rounded-md shadow-lg border border-gray-300 bg-blue-500 py-3 text-white hover:bg-blue-600'
+              />
             </form>
           </CardContent>
         </CardHeader>
       </Card>
-      <button
-        type='button'
-        onClick={() => navigate('/')}
-        className='flex items-center justify-center gap-1.5 mt-3 mx-auto text-sm text-gray-500 hover:text-blue-600 transition-colors group'
-      >
-        <ArrowLeft className='w-4 h-4 group-hover:-translate-x-0.5 transition-transform' />
-        Về trang chủ
-      </button>
     </div>
   )
 }

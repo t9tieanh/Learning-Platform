@@ -1,16 +1,32 @@
-import { useEffect, useMemo, useState, MouseEvent } from 'react'
+import { useMemo, useState } from 'react'
 import { CourseCard } from '@/components/AllCourse/CourseCard'
+import { CourseFetchingOverlay } from '@/components/AllCourse/CourseFetchingOverlay'
 import CourseCardListSkeleton from '@/components/AllCourse/CourseCardListSkeleton'
 import { FilterSidebar } from '@/components/AllCourse/FilterSidebar'
 import { SortBar } from '@/components/AllCourse/SortBar'
 import CustomPagination from '@/components/common/Pagination/CustomPagination'
 import instructorAvatar from '@/assets/images/course.jpg'
+import heroCourses from '@/assets/images/hero-courses.png'
 import courseService from '@/services/course/course-user.service'
 import useDebounce from '@/hooks/useDebounce.hook'
 import eventTracker from '@/services/personalize/eventTracker'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 
 type PaginationItem = number | 'ellipsis'
+
+const getCourseCategoryName = (course: { categoryName?: unknown; category?: unknown }) => {
+  if (typeof course.categoryName === 'string') return course.categoryName
+  if (typeof course.category === 'string') return course.category
+  if (
+    course.category &&
+    typeof course.category === 'object' &&
+    'name' in course.category &&
+    typeof course.category.name === 'string'
+  ) {
+    return course.category.name
+  }
+  return undefined
+}
 
 const getPaginationItems = (
   total: number,
@@ -60,7 +76,8 @@ const getPaginationItems = (
 
 const Index = () => {
   const [currentPage, setCurrentPage] = useState(1)
-  const [pageSize] = useState(10)
+  const [pageSize] = useState(9)
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list')
 
   const [selectedCategories, setSelectedCategories] = useState<string[]>([])
   const [sortValue, setSortValue] = useState('')
@@ -148,11 +165,12 @@ const Index = () => {
   const totalElements = activeQuery.data?.totalElements ?? 0
   const loading = activeQuery.isLoading
   const busy = activeQuery.isFetching
+  const hasError = activeQuery.isError
 
   const filteredItems = useMemo(() => {
     if (!selectedCategories || selectedCategories.length === 0) return items
     return items.filter((c) => {
-      const name = c.categoryName ?? c.category ?? c.category?.name
+      const name = getCourseCategoryName(c)
       return typeof name === 'string' && selectedCategories.includes(name)
     })
   }, [items, selectedCategories])
@@ -173,6 +191,7 @@ const Index = () => {
         reviewCount: c.reviewsCount ?? c.reviewCount ?? 0,
         duration: c.duration ?? '—',
         lectures: c.lectures ?? c.lessonsCount ?? 0,
+        category: getCourseCategoryName(c) ?? 'Lập trình',
         level: c.level ?? 'Mọi cấp độ',
         isBestseller: Boolean(c.isBestseller),
         thumbnail: c.thumbnailUrl ?? c.image ?? instructorAvatar
@@ -189,73 +208,118 @@ const Index = () => {
   // }, [totalPages, currentPage])
 
   return (
-    <div className='flex flex-col md:flex-row min-h-screen bg-white'>
-      <FilterSidebar
-        selectedCategories={selectedCategories}
-        onCategoriesChange={(cats) => {
-          setSelectedCategories(cats)
-          setCurrentPage(1)
+    <div className='min-h-[100dvh] bg-[#f4f9fc]'>
+      <CourseFetchingOverlay visible={busy} />
+      <section
+        className='relative isolate overflow-hidden border-b border-slate-200/70 bg-cover bg-center'
+        style={{
+          backgroundImage: `linear-gradient(90deg, rgba(238, 247, 255, 0) 0%, rgba(223, 240, 251, 0) 55%, rgba(215, 236, 249, 0.5) 100%), url(${heroCourses})`
         }}
-        search={search}
-        onSearchChange={(v) => {
-          setSearch(v)
-          setCurrentPage(1)
-        }}
-        minPrice={minPrice}
-        onMinPriceChange={(v) => {
-          setMinPrice(v)
-          setCurrentPage(1)
-        }}
-        minRating={minRating}
-        onMinRatingChange={(v) => {
-          setMinRating(v)
-          setCurrentPage(1)
-        }}
-      />
-
-      <main className='flex-1 p-4 md:p-8'>
-        <div className='max-w-7xl mx-auto'>
-          <div className='mb-12 text-center px-4 md:px-0'>
-            <h1 className='text-3xl md:text-5xl font-bold mb-3 bg-gradient-to-r from-blue-500 to-indigo-600 bg-clip-text text-transparent'>
-              Khám phá khóa học
+      >
+        <div className='absolute -right-20 -top-24 h-72 w-72 rounded-full border-[28px] border-blue-600/85 opacity-90 shadow-[inset_0_0_30px_rgba(255,255,255,0.55)]' />
+        <div className='relative mx-auto max-w-7xl px-4 py-11 sm:px-6 lg:px-8 md:py-14'>
+          <div className='max-w-[670px]'>
+            <h1 className='mt-4 text-4xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-700 via-cyan-500 to-blue-900 md:text-5xl'>
+              Khám phá
             </h1>
-            <p className='text-base md:text-lg text-muted-foreground max-w-3xl mx-auto'>
-              Tìm kiếm và lựa chọn khóa học phù hợp với mục tiêu học tập của bạn
+            <p className='mt-3 max-w-[640px] text-sm leading-7 text-slate-600 md:text-base'>
+              Tìm kiếm lộ trình phù hợp, lọc theo nhu cầu và so sánh nhanh để chọn khóa học tốt nhất cho mục tiêu học
+              tập của bạn.
             </p>
           </div>
+        </div>
+      </section>
 
-          <SortBar
-            totalCourses={totalElements}
-            sortValue={sortValue}
-            onSortChange={(v) => {
-              setSortValue(v)
+      <main className='mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8'>
+        <div className='grid gap-6 md:grid-cols-[280px_minmax(0,1fr)]'>
+          <FilterSidebar
+            selectedCategories={selectedCategories}
+            onCategoriesChange={(cats) => {
+              setSelectedCategories(cats)
+              setCurrentPage(1)
+            }}
+            search={search}
+            onSearchChange={(v) => {
+              setSearch(v)
+              setCurrentPage(1)
+            }}
+            minPrice={minPrice}
+            onMinPriceChange={(v) => {
+              setMinPrice(v)
+              setCurrentPage(1)
+            }}
+            minRating={minRating}
+            onMinRatingChange={(v) => {
+              setMinRating(v)
               setCurrentPage(1)
             }}
           />
 
-          <div className='flex flex-col gap-4 mb-8'>
-            {loading
-              ? [...Array(10)].map((_, idx) => <CourseCardListSkeleton key={idx} />)
-              : mappedCourses.map((course) => (
-                  <CourseCard
-                    key={course.id}
-                    {...course}
-                    onViewCourse={(courseId) =>
-                      eventTracker.trackingEvent('VIEW_COURSE', courseId).catch(() => {
-                        // ignore tracking errors
-                      })
-                    }
-                  />
-                ))}
-          </div>
-
-          <div className='flex items-center justify-center gap-2'>
-            <CustomPagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={setCurrentPage}
-              loading={loading}
+          <div className='min-w-0'>
+            <SortBar
+              totalCourses={totalElements}
+              sortValue={sortValue}
+              onSortChange={(v) => {
+                setSortValue(v)
+                setCurrentPage(1)
+              }}
+              viewMode={viewMode}
+              onViewModeChange={setViewMode}
+              busy={busy}
             />
+
+            {hasError ? (
+              <div className='mb-8 rounded-2xl border border-red-100 bg-white/80 p-6 text-slate-700 shadow-sm'>
+                <p className='text-base font-semibold text-slate-900'>Không thể tải dữ liệu khóa học.</p>
+                <p className='mt-2 text-sm text-slate-500'>Vui lòng thử lại sau hoặc kiểm tra kết nối mạng của bạn.</p>
+                <button
+                  type='button'
+                  onClick={() => activeQuery.refetch()}
+                  className='mt-4 inline-flex h-10 items-center justify-center rounded-full bg-blue-600 px-5 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(37,99,235,0.22)] transition-all duration-200 ease-in-out hover:-translate-y-0.5 hover:bg-blue-700 hover:shadow-[0_14px_30px_rgba(37,99,235,0.28)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-100 active:scale-95'
+                >
+                  Thử lại
+                </button>
+              </div>
+            ) : (
+              <div
+                className={`mb-8 ${
+                  viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6' : 'flex flex-col gap-4'
+                }`}
+              >
+                {loading
+                  ? [...Array(viewMode === 'grid' ? 9 : 10)].map((_, idx) => (
+                      <CourseCardListSkeleton key={idx} layout={viewMode} />
+                    ))
+                  : mappedCourses.map((course) => (
+                      <CourseCard
+                        key={course.id}
+                        {...course}
+                        layout={viewMode}
+                        onViewCourse={(courseId) =>
+                          eventTracker.trackingEvent('VIEW_COURSE', courseId).catch(() => {
+                            // ignore tracking errors
+                          })
+                        }
+                      />
+                    ))}
+              </div>
+            )}
+
+            {!loading && !hasError && mappedCourses.length === 0 && (
+              <div className='rounded-2xl border border-blue-100/70 bg-white/80 p-8 text-center shadow-sm'>
+                <p className='text-lg font-semibold text-slate-900'>Không có khóa học phù hợp.</p>
+                <p className='mt-2 text-sm text-slate-500'>Hãy thử thay đổi bộ lọc hoặc từ khóa để xem thêm kết quả.</p>
+              </div>
+            )}
+
+            <div className='flex items-center justify-center gap-2'>
+              <CustomPagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+                loading={loading}
+              />
+            </div>
           </div>
         </div>
       </main>

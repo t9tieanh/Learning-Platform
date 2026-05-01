@@ -90,15 +90,15 @@ const SignInForm = ({
             </button>
           </CardTitle>
           <CardDescription className='text-[#2DD4BF] text-base font-semibold mt-2'>
-            Đăng nhập để khám phá tri thức cùng Learnova.
+            Đăng nhập để khám phá tri thức cùng Learnova
           </CardDescription>
           <CardContent className='mt-5'>
             <form onSubmit={handleSubmit(onSubmit)}>
               <div className='login-form flex flex-col gap-3'>
-                <CustomInput placeholder='Nhập username hoặc email' {...register('username')} />
+                <CustomInput placeholder='Tên đăng nhập hoặc email' {...register('username')} />
                 {errors.username && <span className='text-red-500 text-xs text-left'>{errors.username.message}</span>}
 
-                <CustomInput placeholder='Password' type='password' {...register('password')} />
+                <CustomInput placeholder='Mật khẩu' type='password' {...register('password')} />
                 {errors.password && <span className='text-red-500 text-xs text-left'>{errors.password.message}</span>}
               </div>
               <div className='remember-me flex justify-between items-center mt-5'>
@@ -132,41 +132,27 @@ const SignInForm = ({
               </div>
             </div>
             {/* login with other providers */}
-            <div className='mt-5 flex items-center justify-center gap-3 w-full'>
+            <div className='mt-5 flex items-center justify-center gap-3 w-full mb-2'>
               <CustomButton
                 onClick={handleLoginWithGoogle}
                 icon={<FcGoogle />}
-                className='bg-inherit w-1/2 hover:bg-blue-200'
-              />
-              <CustomButton
-                icon={<FaSquareFacebook className='text-white' />}
-                className='bg-blue-600 w-1/2 border-2 border-solid hover:bg-blue-700'
+                className='bg-inherit w-full border-2 border-solid hover:bg-red-600'
               />
             </div>
-            <p className='text-center text-sm text-gray-500 mt-5'>
-              Bạn chưa có tài khoản?{' '}
-              <button
-                type='button'
-                onClick={() => setIsSignUpMode(true)}
-                className='text-blue-500 hover:underline font-bold'
-              >
-                Đăng ký
-              </button>
-            </p>
+
+            <CustomButton
+              type='button'
+              onClick={() => navigate('/')}
+              label='Về trang chủ'
+              icon={<ArrowLeft size={16} />}
+              className='w-full rounded-md shadow-lg border border-gray-300 bg-blue-500 py-3 text-white hover:bg-blue-600'
+            />
           </CardContent>
         </CardHeader>
       </Card>
       <div className='flex items-center justify-center gap-4 mt-2'>
         <p className='text-xs text-center text-muted-foreground'>Copyright © 2025 Learnova. All rights reserved.</p>
       </div>
-      <button
-        type='button'
-        onClick={() => navigate('/')}
-        className='flex items-center justify-center gap-1.5 mt-2 mx-auto text-sm text-gray-500 hover:text-blue-600 transition-colors group'
-      >
-        <ArrowLeft className='w-4 h-4 group-hover:-translate-x-0.5 transition-transform' />
-        Về trang chủ
-      </button>
     </div>
   )
 }
