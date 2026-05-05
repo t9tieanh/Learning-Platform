@@ -24,7 +24,7 @@ const TC_Layout: FC = () => {
     <AuthenticationGate>
       <div className='flex min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-slate-900 dark:to-slate-950 transition-colors'>
         {/* Desktop Sidebar - hidden on mobile */}
-        <div className='hidden lg:block fixed top-0 left-0 h-screen w-64 bg-[#1D1D2A] z-30'>
+        <div className='hidden lg:block fixed top-0 left-0 h-screen w-64 bg-[#1D1D2A] z-30 border-r border-gray-800'>
           <AcademySidebar />
         </div>
 
@@ -40,7 +40,7 @@ const TC_Layout: FC = () => {
                 <Menu className='h-5 w-5' />
               </Button>
             </SheetTrigger>
-            <SheetContent side='left' className='p-0 w-64 border-r-0 bg-[#1D1D2A] text-white'>
+            <SheetContent side='left' className='p-0 w-64 max-w-[85vw] border-r border-gray-800 bg-[#1D1D2A] text-white'>
               <AcademySidebar />
             </SheetContent>
           </Sheet>

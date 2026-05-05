@@ -82,10 +82,6 @@ const CourseCreationPromotion: React.FC<CourseCreationPromotionProps> = ({ open,
                                 <p className='text-gray-400 text-sm md:text-[14px] leading-relaxed font-semibold max-w-sm'>
                                     Sử dụng trợ lý AI chuyên nghiệp của Learnova để tối ưu hóa lộ trình dạy học chỉ trong vài phút.
                                 </p>
-
-                                <div className='pt-2 opacity-60'>
-                                    <img src={logo} className='h-4 w-auto object-contain' alt='Learnova Logo' />
-                                </div>
                             </div>
                         </div>
 

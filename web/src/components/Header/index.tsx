@@ -159,6 +159,14 @@ const Header: FC = () => {
               </div>
             ) : (
               <div className='flex items-center gap-2'>
+                <button
+                  type='button'
+                  onClick={openVipDialog}
+                  className='hidden md:flex items-center gap-1.5 px-3.5 py-1.5 text-sm font-semibold text-yellow-700 bg-gradient-to-r from-yellow-100 to-amber-100 hover:from-yellow-200 hover:to-amber-200 border border-yellow-200 rounded-full transition-all hover:scale-105 shadow-sm'
+                >
+                  <Crown className='w-4 h-4 shrink-0' aria-hidden />
+                  <span>Khám phá VIP</span>
+                </button>
                 <CustomButton
                   label='Đăng ký'
                   icon={<UserPlus className='w-4 h-4' />}
@@ -234,6 +242,20 @@ const Header: FC = () => {
                   ) : (
                     /* Guest auth buttons */
                     <div className='flex flex-col gap-2.5 px-4 py-4 border-b'>
+                      <button
+                        type='button'
+                        onClick={() => {
+                          openVipDialog()
+                          setIsOpen(false)
+                        }}
+                        className='w-full flex items-center justify-between px-4 py-2.5 text-sm font-semibold text-yellow-700 bg-gradient-to-r from-yellow-50 to-amber-100 hover:from-yellow-100 hover:to-amber-200 border border-yellow-200 rounded-xl transition-all shadow-sm'
+                      >
+                        <span className='flex items-center gap-2'>
+                          <Crown className='w-4 h-4 shrink-0' aria-hidden />
+                          Khám phá VIP
+                        </span>
+                        <ChevronRight className='w-4 h-4 opacity-60 shrink-0' aria-hidden />
+                      </button>
                       <CustomButton
                         label='Đăng nhập'
                         icon={<LogIn className='w-4 h-4' />}

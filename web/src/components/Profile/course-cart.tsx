@@ -1,11 +1,10 @@
 /* eslint-disable react/no-children-prop */
-import { Star, MessageCircle, Send } from 'lucide-react'
+import { StarIcon } from '@radix-ui/react-icons'
+import { MessageCircle, Send } from 'lucide-react'
 import { Progress } from '@/components/ui/progress'
 import { Card } from '@/components/ui/card'
 import { useNavigate } from 'react-router-dom'
 import { CourseListItem } from '@/types/course-user'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Item, ItemContent, ItemTitle, ItemDescription, ItemActions } from '@/components/ui/item'
 import CustomButton from '@/components/common/Button'
 import { useState } from 'react'
 import type { MouseEvent } from 'react'
@@ -13,18 +12,29 @@ import CustomDialog from '@/components/common/Dialog'
 import AddFeedback from '@/components/Profile/addFeedback'
 import { useAuthStore } from '@/stores/useAuth.stores'
 
+const courseCardShell =
+  'group cursor-pointer overflow-hidden rounded-2xl border border-slate-200 bg-white p-0 py-0 shadow-[0_10px_24px_rgba(15,23,42,0.04)] transition-all duration-200 ease-in-out hover:-translate-y-0.5 hover:shadow-[0_16px_36px_rgba(15,23,42,0.08)]'
+
+const primaryCtaClass =
+  'inline-flex h-10 min-w-[118px] shrink-0 items-center justify-center rounded-full bg-blue-600 px-4 text-xs font-semibold text-white shadow-[0_6px_18px_rgba(37,99,235,0.12)] transition-all duration-200 ease-in-out hover:bg-blue-700 hover:shadow-[0_10px_24px_rgba(37,99,235,0.2)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-100 active:scale-95'
+
+const secondaryCtaClass =
+  'inline-flex h-10 min-w-[118px] shrink-0 items-center justify-center rounded-full bg-slate-100 px-4 text-xs font-semibold text-slate-900 shadow-none transition-all duration-200 ease-in-out hover:bg-slate-200 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-slate-200 active:scale-95'
+
 const CourseCard = ({ courseItem }: { courseItem: CourseListItem }) => {
   const navigate = useNavigate()
   const { data } = useAuthStore()
+  const isStudent = data && data.userId !== courseItem.instructor.id
+  const progressPct = Math.round((courseItem.progress || 0) * 100)
+  const rating = courseItem.rating ?? 0
+  const instructorLabel = data && data.userId === courseItem.instructor.id ? 'Bạn' : courseItem.instructor.name
 
   const handleClick = () => {
     navigate(`/course-page/${courseItem.id}`)
   }
 
-  // open dialog instead of navigating directly
   const [showDialog, setShowDialog] = useState(false)
 
-  // stop propagation so parent Card onClick won't trigger and open dialog
   const handleAddFeedback = (e: MouseEvent) => {
     e.stopPropagation()
     setShowDialog(true)
@@ -32,89 +42,76 @@ const CourseCard = ({ courseItem }: { courseItem: CourseListItem }) => {
 
   return (
     <>
-      <Card
-        className='group border border-border/60 bg-card/60 backdrop-blur-sm cursor-pointer hover:shadow-md transition-all duration-300 p-0'
-        onClick={handleClick}
-      >
-        <div className='flex flex-col sm:flex-row items-stretch sm:h-[210px]'>
-          <div className='relative w-full sm:w-[280px] h-[210px] flex-shrink-0'>
+      <Card className={courseCardShell} onClick={handleClick}>
+        <div className='flex flex-col md:flex-row md:items-stretch md:h-[240px]'>
+          <div className='relative h-48 w-full shrink-0 overflow-hidden bg-blue-100 md:h-full md:w-[20rem]'>
             <img
               src={courseItem.thumbnailUrl}
               alt={courseItem.title}
-              className='absolute inset-0 w-full h-full object-cover object-center transition-transform duration-300 group-hover:scale-105'
+              className='h-full w-full object-cover object-center transition-transform duration-300 group-hover:scale-[1.03]'
             />
           </div>
-          {/* Content dùng Item UI */}
-          <div className='flex-1 flex flex-col justify-between p-5'>
-            <Item variant='default' size='default' className='p-0'>
-              <ItemContent>
-                <ItemTitle className='text-base sm:text-lg font-semibold line-clamp-2 text-foreground group-hover:text-primary transition-colors duration-200'>
+
+          <div className='flex min-w-0 flex-1 flex-col justify-between gap-3 p-5 md:p-6'>
+            <div className='space-y-2'>
+              <div>
+                <h3 className='line-clamp-2 text-sm font-bold leading-snug text-slate-900 transition-colors duration-200 group-hover:text-blue-600 md:text-base'>
                   {courseItem.title}
-                </ItemTitle>
-                <ItemDescription className='text-sm text-muted-foreground/80 line-clamp-2 mb-2'>
-                  {courseItem.shortDescription}
-                </ItemDescription>
-                {data && data.userId !== courseItem.instructor.id && (
-                  <>
-                    <div className='flex items-center gap-2 mt-1'>
-                      <span className='text-xs text-muted-foreground'>Hoàn thành</span>
-                      <span className='text-xs font-semibold text-primary'>
-                        {Math.round((courseItem.progress || 0) * 100)}%
-                      </span>
-                    </div>
-                    <Progress value={Math.round((courseItem.progress || 0) * 100)} className='h-2 bg-gray-200 my-1' />
-                  </>
-                )}
-                <div className='flex items-center justify-between mt-2'>
-                  <div className='flex items-center gap-2'>
-                    <Avatar>
-                      <AvatarImage src={courseItem.instructor.image} />
-                      <AvatarFallback>
-                        {data && data.userId === courseItem.instructor.id ? 'Bạn' : courseItem.instructor.name}
-                      </AvatarFallback>
-                    </Avatar>
-                    <span className='text-xs text-muted-foreground italic'>
-                      {data && data.userId === courseItem.instructor.id ? 'Bạn' : courseItem.instructor.name}
-                    </span>
-                  </div>
-                  <div className='flex items-center gap-1'>
-                    <span className='text-sm font-semibold text-yellow-500'>{courseItem?.rating}</span>
-                    <div className='flex items-center gap-0.5'>
-                      {[...Array(5)].map((_, i) => (
-                        <Star
-                          key={i}
-                          className={`w-3.5 h-3.5 ${
-                            i < Math.floor(courseItem?.rating || 0)
-                              ? 'fill-yellow-400 text-yellow-400 drop-shadow-sm'
-                              : 'text-muted-foreground/20'
-                          }`}
-                        />
-                      ))}
-                    </div>
-                  </div>
+                </h3>
+                <p className='mt-0.5 line-clamp-2 text-[13px] leading-relaxed text-slate-500'>{courseItem.shortDescription}</p>
+              </div>
+
+              {isStudent && <Progress value={progressPct} className='h-1.5 bg-slate-100' />}
+
+              <div className='flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[11px] text-slate-500'>
+                <div className='flex min-w-0 items-center gap-2'>
+                  <img
+                    src={courseItem.instructor.image}
+                    alt={instructorLabel}
+                    className='h-6 w-6 shrink-0 rounded-full object-cover ring-2 ring-white shadow-sm'
+                  />
+                  <span className='truncate font-semibold text-slate-700'>{instructorLabel}</span>
                 </div>
-              </ItemContent>
-            </Item>
-          </div>
-          {data && data.userId != courseItem.instructor.id && (
-            <div className='p-5 pt-0 sm:pt-5'>
-              {(courseItem.progress || 0) > 0.3 ? (
-                <CustomButton
-                  onClick={handleAddFeedback}
-                  icon={<MessageCircle size={16} />}
-                  label='Thêm đánh giá'
-                  className='w-full mt-2 bg-gray-100 text-black hover:bg-gray-200'
-                />
-              ) : (
-                <CustomButton
-                  onClick={handleClick}
-                  icon={<Send size={16} />}
-                  label='Học ngay'
-                  className='w-full mt-2 bg-blue-500 text-white hover:bg-blue-600'
-                />
-              )}
+
+                <div className='flex items-center gap-1 text-amber-500'>
+                  <StarIcon className='h-3.5 w-3.5' />
+                  <span className='font-semibold text-slate-700 tabular-nums'>{rating}</span>
+                </div>
+              </div>
             </div>
-          )}
+
+            {isStudent && (
+              <>
+                <div className='h-px w-full bg-slate-100' />
+                <div className='flex w-full items-center justify-between gap-4'>
+                  <div>
+                    <p className='text-lg font-bold tabular-nums text-blue-600'>{progressPct}%</p>
+                    <p className='text-[10px] font-medium text-slate-400'>Hoàn thành</p>
+                  </div>
+                  {(courseItem.progress || 0) > 0.3 ? (
+                    <CustomButton
+                      onClick={handleAddFeedback}
+                      icon={<MessageCircle className='h-3.5 w-3.5' />}
+                      iconPosition='right'
+                      label='Thêm đánh giá'
+                      className={secondaryCtaClass}
+                    />
+                  ) : (
+                    <CustomButton
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleClick()
+                      }}
+                      icon={<Send className='h-3.5 w-3.5' />}
+                      iconPosition='right'
+                      label='Học ngay'
+                      className={primaryCtaClass}
+                    />
+                  )}
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </Card>
 

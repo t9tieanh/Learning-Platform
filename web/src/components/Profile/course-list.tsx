@@ -66,14 +66,14 @@ const CourseList = () => {
       {loading ? (
         <CourseListSkeleton />
       ) : (
-        <div className='cart-section pb-5 px-5 bg-white rounded-lg'>
-          <div className='total-cart-item'>
-            <p className='text-sm font-semibold mb-1 flex items-center'>
-              Bạn đang sỡ hữu &nbsp;<span className='text-primary'>{totalItems || 0}</span>&nbsp; khóa học !
+        <div className='cart-section pb-6 px-4 sm:px-6 bg-white rounded-lg'>
+          <div className='total-cart-item pt-1'>
+            <p className='text-sm font-semibold mb-3 text-foreground flex items-center flex-wrap gap-x-1'>
+              Bạn đang sở hữu <span className='text-primary tabular-nums'>{totalItems || 0}</span> khóa học!
             </p>
-            <hr />
+            <hr className='border-border/60' />
           </div>
-          <div className='cart-item flex flex-col p-4 gap-4 min-h-[750px]'>
+          <div className='cart-item flex flex-col pt-6 pb-2 gap-5 sm:gap-6'>
             {(courses.length > 0 ? courses : []).map((item) => (
               <CourseCard key={item.id} courseItem={item} />
             ))}
@@ -89,7 +89,7 @@ const CourseList = () => {
               </div>
             )}
           </div>
-          <Pagination className='flex justify-center mt-4'>
+          <Pagination className='flex justify-center mt-8 mb-2'>
             <PaginationContent>
               <PaginationItem>
                 <PaginationPrevious

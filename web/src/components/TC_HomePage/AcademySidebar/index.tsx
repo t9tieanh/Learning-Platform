@@ -1,29 +1,69 @@
-import { Avatar, AvatarFallback, AvatarImage } from '@radix-ui/react-avatar'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { BookOpen, Home, MessageSquare, FileText, LogOut, ChartColumn } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 import { useAuthStore } from '@/stores/useAuth.stores'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import logo from '@/assets/images/logo1.png'
 import { toast } from 'sonner'
 import { showConfirmToast } from '@/components/common/ShowConfirmToast'
+import { cn } from '@/lib/utils'
+import type { LucideIcon } from 'lucide-react'
 
-const sidebarItems = [
+type NavItem = {
+  name: string
+  icon: LucideIcon
+  match: (pathname: string) => boolean
+  to: string
+}
+
+const navSections: { category: string; items: NavItem[] }[] = [
   {
-    category: 'TỔNG QUAN',
-    items: [{ name: 'Trang chủ', icon: Home, active: false }]
+    category: 'Tổng quan',
+    items: [
+      {
+        name: 'Trang chủ',
+        icon: Home,
+        match: (p) => p === '/teacher' || p === '/teacher/',
+        to: '/teacher',
+      },
+    ],
   },
   {
-    category: 'DANH MỤC',
+    category: 'Danh mục',
     items: [
-      { name: 'Khóa học', icon: BookOpen, active: true },
-      { name: 'Tin nhắn', icon: MessageSquare, active: true },
-      { name: 'Bài viết', icon: FileText, active: true },
-      { name: 'Thống kê', icon: ChartColumn, active: true }
-    ]
-  }
+      {
+        name: 'Khóa học',
+        icon: BookOpen,
+        match: (p) => p === '/teacher/course' || p.startsWith('/teacher/course-details'),
+        to: '/teacher/course',
+      },
+      {
+        name: 'Tin nhắn',
+        icon: MessageSquare,
+        match: (p) => p.startsWith('/teacher/chat'),
+        to: '/teacher/chat',
+      },
+      {
+        name: 'Bài viết',
+        icon: FileText,
+        match: (p) =>
+          p.startsWith('/teacher/blogs') ||
+          p.startsWith('/teacher/blog') ||
+          p.startsWith('/teacher/create-blog') ||
+          p.startsWith('/teacher/update-blog'),
+        to: '/teacher/blogs',
+      },
+      {
+        name: 'Thống kê',
+        icon: ChartColumn,
+        match: (p) => p.startsWith('/teacher/statistics'),
+        to: '/teacher/statistics',
+      },
+    ],
+  },
 ]
 
 const AcademySidebar = () => {
+  const { pathname } = useLocation()
   const { data, setData } = useAuthStore()
   const navigate = useNavigate()
   const displayName = data?.name || 'Giảng viên'
@@ -32,11 +72,12 @@ const AcademySidebar = () => {
     .map((n) => n[0])
     .join('')
     .toUpperCase()
+    .slice(0, 2)
 
   const handleLogout = async () => {
     const confirmed = await showConfirmToast({
       title: 'Đăng xuất',
-      description: 'Bạn có chắc chắn muốn đăng xuất?'
+      description: 'Bạn có chắc chắn muốn đăng xuất?',
     })
     if (confirmed) {
       setData(null)
@@ -44,77 +85,102 @@ const AcademySidebar = () => {
       navigate('/auth')
     }
   }
+
   return (
-    <div className='w-full h-full bg-[#1D1D2A] text-sidebar-foreground flex flex-col min-w-[220px]'>
-      <div className='flex p-4 md:p-6 items-center gap-3'>
-        <button onClick={() => navigate('/teacher')} className='p-0 border-none bg-transparent cursor-pointer'>
-          <img src={logo} alt='LEARNOVA logo' className='h-12 md:h-8 w-auto select-none object-contain' />
-        </button>
+    <aside
+      className='w-full h-full min-h-0 bg-[#1D1D2A] border-r border-gray-800 overflow-y-auto flex flex-col transition-all duration-500 text-white'
+      aria-label='Teacher sidebar'
+    >
+      <div className='p-6 flex-1 flex flex-col'>
+        <div className='mb-7'>
+          <div className='flex mb-5 items-center justify-between'>
+            <button
+              type='button'
+              onClick={() => navigate('/')}
+              className='p-0 border-none bg-transparent cursor-pointer transition-transform hover:scale-105 active:scale-95'
+            >
+              <img src={logo} alt='LEARNOVA logo' className='h-9 w-auto select-none object-contain' />
+            </button>
+          </div>
+        </div>
+
+        <nav className='space-y-6 flex-1'>
+          {navSections.map((section) => (
+            <div key={section.category}>
+              <h3 className='text-[10px] font-bold tracking-wider text-gray-500 mb-3 px-1'>
+                {section.category}
+              </h3>
+              <div className='space-y-1'>
+                {section.items.map((item) => {
+                  const Icon = item.icon
+                  const isActive = item.match(pathname)
+
+                  return (
+                    <button
+                      key={item.name}
+                      type='button'
+                      onClick={() => navigate(item.to)}
+                      aria-current={isActive ? 'page' : undefined}
+                      className={cn(
+                        'w-full text-left p-4 rounded-[24px] transition-all duration-300 group relative overflow-hidden',
+                        isActive
+                          ? 'bg-gray-900 text-white shadow-lg scale-[1.02]'
+                          : 'text-gray-400 hover:bg-gray-800 hover:text-white hover:pl-5'
+                      )}
+                    >
+                      <div className='flex items-center gap-4'>
+                        <span
+                          className={cn(
+                            'flex-shrink-0 p-2.5 rounded-xl transition-all inline-flex',
+                            isActive
+                              ? 'bg-blue-600 text-white'
+                              : 'bg-gray-800 text-gray-500 group-hover:bg-blue-600 group-hover:text-white'
+                          )}
+                          aria-hidden
+                        >
+                          <Icon className='h-4 w-4' />
+                        </span>
+                        <span className='flex-1 min-w-0'>
+                          <span
+                            className={cn(
+                              'text-[13px] font-black transition-colors truncate block',
+                              isActive ? 'text-white' : 'text-gray-300 group-hover:text-white'
+                            )}
+                          >
+                            {item.name}
+                          </span>
+                        </span>
+                      </div>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          ))}
+        </nav>
       </div>
 
-      <nav className='flex-1 px-2 md:px-4 text-white'>
-        {sidebarItems.map((section, sectionIndex) => (
-          <div key={sectionIndex} className='mb-6'>
-            <h3 className='text-xs font-semibold text-sidebar-foreground/60 mb-3 px-2'>{section.category}</h3>
-            <div className='space-y-1'>
-              {section.items.map((item, itemIndex) => {
-                const Icon = item.icon
-                let onClick = undefined
-                if (item.name === 'Trang chủ') onClick = () => navigate('/teacher')
-                if (item.name === 'Quay lại') onClick = () => navigate('/')
-                if (item.name === 'Khóa học') onClick = () => navigate('/teacher/course')
-                if (item.name === 'Tin nhắn') onClick = () => navigate('/teacher/chat/:id')
-                if (item.name === 'Bài viết') onClick = () => navigate('/teacher/blogs')
-                if (item.name === 'Thống kê') onClick = () => navigate('/teacher/statistics')
-                return (
-                  <Button
-                    key={itemIndex}
-                    variant={item.active ? 'secondary' : 'ghost'}
-                    className={`w-full justify-start h-11 px-3 ${item.active
-                        ? 'bg-sidebar-accent text-sidebar-accent-foreground hover:bg-[#ababaf]'
-                        : 'text-sidebar-foreground/80 hover:bg-[#afafb3] hover:text-sidebar-accent-foreground'
-                      }`}
-                    onClick={onClick}
-                  >
-                    <Icon className='w-5 h-5 mr-3' />
-                    {item.name}
-                  </Button>
-                )
-              })}
-            </div>
-          </div>
-        ))}
-      </nav>
-
-      <div className='p-2 md:p-4 border-t border-sidebar-border text-white'>
-        <div className='flex items-center gap-2 md:gap-3'>
-          <Avatar>
-            <AvatarImage className='rounded-full h-10 w-10 md:h-12 md:w-12' src={data?.avatarUrl} />
-            <AvatarFallback className='text-white'>{initials}</AvatarFallback>
+      <div className='p-6 mt-auto border-t border-gray-800 bg-gray-900/20'>
+        <div className='flex items-center gap-3'>
+          <Avatar className='h-11 w-11 shrink-0 border border-gray-700'>
+            <AvatarImage className='object-cover' src={data?.avatarUrl} alt='' />
+            <AvatarFallback className='bg-gray-800 text-white text-xs font-bold'>{initials}</AvatarFallback>
           </Avatar>
-
-          <div className='flex-1'>
-            <p className='text-base font-semibold truncate'>{displayName}</p>
-            <p className='text-xs md:text-sm text-sidebar-foreground/60'>Giảng viên</p>
-          </div>
-
           <div className='flex-1 min-w-0'>
             <p className='text-[13px] font-black text-white truncate'>{displayName}</p>
-            <p className='text-[9px] font-black text-gray-500 uppercase tracking-widest mt-0.5 opacity-60'>
-              Giảng viên Vip
-            </p>
+            <p className='text-[10px] font-medium text-gray-500 mt-0.5'>Giảng viên</p>
           </div>
-
           <button
+            type='button'
             onClick={handleLogout}
-            className='p-2 text-gray-500 hover:text-red-400 hover:bg-red-400/10 rounded-xl transition-all group-hover:bg-red-500/10'
+            className='shrink-0 p-2.5 rounded-xl bg-gray-800 text-gray-400 hover:bg-red-900/30 hover:text-red-400 transition-colors'
             title='Đăng xuất'
           >
-            <LogOut className='w-4.5 h-4.5' />
+            <LogOut className='h-4 w-4' aria-hidden />
           </button>
         </div>
       </div>
-    </div>
+    </aside>
   )
 }
 
