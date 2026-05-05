@@ -8,7 +8,7 @@ const Chat = () => {
   const [selectedConversation, setSelectedConversation] = useState<ConversationListItem | null>(null)
   const location = useLocation()
   const navigate = useNavigate()
-  const { peerId: peerIdParam } = useParams<{ peerId?: string }>()
+  const { id: peerIdParam } = useParams<{ id?: string }>()
   const forcedRole: 'instructor' | 'student' = location.pathname.startsWith('/teacher') ? 'instructor' : 'student'
 
   const handleSelect = (c: ConversationListItem) => {

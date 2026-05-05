@@ -4,64 +4,60 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 const BaseInfomationSkeleton = () => {
   return (
     <div className='space-y-6'>
-      {/* Course Info Card */}
-      <Card className='border border-blue-200 shadow-sm bg-blue-50'>
-        <CardHeader className='bg-blue-200/40 rounded-t-lg'>
-          <CardTitle className='flex items-center gap-2'>
-            <Skeleton className='w-5 h-5 bg-blue-300' />
-            <Skeleton className='h-6 w-40 bg-blue-300' />
+      <Card className='border border-gray-200 shadow-sm bg-white overflow-hidden'>
+        <CardHeader className='bg-gray-50/90 border-b border-gray-100 py-4'>
+          <CardTitle className='flex items-center gap-2 text-base'>
+            <Skeleton className='h-5 w-5 rounded-md' />
+            <Skeleton className='h-5 w-36' />
           </CardTitle>
         </CardHeader>
-        <CardContent className='space-y-5'>
-          <div>
-            <Skeleton className='h-4 w-32 mb-2 bg-blue-200' />
-            <Skeleton className='h-10 w-full bg-white' />
-            <Skeleton className='h-3 w-20 mt-1 bg-blue-200' />
+        <CardContent className='space-y-5 pt-5'>
+          <div className='space-y-2'>
+            <Skeleton className='h-3.5 w-28' />
+            <Skeleton className='h-10 w-full rounded-xl' />
+            <Skeleton className='h-3 w-20' />
           </div>
-          <div>
-            <Skeleton className='h-4 w-40 mb-2 bg-blue-200' />
-            <Skeleton className='h-24 w-full bg-white' />
-            <Skeleton className='h-3 w-24 mt-1 bg-blue-200' />
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Description Card */}
-      <Card className='border border-blue-200 shadow-sm bg-blue-50'>
-        <CardHeader className='bg-blue-200/40 rounded-t-lg'>
-          <CardTitle className='flex items-center gap-2'>
-            <Skeleton className='w-5 h-5 bg-blue-300' />
-            <Skeleton className='h-6 w-48 bg-blue-300' />
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Skeleton className='h-[32rem] w-full bg-white mt-2' />
-        </CardContent>
-      </Card>
-
-      {/* Basic Info Card */}
-      <Card className='border border-blue-200 shadow-sm bg-blue-50'>
-        <CardHeader className='bg-blue-200/40 rounded-t-lg'>
-          <CardTitle className='flex items-center gap-2'>
-            <Skeleton className='w-5 h-5 bg-blue-300' />
-            <Skeleton className='h-6 w-40 bg-blue-300' />
-          </CardTitle>
-        </CardHeader>
-        <CardContent className='grid md:grid-cols-2 gap-6'>
-          <div>
-            <Skeleton className='h-4 w-24 mb-2 bg-blue-200' />
-            <Skeleton className='h-10 w-full bg-white' />
+          <div className='space-y-2'>
+            <Skeleton className='h-3.5 w-40' />
+            <Skeleton className='h-24 w-full rounded-xl' />
+            <Skeleton className='h-3 w-24' />
           </div>
         </CardContent>
       </Card>
 
-      {/* Dynamic Inputs Skeleton */}
-      <div className='space-y-4'>
-        <Skeleton className='h-10 w-full bg-blue-100' />
-        <Skeleton className='h-10 w-full bg-blue-100' />
+      <Card className='border border-gray-200 shadow-sm bg-white overflow-hidden'>
+        <CardHeader className='bg-gray-50/90 border-b border-gray-100 py-4'>
+          <CardTitle className='flex items-center gap-2 text-base'>
+            <Skeleton className='h-5 w-5 rounded-md' />
+            <Skeleton className='h-5 w-44' />
+          </CardTitle>
+        </CardHeader>
+        <CardContent className='pt-5'>
+          <Skeleton className='h-[min(32rem,55vh)] w-full rounded-xl' />
+        </CardContent>
+      </Card>
+
+      <Card className='border border-gray-200 shadow-sm bg-white overflow-hidden'>
+        <CardHeader className='bg-gray-50/90 border-b border-gray-100 py-4'>
+          <CardTitle className='flex items-center gap-2 text-base'>
+            <Skeleton className='h-5 w-5 rounded-md' />
+            <Skeleton className='h-5 w-36' />
+          </CardTitle>
+        </CardHeader>
+        <CardContent className='pt-5 grid md:grid-cols-2 gap-6'>
+          <div className='space-y-2'>
+            <Skeleton className='h-3.5 w-24' />
+            <Skeleton className='h-10 w-full rounded-xl' />
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className='space-y-3'>
+        <Skeleton className='h-10 w-full rounded-xl' />
+        <Skeleton className='h-10 w-full rounded-xl' />
       </div>
 
-      <Skeleton className='h-10 w-32 bg-blue-500 rounded-lg shadow mt-4' />
+      <Skeleton className='h-10 w-36 rounded-lg' />
     </div>
   )
 }

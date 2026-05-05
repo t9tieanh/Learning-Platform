@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import type Quill from 'quill'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import CustomButton from '@/components/common/Button'
-import { Mail, Phone, Calendar, User, Camera, Send, Crown, Sparkles } from 'lucide-react'
+import { Mail, Phone, Calendar, User, Camera, Send, Crown } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { FaUserEdit } from 'react-icons/fa'
 import userService from '@/services/user/user.service'
@@ -35,6 +35,15 @@ const PersonalInfo = () => {
   const { data, setData } = useAuthStore()
   const userId = (data as any)?.userId || (data as any)?.id
   const { openVipDialog } = useVipUpgrade()
+
+  /** Username / email dưới tên: không thêm @ nếu đã là email */
+  const profileHandleLine = useMemo(() => {
+    const raw = userInfo?.username?.trim()
+    if (!raw) return null
+    const normalized = raw.replace(/^@+/, '')
+    if (normalized.includes('@')) return normalized
+    return `@${normalized}`
+  }, [userInfo?.username])
 
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -152,94 +161,99 @@ const PersonalInfo = () => {
       ) : (
         <div className='space-y-6 shadow-sm rounded-xl'>
           <Card className='hover:bg-profile-card-hover transition-colors rounded-xl shadow-md'>
-            <CardContent className='px-8'>
-              <HighGlossBackground className='flex gap-3 md:gap-4 items-center text-center mb-8 px-6 py-8 md:px-10 md:py-12 rounded-xl flex-col md:flex-row mt-6'>
-                <div className='relative flex-shrink-0'>
-                  {editing ? (
-                    <>
-                      <button
-                        type='button'
-                        className='group relative block rounded-full focus:outline-none focus:ring-2 focus:ring-primary/50'
-                        onClick={() => fileInputRef.current?.click()}
-                        aria-label='Chọn ảnh đại diện mới'
-                      >
+            <CardContent className='px-6 sm:px-8 pt-6'>
+              <HighGlossBackground className='mb-10 rounded-xl px-6 py-9 md:px-10 md:py-10'>
+                <div className='flex flex-col items-center gap-6 md:flex-row md:items-center md:gap-8'>
+                  <div className='relative shrink-0'>
+                    {editing ? (
+                      <>
+                        <button
+                          type='button'
+                          className='group relative block rounded-full focus:outline-none focus:ring-2 focus:ring-primary/50'
+                          onClick={() => fileInputRef.current?.click()}
+                          aria-label='Chọn ảnh đại diện mới'
+                        >
+                          <Avatar
+                            className={`h-20 md:h-28 w-20 md:w-28 shadow-lg cursor-pointer ${userInfo?.isVip ? 'ring-4 ring-yellow-400 ring-offset-4 ring-offset-[#0C356A]' : ''
+                              }`}
+                          >
+                            <AvatarImage
+                              src={form.imageFile ? URL.createObjectURL(form.imageFile) : userInfo?.image}
+                              alt={userInfo?.name}
+                              className='object-cover'
+                            />
+                            <AvatarFallback className='text-lg font-semibold bg-primary text-primary-foreground'>
+                              <User className='h-6 w-6' />
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className='pointer-events-none absolute inset-0 flex items-center justify-center rounded-full bg-black/40 opacity-0 transition-opacity group-hover:opacity-100'>
+                            <Camera className='w-6 h-6 text-white' />
+                          </div>
+                          {userInfo?.isVip && (
+                            <div className='absolute bottom-0 right-0 z-10 rounded-full border-2 border-[#0C356A] bg-gradient-to-r from-yellow-400 to-yellow-600 p-1.5 shadow-sm'>
+                              <Crown className='h-4 w-4 text-white md:h-5 md:w-5' strokeWidth={2.5} />
+                            </div>
+                          )}
+                        </button>
+                        <input
+                          ref={fileInputRef}
+                          id='avatarUpload'
+                          type='file'
+                          accept='image/*'
+                          className='hidden'
+                          onChange={handleAvatarChange}
+                        />
+                      </>
+                    ) : (
+                      <div className='relative'>
                         <Avatar
-                          className={`h-20 md:h-28 w-20 md:w-28 shadow-lg cursor-pointer ${userInfo?.isVip ? 'ring-4 ring-yellow-400 ring-offset-4 ring-offset-[#0C356A]' : ''
+                          className={`h-20 md:h-28 w-20 md:w-28 shadow-lg ${userInfo?.isVip ? 'ring-4 ring-yellow-400 ring-offset-4 ring-offset-[#0C356A]' : ''
                             }`}
                         >
-                          <AvatarImage
-                            src={form.imageFile ? URL.createObjectURL(form.imageFile) : userInfo?.image}
-                            alt={userInfo?.name}
-                            className='object-cover'
-                          />
+                          <AvatarImage src={userInfo?.image} alt={userInfo?.name} className='object-cover' />
                           <AvatarFallback className='text-lg font-semibold bg-primary text-primary-foreground'>
                             <User className='h-6 w-6' />
                           </AvatarFallback>
                         </Avatar>
-                        <div className='pointer-events-none absolute inset-0 flex items-center justify-center rounded-full bg-black/40 opacity-0 transition-opacity group-hover:opacity-100'>
-                          <Camera className='w-6 h-6 text-white' />
-                        </div>
                         {userInfo?.isVip && (
-                          <div className='absolute bottom-0 right-0 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-full p-1.5 shadow-sm border-2 border-[#0C356A] z-10'>
-                            <Crown className='w-4 h-4 md:w-5 md:h-5 text-white' strokeWidth={2.5} />
+                          <div className='absolute bottom-0 right-0 z-10 rounded-full border-2 border-[#0C356A] bg-gradient-to-r from-yellow-400 to-yellow-600 p-1.5 shadow-sm'>
+                            <Crown className='h-4 w-4 text-white md:h-5 md:w-5' strokeWidth={2.5} />
                           </div>
                         )}
-                      </button>
-                      <input
-                        ref={fileInputRef}
-                        id='avatarUpload'
-                        type='file'
-                        accept='image/*'
-                        className='hidden'
-                        onChange={handleAvatarChange}
-                      />
-                    </>
-                  ) : (
-                    <div className='relative'>
-                      <Avatar
-                        className={`h-20 md:h-28 w-20 md:w-28 shadow-lg ${userInfo?.isVip ? 'ring-4 ring-yellow-400 ring-offset-4 ring-offset-[#0C356A]' : ''
-                          }`}
-                      >
-                        <AvatarImage src={userInfo?.image} alt={userInfo?.name} className='object-cover' />
-                        <AvatarFallback className='text-lg font-semibold bg-primary text-primary-foreground'>
-                          <User className='h-6 w-6' />
-                        </AvatarFallback>
-                      </Avatar>
+                      </div>
+                    )}
+                  </div>
+                  <div className='flex min-w-0 flex-1 flex-col items-center gap-3 text-center md:items-start md:gap-2.5 md:text-left'>
+                    <div className='flex w-full flex-wrap items-center justify-center gap-x-3 gap-y-2 md:justify-start'>
+                      <h3 className='max-w-full text-lg font-bold leading-tight text-white md:text-3xl'>
+                        {userInfo?.name}
+                      </h3>
                       {userInfo?.isVip && (
-                        <div className='absolute bottom-0 right-0 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-full p-1.5 shadow-sm border-2 border-[#0C356A] z-10'>
-                          <Crown className='w-4 h-4 md:w-5 md:h-5 text-white' strokeWidth={2.5} />
-                        </div>
+                        <span className='inline-flex shrink-0 items-center gap-1.5 rounded-md bg-gradient-to-r from-yellow-400 to-yellow-600 px-2.5 py-1 text-xs font-bold uppercase leading-none text-white shadow-sm md:text-sm'>
+                          <Crown className='h-3.5 w-3.5 md:h-4 md:w-4' strokeWidth={2.5} />
+                          VIP
+                        </span>
                       )}
                     </div>
-                  )}
-                </div>
-                <div className='flex-1 min-w-0 flex flex-col justify-center items-center md:items-start'>
-                  <h3 className='text-lg md:text-3xl font-bold text-white mb-1 truncate text-center md:text-start flex items-center gap-3 w-full justify-center md:justify-start'>
-                    {userInfo?.name}
-                    {userInfo?.isVip && (
-                      <span className='bg-gradient-to-r from-yellow-400 to-yellow-600 text-white text-xs md:text-sm uppercase font-bold px-2 py-0.5 rounded-md shadow-sm flex items-center gap-1.5 flex-shrink-0'>
-                        <Crown className='w-3 h-3 md:w-4 md:h-4' /> VIP
-                      </span>
+                    {profileHandleLine && (
+                      <p className='w-full max-w-full truncate text-xs text-slate-300 md:text-sm'>{profileHandleLine}</p>
                     )}
-                  </h3>
-                  <p className='text-xs md:text-sm text-slate-300 text-center md:text-start truncate w-full mb-3'>
-                    @{userInfo?.username}
-                  </p>
 
-                  {!userInfo?.isVip && (
-                    <CustomButton
-                      label='Tìm hiểu Learnova VIP'
-                      icon={<Crown className='w-4 h-4 mr-1.5 text-yellow-600' />}
-                      className='border-none bg-gradient-to-r from-yellow-100 to-amber-100 hover:from-yellow-200 hover:to-amber-200 text-yellow-800 font-semibold rounded-full px-4 text-xs shadow-sm h-8 mt-1 md:mt-2 transition-transform hover:scale-105'
-                      onClick={openVipDialog}
-                      type='button'
-                    />
-                  )}
+                    {!userInfo?.isVip && (
+                      <CustomButton
+                        label='Tìm hiểu Learnova VIP'
+                        icon={<Crown className='h-4 w-4 shrink-0 text-yellow-600' />}
+                        className='mt-0.5 h-8 border-none bg-gradient-to-r from-yellow-100 to-amber-100 px-4 text-xs font-semibold text-yellow-800 shadow-sm transition-transform hover:scale-105 hover:from-yellow-200 hover:to-amber-200 rounded-full'
+                        onClick={openVipDialog}
+                        type='button'
+                      />
+                    )}
+                  </div>
                 </div>
               </HighGlossBackground>
 
               {/* Info Grid */}
-              <h2 className='font-semibold text-base my-4'>Thông tin cơ bản</h2>
+              <h2 className='mt-2 mb-4 text-base font-semibold'>Thông tin cơ bản</h2>
               {!editing ? (
                 <div className='grid gap-4 md:grid-cols-2'>
                   {/* Name */}

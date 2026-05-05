@@ -5,26 +5,21 @@ import TitleSkeleton from '../../common/TitleSkeleton'
 
 const LandingPageFormSkeleton = () => {
   return (
-    <div className='max-w-7xl w-full mx-auto space-y-10 px-4'>
-      {/* Title Skeleton */}
+    <div className='max-w-7xl w-full mx-auto space-y-8 md:space-y-10 px-0'>
       <TitleSkeleton />
 
-      <div className='grid lg:grid-cols-2 gap-10'>
-        {/* Form Section Skeleton */}
-        <div className='space-y-8'>
-          {/* Tabs List Skeleton */}
-          <div className='grid grid-cols-3 gap-1 bg-blue-200 rounded-xl p-1'>
-            <Skeleton className='h-10 rounded-lg bg-blue-500' />
-            <Skeleton className='h-10 rounded-lg bg-blue-100' />
-            <Skeleton className='h-10 rounded-lg bg-blue-100' />
+      <div className='grid lg:grid-cols-2 gap-8 lg:gap-10'>
+        <div className='space-y-8 min-w-0'>
+          <div className='grid grid-cols-3 gap-1 rounded-xl p-1 bg-gray-100 border border-gray-200/80'>
+            <Skeleton className='h-10 rounded-lg' />
+            <Skeleton className='h-10 rounded-lg bg-neutral-200/40' />
+            <Skeleton className='h-10 rounded-lg bg-neutral-200/40' />
           </div>
 
-          {/* Content Skeleton (Default to Base Info) */}
           <BaseInfomationSkeleton />
         </div>
 
-        {/* Preview Section Skeleton */}
-        <div className='space-y-8'>
+        <div className='space-y-8 min-w-0'>
           <PreviewSkeleton />
         </div>
       </div>

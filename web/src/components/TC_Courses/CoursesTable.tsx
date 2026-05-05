@@ -18,7 +18,7 @@ const getStatusBadge = (status: CourseStatus) => {
       return (
         <div className='inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-50 text-blue-600 border border-blue-100 shadow-sm'>
           <div className='w-1 h-1 rounded-full bg-blue-500 animate-pulse' />
-          <span className='text-[10px] font-bold uppercase tracking-wider'>Hoạt động</span>
+          <span className='text-[10px] font-bold tracking-wider'>Hoạt động</span>
         </div>
       )
     case 'pending':
@@ -26,14 +26,14 @@ const getStatusBadge = (status: CourseStatus) => {
       return (
         <div className='inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 text-amber-600 border border-amber-100 shadow-sm'>
           <div className='w-1 h-1 rounded-full bg-amber-500' />
-          <span className='text-[10px] font-bold uppercase tracking-wider'>Chờ duyệt</span>
+          <span className='text-[10px] font-bold tracking-wider'>Chờ duyệt</span>
         </div>
       )
     default:
       return (
         <div className='inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gray-50 text-gray-500 border border-gray-100 shadow-sm'>
           <div className='w-1 h-1 rounded-full bg-gray-400' />
-          <span className='text-[10px] font-bold uppercase tracking-wider'>Bản nháp</span>
+          <span className='text-[10px] font-bold tracking-wider'>Bản nháp</span>
         </div>
       )
   }
@@ -44,11 +44,12 @@ interface CoursesTableProps {
   statusFilter?: '' | 'PUBLISHED' | 'DRAFT' | 'PENDING_REVIEW'
   onChangeStatusFilter?: (status: '' | 'PUBLISHED' | 'DRAFT' | 'PENDING_REVIEW') => void
   fetchCourses: (nextPage?: number) => Promise<void>
+  onRequestCreate?: () => void
 }
 
 const statusOptions: Array<'' | 'PUBLISHED' | 'DRAFT' | 'PENDING_REVIEW'> = ['', 'PUBLISHED', 'DRAFT', 'PENDING_REVIEW']
 
-const EmptyState: FC = () => {
+const EmptyState: FC<{ onRequestCreate?: () => void }> = ({ onRequestCreate }) => {
   return (
     <div className='flex flex-col items-center justify-center py-28 px-6 bg-white rounded-[2.5rem] border border-gray-100 shadow-sm'>
       <div className='mb-8 relative flex items-center justify-center'>
@@ -65,7 +66,8 @@ const EmptyState: FC = () => {
       </div>
 
       <button
-        onClick={() => window.location.search = '?openCreate=true'}
+        type='button'
+        onClick={() => onRequestCreate?.()}
         className='inline-flex items-center gap-2 px-8 py-3 bg-blue-600 text-white rounded-xl font-bold text-[14px] hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-100 transition-all active:scale-[0.98]'
       >
         <Plus className='w-4 h-4' />
@@ -75,7 +77,13 @@ const EmptyState: FC = () => {
   )
 }
 
-const CoursesTable: FC<CoursesTableProps> = ({ courses, statusFilter = '', onChangeStatusFilter, fetchCourses }) => {
+const CoursesTable: FC<CoursesTableProps> = ({
+  courses,
+  statusFilter = '',
+  onChangeStatusFilter,
+  fetchCourses,
+  onRequestCreate
+}) => {
   const navigate = useNavigate()
 
   const handleDelete = async (courseId: string) => {
@@ -95,15 +103,15 @@ const CoursesTable: FC<CoursesTableProps> = ({ courses, statusFilter = '', onCha
     }
   }
 
-  if (courses.length === 0) return <EmptyState />
+  if (courses.length === 0) return <EmptyState onRequestCreate={onRequestCreate} />
 
   return (
     <div className='relative overflow-hidden rounded-[2.5rem] border border-gray-100 bg-white shadow-xl shadow-gray-200/50'>
       <Table className='min-w-[800px]'>
         <TableHeader>
           <TableRow className='bg-gray-50/50 hover:bg-gray-50/50 border-b border-gray-100'>
-            <TableHead className='px-8 py-6 text-[11px] font-black text-gray-400 uppercase tracking-[0.2em]'>Thông tin khóa học</TableHead>
-            <TableHead className='px-6 py-6 text-[11px] font-black text-gray-400 uppercase tracking-[0.2em]'>
+            <TableHead className='px-8 py-6 text-[11px] font-black text-gray-400 tracking-[0.2em]'>Thông tin khóa học</TableHead>
+            <TableHead className='px-6 py-6 text-[11px] font-black text-gray-400 tracking-[0.2em]'>
               <div className='flex items-center gap-2'>
                 <span>Trạng thái</span>
                 <DropdownMenu>
@@ -130,8 +138,8 @@ const CoursesTable: FC<CoursesTableProps> = ({ courses, statusFilter = '', onCha
                 </DropdownMenu>
               </div>
             </TableHead>
-            <TableHead className='px-6 py-6 text-[11px] font-black text-gray-400 uppercase tracking-[0.2em]'>Thời lượng</TableHead>
-            <TableHead className='px-6 py-6 text-[11px] font-black text-gray-400 uppercase tracking-[0.2em]'>Ngày tạo</TableHead>
+            <TableHead className='px-6 py-6 text-[11px] font-black text-gray-400 tracking-[0.2em]'>Thời lượng</TableHead>
+            <TableHead className='px-6 py-6 text-[11px] font-black text-gray-400 tracking-[0.2em]'>Ngày tạo</TableHead>
             <TableHead className='px-8 py-6' />
           </TableRow>
         </TableHeader>
@@ -161,7 +169,7 @@ const CoursesTable: FC<CoursesTableProps> = ({ courses, statusFilter = '', onCha
                         {(course.tagNames || course.tags || []).slice(0, 2).map((tag, idx) => (
                           <span
                             key={idx}
-                            className='px-2 py-0.5 text-[9px] font-black uppercase tracking-widest rounded bg-gray-100 text-gray-500 group-hover:bg-blue-100 group-hover:text-blue-700 transition-colors'
+                            className='px-2 py-0.5 text-[9px] font-black tracking-widest rounded bg-gray-100 text-gray-500 group-hover:bg-blue-100 group-hover:text-blue-700 transition-colors'
                           >
                             {tag}
                           </span>

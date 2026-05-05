@@ -44,7 +44,6 @@ import DiscountsAdmin from './pages/AD_Discounts'
 import AuthenticationGate from '@/components/auth-gate/AuthenticationGate'
 import VipSuccess from './pages/VipSuccess'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { VipUpgradeProvider } from '@/contexts/VipUpgradeContext'
 
 const queryClient = new QueryClient()
 
@@ -86,6 +85,7 @@ const router = createBrowserRouter([
           { path: '', element: <TCHomePage /> },
           { path: 'course', element: <TC_Course /> },
           { path: 'course-details/:id', element: <TC_CourseDetail /> },
+          { path: 'chat', element: <Chat /> },
           { path: 'chat/:id', element: <Chat /> },
           { path: 'blogs', element: <TC_Blog /> },
           { path: 'create-blog', element: <TC_CreateBlog /> },
@@ -128,9 +128,7 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <>
     <QueryClientProvider client={queryClient}>
       <SocketProvider>
-        <VipUpgradeProvider>
-          <RouterProvider router={router} />
-        </VipUpgradeProvider>
+        <RouterProvider router={router} />
       </SocketProvider>
     </QueryClientProvider>
   </>
