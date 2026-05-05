@@ -7,7 +7,8 @@ export enum QuizStatus {
 export enum QuestionType {
   MULTIPLE_CHOICE = 'MULTIPLE_CHOICE',
   TRUE_FALSE = 'TRUE_FALSE',
-  SHORT_ANSWER = 'SHORT_ANSWER',
+  // TODO: add SHORT_ANSWER later
+  // SHORT_ANSWER = 'SHORT_ANSWER',
 }
 
 export enum DifficultyLevel {

@@ -5,7 +5,6 @@ import quizService from '~/service/analysis/quiz.service';
 import { GenerateQuizDto, GenerateBatchQuizzesDto } from '~/dto/request/quiz-generation.dto';
 import { UpdateQuizDto, NormalizedQuizChoiceInput, UpdateQuizPersistPayload } from '~/dto/request/quiz-update.dto';
 import ApiError from '~/middleware/ApiError';
-import { QuestionType } from '~/enums/quizStatus.enum';
 
 /**
  * QuizController handles quiz-related HTTP endpoints.
@@ -271,16 +270,14 @@ class QuizController {
         feedback: c.feedback ?? null,
       }));
 
-      if (body.type !== QuestionType.SHORT_ANSWER) {
-        QuizController.assertObjectiveQuizChoices(choicesNorm);
-      }
+      QuizController.assertObjectiveQuizChoices(choicesNorm);
 
       const persistPayload: UpdateQuizPersistPayload = {
         question: body.question.trim(),
         explanation: (body.explanation ?? '').trim(),
         type: body.type,
         difficulty: body.difficulty,
-        choices: body.type === QuestionType.SHORT_ANSWER ? [] : choicesNorm,
+        choices: choicesNorm,
       };
       if (body.bloomLevel !== undefined) {
         persistPayload.bloomLevel = body.bloomLevel;

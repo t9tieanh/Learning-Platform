@@ -11,9 +11,11 @@ import {
   Pencil,
   Plus,
   RefreshCw,
+  Rocket,
   ScrollText,
   Sparkles,
   Trash2,
+  Undo2,
 } from 'lucide-react'
 import { LessonChunk } from '@/types/ai'
 import HighGlossBackground from '@/components/common/HighGlossBackground'
@@ -136,9 +138,23 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
   const [rowOpen, setRowOpen] = useState<Record<string, boolean>>({})
   /** Chunk-group PATCH save in flight (`PATCH …/lesson-test/chunk-groups/:groupId`). */
   const [savingGroupRowId, setSavingGroupRowId] = useState<string | null>(null)
-  /** Row đang chỉnh meta inline trong header (tiêu đề / số câu / gợi ý). */
+  /** Row whose header meta is being edited inline (title, count, prompt). */
   const [metaInlineEditRowId, setMetaInlineEditRowId] = useState<string | null>(null)
-  const rowOpsLocked = singleGroupRowId !== null || savingGroupRowId !== null
+  const [lessonTestHeaderStatus, setLessonTestHeaderStatus] = useState<LessonTestStatus>(() => {
+    const raw = persistedLessonTest?.status
+    if (raw === LessonTestStatus.PUBLISHED) return LessonTestStatus.PUBLISHED
+    if (raw === LessonTestStatus.ARCHIVED) return LessonTestStatus.ARCHIVED
+    return LessonTestStatus.DRAFT
+  })
+  const [publishActionLoading, setPublishActionLoading] = useState(false)
+  const rowOpsLocked = singleGroupRowId !== null || savingGroupRowId !== null || publishActionLoading
+
+  useEffect(() => {
+    const raw = persistedLessonTest?.status
+    if (raw === LessonTestStatus.PUBLISHED) setLessonTestHeaderStatus(LessonTestStatus.PUBLISHED)
+    else if (raw === LessonTestStatus.ARCHIVED) setLessonTestHeaderStatus(LessonTestStatus.ARCHIVED)
+    else if (raw === LessonTestStatus.DRAFT || raw != null) setLessonTestHeaderStatus(LessonTestStatus.DRAFT)
+  }, [persistedLessonTest?.status])
 
   useEffect(() => {
     if (metaInlineEditRowId && !rows.some((r) => r.id === metaInlineEditRowId)) {
@@ -179,6 +195,10 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
         if (cancelled) return
         setFlatLessonTestQuizzes(bundle?.quizzes ?? [])
         setFlatLessonTestTitleFromApi(bundle?.lessonTest?.title ?? null)
+        const st = bundle?.lessonTest?.status
+        if (st === LessonTestStatus.PUBLISHED) setLessonTestHeaderStatus(LessonTestStatus.PUBLISHED)
+        else if (st === LessonTestStatus.ARCHIVED) setLessonTestHeaderStatus(LessonTestStatus.ARCHIVED)
+        else if (bundle?.lessonTest) setLessonTestHeaderStatus(LessonTestStatus.DRAFT)
       })
       .catch(() => {
         if (cancelled) return
@@ -527,6 +547,7 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
         setIsGenerating(false)
         return
       }
+      setLessonTestHeaderStatus(LessonTestStatus.DRAFT)
 
       const existing = await lessonTestService.fetchLessonTestBundle(lessonId)
       if (existing?.chunkGroups?.length) {
@@ -719,6 +740,51 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
     ]
   )
 
+  const handleToggleLessonTestPublish = useCallback(async () => {
+    if (!lessonId) {
+      toast.error('Thiếu lessonId.')
+      return
+    }
+    if (!hasServerChunkGroups) {
+      toast.error('Hãy lưu đề cương và sinh câu cho các nhóm trước khi xuất bản.')
+      return
+    }
+
+    const isPublished = lessonTestHeaderStatus === LessonTestStatus.PUBLISHED
+    if (isPublished) {
+      const ok = await showConfirmToast({
+        title: 'Chuyển bài kiểm tra về bản nháp?',
+        description:
+          'Học viên sẽ không còn truy cập bài kiểm tra này cho đến khi bạn xuất bản lại.',
+        confirmLabel: 'Chuyển về bản nháp',
+        cancelLabel: 'Hủy',
+      })
+      if (!ok) return
+    }
+
+    setPublishActionLoading(true)
+    try {
+      const next = isPublished ? LessonTestStatus.DRAFT : LessonTestStatus.PUBLISHED
+      const res = await lessonTestService.putLessonTest(lessonId, { status: next })
+      if (res.code !== 200 || !res.result) {
+        toast.error(res.message || 'Không cập nhật trạng thái được.')
+        return
+      }
+      setLessonTestHeaderStatus(res.result.status as LessonTestStatus)
+      toast.success(
+        next === LessonTestStatus.PUBLISHED
+          ? 'Đã xuất bản. Học viên có thể làm bài kiểm tra.'
+          : 'Đã chuyển về bản nháp.'
+      )
+      onAfterGenerate?.()
+    } catch (e) {
+      const ax = e as AxiosError<{ message?: string }>
+      toast.error(ax.response?.data?.message || 'Không cập nhật trạng thái được.')
+    } finally {
+      setPublishActionLoading(false)
+    }
+  }, [hasServerChunkGroups, lessonId, lessonTestHeaderStatus, onAfterGenerate])
+
   if (!chunks.length) {
     return null
   }
@@ -726,23 +792,71 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
   return (
     <div className='space-y-4'>
       <HighGlossBackground className='rounded-2xl shadow-lg shadow-blue-900/15 overflow-hidden'>
-        <div className='px-6 py-5 md:py-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
-          <div className='flex items-start gap-4 md:gap-5 min-w-0'>
-            <div className='w-10 h-10 md:w-12 md:h-12 mt-0.5 shrink-0 bg-white/10 rounded-2xl flex items-center justify-center text-white shadow-xl backdrop-blur-md border border-white/20'>
-              <ClipboardList className='w-5 h-5 md:w-6 md:h-6' strokeWidth={2.25} />
+        <div className='px-4 py-3.5 md:px-5 md:py-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between'>
+          <div className='flex items-center gap-3 md:gap-4 min-w-0 flex-1'>
+            <div className='w-9 h-9 md:w-10 md:h-10 shrink-0 bg-white/10 rounded-xl flex items-center justify-center text-white shadow-md backdrop-blur-md border border-white/20'>
+              <ClipboardList className='w-4 h-4 md:w-5 md:h-5' strokeWidth={2.25} />
             </div>
-            <div className='min-w-0 flex flex-col pt-0.5'>
-              <h2 className='text-white font-bold text-[15px] md:text-[16px] tracking-tight leading-snug flex items-center gap-2 flex-wrap'>
+            <div className='min-w-0 flex flex-col pt-0 flex-1'>
+              <h2 className='text-white font-bold text-[14px] md:text-[15px] tracking-tight leading-snug flex items-center gap-2 flex-wrap'>
                 Bài kiểm tra theo từng mảng nội dung
                 <Sparkles className='w-3 h-3 text-amber-200/90 shrink-0' aria-hidden />
               </h2>
-              <p className='text-[10px] md:text-[11px] text-blue-100/80 mt-1.5 font-medium leading-snug'>
+              <p className='text-[10px] md:text-[11px] text-blue-100/80 mt-1 font-medium leading-snug max-w-xl'>
                 Tổng câu toàn bài trước → nhóm phân đoạn → cách ra đề (bảng chuẩn đầu ra)
               </p>
+              <div
+                className='mt-2 self-start w-fit max-w-full inline-flex rounded-lg overflow-hidden border border-white/30 shadow-sm bg-white/[0.11] backdrop-blur-md'
+                role='group'
+                aria-label='Lesson test publication status and action'
+              >
+                <span
+                  className={cn(
+                    'inline-flex items-center justify-center shrink-0 h-9 px-2.5 sm:px-3 text-[10px] sm:text-[11px] font-semibold leading-none tracking-tight text-white whitespace-nowrap',
+                    'border-r border-white/25',
+                    lessonTestHeaderStatus === LessonTestStatus.PUBLISHED && 'bg-emerald-500/[0.22]',
+                    lessonTestHeaderStatus === LessonTestStatus.ARCHIVED && 'bg-white/[0.08]',
+                    lessonTestHeaderStatus === LessonTestStatus.DRAFT && 'bg-amber-400/[0.14]'
+                  )}
+                >
+                  {lessonTestHeaderStatus === LessonTestStatus.PUBLISHED
+                    ? 'Đã xuất bản'
+                    : lessonTestHeaderStatus === LessonTestStatus.ARCHIVED
+                      ? 'Đã lưu trữ'
+                      : 'Bản nháp'}
+                </span>
+                <CustomButton
+                  type='button'
+                  variant='ghost'
+                  label={
+                    lessonTestHeaderStatus === LessonTestStatus.PUBLISHED
+                      ? 'Chuyển về bản nháp'
+                      : 'Xuất bản cho học viên'
+                  }
+                  icon={
+                    publishActionLoading ? (
+                      <Loader2 className='w-3.5 h-3.5 animate-spin' strokeWidth={2.25} />
+                    ) : lessonTestHeaderStatus === LessonTestStatus.PUBLISHED ? (
+                      <Undo2 className='w-3.5 h-3.5 shrink-0' strokeWidth={2.25} />
+                    ) : (
+                      <Rocket className='w-3.5 h-3.5 shrink-0' strokeWidth={2.25} />
+                    )
+                  }
+                  className={cn(
+                    'h-9 min-h-9 max-h-9 py-0 rounded-none rounded-r-lg px-2.5 sm:px-3 w-auto min-w-0',
+                    'text-[10px] sm:text-[11px] font-semibold leading-none tracking-tight text-white hover:text-white',
+                    'bg-white/5 hover:bg-white/18 active:bg-white/22',
+                    'border-0 border-l border-white/20 shadow-none gap-1.5 justify-center',
+                    '[&_span:first-child]:!mr-0 [&_span.mr-2]:!mr-0'
+                  )}
+                  disabled={isGenerating || publishActionLoading}
+                  onClick={() => void handleToggleLessonTestPublish()}
+                />
+              </div>
             </div>
           </div>
-          {onBackToStructure ? (
-            <div className='flex shrink-0 sm:justify-end'>
+          <div className='flex flex-col gap-2 shrink-0 w-full sm:w-auto sm:self-center lg:items-end'>
+            {onBackToStructure ? (
               <CustomButton
                 type='button'
                 size='lg'
@@ -750,15 +864,15 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
                 label='Quay lại cấu trúc bài giảng'
                 icon={<ArrowLeft className='w-3.5 h-3.5 shrink-0' strokeWidth={2.25} />}
                 className={[
-                  'h-10 min-h-10 max-h-10 py-0 box-border rounded-xl px-4',
-                  'text-[12px] leading-none font-bold whitespace-nowrap',
+                  'h-9 min-h-9 max-h-9 py-0 box-border rounded-lg px-3.5 sm:px-4',
+                  'text-[11px] sm:text-[12px] leading-none font-bold whitespace-nowrap w-full sm:w-auto',
                   'bg-white/15 border border-white/25 text-white hover:bg-white/25 hover:text-white',
                   'shadow-none gap-2 [&_span:first-child]:!mr-0',
                 ].join(' ')}
                 onClick={onBackToStructure}
               />
-            </div>
-          ) : null}
+            ) : null}
+          </div>
         </div>
       </HighGlossBackground>
 

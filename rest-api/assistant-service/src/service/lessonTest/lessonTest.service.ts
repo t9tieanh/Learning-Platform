@@ -1,4 +1,4 @@
-import { LessonTestStatus, Prisma } from '@prisma/client';
+import { LessonTestStatus, Prisma, QuizScope } from '@prisma/client';
 import { StatusCodes } from 'http-status-codes';
 import ApiError from '~/middleware/ApiError';
 import prismaService from '~/service/utils/prisma.service';
@@ -16,6 +16,43 @@ export class LessonTestService {
     return lessonTest;
   }
 
+  async assertLessonTestPublishable(lessonId: string): Promise<void> {
+    const bundle = await this.getLessonTestBundle(lessonId);
+    if (!bundle) {
+      throw new ApiError(StatusCodes.NOT_FOUND, 'Lesson test blueprint not found');
+    }
+    if (bundle.chunkGroups.length === 0) {
+      throw new ApiError(
+        StatusCodes.BAD_REQUEST,
+        'Cần ít nhất một nhóm nội dung trước khi xuất bản bài kiểm tra.'
+      );
+    }
+    const groupIds = bundle.chunkGroups.map((g) => g.id);
+    const counts = await prismaService.quiz.groupBy({
+      by: ['lessonTestChunkGroupId'],
+      where: {
+        lessonTestChunkGroupId: { in: groupIds },
+        quizScope: QuizScope.LESSON_TEST,
+      },
+      _count: { _all: true },
+    });
+    const countByGroup = new Map(
+      counts
+        .filter((c): c is typeof c & { lessonTestChunkGroupId: string } => c.lessonTestChunkGroupId != null)
+        .map((c) => [c.lessonTestChunkGroupId, c._count._all])
+    );
+    for (const g of bundle.chunkGroups) {
+      const n = countByGroup.get(g.id) ?? 0;
+      if (n < 1) {
+        const label = g.label?.trim() || 'Một nhóm nội dung';
+        throw new ApiError(
+          StatusCodes.BAD_REQUEST,
+          `Chưa thể xuất bản: « ${label} » chưa có câu hỏi. Hãy sinh câu hoặc kiểm tra lại nhóm.`
+        );
+      }
+    }
+  }
+
   async upsertLessonTestHeader(
     lessonId: string,
     userId: string,
@@ -26,6 +63,9 @@ export class LessonTestService {
       notes?: string | null;
     }
   ) {
+    if (body.status === LessonTestStatus.PUBLISHED) {
+      await this.assertLessonTestPublishable(lessonId);
+    }
     return prismaService.lessonTest.upsert({
       where: { lessonId },
       create: {
