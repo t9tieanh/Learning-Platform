@@ -1,0 +1,144 @@
+import React from 'react'
+import { CheckCircle2, Flag, XCircle } from 'lucide-react'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import { Label } from '@/components/ui/label'
+import { cn } from '@/lib/utils'
+import type { LessonTestSubmissionItem, StudentQuizItem } from '@/types/lesson-test-student.type'
+
+export interface LessonTestQuestionCardProps {
+  quiz: StudentQuizItem
+  gIdx: number
+  qIdx: number
+  answers: Record<string, string[]>
+  setChoice: (quizId: string, choiceId: string) => void
+  locked: boolean
+  row: LessonTestSubmissionItem | undefined
+  flaggedIds: Record<string, boolean>
+  toggleFlag: (quizId: string) => void
+}
+
+export const LessonTestQuestionCard: React.FC<LessonTestQuestionCardProps> = ({
+  quiz,
+  gIdx,
+  qIdx,
+  answers,
+  setChoice,
+  locked,
+  row,
+  flaggedIds,
+  toggleFlag,
+}) => (
+  <div
+    id={`lesson-test-quiz-${quiz.id}`}
+    className={cn(
+      'scroll-mt-28 rounded-xl border overflow-hidden shadow-sm shadow-gray-900/[0.04] transition-colors',
+      row &&
+        (row.isCorrect
+          ? 'border-emerald-200/90 ring-1 ring-emerald-500/10'
+          : 'border-gray-200/90'),
+      !row && 'border-gray-200/90'
+    )}
+  >
+    <div className='px-3 md:px-4 py-2.5 md:py-3 flex gap-3 items-start bg-gradient-to-r from-slate-50 via-blue-50/25 to-white border-b border-gray-100'>
+      <span
+        className='mt-0.5 shrink-0 inline-flex h-7 min-w-[2.5rem] items-center justify-center rounded-lg bg-white border border-blue-100 text-[11px] font-bold text-[#0C356A] tabular-nums shadow-sm'
+        aria-hidden
+      >
+        {gIdx + 1}.{qIdx + 1}
+      </span>
+      <p className='text-[12.5px] font-semibold text-gray-800 leading-snug min-w-0 flex-1'>{quiz.question}</p>
+      <div className='flex items-start gap-1 shrink-0'>
+        {!locked ? (
+          <button
+            type='button'
+            onClick={() => toggleFlag(quiz.id)}
+            aria-pressed={Boolean(flaggedIds[quiz.id])}
+            aria-label={flaggedIds[quiz.id] ? 'Bỏ cờ' : 'Gắn cờ xem lại'}
+            className={cn(
+              'p-1.5 rounded-lg border transition-colors',
+              flaggedIds[quiz.id]
+                ? 'border-red-200 bg-red-50 text-red-600'
+                : 'border-transparent text-gray-400 hover:bg-gray-100 hover:text-gray-600'
+            )}
+          >
+            <Flag className={cn('w-4 h-4', flaggedIds[quiz.id] && 'fill-red-500')} strokeWidth={2} />
+          </button>
+        ) : null}
+        {row ? (
+          row.isCorrect ? (
+            <CheckCircle2 className='w-4 h-4 text-emerald-600 shrink-0 mt-0.5' aria-label='Đúng' />
+          ) : (
+            <XCircle className='w-4 h-4 text-red-500 shrink-0 mt-0.5' aria-label='Sai' />
+          )
+        ) : null}
+      </div>
+    </div>
+
+    <div className='bg-white px-3 md:px-4 py-3 space-y-3'>
+      <p className='text-[10px] font-bold uppercase tracking-wider text-gray-400'>
+        Câu hỏi · {quiz.type?.replace(/_/g, ' ')} · {quiz.difficulty}
+      </p>
+
+      <RadioGroup
+        value={answers[quiz.id]?.[0] ?? ''}
+        onValueChange={(v) => !locked && setChoice(quiz.id, v)}
+        disabled={locked}
+        className='flex flex-col gap-2.5'
+      >
+        {quiz.choices.map((c, optIdx) => {
+          const choiceId = `${quiz.id}-${c.id}`
+          const letter = String.fromCharCode(65 + optIdx)
+          const picked = (answers[quiz.id]?.[0] ?? '') === c.id
+          const isCorrectChoice = Boolean(row && row.correctChoiceIds.includes(c.id))
+          const isWrongPick = locked && row && !row.isCorrect && picked && !isCorrectChoice
+
+          return (
+            <div
+              key={c.id}
+              className={cn(
+                'relative rounded-xl border-2 bg-white transition-all duration-200',
+                'shadow-sm shadow-gray-900/[0.03]',
+                !locked && 'hover:border-blue-300/90 hover:shadow-md hover:shadow-blue-900/[0.06]',
+                !locked && picked && 'border-blue-500 bg-gradient-to-r from-blue-50/90 to-white ring-1 ring-blue-500/20 shadow-md',
+                !locked && !picked && 'border-gray-100',
+                locked && isCorrectChoice && 'border-emerald-400/90 bg-emerald-50/70 ring-1 ring-emerald-500/15',
+                locked && isWrongPick && 'border-red-300 bg-red-50/80 ring-1 ring-red-400/20',
+                locked && !isCorrectChoice && !isWrongPick && 'border-gray-100'
+              )}
+            >
+              <Label
+                htmlFor={choiceId}
+                className='flex items-center gap-2.5 md:gap-3 px-3 py-2.5 md:px-3.5 md:py-3 cursor-pointer select-none'
+              >
+                <span
+                  className={cn(
+                    'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[13px] font-bold tabular-nums transition-colors',
+                    !locked &&
+                      (picked ? 'bg-blue-600 text-white shadow-md shadow-blue-600/25' : 'bg-gray-100 text-gray-600'),
+                    locked && isCorrectChoice && 'bg-emerald-600 text-white',
+                    locked && isWrongPick && 'bg-red-500 text-white',
+                    locked && !isCorrectChoice && !isWrongPick && 'bg-gray-100 text-gray-500'
+                  )}
+                  aria-hidden
+                >
+                  {letter}
+                </span>
+                <span className='text-[12.5px] font-semibold leading-snug text-gray-800 flex-1 min-w-0'>{c.text}</span>
+                <RadioGroupItem value={c.id} id={choiceId} disabled={locked} className='shrink-0' />
+              </Label>
+            </div>
+          )
+        })}
+      </RadioGroup>
+
+      {locked && row?.explanation ? (
+        <div className='rounded-lg border border-blue-100/70 bg-gradient-to-br from-blue-50/95 via-white to-indigo-50/35 px-3 py-2.5'>
+          <p className='text-[12.5px] font-medium text-gray-700 leading-relaxed'>
+            <span className='font-semibold text-[#0C356A]'>Giải thích: </span>
+            {row.explanation}
+          </p>
+        </div>
+      ) : null}
+    </div>
+  </div>
+)

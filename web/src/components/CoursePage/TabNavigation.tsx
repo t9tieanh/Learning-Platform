@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from 'react'
-import { Search, Info, MessageCircleQuestionMark, NotebookPen, Brain } from 'lucide-react'
+import { Info, MessageCircleQuestionMark, NotebookPen, Brain, ClipboardList } from 'lucide-react'
 import { QASection } from './QASection/QASection'
 import { LectureInfo } from '@/components/CoursePage/LectureInfo'
 import { Lesson } from '@/types/course-student'
@@ -8,6 +8,15 @@ import NoteSection from './NoteSection'
 import lessonStudentService from '@/services/course/lesson-student.service'
 import { AILessonInsights } from './AILessonInsights'
 import { AnalysisResult } from '@/services/assistant/analysis.service'
+import type { StudentLessonTestView } from '@/types/lesson-test-student.type'
+import lessonTestStudentService from '@/services/assistant/lesson-test-student.service'
+import { LessonTestStudentSection } from '@/components/CoursePage/LessonTestStudentSection'
+
+/** True when GET …/lesson-test/student returns 200 and includes at least one quiz. */
+function studentLessonTestHasQuestions(result: StudentLessonTestView | undefined): boolean {
+  if (!result?.chunkGroups?.length) return false
+  return result.chunkGroups.some((g) => (g.quizzes?.length ?? 0) > 0)
+}
 
 export const TabNavigation = ({
   currentLecture,
@@ -33,6 +42,10 @@ export const TabNavigation = ({
   const activeTab = externalActiveTab
   const setActiveTab = onTabChange
   const [noteContent, setNoteContent] = useState('')
+  const [lessonTestTabVisible, setLessonTestTabVisible] = useState(false)
+  /** Cached GET student lesson-test (same payload as tab probe — avoids a second fetch when opening the tab). */
+  const [lessonTestPrefetch, setLessonTestPrefetch] = useState<StudentLessonTestView | null>(null)
+
   const tabs: { label: string; icon: React.ReactNode; onClick?: () => void }[] = useMemo(
     () => {
       const baseTabs = [
@@ -51,7 +64,15 @@ export const TabNavigation = ({
         {
           label: 'Ghi chú',
           icon: <NotebookPen className='w-3.5 h-3.5' />
-        }
+        },
+        ...(lessonTestTabVisible
+          ? [
+              {
+                label: 'Bài kiểm tra',
+                icon: <ClipboardList className='w-3.5 h-3.5' />
+              }
+            ]
+          : [])
       ]
 
       if (!analysisData) {
@@ -59,7 +80,7 @@ export const TabNavigation = ({
       }
       return baseTabs
     },
-    [analysisData]
+    [analysisData, lessonTestTabVisible]
   )
 
   useEffect(() => {
@@ -78,11 +99,51 @@ export const TabNavigation = ({
   }, [currentLectureId])
 
   useEffect(() => {
+    let cancelled = false
+    const lessonId = currentLecture.id
+
+    if (!lessonId || lessonId === 'introduction') {
+      setLessonTestTabVisible(false)
+      return
+    }
+
+    const probe = async () => {
+      setLessonTestTabVisible(false)
+      setLessonTestPrefetch(null)
+      try {
+        const res = await lessonTestStudentService.getStudentLessonTest(lessonId)
+        if (cancelled) return
+        const visible =
+          res.code === 200 && res.result != null && studentLessonTestHasQuestions(res.result)
+        setLessonTestTabVisible(visible)
+        setLessonTestPrefetch(visible && res.result ? res.result : null)
+      } catch {
+        if (!cancelled) {
+          setLessonTestTabVisible(false)
+          setLessonTestPrefetch(null)
+        }
+      }
+    }
+
+    void probe()
+
+    return () => {
+      cancelled = true
+    }
+  }, [currentLecture.id])
+
+  useEffect(() => {
     const isAnalysisUnavailable = !analysisData || analysisData.status?.toLowerCase() === 'failed'
     if (isAnalysisUnavailable && activeTab === 'AI Phân tích') {
       setActiveTab('Tổng quan')
     }
   }, [analysisData, activeTab, setActiveTab])
+
+  useEffect(() => {
+    if (!lessonTestTabVisible && activeTab === 'Bài kiểm tra') {
+      setActiveTab('Tổng quan')
+    }
+  }, [lessonTestTabVisible, activeTab, setActiveTab])
 
   return (
     <div className='border-b border-border'>
@@ -91,7 +152,7 @@ export const TabNavigation = ({
           <CustomButton
             key={tab.label}
             onClick={() => (tab.onClick ? tab.onClick() : setActiveTab(tab.label))}
-            className={`py-3 md:py-4 px-3 md:px-5 text-[10px] font-black uppercase tracking-widest bg-white transition-all relative whitespace-nowrap flex-shrink-0 ${activeTab === tab.label ? 'text-blue-600' : 'text-muted-foreground hover:text-foreground'
+            className={`py-3 md:py-4 px-3 md:px-5 text-[11px] font-bold tracking-[0.1em] bg-white transition-all relative whitespace-nowrap flex-shrink-0 ${activeTab === tab.label ? 'text-blue-600' : 'text-muted-foreground hover:text-foreground'
               }`}
             label={
               <div className='flex items-center'>
@@ -107,7 +168,7 @@ export const TabNavigation = ({
         ))}
       </div>
 
-      <div className='px-0 min-h-[600px]'>
+      <div className='px-0 min-h-[600px] overflow-visible'>
         {activeTab === 'Hỏi đáp' && <QASection lessonId={String(currentLectureId)} instructorId={instructorId} />}
         {activeTab === 'Tổng quan' && (
           <div className='mt-6 mx-auto w-full space-y-8'>
@@ -132,6 +193,16 @@ export const TabNavigation = ({
               lessonId={currentLecture.id}
               note={noteContent}
               setNote={setNoteContent}
+            />
+          </div>
+        )}
+        {activeTab === 'Bài kiểm tra' && lessonTestTabVisible && (
+          <div className='mt-2 mx-auto w-full'>
+            <LessonTestStudentSection
+              key={currentLecture.id}
+              lessonId={currentLecture.id}
+              initialView={lessonTestPrefetch}
+              onPrefetchRefresh={setLessonTestPrefetch}
             />
           </div>
         )}

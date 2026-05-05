@@ -217,16 +217,19 @@ const CoursePage = () => {
               </div>
             </>
           ) : currentLecture ? (
-            <div className='animate-in fade-in slide-in-from-bottom-2 duration-500'>
-              <LessonViewer
-                ref={viewerRef}
-                lesson={currentLecture!}
-                subtitlesRaw={analysisData?.subtitles ?? undefined}
-                chunks={analysisData?.chunks ?? []}
-                isInvalid={analysisData?.status?.toLowerCase() === 'failed'}
-                qualityReason={analysisData?.qualityReason}
-                onShowChunkDetails={handleShowChunkDetails}
-              />
+            <>
+              {/* Chỉ animate LessonViewer — transform trên ancestor làm hỏng sticky trong TabNavigation (Bản đồ câu) */}
+              <div className='animate-in fade-in slide-in-from-bottom-2 duration-500'>
+                <LessonViewer
+                  ref={viewerRef}
+                  lesson={currentLecture!}
+                  subtitlesRaw={analysisData?.subtitles ?? undefined}
+                  chunks={analysisData?.chunks ?? []}
+                  isInvalid={analysisData?.status?.toLowerCase() === 'failed'}
+                  qualityReason={analysisData?.qualityReason}
+                  onShowChunkDetails={handleShowChunkDetails}
+                />
+              </div>
               <div className='mt-2 mx-auto w-full'>
                 <TabNavigation
                   currentLecture={currentLecture!}
@@ -240,7 +243,7 @@ const CoursePage = () => {
                   selectedChunkId={selectedChunkId}
                 />
               </div>
-            </div>
+            </>
           ) : null}
         </div>
 

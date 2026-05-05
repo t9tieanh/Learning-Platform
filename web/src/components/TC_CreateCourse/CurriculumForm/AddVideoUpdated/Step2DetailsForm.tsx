@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useMemo } from 'react'
 import {
   Upload,
   ScanEye,
@@ -16,7 +16,7 @@ import { LoadingDots } from '@/components/common/Loading/LoadingDots'
 import CustomInput from '@/components/common/Input'
 import CustomButton from '@/components/common/Button'
 import QuillEditor from '@/components/common/Input/QuillEditor'
-import AssistantAnalysisService from '@/services/assistant/analysis.service'
+import AssistantAnalysisService, { type AnalysisResult } from '@/services/assistant/analysis.service'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { UseFormRegister, UseFormWatch, UseFormSetValue, FieldErrors, UseFormHandleSubmit } from 'react-hook-form'
@@ -75,7 +75,39 @@ const Step2DetailsForm: React.FC<Step2DetailsFormProps> = ({
   const detailedVideoRef = useRef<HTMLVideoElement>(null)
 
   const isAnalysisFailed = analysisState.status === 'failed'
-  const analysisData = (analysisState.status === 'completed' || analysisState.status === 'failed') ? (analysisState as any).data : null
+  /** Keeps last completed/failed payload visible while a refetch is `loading` (avoids UI flicker / unmount). */
+  const lastStableAnalysisRef = useRef<AnalysisResult | null>(null)
+
+  useEffect(() => {
+    if (analysisState.status === 'completed' || analysisState.status === 'failed') {
+      lastStableAnalysisRef.current = analysisState.data
+    }
+  }, [analysisState])
+
+  useEffect(() => {
+    if (!lessonId) {
+      lastStableAnalysisRef.current = null
+      return
+    }
+    const cached = lastStableAnalysisRef.current
+    if (cached && cached.lessonId !== lessonId) {
+      lastStableAnalysisRef.current = null
+    }
+  }, [lessonId])
+
+  const analysisData = useMemo((): AnalysisResult | null => {
+    if (analysisState.status === 'completed' || analysisState.status === 'failed') {
+      return analysisState.data
+    }
+    if (analysisState.status === 'loading') {
+      const cached = lastStableAnalysisRef.current
+      if (cached && lessonId && cached.lessonId === lessonId) {
+        return cached
+      }
+    }
+    return null
+  }, [analysisState, lessonId])
+
   const isAnalysisLoading = analysisState.status === 'loading' || analysisState.status === 'processing'
 
   const [isVideoLoading, setIsVideoLoading] = useState(true)
