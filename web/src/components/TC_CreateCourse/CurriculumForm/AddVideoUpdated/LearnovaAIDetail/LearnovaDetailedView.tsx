@@ -107,7 +107,7 @@ const LearnovaDetailedView: React.FC<LearnovaDetailedViewProps> = ({
             <div className='max-w-5xl mx-auto w-full px-4'>
                 {detailMainPanel === 'structure' ? (
                     <div className='space-y-6'>
-                        <HighGlossBackground className='rounded-2xl shadow-xl border border-blue-400/20 overflow-hidden'>
+                        <HighGlossBackground className='rounded-2xl shadow-lg shadow-blue-900/15 overflow-hidden'>
                             <div className='px-6 py-5 md:py-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
                                 <div className='flex items-start gap-4 md:gap-5 min-w-0'>
                                     <div className='w-10 h-10 md:w-12 md:h-12 mt-0.5 shrink-0 bg-white/10 rounded-2xl flex items-center justify-center text-white shadow-xl backdrop-blur-md border border-white/20'>
@@ -155,30 +155,32 @@ const LearnovaDetailedView: React.FC<LearnovaDetailedViewProps> = ({
                             </div>
                         </HighGlossBackground>
 
-                        <div className='w-full rounded-2xl border border-gray-100 bg-white/80 backdrop-blur-sm shadow-sm p-4 md:p-6'>
-                            <Accordion
-                                type='single'
-                                collapsible
-                                defaultValue={chunks[0]?.id}
-                                className='space-y-4 md:space-y-5'
-                            >
-                                {chunks.map((chunk, idx) => (
-                                    <ChunkItem
-                                        key={chunk.id}
-                                        chunk={chunk}
-                                        idx={idx}
-                                        handleSeek={handleSeek}
-                                        editingSummaryId={editingSummaryId}
-                                        draftSummary={draftSummary}
-                                        setDraftSummary={setDraftSummary}
-                                        isSavingSummary={isSavingSummary}
-                                        handleStartEdit={handleStartEdit}
-                                        handleCancelEdit={handleCancelEdit}
-                                        handleSave={handleSave}
-                                    />
-                                ))}
-                            </Accordion>
-                        </div>
+                        <HighGlossBackground className='rounded-2xl shadow-lg shadow-blue-900/10'>
+                            <div className='rounded-[13px] bg-white p-4 md:p-6 border-0'>
+                                <Accordion
+                                    type='single'
+                                    collapsible
+                                    defaultValue={chunks[0]?.id}
+                                    className='space-y-4 md:space-y-5'
+                                >
+                                    {chunks.map((chunk, idx) => (
+                                        <ChunkItem
+                                            key={chunk.id}
+                                            chunk={chunk}
+                                            idx={idx}
+                                            handleSeek={handleSeek}
+                                            editingSummaryId={editingSummaryId}
+                                            draftSummary={draftSummary}
+                                            setDraftSummary={setDraftSummary}
+                                            isSavingSummary={isSavingSummary}
+                                            handleStartEdit={handleStartEdit}
+                                            handleCancelEdit={handleCancelEdit}
+                                            handleSave={handleSave}
+                                        />
+                                    ))}
+                                </Accordion>
+                            </div>
+                        </HighGlossBackground>
                     </div>
                 ) : canOpenLessonExam && analysisData?.lessonId ? (
                     <LessonExamBlueprintSection

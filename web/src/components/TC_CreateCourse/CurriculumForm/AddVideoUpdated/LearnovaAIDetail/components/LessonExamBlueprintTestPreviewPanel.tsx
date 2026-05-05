@@ -263,8 +263,8 @@ const QuizTeacherInlineEditor: React.FC<QuizTeacherInlineEditorProps> = ({
                 className={cn(
                   'shrink-0 text-[10px] font-bold px-2 py-1 rounded-md border transition-colors',
                   c.isCorrect
-                    ? 'border-emerald-400 bg-emerald-50 text-emerald-900'
-                    : 'border-gray-200 bg-gray-50 text-gray-500 hover:border-emerald-200'
+                    ? 'border-blue-400 bg-blue-50 text-blue-900'
+                    : 'border-gray-200 bg-gray-50 text-gray-500 hover:border-blue-200'
                 )}
               >
                 {c.isCorrect ? 'Đáp án đúng' : `Đánh dấu đúng`}
@@ -356,26 +356,26 @@ const LessonExamBlueprintTestPreviewPanel: React.FC<
   }
 
   return (
-    <div className='rounded-2xl border border-violet-200/80 bg-gradient-to-b from-violet-50/90 via-white to-white shadow-md shadow-violet-100/60 overflow-hidden'>
-      <div className='px-4 py-3 md:px-5 md:py-3.5 border-b border-violet-100/90 bg-violet-600/[0.07] flex flex-col gap-3'>
+    <div className='rounded-2xl border border-blue-200/80 bg-gradient-to-b from-blue-50/90 via-white to-white shadow-md shadow-blue-100/60 overflow-hidden'>
+      <div className='px-4 py-3 md:px-5 md:py-3.5 border-b border-blue-100/90 bg-blue-600/[0.07] flex flex-col gap-3'>
         <div className='flex flex-wrap items-start gap-3'>
           <div className='flex items-center gap-2 min-w-0 flex-1'>
-            <div className='shrink-0 w-8 h-8 rounded-xl bg-violet-600/15 flex items-center justify-center border border-violet-300/40'>
+            <div className='shrink-0 w-8 h-8 rounded-xl bg-blue-600/15 flex items-center justify-center border border-blue-300/40'>
               {mode === 'student' ? (
-                <GraduationCap className='w-4 h-4 text-violet-700' strokeWidth={2.25} aria-hidden />
+                <GraduationCap className='w-4 h-4 text-blue-700' strokeWidth={2.25} aria-hidden />
               ) : (
-                <ShieldCheck className='w-4 h-4 text-violet-700' strokeWidth={2.25} aria-hidden />
+                <ShieldCheck className='w-4 h-4 text-blue-700' strokeWidth={2.25} aria-hidden />
               )}
             </div>
             <div className='min-w-0'>
-              <h3 className='text-[12px] md:text-[13px] font-bold text-violet-950 tracking-tight leading-snug'>
+              <h3 className='text-[12px] md:text-[13px] font-bold text-blue-950 tracking-tight leading-snug'>
                 Xem trước toàn bài kiểm tra
               </h3>
-              <p className='text-[10px] md:text-[11px] text-violet-800/75 font-medium leading-snug mt-0.5'>
+              <p className='text-[10px] md:text-[11px] text-blue-800/75 font-medium leading-snug mt-0.5'>
                 Danh sách phẳng theo thứ tự làm bài (đã gộp các nhóm phân đoạn).
                 {titleHint ? (
                   <span className='block [overflow-wrap:anywhere] opacity-90 mt-0.5'>
-                    Tiêu đề: <span className='font-semibold text-violet-900'>{titleHint}</span>
+                    Tiêu đề: <span className='font-semibold text-blue-900'>{titleHint}</span>
                   </span>
                 ) : null}
               </p>
@@ -383,7 +383,7 @@ const LessonExamBlueprintTestPreviewPanel: React.FC<
           </div>
           {!loading && localQuizzes.length > 0 ? (
             <div className='flex items-center gap-2 shrink-0 ml-auto'>
-              <span className='text-[10px] md:text-[11px] font-semibold tabular-nums text-violet-700 bg-violet-100/80 border border-violet-200/90 px-2 py-0.5 rounded-full'>
+              <span className='text-[10px] md:text-[11px] font-semibold tabular-nums text-blue-700 bg-blue-100/80 border border-blue-200/90 px-2 py-0.5 rounded-full'>
                 {localQuizzes.length} câu
               </span>
               {onBack && (
@@ -392,7 +392,7 @@ const LessonExamBlueprintTestPreviewPanel: React.FC<
                   variant='outline'
                   label='Quay lại'
                   icon={<ArrowLeft className='w-3 h-3' />}
-                  className='h-7.5 text-[11px] font-bold border-violet-200 text-violet-700 bg-white hover:bg-violet-50 rounded-lg px-2.5'
+                  className='h-7.5 text-[11px] font-bold border-blue-200 text-blue-700 bg-white hover:bg-blue-50 rounded-lg px-2.5'
                   onClick={onBack}
                 />
               )}
@@ -405,7 +405,7 @@ const LessonExamBlueprintTestPreviewPanel: React.FC<
                   variant='outline'
                   label='Quay lại'
                   icon={<ArrowLeft className='w-3 h-3' />}
-                  className='h-7.5 text-[11px] font-bold border-violet-200 text-violet-700 bg-white hover:bg-violet-50 rounded-lg px-2.5'
+                  className='h-7.5 text-[11px] font-bold border-blue-200 text-blue-700 bg-white hover:bg-blue-50 rounded-lg px-2.5'
                   onClick={onBack}
                 />
               </div>
@@ -414,7 +414,7 @@ const LessonExamBlueprintTestPreviewPanel: React.FC<
         </div>
 
         <div
-          className='flex flex-wrap gap-1 p-0.5 rounded-xl bg-violet-900/10 border border-violet-200/60 w-fit max-w-full'
+          className='flex flex-wrap gap-1 p-0.5 rounded-xl bg-blue-900/10 border border-blue-200/60 w-fit max-w-full'
           role='tablist'
           aria-label='Chế độ xem'
         >
@@ -426,8 +426,8 @@ const LessonExamBlueprintTestPreviewPanel: React.FC<
             className={cn(
               'inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[10px] md:text-[11px] font-bold transition-colors',
               mode === 'teacher'
-                ? 'bg-white text-violet-900 shadow-sm'
-                : 'text-violet-800/80 hover:text-violet-950'
+                ? 'bg-white text-blue-900 shadow-sm'
+                : 'text-blue-800/80 hover:text-blue-950'
             )}
           >
             <Eye className='w-3.5 h-3.5 shrink-0' strokeWidth={2.25} aria-hidden />
@@ -444,8 +444,8 @@ const LessonExamBlueprintTestPreviewPanel: React.FC<
             className={cn(
               'inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[10px] md:text-[11px] font-bold transition-colors',
               mode === 'student'
-                ? 'bg-white text-violet-900 shadow-sm'
-                : 'text-violet-800/80 hover:text-violet-950'
+                ? 'bg-white text-blue-900 shadow-sm'
+                : 'text-blue-800/80 hover:text-blue-950'
             )}
           >
             <GraduationCap className='w-3.5 h-3.5 shrink-0' strokeWidth={2.25} aria-hidden />
@@ -456,12 +456,12 @@ const LessonExamBlueprintTestPreviewPanel: React.FC<
 
       <div className='px-4 py-3 md:px-5 md:py-4'>
         {loading ? (
-          <div className='flex items-center gap-2 text-[11px] md:text-[12px] text-violet-900/80 py-6 justify-center'>
-            <Loader2 className='w-4 h-4 animate-spin text-violet-600 shrink-0' aria-hidden />
+          <div className='flex items-center gap-2 text-[11px] md:text-[12px] text-blue-900/80 py-6 justify-center'>
+            <Loader2 className='w-4 h-4 animate-spin text-blue-600 shrink-0' aria-hidden />
             Đang tải bài kiểm tra đầy đủ…
           </div>
         ) : localQuizzes.length === 0 ? (
-          <p className='text-[11px] md:text-[12px] text-violet-900/70 leading-relaxed py-2'>
+          <p className='text-[11px] md:text-[12px] text-blue-900/70 leading-relaxed py-2'>
             Chưa có câu hỏi nào cho bài kiểm tra này. Sau khi sinh câu thành công, danh sách sẽ hiện ở đây.
           </p>
         ) : mode === 'student' ? (
@@ -476,7 +476,7 @@ const LessonExamBlueprintTestPreviewPanel: React.FC<
                   className='rounded-xl border border-slate-200/90 bg-slate-50/40 p-3 md:p-3.5 shadow-sm'
                 >
                   <p className='text-[11px] md:text-[12px] font-bold text-slate-800 leading-snug flex gap-2'>
-                    <span className='tabular-nums text-violet-700 shrink-0'>{idx + 1}.</span>
+                    <span className='tabular-nums text-blue-700 shrink-0'>{idx + 1}.</span>
                     <span className='[overflow-wrap:anywhere]'>{q.question}</span>
                   </p>
 
@@ -497,11 +497,11 @@ const LessonExamBlueprintTestPreviewPanel: React.FC<
                         const isSelected = selectedId === choice.id
 
                         let ring =
-                          'border-slate-200 bg-white hover:border-violet-300 hover:bg-violet-50/40 text-slate-700'
+                          'border-slate-200 bg-white hover:border-blue-300 hover:bg-blue-50/40 text-slate-700'
                         if (answered) {
                           if (isCorrect)
                             ring =
-                              'border-emerald-300 bg-emerald-50/90 text-emerald-950 shadow-[0_0_12px_rgba(16,185,129,0.12)]'
+                              'border-blue-300 bg-blue-50/90 text-blue-950 shadow-[0_0_12px_rgba(37,99,235,0.12)]'
                           else if (isSelected)
                             ring =
                               'border-rose-300 bg-rose-50/90 text-rose-950 shadow-[0_0_12px_rgba(244,63,94,0.1)]'
@@ -547,7 +547,7 @@ const LessonExamBlueprintTestPreviewPanel: React.FC<
               >
                 <div className='flex flex-wrap items-start justify-between gap-2'>
                   <p className='text-[11px] md:text-[12px] font-bold text-slate-800 leading-snug flex gap-2 min-w-0 flex-1'>
-                    <span className='tabular-nums text-violet-700 shrink-0'>{idx + 1}.</span>
+                    <span className='tabular-nums text-blue-700 shrink-0'>{idx + 1}.</span>
                     <span className='[overflow-wrap:anywhere]'>{q.question}</span>
                   </p>
                   <CustomButton
@@ -555,7 +555,7 @@ const LessonExamBlueprintTestPreviewPanel: React.FC<
                     variant='outline'
                     label={editingQuizId === q.id ? 'Đang sửa…' : 'Chỉnh sửa'}
                     icon={<PencilLine className='w-3.5 h-3.5' strokeWidth={2.25} />}
-                    className='h-8 text-[10px] md:text-[11px] font-bold shrink-0 rounded-lg border-violet-200 text-violet-800'
+                    className='h-8 text-[10px] md:text-[11px] font-bold shrink-0 rounded-lg border-blue-200 text-blue-800'
                     onClick={() =>
                       setEditingQuizId((cur) => (cur === q.id ? null : q.id))
                     }
@@ -564,15 +564,15 @@ const LessonExamBlueprintTestPreviewPanel: React.FC<
                 </div>
 
                 {q.type === QuestionType.SHORT_ANSWER ? (
-                  <div className='rounded-lg border border-sky-100 bg-sky-50/50 px-2.5 py-2'>
-                    <p className='text-[10px] font-semibold text-sky-900 mb-1'>Tự luận ngắn</p>
+                  <div className='rounded-lg border border-blue-100 bg-blue-50/50 px-2.5 py-2'>
+                    <p className='text-[10px] font-semibold text-blue-900 mb-1'>Tự luận ngắn</p>
                     {q.explanation?.trim() ? (
-                      <p className='text-[10px] md:text-[11px] text-sky-900/85 leading-snug [overflow-wrap:anywhere]'>
+                      <p className='text-[10px] md:text-[11px] text-blue-900/85 leading-snug [overflow-wrap:anywhere]'>
                         <span className='font-semibold'>Gợi ý đáp án / chấm: </span>
                         {q.explanation.trim()}
                       </p>
                     ) : (
-                      <p className='text-[10px] text-sky-800/70'>Chưa có gợi ý chấm.</p>
+                      <p className='text-[10px] text-blue-800/70'>Chưa có gợi ý chấm.</p>
                     )}
                   </div>
                 ) : (
@@ -583,12 +583,12 @@ const LessonExamBlueprintTestPreviewPanel: React.FC<
                         className={cn(
                           'rounded-xl border px-2.5 py-2 text-[11px] md:text-[12px] font-medium leading-snug',
                           choice.isCorrect
-                            ? 'border-emerald-400 bg-emerald-50/95 text-emerald-950 ring-1 ring-emerald-200/80'
+                            ? 'border-blue-400 bg-blue-50/95 text-blue-950 ring-1 ring-blue-200/80'
                             : 'border-slate-200 bg-slate-50/60 text-slate-600'
                         )}
                       >
                         {choice.isCorrect ? (
-                          <span className='block text-[9px] font-bold uppercase tracking-wide text-emerald-700 mb-0.5'>
+                          <span className='block text-[9px] font-bold uppercase tracking-wide text-blue-700 mb-0.5'>
                             Đáp án đúng
                           </span>
                         ) : null}

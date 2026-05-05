@@ -39,7 +39,7 @@ const LessonExamBlueprintTargetTotalCard: React.FC<
             htmlFor='lesson-exam-total-questions'
             className='text-[12px] md:text-[13px] font-semibold text-gray-800 flex items-center gap-1.5'
           >
-            <Hash className='w-4 h-4 text-violet-500 shrink-0' strokeWidth={2.5} />
+            <Hash className='w-4 h-4 text-blue-600 shrink-0' strokeWidth={2.5} />
             Tổng câu cần tạo (toàn bài)
           </Label>
           <p className='text-[11px] md:text-[12px] text-gray-500 font-medium leading-snug'>
