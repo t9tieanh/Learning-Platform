@@ -8,6 +8,7 @@ import {
   Layers,
   LayoutList,
   Loader2,
+  Pencil,
   Plus,
   RefreshCw,
   ScrollText,
@@ -29,7 +30,7 @@ import { showConfirmToast } from '@/components/common/ShowConfirmToast'
 import { cn } from '@/lib/utils'
 import LessonExamBlueprintHelpPanel from './LessonExamBlueprintHelpPanel'
 import LessonExamBlueprintTargetTotalCard from './LessonExamBlueprintTargetTotalCard'
-import LessonExamBlueprintGroupMetaPanel from './LessonExamBlueprintGroupMetaPanel'
+import LessonExamBlueprintRowMetaInlineEditor from './LessonExamBlueprintRowMetaInlineEditor'
 import LessonExamBlueprintTestPreviewPanel from './LessonExamBlueprintTestPreviewPanel'
 import lessonTestService from '@/services/assistant/lessonTest.service'
 import type {
@@ -135,7 +136,15 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
   const [rowOpen, setRowOpen] = useState<Record<string, boolean>>({})
   /** Chunk-group PATCH save in flight (`PATCH …/lesson-test/chunk-groups/:groupId`). */
   const [savingGroupRowId, setSavingGroupRowId] = useState<string | null>(null)
+  /** Row đang chỉnh meta inline trong header (tiêu đề / số câu / gợi ý). */
+  const [metaInlineEditRowId, setMetaInlineEditRowId] = useState<string | null>(null)
   const rowOpsLocked = singleGroupRowId !== null || savingGroupRowId !== null
+
+  useEffect(() => {
+    if (metaInlineEditRowId && !rows.some((r) => r.id === metaInlineEditRowId)) {
+      setMetaInlineEditRowId(null)
+    }
+  }, [rows, metaInlineEditRowId])
 
   const hasServerChunkGroups = useMemo(
     () => Object.keys(groupIdsByRowId).length > 0,
@@ -506,7 +515,7 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
     const toastId = 'exam-blueprint'
 
     try {
-      toast.loading('Đang lưu đề cương và đồng bộ nhóm nội dung…', { id: toastId })
+      toast.loading('Đang lưu đề cương và các nhóm…', { id: toastId })
 
       const putRes = await lessonTestService.putLessonTest(lessonId, {
         status: LessonTestStatus.DRAFT,
@@ -529,7 +538,7 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
       const mapping: Record<string, string> = {}
       for (let i = 0; i < valid.length; i += 1) {
         const row = valid[i]
-        toast.loading(`Đang tạo nhóm ${i + 1}/${valid.length} trên máy chủ…`, {
+        toast.loading(`Đang tạo nhóm ${i + 1}/${valid.length}…`, {
           id: toastId,
         })
         const created = await lessonTestService.createChunkGroup(lessonId, {
@@ -541,7 +550,7 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
         })
         if (created.code !== 201 || !created.result?.id) {
           toast.dismiss(toastId)
-          toast.error(created.message || 'Không tạo được nhóm nội dung trên máy chủ.')
+          toast.error(created.message || 'Không tạo được nhóm nội dung.')
           setIsGenerating(false)
           onAfterGenerate?.()
           return
@@ -619,7 +628,7 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
       const ax = e as AxiosError<{ message?: string }>
       const msg =
         ax.response?.data?.message ||
-        (e instanceof Error ? e.message : 'Lỗi mạng hoặc máy chủ')
+        (e instanceof Error ? e.message : 'Lỗi kết nối. Thử lại sau.')
       toast.error(msg)
       onAfterGenerate?.()
     } finally {
@@ -647,7 +656,7 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
       }
       const groupId = groupIdsByRowId[rowId]
       if (!groupId || !lessonId) {
-        toast.error('Chưa có nhóm trên máy chủ — hãy bấm sinh theo các nhóm trước.')
+        toast.error('Chưa có nhóm đã lưu — hãy sinh câu theo các nhóm trước.')
         return
       }
 
@@ -692,7 +701,7 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
         const ax = e as AxiosError<{ message?: string }>
         const msg =
           ax.response?.data?.message ||
-          (e instanceof Error ? e.message : 'Lỗi mạng hoặc máy chủ')
+          (e instanceof Error ? e.message : 'Lỗi kết nối. Thử lại sau.')
         toast.error(msg)
       } finally {
         setSingleGroupRowId(null)
@@ -716,7 +725,7 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
 
   return (
     <div className='space-y-4'>
-      <HighGlossBackground className='rounded-2xl shadow-xl border border-blue-400/20 overflow-hidden'>
+      <HighGlossBackground className='rounded-2xl shadow-lg shadow-blue-900/15 overflow-hidden'>
         <div className='px-6 py-5 md:py-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
           <div className='flex items-start gap-4 md:gap-5 min-w-0'>
             <div className='w-10 h-10 md:w-12 md:h-12 mt-0.5 shrink-0 bg-white/10 rounded-2xl flex items-center justify-center text-white shadow-xl backdrop-blur-md border border-white/20'>
@@ -754,7 +763,8 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
       </HighGlossBackground>
 
       {!showPreview && (
-        <div className='rounded-2xl border border-gray-100 bg-white/80 backdrop-blur-sm shadow-sm p-4 md:p-6 space-y-4'>
+        <HighGlossBackground className='rounded-2xl shadow-lg shadow-blue-900/10'>
+          <div className='rounded-[13px] bg-white p-4 md:p-6 space-y-4'>
           <LessonExamBlueprintHelpPanel />
 
             <LessonExamBlueprintTargetTotalCard
@@ -799,6 +809,8 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
                     ? `${chunkSummaryRaw.slice(0, 119)}…`
                     : chunkSummaryRaw
 
+                const isMetaInlineEditing = metaInlineEditRowId === row.id
+
                 return (
                   <Collapsible
                     key={row.id}
@@ -808,66 +820,118 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
                       if (open) void ensureQuizzesForRow(row.id)
                     }}
                   >
-                    <div
-                      className={cn(
-                        'rounded-xl border border-blue-200/50 shadow-md shadow-blue-100/20',
-                        'border-l-[4px] border-l-blue-600 ring-1 ring-blue-100/40',
-                        'overflow-hidden bg-gradient-to-b from-blue-50/45 via-white to-indigo-50/20'
-                      )}
-                    >
+                    <HighGlossBackground className='rounded-xl overflow-hidden shadow-[0_8px_28px_-14px_rgba(30,58,138,0.22)]'>
                       <div
                         className={cn(
-                          'flex items-stretch gap-2 p-3 md:p-4 bg-blue-50/50',
-                          isRowOpen && 'border-b border-blue-100/80'
+                          'flex gap-2 p-3 md:p-4',
+                          isMetaInlineEditing ? 'items-start' : 'items-stretch',
+                          isRowOpen && 'border-b border-white/10'
                         )}
                       >
-                        <CollapsibleTrigger asChild>
-                          <button
-                            type='button'
-                            className={cn(
-                              'flex min-w-0 flex-1 items-start gap-2 rounded-lg text-left outline-none',
-                              'focus-visible:ring-2 focus-visible:ring-blue-500/40 focus-visible:ring-offset-2'
-                            )}
-                          >
-                            <ChevronDown
-                              className={cn(
-                                'mt-0.5 h-4 w-4 shrink-0 text-blue-600 transition-transform duration-200',
-                                isRowOpen ? 'rotate-0' : '-rotate-90'
-                              )}
-                              strokeWidth={2.25}
-                              aria-hidden
-                            />
-                            <div className='min-w-0 flex-1'>
-                              <span className='text-[12px] md:text-[13px] font-semibold text-gray-800 flex items-center gap-2 min-w-0'>
-                                <LayoutList
-                                  className='w-4 h-4 shrink-0 text-blue-600'
+                        {isMetaInlineEditing ? (
+                          <>
+                            <CollapsibleTrigger asChild>
+                              <button
+                                type='button'
+                                className={cn(
+                                  'flex shrink-0 items-center justify-center rounded-lg h-9 w-9 mt-0.5 outline-none',
+                                  'focus-visible:ring-2 focus-visible:ring-white/55 focus-visible:ring-offset-0'
+                                )}
+                                aria-expanded={isRowOpen}
+                              >
+                                <ChevronDown
+                                  className={cn(
+                                    'h-4 w-4 shrink-0 text-white transition-transform duration-200',
+                                    isRowOpen ? 'rotate-0' : '-rotate-90'
+                                  )}
                                   strokeWidth={2.25}
+                                  aria-hidden
                                 />
-                                {row.groupTitle.trim() || `Nhóm nội dung ${labelIdx}`}
-                              </span>
-                              {!isRowOpen && (
-                                <p className='mt-1.5 text-[12px] leading-snug text-gray-600'>
-                                  <span className='font-semibold text-gray-700'>Phân đoạn: </span>
-                                  <span className='[overflow-wrap:anywhere]'>{chunkSummaryLine}</span>
-                                  <span className='ml-2 font-bold tabular-nums text-blue-700'>
-                                    · {row.questionCount} câu
-                                  </span>
-                                </p>
-                              )}
+                              </button>
+                            </CollapsibleTrigger>
+                            <div className='rounded-xl bg-white/95 backdrop-blur-sm ring-1 ring-white/35 p-3 min-w-0 flex-1 shadow-sm'>
+                              <LessonExamBlueprintRowMetaInlineEditor
+                                rowId={row.id}
+                                labelIdx={labelIdx}
+                                groupTitle={row.groupTitle}
+                                instruction={row.instruction}
+                                questionCount={row.questionCount}
+                                hasServerGroup={Boolean(groupIdsByRowId[row.id])}
+                                disabled={isGenerating || rowOpsLocked}
+                                isSaving={savingGroupRowId === row.id}
+                                onCancel={() => setMetaInlineEditRowId(null)}
+                                onCommit={async (rid, next) => {
+                                  await commitGroupMeta(rid, next)
+                                  setMetaInlineEditRowId(null)
+                                }}
+                              />
                             </div>
-                          </button>
-                        </CollapsibleTrigger>
+                          </>
+                        ) : (
+                          <>
+                            <CollapsibleTrigger asChild>
+                              <button
+                                type='button'
+                                className={cn(
+                                  'flex min-w-0 flex-1 items-start gap-2 rounded-lg text-left outline-none',
+                                  'focus-visible:ring-2 focus-visible:ring-white/55 focus-visible:ring-offset-0'
+                                )}
+                              >
+                                <ChevronDown
+                                  className={cn(
+                                    'mt-0.5 h-4 w-4 shrink-0 text-white transition-transform duration-200',
+                                    isRowOpen ? 'rotate-0' : '-rotate-90'
+                                  )}
+                                  strokeWidth={2.25}
+                                  aria-hidden
+                                />
+                                <div className='min-w-0 flex-1'>
+                                  <span className='text-[12px] md:text-[13px] font-semibold text-white flex items-center gap-2 min-w-0'>
+                                    <LayoutList
+                                      className='w-4 h-4 shrink-0 text-blue-100'
+                                      strokeWidth={2.25}
+                                    />
+                                    {row.groupTitle.trim() || `Nhóm nội dung ${labelIdx}`}
+                                  </span>
+                                  {!isRowOpen && (
+                                    <p className='mt-1.5 text-[12px] leading-snug text-blue-100/95'>
+                                      <span className='font-semibold text-white/95'>Phân đoạn: </span>
+                                      <span className='text-white/90 [overflow-wrap:anywhere]'>{chunkSummaryLine}</span>
+                                      <span className='ml-2 font-bold tabular-nums text-blue-200'>
+                                        · {row.questionCount} câu
+                                      </span>
+                                    </p>
+                                  )}
+                                </div>
+                              </button>
+                            </CollapsibleTrigger>
+                            <CustomButton
+                              type='button'
+                              variant='outline'
+                              size='sm'
+                              icon={<Pencil className='w-3.5 h-3.5' strokeWidth={2.25} />}
+                              className='shrink-0 self-start h-7.5 w-7.5 md:h-8 md:w-8 p-0 font-bold border-2 border-white/35 text-white bg-white/15 hover:bg-white/25 hover:border-white/50 shadow-sm [&_span]:!mr-0'
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                setMetaInlineEditRowId(row.id)
+                                setRowOpen((prev) => ({ ...prev, [row.id]: true }))
+                              }}
+                              disabled={isGenerating || rowOpsLocked}
+                              aria-label='Chỉnh thông tin nhóm'
+                            />
+                          </>
+                        )}
                         <CustomButton
                           type='button'
                           variant='outline'
                           size='sm'
                           icon={<Trash2 className='w-3.5 h-3.5' strokeWidth={2.5} />}
-                          className='shrink-0 self-start h-7.5 w-7.5 md:h-8 md:w-8 p-0 font-bold border-2 border-red-300 text-red-600 bg-red-50 hover:bg-red-100 hover:text-red-700 hover:border-red-400 shadow-sm [&_span]:!mr-0'
+                          className='shrink-0 self-start h-7.5 w-7.5 md:h-8 md:w-8 p-0 font-bold border-2 border-red-300/80 text-red-100 bg-white/10 hover:bg-red-500/25 hover:text-white hover:border-red-200/90 shadow-sm [&_span]:!mr-0'
                           onClick={async (e) => {
                             e.stopPropagation()
                             const ok = await showConfirmToast({
                               title: 'Xóa nhóm cấu hình?',
-                              description: `Bạn có chắc muốn xóa nhóm nội dung ${labelIdx}? Nếu nhóm đã đồng bộ máy chủ, dữ liệu nhóm đó cũng sẽ bị xóa.`,
+                              description: `Bạn có chắc muốn xóa nhóm nội dung ${labelIdx}? Nếu nhóm đã được lưu, dữ liệu nhóm đó cũng sẽ bị xóa.`,
                               confirmLabel: 'Có, xóa',
                               cancelLabel: 'Hủy',
                             })
@@ -876,11 +940,11 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
                             if (gid) {
                               try {
                                 await lessonTestService.deleteChunkGroup(gid)
-                                toast.success('Đã xóa nhóm trên máy chủ.')
+                                toast.success('Đã xóa nhóm.')
                                 setBulkSyncSignature(null)
                                 onAfterGenerate?.()
                               } catch {
-                                toast.error('Không xóa được nhóm trên máy chủ.')
+                                toast.error('Không xóa được nhóm.')
                                 return
                               }
                             }
@@ -899,28 +963,15 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
                           disabled={
                             rows.length <= 1 ||
                             isGenerating ||
-                            rowOpsLocked
+                            rowOpsLocked ||
+                            isMetaInlineEditing
                           }
                           aria-label='Xóa nhóm cấu hình'
                         />
                       </div>
 
                       <CollapsibleContent>
-                        <div className='space-y-3 border-t border-blue-100/70 px-3 md:px-4 pb-3 md:pb-4 pt-2'>
-                    <LessonExamBlueprintGroupMetaPanel
-                      rowId={row.id}
-                      labelIdx={labelIdx}
-                      meta={{
-                        groupTitle: row.groupTitle,
-                        instruction: row.instruction,
-                        questionCount: row.questionCount,
-                      }}
-                      hasServerGroup={Boolean(groupIdsByRowId[row.id])}
-                      disabled={isGenerating || rowOpsLocked}
-                      isSaving={savingGroupRowId === row.id}
-                      onCommit={(rid, next) => commitGroupMeta(rid, next)}
-                    />
-
+                        <div className='space-y-3 bg-white px-3 md:px-4 pb-3 md:pb-4 pt-2'>
                     <div className='grid grid-cols-1 lg:grid-cols-2 gap-4 items-stretch'>
                       <div className='space-y-1.5 min-w-0 flex flex-col'>
                         <Label className='text-[11px] md:text-[12px] font-semibold text-gray-600 flex items-center gap-1.5'>
@@ -938,22 +989,22 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
                           className='space-y-2 [&_button]:min-h-10 [&_button]:text-[13px] md:[&_button]:text-[14px] [&_button]:px-3.5 [&_button]:py-2.5 [&_button]:rounded-xl'
                         />
                         <p className='text-[11px] md:text-[12px] text-gray-500 font-medium leading-snug pl-0.5'>
-                          Tối đa 3 phân đoạn mỗi nhóm; AI gộp ngữ cảnh và sinh câu theo đúng số câu nhóm. Số câu chỉnh trong{' '}
-                          <span className='font-semibold text-gray-600'>Thông tin nhóm</span>.
+                          Tối đa 3 phân đoạn mỗi nhóm; AI gộp ngữ cảnh và sinh câu theo đúng số câu nhóm. Tiêu đề, số câu và gợi ý ra đề chỉnh ngay trên thanh tiêu đề khi bấm{' '}
+                          <span className='font-semibold text-gray-600'>bút chì</span>.
                         </p>
                       </div>
 
                       {selectedChunks.length > 0 && previewChunk && (
-                        <div className='flex flex-col min-h-0 min-w-0 rounded-xl border border-sky-100/90 bg-sky-50/40 p-3 md:p-3.5 shadow-sm'>
-                          <p className='text-[11px] md:text-[12px] font-semibold text-sky-800/90 flex items-center gap-1.5 shrink-0 mb-2'>
-                            <ScrollText className='w-3.5 h-3.5 shrink-0' strokeWidth={2.5} />
+                        <div className='flex flex-col min-h-0 min-w-0 rounded-xl border border-blue-100/90 bg-blue-50/40 p-3 md:p-3.5 shadow-sm'>
+                          <p className='text-[11px] md:text-[12px] font-semibold text-blue-800/90 flex items-center gap-1.5 shrink-0 mb-2'>
+                            <ScrollText className='w-3.5 h-3.5 shrink-0 text-blue-600' strokeWidth={2.5} />
                             Xem tóm tắt
                           </p>
                           {selectedChunks.length > 1 ? (
                             <div className='mb-2 space-y-1'>
                               <Label
                                 htmlFor={`preview-${row.id}`}
-                                className='text-[10px] md:text-[11px] font-semibold text-sky-700/80'
+                                className='text-[10px] md:text-[11px] font-semibold text-blue-700/80'
                               >
                                 Chọn phân đoạn để xem
                               </Label>
@@ -967,7 +1018,7 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
                                 <SelectTrigger
                                   id={`preview-${row.id}`}
                                   size='sm'
-                                  className='h-8 w-full text-[12px] md:text-[13px] font-medium border-sky-200/80 bg-white'
+                                  className='h-8 w-full text-[12px] md:text-[13px] font-medium border-blue-200/80 bg-white'
                                 >
                                   <SelectValue />
                                 </SelectTrigger>
@@ -989,11 +1040,11 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
                               </Select>
                             </div>
                           ) : null}
-                          <div className='flex-1 min-h-[120px] max-h-[200px] overflow-y-auto rounded-lg border border-sky-100/80 bg-white/80 px-3 py-2.5'>
+                          <div className='flex-1 min-h-[120px] max-h-[200px] overflow-y-auto rounded-lg border border-blue-100/80 bg-white/80 px-3 py-2.5'>
                             <p className='text-[12px] md:text-[13px] font-bold text-gray-800 leading-snug'>
                               {previewChunk.title || `Phân đoạn ${previewPartIdx || '?'}`}
                               {previewChunk.startTime ? (
-                                <span className='font-medium text-sky-600/90 ml-1.5 text-[11px] md:text-[12px]'>
+                                <span className='font-medium text-blue-600/90 ml-1.5 text-[11px] md:text-[12px]'>
                                   · {previewChunk.startTime}
                                 </span>
                               ) : null}
@@ -1008,21 +1059,21 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
 
                     {quizFetchLoadingRowIds[row.id] ? (
                       <div className='flex items-center gap-2 mt-3 text-[12px] text-gray-600'>
-                        <Loader2 className='w-4 h-4 shrink-0 animate-spin text-emerald-600' />
+                        <Loader2 className='w-4 h-4 shrink-0 animate-spin text-blue-600' />
                         Đang tải câu đề ôn…
                       </div>
                     ) : lessonTestQuizzesByRowId[row.id]?.length ? (
-                      <div className='rounded-lg border border-emerald-100/90 bg-emerald-50/40 px-3 py-2.5 md:py-3 mt-3 space-y-2'>
-                        <p className='text-[11px] md:text-[12px] font-semibold text-emerald-900'>
+                      <div className='rounded-lg border border-blue-100/90 bg-blue-50/40 px-3 py-2.5 md:py-3 mt-3 space-y-2'>
+                        <p className='text-[11px] md:text-[12px] font-semibold text-blue-900'>
                           Câu đề ôn đã sinh ({lessonTestQuizzesByRowId[row.id].length})
                         </p>
                         <ul className='max-h-[220px] overflow-y-auto space-y-2 pr-0.5'>
                           {lessonTestQuizzesByRowId[row.id].map((q, qi) => (
                             <li
                               key={q.id}
-                              className='flex items-start gap-2 text-[12px] text-gray-800 leading-snug rounded-lg bg-white/85 border border-emerald-100/70 px-2.5 py-2 group/quiz'
+                              className='flex items-start gap-2 text-[12px] text-gray-800 leading-snug rounded-lg bg-white/85 border border-blue-100/70 px-2.5 py-2 group/quiz'
                             >
-                              <span className='font-bold text-emerald-800 shrink-0 tabular-nums'>
+                              <span className='font-bold text-blue-800 shrink-0 tabular-nums'>
                                 {qi + 1}.
                               </span>
                               <span className='flex-1 [overflow-wrap:anywhere]'>{q.question}</span>
@@ -1087,7 +1138,7 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
                     ) : null}
                         </div>
                       </CollapsibleContent>
-                    </div>
+                    </HighGlossBackground>
                   </Collapsible>
                 )
               })}
@@ -1140,7 +1191,8 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
               />
             </div>
           </div>
-        </div>
+          </div>
+        </HighGlossBackground>
       )}
 
       <LessonExamBlueprintTestPreviewPanel

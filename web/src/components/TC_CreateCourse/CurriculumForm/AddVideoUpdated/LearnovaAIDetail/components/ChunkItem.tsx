@@ -26,6 +26,7 @@ import {
 import { useVipUpgrade } from '@/contexts/VipUpgradeContext'
 import { useAuthStore } from '@/stores/useAuth.stores'
 import { cn } from '@/lib/utils'
+import HighGlossBackground from '@/components/common/HighGlossBackground'
 import quizService from '@/services/assistant/quiz.service'
 import { QuizDifficulty, BloomLevel, QuizBatchDistributionItem } from '@/types/quiz'
 import { toast } from 'sonner'
@@ -143,50 +144,49 @@ const ChunkItem: React.FC<ChunkItemProps> = ({
         <AccordionItem
             value={chunk.id}
             className={cn(
-                'border-b-0 rounded-xl border border-blue-200/50 shadow-md shadow-blue-100/20',
-                'border-l-[4px] border-l-blue-600 ring-1 ring-blue-100/40',
-                'overflow-hidden bg-gradient-to-b from-blue-50/45 via-white to-indigo-50/20',
-                'transition-shadow duration-300 hover:shadow-lg hover:shadow-blue-100/30'
+                'border-0 rounded-xl overflow-hidden',
+                'shadow-[0_8px_28px_-14px_rgba(30,58,138,0.22)]'
             )}
         >
-            <AccordionTrigger
-                className={cn(
-                    'px-3 py-3 md:px-4 md:py-4 hover:no-underline group rounded-none w-full',
-                    'bg-blue-50/50 data-[state=open]:border-b data-[state=open]:border-blue-100/80',
-                    '[&>svg]:shrink-0 [&>svg]:text-blue-600 [&>svg]:mt-0.5'
-                )}
-            >
+            <HighGlossBackground className='rounded-xl overflow-hidden'>
+                <AccordionTrigger
+                    className={cn(
+                        'px-3 py-3 md:px-4 md:py-4 hover:no-underline group rounded-none w-full',
+                        'bg-transparent hover:bg-white/10 data-[state=open]:border-b data-[state=open]:border-white/15',
+                        '[&>svg]:shrink-0 [&>svg]:text-white [&>svg]:mt-0.5'
+                    )}
+                >
                 <div className='flex items-start justify-between w-full pr-2'>
                     <div className='flex items-start gap-3 md:gap-4 min-w-0 flex-1'>
                         <div
                             className={cn(
                                 'w-9 h-9 md:w-10 md:h-10 shrink-0 mt-0.5 rounded-2xl flex items-center justify-center',
-                                'bg-white/95 text-blue-700 font-bold text-[13px] md:text-[14px] tabular-nums leading-none',
-                                'border border-blue-200/80 shadow-sm ring-1 ring-blue-100/30',
+                                'bg-white/15 text-white font-bold text-[13px] md:text-[14px] tabular-nums leading-none',
+                                'border border-white/25 shadow-sm ring-1 ring-white/15',
                                 'group-hover:scale-[1.02] transition-transform'
                             )}
                         >
                             {idx + 1}
                         </div>
                         <div className='text-left min-w-0 flex-1'>
-                            <h4 className='text-[12px] md:text-[13px] font-semibold text-gray-800 tracking-tight leading-snug group-hover:text-blue-700 transition-colors [overflow-wrap:anywhere]'>
+                            <h4 className='text-[12px] md:text-[13px] font-semibold text-white tracking-tight leading-snug group-hover:text-white transition-colors [overflow-wrap:anywhere]'>
                                 {chunk.title || `Phân đoạn ${idx + 1}`}
                             </h4>
-                            <div className='mt-1 flex items-center flex-wrap gap-x-2 gap-y-1 text-[11px] text-gray-500 font-medium'>
+                            <div className='mt-1 flex items-center flex-wrap gap-x-2 gap-y-1 text-[11px] text-blue-100/90 font-medium'>
                                 <span
-                                    className='inline-flex items-center gap-1.5 bg-gray-50 px-2 py-0.5 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors cursor-pointer group/time'
+                                    className='inline-flex items-center gap-1.5 bg-white/10 px-2 py-0.5 rounded-lg hover:bg-white/20 transition-colors cursor-pointer group/time text-blue-50 hover:text-white'
                                     onClick={(e) => {
                                         e.stopPropagation()
                                         handleSeek(chunk.startTime)
                                     }}
                                 >
-                                    <PlayCircle className='w-3.5 h-3.5 shrink-0 text-blue-500 group-hover/time:scale-110 transition-transform' />{' '}
+                                    <PlayCircle className='w-3.5 h-3.5 shrink-0 text-white/90 group-hover/time:scale-110 transition-transform' />{' '}
                                     <span className='tabular-nums'>{chunk.startTime}</span>
                                 </span>
-                                <span className='text-gray-300 select-none' aria-hidden>
+                                <span className='text-white/35 select-none' aria-hidden>
                                     ·
                                 </span>
-                                <span className='tabular-nums'>
+                                <span className='tabular-nums text-blue-100/85'>
                                     {chunk.sentenceCount} Câu phát biểu
                                 </span>
                             </div>
@@ -195,7 +195,7 @@ const ChunkItem: React.FC<ChunkItemProps> = ({
                 </div>
             </AccordionTrigger>
 
-            <AccordionContent className='px-3 md:px-4 pt-2 md:pt-3 pb-2 md:pb-3 space-y-6 border-t border-blue-100/70 bg-gradient-to-b from-white/90 to-slate-50/40'>
+            <AccordionContent className='px-3 md:px-4 pt-2 md:pt-3 pb-2 md:pb-3 space-y-6 bg-white'>
                 {/* Summary Section */}
                 <div className='space-y-4'>
                     <div className='flex items-center justify-between px-1'>
@@ -229,8 +229,8 @@ const ChunkItem: React.FC<ChunkItemProps> = ({
                             onCancel={handleCancelEdit}
                         />
                     ) : (
-                        <div className='bg-white border border-gray-100 p-6 rounded-2xl relative shadow-sm group/summary'>
-                            <div className='absolute -top-2.5 -left-2.5 p-1.5 bg-white rounded-xl border border-blue-100 shadow-sm'>
+                        <div className='rounded-2xl bg-slate-50/35 p-6 relative shadow-[inset_0_1px_0_0_rgba(255,255,255,0.85)] ring-1 ring-slate-900/[0.055] border-0 group/summary'>
+                            <div className='absolute -top-2.5 -left-2.5 p-1.5 bg-white rounded-xl shadow-md shadow-slate-900/8 ring-1 ring-blue-500/12 border-0'>
                                 <Brain className='w-3.5 h-3.5 text-blue-600' />
                             </div>
                             <p className='text-gray-700 text-[14px] leading-relaxed font-normal italic opacity-90'>
@@ -248,10 +248,11 @@ const ChunkItem: React.FC<ChunkItemProps> = ({
                             onClick={() => setIsQuizVisible(!isQuizVisible)}
                             variant='ghost'
                             className={cn(
-                                'h-auto flex items-center gap-2.5 px-4 py-2.5 rounded-xl transition-all border group/quiz-btn bg-white hover:bg-white',
+                                'h-auto flex items-center gap-2.5 px-4 py-2.5 rounded-xl transition-all border-0 group/quiz-btn bg-white hover:bg-white',
+                                'shadow-[0_1px_3px_rgba(15,23,42,0.06)] ring-1 ring-slate-900/[0.055]',
                                 isQuizVisible
-                                    ? 'border-blue-200 shadow-sm'
-                                    : 'border-gray-100 text-gray-500 hover:border-blue-100 hover:shadow-sm'
+                                    ? 'ring-blue-500/20 shadow-[0_4px_14px_-6px_rgba(37,99,235,0.22)]'
+                                    : 'text-gray-500 hover:ring-blue-500/12 hover:shadow-[0_2px_10px_-5px_rgba(37,99,235,0.15)]'
                             )}
                         >
                             <div className={cn(
@@ -346,6 +347,7 @@ const ChunkItem: React.FC<ChunkItemProps> = ({
                     </AnimatePresence>
                 </div>
             </AccordionContent>
+            </HighGlossBackground>
         </AccordionItem>
     )
 }
