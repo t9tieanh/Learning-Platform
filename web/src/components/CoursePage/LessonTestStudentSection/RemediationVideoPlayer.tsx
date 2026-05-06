@@ -104,10 +104,10 @@ const RemediationVideoPlayer: React.FC<RemediationVideoPlayerProps> = ({
         containerClassName='aspect-video h-auto'
       />
       <div className='bg-blue-600 px-4 py-2 flex items-center justify-between'>
-        <span className='text-[10px] font-bold text-white uppercase tracking-widest'>
-          Đang xem lại kiến thức quan trọng
+        <span className='text-[10px] font-bold text-white tracking-widest truncate max-w-[70%]'>
+          {chunk.title || 'Đang xem lại kiến thức quan trọng'}
         </span>
-        <span className='text-[10px] font-medium text-blue-100'>
+        <span className='text-[10px] font-medium text-blue-100 flex-shrink-0 ml-2'>
           {chunk.timestamp}
         </span>
       </div>

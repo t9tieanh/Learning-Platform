@@ -69,6 +69,8 @@ export interface LessonTestSubmissionResult {
   lessonId: string
   summary: LessonTestSubmissionSummary
   items: LessonTestSubmissionItem[]
+  chunks?: import('./ai').LessonChunk[]
+  subtitles?: string | null
 }
 
 /** One row in `GET …/student/submissions` (list attempts). */

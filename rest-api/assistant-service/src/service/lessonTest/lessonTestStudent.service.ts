@@ -183,6 +183,29 @@ export class LessonTestStudentService {
   ) {
     await this.assertLessonApprovedForStudent(lessonId);
 
+    const lesson = await prismaService.lesson.findUnique({
+      where: { id: lessonId },
+      include: {
+        chunks: {
+          orderBy: { chunkIndex: 'asc' },
+          select: {
+            id: true,
+            chunkIndex: true,
+            title: true,
+            summary: true,
+            timestamp: true,
+            startTime: true,
+            endTime: true,
+            sentenceCount: true,
+          },
+        },
+      },
+    });
+
+    if (!lesson) {
+      throw new ApiError(StatusCodes.NOT_FOUND, 'Không tìm thấy bài học');
+    }
+
     const bundle = await lessonTestService.getLessonTestBundle(lessonId);
     if (!bundle) {
       throw new ApiError(StatusCodes.NOT_FOUND, 'Không có bài kiểm tra cho bài học này');
@@ -289,6 +312,8 @@ export class LessonTestStudentService {
         percent,
       },
       items,
+      chunks: lesson.chunks,
+      subtitles: lesson.subtitles,
     };
   }
 

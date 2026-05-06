@@ -71,12 +71,16 @@ export interface LessonTestStudentSectionProps {
   lessonId: string
   initialView?: StudentLessonTestView | null
   onPrefetchRefresh?: (view: StudentLessonTestView) => void
+  onSeek?: (timestamp: string) => void
+  chunks?: import('@/types/ai').LessonChunk[]
 }
 
 const LessonTestStudentSection: React.FC<LessonTestStudentSectionProps> = ({
   lessonId,
   initialView = null,
   onPrefetchRefresh,
+  onSeek,
+  chunks,
 }) => {
   const setLessonDraft = useLessonTestDraftStore((s) => s.setLessonDraft)
   const clearLessonDraft = useLessonTestDraftStore((s) => s.clearLessonDraft)
@@ -367,6 +371,10 @@ const LessonTestStudentSection: React.FC<LessonTestStudentSectionProps> = ({
                   resultByQuizId={resultByQuizId}
                   flaggedIds={flaggedIds}
                   toggleFlag={toggleFlag}
+                  onSeek={onSeek}
+                  chunks={result?.chunks ?? chunks}
+                  lessonId={lessonId}
+                  subtitlesRaw={result?.subtitles}
                 />
 
                 <div className='flex flex-wrap gap-3 justify-end pt-2 border-t border-gray-100'>

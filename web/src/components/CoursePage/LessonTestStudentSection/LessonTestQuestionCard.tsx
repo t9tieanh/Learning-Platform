@@ -20,6 +20,7 @@ export interface LessonTestQuestionCardProps {
   chunks?: LessonChunk[]
   lessonId?: string
   subtitlesRaw?: string | null
+  onSeek?: (timestamp: string) => void
 }
 
 export const LessonTestQuestionCard: React.FC<LessonTestQuestionCardProps> = ({
@@ -35,6 +36,7 @@ export const LessonTestQuestionCard: React.FC<LessonTestQuestionCardProps> = ({
   chunks = [],
   lessonId,
   subtitlesRaw,
+  onSeek,
 }) => (
   <div
     id={`lesson-test-quiz-${quiz.id}`}
@@ -109,9 +111,9 @@ export const LessonTestQuestionCard: React.FC<LessonTestQuestionCardProps> = ({
                 !locked && 'hover:border-blue-300/90 hover:shadow-md hover:shadow-blue-900/[0.06]',
                 !locked && picked && 'border-blue-500 bg-gradient-to-r from-blue-50/90 to-white ring-1 ring-blue-500/20 shadow-md',
                 !locked && !picked && 'border-gray-100',
-                locked && isCorrectChoice && 'border-emerald-400/90 bg-emerald-50/70 ring-1 ring-emerald-500/15',
-                locked && isWrongPick && 'border-red-300 bg-red-50/80 ring-1 ring-red-400/20',
-                locked && !isCorrectChoice && !isWrongPick && 'border-gray-100'
+                locked && isCorrectChoice && 'border-emerald-200/60 bg-emerald-50/30 shadow-[0_0_20px_-5px_rgba(16,185,129,0.1)] ring-1 ring-emerald-500/5',
+                locked && isWrongPick && 'border-rose-200/60 bg-rose-50/30 shadow-[0_0_20px_-5px_rgba(244,63,94,0.1)] ring-1 ring-rose-500/5',
+                locked && !isCorrectChoice && !isWrongPick && 'border-gray-100 bg-gray-50/10 opacity-70'
               )}
             >
               <Label
@@ -123,16 +125,25 @@ export const LessonTestQuestionCard: React.FC<LessonTestQuestionCardProps> = ({
                     'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[13px] font-bold tabular-nums transition-colors',
                     !locked &&
                       (picked ? 'bg-blue-600 text-white shadow-md shadow-blue-600/25' : 'bg-gray-100 text-gray-600'),
-                    locked && isCorrectChoice && 'bg-emerald-600 text-white',
-                    locked && isWrongPick && 'bg-red-500 text-white',
-                    locked && !isCorrectChoice && !isWrongPick && 'bg-gray-100 text-gray-500'
+                    locked && isCorrectChoice && 'bg-emerald-500 text-white border-none shadow-[0_4px_12px_-2px_rgba(16,185,129,0.3)]',
+                    locked && isWrongPick && 'bg-rose-500 text-white border-none shadow-[0_4px_12px_-2px_rgba(244,63,94,0.3)]',
+                    locked && !isCorrectChoice && !isWrongPick && 'bg-gray-100 text-gray-400 border border-gray-200/50'
                   )}
                   aria-hidden
                 >
                   {letter}
                 </span>
                 <span className='text-[12.5px] font-semibold leading-snug text-gray-800 flex-1 min-w-0'>{c.text}</span>
-                <RadioGroupItem value={c.id} id={choiceId} disabled={locked} className='shrink-0' />
+                <RadioGroupItem 
+                  value={c.id} 
+                  id={choiceId} 
+                  disabled={locked} 
+                  className={cn(
+                    'shrink-0 transition-all duration-300',
+                    locked && isCorrectChoice && 'border-emerald-500 text-emerald-500 fill-emerald-500 scale-110',
+                    locked && isWrongPick && 'border-rose-500 text-rose-500 fill-rose-500 scale-110'
+                  )} 
+                />
               </Label>
             </div>
           )
@@ -140,14 +151,16 @@ export const LessonTestQuestionCard: React.FC<LessonTestQuestionCardProps> = ({
       </RadioGroup>
 
       {locked && row?.explanation ? (
-        <div className='rounded-lg border border-blue-100/70 bg-gradient-to-br from-blue-50/95 via-white to-indigo-50/35 px-3 py-2.5'>
-          <span className='font-semibold text-[#0C356A] text-[12.5px] mb-1 block'>Giải thích: </span>
-          {lessonId && chunks.length > 0 ? (
+        <div className='relative rounded-2xl border border-blue-100/50 bg-white/40 backdrop-blur-md px-4 py-3.5 mt-2 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden group/expl'>
+          <div className='absolute top-0 left-0 w-1 h-full bg-blue-500/50' />
+          <span className='font-bold text-[#0C356A] text-[11px] uppercase tracking-widest mb-2 block opacity-70'>Phân tích đáp án</span>
+          {lessonId ? (
             <StudentExplanationRemediation
               explanation={row.explanation}
               chunks={chunks}
               lessonId={lessonId}
               subtitlesRaw={subtitlesRaw}
+              onSeek={onSeek}
             />
           ) : (
             <p className='text-[12.5px] font-medium text-gray-700 leading-relaxed'>

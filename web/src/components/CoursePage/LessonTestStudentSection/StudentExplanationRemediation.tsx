@@ -1,15 +1,22 @@
 import React, { useMemo, useState } from 'react'
 import { Play, ChevronUp, ChevronDown } from 'lucide-react'
 import { LessonChunk } from '@/types/ai'
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
+import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible'
 import RemediationVideoPlayer from './RemediationVideoPlayer'
 import { cn } from '@/lib/utils'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 
 interface StudentExplanationRemediationProps {
   explanation: string
   chunks: LessonChunk[]
   lessonId: string
   subtitlesRaw?: string | null
+  onSeek?: (timestamp: string) => void
 }
 
 const StudentExplanationRemediation: React.FC<StudentExplanationRemediationProps> = ({
@@ -17,11 +24,12 @@ const StudentExplanationRemediation: React.FC<StudentExplanationRemediationProps
   chunks,
   lessonId,
   subtitlesRaw,
+  onSeek,
 }) => {
   const [openChunkId, setOpenChunkId] = useState<string | null>(null)
 
   const parts = useMemo(() => {
-    const regex = /@{{([a-f0-9-]{36})}}@/gi
+    const regex = /@{{([0-9a-fA-F-]+)}}@/g
     const result: (string | { chunkId: string })[] = []
     let lastIndex = 0
     let match
@@ -41,8 +49,12 @@ const StudentExplanationRemediation: React.FC<StudentExplanationRemediationProps
     return result
   }, [explanation])
 
-  const toggleChunk = (id: string) => {
-    setOpenChunkId(openChunkId === id ? null : id)
+  const toggleChunk = (chunk: LessonChunk) => {
+    if (onSeek) {
+      onSeek(chunk.startTime || '00:00')
+      return
+    }
+    setOpenChunkId(openChunkId === chunk.id ? null : chunk.id)
   }
 
   if (parts.length === 0) {
@@ -61,28 +73,36 @@ const StudentExplanationRemediation: React.FC<StudentExplanationRemediationProps
           const isOpen = openChunkId === chunk.id
 
           return (
-            <button
-              key={i}
-              type='button'
-              onClick={() => toggleChunk(chunk.id)}
-              className={cn(
-                'inline-flex items-center gap-1 mx-1 px-2 py-0.5 rounded-lg border transition-all font-bold cursor-pointer group',
-                isOpen 
-                  ? 'bg-blue-600 border-blue-700 text-white shadow-md' 
-                  : 'bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 hover:border-blue-300'
-              )}
-            >
-              <Play className={cn('w-2.5 h-2.5', isOpen ? 'fill-white' : 'fill-blue-600')} />
-              <span className='text-[10px] md:text-[11px] leading-none'>
-                {isOpen ? 'Đang xem' : `Xem lại ${chunk.timestamp}`}
-              </span>
-              {isOpen ? <ChevronUp className='w-3 h-3 ml-0.5' /> : <ChevronDown className='w-3 h-3 ml-0.5' />}
-            </button>
+            <TooltipProvider key={i} delayDuration={300}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    type='button'
+                    onClick={() => toggleChunk(chunk)}
+                    className={cn(
+                      'inline-flex items-center gap-1 mx-1 px-2 py-0.5 rounded-lg border transition-all font-bold cursor-pointer group',
+                      isOpen 
+                        ? 'bg-blue-600 border-blue-700 text-white shadow-md' 
+                        : 'bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 hover:border-blue-300'
+                    )}
+                  >
+                    <Play className={cn('w-2.5 h-2.5', isOpen ? 'fill-white' : 'fill-blue-600')} />
+                    <span className='text-[10px] md:text-[11px] leading-none'>
+                      {onSeek ? `Tua tới ${chunk.timestamp}` : (isOpen ? 'Đang xem' : `Xem lại ${chunk.timestamp}`)}
+                    </span>
+                    {!onSeek && (isOpen ? <ChevronUp className='w-3 h-3 ml-0.5' /> : <ChevronDown className='w-3 h-3 ml-0.5' />)}
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side='top' className='bg-slate-900 text-white border-none text-[10px] px-2 py-1'>
+                  <p className='font-bold uppercase tracking-tight'>{chunk.title || 'Nội dung kiến thức'}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           )
         })}
       </p>
 
-      {chunks.map((chunk) => (
+      {!onSeek && chunks.map((chunk) => (
         <Collapsible key={chunk.id} open={openChunkId === chunk.id}>
           <CollapsibleContent className='overflow-hidden animate-in slide-in-from-top-2 duration-300'>
             <div className='mt-2 rounded-2xl overflow-hidden'>
