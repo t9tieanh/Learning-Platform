@@ -141,7 +141,7 @@ export class QuizPersistenceService {
     for (const quiz of batchQuizzes.quizzes) {
       const row = await prismaService.quiz.create({
         data: {
-          chunkId: null,
+          chunkId: quiz.groundedChunkId || null,
           quizScope: QuizScope.LESSON_TEST,
           lessonTestChunkGroupId,
           question: quiz.question,

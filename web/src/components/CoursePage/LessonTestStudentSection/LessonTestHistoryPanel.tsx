@@ -262,6 +262,9 @@ export const LessonTestHistoryPanel: React.FC<LessonTestHistoryPanelProps> = ({ 
                       row={item}
                       flaggedIds={{}}
                       toggleFlag={() => {}}
+                      chunks={detail.chunks}
+                      lessonId={lessonId}
+                      subtitlesRaw={detail.subtitles}
                     />
                   )
                 })

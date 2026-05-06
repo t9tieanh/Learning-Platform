@@ -73,6 +73,7 @@ interface LessonExamBlueprintSectionProps {
   onAfterGenerate?: () => void
   /** When set, shows a back control inside the blue header (e.g. return to lecture structure). */
   onBackToStructure?: () => void
+  handleSeek?: (startTime: string | null) => void
 }
 
 /** Section: map chunks to config groups, target total, then batch-generate quizzes per group (VIP). */
@@ -83,6 +84,7 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
   persistedLessonTestChunkGroups = [],
   onAfterGenerate,
   onBackToStructure,
+  handleSeek,
 }) => {
   const { openVipDialog } = useVipUpgrade()
   const { data: authData } = useAuthStore()
@@ -1314,6 +1316,8 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
         onBack={() => setShowPreview(false)}
         loading={flatLessonTestPreviewLoading}
         quizzes={flatLessonTestQuizzes}
+        chunks={chunks}
+        handleSeek={handleSeek}
         testTitle={flatLessonTestTitleFromApi ?? persistedLessonTest?.title ?? null}
       />
     </div>

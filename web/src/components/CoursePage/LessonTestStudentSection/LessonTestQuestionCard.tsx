@@ -4,6 +4,8 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Label } from '@/components/ui/label'
 import { cn } from '@/lib/utils'
 import type { LessonTestSubmissionItem, StudentQuizItem } from '@/types/lesson-test-student.type'
+import { LessonChunk } from '@/types/ai'
+import StudentExplanationRemediation from './StudentExplanationRemediation'
 
 export interface LessonTestQuestionCardProps {
   quiz: StudentQuizItem
@@ -15,6 +17,9 @@ export interface LessonTestQuestionCardProps {
   row: LessonTestSubmissionItem | undefined
   flaggedIds: Record<string, boolean>
   toggleFlag: (quizId: string) => void
+  chunks?: LessonChunk[]
+  lessonId?: string
+  subtitlesRaw?: string | null
 }
 
 export const LessonTestQuestionCard: React.FC<LessonTestQuestionCardProps> = ({
@@ -27,6 +32,9 @@ export const LessonTestQuestionCard: React.FC<LessonTestQuestionCardProps> = ({
   row,
   flaggedIds,
   toggleFlag,
+  chunks = [],
+  lessonId,
+  subtitlesRaw,
 }) => (
   <div
     id={`lesson-test-quiz-${quiz.id}`}
@@ -133,10 +141,19 @@ export const LessonTestQuestionCard: React.FC<LessonTestQuestionCardProps> = ({
 
       {locked && row?.explanation ? (
         <div className='rounded-lg border border-blue-100/70 bg-gradient-to-br from-blue-50/95 via-white to-indigo-50/35 px-3 py-2.5'>
-          <p className='text-[12.5px] font-medium text-gray-700 leading-relaxed'>
-            <span className='font-semibold text-[#0C356A]'>Giải thích: </span>
-            {row.explanation}
-          </p>
+          <span className='font-semibold text-[#0C356A] text-[12.5px] mb-1 block'>Giải thích: </span>
+          {lessonId && chunks.length > 0 ? (
+            <StudentExplanationRemediation
+              explanation={row.explanation}
+              chunks={chunks}
+              lessonId={lessonId}
+              subtitlesRaw={subtitlesRaw}
+            />
+          ) : (
+            <p className='text-[12.5px] font-medium text-gray-700 leading-relaxed'>
+              {row.explanation}
+            </p>
+          )}
         </div>
       ) : null}
     </div>

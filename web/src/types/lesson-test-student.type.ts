@@ -87,10 +87,14 @@ export interface LessonTestSubmissionDetailItem extends LessonTestSubmissionItem
   choices: StudentQuizChoice[]
 }
 
+import { LessonChunk } from './ai'
+
 export interface LessonTestSubmissionDetailResult {
   submissionId: string
   lessonId: string
   submittedAt: string
   summary: LessonTestSubmissionSummary
   items: LessonTestSubmissionDetailItem[]
+  chunks?: LessonChunk[]
+  subtitles?: string | null
 }
