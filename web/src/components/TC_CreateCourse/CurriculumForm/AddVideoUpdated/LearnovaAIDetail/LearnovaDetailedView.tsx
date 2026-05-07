@@ -186,6 +186,7 @@ const LearnovaDetailedView: React.FC<LearnovaDetailedViewProps> = ({
                     <LessonExamBlueprintSection
                         lessonId={analysisData.lessonId}
                         chunks={chunks}
+                        handleSeek={handleSeek}
                         persistedLessonTest={analysisData.lessonTest ?? null}
                         persistedLessonTestChunkGroups={
                             analysisData.lessonTestChunkGroups ?? []

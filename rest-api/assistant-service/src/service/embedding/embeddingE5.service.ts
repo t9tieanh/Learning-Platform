@@ -130,6 +130,35 @@ export class EmbeddingE5Service {
     }
 
     /**
+     * One vector for arbitrary text indexed as **E5 passage** (prefix `passage:`).
+     * Use for persisted / corpus text (lesson chunks, chat turns stored for recall, documents, FAQs, …).
+     * Pair retrieval queries with the **query:** side (see `SearchService`).
+     *
+     * @param text Trimmed source string; whitespace-only yields `null`.
+     */
+    async embedPassage(text: string): Promise<number[] | null> {
+        const trimmed = text.trim();
+        if (!trimmed) {
+            return null;
+        }
+        const map = await this.generateEmbeddingsForChunkContents([trimmed]);
+        return map.get(0) ?? null;
+    }
+
+    /**
+     * Single query vector for asymmetric E5 retrieval (`query:` prefix).
+     * Use with `embedPassage`-indexed documents (chunks, stored chat, etc.).
+     */
+    async embedQuery(text: string): Promise<number[] | null> {
+        const trimmed = text.trim();
+        if (!trimmed) {
+            return null;
+        }
+        const vectors = await this.embeddings.embedDocuments([`query: ${trimmed}`]);
+        return vectors[0] ?? null;
+    }
+
+    /**
      * Serializes an embedding vector to a JSON string for storage in PostgreSQL TEXT field.
      *
      * @param {number[]} embedding - The embedding vector.

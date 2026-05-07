@@ -145,6 +145,7 @@ export class LessonTestStudentService {
           status: quiz.status,
           createdAt: quiz.createdAt.toISOString(),
           updatedAt: quiz.updatedAt.toISOString(),
+          chunkId: quiz.chunkId,
         };
       });
 
@@ -182,6 +183,29 @@ export class LessonTestStudentService {
   ) {
     await this.assertLessonApprovedForStudent(lessonId);
 
+    const lesson = await prismaService.lesson.findUnique({
+      where: { id: lessonId },
+      include: {
+        chunks: {
+          orderBy: { chunkIndex: 'asc' },
+          select: {
+            id: true,
+            chunkIndex: true,
+            title: true,
+            summary: true,
+            timestamp: true,
+            startTime: true,
+            endTime: true,
+            sentenceCount: true,
+          },
+        },
+      },
+    });
+
+    if (!lesson) {
+      throw new ApiError(StatusCodes.NOT_FOUND, 'Không tìm thấy bài học');
+    }
+
     const bundle = await lessonTestService.getLessonTestBundle(lessonId);
     if (!bundle) {
       throw new ApiError(StatusCodes.NOT_FOUND, 'Không có bài kiểm tra cho bài học này');
@@ -215,6 +239,7 @@ export class LessonTestStudentService {
       selectedChoiceIds: string[];
       correctChoiceIds: string[];
       explanation: string;
+      chunkId: string | null;
     }[] = [];
 
     let earnedPoints = 0;
@@ -245,6 +270,7 @@ export class LessonTestStudentService {
         selectedChoiceIds,
         correctChoiceIds,
         explanation: quiz.explanation,
+        chunkId: quiz.chunkId,
       });
     }
 
@@ -286,6 +312,8 @@ export class LessonTestStudentService {
         percent,
       },
       items,
+      chunks: lesson.chunks,
+      subtitles: lesson.subtitles,
     };
   }
 
@@ -329,6 +357,29 @@ export class LessonTestStudentService {
    */
   async getStudentSubmissionDetail(lessonId: string, userId: string, submissionId: string) {
     await this.assertLessonApprovedForStudent(lessonId);
+
+    const lesson = await prismaService.lesson.findUnique({
+      where: { id: lessonId },
+      include: {
+        chunks: {
+          orderBy: { chunkIndex: 'asc' },
+          select: {
+            id: true,
+            chunkIndex: true,
+            title: true,
+            summary: true,
+            timestamp: true,
+            startTime: true,
+            endTime: true,
+            sentenceCount: true,
+          },
+        },
+      },
+    });
+
+    if (!lesson) {
+      throw new ApiError(StatusCodes.NOT_FOUND, 'Không tìm thấy bài học');
+    }
 
     const submission = await prismaService.lessonTestSubmission.findFirst({
       where: { id: submissionId, lessonId, userId },
@@ -391,6 +442,7 @@ export class LessonTestStudentService {
         difficulty: quiz.difficulty,
         bloomLevel: quiz.bloomLevel,
         choices: choicesOrdered.map((c) => ({ id: c.id, text: c.text })),
+        chunkId: quiz.chunkId,
       };
     };
 
@@ -414,6 +466,8 @@ export class LessonTestStudentService {
         percent: submission.percent,
       },
       items,
+      chunks: lesson.chunks,
+      subtitles: lesson.subtitles,
     };
   }
 }

@@ -143,6 +143,38 @@ model Lesson {
   @@map("lessons")
 }
 
+/// Chat threads per (logical) lesson id from the platform. No FK to `lessons` — ids may exist before analysis ingests the row.
+model LessonChatSession {
+  id          String   @id @default(uuid())
+  lessonId    String   @map("lesson_id")
+  userId      String   @map("user_id")
+  title       String?
+  summaryLast String?  @map("summary_last")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  messages LessonChatMessage[]
+
+  @@index([lessonId, userId])
+  @@map("lesson_chat_sessions")
+}
+
+
+model LessonChatMessage {
+  id        String                @id @default(uuid())
+  sessionId String                @map("session_id")
+  role      LessonChatMessageRole
+  content   String                @db.Text
+  metadata  Json?
+  embedding Unsupported("vector")?
+  createdAt DateTime              @default(now()) @map("created_at")
+
+  session LessonChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+  @@map("lesson_chat_messages")
+}
+
 model NavigatorEmbedding {
   id          String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   category    String
@@ -276,4 +308,10 @@ enum LessonTestStatus {
 enum QuizScope {
   CHUNK_STANDALONE
   LESSON_TEST
+}
+
+enum LessonChatMessageRole {
+  USER
+  ASSISTANT
+  SYSTEM
 }

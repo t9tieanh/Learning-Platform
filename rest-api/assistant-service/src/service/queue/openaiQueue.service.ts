@@ -5,6 +5,7 @@ import Logger from '~/utils/logger';
 import { env } from '~/config/env';
 import { ParsedQuiz, ParsedQuizChoice } from '~/prompts/quiz.prompt';
 import { SingleQuizSchema, BatchQuizSchema, SingleQuiz, BatchQuiz, QuizChoice, RAGAnswerSchema, RAGAnswer } from '~/schemas/openai.schema';
+import { json } from 'stream/consumers';
 
 /**
  * OpenAI Queue Service Job Data Type
@@ -304,7 +305,9 @@ export class OpenAiQueueService {
          new HumanMessage(userPrompt),
        ];
 
-       Logger.info('[OpenAiQueueService] Calling RAG LLM with structured output');
+       Logger.info(`[OpenAiQueueService] Calling RAG LLM with structured output', ${JSON.stringify(messages)}`);
+       Logger.info(`[OpenAiQueueService] System prompt: ${systemPrompt}`);
+       Logger.info(`[OpenAiQueueService] User prompt: ${userPrompt}`);
 
        // Use withStructuredOutput for guaranteed JSON response
        const llmWithSchema = this.llmRAG.withStructuredOutput(RAGAnswerSchema);

@@ -5,6 +5,7 @@ import {
   GraduationCap,
   Loader2,
   PencilLine,
+  Play,
   Plus,
   ShieldCheck,
   Trash2,
@@ -26,11 +27,20 @@ import type { GeneratedQuiz } from '@/types/quiz'
 import { QuestionType, QuizDifficulty } from '@/types/quiz'
 import quizService from '@/services/assistant/quiz.service'
 import { toast } from 'sonner'
+import { LessonChunk } from '@/types/ai'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 
 export interface LessonExamBlueprintTestPreviewPanelProps {
   visible: boolean
   loading: boolean
   quizzes: GeneratedQuiz[]
+  chunks: LessonChunk[]
+  handleSeek?: (startTime: string | null) => void
   testTitle?: string | null
   onBack?: () => void
 }
@@ -313,11 +323,77 @@ const QuizTeacherInlineEditor: React.FC<QuizTeacherInlineEditorProps> = ({
 }
 
 /**
+ * Parses explanation text and replaces @{{chunkId}}@ with a clickable jump badge.
+ */
+const ExplanationCitation: React.FC<{
+  text: string
+  chunks: LessonChunk[]
+  handleSeek?: (startTime: string | null) => void
+}> = ({ text, chunks, handleSeek }) => {
+  const parts = useMemo(() => {
+    // Regex for @{{uuid}}@
+    const regex = /@{{([a-f0-9-]{36})}}@/gi
+    const result: (string | { chunkId: string })[] = []
+    let lastIndex = 0
+    let match
+
+    while ((match = regex.exec(text)) !== null) {
+      if (match.index > lastIndex) {
+        result.push(text.substring(lastIndex, match.index))
+      }
+      result.push({ chunkId: match[1] })
+      lastIndex = regex.lastIndex
+    }
+
+    if (lastIndex < text.length) {
+      result.push(text.substring(lastIndex))
+    }
+
+    return result
+  }, [text])
+
+  if (parts.length === 0) return <>{text}</>
+
+  return (
+    <>
+      {parts.map((part, i) => {
+        if (typeof part === 'string') return <span key={i}>{part}</span>
+
+        const chunk = chunks.find((c) => c.id === part.chunkId)
+        if (!chunk) return <span key={i} className='text-slate-400 opacity-60'>[Nội dung cũ]</span>
+
+        return (
+          <TooltipProvider key={i} delayDuration={300}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type='button'
+                  onClick={() => handleSeek?.(chunk.startTime)}
+                  className='inline-flex items-center gap-1 mx-1 px-1.5 py-0.5 rounded-md bg-blue-50 border border-blue-200 text-blue-700 hover:bg-blue-100 hover:border-blue-300 transition-all font-bold group cursor-pointer'
+                >
+                  <Play className='w-2 h-2 fill-blue-600' />
+                  <span className='text-[9px] md:text-[10px] leading-none'>
+                    {chunk.timestamp || `00:00`}
+                  </span>
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side='top' className='bg-slate-900 text-white border-0 text-[10px] rounded-lg px-2 py-1 shadow-xl'>
+                Xem lại: {chunk.title || `Phân đoạn ${chunk.chunkIndex + 1}`}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )
+      })}
+    </>
+  )
+}
+
+/**
  * Flat lesson-test preview: learner interaction vs teacher review/edit.
  */
 const LessonExamBlueprintTestPreviewPanel: React.FC<
   LessonExamBlueprintTestPreviewPanelProps
-> = ({ visible, loading, quizzes, testTitle, onBack }) => {
+> = ({ visible, loading, quizzes, chunks, handleSeek, testTitle, onBack }) => {
   const [mode, setMode] = useState<PreviewMode>('teacher')
   const [localQuizzes, setLocalQuizzes] = useState<GeneratedQuiz[]>(quizzes)
   const [selectionByQuizId, setSelectionByQuizId] = useState<Record<string, string>>({})
@@ -531,7 +607,11 @@ const LessonExamBlueprintTestPreviewPanel: React.FC<
                   q.explanation?.trim() ? (
                     <p className='mt-2 text-[10px] md:text-[11px] text-slate-600 leading-snug border-t border-slate-200/80 pt-2 [overflow-wrap:anywhere]'>
                       <span className='font-semibold text-slate-700'>Giải thích: </span>
-                      {q.explanation.trim()}
+                      <ExplanationCitation
+                        text={q.explanation.trim()}
+                        chunks={chunks}
+                        handleSeek={handleSeek}
+                      />
                     </p>
                   ) : null}
                 </li>
@@ -569,7 +649,11 @@ const LessonExamBlueprintTestPreviewPanel: React.FC<
                     {q.explanation?.trim() ? (
                       <p className='text-[10px] md:text-[11px] text-blue-900/85 leading-snug [overflow-wrap:anywhere]'>
                         <span className='font-semibold'>Gợi ý đáp án / chấm: </span>
-                        {q.explanation.trim()}
+                        <ExplanationCitation
+                          text={q.explanation.trim()}
+                          chunks={chunks}
+                          handleSeek={handleSeek}
+                        />
                       </p>
                     ) : (
                       <p className='text-[10px] text-blue-800/70'>Chưa có gợi ý chấm.</p>
@@ -601,7 +685,11 @@ const LessonExamBlueprintTestPreviewPanel: React.FC<
                 {q.type !== QuestionType.SHORT_ANSWER && q.explanation?.trim() ? (
                   <p className='text-[10px] md:text-[11px] text-slate-600 leading-snug border-t border-slate-100 pt-2 [overflow-wrap:anywhere]'>
                     <span className='font-semibold text-slate-700'>Giải thích: </span>
-                    {q.explanation.trim()}
+                    <ExplanationCitation
+                      text={q.explanation.trim()}
+                      chunks={chunks}
+                      handleSeek={handleSeek}
+                    />
                   </p>
                 ) : null}
 

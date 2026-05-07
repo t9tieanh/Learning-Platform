@@ -33,6 +33,7 @@ export class GeneratedQuizResponse {
   // Optional fields
   id?: string
   chunkId?: string
+  groundedChunkId?: string
   aiGenerated?: boolean
   aiModel?: string | null
   aiConfidence?: number | null

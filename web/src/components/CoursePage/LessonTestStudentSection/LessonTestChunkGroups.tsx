@@ -15,6 +15,10 @@ export interface LessonTestChunkGroupsProps {
   resultByQuizId: Map<string, LessonTestSubmissionItem>
   flaggedIds: Record<string, boolean>
   toggleFlag: (quizId: string) => void
+  onSeek?: (timestamp: string) => void
+  chunks?: import('@/types/ai').LessonChunk[]
+  lessonId: string
+  subtitlesRaw?: string | null
 }
 
 export const LessonTestChunkGroups: React.FC<LessonTestChunkGroupsProps> = ({
@@ -25,6 +29,10 @@ export const LessonTestChunkGroups: React.FC<LessonTestChunkGroupsProps> = ({
   resultByQuizId,
   flaggedIds,
   toggleFlag,
+  onSeek,
+  chunks,
+  lessonId,
+  subtitlesRaw,
 }) => (
   <div className='space-y-8 md:space-y-10'>
     {chunkGroups.map((group, gIdx) => (
@@ -56,6 +64,10 @@ export const LessonTestChunkGroups: React.FC<LessonTestChunkGroupsProps> = ({
               row={resultByQuizId.get(quiz.id)}
               flaggedIds={flaggedIds}
               toggleFlag={toggleFlag}
+              onSeek={onSeek}
+              chunks={chunks}
+              lessonId={lessonId}
+              subtitlesRaw={subtitlesRaw}
             />
           ))}
         </div>
