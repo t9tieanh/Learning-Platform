@@ -139,11 +139,11 @@ model Lesson {
   chunks                  LessonChunk[]
   lessonTest              LessonTest?
   lessonTestSubmissions   LessonTestSubmission[]
-  lessonChatSessions      LessonChatSession[]
 
   @@map("lessons")
 }
 
+/// Chat threads per (logical) lesson id from the platform. No FK to `lessons` — ids may exist before analysis ingests the row.
 model LessonChatSession {
   id          String   @id @default(uuid())
   lessonId    String   @map("lesson_id")
@@ -153,7 +153,6 @@ model LessonChatSession {
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
-  lesson   Lesson              @relation(fields: [lessonId], references: [id], onDelete: Cascade)
   messages LessonChatMessage[]
 
   @@index([lessonId, userId])

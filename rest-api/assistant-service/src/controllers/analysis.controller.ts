@@ -6,6 +6,7 @@ import { AnalysisOutcome } from '~/enums/analysisOutcome.enum'
 import { RAGResult, lessonRAGService } from '~/service/search/lesson.rag.service'
 import { CHATBOT_ERROR_MESSAGE } from '~/utils/constants'
 import lessonChatPersistenceService from '~/service/lesson-chat/lessonChat.persistence.service'
+import { lessonChatQueryService } from '~/service/lesson-chat/lessonChat.query.service'
 import { RAGQuestionRequest } from '~/dto/request/ragQuestion.dto'
 import ApiError from '~/middleware/ApiError'
 import Logger from '~/utils/logger'
@@ -183,12 +184,114 @@ class AnalysisController {
                 result: { ...result, sessionId: activeSessionId },
             });
         } catch (error) {
+            if (error instanceof ApiError) {
+                sendResponse(res, {
+                    code: error.status,
+                    message: error.message,
+                    result: null,
+                });
+                return;
+            }
             Logger.error(`[AnalysisController.answerQuestion] Error answering question – ${error}`);
             sendResponse(res, {
                 code: StatusCodes.OK,
                 message: CHATBOT_ERROR_MESSAGE,
-                result: null
-            })
+                result: null,
+            });
+        }
+    };
+
+    /** GET .../chat/sessions */
+    listLessonChatSessions = async (
+        req: Request,
+        res: Response,
+        next: NextFunction
+    ): Promise<void> => {
+        try {
+            const lessonId = String(req.params.lessonId);
+            const userId = String(req.user?.sub);
+            const result = await lessonChatQueryService.listSessionsForUser(
+                lessonId,
+                userId
+            );
+            sendResponse(res, {
+                code: StatusCodes.OK,
+                message: 'OK',
+                result,
+            });
+        } catch (error) {
+            Logger.error(`[AnalysisController.listLessonChatSessions] ${error}`);
+            sendResponse(res, {
+                code: StatusCodes.INTERNAL_SERVER_ERROR,
+                message: CHATBOT_ERROR_MESSAGE,
+                result: null,
+            });
+        }
+    };
+
+    /** GET .../chat/sessions/:sessionId/messages */
+    getLessonChatMessages = async (
+        req: Request,
+        res: Response,
+        next: NextFunction
+    ): Promise<void> => {
+        try {
+            const lessonId = String(req.params.lessonId);
+            const sessionId = String(req.params.sessionId);
+            const userId = String(req.user?.sub);
+            const result = await lessonChatQueryService.getMessagesForSession(
+                sessionId,
+                lessonId,
+                userId
+            );
+            sendResponse(res, {
+                code: StatusCodes.OK,
+                message: 'OK',
+                result,
+            });
+        } catch (error) {
+            if (error instanceof ApiError) {
+                sendResponse(res, {
+                    code: error.status,
+                    message: error.message,
+                    result: null,
+                });
+                return;
+            }
+            Logger.error(`[AnalysisController.getLessonChatMessages] ${error}`);
+            sendResponse(res, {
+                code: StatusCodes.INTERNAL_SERVER_ERROR,
+                message: CHATBOT_ERROR_MESSAGE,
+                result: null,
+            });
+        }
+    };
+
+    /** POST .../chat/sessions — empty thread */
+    createLessonChatSession = async (
+        req: Request,
+        res: Response,
+        next: NextFunction
+    ): Promise<void> => {
+        try {
+            const lessonId = String(req.params.lessonId);
+            const userId = String(req.user?.sub);
+            const sessionId = await lessonChatPersistenceService.createEmptySession(
+                lessonId,
+                userId
+            );
+            sendResponse(res, {
+                code: StatusCodes.CREATED,
+                message: 'Session created',
+                result: { sessionId },
+            });
+        } catch (error) {
+            Logger.error(`[AnalysisController.createLessonChatSession] ${error}`);
+            sendResponse(res, {
+                code: StatusCodes.INTERNAL_SERVER_ERROR,
+                message: CHATBOT_ERROR_MESSAGE,
+                result: null,
+            });
         }
     };
 }

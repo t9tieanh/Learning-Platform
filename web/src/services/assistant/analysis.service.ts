@@ -24,6 +24,27 @@ export interface RAGResult {
   sessionId?: string
 }
 
+/** Matches assistant-service lesson chat enums / DTO shapes (dates as ISO strings over JSON). */
+export type LessonChatMessageRoleDto = 'USER' | 'ASSISTANT' | 'SYSTEM'
+
+export interface LessonChatSessionListItemDto {
+  id: string
+  lessonId: string
+  title: string | null
+  summaryLast: string | null
+  createdAt: string
+  updatedAt: string
+  messageCount: number
+}
+
+export interface LessonChatMessageItemDto {
+  id: string
+  role: LessonChatMessageRoleDto
+  content: string
+  metadata: { sources?: RAGSource[] } | null
+  createdAt: string
+}
+
 /** Mirrors assistant-service `AnalysisLessonTestHeaderDto` */
 export interface AnalysisLessonTestHeaderSnapshot {
   lessonId: string
@@ -120,6 +141,34 @@ class AssistantAnalysisService {
       }
     )
     return res.data as ApiResponse<RAGResult>
+  }
+
+  async listLessonChatSessions(
+    lessonId: string
+  ): Promise<ApiResponse<LessonChatSessionListItemDto[]>> {
+    const res = await axiosClient.axiosInstance.get(
+      `assistant/analysis/lessons/${lessonId}/chat/sessions`
+    )
+    return res.data as ApiResponse<LessonChatSessionListItemDto[]>
+  }
+
+  async getLessonChatMessages(
+    lessonId: string,
+    sessionId: string
+  ): Promise<ApiResponse<LessonChatMessageItemDto[]>> {
+    const res = await axiosClient.axiosInstance.get(
+      `assistant/analysis/lessons/${lessonId}/chat/sessions/${sessionId}/messages`
+    )
+    return res.data as ApiResponse<LessonChatMessageItemDto[]>
+  }
+
+  async createLessonChatSession(
+    lessonId: string
+  ): Promise<ApiResponse<{ sessionId: string }>> {
+    const res = await axiosClient.axiosInstance.post(
+      `assistant/analysis/lessons/${lessonId}/chat/sessions`
+    )
+    return res.data as ApiResponse<{ sessionId: string }>
   }
 }
 

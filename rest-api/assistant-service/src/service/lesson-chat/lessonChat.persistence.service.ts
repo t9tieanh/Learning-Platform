@@ -55,6 +55,14 @@ export class LessonChatPersistenceService {
         return session.id;
     }
 
+    /** Creates an empty session (e.g. user starts a new thread from the UI). */
+    async createEmptySession(lessonId: string, userId: string): Promise<string> {
+        const session = await prismaService.lessonChatSession.create({
+            data: { lessonId, userId },
+        });
+        return session.id;
+    }
+
     /**
      * Persists USER + ASSISTANT messages with embeddings awaited on the main request thread.
      * Uses Promise.all so the two branches (embed + write + vector update each) run concurrently.
