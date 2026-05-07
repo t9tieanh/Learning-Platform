@@ -20,6 +20,8 @@ export interface RAGSource {
 export interface RAGResult {
   answer: string
   sources: RAGSource[]
+  /** Persisted chat thread id — send on the next ask to keep context */
+  sessionId?: string
 }
 
 /** Mirrors assistant-service `AnalysisLessonTestHeaderDto` */
@@ -103,12 +105,19 @@ class AssistantAnalysisService {
   }
 
   /**
-   * Ask AI a question about the lesson.
+   * Ask AI about the lesson (RAG). Pass `sessionId` from the previous response for multi-turn memory.
    */
-  async askAI(lessonId: string, question: string): Promise<ApiResponse<RAGResult>> {
+  async askAI(
+    lessonId: string,
+    question: string,
+    sessionId?: string | null
+  ): Promise<ApiResponse<RAGResult>> {
     const res = await axiosClient.axiosInstance.post(
       `assistant/analysis/lessons/${lessonId}/chat`,
-      { question }
+      {
+        question,
+        ...(sessionId ? { sessionId } : {}),
+      }
     )
     return res.data as ApiResponse<RAGResult>
   }

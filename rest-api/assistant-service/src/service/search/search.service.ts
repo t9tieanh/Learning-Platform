@@ -50,13 +50,7 @@ export class SearchService {
                 `[SearchService] Searching chunks for lessonId=${lessonId}, query="${query}", limit=${limit}`
             );
 
-            // Step 1: Generate embedding for the query
-            // e5-base-v2 expects "query: " prefix for search queries (vs "passage: " for docs)
-            const queryWithPrefix = `query: ${query}`;
-            const embeddingsMap = await this.embeddingService.generateEmbeddingsForChunkContents([
-                queryWithPrefix,
-            ]);
-            const queryEmbedding = embeddingsMap.get(0);
+            const queryEmbedding = await this.embeddingService.embedQuery(query);
 
             if (!queryEmbedding) {
                 throw new Error(

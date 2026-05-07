@@ -139,8 +139,41 @@ model Lesson {
   chunks                  LessonChunk[]
   lessonTest              LessonTest?
   lessonTestSubmissions   LessonTestSubmission[]
+  lessonChatSessions      LessonChatSession[]
 
   @@map("lessons")
+}
+
+model LessonChatSession {
+  id          String   @id @default(uuid())
+  lessonId    String   @map("lesson_id")
+  userId      String   @map("user_id")
+  title       String?
+  summaryLast String?  @map("summary_last")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  lesson   Lesson              @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  messages LessonChatMessage[]
+
+  @@index([lessonId, userId])
+  @@map("lesson_chat_sessions")
+}
+
+
+model LessonChatMessage {
+  id        String                @id @default(uuid())
+  sessionId String                @map("session_id")
+  role      LessonChatMessageRole
+  content   String                @db.Text
+  metadata  Json?
+  embedding Unsupported("vector")?
+  createdAt DateTime              @default(now()) @map("created_at")
+
+  session LessonChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+  @@map("lesson_chat_messages")
 }
 
 model NavigatorEmbedding {
@@ -276,4 +309,10 @@ enum LessonTestStatus {
 enum QuizScope {
   CHUNK_STANDALONE
   LESSON_TEST
+}
+
+enum LessonChatMessageRole {
+  USER
+  ASSISTANT
+  SYSTEM
 }

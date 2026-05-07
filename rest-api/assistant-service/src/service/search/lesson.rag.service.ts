@@ -1,8 +1,9 @@
-import { HumanMessage, SystemMessage } from '@langchain/core/messages';
 import Logger from '~/utils/logger';
 import { RAGPrompts } from '~/prompts/rag.prompt';
 import { searchService, SearchChunkResult } from '~/service/search/search.service';
 import openaiQueueService from '~/service/queue/openaiQueue.service';
+import { lessonChatHistoryService, LessonChatHistoryService } from '~/service/lesson-chat/lessonChatHistory.service';
+import { lessonChatSemanticSearchService } from '~/service/lesson-chat/lessonChatSemanticSearch.service';
 
 export interface RAGResult {
   answer: string;
@@ -16,16 +17,18 @@ export interface RAGResult {
     timestamp: string | null;
     similarity: number;
   }>;
+  /** Set after persisting lesson chat history (same id for subsequent requests). */
+  sessionId?: string;
 }
 
 /**
  * RAGService (Retrieval-Augmented Generation) implements context-aware QA.
  *
  * Flow:
- *   1. Search for similar chunks using embeddings (semantic search)
- *   2. Format retrieved chunks as context
- *   3. Send context + question to LLM with Structured Outputs
- *   4. Return LLM's answer + source metadata
+ *   1. In parallel: chunk search, recent session transcript, semantic message recall (session only)
+ *   2. Format chunk text as primary lesson context
+ *   3. Merge session blocks (recent + semantic, de-duplicated) into the user prompt
+ *   4. Call the LLM and return answer + chunk sources
  *
  * This ensures answers are grounded in lesson content, reducing hallucinations.
  */
@@ -40,24 +43,35 @@ export class LessonRAGService {
   /**
    * Answer a user question about a lesson using retrieved context.
    *
-   * Workflow:
-   *   1. Search for up to 5 most similar chunks
-   *   2. Format chunks as context (title + summary + content)
-   *   3. Send to LLM with system prompt + context + question
-   *   4. Return answer + source references
+   * When `sessionId` is set:
+   * - Loads recent messages (verbatim) and related messages (same session, pgvector RPC)
+   * - Semantic hits that already appear in the recent window are skipped to save tokens
    *
-   * @param lessonId - The lesson to search within
-   * @param question - User's natural language question
-   * @returns Promise containing answer and source chunk references
+   * @param lessonId - Lesson scope for chunk search
+   * @param question - User question
+   * @param sessionId - Optional chat session for multi-turn context
    */
-  public async answerQuestion(lessonId: string, question: string): Promise<RAGResult> {
+  public async answerQuestion(
+    lessonId: string,
+    question: string,
+    sessionId?: string | null
+  ): Promise<RAGResult> {
     try {
       Logger.info(
         `[RAGService] Answering question for lessonId=${lessonId}, question="${question}"`
       );
 
-      // Step 1: Search for relevant chunks
-      const chunks = await searchService.searchChunks(lessonId, question, 3);
+      const sessionActive = sessionId != null && sessionId !== '';
+
+      const [chunks, recentData, semanticHits] = await Promise.all([
+        searchService.searchChunks(lessonId, question, 3),
+        sessionActive
+          ? lessonChatHistoryService.buildRecentTranscriptForRag(sessionId!)
+          : Promise.resolve({ transcript: '', messageIds: [] as string[] }),
+        sessionActive
+          ? lessonChatSemanticSearchService.searchRelatedMessages(sessionId!, question, 5)
+          : Promise.resolve([]),
+      ]);
 
       if (chunks.length === 0) {
         Logger.warn(
@@ -73,13 +87,30 @@ export class LessonRAGService {
         `[RAGService] Retrieved ${chunks.length} relevant chunk(s) for question="${question}"`
       );
 
-      // Step 2: Format context from retrieved chunks
       const context = this.formatContext(chunks);
 
-      // Step 3: Send to LLM with RAG prompt (using Structured Outputs)
-      const answer = await this.generateAnswer(context, question);
+      const recentIdSet = new Set(recentData.messageIds);
+      const semanticFiltered = semanticHits.filter((h) => !recentIdSet.has(h.id));
+      const semanticTranscript =
+        lessonChatSemanticSearchService.formatHitsForPrompt(semanticFiltered);
 
-      // Step 4: Build result with source references
+      const historyForPrompt = LessonChatHistoryService.composeSessionHistoryForPrompt(
+        recentData.transcript,
+        semanticTranscript
+      );
+
+      if (historyForPrompt?.trim()) {
+        Logger.info(
+          `[RAGService] Session context included (${historyForPrompt.length} chars, recentIds=${recentData.messageIds.length}, semantic=${semanticFiltered.length})`
+        );
+      } else if (sessionActive) {
+        Logger.info(
+          `[RAGService] No prior session messages to attach (first turn or empty session)`
+        );
+      }
+
+      const answer = await this.generateAnswer(context, question, historyForPrompt);
+
       const result: RAGResult = {
         answer,
         sources: chunks.map((chunk) => ({
@@ -147,17 +178,22 @@ export class LessonRAGService {
    * - Reliable error handling
    * - Future Bull Queue integration for retry logic
    *
-   * @param context - Formatted chunks as context
+   * @param context - Formatted chunks as lesson context
    * @param question - User's question
+   * @param chatHistoryTranscript - Optional session context (recent + semantic blocks)
    * @returns LLM-generated answer
    */
-  private async generateAnswer(context: string, question: string): Promise<string> {
+  private async generateAnswer(
+    context: string,
+    question: string,
+    chatHistoryTranscript?: string
+  ): Promise<string> {
     try {
       Logger.info('[RAGService.generateAnswer] Calling OpenAI with Structured Outputs');
 
       const answer = await openaiQueueService.queueRAGAnswer(
         RAGPrompts.system(),
-        RAGPrompts.human(context, question)
+        RAGPrompts.human(context, question, chatHistoryTranscript)
       );
 
       Logger.info('[RAGService.generateAnswer] Answer generated successfully');

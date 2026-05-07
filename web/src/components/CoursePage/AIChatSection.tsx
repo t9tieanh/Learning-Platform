@@ -28,7 +28,14 @@ export const AIChatSection: React.FC<AIChatSectionProps> = ({ lessonId, onSeek }
     const [messages, setMessages] = useState<Message[]>([])
     const [input, setInput] = useState('')
     const [isLoading, setIsLoading] = useState(false)
+    /** Server chat session — required for transcript + semantic recall on the assistant */
+    const [chatSessionId, setChatSessionId] = useState<string | null>(null)
     const scrollRef = useRef<HTMLDivElement>(null)
+
+    useEffect(() => {
+        setChatSessionId(null)
+        setMessages([])
+    }, [lessonId])
 
     useEffect(() => {
         if (scrollRef.current) {
@@ -59,8 +66,11 @@ export const AIChatSection: React.FC<AIChatSectionProps> = ({ lessonId, onSeek }
         setIsLoading(true)
 
         try {
-            const response = await assistantAnalysisService.askAI(lessonId, input)
+            const response = await assistantAnalysisService.askAI(lessonId, input, chatSessionId)
             if (response.code === 200 && response.result) {
+                if (response.result.sessionId) {
+                    setChatSessionId(response.result.sessionId)
+                }
                 const aiMessage: Message = {
                     id: (Date.now() + 1).toString(),
                     role: 'assistant',

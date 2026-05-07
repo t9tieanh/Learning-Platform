@@ -5,6 +5,10 @@ import analysisService from '~/service/analysis/analysis.service'
 import { AnalysisOutcome } from '~/enums/analysisOutcome.enum'
 import { RAGResult, lessonRAGService } from '~/service/search/lesson.rag.service'
 import { CHATBOT_ERROR_MESSAGE } from '~/utils/constants'
+import lessonChatPersistenceService from '~/service/lesson-chat/lessonChat.persistence.service'
+import { RAGQuestionRequest } from '~/dto/request/ragQuestion.dto'
+import ApiError from '~/middleware/ApiError'
+import Logger from '~/utils/logger'
 
 class AnalysisController {
     /**
@@ -126,9 +130,9 @@ class AnalysisController {
      *
      * Request:
      * POST /lessons/:lessonId/chat
-     * Body: { "question": "User's question about the lesson" }
+     * Body: `{ "question": string, "sessionId"?: string }`
      *
-     * Response:
+     * Response `result`: RAG payload (answer, sources) and `sessionId`.
      * {
      *   "code": 200,
      *   "message": "Answer generated successfully",
@@ -141,7 +145,8 @@ class AnalysisController {
      *         "chunkIndex": 0,
      *         "similarity": 0.95
      *       }
-     *     ]
+     *     ],
+     *     "sessionId": "<uuid>"
      *   }
      * }
      */
@@ -152,16 +157,33 @@ class AnalysisController {
     ): Promise<void> => {
         try {
             const lessonId = String(req.params.lessonId);
-            const { question } = req.data;
+            const { question, sessionId } = req.data as RAGQuestionRequest;
+            const userId = String(req.user?.sub);
 
-            const result: RAGResult = await lessonRAGService.answerQuestion(lessonId, question);
+            const activeSessionId = await lessonChatPersistenceService.ensureSession(
+                lessonId,
+                userId,
+                sessionId
+            );
 
+            const result: RAGResult = await lessonRAGService.answerQuestion(
+                lessonId,
+                question,
+                activeSessionId
+            );
+
+            await lessonChatPersistenceService.appendMessages(
+                activeSessionId,
+                question,
+                result
+            );
             sendResponse(res, {
                 code: StatusCodes.OK,
                 message: 'Answer generated successfully',
-                result,
+                result: { ...result, sessionId: activeSessionId },
             });
         } catch (error) {
+            Logger.error(`[AnalysisController.answerQuestion] Error answering question – ${error}`);
             sendResponse(res, {
                 code: StatusCodes.OK,
                 message: CHATBOT_ERROR_MESSAGE,
