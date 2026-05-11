@@ -25,6 +25,7 @@ import {
 } from '@/components/ui/select'
 import assistantAnalysisService, {
     type LessonChatSessionListItemDto,
+    type RAGSource,
 } from '@/services/assistant/analysis.service'
 import { motion } from 'framer-motion'
 import ReactMarkdown from 'react-markdown'
@@ -32,11 +33,15 @@ import { useAuthStore } from '@/stores/useAuth.stores'
 import type { AIChatSectionProps, LessonAiChatMessage } from '@/types/lesson-ai-chat.type'
 import { formatSessionPickLabel, mapLessonChatHistoryToUi } from '@/utils/lessonAiChat.utils'
 import { PremiumLockedState } from './PremiumLockedState'
+import RemediationVideoPlayer from './LessonTestStudentSection/RemediationVideoPlayer'
+import { LessonChunk } from '@/types/ai'
+import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible'
 
 export const AIChatSection: React.FC<AIChatSectionProps> = ({
     lessonId,
     onSeek,
     isTabVisible = true,
+    subtitlesRaw
 }) => {
     const { data: user } = useAuthStore()
     const [messages, setMessages] = useState<LessonAiChatMessage[]>([])
@@ -56,6 +61,7 @@ export const AIChatSection: React.FC<AIChatSectionProps> = ({
     const [isEditingNote, setIsEditingNote] = useState(false)
     const [editNote, setEditNote] = useState('')
     const [updatingNote, setUpdatingNote] = useState(false)
+    const [openSourceId, setOpenSourceId] = useState<string | null>(null)
 
     const scrollRef = useRef<HTMLDivElement>(null)
 
@@ -552,41 +558,83 @@ export const AIChatSection: React.FC<AIChatSectionProps> = ({
                                                 Nguồn tham chiếu từ video
                                             </p>
                                             <div className='grid gap-2'>
-                                                {m.sources.map((source, idx) => (
-                                                    <div
-                                                        key={idx}
-                                                        className='bg-white border border-gray-100 rounded-xl p-3 shadow-sm hover:border-blue-200 transition-all group'
-                                                    >
-                                                        <div className='flex items-start justify-between gap-3'>
-                                                            <div className='flex-1 space-y-1.5'>
-                                                                <div className='flex items-center gap-2'>
-                                                                    <span className='text-[12px] font-bold text-gray-800 line-clamp-1'>
-                                                                        {source.title ||
-                                                                            `Đoạn ${idx + 1}`}
-                                                                    </span>
-                                                                    <span className='text-[10px] text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded font-bold whitespace-nowrap'>
-                                                                        {source.startTime}
-                                                                    </span>
-                                                                </div>
-                                                                {source.summary && (
-                                                                    <p className='text-[11px] text-gray-500 leading-relaxed line-clamp-2 italic italic-muted'>
-                                                                        {source.summary}
-                                                                    </p>
+                                                {m.sources.map((source: RAGSource, idx: number) => {
+                                                    const isPlayerOpen = openSourceId === source.chunkId
+                                                    const chunk: LessonChunk = {
+                                                        id: source.chunkId,
+                                                        title: source.title || `Đoạn ${idx + 1}`,
+                                                        summary: source.summary,
+                                                        startTime: source.startTime || '00:00',
+                                                        endTime: source.endTime || '00:00',
+                                                        chunkIndex: source.chunkIndex,
+                                                        timestamp: source.startTime,
+                                                        sentenceCount: 0
+                                                    }
+
+                                                    return (
+                                                        <div key={idx} className='space-y-2'>
+                                                            <div
+                                                                className={cn(
+                                                                    'bg-white border rounded-xl p-3 shadow-sm transition-all group',
+                                                                    isPlayerOpen ? 'border-blue-400 ring-1 ring-blue-400/20' : 'border-gray-100 hover:border-blue-200'
                                                                 )}
-                                                            </div>
-                                                            <button
-                                                                onClick={() =>
-                                                                    onSeek?.(source.startTime || '0')
-                                                                }
-                                                                className='w-8 h-8 rounded-lg bg-gray-50 text-gray-400 hover:bg-blue-600 hover:text-white transition-all flex items-center justify-center shrink-0'
-                                                                title='Tua ngay'
-                                                                type='button'
                                                             >
-                                                                <Play className='w-3.5 h-3.5 fill-current ml-0.5' />
-                                                            </button>
+                                                                <div className='flex items-start justify-between gap-3'>
+                                                                    <div className='flex-1 space-y-1.5'>
+                                                                        <div className='flex items-center gap-2'>
+                                                                            <span className='text-[12px] font-bold text-gray-800 line-clamp-1'>
+                                                                                {source.title || `Đoạn ${idx + 1}`}
+                                                                            </span>
+                                                                            <span className='text-[10px] text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded font-bold whitespace-nowrap'>
+                                                                                {source.startTime}
+                                                                            </span>
+                                                                        </div>
+                                                                        {source.summary && !isPlayerOpen && (
+                                                                            <p className='text-[11px] text-gray-500 leading-relaxed line-clamp-2 italic italic-muted'>
+                                                                                {source.summary}
+                                                                            </p>
+                                                                        )}
+                                                                    </div>
+                                                                    <div className='flex items-center gap-1.5'>
+                                                                        <button
+                                                                            onClick={() => onSeek?.(source.startTime || '0')}
+                                                                            className='w-8 h-8 rounded-lg bg-gray-50 text-gray-400 hover:bg-blue-600 hover:text-white transition-all flex items-center justify-center shrink-0'
+                                                                            title='Xem trên video chính'
+                                                                            type='button'
+                                                                        >
+                                                                            <Sparkles className='w-3.5 h-3.5' />
+                                                                        </button>
+                                                                        <button
+                                                                            onClick={() => setOpenSourceId(isPlayerOpen ? null : source.chunkId)}
+                                                                            className={cn(
+                                                                                'w-8 h-8 rounded-lg transition-all flex items-center justify-center shrink-0',
+                                                                                isPlayerOpen
+                                                                                    ? 'bg-blue-600 text-white shadow-lg'
+                                                                                    : 'bg-gray-50 text-gray-400 hover:bg-blue-600 hover:text-white'
+                                                                            )}
+                                                                            title={isPlayerOpen ? 'Đóng trình phát' : 'Xem đoạn trích'}
+                                                                            type='button'
+                                                                        >
+                                                                            <Play className={cn('w-3.5 h-3.5 fill-current ml-0.5', isPlayerOpen && 'animate-pulse')} />
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <Collapsible open={isPlayerOpen}>
+                                                                <CollapsibleContent>
+                                                                    <div className='animate-in fade-in slide-in-from-top-2 duration-300'>
+                                                                        <RemediationVideoPlayer
+                                                                            lessonId={lessonId}
+                                                                            chunk={chunk}
+                                                                            subtitlesRaw={subtitlesRaw}
+                                                                        />
+                                                                    </div>
+                                                                </CollapsibleContent>
+                                                            </Collapsible>
                                                         </div>
-                                                    </div>
-                                                ))}
+                                                    )
+                                                })}
                                             </div>
                                         </div>
                                     )}

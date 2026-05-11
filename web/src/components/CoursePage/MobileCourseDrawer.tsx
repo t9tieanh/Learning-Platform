@@ -13,6 +13,7 @@ interface MobileCourseDrawerProps {
   onSelectLecture: (lecture: any) => void
   onSeek: (timestamp: string) => void
   isLoading: boolean
+  subtitlesRaw?: string | null
 }
 
 export const MobileCourseDrawer: React.FC<MobileCourseDrawerProps> = ({
@@ -22,7 +23,8 @@ export const MobileCourseDrawer: React.FC<MobileCourseDrawerProps> = ({
   currentLectureId,
   onSelectLecture,
   onSeek,
-  isLoading
+  isLoading,
+  subtitlesRaw
 }) => {
   return (
     <div className='lg:hidden fixed bottom-0 left-0 right-0 z-[60]'>
@@ -106,6 +108,7 @@ export const MobileCourseDrawer: React.FC<MobileCourseDrawerProps> = ({
               onSeek={onSeek}
               hideHeader={true}
               initialTab={activeMobileTab === 'ai' ? 'ai' : 'content'}
+              subtitlesRaw={subtitlesRaw}
             />
           )}
         </div>

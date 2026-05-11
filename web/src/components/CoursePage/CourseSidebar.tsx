@@ -28,9 +28,10 @@ interface CourseSidebarProps {
   onSeek?: (timestamp: string) => void
   initialTab?: 'content' | 'ai'
   hideHeader?: boolean
+  subtitlesRaw?: string | null
 }
 
-export const CourseSidebar = ({ sections, currentLectureId, onSelectLecture, onClose, onSeek, initialTab, hideHeader }: CourseSidebarProps) => {
+export const CourseSidebar = ({ sections, currentLectureId, onSelectLecture, onClose, onSeek, initialTab, hideHeader, subtitlesRaw }: CourseSidebarProps) => {
   const [activeTab, setActiveTab] = useState<'content' | 'ai'>(initialTab || 'content')
 
   // Update activeTab if initialTab changes (e.g. from mobile drawer)
@@ -109,6 +110,7 @@ export const CourseSidebar = ({ sections, currentLectureId, onSelectLecture, onC
             lessonId={currentLectureId}
             onSeek={onSeek}
             isTabVisible={activeTab === 'ai'}
+            subtitlesRaw={subtitlesRaw}
           />
         </div>
       </div>
