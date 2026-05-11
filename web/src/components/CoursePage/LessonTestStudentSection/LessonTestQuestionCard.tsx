@@ -49,7 +49,7 @@ export const LessonTestQuestionCard: React.FC<LessonTestQuestionCardProps> = ({
       !row && 'border-gray-200/90'
     )}
   >
-    <div className='px-3 md:px-4 py-2.5 md:py-3 flex gap-3 items-start bg-gradient-to-r from-slate-50 via-blue-50/25 to-white border-b border-gray-100'>
+    <div className='px-2.5 md:px-4 py-2 md:py-3 flex gap-2.5 md:gap-3 items-start bg-gradient-to-r from-slate-50 via-blue-50/25 to-white border-b border-gray-100'>
       <span
         className='mt-0.5 shrink-0 inline-flex h-7 min-w-[2.5rem] items-center justify-center rounded-lg bg-white border border-blue-100 text-[11px] font-bold text-[#0C356A] tabular-nums shadow-sm'
         aria-hidden
@@ -84,7 +84,7 @@ export const LessonTestQuestionCard: React.FC<LessonTestQuestionCardProps> = ({
       </div>
     </div>
 
-    <div className='bg-white px-3 md:px-4 py-3 space-y-3'>
+    <div className='bg-white px-2.5 md:px-4 py-2.5 md:py-3 space-y-2.5 md:space-y-3'>
       <p className='text-[10px] font-bold uppercase tracking-wider text-gray-400'>
         Câu hỏi · {quiz.type?.replace(/_/g, ' ')} · {quiz.difficulty}
       </p>
@@ -118,7 +118,7 @@ export const LessonTestQuestionCard: React.FC<LessonTestQuestionCardProps> = ({
             >
               <Label
                 htmlFor={choiceId}
-                className='flex items-center gap-2.5 md:gap-3 px-3 py-2.5 md:px-3.5 md:py-3 cursor-pointer select-none'
+                className='flex items-center gap-2 md:gap-3 px-2.5 py-2 md:px-3.5 md:py-3 cursor-pointer select-none'
               >
                 <span
                   className={cn(
@@ -151,7 +151,7 @@ export const LessonTestQuestionCard: React.FC<LessonTestQuestionCardProps> = ({
       </RadioGroup>
 
       {locked && row?.explanation ? (
-        <div className='relative rounded-2xl border border-blue-100/50 bg-white/40 backdrop-blur-md px-4 py-3.5 mt-2 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden group/expl'>
+        <div className='relative rounded-2xl border border-blue-100/50 bg-white/40 backdrop-blur-md px-3 md:px-4 py-3 md:py-3.5 mt-2 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden group/expl'>
           <div className='absolute top-0 left-0 w-1 h-full bg-blue-500/50' />
           <span className='font-bold text-[#0C356A] text-[11px] tracking-widest mb-2 block opacity-70'>Phân tích đáp án</span>
           {lessonId ? (

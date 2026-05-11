@@ -478,7 +478,7 @@ export const AIChatSection: React.FC<AIChatSectionProps> = ({
             >
                 {messagesLoading && (
                     <div className='absolute inset-0 bg-white/60 z-10 flex items-center justify-center'>
-                        <div className='flex items-center gap-2 text-[13px] text-gray-600 font-medium'>
+                        <div className='flex items-center gap-2 text-[12px] text-gray-600 font-medium'>
                             <Loader2 className='w-5 h-5 animate-spin text-blue-600' /> Đang tải
                             lịch sử…
                         </div>
@@ -501,10 +501,10 @@ export const AIChatSection: React.FC<AIChatSectionProps> = ({
                             </div>
                             
                             <div className='space-y-3'>
-                                <h3 className='text-[18px] font-black tracking-tight text-slate-800 chatbot-heading'>
+                                <h3 className='text-[16px] font-black tracking-tight text-slate-800 chatbot-heading'>
                                     Sẵn sàng hỗ trợ bạn
                                 </h3>
-                                <p className='text-[13px] text-slate-500 leading-relaxed font-medium chatbot-body'>
+                                <p className='text-[12px] text-slate-500 leading-relaxed font-medium chatbot-body'>
                                     {chatSessionId ? (
                                         <span className='opacity-80'>
                                             Đặt câu hỏi về bài giảng này, tôi sẽ giúp bạn tóm tắt và tìm kiến thức từ video ngay lập tức!
@@ -546,7 +546,7 @@ export const AIChatSection: React.FC<AIChatSectionProps> = ({
                                 </div>
                                 <div className='space-y-3'>
                                     <div
-                                        className={`px-4 py-3 rounded-2xl text-[14px] leading-relaxed font-medium shadow-sm ${m.role === 'user'
+                                        className={`px-4 py-2.5 rounded-2xl text-[13px] leading-relaxed font-medium shadow-sm ${m.role === 'user'
                                             ? 'bg-blue-600 text-white rounded-tr-none'
                                             : 'bg-gray-50 text-gray-700 border border-gray-100 rounded-tl-none'
                                             }`}
@@ -589,9 +589,9 @@ export const AIChatSection: React.FC<AIChatSectionProps> = ({
                                                                     isPlayerOpen ? 'border-blue-400 ring-1 ring-blue-400/20' : 'border-gray-100 hover:border-blue-200'
                                                                 )}
                                                             >
-                                                                <div className='flex flex-col gap-2'>
+                                                                <div className='flex flex-col gap-1.5'>
                                                                     <div className='flex items-center justify-between'>
-                                                                        <span className='text-[10px] text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full font-bold whitespace-nowrap shadow-sm border border-blue-100/50'>
+                                                                        <span className='text-[9px] text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full font-bold whitespace-nowrap shadow-sm border border-blue-100/50'>
                                                                             {source.startTime}
                                                                         </span>
                                                                         <div className='flex items-center gap-1.5'>

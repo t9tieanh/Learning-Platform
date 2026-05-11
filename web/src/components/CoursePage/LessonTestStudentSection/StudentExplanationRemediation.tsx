@@ -72,7 +72,7 @@ const StudentExplanationRemediation: React.FC<StudentExplanationRemediationProps
             <TooltipProvider key={i} delayDuration={300}>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <span className='inline-flex items-center gap-1.5 mx-1 p-0.5 pr-2 rounded-full border border-blue-200 bg-blue-50/50 hover:bg-blue-100 transition-all group cursor-default shadow-sm'>
+                  <span className='inline-flex items-center gap-1 md:gap-1.5 mx-0.5 md:mx-1 p-0.5 pr-1.5 md:pr-2 rounded-full border border-blue-200 bg-blue-50/50 hover:bg-blue-100 transition-all group cursor-default shadow-sm'>
                     <button
                       type='button'
                       onClick={() => toggleChunk(chunk)}
