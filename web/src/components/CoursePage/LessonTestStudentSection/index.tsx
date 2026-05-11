@@ -27,7 +27,7 @@ function LessonTestSectionModeTabs({
 }) {
   return (
     <div
-      className='flex rounded-xl bg-gray-100/90 p-0.5 w-full sm:w-fit gap-0.5'
+      className='flex rounded-xl bg-blue-50/50 p-1 w-full sm:w-fit gap-1 border border-blue-100/50 backdrop-blur-sm'
       role='tablist'
       aria-label='Chế độ bài kiểm tra'
     >
@@ -40,10 +40,10 @@ function LessonTestSectionModeTabs({
         label='Làm bài'
         icon={<PencilLine className='w-3.5 h-3.5 shrink-0' aria-hidden />}
         className={cn(
-          'flex-1 sm:flex-none rounded-[10px] text-[11px] font-bold tracking-wide min-h-[2.25rem] h-auto py-2 shadow-none',
+          'flex-1 sm:flex-none rounded-lg text-[11px] font-bold tracking-wide min-h-[2.25rem] h-auto py-2 transition-all duration-300',
           sectionTab === 'take'
-            ? 'bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-950 text-white shadow-sm shadow-blue-900/20 hover:bg-gradient-to-br hover:from-blue-600 hover:via-blue-700 hover:to-indigo-950 hover:text-white'
-            : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100/90'
+            ? 'bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/40 ring-1 ring-white/40'
+            : 'text-slate-500 hover:text-blue-600 hover:bg-white/50'
         )}
         onClick={() => setSectionTab('take')}
       />
@@ -56,10 +56,10 @@ function LessonTestSectionModeTabs({
         label='Lịch sử'
         icon={<History className='w-3.5 h-3.5 shrink-0' aria-hidden />}
         className={cn(
-          'flex-1 sm:flex-none rounded-[10px] text-[11px] font-bold tracking-wide min-h-[2.25rem] h-auto py-2 shadow-none',
+          'flex-1 sm:flex-none rounded-lg text-[11px] font-bold tracking-wide min-h-[2.25rem] h-auto py-2 transition-all duration-300',
           sectionTab === 'history'
-            ? 'bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-950 text-white shadow-sm shadow-blue-900/20 hover:bg-gradient-to-br hover:from-blue-600 hover:via-blue-700 hover:to-indigo-950 hover:text-white'
-            : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100/90'
+            ? 'bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/40 ring-1 ring-white/40'
+            : 'text-slate-500 hover:text-blue-600 hover:bg-white/50'
         )}
         onClick={() => setSectionTab('history')}
       />

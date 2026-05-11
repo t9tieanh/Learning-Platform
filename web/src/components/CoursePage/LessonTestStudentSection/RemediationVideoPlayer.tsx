@@ -55,29 +55,12 @@ const RemediationVideoPlayer: React.FC<RemediationVideoPlayerProps> = ({
     }
   }, [subtitlesRaw])
 
-  // Handle boundary constraints
+  // Auto-seek to start when video is ready
   useEffect(() => {
     const video = videoRef.current
-    if (!video) return
-
-    const handleTimeUpdate = () => {
-      if (endTime && video.currentTime >= endTime) {
-        video.pause()
-        video.currentTime = startTime // Reset to start of chunk
-      }
-    }
-
-    const handleLoadedMetadata = () => {
-      video.currentTime = startTime
-    }
-
-    video.addEventListener('timeupdate', handleTimeUpdate)
-    video.addEventListener('loadedmetadata', handleLoadedMetadata)
-    return () => {
-      video.removeEventListener('timeupdate', handleTimeUpdate)
-      video.removeEventListener('loadedmetadata', handleLoadedMetadata)
-    }
-  }, [startTime, endTime])
+    if (!video || !startTime) return
+    video.currentTime = startTime
+  }, [videoUrl, startTime])
 
   if (loading) {
     return (
@@ -102,6 +85,8 @@ const RemediationVideoPlayer: React.FC<RemediationVideoPlayerProps> = ({
         chunks={[chunk]}
         isSeekingAllowed={true}
         containerClassName='aspect-video h-auto'
+        clipStartTime={startTime}
+        clipEndTime={endTime}
       />
       <div className='bg-blue-600 px-4 py-2 flex items-center justify-between'>
         <span className='text-[10px] font-bold text-white tracking-widest truncate max-w-[70%]'>

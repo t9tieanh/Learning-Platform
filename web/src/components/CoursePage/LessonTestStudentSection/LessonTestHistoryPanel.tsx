@@ -157,59 +157,75 @@ export const LessonTestHistoryPanel: React.FC<LessonTestHistoryPanelProps> = ({ 
   }
 
   return (
-    <div className='space-y-4'>
-      <div className='flex flex-wrap items-center justify-between gap-2'>
-        <p className='text-[11px] font-bold tracking-wider text-gray-400'>
-          Các lần nộp gần đây
-        </p>
+    <div className='space-y-5'>
+      <div className='flex items-center justify-between gap-3'>
+        <div className='flex items-center gap-2'>
+          <div className='w-1 h-4 bg-blue-600 rounded-full' />
+          <h3 className='text-[11px] font-bold tracking-widest text-gray-400'>
+            Lịch sử nộp bài
+          </h3>
+        </div>
         <CustomButton
           type='button'
-          variant='outline'
-          label='Làm mới'
+          variant='ghost'
           icon={<RefreshCw className='w-3 h-3' />}
-          className='h-8 text-[10px] font-bold tracking-[0.08em] rounded-lg border-gray-200'
+          className='h-8 text-[10px] font-bold tracking-tight rounded-lg bg-blue-50/50 text-blue-600 hover:bg-blue-600 hover:text-white border border-blue-100/50 transition-all px-3'
           onClick={() => void loadList()}
         />
       </div>
 
       {listError ? (
-        <div className='rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-[12.5px] text-gray-800'>
+        <div className='rounded-xl border border-red-100 bg-red-50/50 px-4 py-3 text-[12.5px] text-red-800 animate-in fade-in slide-in-from-top-2'>
           {listError}
         </div>
       ) : null}
 
       {!rows?.length ? (
-        <div className='rounded-[2rem] border border-gray-100 bg-white px-6 py-12 text-center shadow-sm space-y-3'>
-          <ClipboardList className='w-9 h-9 mx-auto text-gray-300' />
-          <p className='text-[12.5px] font-medium text-gray-500 max-w-sm mx-auto'>
+        <div className='rounded-[2rem] border-2 border-dashed border-gray-100 bg-white/50 px-6 py-16 text-center space-y-4'>
+          <div className='w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto'>
+            <ClipboardList className='w-8 h-8 text-gray-300' />
+          </div>
+          <p className='text-[12.5px] font-medium text-gray-500 max-w-sm mx-auto leading-relaxed'>
             Chưa có lần nộp bài nào. Hoàn thành và nộp bài kiểm tra để thấy lịch sử tại đây.
           </p>
         </div>
       ) : (
-        <ul className='space-y-2'>
+        <ul className='grid gap-3'>
           {rows.map((r) => (
             <li key={r.submissionId}>
               <button
                 type='button'
                 onClick={() => void openDetail(r.submissionId)}
                 className={cn(
-                  'w-full text-left rounded-xl border-0 bg-white px-4 py-3 shadow-sm shadow-gray-900/[0.04]',
-                  'flex items-center gap-3 transition-colors hover:bg-gray-50/90'
+                  'group w-full text-left rounded-2xl border border-gray-100 bg-white p-3.5 shadow-sm transition-all duration-300',
+                  'hover:border-blue-300 hover:shadow-lg hover:shadow-blue-900/[0.04] hover:-translate-y-0.5',
+                  'flex items-center gap-4'
                 )}
               >
-                <div className='shrink-0 w-9 h-9 rounded-lg bg-slate-50 border border-gray-100 flex items-center justify-center text-gray-500'>
-                  <CalendarClock className='w-4 h-4' />
+                <div className='shrink-0 w-11 h-11 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 transition-all duration-300 group-hover:bg-blue-600 group-hover:text-white group-hover:scale-110'>
+                  <CalendarClock className='w-5 h-5' />
                 </div>
-                <div className='min-w-0 flex-1'>
-                  <p className='text-[12.5px] font-semibold text-gray-800'>
+                <div className='min-w-0 flex-1 space-y-1.5'>
+                  <p className='text-[13px] font-bold text-slate-800 leading-none'>
                     {formatSubmittedAt(r.submittedAt)}
                   </p>
-                  <p className='text-[11px] text-gray-500 mt-0.5 tabular-nums'>
-                    {r.summary.earnedPoints}/{r.summary.maxPoints} điểm ·{' '}
-                    <span className='font-semibold text-gray-800'>{r.summary.percent}%</span>
-                  </p>
+                  <div className='flex items-center gap-2'>
+                    <span className='text-[11px] font-medium text-gray-500 tabular-nums bg-gray-50 px-1.5 py-0.5 rounded'>
+                      {r.summary.earnedPoints}/{r.summary.maxPoints} điểm
+                    </span>
+                    <span className={cn(
+                      'text-[10px] font-black px-2 py-0.5 rounded-full transition-colors',
+                      r.summary.percent >= 80 ? 'bg-emerald-50 text-emerald-600' :
+                      r.summary.percent >= 50 ? 'bg-amber-50 text-amber-600' :
+                      'bg-rose-50 text-rose-600'
+                    )}>
+                      {r.summary.percent}%
+                    </span>
+                  </div>
                 </div>
-                <ChevronRight className='w-4 h-4 text-gray-300 shrink-0' aria-hidden />
+                <div className='w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center transition-all group-hover:bg-blue-50 group-hover:text-blue-600'>
+                  <ChevronRight className='w-4 h-4 text-gray-300 group-hover:text-blue-600' aria-hidden />
+                </div>
               </button>
             </li>
           ))}

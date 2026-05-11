@@ -13,4 +13,5 @@ export interface AIChatSectionProps {
     onSeek?: (timestamp: string) => void
     /** When false (e.g. another sidebar tab visible), skips network refreshes until true */
     isTabVisible?: boolean
+    subtitlesRaw?: string | null
 }

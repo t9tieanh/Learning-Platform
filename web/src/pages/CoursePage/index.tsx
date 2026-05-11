@@ -259,6 +259,7 @@ const CoursePage = () => {
               currentLectureId={currentLecture?.id || ''}
               onSelectLecture={handleSelectLecture}
               onSeek={handleSeek}
+              subtitlesRaw={analysisData?.subtitles}
             />
           )}
         </div>
@@ -272,6 +273,7 @@ const CoursePage = () => {
           onSelectLecture={handleSelectLecture}
           onSeek={handleSeek}
           isLoading={isLoading}
+          subtitlesRaw={analysisData?.subtitles}
         />
       </div>
     </div>

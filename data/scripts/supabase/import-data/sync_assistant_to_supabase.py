@@ -18,7 +18,7 @@ except ImportError:
 
 # Configuration
 # The script can target a specific course to sync analysis data to all its video lessons
-TARGET_COURSE_ID = "fb8b8c2f-e42c-4d12-892e-6f72be7a74ab"
+TARGET_COURSE_ID = "00d36904-928e-41cd-b5c5-752e42d16e31"
 
 # MySQL Database Configuration (Source of lessons)
 MYSQL_HOST = os.getenv('DB_HOST', 'localhost')
@@ -69,11 +69,11 @@ def sync_data():
     # 1. Load exported analysis data to use as template
     script_dir = Path(__file__).parent
     # We use the latest exported lesson as the standard template for seeding
-    sample_json_path = script_dir.parent / 'data-template' / 'lesson_8db834f8-8035-4207-8f85-54a28173f038.json'
+    sample_json_path = script_dir.parent / 'data-template' / 'lesson_527bff0d-cf33-406b-9794-3e2c68bfae2e.json'
     
     if not sample_json_path.exists():
         # Fallback to the other common template if first one is missing
-        sample_json_path = script_dir.parent / 'data-template' / 'lesson_208126fd-3544-4551-8c9b-5110c33261af.json'
+        sample_json_path = script_dir.parent / 'data-template' / 'lesson_527bff0d-cf33-406b-9794-3e2c68bfae2e.json'
     
     if not sample_json_path.exists():
         print(f"Error: Sample JSON not found at {sample_json_path}")
@@ -146,6 +146,16 @@ def sync_data():
                 # C. Prepare mapping to track old chunk IDs to new chunk IDs for this lesson
                 chunk_id_map = {}
                 
+                def replace_chunk_ids(text, mapping):
+                    if not text: return text
+                    import re
+                    # Regex to find @{{uuid}}@
+                    pattern = r'@{{([0-9a-fA-F-]+)}}@'
+                    def replace_func(match):
+                        old_id = match.group(1)
+                        return f"@{{{{{mapping.get(old_id, old_id)}}}}}@"
+                    return re.sub(pattern, replace_func, text)
+                
                 # D. Insert Chunks & Standalone Quizzes
                 for chunk_sample in sample_data['chunks']:
                     old_chunk_id = chunk_sample['id']
@@ -181,6 +191,9 @@ def sync_data():
                     # Insert CHUNK_STANDALONE quizzes
                     for quiz_sample in chunk_sample.get('quizzes', []):
                         new_quiz_id = str(uuid.uuid4())
+                        # Process explanation to replace old chunk IDs with new ones
+                        explanation = replace_chunk_ids(quiz_sample['explanation'], chunk_id_map)
+                        
                         cur.execute("""
                             INSERT INTO quizzes 
                             (id, "chunkId", "quiz_scope", question, explanation, type, difficulty, "bloomLevel", 
@@ -192,7 +205,7 @@ def sync_data():
                             new_chunk_id,
                             'CHUNK_STANDALONE',
                             quiz_sample['question'],
-                            quiz_sample['explanation'],
+                            explanation,
                             quiz_sample['type'],
                             quiz_sample['difficulty'],
                             quiz_sample['bloomLevel'],
@@ -231,7 +244,7 @@ def sync_data():
                     """, (
                         lesson_id,
                         lt_sample['title'],
-                        lt_sample['status'],
+                        'PUBLISHED',
                         lt_sample['target_total_questions'],
                         lt_sample['notes'],
                         lt_sample['created_by'],
@@ -266,6 +279,9 @@ def sync_data():
                     # Insert quizzes linked to this group
                     for quiz_sample in group_sample.get('quizzes', []):
                         new_quiz_id = str(uuid.uuid4())
+                        # Process explanation to replace old chunk IDs with new ones
+                        explanation = replace_chunk_ids(quiz_sample['explanation'], chunk_id_map)
+
                         cur.execute("""
                             INSERT INTO quizzes 
                             (id, "lesson_test_chunk_group_id", "quiz_scope", question, explanation, type, difficulty, "bloomLevel", 
@@ -277,7 +293,7 @@ def sync_data():
                             new_group_id,
                             'LESSON_TEST',
                             quiz_sample['question'],
-                            quiz_sample['explanation'],
+                            explanation,
                             quiz_sample['type'],
                             quiz_sample['difficulty'],
                             quiz_sample['bloomLevel'],

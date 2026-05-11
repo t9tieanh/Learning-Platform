@@ -60,7 +60,7 @@ function NavCell({
       className={cn(
         'rounded-md border-2 font-bold tabular-nums transition-colors',
         compact
-          ? 'h-9 w-9 shrink-0 flex items-center justify-center text-[11px]'
+          ? 'h-8 w-8 shrink-0 flex items-center justify-center text-[10px]'
           : 'min-h-[2.25rem] flex items-center justify-center text-[11px]',
         flagged && 'border-red-500 bg-red-50 text-red-700 shadow-sm',
         !flagged && lockedAll && row?.isCorrect && 'border-emerald-500 bg-emerald-50 text-emerald-800',
@@ -103,11 +103,11 @@ export const LessonTestQuestionNavMobile: React.FC<QuestionMapState> = (state) =
   const { questionNavItems } = state
   if (questionNavItems.length === 0) return null
   return (
-    <div className='lg:hidden sticky top-4 z-30 -mx-4 px-4 py-2.5 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm'>
-      <p className='text-[10px] font-bold uppercase tracking-wider text-[#0C356A] mb-2'>
+    <div className='lg:hidden sticky top-4 z-30 -mx-4 px-4 py-2 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm'>
+      <p className='text-[9px] font-bold uppercase tracking-wider text-[#0C356A] mb-1.5'>
         Bản đồ câu — bấm để nhảy tới
       </p>
-      <div className='flex gap-1.5 overflow-x-auto pb-1 scrollbar-none'>{mapCells(questionNavItems, state, true)}</div>
+      <div className='flex gap-1 overflow-x-auto pb-1 scrollbar-none'>{mapCells(questionNavItems, state, true)}</div>
     </div>
   )
 }
