@@ -7,6 +7,7 @@ import {
     Loader2,
     Sparkles,
     MessageSquarePlus,
+    MessageSquare,
     Pencil,
     Check,
     X,
@@ -278,9 +279,11 @@ export const AIChatSection: React.FC<AIChatSectionProps> = ({
     }
 
     return (
-        <div className='flex flex-col h-full bg-white relative overflow-hidden'>
+        <div className='flex flex-col h-full bg-[#fcfdfe] relative overflow-hidden w-full p-0 m-0'>
             {/* Chỉ chọn phiên khi đã có lịch sử; không đặt nút tạo phiên ở đây */}
-            <div className='relative z-20 shrink-0 border-b border-white/10 bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-950 p-3 shadow-lg'>
+            <div 
+                className='relative z-20 shrink-0 border-b border-white/10 bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-950 shadow-lg transition-all duration-300 group w-full p-3 flex flex-col items-stretch'
+            >
                 <div className='absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_50%_-20%,#ffffff,transparent)] pointer-events-none' />
                 <div className='absolute inset-0 opacity-5 bg-[url("https://www.transparenttextures.com/patterns/cubes.png")] pointer-events-none' />
 
@@ -290,129 +293,143 @@ export const AIChatSection: React.FC<AIChatSectionProps> = ({
                         <span>Đang tải các phiên chat...</span>
                     </div>
                 ) : (
-                    <div className='relative z-10 space-y-3'>
-                        <div className='flex items-center gap-2'>
-                            <div className='flex-1 min-w-0'>
-                                {isEditingTitle ? (
-                                    <div className='flex items-center gap-1.5 animate-in fade-in slide-in-from-left-2 duration-300'>
-                                        <input
-                                            value={editTitle}
-                                            onChange={(e) => setEditTitle(e.target.value)}
-                                            onKeyDown={(e) => {
-                                                if (e.key === 'Enter') handleUpdateTitle()
-                                                if (e.key === 'Escape') setIsEditingTitle(false)
-                                            }}
-                                            autoFocus
-                                            className='h-8 w-full rounded-lg border border-white/20 bg-white/10 px-3 text-[12px] font-semibold text-white placeholder:text-white/40 shadow-inner focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 outline-none transition-all'
-                                            placeholder='Tên phiên mới...'
-                                        />
-                                        <div className='flex items-center gap-1'>
-                                            <Button
-                                                onClick={handleUpdateTitle}
-                                                disabled={updatingTitle || !editTitle.trim()}
-                                                size='icon'
-                                                className='h-7.5 w-7.5 rounded-lg bg-blue-500 hover:bg-blue-400 text-white shadow-lg transition-all active:scale-95'
+                    <div className='relative z-10 w-full flex flex-col space-y-3 items-stretch self-stretch'>
+                        {isEditingTitle ? (
+                            <div className='flex items-center gap-1.5 animate-in fade-in slide-in-from-left-2 duration-300 w-full'>
+                                <input
+                                    value={editTitle}
+                                    onChange={(e) => setEditTitle(e.target.value)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') handleUpdateTitle()
+                                        if (e.key === 'Escape') setIsEditingTitle(false)
+                                    }}
+                                    autoFocus
+                                    className='h-8 w-full rounded-lg border border-white/20 bg-white/10 px-3 text-[12px] font-semibold text-white placeholder:text-white/40 shadow-inner focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 outline-none transition-all'
+                                    placeholder='Tên phiên mới...'
+                                />
+                                <div className='flex items-center gap-1 shrink-0'>
+                                    <Button
+                                        onClick={handleUpdateTitle}
+                                        disabled={updatingTitle || !editTitle.trim()}
+                                        size='icon'
+                                        className='h-7.5 w-7.5 rounded-lg bg-blue-500 hover:bg-blue-400 text-white shadow-lg transition-all active:scale-95'
+                                    >
+                                        {updatingTitle ? (
+                                            <Loader2 className='h-3.5 w-3.5 animate-spin' />
+                                        ) : (
+                                            <Check className='h-3.5 w-3.5' />
+                                        )}
+                                    </Button>
+                                    <Button
+                                        onClick={() => setIsEditingTitle(false)}
+                                        variant='ghost'
+                                        size='icon'
+                                        className='h-7.5 w-7.5 rounded-lg text-white/60 hover:text-red-400 hover:bg-red-500/10 transition-all active:scale-95'
+                                    >
+                                        <X className='h-3.5 w-3.5' />
+                                    </Button>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className='relative flex items-stretch w-full self-stretch'>
+                                <div className='flex-1 min-w-0 w-full transition-all duration-300 flex items-center self-stretch' style={{ width: '100%' }}>
+                                    {sessions.length > 0 && (
+                                        <div className="w-full flex">
+                                            <Select
+                                                value={chatSessionId || ''}
+                                                onValueChange={(id) => {
+                                                    setChatSessionId(id)
+                                                    setIsEditingTitle(false)
+                                                    setIsEditingNote(false)
+                                                }}
                                             >
-                                                {updatingTitle ? (
-                                                    <Loader2 className='h-3.5 w-3.5 animate-spin' />
-                                                ) : (
-                                                    <Check className='h-3.5 w-3.5' />
-                                                )}
-                                            </Button>
-                                            <Button
-                                                onClick={() => setIsEditingTitle(false)}
-                                                variant='ghost'
-                                                size='icon'
-                                                className='h-7.5 w-7.5 rounded-lg text-white/60 hover:text-red-400 hover:bg-red-500/10 transition-all active:scale-95'
-                                            >
-                                                <X className='h-3.5 w-3.5' />
-                                            </Button>
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <div className='flex items-center gap-2'>
-                                        <Select
-                                            value={chatSessionId || ''}
-                                            disabled={sessions.length === 0}
-                                            onValueChange={(id) => {
-                                                setChatSessionId(id)
-                                                setIsEditingTitle(false)
-                                                setIsEditingNote(false)
-                                            }}
-                                        >
-                                            <SelectTrigger
-                                                size='sm'
-                                                className='w-full h-8.5 rounded-lg border-white/10 bg-white/5 text-[12px] font-bold !text-white shadow-lg backdrop-blur-sm hover:border-white/20 hover:bg-white/10 transition-all px-3 disabled:opacity-70'
-                                            >
-                                                <div className='flex items-center gap-2 !text-white'>
-                                                    <MessageSquarePlus className='w-3.5 h-3.5 !text-white' />
-                                                    <SelectValue placeholder='Chọn phiên' className='!text-white' />
-                                                </div>
-                                            </SelectTrigger>
-                                            <SelectContent className='rounded-xl shadow-2xl border-white/10 bg-white'>
-                                                {sessions.map((s) => (
+                                                <SelectTrigger 
+                                                    className='h-8.5 w-full min-w-full bg-white/10 border-white/10 text-white hover:bg-white/20 text-[11px] font-bold gap-2 transition-all shadow-lg active:scale-[0.98]'
+                                                    style={{ width: '100% !important' }}
+                                                >
+                                                    <MessageSquare className='h-3.5 w-3.5 shrink-0 opacity-80' />
+                                                    <div className='flex-1 truncate text-left'>
+                                                        {sessions.find((s) => s.id === chatSessionId)?.title ||
+                                                            'Chọn phiên chat'}
+                                                    </div>
+                                                </SelectTrigger>
+                                            <SelectContent className='bg-white/95 backdrop-blur-xl border-blue-100 shadow-2xl rounded-xl overflow-hidden'>
+                                                {sessions.map((session) => (
                                                     <SelectItem
-                                                        key={s.id}
-                                                        value={s.id}
-                                                        className='text-[12px] py-2 px-3 focus:bg-blue-50 focus:text-blue-700 cursor-pointer rounded-lg mx-1.5 my-0.5 transition-colors'
+                                                        key={session.id}
+                                                        value={session.id}
+                                                        className='text-[11px] font-medium py-2.5 focus:bg-blue-50 focus:text-blue-700 transition-colors'
                                                     >
-                                                        <div className='flex flex-col gap-0.5'>
-                                                            <div className='font-bold truncate max-w-[200px]'>
-                                                                {s.title || (s.summaryLast ? s.summaryLast.substring(0, 30) + '...' : `Phiên ${new Date(s.createdAt).toLocaleDateString('vi-VN')}`)}
-                                                            </div>
-                                                        </div>
+                                                        {session.title || `Phiên ${new Date(session.createdAt).toLocaleDateString('vi-VN')}`}
                                                     </SelectItem>
                                                 ))}
                                             </SelectContent>
                                         </Select>
-
-                                        <div className='flex items-center gap-1 shrink-0'>
-                                            {chatSessionId && (
-                                                <>
-                                                    <Button
-                                                        onClick={() => {
-                                                            const current = sessions.find((s) => s.id === chatSessionId)
-                                                            setEditTitle(current?.title || '')
-                                                            setIsEditingTitle(true)
-                                                        }}
-                                                        variant='ghost'
-                                                        size='icon'
-                                                        className='h-8.5 w-8.5 rounded-lg text-white/60 hover:text-white hover:bg-white/10 transition-all border border-transparent hover:border-white/10'
-                                                        title='Đổi tên phiên'
-                                                    >
-                                                        <Pencil className='h-3.5 w-3.5' />
-                                                    </Button>
-                                                    <Button
-                                                        onClick={() => {
-                                                            const current = sessions.find((s) => s.id === chatSessionId)
-                                                            setEditNote(current?.notes || '')
-                                                            setIsEditingNote(!isEditingNote)
-                                                        }}
-                                                        variant='ghost'
-                                                        size='icon'
-                                                        className={cn(
-                                                            'h-8.5 w-8.5 rounded-lg transition-all border border-transparent',
-                                                            isEditingNote
-                                                                ? 'bg-white/20 text-white border-white/20'
-                                                                : 'text-white/60 hover:text-white hover:bg-white/10 hover:border-white/10'
-                                                        )}
-                                                        title='Ghi chú hướng dẫn AI'
-                                                    >
-                                                        <StickyNote className='h-3.5 w-3.5' />
-                                                    </Button>
-                                                </>
-                                            )}
-                                        </div>
                                     </div>
-                                )}
-                            </div>
-                        </div>
+                                    )}
+                                </div>
 
-                        {/* Note area expansion */}
+                                <div className='hidden group-hover:flex items-center shrink-0 opacity-0 group-hover:opacity-100 overflow-hidden transition-all duration-300 ml-0 group-hover:ml-3 pr-0 group-hover:pr-1'>
+                                    <div className='flex items-center gap-2'>
+                                        {chatSessionId && (
+                                            <>
+                                                <Button
+                                                    onClick={() => {
+                                                        const current = sessions.find((s) => s.id === chatSessionId)
+                                                        setEditTitle(current?.title || '')
+                                                        setIsEditingTitle(!isEditingTitle)
+                                                    }}
+                                                    variant='ghost'
+                                                    size='icon'
+                                                    className='h-8.5 w-8.5 rounded-lg text-white/60 hover:text-white hover:bg-white/10 transition-all border border-transparent hover:border-white/10 bg-white/5 scale-90 group-hover:scale-100 transition-all duration-200'
+                                                    title='Đổi tên phiên'
+                                                >
+                                                    <Pencil className='h-3.5 w-3.5' />
+                                                </Button>
+                                                <Button
+                                                    onClick={() => {
+                                                        const current = sessions.find((s) => s.id === chatSessionId)
+                                                        setEditNote(current?.notes || '')
+                                                        setIsEditingNote(!isEditingNote)
+                                                    }}
+                                                    variant='ghost'
+                                                    size='icon'
+                                                    className={cn(
+                                                        'h-8.5 w-8.5 rounded-lg transition-all border border-transparent',
+                                                        isEditingNote
+                                                            ? 'bg-white/20 text-white border-white/20'
+                                                            : 'text-white/60 hover:text-white hover:bg-white/10 hover:border-white/10 bg-white/5 scale-90 group-hover:scale-100 transition-all duration-200'
+                                                    )}
+                                                    title='Ghi chú hướng dẫn AI'
+                                                >
+                                                    <StickyNote className='h-3.5 w-3.5' />
+                                                </Button>
+
+                                                <Button
+                                                    onClick={handleNewChat}
+                                                    disabled={creatingSession || isLoading}
+                                                    variant='ghost'
+                                                    size='icon'
+                                                    className='h-8.5 w-8.5 rounded-lg text-white/60 hover:text-white hover:bg-white/10 transition-all border border-transparent hover:border-white/10 bg-white/5 scale-90 group-hover:scale-100 transition-all duration-200'
+                                                    title='Tạo cuộc trò chuyện mới'
+                                                >
+                                                    {creatingSession ? (
+                                                        <Loader2 className='h-3.5 w-3.5 animate-spin' />
+                                                    ) : (
+                                                        <MessageSquarePlus className='h-3.5 w-3.5' />
+                                                    )}
+                                                </Button>
+                                            </>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
                         {isEditingNote && (
                             <div className='animate-in fade-in slide-in-from-top-1 duration-300 space-y-2 p-2.5 rounded-xl bg-white/5 border border-white/10'>
-                                <div className='flex items-center justify-between'>
-                                    <div className='flex items-center gap-1.5 text-[10px] font-bold text-blue-200 uppercase tracking-wider'>
+                                <div className='flex items-center justify-between gap-6'>
+                                    <div className='flex items-center gap-2 flex-1 min-w-0 max-w-[calc(100%-120px)] text-[10px] font-bold text-blue-200 uppercase tracking-wider'>
                                         <StickyNote className='w-3 h-3' />
                                         <span>Ghi chú cho AI</span>
                                     </div>
@@ -450,26 +467,10 @@ export const AIChatSection: React.FC<AIChatSectionProps> = ({
                             </div>
                         )}
 
-                        <div className='flex gap-2 pt-1'>
-                            <Button
-                                type='button'
-                                onClick={handleNewChat}
-                                disabled={!lessonId || lessonId === 'undefined' || creatingSession || isLoading}
-                                className='h-8.5 flex-1 rounded-lg bg-white/10 border border-white/10 text-white hover:bg-white/20 text-[11px] font-bold gap-2 shadow-lg transition-all active:scale-[0.98] disabled:opacity-50 group'
-                            >
-                                {creatingSession ? (
-                                    <Loader2 className='w-3.5 h-3.5 animate-spin' />
-                                ) : (
-                                    <MessageSquarePlus className='w-3.5 h-3.5 group-hover:rotate-6 transition-transform' />
-                                )}
-                                Tạo cuộc trò chuyện mới
-                            </Button>
-                        </div>
                     </div>
                 )}
             </div>
 
-            {/* Messages Area */}
             <div
                 ref={scrollRef}
                 className='flex-1 min-h-0 overflow-y-auto p-4 space-y-6 scroll-smooth scrollbar-thin scrollbar-thumb-gray-100 relative'
