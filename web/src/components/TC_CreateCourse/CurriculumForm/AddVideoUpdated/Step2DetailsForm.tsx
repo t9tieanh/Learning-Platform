@@ -26,6 +26,7 @@ import { AnalysisState } from '@/hooks/useAnalysis.hook'
 import { LessonChunk } from '@/types/ai'
 import { toast } from 'sonner'
 
+import { LessonType } from '@/types/lesson'
 import LearnovaDetailedView from './LearnovaAIDetail/LearnovaDetailedView'
 
 interface Step2DetailsFormProps {
@@ -42,7 +43,7 @@ interface Step2DetailsFormProps {
   lessonId?: string
   handleClose?: (value: boolean) => void
   handleUpdateLesson: (data: CreationLessonFormValues, startLoading?: () => void, stopLoading?: () => void) => void
-  contentType: 'video' | 'document'
+  contentType: LessonType
   handleDelLesson?: (lessonId: string) => Promise<void>
   analysisState: AnalysisState
   refetchAnalysis: () => void

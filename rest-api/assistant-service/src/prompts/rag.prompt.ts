@@ -27,7 +27,7 @@ GIỌNG VĂN:
 - Giống giáo viên đang giảng bài
 `,
 
-  human: (lessonContext: string, question: string, chatHistoryTranscript?: string) => {
+  human: (lessonContext: string, question: string, chatHistoryTranscript?: string, userNotes?: string) => {
     const history = chatHistoryTranscript?.trim();
     const historySection = history
       ? `=== SESSION CONTEXT (recent turns + semantic recall; same chat session) ===
@@ -36,14 +36,23 @@ ${history}
 `
       : '';
 
-    return `${historySection}=== NỘI DUNG BÀI HỌC (nguồn chính) ===
+    const notesSection = userNotes?.trim()
+      ? `=== USER NOTES (special instructions for this session) ===
+${userNotes}
+
+`
+      : '';
+
+    return `${notesSection}${historySection}=== NỘI DUNG BÀI HỌC (nguồn chính) ===
 ${lessonContext}
 
 === CÂU HỎI HIỆN TẠI ===
 ${question}
 
 === YÊU CẦU ===
-Trả lời câu hỏi hiện tại, ưu tiên NỘI DUNG BÀI HỌC. Dùng SESSION CONTEXT chỉ để hiểu đại từ và nhất quán cách diễn đạt; mọi sự kiện/fact về bài học phải bám nội dung bài.
+Trả lời câu hỏi hiện tại, ưu tiên NỘI DUNG BÀI HỌC. 
+${userNotes ? 'Lưu ý: Tuân thủ các ghi chú (USER NOTES) được người dùng cung cấp ở trên.' : ''}
+Dùng SESSION CONTEXT chỉ để hiểu đại từ và nhất quán cách diễn đạt; mọi sự kiện/fact về bài học phải bám nội dung bài.
 
 === TRẢ LỜI ===
 `;

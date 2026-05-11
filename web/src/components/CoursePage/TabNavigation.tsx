@@ -67,11 +67,11 @@ export const TabNavigation = ({
         },
         ...(lessonTestTabVisible
           ? [
-              {
-                label: 'Bài kiểm tra',
-                icon: <ClipboardList className='w-3.5 h-3.5' />
-              }
-            ]
+            {
+              label: 'Bài kiểm tra',
+              icon: <ClipboardList className='w-3.5 h-3.5' />
+            }
+          ]
           : [])
       ]
 

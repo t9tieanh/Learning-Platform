@@ -4,6 +4,7 @@ import { LessonChunk } from '@/types/ai'
 import { AnalysisResult } from '@/services/assistant/analysis.service'
 import { SubtitleEntry } from '@/components/common/Video/LearnovaVideoPlayer'
 import { parseSRT } from '@/utils/srtParser'
+import { LessonType } from '@/types/lesson'
 import { Accordion } from '@/components/ui/accordion'
 import CustomButton from '@/components/common/Button'
 
@@ -97,11 +98,21 @@ const LearnovaDetailedView: React.FC<LearnovaDetailedViewProps> = ({
             <Header onBack={onBack} />
 
             <div className='max-w-6xl mx-auto w-full px-4'>
-                <VideoPreview
-                    videoSrc={videoSrc}
-                    detailedVideoRef={detailedVideoRef}
-                    subtitles={subtitles}
-                />
+                {analysisData?.lessonType !== LessonType.VIDEO ? (
+                    <div className='relative w-full aspect-video bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm'>
+                        <iframe
+                            src={videoSrc || ''}
+                            className='w-full h-full'
+                            title='Document Preview'
+                        />
+                    </div>
+                ) : (
+                    <VideoPreview
+                        videoSrc={videoSrc}
+                        detailedVideoRef={detailedVideoRef}
+                        subtitles={subtitles}
+                    />
+                )}
             </div>
 
             <div className='max-w-5xl mx-auto w-full px-4'>
@@ -191,6 +202,7 @@ const LearnovaDetailedView: React.FC<LearnovaDetailedViewProps> = ({
                         persistedLessonTestChunkGroups={
                             analysisData.lessonTestChunkGroups ?? []
                         }
+                        lessonType={analysisData.lessonType ?? undefined}
                         onAfterGenerate={onAfterExamGenerate}
                         onBackToStructure={() => setDetailMainPanel('structure')}
                     />

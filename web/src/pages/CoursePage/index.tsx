@@ -3,6 +3,7 @@ import { ChevronLeft } from 'lucide-react'
 import { LessonViewer } from '@/components/CoursePage/LessonViewer'
 import { TabNavigation } from '@/components/CoursePage/TabNavigation'
 import { CourseSidebar } from '@/components/CoursePage/CourseSidebar'
+import { MobileCourseDrawer } from '@/components/CoursePage/MobileCourseDrawer'
 import { CourseDetail, Lesson } from '@/types/course-student'
 import courseService from '@/services/course/course-student.service'
 import { useParams, useNavigate } from 'react-router-dom'
@@ -32,6 +33,7 @@ const CoursePage = () => {
   const [currentLecture, setCurrentLecture] = useState<Lesson>()
   const [activeTab, setActiveTab] = useState('Tổng quan')
   const [selectedChunkId, setSelectedChunkId] = useState<string | null>(null)
+  const [activeMobileTab, setActiveMobileTab] = useState<'content' | 'ai' | null>(null)
   const navigate = useNavigate()
   const viewerRef = useRef<import('@/components/CoursePage/VideoPlayer').VideoPlayerRef>(null)
 
@@ -180,7 +182,7 @@ const CoursePage = () => {
                 onClick={() => navigate(-1)}
               >
                 <ChevronLeft className='w-4 md:w-5 h-4 md:h-5' />
-                <span className='text-xs md:text-sm cursor-pointer font-bold tracking-tight uppercase hidden sm:inline'>
+                <span className='text-xs md:text-sm cursor-pointer font-bold tracking-tight  hidden sm:inline'>
                   Trở lại
                 </span>
               </button>
@@ -196,7 +198,7 @@ const CoursePage = () => {
                   </Avatar>
                   <div className='flex flex-col items-start min-w-0'>
                     <span className='truncate w-full tracking-tight'>{courseData?.title}</span>
-                    <span className='text-[9px] text-blue-200/60 uppercase tracking-widest'>Đang trong lộ trình học</span>
+                    <span className='text-[9px] text-blue-200/60  tracking-widest'>Đang trong lộ trình học</span>
                   </div>
                 </div>
               </Button>
@@ -208,7 +210,7 @@ const CoursePage = () => {
       {/* Main Content */}
       <div className='flex-1 flex overflow-hidden flex-col lg:flex-row'>
         {/* Left Column - Video & Tabs */}
-        <div className='flex-1 flex flex-col overflow-y-auto px-3 md:px-6 py-3 md:py-4 lg:border-r lg:border-border'>
+        <div className='flex-1 flex flex-col overflow-y-auto px-3 md:px-6 py-3 md:py-4 lg:border-r lg:border-border pb-20 lg:pb-4'>
           {isLoading ? (
             <>
               <CourseSkeleton />
@@ -261,19 +263,16 @@ const CoursePage = () => {
           )}
         </div>
 
-        {/* Mobile Sidebar (Below video on mobile, beside on desktop) */}
-        <div className='w-full lg:hidden lg:w-96 flex-shrink-0 border-t lg:border-l lg:border-t-0 border-border'>
-          {isLoading ? (
-            <CourseSidebarSkeleton />
-          ) : (
-            <CourseSidebar
-              sections={uiSections}
-              currentLectureId={currentLecture?.id || ''}
-              onSelectLecture={handleSelectLecture}
-              onSeek={handleSeek}
-            />
-          )}
-        </div>
+        {/* Mobile Sidebar (Expandable Bottom Drawer) */}
+        <MobileCourseDrawer
+          activeMobileTab={activeMobileTab}
+          setActiveMobileTab={setActiveMobileTab}
+          uiSections={uiSections}
+          currentLectureId={currentLecture?.id || ''}
+          onSelectLecture={handleSelectLecture}
+          onSeek={handleSeek}
+          isLoading={isLoading}
+        />
       </div>
     </div>
   )

@@ -4,6 +4,7 @@ import { searchService, SearchChunkResult } from '~/service/search/search.servic
 import openaiQueueService from '~/service/queue/openaiQueue.service';
 import { lessonChatHistoryService, LessonChatHistoryService } from '~/service/lesson-chat/lessonChatHistory.service';
 import { lessonChatSemanticSearchService } from '~/service/lesson-chat/lessonChatSemanticSearch.service';
+import { lessonChatQueryService } from '~/service/lesson-chat/lessonChat.query.service';
 
 export interface RAGResult {
   answer: string;
@@ -50,11 +51,13 @@ export class LessonRAGService {
    * @param lessonId - Lesson scope for chunk search
    * @param question - User question
    * @param sessionId - Optional chat session for multi-turn context
+   * @param userId - Optional user id to fetch session notes
    */
   public async answerQuestion(
     lessonId: string,
     question: string,
-    sessionId?: string | null
+    sessionId?: string | null,
+    userId?: string | null
   ): Promise<RAGResult> {
     try {
       Logger.info(
@@ -63,7 +66,7 @@ export class LessonRAGService {
 
       const sessionActive = sessionId != null && sessionId !== '';
 
-      const [chunks, recentData, semanticHits] = await Promise.all([
+      const [chunks, recentData, semanticHits, sessionDetail] = await Promise.all([
         searchService.searchChunks(lessonId, question, 3),
         sessionActive
           ? lessonChatHistoryService.buildRecentTranscriptForRag(sessionId!)
@@ -71,7 +74,12 @@ export class LessonRAGService {
         sessionActive
           ? lessonChatSemanticSearchService.searchRelatedMessages(sessionId!, question, 5)
           : Promise.resolve([]),
+        sessionActive && userId
+          ? lessonChatQueryService.getSessionDetail(sessionId!, userId)
+          : Promise.resolve(null),
       ]);
+
+      const userNotes = sessionDetail?.notes;
 
       if (chunks.length === 0) {
         Logger.warn(
@@ -109,7 +117,7 @@ export class LessonRAGService {
         );
       }
 
-      const answer = await this.generateAnswer(context, question, historyForPrompt);
+      const answer = await this.generateAnswer(context, question, historyForPrompt, userNotes || undefined);
 
       const result: RAGResult = {
         answer,
@@ -186,14 +194,15 @@ export class LessonRAGService {
   private async generateAnswer(
     context: string,
     question: string,
-    chatHistoryTranscript?: string
+    chatHistoryTranscript?: string,
+    userNotes?: string
   ): Promise<string> {
     try {
       Logger.info('[RAGService.generateAnswer] Calling OpenAI with Structured Outputs');
 
       const answer = await openaiQueueService.queueRAGAnswer(
         RAGPrompts.system(),
-        RAGPrompts.human(context, question, chatHistoryTranscript)
+        RAGPrompts.human(context, question, chatHistoryTranscript, userNotes)
       );
 
       Logger.info('[RAGService.generateAnswer] Answer generated successfully');

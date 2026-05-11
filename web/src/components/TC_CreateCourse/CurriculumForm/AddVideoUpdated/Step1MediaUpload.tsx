@@ -5,6 +5,8 @@ import { cn } from '@/lib/utils'
 import learnovaLogo from '@/assets/images/logo1.png'
 import { LoadingDots } from '@/components/common/Loading/LoadingDots'
 
+import { LessonType } from '@/types/lesson'
+
 interface Step1MediaUploadProps {
   videoSrc: string | null
   selectedFile: File | null
@@ -18,7 +20,7 @@ interface Step1MediaUploadProps {
   onContinueEditing: () => void
   isUploading: boolean
   uploadProgress?: number
-  contentType: 'video' | 'document'
+  contentType: LessonType
 }
 
 const Step1MediaUpload: React.FC<Step1MediaUploadProps> = ({
@@ -48,7 +50,7 @@ const Step1MediaUpload: React.FC<Step1MediaUploadProps> = ({
         >
           {videoSrc ? (
             <div className='relative w-full h-full flex items-center justify-center group p-4'>
-              {contentType === 'video' ? (
+              {contentType === LessonType.VIDEO ? (
                 <video
                   ref={videoRef}
                   src={videoSrc}
@@ -87,14 +89,14 @@ const Step1MediaUpload: React.FC<Step1MediaUploadProps> = ({
               </div>
               <h4 className='text-base font-semibold text-gray-900 mb-2 flex items-center justify-center gap-2'>
                 <CloudUpload className='w-5 h-5 text-blue-600' />
-                {contentType === 'video' ? 'Tải lên bài giảng video' : 'Tải lên tài liệu PDF'}
+                {contentType === LessonType.VIDEO ? 'Tải lên bài giảng video' : 'Tải lên tài liệu PDF'}
               </h4>
               <p className='text-sm text-gray-500 mb-6 max-w-xs mx-auto'>
-                {contentType === 'video'
+                {contentType === LessonType.VIDEO
                   ? 'Kéo và thả video của bạn vào đây, hoặc nhấn để chọn file.'
                   : 'Kéo và thả tài liệu PDF vào đây, hoặc nhấn để chọn file.'}
                 <br />
-                Dung lượng tối đa: {contentType === 'video' ? '500MB' : '50MB'}.
+                Dung lượng tối đa: {contentType === LessonType.VIDEO ? '500MB' : '50MB'}.
               </p>
               <CustomButton
                 type='button'
@@ -111,7 +113,7 @@ const Step1MediaUpload: React.FC<Step1MediaUploadProps> = ({
           <input
             ref={fileInputRef}
             type='file'
-            accept={contentType === 'video' ? 'video/*' : 'application/pdf'}
+            accept={contentType === LessonType.VIDEO ? 'video/*' : 'application/pdf'}
             className='hidden'
             onChange={handleSelectFile}
           />
@@ -146,7 +148,7 @@ const Step1MediaUpload: React.FC<Step1MediaUploadProps> = ({
               )}
 
               <div className='w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center text-blue-600 flex-shrink-0'>
-                {contentType === 'video' ? <FileVideo className='w-5 h-5' /> : <FileText className='w-5 h-5' />}
+                {contentType === LessonType.VIDEO ? <FileVideo className='w-5 h-5' /> : <FileText className='w-5 h-5' />}
               </div>
 
               <div className='flex-1 min-w-0'>

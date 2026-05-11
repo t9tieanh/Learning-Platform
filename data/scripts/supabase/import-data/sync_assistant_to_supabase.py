@@ -17,16 +17,17 @@ except ImportError:
     load_dotenv()
 
 # Configuration
-TARGET_COURSE_ID = "007f2de4-ade5-4db6-a755-4cc388b453c0"
+# The script can target a specific course to sync analysis data to all its video lessons
+TARGET_COURSE_ID = "fb8b8c2f-e42c-4d12-892e-6f72be7a74ab"
 
-# MySQL Database Configuration
+# MySQL Database Configuration (Source of lessons)
 MYSQL_HOST = os.getenv('DB_HOST', 'localhost')
 MYSQL_USER = os.getenv('DB_USER', 'root')
 MYSQL_PASSWORD = os.getenv('DB_PASSWORD', '')
 MYSQL_PORT = int(os.getenv('DB_PORT', 3306))
 MYSQL_DATABASE = 'course_service'
 
-# Supabase (PostgreSQL) Configuration
+# Supabase (PostgreSQL) Configuration (Target)
 SUPABASE_CONNECTION_STRING = os.getenv('DB_CONNECTION_STRING', '')
 
 if not SUPABASE_CONNECTION_STRING:
@@ -65,14 +66,20 @@ def get_video_lessons_from_mysql():
     return lessons
 
 def sync_data():
-    # 1. Load sample analysis data
+    # 1. Load exported analysis data to use as template
     script_dir = Path(__file__).parent
-    sample_json_path = script_dir.parent / 'data-template' / 'lesson_208126fd-3544-4551-8c9b-5110c33261af.json'
+    # We use the latest exported lesson as the standard template for seeding
+    sample_json_path = script_dir.parent / 'data-template' / 'lesson_8db834f8-8035-4207-8f85-54a28173f038.json'
+    
+    if not sample_json_path.exists():
+        # Fallback to the other common template if first one is missing
+        sample_json_path = script_dir.parent / 'data-template' / 'lesson_208126fd-3544-4551-8c9b-5110c33261af.json'
     
     if not sample_json_path.exists():
         print(f"Error: Sample JSON not found at {sample_json_path}")
         return
 
+    print(f"Using template: {sample_json_path.name}")
     with open(sample_json_path, 'r', encoding='utf-8') as f:
         sample_data = json.load(f)
 
@@ -89,10 +96,10 @@ def sync_data():
         conn = psycopg2.connect(SUPABASE_CONNECTION_STRING)
         cur = conn.cursor()
         
-        chunk_size = 20 # Smaller batch for focused sync
-        for i in range(0, len(mysql_lessons), chunk_size):
-            batch = mysql_lessons[i:i + chunk_size]
-            print(f"Processing batch {i//chunk_size + 1} ({len(batch)} lessons)...")
+        batch_size = 10
+        for i in range(0, len(mysql_lessons), batch_size):
+            batch = mysql_lessons[i:i + batch_size]
+            print(f"Processing batch {i//batch_size + 1} ({len(batch)} lessons)...")
             
             for m_lesson in batch:
                 lesson_id = m_lesson['id']
@@ -102,14 +109,15 @@ def sync_data():
                     INSERT INTO lessons (
                         id, title, content, duration, position, "isPublic", type, url, 
                         "chapterId", "createdAt", "updatedAt", deleted,
-                        transcript, subtitles, summary, "suggestedTitle"
+                        transcript, subtitles, summary, "suggestedTitle", status
                     )
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                     ON CONFLICT (id) DO UPDATE SET
                         transcript = EXCLUDED.transcript,
                         subtitles = EXCLUDED.subtitles,
                         summary = EXCLUDED.summary,
                         "suggestedTitle" = EXCLUDED."suggestedTitle",
+                        status = EXCLUDED.status,
                         "updatedAt" = EXCLUDED."updatedAt"
                 """, (
                     lesson_id,
@@ -127,15 +135,23 @@ def sync_data():
                     sample_data['lesson']['transcript'],
                     sample_data['lesson']['subtitles'],
                     sample_data['lesson']['summary'],
-                    sample_data['lesson']['suggestedTitle']
+                    sample_data['lesson']['suggestedTitle'],
+                    sample_data['lesson'].get('status', 'COMPLETED')
                 ))
 
-                # B. Clear existing chunks/quizzes
+                # B. Clear existing analysis data (Cascade should handle quizzes but we clear headers first)
+                cur.execute("DELETE FROM lesson_tests WHERE \"lesson_id\" = %s", (lesson_id,))
                 cur.execute("DELETE FROM lesson_chunks WHERE \"lessonId\" = %s", (lesson_id,))
                 
-                # C. Prepare Chunks, Quizzes, Choices
+                # C. Prepare mapping to track old chunk IDs to new chunk IDs for this lesson
+                chunk_id_map = {}
+                
+                # D. Insert Chunks & Standalone Quizzes
                 for chunk_sample in sample_data['chunks']:
+                    old_chunk_id = chunk_sample['id']
                     new_chunk_id = str(uuid.uuid4())
+                    chunk_id_map[old_chunk_id] = new_chunk_id
+                    
                     cur.execute("""
                         INSERT INTO lesson_chunks 
                         (id, "lessonId", content, title, summary, "chunkIndex", 
@@ -162,17 +178,104 @@ def sync_data():
                         datetime.now()
                     ))
                     
+                    # Insert CHUNK_STANDALONE quizzes
                     for quiz_sample in chunk_sample.get('quizzes', []):
                         new_quiz_id = str(uuid.uuid4())
                         cur.execute("""
                             INSERT INTO quizzes 
-                            (id, "chunkId", question, explanation, type, difficulty, "bloomLevel", 
+                            (id, "chunkId", "quiz_scope", question, explanation, type, difficulty, "bloomLevel", 
                              "aiGenerated", "aiModel", "aiConfidence", "createdBy", "isApproved", status,
                              "createdAt", "updatedAt")
-                            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                         """, (
                             new_quiz_id,
                             new_chunk_id,
+                            'CHUNK_STANDALONE',
+                            quiz_sample['question'],
+                            quiz_sample['explanation'],
+                            quiz_sample['type'],
+                            quiz_sample['difficulty'],
+                            quiz_sample['bloomLevel'],
+                            quiz_sample['aiGenerated'],
+                            quiz_sample['aiModel'],
+                            quiz_sample['aiConfidence'],
+                            quiz_sample['createdBy'],
+                            quiz_sample['isApproved'],
+                            quiz_sample['status'],
+                            datetime.now(),
+                            datetime.now()
+                        ))
+                        
+                        for choice_sample in quiz_sample.get('choices', []):
+                            cur.execute("""
+                                INSERT INTO quiz_choices (id, "quizId", text, "isCorrect", "order", feedback, "createdAt", "updatedAt")
+                                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                            """, (
+                                str(uuid.uuid4()),
+                                new_quiz_id,
+                                choice_sample['text'],
+                                choice_sample['isCorrect'],
+                                choice_sample['order'],
+                                choice_sample['feedback'],
+                                datetime.now(),
+                                datetime.now()
+                            ))
+
+                # E. Insert LessonTest Blueprint
+                lt_sample = sample_data.get('lessonTest')
+                if lt_sample:
+                    cur.execute("""
+                        INSERT INTO lesson_tests 
+                        ("lesson_id", title, status, "target_total_questions", notes, "created_by", "created_at", "updated_at")
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                    """, (
+                        lesson_id,
+                        lt_sample['title'],
+                        lt_sample['status'],
+                        lt_sample['target_total_questions'],
+                        lt_sample['notes'],
+                        lt_sample['created_by'],
+                        datetime.now(),
+                        datetime.now()
+                    ))
+
+                # F. Insert LessonTestChunkGroups & LESSON_TEST quizzes
+                for group_sample in sample_data.get('lessonTestChunkGroups', []):
+                    new_group_id = str(uuid.uuid4())
+                    
+                    # Map old chunk IDs in array to new chunk IDs
+                    old_group_chunk_ids = group_sample.get('chunk_ids', [])
+                    new_group_chunk_ids = [chunk_id_map.get(old_id, old_id) for old_id in old_group_chunk_ids]
+                    
+                    cur.execute("""
+                        INSERT INTO lesson_test_chunk_groups 
+                        (id, "lesson_id", "chunk_ids", "question_count", label, "batch_user_prompt", distribution, "created_at", "updated_at")
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    """, (
+                        new_group_id,
+                        lesson_id,
+                        json.dumps(new_group_chunk_ids),
+                        group_sample['question_count'],
+                        group_sample['label'],
+                        group_sample['batch_user_prompt'],
+                        json.dumps(group_sample['distribution']) if group_sample.get('distribution') else None,
+                        datetime.now(),
+                        datetime.now()
+                    ))
+                    
+                    # Insert quizzes linked to this group
+                    for quiz_sample in group_sample.get('quizzes', []):
+                        new_quiz_id = str(uuid.uuid4())
+                        cur.execute("""
+                            INSERT INTO quizzes 
+                            (id, "lesson_test_chunk_group_id", "quiz_scope", question, explanation, type, difficulty, "bloomLevel", 
+                             "aiGenerated", "aiModel", "aiConfidence", "createdBy", "isApproved", status,
+                             "createdAt", "updatedAt")
+                            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                        """, (
+                            new_quiz_id,
+                            new_group_id,
+                            'LESSON_TEST',
                             quiz_sample['question'],
                             quiz_sample['explanation'],
                             quiz_sample['type'],
@@ -204,14 +307,16 @@ def sync_data():
                             ))
             
             conn.commit()
-            print(f"Batch {i//chunk_size + 1} for course {TARGET_COURSE_ID} complete.")
+            print(f"Batch {i//batch_size + 1} for course {TARGET_COURSE_ID} complete.")
 
-        print(f"--- Sync for Course {TARGET_COURSE_ID} Complete ---")
+        print(f"--- Sync & Seeding for Course {TARGET_COURSE_ID} Complete ---")
 
     except Exception as e:
         if conn:
             conn.rollback()
         print(f"Sync error: {e}")
+        import traceback
+        traceback.print_exc()
     finally:
         if conn:
             conn.close()

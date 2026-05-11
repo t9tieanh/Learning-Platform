@@ -127,6 +127,32 @@ export class LessonChatPersistenceService {
             WHERE id = ${messageId}
         `;
     }
+
+    async updateSessionTitle(sessionId: string, userId: string, title: string): Promise<void> {
+        const session = await prismaService.lessonChatSession.findFirst({
+            where: { id: sessionId, userId },
+        });
+        if (!session) {
+            throw new ApiError(StatusCodes.NOT_FOUND, 'Không tìm thấy phiên chat.');
+        }
+        await prismaService.lessonChatSession.update({
+            where: { id: sessionId },
+            data: { title },
+        });
+    }
+
+    async updateSessionNotes(sessionId: string, userId: string, notes: string): Promise<void> {
+        const session = await prismaService.lessonChatSession.findFirst({
+            where: { id: sessionId, userId },
+        });
+        if (!session) {
+            throw new ApiError(StatusCodes.NOT_FOUND, 'Không tìm thấy phiên chat.');
+        }
+        await prismaService.lessonChatSession.update({
+            where: { id: sessionId },
+            data: { notes },
+        });
+    }
 }
 
 export default new LessonChatPersistenceService();

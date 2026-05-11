@@ -33,6 +33,7 @@ const LearnovaAISection: React.FC<LearnovaAISectionProps> = ({
 
   const summary = state.status === 'completed' ? state.data.summary : null
   const suggestedTitle = state.status === 'completed' ? state.data.suggestedTitle : null
+  const lessonType = state.status === 'completed' ? state.data.lessonType : null
 
   const handleSaveSummary = async (id: string, newSummary: string) => {
     try {
@@ -134,7 +135,7 @@ const LearnovaAISection: React.FC<LearnovaAISectionProps> = ({
 
           <div className='space-y-4 md:space-y-5'>
             {chunks.map((chunk) => (
-              <ChunkCard key={chunk.id} chunk={chunk} onSaveSummary={handleSaveSummary} onSeek={onSeek} />
+              <ChunkCard key={chunk.id} chunk={chunk} onSaveSummary={handleSaveSummary} onSeek={onSeek} lessonType={lessonType ?? undefined} />
             ))}
           </div>
         </div>

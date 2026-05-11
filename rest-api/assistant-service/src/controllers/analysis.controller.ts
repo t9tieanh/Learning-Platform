@@ -170,7 +170,8 @@ class AnalysisController {
             const result: RAGResult = await lessonRAGService.answerQuestion(
                 lessonId,
                 question,
-                activeSessionId
+                activeSessionId,
+                userId
             );
 
             await lessonChatPersistenceService.appendMessages(
@@ -286,12 +287,61 @@ class AnalysisController {
                 result: { sessionId },
             });
         } catch (error) {
-            Logger.error(`[AnalysisController.createLessonChatSession] ${error}`);
             sendResponse(res, {
                 code: StatusCodes.INTERNAL_SERVER_ERROR,
                 message: CHATBOT_ERROR_MESSAGE,
                 result: null,
             });
+        }
+    };
+
+    /** PATCH .../chat/sessions/:sessionId/title */
+    updateLessonChatSessionTitle = async (
+        req: Request,
+        res: Response,
+        next: NextFunction
+    ): Promise<void> => {
+        try {
+            const sessionId = String(req.params.sessionId);
+            const userId = String(req.user?.sub);
+            const { title } = req.body;
+
+            if (!title || typeof title !== 'string') {
+                throw new ApiError(StatusCodes.BAD_REQUEST, 'Tiêu đề không hợp lệ');
+            }
+
+            await lessonChatPersistenceService.updateSessionTitle(sessionId, userId, title);
+
+            sendResponse(res, {
+                code: StatusCodes.OK,
+                message: 'Cập nhật tiêu đề thành công',
+                result: null,
+            });
+        } catch (error) {
+            next(error);
+        }
+    };
+
+    /** PATCH .../chat/sessions/:sessionId/notes */
+    updateLessonChatSessionNotes = async (
+        req: Request,
+        res: Response,
+        next: NextFunction
+    ): Promise<void> => {
+        try {
+            const sessionId = String(req.params.sessionId);
+            const userId = String(req.user?.sub);
+            const { notes } = req.body;
+
+            await lessonChatPersistenceService.updateSessionNotes(sessionId, userId, notes);
+
+            sendResponse(res, {
+                code: StatusCodes.OK,
+                message: 'Cập nhật ghi chú thành công',
+                result: null,
+            });
+        } catch (error) {
+            next(error);
         }
     };
 }
