@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react'
-import { Play, ChevronUp, ChevronDown } from 'lucide-react'
+import { Play, ChevronUp, ChevronDown, Sparkles } from 'lucide-react'
 import { LessonChunk } from '@/types/ai'
 import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible'
 import RemediationVideoPlayer from './RemediationVideoPlayer'
@@ -50,10 +50,6 @@ const StudentExplanationRemediation: React.FC<StudentExplanationRemediationProps
   }, [explanation])
 
   const toggleChunk = (chunk: LessonChunk) => {
-    if (onSeek) {
-      onSeek(chunk.startTime || '00:00')
-      return
-    }
     setOpenChunkId(openChunkId === chunk.id ? null : chunk.id)
   }
 
@@ -76,22 +72,39 @@ const StudentExplanationRemediation: React.FC<StudentExplanationRemediationProps
             <TooltipProvider key={i} delayDuration={300}>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <button
-                    type='button'
-                    onClick={() => toggleChunk(chunk)}
-                    className={cn(
-                      'inline-flex items-center gap-1 mx-1 px-2 py-0.5 rounded-lg border transition-all font-bold cursor-pointer group',
-                      isOpen 
-                        ? 'bg-blue-600 border-blue-700 text-white shadow-md' 
-                        : 'bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 hover:border-blue-300'
-                    )}
-                  >
-                    <Play className={cn('w-2.5 h-2.5', isOpen ? 'fill-white' : 'fill-blue-600')} />
-                    <span className='text-[10px] md:text-[11px] leading-none'>
-                      {onSeek ? `Tua tới ${chunk.timestamp}` : (isOpen ? 'Đang xem' : `Xem lại ${chunk.timestamp}`)}
+                  <span className='inline-flex items-center gap-1.5 mx-1 p-0.5 pr-2 rounded-full border border-blue-200 bg-blue-50/50 hover:bg-blue-100 transition-all group cursor-default shadow-sm'>
+                    <button
+                      type='button'
+                      onClick={() => toggleChunk(chunk)}
+                      className={cn(
+                        'flex h-6 w-6 items-center justify-center rounded-full transition-all',
+                        isOpen 
+                          ? 'bg-blue-600 text-white shadow-lg shadow-blue-200' 
+                          : 'bg-white text-blue-600 hover:bg-blue-600 hover:text-white'
+                      )}
+                      title={isOpen ? 'Đóng trình phát' : 'Xem đoạn trích'}
+                    >
+                      <Play className={cn('w-2.5 h-2.5 fill-current ml-0.5', isOpen && 'animate-pulse')} />
+                    </button>
+                    
+                    <span className='text-[11px] font-bold text-blue-700 select-none'>
+                      {chunk.timestamp}
                     </span>
-                    {!onSeek && (isOpen ? <ChevronUp className='w-3 h-3 ml-0.5' /> : <ChevronDown className='w-3 h-3 ml-0.5' />)}
-                  </button>
+
+                    {onSeek && (
+                      <button
+                        type='button'
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          onSeek(chunk.startTime || '00:00')
+                        }}
+                        className='flex h-6 w-6 items-center justify-center rounded-full bg-white text-blue-400 hover:bg-blue-600 hover:text-white transition-all border border-blue-100 hover:border-blue-600 ml-1 shadow-sm'
+                        title='Tua video chính tới đoạn này'
+                      >
+                        <Sparkles className='w-3 h-3' />
+                      </button>
+                    )}
+                  </span>
                 </TooltipTrigger>
                 <TooltipContent side='top' className='bg-slate-900 text-white border-none text-[10px] px-2 py-1'>
                   <p className='font-bold uppercase tracking-tight'>{chunk.title || 'Nội dung kiến thức'}</p>
@@ -102,10 +115,10 @@ const StudentExplanationRemediation: React.FC<StudentExplanationRemediationProps
         })}
       </p>
 
-      {!onSeek && chunks.map((chunk) => (
+      {chunks.map((chunk) => (
         <Collapsible key={chunk.id} open={openChunkId === chunk.id}>
           <CollapsibleContent className='overflow-hidden animate-in slide-in-from-top-2 duration-300'>
-            <div className='mt-2 rounded-2xl overflow-hidden'>
+            <div className='mt-2 rounded-2xl overflow-hidden shadow-2xl border border-blue-100/50 bg-white'>
                <RemediationVideoPlayer 
                   lessonId={lessonId} 
                   chunk={chunk} 

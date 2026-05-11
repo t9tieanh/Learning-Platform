@@ -153,7 +153,7 @@ export const LessonTestQuestionCard: React.FC<LessonTestQuestionCardProps> = ({
       {locked && row?.explanation ? (
         <div className='relative rounded-2xl border border-blue-100/50 bg-white/40 backdrop-blur-md px-4 py-3.5 mt-2 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden group/expl'>
           <div className='absolute top-0 left-0 w-1 h-full bg-blue-500/50' />
-          <span className='font-bold text-[#0C356A] text-[11px] uppercase tracking-widest mb-2 block opacity-70'>Phân tích đáp án</span>
+          <span className='font-bold text-[#0C356A] text-[11px] tracking-widest mb-2 block opacity-70'>Phân tích đáp án</span>
           {lessonId ? (
             <StudentExplanationRemediation
               explanation={row.explanation}

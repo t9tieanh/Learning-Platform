@@ -589,44 +589,37 @@ export const AIChatSection: React.FC<AIChatSectionProps> = ({
                                                                     isPlayerOpen ? 'border-blue-400 ring-1 ring-blue-400/20' : 'border-gray-100 hover:border-blue-200'
                                                                 )}
                                                             >
-                                                                <div className='flex items-start justify-between gap-3'>
-                                                                    <div className='flex-1 space-y-1.5'>
-                                                                        <div className='flex items-center gap-2'>
-                                                                            <span className='text-[12px] font-bold text-gray-800 line-clamp-1'>
-                                                                                {source.title || `Đoạn ${idx + 1}`}
-                                                                            </span>
-                                                                            <span className='text-[10px] text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded font-bold whitespace-nowrap'>
-                                                                                {source.startTime}
-                                                                            </span>
+                                                                <div className='flex flex-col gap-2'>
+                                                                    <div className='flex items-center justify-between'>
+                                                                        <span className='text-[10px] text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full font-bold whitespace-nowrap shadow-sm border border-blue-100/50'>
+                                                                            {source.startTime}
+                                                                        </span>
+                                                                        <div className='flex items-center gap-1.5'>
+                                                                            <button
+                                                                                onClick={() => onSeek?.(source.startTime || '0')}
+                                                                                className='w-8 h-8 rounded-lg bg-gray-50 text-gray-400 hover:bg-blue-600 hover:text-white transition-all flex items-center justify-center shrink-0 border border-gray-100 hover:border-blue-600 shadow-sm'
+                                                                                title='Xem trên video chính'
+                                                                                type='button'
+                                                                            >
+                                                                                <Sparkles className='w-3.5 h-3.5' />
+                                                                            </button>
+                                                                            <button
+                                                                                onClick={() => setOpenSourceId(isPlayerOpen ? null : source.chunkId)}
+                                                                                className={cn(
+                                                                                    'w-8 h-8 rounded-lg transition-all flex items-center justify-center shrink-0 border shadow-sm',
+                                                                                    isPlayerOpen
+                                                                                        ? 'bg-blue-600 text-white border-blue-600 shadow-blue-200'
+                                                                                        : 'bg-gray-50 text-gray-400 border-gray-100 hover:bg-blue-600 hover:text-white hover:border-blue-600'
+                                                                                )}
+                                                                                title={isPlayerOpen ? 'Đóng trình phát' : 'Xem đoạn trích'}
+                                                                                type='button'
+                                                                            >
+                                                                                <Play className={cn('w-3.5 h-3.5 fill-current ml-0.5', isPlayerOpen && 'animate-pulse')} />
+                                                                            </button>
                                                                         </div>
-                                                                        {source.summary && !isPlayerOpen && (
-                                                                            <p className='text-[11px] text-gray-500 leading-relaxed line-clamp-2 italic italic-muted'>
-                                                                                {source.summary}
-                                                                            </p>
-                                                                        )}
                                                                     </div>
-                                                                    <div className='flex items-center gap-1.5'>
-                                                                        <button
-                                                                            onClick={() => onSeek?.(source.startTime || '0')}
-                                                                            className='w-8 h-8 rounded-lg bg-gray-50 text-gray-400 hover:bg-blue-600 hover:text-white transition-all flex items-center justify-center shrink-0'
-                                                                            title='Xem trên video chính'
-                                                                            type='button'
-                                                                        >
-                                                                            <Sparkles className='w-3.5 h-3.5' />
-                                                                        </button>
-                                                                        <button
-                                                                            onClick={() => setOpenSourceId(isPlayerOpen ? null : source.chunkId)}
-                                                                            className={cn(
-                                                                                'w-8 h-8 rounded-lg transition-all flex items-center justify-center shrink-0',
-                                                                                isPlayerOpen
-                                                                                    ? 'bg-blue-600 text-white shadow-lg'
-                                                                                    : 'bg-gray-50 text-gray-400 hover:bg-blue-600 hover:text-white'
-                                                                            )}
-                                                                            title={isPlayerOpen ? 'Đóng trình phát' : 'Xem đoạn trích'}
-                                                                            type='button'
-                                                                        >
-                                                                            <Play className={cn('w-3.5 h-3.5 fill-current ml-0.5', isPlayerOpen && 'animate-pulse')} />
-                                                                        </button>
+                                                                    <div className='text-[12px] font-bold text-slate-800 line-clamp-2 leading-relaxed'>
+                                                                        {source.title || `Đoạn ${idx + 1}`}
                                                                     </div>
                                                                 </div>
                                                             </div>
