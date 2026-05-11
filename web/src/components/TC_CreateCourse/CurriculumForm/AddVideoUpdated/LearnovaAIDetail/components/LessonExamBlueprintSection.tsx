@@ -18,6 +18,7 @@ import {
   Undo2,
 } from 'lucide-react'
 import { LessonChunk } from '@/types/ai'
+import { LessonType } from '@/types/lesson'
 import HighGlossBackground from '@/components/common/HighGlossBackground'
 import CustomButton from '@/components/common/Button'
 import MultiSelectSearch from '@/components/common/MultiSelectSearch'
@@ -74,6 +75,7 @@ interface LessonExamBlueprintSectionProps {
   /** When set, shows a back control inside the blue header (e.g. return to lecture structure). */
   onBackToStructure?: () => void
   handleSeek?: (startTime: string | null) => void
+  lessonType?: LessonType
 }
 
 /** Section: map chunks to config groups, target total, then batch-generate quizzes per group (VIP). */
@@ -85,6 +87,7 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
   onAfterGenerate,
   onBackToStructure,
   handleSeek,
+  lessonType
 }) => {
   const { openVipDialog } = useVipUpgrade()
   const { data: authData } = useAuthStore()
@@ -1319,6 +1322,7 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
         chunks={chunks}
         handleSeek={handleSeek}
         testTitle={flatLessonTestTitleFromApi ?? persistedLessonTest?.title ?? null}
+        lessonType={lessonType}
       />
     </div>
   )

@@ -8,6 +8,7 @@ export interface LessonChatSessionListItem {
     lessonId: string;
     title: string | null;
     summaryLast: string | null;
+    notes: string | null;
     createdAt: Date;
     updatedAt: Date;
     messageCount: number;
@@ -35,6 +36,7 @@ export class LessonChatQueryService {
                 lessonId: true,
                 title: true,
                 summaryLast: true,
+                notes: true,
                 createdAt: true,
                 updatedAt: true,
                 _count: { select: { messages: true } },
@@ -46,10 +48,40 @@ export class LessonChatQueryService {
             lessonId: r.lessonId,
             title: r.title,
             summaryLast: r.summaryLast,
+            notes: (r as any).notes ?? null,
             createdAt: r.createdAt,
             updatedAt: r.updatedAt,
             messageCount: r._count.messages,
         }));
+    }
+
+    async getSessionDetail(sessionId: string, userId: string): Promise<LessonChatSessionListItem> {
+        const r = await prismaService.lessonChatSession.findFirst({
+            where: { id: sessionId, userId },
+            select: {
+                id: true,
+                lessonId: true,
+                title: true,
+                summaryLast: true,
+                notes: true,
+                createdAt: true,
+                updatedAt: true,
+                _count: { select: { messages: true } },
+            },
+        });
+        if (!r) {
+            throw new ApiError(StatusCodes.NOT_FOUND, 'Không tìm thấy phiên chat.');
+        }
+        return {
+            id: r.id,
+            lessonId: r.lessonId,
+            title: r.title,
+            summaryLast: r.summaryLast,
+            notes: (r as any).notes ?? null,
+            createdAt: r.createdAt,
+            updatedAt: r.updatedAt,
+            messageCount: r._count.messages,
+        };
     }
 
     async getMessagesForSession(

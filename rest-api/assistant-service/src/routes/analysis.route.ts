@@ -61,6 +61,20 @@ analysisRouter.post(
     analysisController.createLessonChatSession
 )
 
+analysisRouter.patch(
+    '/lessons/:lessonId/chat/sessions/:sessionId/title',
+    Authentication(true),
+    checkViewLesson,
+    analysisController.updateLessonChatSessionTitle
+)
+
+analysisRouter.patch(
+    '/lessons/:lessonId/chat/sessions/:sessionId/notes',
+    Authentication(true),
+    checkViewLesson,
+    analysisController.updateLessonChatSessionNotes
+)
+
 analysisRouter.get(
     '/lessons/:lessonId/chat/sessions',
     Authentication(true),

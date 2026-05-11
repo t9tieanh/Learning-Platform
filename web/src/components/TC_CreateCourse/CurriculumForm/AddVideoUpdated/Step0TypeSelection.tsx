@@ -2,14 +2,16 @@ import React from 'react'
 import { Video, FileText, BookOpen, HelpCircle, PlusCircle, MousePointerClick } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
+import { LessonType } from '@/types/lesson'
+
 interface Step0TypeSelectionProps {
-  onSelectType: (type: 'video' | 'document') => void
+  onSelectType: (type: LessonType) => void
 }
 
 const Step0TypeSelection: React.FC<Step0TypeSelectionProps> = ({ onSelectType }) => {
   const types = [
     {
-      id: 'video',
+      id: LessonType.VIDEO,
       title: 'Bài giảng video',
       description: 'Tạo và xuất bản bài giảng Video cho người học.',
       icon: <Video className='w-6 h-6 text-white' />,
@@ -18,7 +20,7 @@ const Step0TypeSelection: React.FC<Step0TypeSelectionProps> = ({ onSelectType })
       borderColor: 'border-purple-200'
     },
     {
-      id: 'document',
+      id: LessonType.ARTICLE,
       title: 'Bài giảng tài liệu (PDF)',
       description: 'Tạo và xuất bản bài giảng dạng tài liệu (PDF) cho người học.',
       icon: <FileText className='w-6 h-6 text-white' />,
@@ -45,7 +47,7 @@ const Step0TypeSelection: React.FC<Step0TypeSelectionProps> = ({ onSelectType })
         {types.map((type) => (
           <button
             key={type.id}
-            onClick={() => onSelectType(type.id as 'video' | 'document')}
+            onClick={() => onSelectType(type.id as LessonType)}
             className={cn(
               'flex flex-col text-left p-6 rounded-xl border-2 transition-all duration-200 hover:shadow-lg group',
               'bg-white border-gray-100 hover:border-blue-500'

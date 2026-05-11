@@ -1,4 +1,5 @@
 import * as yup from 'yup'
+import { LessonType } from '@/types/lesson'
 
 export interface Chapter {
   id: string
@@ -17,7 +18,7 @@ export interface Lesson {
   isPublic: boolean
   duration?: string
   url?: string
-  type: 'video' | 'article'
+  type: LessonType
 }
 
 export const UpdateChapterSchema = yup.object({

@@ -3,14 +3,16 @@ import { ChevronDown, Hash, Pencil, PlayCircle, Check } from 'lucide-react'
 import CustomButton from '@/components/common/Button'
 import { LessonChunk } from '@/types/ai'
 import { cn } from '@/lib/utils'
+import { LessonType } from '@/types/lesson'
 
 interface ChunkCardProps {
   chunk: LessonChunk
   onSaveSummary: (id: string, newSummary: string) => Promise<void> | void
   onSeek?: (startTime: string | null) => void
+  lessonType?: LessonType
 }
 
-const ChunkCard: React.FC<ChunkCardProps> = ({ chunk, onSaveSummary, onSeek }) => {
+const ChunkCard: React.FC<ChunkCardProps> = ({ chunk, onSaveSummary, onSeek, lessonType }) => {
   const [isExpanded, setIsExpanded] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [draftSummary, setDraftSummary] = useState(chunk.summary ?? '')
@@ -73,23 +75,45 @@ const ChunkCard: React.FC<ChunkCardProps> = ({ chunk, onSaveSummary, onSeek }) =
             )}
 
             <div className='flex items-center flex-wrap gap-x-2 gap-y-0.5'>
-              {(chunk.timestamp || seekTime) && (
-                <span className='inline-flex items-center gap-1 text-[10px] md:text-[11px] text-gray-500 font-medium tabular-nums bg-white/80 px-1.5 py-0.5 rounded-md border border-blue-100/80'>
-                  <Hash className='w-3 h-3 text-blue-500 shrink-0' strokeWidth={2.5} />
-                  {chunk.timestamp ?? seekTime}
-                </span>
-              )}
-              {onSeek && seekTime && (
-                <CustomButton
-                  type='button'
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    onSeek(seekTime)
-                  }}
-                  title='Tua tới đoạn này trong video'
-                  icon={<PlayCircle className='w-3.5 h-3.5' strokeWidth={2.25} />}
-                  className='h-7 min-w-7 px-1.5 bg-white/90 border border-blue-200/80 text-blue-600 hover:text-blue-800 hover:bg-blue-50/80 rounded-lg shadow-sm'
-                />
+              {lessonType === LessonType.VIDEO ? (
+                <>
+                  {(chunk.timestamp || seekTime) && (
+                    <span className='inline-flex items-center gap-1 text-[10px] md:text-[11px] text-gray-500 font-medium tabular-nums bg-white/80 px-1.5 py-0.5 rounded-md border border-blue-100/80'>
+                      <Hash className='w-3 h-3 text-blue-500 shrink-0' strokeWidth={2.5} />
+                      {chunk.timestamp ?? seekTime}
+                    </span>
+                  )}
+                  {onSeek && seekTime && (
+                    <CustomButton
+                      type='button'
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        onSeek(seekTime)
+                      }}
+                      title='Tua tới đoạn này trong video'
+                      icon={<PlayCircle className='w-3.5 h-3.5' strokeWidth={2.25} />}
+                      className='h-7 min-w-7 px-1.5 bg-white/90 border border-blue-200/80 text-blue-600 hover:text-blue-800 hover:bg-blue-50/80 rounded-lg shadow-sm'
+                    />
+                  )}
+                </>
+              ) : (
+                chunk.summary && !isExpanded && (
+                  <div className='flex items-center gap-2 min-w-0 flex-1 pr-4'>
+                    <p className='text-[11px] text-gray-500 line-clamp-1 italic'>
+                      {chunk.summary}
+                    </p>
+                    <button
+                      type='button'
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setIsExpanded(true)
+                      }}
+                      className='text-[10px] font-bold text-blue-600 hover:text-blue-800 shrink-0'
+                    >
+                      Xem thêm
+                    </button>
+                  </div>
+                )
               )}
             </div>
           </div>
