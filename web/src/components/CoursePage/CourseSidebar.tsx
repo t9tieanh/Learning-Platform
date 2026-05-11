@@ -105,7 +105,7 @@ export const CourseSidebar = ({ sections, currentLectureId, onSelectLecture, onC
             <SectionList sections={sections} currentLectureId={currentLectureId} onSelectLecture={onSelectLecture} />
           </div>
         )}
-        <div className={`h-full min-h-0 flex flex-col bg-[#fcfdfe] items-stretch w-full ${activeTab !== 'ai' ? 'hidden' : ''}`}>
+        <div className={`h-full min-h-0 flex flex-col bg-[#fcfdfe] items-stretch w-full px-4 ${activeTab !== 'ai' ? 'hidden' : ''}`}>
           <AIChatSection
             lessonId={currentLectureId}
             onSeek={onSeek}

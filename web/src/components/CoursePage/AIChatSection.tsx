@@ -14,7 +14,8 @@ import {
     StickyNote,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import learnovaLogo from '@/assets/images/logo1.png'
+import learnovaLogo from '@/assets/images/LEARNOVA_sm.png'
+import aiAssistantEmpty from '@/assets/images/ai-assistant-empty.png'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import {
@@ -485,33 +486,41 @@ export const AIChatSection: React.FC<AIChatSectionProps> = ({
                 )}
 
                 {messages.length === 0 ? (
-                    <div className='h-full flex flex-col items-center justify-center text-center px-8 space-y-4'>
-                        <div className='w-16 h-16 bg-blue-50/50 rounded-2xl flex items-center justify-center p-3 shadow-inner'>
-                            <img
-                                src={learnovaLogo}
-                                alt='Learnova'
-                                className='w-full h-full object-contain filter drop-shadow-sm'
-                            />
-                        </div>
-                        <div className='space-y-2'>
-                            <h3 className='text-[15px] font-bold text-gray-800'>
-                                Hỏi đáp cùng trợ lý AI
-                            </h3>
-                            <p className='text-[13px] text-gray-500 max-w-[280px] mx-auto leading-relaxed'>
-                                {chatSessionId ? (
-                                    <>
-                                        Đặt câu hỏi về nội dung bài giảng này. Tôi sẽ giúp bạn tìm câu
-                                        trả lời từ video!
-                                    </>
-                                ) : sessionsLoading ? (
-                                    <>Đang tải các phiên chat của bạn…</>
-                                ) : (
-                                    <>
-                                        Nhấn nút &quot;Tạo cuộc trò chuyện mới&quot; ở trên để mở
-                                        phiên hỏi đáp với AI trong bối cảnh bài học này.
-                                    </>
-                                )}
-                            </p>
+                    <div className='h-full flex flex-col items-center justify-center text-center px-8 relative overflow-hidden'>
+                        {/* Decorative background elements */}
+                        <div className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-blue-400/5 blur-[80px] rounded-full pointer-events-none' />
+                        <div className='absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-white/80 to-transparent pointer-events-none' />
+
+                        <div className='relative z-10 w-full max-w-[280px] animate-in fade-in zoom-in duration-700'>
+                            <div className='mb-8 transform transition-transform hover:scale-105 duration-700 ease-out'>
+                                <img
+                                    src={aiAssistantEmpty}
+                                    alt='AI Assistant'
+                                    className='w-full h-auto mix-blend-multiply opacity-90'
+                                />
+                            </div>
+                            
+                            <div className='space-y-3'>
+                                <h3 className='text-[18px] font-black tracking-tight text-slate-800 chatbot-heading'>
+                                    Sẵn sàng hỗ trợ bạn
+                                </h3>
+                                <p className='text-[13px] text-slate-500 leading-relaxed font-medium chatbot-body'>
+                                    {chatSessionId ? (
+                                        <span className='opacity-80'>
+                                            Đặt câu hỏi về bài giảng này, tôi sẽ giúp bạn tóm tắt và tìm kiến thức từ video ngay lập tức!
+                                        </span>
+                                    ) : sessionsLoading ? (
+                                        <span className='flex items-center justify-center gap-2'>
+                                            <Loader2 className='w-3 h-3 animate-spin text-blue-500' />
+                                            Đang chuẩn bị dữ liệu học tập...
+                                        </span>
+                                    ) : (
+                                        <span className='opacity-80'>
+                                            Hãy bắt đầu một hành trình học tập mới bằng cách tạo cuộc trò chuyện ở phía trên.
+                                        </span>
+                                    )}
+                                </p>
+                            </div>
                         </div>
                     </div>
                 ) : (
