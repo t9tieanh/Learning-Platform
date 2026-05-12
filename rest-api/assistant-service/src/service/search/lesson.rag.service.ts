@@ -121,13 +121,24 @@ export class LessonRAGService {
       const answer = await this.generateAnswer(context, question, historyForPrompt, userNotes || undefined);
 
       // Filter sources to only include those cited in the answer text with @{{chunkId}}@
-      const citedIds = [...answer.matchAll(/@{{(.*?)}}@/g)].map((m) => m[1]);
-      Logger.info(`[RAGService] LLM cited ${citedIds.length} chunks: ${citedIds.join(', ')}`);
+      const citedIds = Array.from(new Set([...answer.matchAll(/@{{(.*?)}}@/g)].map((m) => m[1])));
+      Logger.info(`[RAGService] LLM cited ${citedIds.length} unique chunks: ${citedIds.join(', ')}`);
 
-      const filteredChunks = chunks.filter((c) => citedIds.includes(c.id));
+      const existingCitedChunks = chunks.filter((c) => citedIds.includes(c.id));
+      const existingCitedIds = new Set(existingCitedChunks.map(c => c.id));
+      const missingCitedIds = citedIds.filter(id => !existingCitedIds.has(id));
 
-      // If LLM failed to tag but we have chunks, or if we want to fallback to all chunks if none cited?
-      const finalChunks = filteredChunks.length > 0 ? filteredChunks : chunks;
+      let finalChunks = existingCitedChunks;
+
+      if (missingCitedIds.length > 0) {
+        Logger.info(`[RAGService] Fetching ${missingCitedIds.length} missing cited chunks from DB: ${missingCitedIds.join(', ')}`);
+        const recoveredChunks = await searchService.getChunksByIds(missingCitedIds);
+        finalChunks = [...existingCitedChunks, ...recoveredChunks];
+      }
+
+      if (finalChunks.length === 0) {
+        finalChunks = chunks;
+      }
 
       const result: RAGResult = {
         answer,

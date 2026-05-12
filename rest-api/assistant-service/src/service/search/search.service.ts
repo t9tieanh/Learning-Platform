@@ -101,6 +101,26 @@ export class SearchService {
             throw error;
         }
     }
+
+    /**
+     * Fetch full chunk details for a given list of IDs.
+     * Useful for recovering sources cited by LLM from previous conversation turns.
+     */
+    async getChunksByIds(ids: string[]): Promise<SearchChunkResult[]> {
+        if (ids.length === 0) return [];
+        try {
+            const chunksFromDb = await prismaService.lessonChunk.findMany({
+                where: { id: { in: ids } }
+            });
+
+            return chunksFromDb.map(c => new SearchChunkResponseDto(c, 1.0));
+        } catch (error) {
+            Logger.error(
+                `[SearchService.getChunksByIds] Error fetching chunks by IDs – ${error}`
+            );
+            return [];
+        }
+    }
 }
 
 // Export singleton instance
