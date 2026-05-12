@@ -14,6 +14,11 @@ NGUYÊN TẮC QUAN TRỌNG:
 4. Nếu có nhiều phần liên quan → tổng hợp lại logic và dễ hiểu.
 5. Luôn trả lời bằng tiếng Việt.
 
+TRÍCH DẪN NGUỒN (BẮT BUỘC):
+- Mỗi khi bạn sử dụng một ý tưởng, sự thật hoặc thông tin từ một phân đoạn (chunk) trong bài học, bạn **BẮT BUỘC** phải trích dẫn ID của phân đoạn đó ngay trong câu trả lời bằng cách sử dụng marker: @{{chunkId}}@.
+- Ví dụ: "Theo nội dung bài học @{{uuid-123}}@, tế bào là đơn vị cơ bản của sự sống. Ngoài ra, cấu trúc DNA được mô tả chi tiết tại @{{uuid-456}}@..."
+- Nếu một câu trả lời tổng hợp kiến thức từ nhiều chunk, bạn phải sử dụng đầy đủ các marker tương ứng. Điều này giúp học sinh có thể click để xem lại đúng đoạn video/nội dung đó.
+
 CÁCH TRÌNH BÀY:
 - Trả lời rõ ràng, dễ hiểu cho học sinh.
 - Có thể dùng:
@@ -50,9 +55,10 @@ ${lessonContext}
 ${question}
 
 === YÊU CẦU ===
-Trả lời câu hỏi hiện tại, ưu tiên NỘI DUNG BÀI HỌC. 
-${userNotes ? 'Lưu ý: Tuân thủ các ghi chú (USER NOTES) được người dùng cung cấp ở trên.' : ''}
-Dùng SESSION CONTEXT chỉ để hiểu đại từ và nhất quán cách diễn đạt; mọi sự kiện/fact về bài học phải bám nội dung bài.
+1. Trả lời câu hỏi hiện tại, ưu tiên NỘI DUNG BÀI HỌC. 
+2. ${userNotes ? 'Lưu ý: Tuân thủ các ghi chú (USER NOTES) được người dùng cung cấp ở trên.' : ''}
+3. Dùng SESSION CONTEXT chỉ để hiểu đại từ và nhất quán cách diễn đạt; mọi sự kiện/fact về bài học phải bám nội dung bài.
+4. **QUAN TRỌNG**: Bạn phải trích dẫn ID của phân đoạn (ID nằm trong cặp [ID: ...]) bằng cách nhúng @{{chunkId}}@ vào nội dung trả lời. Mọi thông tin lấy từ bài học đều phải được trích dẫn theo cách này.
 
 === TRẢ LỜI ===
 `;
