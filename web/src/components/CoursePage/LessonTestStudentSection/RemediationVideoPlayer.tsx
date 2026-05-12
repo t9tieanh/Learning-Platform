@@ -87,6 +87,7 @@ const RemediationVideoPlayer: React.FC<RemediationVideoPlayerProps> = ({
         containerClassName='aspect-video h-auto'
         clipStartTime={startTime}
         clipEndTime={endTime}
+        defaultShowSubtitles={false}
       />
       <div className='bg-blue-600 px-4 py-2 flex items-center justify-between'>
         <span className='text-[10px] font-bold text-white tracking-widest truncate max-w-[70%]'>

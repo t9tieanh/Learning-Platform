@@ -67,7 +67,7 @@ export class LessonRAGService {
       const sessionActive = sessionId != null && sessionId !== '';
 
       const [chunks, recentData, semanticHits, sessionDetail] = await Promise.all([
-        searchService.searchChunks(lessonId, question, 3),
+        searchService.searchChunks(lessonId, question, 10),
         sessionActive
           ? lessonChatHistoryService.buildRecentTranscriptForRag(sessionId!)
           : Promise.resolve({ transcript: '', messageIds: [] as string[] }),
@@ -91,8 +91,9 @@ export class LessonRAGService {
         };
       }
 
+      const retrievedIds = chunks.map(c => c.id);
       Logger.info(
-        `[RAGService] Retrieved ${chunks.length} relevant chunk(s) for question="${question}"`
+        `[RAGService] Retrieved ${chunks.length} relevant chunk(s) for question="${question}". IDs: ${retrievedIds.join(', ')}`
       );
 
       const context = this.formatContext(chunks);
@@ -121,12 +122,11 @@ export class LessonRAGService {
 
       // Filter sources to only include those cited in the answer text with @{{chunkId}}@
       const citedIds = [...answer.matchAll(/@{{(.*?)}}@/g)].map((m) => m[1]);
+      Logger.info(`[RAGService] LLM cited ${citedIds.length} chunks: ${citedIds.join(', ')}`);
+
       const filteredChunks = chunks.filter((c) => citedIds.includes(c.id));
 
       // If LLM failed to tag but we have chunks, or if we want to fallback to all chunks if none cited?
-      // The user specifically asked for tagging, so we should probably stick to cited ones.
-      // However, for safety, if none are cited, we might want to return all as fallback?
-      // But "thay vì trả về một list chunk" implies they want to move away from the list.
       const finalChunks = filteredChunks.length > 0 ? filteredChunks : chunks;
 
       const result: RAGResult = {
