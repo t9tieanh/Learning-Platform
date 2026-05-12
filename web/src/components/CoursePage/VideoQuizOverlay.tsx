@@ -186,8 +186,7 @@ const VideoQuizOverlay: React.FC<VideoQuizOverlayProps> = ({
                                         onClick={() => onSeek(timeToSeconds(activeChunk.startTime))}
                                         className='flex items-center gap-2 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-lg shadow-blue-500/20 transition-all text-[10px] font-bold uppercase tracking-tight whitespace-nowrap'
                                     >
-                                        <PlayCircle className='w-4 h-4' />
-                                        Xem lại đoạn này
+                                        <PlayCircle className='w-4 h-4' /> Xem lại đoạn này
                                     </motion.button>
                                 </div>
                                 <p className='text-xs text-slate-600 leading-relaxed font-normal'>
