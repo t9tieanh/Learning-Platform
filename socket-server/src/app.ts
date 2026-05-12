@@ -5,7 +5,10 @@ import logger from './utils/logger';
 
 export const initSocket = async (httpServer: http.Server) => {
     const io = new Server(httpServer, {
-        cors: { origin: "*" }
+        cors: { 
+            origin: ["https://learnova.t9tieanh.io.vn", "http://localhost:3000"],
+            credentials: true
+        }
     });
 
 
