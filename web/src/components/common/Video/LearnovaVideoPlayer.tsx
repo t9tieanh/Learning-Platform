@@ -27,11 +27,12 @@ interface LearnovaVideoPlayerProps {
     onShowChunkDetails?: (chunkId: string) => void
     clipStartTime?: number
     clipEndTime?: number
+    defaultShowSubtitles?: boolean
 }
 
 
 const LearnovaVideoPlayer = forwardRef<HTMLVideoElement | null, LearnovaVideoPlayerProps>(
-    ({ src, subtitles = [], chunks = [], isPiPEnabled = false, isSeekingAllowed = true, className = '', containerClassName = '', onSeeking, onTimeUpdate, onShowChunkDetails, clipStartTime, clipEndTime }, ref) => {
+    ({ src, subtitles = [], chunks = [], isPiPEnabled = false, isSeekingAllowed = true, className = '', containerClassName = '', onSeeking, onTimeUpdate, onShowChunkDetails, clipStartTime, clipEndTime, defaultShowSubtitles }, ref) => {
         const [isVideoLoading, setIsVideoLoading] = useState(true)
         const [isPlaying, setIsPlaying] = useState(false)
         const [duration, setDuration] = useState(0)
@@ -43,7 +44,7 @@ const LearnovaVideoPlayer = forwardRef<HTMLVideoElement | null, LearnovaVideoPla
         const [isPiP, setIsPiP] = useState(false)
         const [isBuffering, setIsBuffering] = useState(false)
         const [lastAction, setLastAction] = useState<'play' | 'pause' | null>(null)
-        const [showSubtitles, setShowSubtitles] = useState(true)
+        const [showSubtitles, setShowSubtitles] = useState(defaultShowSubtitles ?? true)
 
         // Tooltip States
         const [hoverTime, setHoverTime] = useState<number | null>(null)
