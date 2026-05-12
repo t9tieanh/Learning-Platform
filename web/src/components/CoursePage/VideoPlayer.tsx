@@ -39,7 +39,7 @@ const VideoPlayer = forwardRef<VideoPlayerRef, {
 
   const SKIP_DETECTION_WINDOW = 10000
   const SKIP_THRESHOLD = 3
-  const COMPLETION_THRESHOLD = 0.9
+  const COMPLETION_THRESHOLD = 0.7
 
   // Expose seekTo method
   useImperativeHandle(ref, () => ({

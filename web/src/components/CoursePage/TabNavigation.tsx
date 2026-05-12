@@ -82,7 +82,7 @@ export const TabNavigation = ({
       }
       return baseTabs
     },
-    [analysisData, lessonTestTabVisible]
+    [analysisData, lessonTestTabVisible, watchedPercent, currentLecture.completionStatus]
   )
 
   useEffect(() => {

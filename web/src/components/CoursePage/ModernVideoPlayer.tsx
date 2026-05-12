@@ -59,7 +59,7 @@ const ModernVideoPlayer = forwardRef<VideoPlayerRef, {
 
     const isCompleted = lesson.completionStatus === 'COMPLETED'
 
-    const COMPLETION_THRESHOLD = 0.9
+    const COMPLETION_THRESHOLD = 0.6
 
     useImperativeHandle(ref, () => ({
         seekTo: (time: number) => {
