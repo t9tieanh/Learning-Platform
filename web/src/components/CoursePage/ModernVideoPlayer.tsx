@@ -10,6 +10,7 @@ import { timeToSeconds } from '@/utils/time/time.utils'
 import { AnimatePresence, motion } from 'framer-motion'
 import { CheckCircle2, ChevronLeft, ChevronRight } from 'lucide-react'
 import VideoQuizOverlay from './VideoQuizOverlay'
+import { useLessonProgressStore } from '@/stores/useLessonProgressStore'
 
 export interface VideoPlayerRef {
     seekTo: (time: number) => void
@@ -42,7 +43,20 @@ const ModernVideoPlayer = forwardRef<VideoPlayerRef, {
     const shownQuizIds = useRef<Set<string>>(new Set())
     const lastCheckTime = useRef(0)
 
-    const [maxTimeWatched, setMaxTimeWatched] = useState(0)
+    const updateProgress = useLessonProgressStore(state => state.updateProgress)
+    const getProgress = useLessonProgressStore(state => state.getProgress)
+    
+    // Use a ref to store saved progress to avoid re-renders when it changes in the store
+    const savedProgressRef = useRef(getProgress(lesson.id))
+    const [maxTimeWatched, setMaxTimeWatched] = useState(savedProgressRef.current.maxTimeWatched)
+    const isSeekingToSaved = useRef(false)
+    useEffect(() => {
+        const progress = getProgress(lesson.id)
+        savedProgressRef.current = progress
+        setMaxTimeWatched(progress.maxTimeWatched)
+        isSeekingToSaved.current = false
+    }, [lesson.id, getProgress])
+
     const isCompleted = lesson.completionStatus === 'COMPLETED'
 
     const COMPLETION_THRESHOLD = 0.9
@@ -82,6 +96,17 @@ const ModernVideoPlayer = forwardRef<VideoPlayerRef, {
         fetchVideoData()
     }, [lesson.id, lesson.introductionVideo, data?.accessToken])
 
+    // Auto resume video from last position - ONLY ONCE when URL is ready
+    useEffect(() => {
+        if (actualVideoUrl && videoRef.current && !isSeekingToSaved.current) {
+            const progress = getProgress(lesson.id)
+            if (progress.lastCurrentTime > 0) {
+                isSeekingToSaved.current = true
+                videoRef.current.currentTime = progress.lastCurrentTime
+            }
+        }
+    }, [actualVideoUrl, lesson.id, getProgress])
+
     const parsedSubtitles = useMemo(() => {
         if (!subtitlesRaw) return []
         return parseSRT(subtitlesRaw)
@@ -97,6 +122,13 @@ const ModernVideoPlayer = forwardRef<VideoPlayerRef, {
         // Track max time reached in this session
         if (currentTime > maxTimeWatched && !isCompleted) {
             setMaxTimeWatched(currentTime)
+            updateProgress(lesson.id, { maxTimeWatched: currentTime })
+        }
+
+        // Periodically update current progress (every 2 seconds)
+        if (Math.abs(currentTime - lastCheckTime.current) > 2) {
+            updateProgress(lesson.id, { lastCurrentTime: currentTime })
+            lastCheckTime.current = currentTime
         }
 
         const currentPercent = (currentTime / duration) * 100
@@ -253,6 +285,7 @@ const ModernVideoPlayer = forwardRef<VideoPlayerRef, {
                             <VideoQuizOverlay
                                 chunk={currentQuizChunk}
                                 allChunks={chunks}
+                                maxTimeWatched={maxTimeWatched}
                                 onSkip={() => finishQuiz(currentQuizChunk.id)}
                                 onContinue={() => finishQuiz(currentQuizChunk.id)}
                                 onClose={closeQuiz}
