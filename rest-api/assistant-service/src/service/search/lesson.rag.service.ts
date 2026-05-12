@@ -119,9 +119,19 @@ export class LessonRAGService {
 
       const answer = await this.generateAnswer(context, question, historyForPrompt, userNotes || undefined);
 
+      // Filter sources to only include those cited in the answer text with @{{chunkId}}@
+      const citedIds = [...answer.matchAll(/@{{(.*?)}}@/g)].map((m) => m[1]);
+      const filteredChunks = chunks.filter((c) => citedIds.includes(c.id));
+
+      // If LLM failed to tag but we have chunks, or if we want to fallback to all chunks if none cited?
+      // The user specifically asked for tagging, so we should probably stick to cited ones.
+      // However, for safety, if none are cited, we might want to return all as fallback?
+      // But "thay vì trả về một list chunk" implies they want to move away from the list.
+      const finalChunks = filteredChunks.length > 0 ? filteredChunks : chunks;
+
       const result: RAGResult = {
         answer,
-        sources: chunks.map((chunk) => ({
+        sources: finalChunks.map((chunk) => ({
           chunkId: chunk.id,
           title: chunk.title,
           summary: chunk.summary,
@@ -166,14 +176,15 @@ export class LessonRAGService {
    */
   private formatContext(chunks: SearchChunkResult[]): string {
     return chunks
-      .map((chunk, index) => {
+      .map((chunk) => {
         const title = chunk.title ? `[Phần ${chunk.chunkIndex + 1}: ${chunk.title}]` : `[Phần ${chunk.chunkIndex + 1}]`;
+        const idTag = `[ID: ${chunk.id}]`;
 
         const summary = chunk.summary
           ? `Tóm tắt: ${chunk.summary}\n`
           : '';
 
-        return `${title}\n${summary}Nội dung: ${chunk.content}`;
+        return `${title} ${idTag}\n${summary}Nội dung: ${chunk.content}`;
       })
       .join('\n\n---\n\n');
   }

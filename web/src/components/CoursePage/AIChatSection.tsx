@@ -17,6 +17,7 @@ import { cn } from '@/lib/utils'
 import learnovaLogo from '@/assets/images/LEARNOVA_sm.png'
 import aiAssistantEmpty from '@/assets/images/ai-assistant-empty.png'
 import { Button } from '@/components/ui/button'
+import CustomButton from '@/components/common/Button'
 import { Textarea } from '@/components/ui/textarea'
 import {
     Select,
@@ -63,7 +64,7 @@ export const AIChatSection: React.FC<AIChatSectionProps> = ({
     const [isEditingNote, setIsEditingNote] = useState(false)
     const [editNote, setEditNote] = useState('')
     const [updatingNote, setUpdatingNote] = useState(false)
-    const [openSourceId, setOpenSourceId] = useState<string | null>(null)
+    const [activePlayerKey, setActivePlayerKey] = useState<string | null>(null);
 
     const scrollRef = useRef<HTMLDivElement>(null)
 
@@ -553,15 +554,105 @@ export const AIChatSection: React.FC<AIChatSectionProps> = ({
                                     >
                                         {m.role === 'assistant' ? (
                                             <div className='react-markdown-container'>
-                                                <ReactMarkdown>{m.content}</ReactMarkdown>
+                                                {(() => {
+                                                    const text = m.content;
+                                                    const parts = text.split(/(@{{.*?}}@)/g);
+                                                    const hasMarkers = parts.some(p => p.match(/@{{(.*?)}}@/));
+                                                    
+                                                    return parts.map((part, index) => {
+                                                        const match = part.match(/@{{(.*?)}}@/);
+                                                        if (match) {
+                                                            const chunkId = match[1];
+                                                            const source = m.sources?.find(s => s.chunkId === chunkId);
+                                                            if (!source) return <span key={index} className="text-red-400 opacity-50 text-[10px]">[Nguồn lỗi]</span>;
+
+                                                            const playerKey = `${m.id}:${chunkId}`;
+                                                            const isPlayerOpen = activePlayerKey === playerKey;
+
+                                                            return (
+                                                                <button
+                                                                    key={index}
+                                                                    onClick={() => {
+                                                                        // If player for this specific message+source is already open, close it. 
+                                                                        // Otherwise, open it and seek.
+                                                                        if (isPlayerOpen) {
+                                                                            setActivePlayerKey(null);
+                                                                        } else {
+                                                                            setActivePlayerKey(playerKey);
+                                                                            onSeek?.(source.startTime || '0');
+                                                                        }
+                                                                    }}
+                                                                    className={cn(
+                                                                        "inline-flex items-center gap-1.5 px-3 py-1 mx-1 rounded-full text-[10px] font-bold transition-all border shadow-sm align-middle mb-1 group/badge",
+                                                                        isPlayerOpen 
+                                                                            ? "bg-blue-600 text-white border-blue-600 shadow-blue-200" 
+                                                                            : "bg-blue-50 text-blue-600 border-blue-100 hover:bg-blue-600 hover:text-white hover:border-blue-600"
+                                                                    )}
+                                                                    title={`Xem đoạn video: ${source.title || 'Nội dung bài học'} (${source.startTime})`}
+                                                                >
+                                                                    <Play className={cn("w-2.5 h-2.5 fill-current shrink-0", isPlayerOpen && "animate-pulse")} />
+                                                                    <span className="max-w-[150px] truncate">
+                                                                        {source.title || 'Nội dung bài học'}
+                                                                    </span>
+                                                                </button>
+                                                            );
+                                                        }
+                                                        return (
+                                                            <span key={index} className="inline">
+                                                                <ReactMarkdown components={{ p: 'span' }}>
+                                                                    {part}
+                                                                </ReactMarkdown>
+                                                            </span>
+                                                        );
+                                                    });
+                                                })()}
                                             </div>
                                         ) : (
                                             m.content
                                         )}
                                     </div>
 
-                                    {/* Sources / References */}
-                                    {m.sources && m.sources.length > 0 && (
+                                    {/* Inline Player for sources cited in the text */}
+                                    {activePlayerKey && m.sources?.some(s => activePlayerKey === `${m.id}:${s.chunkId}`) && (
+                                        <div className="mt-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                                            {(() => {
+                                                const chunkId = activePlayerKey.split(':')[1];
+                                                const source = m.sources.find(s => s.chunkId === chunkId);
+                                                if (!source) return null;
+                                                const chunk: LessonChunk = {
+                                                    id: source.chunkId,
+                                                    title: source.title || 'Đoạn trích',
+                                                    summary: source.summary,
+                                                    startTime: source.startTime || '00:00',
+                                                    endTime: source.endTime || '00:00',
+                                                    chunkIndex: source.chunkIndex,
+                                                    timestamp: source.startTime,
+                                                    sentenceCount: 0
+                                                };
+                                                return (
+                                                    <div className="space-y-2">
+                                                        <div className="flex items-center justify-between px-2">
+                                                            <CustomButton 
+                                                                onClick={() => onSeek?.(source.startTime || '0')}
+                                                                label="Xem ở màn hình lớn"
+                                                                icon={<Sparkles className="w-3 h-3" />}
+                                                                className="h-7 text-[10px] font-bold px-3 py-1 bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-700 border-none shadow-none"
+                                                                title="Chuyển sang trình phát chính"
+                                                            />
+                                                        </div>
+                                                        <RemediationVideoPlayer
+                                                            lessonId={lessonId}
+                                                            chunk={chunk}
+                                                            subtitlesRaw={subtitlesRaw}
+                                                        />
+                                                    </div>
+                                                );
+                                            })()}
+                                        </div>
+                                    )}
+
+                                    {/* Legacy Sources / References - Only show if NO markers are detected in the content */}
+                                    {m.sources && m.sources.length > 0 && !m.content.includes('@{{') && (
                                         <div className='space-y-2 mt-4 animate-in fade-in slide-in-from-top-2 duration-500'>
                                             <p className='text-[11px] font-bold text-gray-400 tracking-widest flex items-center gap-2'>
                                                 <Sparkles className='w-3 h-3 text-blue-400' />{' '}
@@ -569,7 +660,8 @@ export const AIChatSection: React.FC<AIChatSectionProps> = ({
                                             </p>
                                             <div className='grid gap-2'>
                                                 {m.sources.map((source: RAGSource, idx: number) => {
-                                                    const isPlayerOpen = openSourceId === source.chunkId
+                                                    const playerKey = `${m.id}:${source.chunkId}`;
+                                                    const isPlayerOpen = activePlayerKey === playerKey;
                                                     const chunk: LessonChunk = {
                                                         id: source.chunkId,
                                                         title: source.title || `Đoạn ${idx + 1}`,
@@ -604,7 +696,7 @@ export const AIChatSection: React.FC<AIChatSectionProps> = ({
                                                                                 <Sparkles className='w-3.5 h-3.5' />
                                                                             </button>
                                                                             <button
-                                                                                onClick={() => setOpenSourceId(isPlayerOpen ? null : source.chunkId)}
+                                                                                onClick={() => setActivePlayerKey(isPlayerOpen ? null : playerKey)}
                                                                                 className={cn(
                                                                                     'w-8 h-8 rounded-lg transition-all flex items-center justify-center shrink-0 border shadow-sm',
                                                                                     isPlayerOpen
