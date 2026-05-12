@@ -20,28 +20,9 @@ const PDFViewer = ({ lesson, markDoneVideo }: { lesson: Lesson; markDoneVideo: (
       if (lesson.id && data?.accessToken) {
         setIsLoading(true)
         try {
-          const currentHost = window.location.hostname
-          const response = await lessonStudentService.getPresignedCookies(lesson.id)
-
-          if (response.code === 200 && response.result) {
-            const { policy, signature, keyPairId, expires, domain, url } = response.result
-
-            const canUseCookies = !domain.endsWith('.cloudfront.net') &&
-              (currentHost.endsWith(domain.split('.').slice(-2).join('.')) || currentHost === 'localhost')
-
-            if (canUseCookies && currentHost !== 'localhost') {
-              const cookieSettings = `; domain=.${domain}; path=/; Secure; SameSite=None`
-              if (policy) document.cookie = `CloudFront-Policy=${policy}${cookieSettings}`
-              if (expires) document.cookie = `CloudFront-Expires=${expires}${cookieSettings}`
-              document.cookie = `CloudFront-Signature=${signature}${cookieSettings}`
-              document.cookie = `CloudFront-Key-Pair-Id=${keyPairId}${cookieSettings}`
-              setPdfSrc(url)
-            } else {
-              const urlResponse = await lessonStudentService.getPresignedUrl(lesson.id)
-              if (urlResponse.code === 200) {
-                setPdfSrc(urlResponse.result || '')
-              }
-            }
+          const urlResponse = await lessonStudentService.getPresignedUrl(lesson.id)
+          if (urlResponse.code === 200) {
+            setPdfSrc(urlResponse.result || '')
           }
         } catch (error) {
           console.error('PDF access error:', error)

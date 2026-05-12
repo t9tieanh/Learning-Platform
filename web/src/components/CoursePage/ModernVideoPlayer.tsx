@@ -61,27 +61,9 @@ const ModernVideoPlayer = forwardRef<VideoPlayerRef, {
 
             if (lesson.id && data?.accessToken) {
                 try {
-                    const currentHost = window.location.hostname
-                    const response = await lessonStudentService.getPresignedCookies(lesson.id)
-
-                    if (response.code === 200 && response.result) {
-                        const { policy, signature, keyPairId, expires, domain, url } = response.result
-                        const canUseCookies = !domain.endsWith('.cloudfront.net') &&
-                            (currentHost.endsWith(domain.split('.').slice(-2).join('.')) || currentHost === 'localhost')
-
-                        if (canUseCookies && currentHost !== 'localhost') {
-                            const cookieSettings = `; domain=.${domain}; path=/; Secure; SameSite=None`
-                            if (policy) document.cookie = `CloudFront-Policy=${policy}${cookieSettings}`
-                            if (expires) document.cookie = `CloudFront-Expires=${expires}${cookieSettings}`
-                            document.cookie = `CloudFront-Signature=${signature}${cookieSettings}`
-                            document.cookie = `CloudFront-Key-Pair-Id=${keyPairId}${cookieSettings}`
-                            setActualVideoUrl(url)
-                        } else {
-                            const urlResponse = await lessonStudentService.getPresignedUrl(lesson.id)
-                            if (urlResponse.code === 200) {
-                                setActualVideoUrl(urlResponse.result || '')
-                            }
-                        }
+                    const urlResponse = await lessonStudentService.getPresignedUrl(lesson.id)
+                    if (urlResponse.code === 200) {
+                        setActualVideoUrl(urlResponse.result || '')
                     }
                 } catch (error) {
                     console.error('Video access error:', error)

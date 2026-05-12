@@ -39,6 +39,13 @@ import { PremiumLockedState } from './PremiumLockedState'
 import RemediationVideoPlayer from './LessonTestStudentSection/RemediationVideoPlayer'
 import { LessonChunk } from '@/types/ai'
 import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible'
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip"
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
 export const AIChatSection: React.FC<AIChatSectionProps> = ({
     lessonId,
@@ -475,7 +482,7 @@ export const AIChatSection: React.FC<AIChatSectionProps> = ({
 
             <div
                 ref={scrollRef}
-                className='flex-1 min-h-0 overflow-y-auto p-4 space-y-6 scroll-smooth scrollbar-thin scrollbar-thumb-gray-100 relative'
+                className='flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-4 space-y-6 scroll-smooth scrollbar-thin scrollbar-thumb-gray-100 relative'
             >
                 {messagesLoading && (
                     <div className='absolute inset-0 bg-white/60 z-10 flex items-center justify-center'>
@@ -530,30 +537,32 @@ export const AIChatSection: React.FC<AIChatSectionProps> = ({
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             key={m.id}
-                            className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                            className={`flex w-full mb-4 ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
                         >
                             <div
-                                className={`flex gap-3 max-w-[85%] ${m.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}
+                                className={`flex gap-3 max-w-[88%] min-w-0 ${m.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}
                             >
-                                <div
-                                    className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 shadow-sm ${m.role === 'user' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600'
-                                        }`}
-                                >
-                                    {m.role === 'user' ? (
-                                        <User className='w-4 h-4' />
-                                    ) : (
-                                        <Bot className='w-4 h-4' />
-                                    )}
-                                </div>
-                                <div className='space-y-3'>
+                                {m.role === 'user' ? (
+                                    <Avatar className="w-8 h-8 rounded-xl shadow-sm border border-blue-100">
+                                        <AvatarImage src={user?.avatarUrl} alt={user?.name || 'User'} />
+                                        <AvatarFallback className="bg-blue-600 text-white text-[10px] font-bold rounded-xl">
+                                            {(user?.name || 'U').substring(0, 2).toUpperCase()}
+                                        </AvatarFallback>
+                                    </Avatar>
+                                ) : (
+                                    <div className="w-8 h-8 rounded-xl bg-white flex items-center justify-center shrink-0 shadow-sm border border-gray-100 overflow-hidden">
+                                        <img src={learnovaLogo} alt="Learnova Bot" className="w-5 h-5 object-contain" />
+                                    </div>
+                                )}
+                                <div className='space-y-3 min-w-0 flex-1 overflow-hidden'>
                                     <div
-                                        className={`px-4 py-2.5 rounded-2xl text-[13px] leading-relaxed font-medium shadow-sm ${m.role === 'user'
+                                        className={`px-4 py-2.5 rounded-2xl text-[13px] leading-relaxed font-medium shadow-sm break-words overflow-hidden ${m.role === 'user'
                                             ? 'bg-blue-600 text-white rounded-tr-none'
                                             : 'bg-gray-50 text-gray-700 border border-gray-100 rounded-tl-none'
                                             }`}
                                     >
                                         {m.role === 'assistant' ? (
-                                            <div className='react-markdown-container'>
+                                            <div className='react-markdown-container overflow-hidden break-words'>
                                                 {(() => {
                                                     const text = m.content;
                                                     const parts = text.split(/(@{{.*?}}@)/g);
@@ -570,31 +579,36 @@ export const AIChatSection: React.FC<AIChatSectionProps> = ({
                                                             const isPlayerOpen = activePlayerKey === playerKey;
 
                                                             return (
-                                                                <button
-                                                                    key={index}
-                                                                    onClick={() => {
-                                                                        // If player for this specific message+source is already open, close it. 
-                                                                        // Otherwise, open it and seek.
-                                                                        if (isPlayerOpen) {
-                                                                            setActivePlayerKey(null);
-                                                                        } else {
-                                                                            setActivePlayerKey(playerKey);
-                                                                            onSeek?.(source.startTime || '0');
-                                                                        }
-                                                                    }}
-                                                                    className={cn(
-                                                                        "inline-flex items-center gap-1.5 px-3 py-1 mx-1 rounded-full text-[10px] font-bold transition-all border shadow-sm align-middle mb-1 group/badge",
-                                                                        isPlayerOpen 
-                                                                            ? "bg-blue-600 text-white border-blue-600 shadow-blue-200" 
-                                                                            : "bg-blue-50 text-blue-600 border-blue-100 hover:bg-blue-600 hover:text-white hover:border-blue-600"
-                                                                    )}
-                                                                    title={`Xem đoạn video: ${source.title || 'Nội dung bài học'} (${source.startTime})`}
-                                                                >
-                                                                    <Play className={cn("w-2.5 h-2.5 fill-current shrink-0", isPlayerOpen && "animate-pulse")} />
-                                                                    <span className="max-w-[150px] truncate">
-                                                                        {source.title || 'Nội dung bài học'}
-                                                                    </span>
-                                                                </button>
+                                                                <Tooltip key={index}>
+                                                                    <TooltipTrigger asChild>
+                                                                        <button
+                                                                            onClick={() => {
+                                                                                // If player for this specific message+source is already open, close it. 
+                                                                                // Otherwise, open it and seek.
+                                                                                if (isPlayerOpen) {
+                                                                                    setActivePlayerKey(null);
+                                                                                } else {
+                                                                                    setActivePlayerKey(playerKey);
+                                                                                }
+                                                                            }}
+                                                                            className={cn(
+                                                                                "inline-flex items-center gap-1.5 px-3 py-1 mx-1 rounded-full text-[10px] font-bold transition-all border shadow-sm align-middle mb-1 group/badge",
+                                                                                isPlayerOpen 
+                                                                                    ? "bg-blue-600 text-white border-blue-600 shadow-blue-200" 
+                                                                                    : "bg-blue-50 text-blue-600 border-blue-100 hover:bg-blue-600 hover:text-white hover:border-blue-600"
+                                                                            )}
+                                                                        >
+                                                                            <Play className={cn("w-2.5 h-2.5 fill-current shrink-0", isPlayerOpen && "animate-pulse")} />
+                                                                            <span className="max-w-[120px] truncate">
+                                                                                {source.title || 'Nội dung bài học'}
+                                                                            </span>
+                                                                        </button>
+                                                                    </TooltipTrigger>
+                                                                    <TooltipContent side="top">
+                                                                        <p className="font-bold">Xem đoạn video: {source.startTime}</p>
+                                                                        <p className="opacity-80">{source.title || 'Nội dung bài học'}</p>
+                                                                    </TooltipContent>
+                                                                </Tooltip>
                                                             );
                                                         }
                                                         return (
@@ -632,13 +646,19 @@ export const AIChatSection: React.FC<AIChatSectionProps> = ({
                                                 return (
                                                     <div className="space-y-2">
                                                         <div className="flex items-center justify-between px-2">
-                                                            <CustomButton 
-                                                                onClick={() => onSeek?.(source.startTime || '0')}
-                                                                label="Xem ở màn hình lớn"
-                                                                icon={<Sparkles className="w-3 h-3" />}
-                                                                className="h-7 text-[10px] font-bold px-3 py-1 bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-700 border-none shadow-none"
-                                                                title="Chuyển sang trình phát chính"
-                                                            />
+                                                            <Tooltip>
+                                                                <TooltipTrigger asChild>
+                                                                    <CustomButton 
+                                                                        onClick={() => onSeek?.(source.startTime || '0')}
+                                                                        label="Xem ở màn hình lớn"
+                                                                        icon={<Sparkles className="w-3 h-3" />}
+                                                                        className="h-7 text-[10px] font-bold px-3 py-1 bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-700 border-none shadow-none"
+                                                                    />
+                                                                </TooltipTrigger>
+                                                                <TooltipContent side="top">
+                                                                    <p>Chuyển sang trình phát chính tại {source.startTime}</p>
+                                                                </TooltipContent>
+                                                            </Tooltip>
                                                         </div>
                                                         <RemediationVideoPlayer
                                                             lessonId={lessonId}
@@ -687,27 +707,40 @@ export const AIChatSection: React.FC<AIChatSectionProps> = ({
                                                                             {source.startTime}
                                                                         </span>
                                                                         <div className='flex items-center gap-1.5'>
-                                                                            <button
-                                                                                onClick={() => onSeek?.(source.startTime || '0')}
-                                                                                className='w-8 h-8 rounded-lg bg-gray-50 text-gray-400 hover:bg-blue-600 hover:text-white transition-all flex items-center justify-center shrink-0 border border-gray-100 hover:border-blue-600 shadow-sm'
-                                                                                title='Xem trên video chính'
-                                                                                type='button'
-                                                                            >
-                                                                                <Sparkles className='w-3.5 h-3.5' />
-                                                                            </button>
-                                                                            <button
-                                                                                onClick={() => setActivePlayerKey(isPlayerOpen ? null : playerKey)}
-                                                                                className={cn(
-                                                                                    'w-8 h-8 rounded-lg transition-all flex items-center justify-center shrink-0 border shadow-sm',
-                                                                                    isPlayerOpen
-                                                                                        ? 'bg-blue-600 text-white border-blue-600 shadow-blue-200'
-                                                                                        : 'bg-gray-50 text-gray-400 border-gray-100 hover:bg-blue-600 hover:text-white hover:border-blue-600'
-                                                                                )}
-                                                                                title={isPlayerOpen ? 'Đóng trình phát' : 'Xem đoạn trích'}
-                                                                                type='button'
-                                                                            >
-                                                                                <Play className={cn('w-3.5 h-3.5 fill-current ml-0.5', isPlayerOpen && 'animate-pulse')} />
-                                                                            </button>
+                                                                            <Tooltip>
+                                                                                <TooltipTrigger asChild>
+                                                                                    <button
+                                                                                        onClick={() => onSeek?.(source.startTime || '0')}
+                                                                                        className='w-8 h-8 rounded-lg bg-gray-50 text-gray-400 hover:bg-blue-600 hover:text-white transition-all flex items-center justify-center shrink-0 border border-gray-100 hover:border-blue-600 shadow-sm'
+                                                                                        type='button'
+                                                                                    >
+                                                                                        <Sparkles className='w-3.5 h-3.5' />
+                                                                                    </button>
+                                                                                </TooltipTrigger>
+                                                                                <TooltipContent side="top">
+                                                                                    <p>Xem trên video chính tại {source.startTime}</p>
+                                                                                </TooltipContent>
+                                                                            </Tooltip>
+                                                                            
+                                                                            <Tooltip>
+                                                                                <TooltipTrigger asChild>
+                                                                                    <button
+                                                                                        onClick={() => setActivePlayerKey(isPlayerOpen ? null : playerKey)}
+                                                                                        className={cn(
+                                                                                            'w-8 h-8 rounded-lg transition-all flex items-center justify-center shrink-0 border shadow-sm',
+                                                                                            isPlayerOpen
+                                                                                                ? 'bg-blue-600 text-white border-blue-600 shadow-blue-200'
+                                                                                                : 'bg-gray-50 text-gray-400 border-gray-100 hover:bg-blue-600 hover:text-white hover:border-blue-600'
+                                                                                        )}
+                                                                                        type='button'
+                                                                                    >
+                                                                                        <Play className={cn('w-3.5 h-3.5 fill-current ml-0.5', isPlayerOpen && 'animate-pulse')} />
+                                                                                    </button>
+                                                                                </TooltipTrigger>
+                                                                                <TooltipContent side="top">
+                                                                                    <p>{isPlayerOpen ? 'Đóng trình phát' : 'Xem đoạn trích video'}</p>
+                                                                                </TooltipContent>
+                                                                            </Tooltip>
                                                                         </div>
                                                                     </div>
                                                                     <div className='text-[12px] font-bold text-slate-800 line-clamp-2 leading-relaxed'>
@@ -742,8 +775,8 @@ export const AIChatSection: React.FC<AIChatSectionProps> = ({
                 {isLoading && (
                     <div className='flex justify-start animate-in fade-in duration-300'>
                         <div className='flex gap-3 max-w-[85%]'>
-                            <div className='w-8 h-8 rounded-xl bg-gray-100 text-gray-400 flex items-center justify-center animate-pulse'>
-                                <Bot className='w-4 h-4' />
+                            <div className='w-8 h-8 rounded-xl bg-white flex items-center justify-center shrink-0 shadow-sm border border-gray-100 overflow-hidden animate-pulse'>
+                                <img src={learnovaLogo} alt="Learnova Bot" className="w-5 h-5 object-contain" />
                             </div>
                             <div className='bg-gray-50 border border-gray-100 px-4 py-3 rounded-2xl rounded-tl-none flex items-center gap-2'>
                                 <Loader2 className='w-4 h-4 animate-spin text-blue-500' />
