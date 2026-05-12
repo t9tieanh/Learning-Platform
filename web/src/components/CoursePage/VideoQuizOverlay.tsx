@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, memo, useMemo, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { CheckCircle2, XCircle, ArrowRight, SkipForward, PlayCircle } from 'lucide-react'
 import { LessonChunk } from '@/types/ai'
@@ -15,7 +15,99 @@ interface VideoQuizOverlayProps {
     onSeek: (time: number) => void
 }
 
-const VideoQuizOverlay: React.FC<VideoQuizOverlayProps> = ({
+// Separate and memoize Choice Item for performance
+const ChoiceItem = memo(({ 
+    choice, 
+    isAnswered, 
+    isSelected, 
+    onSelect 
+}: { 
+    choice: any, 
+    isAnswered: boolean, 
+    isSelected: boolean, 
+    onSelect: (id: string) => void 
+}) => {
+    const isCorrect = choice.isCorrect
+
+    let styleClass = 'border-slate-100 bg-slate-50/50 hover:border-blue-300 hover:bg-blue-50/50 text-slate-700'
+    if (isAnswered) {
+        if (isCorrect) styleClass = 'border-emerald-200 bg-emerald-50/80 text-emerald-900 shadow-[0_0_15px_rgba(16,185,129,0.1)]'
+        else if (isSelected) styleClass = 'border-rose-200 bg-rose-50/80 text-rose-900 shadow-[0_0_15px_rgba(244,63,94,0.1)]'
+        else styleClass = 'opacity-40 border-slate-50'
+    }
+
+    return (
+        <motion.button
+            whileHover={!isAnswered ? { x: 4 } : {}}
+            whileTap={!isAnswered ? { scale: 0.985 } : {}}
+            onClick={() => onSelect(choice.id)}
+            className={`w-full text-left px-5 py-4 rounded-2xl border transition-all flex items-center justify-between gap-4 group cursor-pointer ${styleClass}`}
+            disabled={isAnswered}
+        >
+            <span className='text-sm font-medium tracking-tight leading-relaxed'>
+                {choice.text}
+            </span>
+            {isAnswered && (
+                <motion.div
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    className='flex-shrink-0'
+                >
+                    {isCorrect ? (
+                        <div className='w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center'>
+                            <CheckCircle2 className='w-4 h-4 text-white' />
+                        </div>
+                    ) : isSelected ? (
+                        <div className='w-6 h-6 rounded-full bg-rose-500 flex items-center justify-center'>
+                            <XCircle className='w-4 h-4 text-white' />
+                        </div>
+                    ) : null}
+                </motion.div>
+            )}
+        </motion.button>
+    )
+})
+ChoiceItem.displayName = 'ChoiceItem'
+
+// Separate and memoize Chunk Item for performance
+const ChunkItem = memo(({ 
+    chunk, 
+    idx, 
+    isActive, 
+    isLocked, 
+    onSelect 
+}: { 
+    chunk: LessonChunk, 
+    idx: number, 
+    isActive: boolean, 
+    isLocked: boolean, 
+    onSelect: (id: string) => void 
+}) => (
+    <button
+        disabled={isLocked}
+        onClick={() => onSelect(chunk.id)}
+        className={`px-3.5 py-2 rounded-xl text-[9px] font-bold uppercase tracking-tight transition-all whitespace-nowrap border flex flex-col items-start gap-0.5 relative ${isActive
+            ? 'bg-white text-blue-600 border-white shadow-lg'
+            : isLocked
+                ? 'bg-black/10 text-white/30 border-white/5 cursor-not-allowed opacity-50'
+                : 'bg-white/10 text-white/60 border-white/10 hover:bg-white/20'
+            }`}
+    >
+        <div className='flex items-center gap-1'>
+            <span className={`text-[8px] opacity-70 ${isActive ? 'text-blue-500' : isLocked ? 'text-white/20' : 'text-white/40'}`}>
+                Phần {idx + 1}
+            </span>
+            {isLocked && <div className='w-2 h-2 rounded-full bg-white/20 flex items-center justify-center'><div className='w-1 h-1 bg-white/40 rounded-full' /></div>}
+        </div>
+        <span className='truncate max-w-[120px]'>{chunk.title}</span>
+        {isLocked && (
+            <div className='absolute inset-0 bg-black/5 rounded-xl pointer-events-none' />
+        )}
+    </button>
+))
+ChunkItem.displayName = 'ChunkItem'
+
+const VideoQuizOverlay: React.FC<VideoQuizOverlayProps> = memo(({
     chunk: initialChunk,
     allChunks,
     maxTimeWatched,
@@ -112,35 +204,16 @@ const VideoQuizOverlay: React.FC<VideoQuizOverlayProps> = ({
                                 display: none;
                             }
                         `}</style>
-                        {allChunks.filter(c => c.quizzes && c.quizzes.length > 0).map((c, idx) => {
-                            const isLocked = timeToSeconds(c.startTime) > maxTimeWatched + 2
-                            const isActive = activeChunkId === c.id
-
-                            return (
-                                <button
-                                    key={c.id}
-                                    disabled={isLocked}
-                                    onClick={() => handleChunkSwitch(c.id)}
-                                    className={`px-3.5 py-2 rounded-xl text-[9px] font-bold uppercase tracking-tight transition-all whitespace-nowrap border flex flex-col items-start gap-0.5 relative ${isActive
-                                        ? 'bg-white text-blue-600 border-white shadow-lg'
-                                        : isLocked
-                                            ? 'bg-black/10 text-white/30 border-white/5 cursor-not-allowed opacity-50'
-                                            : 'bg-white/10 text-white/60 border-white/10 hover:bg-white/20'
-                                        }`}
-                                >
-                                    <div className='flex items-center gap-1'>
-                                        <span className={`text-[8px] opacity-70 ${isActive ? 'text-blue-500' : isLocked ? 'text-white/20' : 'text-white/40'}`}>
-                                            Phần {idx + 1}
-                                        </span>
-                                        {isLocked && <div className='w-2 h-2 rounded-full bg-white/20 flex items-center justify-center'><div className='w-1 h-1 bg-white/40 rounded-full' /></div>}
-                                    </div>
-                                    <span className='truncate max-w-[120px]'>{c.title}</span>
-                                    {isLocked && (
-                                        <div className='absolute inset-0 bg-black/5 rounded-xl pointer-events-none' />
-                                    )}
-                                </button>
-                            )
-                        })}
+                        {allChunks.filter(c => c.quizzes && c.quizzes.length > 0).map((c, idx) => (
+                            <ChunkItem 
+                                key={c.id}
+                                chunk={c}
+                                idx={idx}
+                                isActive={activeChunkId === c.id}
+                                isLocked={timeToSeconds(c.startTime) > maxTimeWatched + 2}
+                                onSelect={handleChunkSwitch}
+                            />
+                        ))}
                     </div>
 
                     <AnimatePresence mode='wait'>
@@ -173,49 +246,15 @@ const VideoQuizOverlay: React.FC<VideoQuizOverlayProps> = ({
                             transition={{ duration: 0.2, delay: 0.1 }}
                             className='grid grid-cols-1 md:grid-cols-2 gap-3 mb-6'
                         >
-                            {currentQuiz.choices.map((choice) => {
-                                const isCorrect = choice.isCorrect
-                                const isSelected = selectedChoiceId === choice.id
-
-                                let styleClass = 'border-slate-100 bg-slate-50/50 hover:border-blue-300 hover:bg-blue-50/50 text-slate-700'
-                                if (isAnswered) {
-                                    if (isCorrect) styleClass = 'border-emerald-200 bg-emerald-50/80 text-emerald-900 shadow-[0_0_15px_rgba(16,185,129,0.1)]'
-                                    else if (isSelected) styleClass = 'border-rose-200 bg-rose-50/80 text-rose-900 shadow-[0_0_15px_rgba(244,63,94,0.1)]'
-                                    else styleClass = 'opacity-40 border-slate-50'
-                                }
-
-                                return (
-                                    <motion.button
-                                        key={choice.id}
-                                        whileHover={!isAnswered ? { x: 4 } : {}}
-                                        whileTap={!isAnswered ? { scale: 0.985 } : {}}
-                                        onClick={() => handleChoiceSelect(choice.id)}
-                                        className={`w-full text-left px-5 py-4 rounded-2xl border transition-all flex items-center justify-between gap-4 group cursor-pointer ${styleClass}`}
-                                        disabled={isAnswered}
-                                    >
-                                        <span className='text-sm font-medium tracking-tight leading-relaxed'>
-                                            {choice.text}
-                                        </span>
-                                        {isAnswered && (
-                                            <motion.div
-                                                initial={{ scale: 0, opacity: 0 }}
-                                                animate={{ scale: 1, opacity: 1 }}
-                                                className='flex-shrink-0'
-                                            >
-                                                {isCorrect ? (
-                                                    <div className='w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center'>
-                                                        <CheckCircle2 className='w-4 h-4 text-white' />
-                                                    </div>
-                                                ) : isSelected ? (
-                                                    <div className='w-6 h-6 rounded-full bg-rose-500 flex items-center justify-center'>
-                                                        <XCircle className='w-4 h-4 text-white' />
-                                                    </div>
-                                                ) : null}
-                                            </motion.div>
-                                        )}
-                                    </motion.button>
-                                )
-                            })}
+                            {currentQuiz.choices.map((choice) => (
+                                <ChoiceItem 
+                                    key={choice.id}
+                                    choice={choice}
+                                    isAnswered={isAnswered}
+                                    isSelected={selectedChoiceId === choice.id}
+                                    onSelect={handleChoiceSelect}
+                                />
+                            ))}
                         </motion.div>
                     </AnimatePresence>
 
@@ -272,6 +311,8 @@ const VideoQuizOverlay: React.FC<VideoQuizOverlayProps> = ({
             </motion.div>
         </motion.div>
     )
-}
+})
+
+VideoQuizOverlay.displayName = 'VideoQuizOverlay'
 
 export default VideoQuizOverlay

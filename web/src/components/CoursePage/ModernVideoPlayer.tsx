@@ -168,7 +168,7 @@ const ModernVideoPlayer = forwardRef<VideoPlayerRef, {
         lastCheckTime.current = videoRef.current.currentTime
     }, [maxTimeWatched, isCompleted])
 
-    const startQuiz = () => {
+    const startQuiz = useCallback(() => {
         const video = videoRef.current
         if (!video || chunks.length === 0) return
 
@@ -188,18 +188,18 @@ const ModernVideoPlayer = forwardRef<VideoPlayerRef, {
             video.pause()
             setCurrentQuizChunk(chunkWithQuizzes)
         }
-    }
+    }, [chunks])
 
-    const finishQuiz = (chunkId: string) => {
+    const finishQuiz = useCallback((chunkId: string) => {
         shownQuizIds.current.add(chunkId)
         setCurrentQuizChunk(null)
         videoRef.current?.play().catch(() => { })
-    }
+    }, [])
 
-    const closeQuiz = () => {
+    const closeQuiz = useCallback(() => {
         setCurrentQuizChunk(null)
         videoRef.current?.play().catch(() => { })
-    }
+    }, [])
 
     return (
         <div className='w-full h-full relative group/modern-player overflow-hidden rounded-[2rem] shadow-2xl'>
