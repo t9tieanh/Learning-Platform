@@ -17,7 +17,6 @@ import { cn } from '@/lib/utils'
 import learnovaLogo from '@/assets/images/LEARNOVA_sm.png'
 import aiAssistantEmpty from '@/assets/images/ai-assistant-empty.png'
 import { Button } from '@/components/ui/button'
-import CustomButton from '@/components/common/Button'
 import { Textarea } from '@/components/ui/textarea'
 import {
     Select,
@@ -38,7 +37,6 @@ import { formatSessionPickLabel, mapLessonChatHistoryToUi } from '@/utils/lesson
 import { PremiumLockedState } from './PremiumLockedState'
 import RemediationVideoPlayer from './LessonTestStudentSection/RemediationVideoPlayer'
 import { LessonChunk } from '@/types/ai'
-import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible'
 import {
     Tooltip,
     TooltipContent,
@@ -289,10 +287,8 @@ export const AIChatSection: React.FC<AIChatSectionProps> = ({
 
     return (
         <div className='flex flex-col h-full bg-[#fcfdfe] relative overflow-hidden w-full p-0 m-0'>
-            {/* Chỉ chọn phiên khi đã có lịch sử; không đặt nút tạo phiên ở đây */}
-            <div 
-                className='relative z-20 shrink-0 border-b border-white/10 bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-950 shadow-lg transition-all duration-300 group w-full p-3 flex flex-col items-stretch'
-            >
+            {/* Header Section */}
+            <div className='relative z-20 shrink-0 border-b border-white/10 bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-950 shadow-xl transition-all duration-300 group w-full p-3.5 flex flex-col items-stretch'>
                 <div className='absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_50%_-20%,#ffffff,transparent)] pointer-events-none' />
                 <div className='absolute inset-0 opacity-5 bg-[url("https://www.transparenttextures.com/patterns/cubes.png")] pointer-events-none' />
 
@@ -313,7 +309,7 @@ export const AIChatSection: React.FC<AIChatSectionProps> = ({
                                         if (e.key === 'Escape') setIsEditingTitle(false)
                                     }}
                                     autoFocus
-                                    className='h-8 w-full rounded-lg border border-white/20 bg-white/10 px-3 text-[12px] font-semibold text-white placeholder:text-white/40 shadow-inner focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 outline-none transition-all'
+                                    className='h-10 w-full rounded-xl border border-white/20 bg-white/10 px-4 text-[13px] font-semibold text-white placeholder:text-white/40 shadow-inner focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 outline-none transition-all'
                                     placeholder='Tên phiên mới...'
                                 />
                                 <div className='flex items-center gap-1 shrink-0'>
@@ -321,124 +317,120 @@ export const AIChatSection: React.FC<AIChatSectionProps> = ({
                                         onClick={handleUpdateTitle}
                                         disabled={updatingTitle || !editTitle.trim()}
                                         size='icon'
-                                        className='h-7.5 w-7.5 rounded-lg bg-blue-500 hover:bg-blue-400 text-white shadow-lg transition-all active:scale-95'
+                                        className='h-9 w-9 rounded-xl bg-blue-500 hover:bg-blue-400 text-white shadow-lg transition-all active:scale-95'
                                     >
                                         {updatingTitle ? (
                                             <Loader2 className='h-3.5 w-3.5 animate-spin' />
                                         ) : (
-                                            <Check className='h-3.5 w-3.5' />
+                                            <Check className='h-4 w-4' />
                                         )}
                                     </Button>
                                     <Button
                                         onClick={() => setIsEditingTitle(false)}
                                         variant='ghost'
                                         size='icon'
-                                        className='h-7.5 w-7.5 rounded-lg text-white/60 hover:text-red-400 hover:bg-red-500/10 transition-all active:scale-95'
+                                        className='h-9 w-9 rounded-xl text-white/60 hover:text-red-400 hover:bg-red-500/10 transition-all active:scale-95'
                                     >
-                                        <X className='h-3.5 w-3.5' />
+                                        <X className='h-4 w-4' />
                                     </Button>
                                 </div>
                             </div>
                         ) : (
-                            <div className='relative flex items-stretch w-full self-stretch'>
-                                <div className='flex-1 min-w-0 w-full transition-all duration-300 flex items-center self-stretch' style={{ width: '100%' }}>
-                                    {sessions.length > 0 && (
-                                        <div className="w-full flex">
-                                            <Select
-                                                value={chatSessionId || ''}
-                                                onValueChange={(id) => {
-                                                    setChatSessionId(id)
-                                                    setIsEditingTitle(false)
-                                                    setIsEditingNote(false)
-                                                }}
+                            <div className='relative flex items-center w-full gap-3'>
+                                <div className='flex-1 min-w-0 flex items-center'>
+                                    {sessions.length > 0 ? (
+                                        <Select
+                                            value={chatSessionId || ''}
+                                            onValueChange={(id) => {
+                                                setChatSessionId(id)
+                                                setIsEditingTitle(false)
+                                                setIsEditingNote(false)
+                                            }}
+                                        >
+                                            <SelectTrigger 
+                                                className='h-10 w-full bg-white/15 border-white/10 text-white hover:bg-white/20 text-[13px] font-bold gap-3 transition-all shadow-lg rounded-xl px-4'
                                             >
-                                                <SelectTrigger 
-                                                    className='h-8.5 w-full min-w-full bg-white/10 border-white/10 text-white hover:bg-white/20 text-[11px] font-bold gap-2 transition-all shadow-lg active:scale-[0.98]'
-                                                    style={{ width: '100% !important' }}
-                                                >
-                                                    <MessageSquare className='h-3.5 w-3.5 shrink-0 opacity-80' />
-                                                    <div className='flex-1 truncate text-left'>
-                                                        {sessions.find((s) => s.id === chatSessionId)?.title ||
-                                                            'Chọn phiên chat'}
-                                                    </div>
-                                                </SelectTrigger>
+                                                <MessageSquare className='h-4.5 w-4.5 shrink-0 opacity-90' />
+                                                <div className='flex-1 truncate text-left'>
+                                                    {sessions.find((s) => s.id === chatSessionId)?.title || 'Chọn phiên chat'}
+                                                </div>
+                                            </SelectTrigger>
                                             <SelectContent className='bg-white/95 backdrop-blur-xl border-blue-100 shadow-2xl rounded-xl overflow-hidden'>
                                                 {sessions.map((session) => (
                                                     <SelectItem
                                                         key={session.id}
                                                         value={session.id}
-                                                        className='text-[11px] font-medium py-2.5 focus:bg-blue-50 focus:text-blue-700 transition-colors'
+                                                        className='text-[13px] font-semibold py-3 focus:bg-blue-50 focus:text-blue-700 transition-colors'
                                                     >
                                                         {session.title || `Phiên ${new Date(session.createdAt).toLocaleDateString('vi-VN')}`}
                                                     </SelectItem>
                                                 ))}
                                             </SelectContent>
                                         </Select>
-                                    </div>
+                                    ) : (
+                                        <div className='h-10 px-4 flex items-center bg-white/10 border border-white/10 rounded-xl text-white/60 text-[13px] font-bold italic w-full shadow-inner'>
+                                            Chưa có phiên hội thoại nào
+                                        </div>
                                     )}
                                 </div>
 
-                                <div className='hidden group-hover:flex items-center shrink-0 opacity-0 group-hover:opacity-100 overflow-hidden transition-all duration-300 ml-0 group-hover:ml-3 pr-0 group-hover:pr-1'>
-                                    <div className='flex items-center gap-2'>
-                                        {chatSessionId && (
-                                            <>
-                                                <Button
-                                                    onClick={() => {
-                                                        const current = sessions.find((s) => s.id === chatSessionId)
-                                                        setEditTitle(current?.title || '')
-                                                        setIsEditingTitle(!isEditingTitle)
-                                                    }}
-                                                    variant='ghost'
-                                                    size='icon'
-                                                    className='h-8.5 w-8.5 rounded-lg text-white/60 hover:text-white hover:bg-white/10 transition-all border border-transparent hover:border-white/10 bg-white/5 scale-90 group-hover:scale-100 transition-all duration-200'
-                                                    title='Đổi tên phiên'
-                                                >
-                                                    <Pencil className='h-3.5 w-3.5' />
-                                                </Button>
-                                                <Button
-                                                    onClick={() => {
-                                                        const current = sessions.find((s) => s.id === chatSessionId)
-                                                        setEditNote(current?.notes || '')
-                                                        setIsEditingNote(!isEditingNote)
-                                                    }}
-                                                    variant='ghost'
-                                                    size='icon'
-                                                    className={cn(
-                                                        'h-8.5 w-8.5 rounded-lg transition-all border border-transparent',
-                                                        isEditingNote
-                                                            ? 'bg-white/20 text-white border-white/20'
-                                                            : 'text-white/60 hover:text-white hover:bg-white/10 hover:border-white/10 bg-white/5 scale-90 group-hover:scale-100 transition-all duration-200'
-                                                    )}
-                                                    title='Ghi chú hướng dẫn AI'
-                                                >
-                                                    <StickyNote className='h-3.5 w-3.5' />
-                                                </Button>
-
-                                                <Button
-                                                    onClick={handleNewChat}
-                                                    disabled={creatingSession || isLoading}
-                                                    variant='ghost'
-                                                    size='icon'
-                                                    className='h-8.5 w-8.5 rounded-lg text-white/60 hover:text-white hover:bg-white/10 transition-all border border-transparent hover:border-white/10 bg-white/5 scale-90 group-hover:scale-100 transition-all duration-200'
-                                                    title='Tạo cuộc trò chuyện mới'
-                                                >
-                                                    {creatingSession ? (
-                                                        <Loader2 className='h-3.5 w-3.5 animate-spin' />
-                                                    ) : (
-                                                        <MessageSquarePlus className='h-3.5 w-3.5' />
-                                                    )}
-                                                </Button>
-                                            </>
+                                <div className='flex items-center gap-1.5 shrink-0 transition-all duration-300'>
+                                    <Button
+                                        onClick={handleNewChat}
+                                        disabled={creatingSession || isLoading}
+                                        variant='ghost'
+                                        size='icon'
+                                        className='h-10 w-10 rounded-xl text-white hover:bg-white/20 transition-all border border-white/20 bg-white/15 shadow-md'
+                                        title='Tạo cuộc trò chuyện mới'
+                                    >
+                                        {creatingSession ? (
+                                            <Loader2 className='h-3.5 w-3.5 animate-spin' />
+                                        ) : (
+                                            <MessageSquarePlus className='h-4.5 w-4.5' />
                                         )}
-                                    </div>
+                                    </Button>
+
+                                    {chatSessionId && (
+                                        <>
+                                            <Button
+                                                onClick={() => {
+                                                    const current = sessions.find((s) => s.id === chatSessionId)
+                                                    setEditTitle(current?.title || '')
+                                                    setIsEditingTitle(true)
+                                                }}
+                                                variant='ghost'
+                                                size='icon'
+                                                className='h-10 w-10 rounded-xl text-white/70 hover:text-white hover:bg-white/15 transition-all border border-transparent hover:border-white/10 bg-white/10'
+                                                title='Đổi tên phiên'
+                                            >
+                                                <Pencil className='h-4.5 w-4.5' />
+                                            </Button>
+                                            <Button
+                                                onClick={() => {
+                                                    const current = sessions.find((s) => s.id === chatSessionId)
+                                                    setEditNote(current?.notes || '')
+                                                    setIsEditingNote(!isEditingNote)
+                                                }}
+                                                variant='ghost'
+                                                size='icon'
+                                                className={cn(
+                                                    'h-10 w-10 rounded-xl transition-all border border-transparent',
+                                                    isEditingNote ? 'bg-white/25 text-white border-white/20' : 'text-white/70 hover:text-white hover:bg-white/15 bg-white/10'
+                                                )}
+                                                title='Ghi chú AI'
+                                            >
+                                                <StickyNote className='h-4.5 w-4.5' />
+                                            </Button>
+                                        </>
+                                    )}
                                 </div>
                             </div>
                         )}
 
                         {isEditingNote && (
                             <div className='animate-in fade-in slide-in-from-top-1 duration-300 space-y-2 p-2.5 rounded-xl bg-white/5 border border-white/10'>
-                                <div className='flex items-center justify-between gap-6'>
-                                    <div className='flex items-center gap-2 flex-1 min-w-0 max-w-[calc(100%-120px)] text-[10px] font-bold text-blue-200 uppercase tracking-wider'>
+                                <div className='flex items-center justify-between'>
+                                    <div className='flex items-center gap-2 text-[10px] font-bold text-blue-200 uppercase tracking-wider'>
                                         <StickyNote className='w-3 h-3' />
                                         <span>Ghi chú cho AI</span>
                                     </div>
@@ -448,21 +440,12 @@ export const AIChatSection: React.FC<AIChatSectionProps> = ({
                                             disabled={updatingNote}
                                             variant='ghost'
                                             size='sm'
-                                            className='h-6 px-2.5 rounded-md bg-blue-500 hover:bg-blue-400 text-white text-[9px] font-bold gap-1 transition-all'
+                                            className='h-6 px-2.5 rounded-md bg-blue-500 hover:bg-blue-400 text-white text-[9px] font-bold gap-1'
                                         >
-                                            {updatingNote ? (
-                                                <Loader2 className='w-2.5 h-2.5 animate-spin' />
-                                            ) : (
-                                                <Check className='w-2.5 h-2.5' />
-                                            )}
+                                            {updatingNote ? <Loader2 className='w-2.5 h-2.5 animate-spin' /> : <Check className='w-2.5 h-2.5' />}
                                             Lưu
                                         </Button>
-                                        <Button
-                                            onClick={() => setIsEditingNote(false)}
-                                            variant='ghost'
-                                            size='icon'
-                                            className='h-6 w-6 rounded-md text-white/40 hover:text-red-400 hover:bg-red-500/10'
-                                        >
+                                        <Button onClick={() => setIsEditingNote(false)} variant='ghost' size='icon' className='h-6 w-6 text-white/40 hover:text-red-400'>
                                             <X className='w-2.5 h-2.5' />
                                         </Button>
                                     </div>
@@ -470,64 +453,53 @@ export const AIChatSection: React.FC<AIChatSectionProps> = ({
                                 <Textarea
                                     value={editNote}
                                     onChange={(e) => setEditNote(e.target.value)}
-                                    placeholder='VD: Hãy giải thích ngắn gọn, tập trung vào code...'
+                                    placeholder='VD: Giải thích ngắn gọn, tập trung vào thực hành...'
                                     className='min-h-[60px] bg-white/10 border-white/10 text-white text-[12px] placeholder:text-white/20 rounded-lg focus-visible:ring-blue-400/30 resize-none py-1.5 px-2.5'
                                 />
                             </div>
                         )}
-
                     </div>
                 )}
             </div>
 
-            <div
-                ref={scrollRef}
-                className='flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-4 space-y-6 scroll-smooth scrollbar-thin scrollbar-thumb-gray-100 relative'
-            >
+            {/* Content Area */}
+            <div ref={scrollRef} className='flex-1 min-h-0 overflow-y-auto p-4 space-y-6 scroll-smooth scrollbar-thin relative'>
                 {messagesLoading && (
                     <div className='absolute inset-0 bg-white/60 z-10 flex items-center justify-center'>
                         <div className='flex items-center gap-2 text-[12px] text-gray-600 font-medium'>
-                            <Loader2 className='w-5 h-5 animate-spin text-blue-600' /> Đang tải
-                            lịch sử…
+                            <Loader2 className='w-5 h-5 animate-spin text-blue-600' /> Đang tải lịch sử…
                         </div>
                     </div>
                 )}
 
                 {messages.length === 0 ? (
-                    <div className='h-full flex flex-col items-center justify-center text-center px-8 relative overflow-hidden'>
-                        {/* Decorative background elements */}
+                    <div className='h-full flex flex-col items-center justify-center text-center px-8 relative'>
                         <div className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-blue-400/5 blur-[80px] rounded-full pointer-events-none' />
-                        <div className='absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-white/80 to-transparent pointer-events-none' />
-
                         <div className='relative z-10 w-full max-w-[280px] animate-in fade-in zoom-in duration-700'>
-                            <div className='mb-8 transform transition-transform hover:scale-105 duration-700 ease-out'>
-                                <img
-                                    src={aiAssistantEmpty}
-                                    alt='AI Assistant'
-                                    className='w-full h-auto mix-blend-multiply opacity-90'
-                                />
+                            <div className='mb-8'>
+                                <img src={aiAssistantEmpty} alt='AI Assistant' className='w-full h-auto mix-blend-multiply opacity-90' />
                             </div>
-                            
-                            <div className='space-y-3'>
-                                <h3 className='text-[16px] font-black tracking-tight text-slate-800 chatbot-heading'>
-                                    Sẵn sàng hỗ trợ bạn
-                                </h3>
-                                <p className='text-[12px] text-slate-500 leading-relaxed font-medium chatbot-body'>
-                                    {chatSessionId ? (
-                                        <span className='opacity-80'>
-                                            Đặt câu hỏi về bài giảng này, tôi sẽ giúp bạn tóm tắt và tìm kiến thức từ video ngay lập tức!
-                                        </span>
-                                    ) : sessionsLoading ? (
-                                        <span className='flex items-center justify-center gap-2'>
-                                            <Loader2 className='w-3 h-3 animate-spin text-blue-500' />
-                                            Đang chuẩn bị dữ liệu học tập...
-                                        </span>
-                                    ) : (
-                                        <span className='opacity-80'>
-                                            Hãy bắt đầu một hành trình học tập mới bằng cách tạo cuộc trò chuyện ở phía trên.
-                                        </span>
-                                    )}
-                                </p>
+                            <div className='space-y-4'>
+                                <div className='space-y-1.5'>
+                                    <h3 className='text-[16px] font-black tracking-tight text-slate-800'>Sẵn sàng hỗ trợ bạn</h3>
+                                    <p className='text-[12px] text-slate-500 leading-relaxed font-medium px-4'>
+                                        {chatSessionId 
+                                            ? 'Đặt câu hỏi về bài giảng này, tôi sẽ giúp bạn tóm tắt và tìm kiến thức từ video ngay lập tức!'
+                                            : sessionsLoading 
+                                                ? 'Đang chuẩn bị dữ liệu học tập...' 
+                                                : 'Hãy bắt đầu một hành trình học tập mới bằng cách tạo cuộc trò chuyện đầu tiên.'}
+                                    </p>
+                                </div>
+                                {!chatSessionId && !sessionsLoading && (
+                                    <Button
+                                        onClick={handleNewChat}
+                                        disabled={creatingSession}
+                                        className='bg-blue-600 hover:bg-blue-700 text-white rounded-xl px-6 py-5 text-[12px] font-bold shadow-lg shadow-blue-200 gap-2 transition-all active:scale-95'
+                                    >
+                                        {creatingSession ? <Loader2 className='w-4 h-4 animate-spin' /> : <MessageSquarePlus className='w-4 h-4' />}
+                                        Bắt đầu trò chuyện mới
+                                    </Button>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -539,11 +511,9 @@ export const AIChatSection: React.FC<AIChatSectionProps> = ({
                             key={m.id}
                             className={`flex w-full mb-4 ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
                         >
-                            <div
-                                className={`flex gap-3 max-w-[88%] min-w-0 ${m.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}
-                            >
+                            <div className={`flex gap-3 max-w-[88%] min-w-0 ${m.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
                                 {m.role === 'user' ? (
-                                    <Avatar className="w-8 h-8 rounded-xl shadow-sm border border-blue-100">
+                                    <Avatar className="w-8 h-8 rounded-xl shadow-sm border border-blue-100 shrink-0">
                                         <AvatarImage src={user?.avatarUrl} alt={user?.name || 'User'} />
                                         <AvatarFallback className="bg-blue-600 text-white text-[10px] font-bold rounded-xl">
                                             {(user?.name || 'U').substring(0, 2).toUpperCase()}
@@ -555,103 +525,54 @@ export const AIChatSection: React.FC<AIChatSectionProps> = ({
                                     </div>
                                 )}
                                 <div className='space-y-3 min-w-0 flex-1 overflow-hidden'>
-                                    <div
-                                        className={`px-4 py-2.5 rounded-2xl text-[13px] leading-relaxed font-medium shadow-sm break-words overflow-hidden ${m.role === 'user'
-                                            ? 'bg-blue-600 text-white rounded-tr-none'
-                                            : 'bg-gray-50 text-gray-700 border border-gray-100 rounded-tl-none'
-                                            }`}
-                                    >
+                                    <div className={`px-4 py-2.5 rounded-2xl text-[13px] leading-relaxed font-medium shadow-sm break-words overflow-hidden ${m.role === 'user' ? 'bg-blue-600 text-white rounded-tr-none' : 'bg-gray-50 text-gray-700 border border-gray-100 rounded-tl-none'}`}>
                                         {m.role === 'assistant' ? (
                                             <div className='react-markdown-container overflow-hidden break-words'>
                                                 {(() => {
-                                                    const text = m.content;
-                                                    const parts = text.split(/(@{{.*?}}@)/g);
-                                                    const hasMarkers = parts.some(p => p.match(/@{{(.*?)}}@/));
-                                                    
+                                                    const parts = m.content.split(/(@{{.*?}}@)/g);
                                                     return parts.map((part, index) => {
                                                         const match = part.match(/@{{(.*?)}}@/);
                                                         if (match) {
                                                             const chunkId = match[1];
                                                             const source = m.sources?.find(s => s.chunkId === chunkId);
                                                             if (!source) return <span key={index} className="text-red-400 opacity-50 text-[10px]">[Nguồn lỗi]</span>;
-
                                                             const playerKey = `${m.id}:${chunkId}`;
                                                             const isPlayerOpen = activePlayerKey === playerKey;
-
                                                             return (
-                                                                <Tooltip key={index}>
-                                                                    <TooltipTrigger asChild>
-                                                                        <button
-                                                                            onClick={() => {
-                                                                                // If player for this specific message+source is already open, close it. 
-                                                                                // Otherwise, open it and seek.
-                                                                                if (isPlayerOpen) {
-                                                                                    setActivePlayerKey(null);
-                                                                                } else {
-                                                                                    setActivePlayerKey(playerKey);
-                                                                                }
-                                                                            }}
-                                                                            className={cn(
-                                                                                "inline-flex items-center gap-1.5 px-3 py-1 mx-1 rounded-full text-[10px] font-bold transition-all border shadow-sm align-middle mb-1 group/badge",
-                                                                                isPlayerOpen 
-                                                                                    ? "bg-blue-600 text-white border-blue-600 shadow-blue-200" 
-                                                                                    : "bg-blue-50 text-blue-600 border-blue-100 hover:bg-blue-600 hover:text-white hover:border-blue-600"
-                                                                            )}
-                                                                        >
-                                                                            <Play className={cn("w-2.5 h-2.5 fill-current shrink-0", isPlayerOpen && "animate-pulse")} />
-                                                                            <span className="max-w-[120px] truncate">
-                                                                                {source.title || 'Nội dung bài học'}
-                                                                            </span>
-                                                                        </button>
-                                                                    </TooltipTrigger>
-                                                                    <TooltipContent side="top">
-                                                                        <p className="font-bold">Xem đoạn video: {source.startTime}</p>
-                                                                        <p className="opacity-80">{source.title || 'Nội dung bài học'}</p>
-                                                                    </TooltipContent>
-                                                                </Tooltip>
+                                                                <TooltipProvider key={index}>
+                                                                    <Tooltip>
+                                                                        <TooltipTrigger asChild>
+                                                                            <button
+                                                                                onClick={() => setActivePlayerKey(isPlayerOpen ? null : playerKey)}
+                                                                                className={cn(
+                                                                                    "inline-flex items-center gap-1.5 px-3 py-1 mx-1 rounded-full text-[10px] font-bold transition-all border shadow-sm align-middle mb-1",
+                                                                                    isPlayerOpen ? "bg-blue-600 text-white border-blue-600" : "bg-blue-50 text-blue-600 border-blue-100 hover:bg-blue-600 hover:text-white"
+                                                                                )}
+                                                                            >
+                                                                                <Play className={cn("w-2.5 h-2.5 fill-current shrink-0", isPlayerOpen && "animate-pulse")} />
+                                                                                <span className="max-w-[120px] truncate">{source.title || 'Nội dung'}</span>
+                                                                            </button>
+                                                                        </TooltipTrigger>
+                                                                        <TooltipContent side="top">
+                                                                            <p className="font-bold">Xem video: {source.startTime}</p>
+                                                                        </TooltipContent>
+                                                                    </Tooltip>
+                                                                </TooltipProvider>
                                                             );
                                                         }
-                                                        return (
-                                                            <span key={index} className="inline">
-                                                                <ReactMarkdown components={{ p: 'span' }}>
-                                                                    {part}
-                                                                </ReactMarkdown>
-                                                            </span>
-                                                        );
+                                                        return <span key={index} className="inline"><ReactMarkdown components={{ p: 'span' }}>{part}</ReactMarkdown></span>;
                                                     });
                                                 })()}
                                             </div>
-                                        ) : (
-                                            m.content
-                                        )}
+                                        ) : m.content}
                                     </div>
-
-                                    {/* Inline Player for sources cited in the text */}
                                     {activePlayerKey && m.sources?.some(s => activePlayerKey === `${m.id}:${s.chunkId}`) && (
                                         <div className="mt-3 animate-in fade-in slide-in-from-top-2 duration-300">
                                             {(() => {
                                                 const chunkId = activePlayerKey.split(':')[1];
                                                 const source = m.sources.find(s => s.chunkId === chunkId);
                                                 if (!source) return null;
-                                                const chunk: LessonChunk = {
-                                                    id: source.chunkId,
-                                                    title: source.title || 'Đoạn trích',
-                                                    summary: source.summary,
-                                                    startTime: source.startTime || '00:00',
-                                                    endTime: source.endTime || '00:00',
-                                                    chunkIndex: source.chunkIndex,
-                                                    timestamp: source.startTime,
-                                                    sentenceCount: 0
-                                                };
-                                                return (
-                                                    <div className="space-y-2">
-                                                        <RemediationVideoPlayer
-                                                            lessonId={lessonId}
-                                                            chunk={chunk}
-                                                            subtitlesRaw={subtitlesRaw}
-                                                        />
-                                                    </div>
-                                                );
+                                                return <RemediationVideoPlayer lessonId={lessonId} chunk={{...source, timestamp: source.startTime, sentenceCount: 0} as any} subtitlesRaw={subtitlesRaw} />;
                                             })()}
                                         </div>
                                     )}
@@ -662,24 +583,22 @@ export const AIChatSection: React.FC<AIChatSectionProps> = ({
                 )}
 
                 {isLoading && (
-                    <div className='flex justify-start animate-in fade-in duration-300'>
+                    <div className='flex justify-start animate-pulse'>
                         <div className='flex gap-3 max-w-[85%]'>
-                            <div className='w-8 h-8 rounded-xl bg-white flex items-center justify-center shrink-0 shadow-sm border border-gray-100 overflow-hidden animate-pulse'>
-                                <img src={learnovaLogo} alt="Learnova Bot" className="w-5 h-5 object-contain" />
+                            <div className='w-8 h-8 rounded-xl bg-white flex items-center justify-center shrink-0 border border-gray-100 shadow-sm'>
+                                <img src={learnovaLogo} alt="AI" className="w-5 h-5" />
                             </div>
                             <div className='bg-gray-50 border border-gray-100 px-4 py-3 rounded-2xl rounded-tl-none flex items-center gap-2'>
                                 <Loader2 className='w-4 h-4 animate-spin text-blue-500' />
-                                <span className='text-[13px] text-gray-500 font-medium italic'>
-                                    Đang phân tích bài giảng...
-                                </span>
+                                <span className='text-[13px] text-gray-500 italic'>Đang phân tích bài giảng...</span>
                             </div>
                         </div>
                     </div>
                 )}
             </div>
 
-            {/* Input — chỉ hiện khi đã có session */}
-            {chatSessionId ? (
+            {/* Input Section */}
+            {chatSessionId && (
                 <div className='shrink-0 p-4 border-t border-gray-100 bg-gray-50/50'>
                     <div className='relative flex items-end gap-2'>
                         <Textarea
@@ -687,33 +606,26 @@ export const AIChatSection: React.FC<AIChatSectionProps> = ({
                             onChange={(e) => setInput(e.target.value)}
                             onKeyDown={(e) => {
                                 if (e.key === 'Enter' && !e.shiftKey) {
-                                    e.preventDefault()
-                                    handleSend()
+                                    e.preventDefault();
+                                    handleSend();
                                 }
                             }}
-                            placeholder='Hỏi AI bất cứ điều gì về bài giảng này...'
-                            className='min-h-[48px] max-h-32 py-3 px-4 rounded-2xl border-gray-200 focus:ring-blue-500 focus:border-blue-500 text-[14px] bg-white resize-none pr-12 transition-all shadow-sm'
+                            placeholder='Hỏi AI về bài giảng này...'
+                            className='min-h-[48px] max-h-32 py-3 px-4 rounded-2xl border-gray-200 focus:ring-blue-500 text-[14px] bg-white resize-none pr-12 transition-all shadow-sm'
                             disabled={isLoading}
                         />
                         <Button
                             onClick={handleSend}
                             disabled={!input.trim() || isLoading}
                             size='icon'
-                            type='button'
-                            className='absolute right-2 bottom-2 rounded-xl bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all h-9 w-9'
+                            className='absolute right-2 bottom-2 rounded-xl bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-200 h-9 w-9'
                         >
-                            {isLoading ? (
-                                <Loader2 className='h-4 w-4 animate-spin' />
-                            ) : (
-                                <Send className='h-4 w-4' />
-                            )}
+                            {isLoading ? <Loader2 className='h-4 w-4 animate-spin' /> : <Send className='h-4 w-4' />}
                         </Button>
                     </div>
-                    <p className='text-[10px] text-gray-400 mt-2 text-center font-medium'>
-                        AI có thể nhầm lẫn. Vui lòng kiểm tra lại các nguồn tham chiếu được cung cấp.
-                    </p>
+                    <p className='text-[10px] text-gray-400 mt-2 text-center'>AI có thể nhầm lẫn. Vui lòng kiểm tra lại thông tin.</p>
                 </div>
-            ) : null}
+            )}
         </div>
     )
 }

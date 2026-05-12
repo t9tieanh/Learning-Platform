@@ -4,6 +4,8 @@ import { CheckCircle2, XCircle, ArrowRight, SkipForward, PlayCircle } from 'luci
 import { LessonChunk } from '@/types/ai'
 import CustomButton from '@/components/common/Button'
 import { timeToSeconds } from '@/utils/time/time.utils'
+import QuizChoiceItem from './QuizChoiceItem'
+import QuizChunkItem from './QuizChunkItem'
 
 interface VideoQuizOverlayProps {
     chunk: LessonChunk
@@ -14,98 +16,6 @@ interface VideoQuizOverlayProps {
     onClose: () => void
     onSeek: (time: number) => void
 }
-
-// Separate and memoize Choice Item for performance
-const ChoiceItem = memo(({ 
-    choice, 
-    isAnswered, 
-    isSelected, 
-    onSelect 
-}: { 
-    choice: any, 
-    isAnswered: boolean, 
-    isSelected: boolean, 
-    onSelect: (id: string) => void 
-}) => {
-    const isCorrect = choice.isCorrect
-
-    let styleClass = 'border-slate-100 bg-slate-50/50 hover:border-blue-300 hover:bg-blue-50/50 text-slate-700'
-    if (isAnswered) {
-        if (isCorrect) styleClass = 'border-emerald-200 bg-emerald-50/80 text-emerald-900 shadow-[0_0_15px_rgba(16,185,129,0.1)]'
-        else if (isSelected) styleClass = 'border-rose-200 bg-rose-50/80 text-rose-900 shadow-[0_0_15px_rgba(244,63,94,0.1)]'
-        else styleClass = 'opacity-40 border-slate-50'
-    }
-
-    return (
-        <motion.button
-            whileHover={!isAnswered ? { x: 4 } : {}}
-            whileTap={!isAnswered ? { scale: 0.985 } : {}}
-            onClick={() => onSelect(choice.id)}
-            className={`w-full text-left px-5 py-4 rounded-2xl border transition-all flex items-center justify-between gap-4 group cursor-pointer ${styleClass}`}
-            disabled={isAnswered}
-        >
-            <span className='text-sm font-medium tracking-tight leading-relaxed'>
-                {choice.text}
-            </span>
-            {isAnswered && (
-                <motion.div
-                    initial={{ scale: 0, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    className='flex-shrink-0'
-                >
-                    {isCorrect ? (
-                        <div className='w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center'>
-                            <CheckCircle2 className='w-4 h-4 text-white' />
-                        </div>
-                    ) : isSelected ? (
-                        <div className='w-6 h-6 rounded-full bg-rose-500 flex items-center justify-center'>
-                            <XCircle className='w-4 h-4 text-white' />
-                        </div>
-                    ) : null}
-                </motion.div>
-            )}
-        </motion.button>
-    )
-})
-ChoiceItem.displayName = 'ChoiceItem'
-
-// Separate and memoize Chunk Item for performance
-const ChunkItem = memo(({ 
-    chunk, 
-    idx, 
-    isActive, 
-    isLocked, 
-    onSelect 
-}: { 
-    chunk: LessonChunk, 
-    idx: number, 
-    isActive: boolean, 
-    isLocked: boolean, 
-    onSelect: (id: string) => void 
-}) => (
-    <button
-        disabled={isLocked}
-        onClick={() => onSelect(chunk.id)}
-        className={`px-3.5 py-2 rounded-xl text-[9px] font-bold uppercase tracking-tight transition-all whitespace-nowrap border flex flex-col items-start gap-0.5 relative ${isActive
-            ? 'bg-white text-blue-600 border-white shadow-lg'
-            : isLocked
-                ? 'bg-black/10 text-white/30 border-white/5 cursor-not-allowed opacity-50'
-                : 'bg-white/10 text-white/60 border-white/10 hover:bg-white/20'
-            }`}
-    >
-        <div className='flex items-center gap-1'>
-            <span className={`text-[8px] opacity-70 ${isActive ? 'text-blue-500' : isLocked ? 'text-white/20' : 'text-white/40'}`}>
-                Phần {idx + 1}
-            </span>
-            {isLocked && <div className='w-2 h-2 rounded-full bg-white/20 flex items-center justify-center'><div className='w-1 h-1 bg-white/40 rounded-full' /></div>}
-        </div>
-        <span className='truncate max-w-[120px]'>{chunk.title}</span>
-        {isLocked && (
-            <div className='absolute inset-0 bg-black/5 rounded-xl pointer-events-none' />
-        )}
-    </button>
-))
-ChunkItem.displayName = 'ChunkItem'
 
 const VideoQuizOverlay: React.FC<VideoQuizOverlayProps> = memo(({
     chunk: initialChunk,
@@ -205,7 +115,7 @@ const VideoQuizOverlay: React.FC<VideoQuizOverlayProps> = memo(({
                             }
                         `}</style>
                         {allChunks.filter(c => c.quizzes && c.quizzes.length > 0).map((c, idx) => (
-                            <ChunkItem 
+                            <QuizChunkItem 
                                 key={c.id}
                                 chunk={c}
                                 idx={idx}
@@ -247,7 +157,7 @@ const VideoQuizOverlay: React.FC<VideoQuizOverlayProps> = memo(({
                             className='grid grid-cols-1 md:grid-cols-2 gap-3 mb-6'
                         >
                             {currentQuiz.choices.map((choice) => (
-                                <ChoiceItem 
+                                <QuizChoiceItem 
                                     key={choice.id}
                                     choice={choice}
                                     isAnswered={isAnswered}
