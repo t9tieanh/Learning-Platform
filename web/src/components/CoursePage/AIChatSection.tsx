@@ -645,21 +645,6 @@ export const AIChatSection: React.FC<AIChatSectionProps> = ({
                                                 };
                                                 return (
                                                     <div className="space-y-2">
-                                                        <div className="flex items-center justify-between px-2">
-                                                            <Tooltip>
-                                                                <TooltipTrigger asChild>
-                                                                    <CustomButton 
-                                                                        onClick={() => onSeek?.(source.startTime || '0')}
-                                                                        label="Xem ở màn hình lớn"
-                                                                        icon={<Sparkles className="w-3 h-3" />}
-                                                                        className="h-7 text-[10px] font-bold px-3 py-1 bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-700 border-none shadow-none"
-                                                                    />
-                                                                </TooltipTrigger>
-                                                                <TooltipContent side="top">
-                                                                    <p>Chuyển sang trình phát chính tại {source.startTime}</p>
-                                                                </TooltipContent>
-                                                            </Tooltip>
-                                                        </div>
                                                         <RemediationVideoPlayer
                                                             lessonId={lessonId}
                                                             chunk={chunk}
@@ -668,102 +653,6 @@ export const AIChatSection: React.FC<AIChatSectionProps> = ({
                                                     </div>
                                                 );
                                             })()}
-                                        </div>
-                                    )}
-
-                                    {/* Legacy Sources / References - Only show if NO markers are detected in the content */}
-                                    {m.sources && m.sources.length > 0 && !m.content.includes('@{{') && (
-                                        <div className='space-y-2 mt-4 animate-in fade-in slide-in-from-top-2 duration-500'>
-                                            <p className='text-[11px] font-bold text-gray-400 tracking-widest flex items-center gap-2'>
-                                                <Sparkles className='w-3 h-3 text-blue-400' />{' '}
-                                                Nguồn tham chiếu từ video
-                                            </p>
-                                            <div className='grid gap-2'>
-                                                {m.sources.map((source: RAGSource, idx: number) => {
-                                                    const playerKey = `${m.id}:${source.chunkId}`;
-                                                    const isPlayerOpen = activePlayerKey === playerKey;
-                                                    const chunk: LessonChunk = {
-                                                        id: source.chunkId,
-                                                        title: source.title || `Đoạn ${idx + 1}`,
-                                                        summary: source.summary,
-                                                        startTime: source.startTime || '00:00',
-                                                        endTime: source.endTime || '00:00',
-                                                        chunkIndex: source.chunkIndex,
-                                                        timestamp: source.startTime,
-                                                        sentenceCount: 0
-                                                    }
-
-                                                    return (
-                                                        <div key={idx} className='space-y-2'>
-                                                            <div
-                                                                className={cn(
-                                                                    'bg-white border rounded-xl p-3 shadow-sm transition-all group',
-                                                                    isPlayerOpen ? 'border-blue-400 ring-1 ring-blue-400/20' : 'border-gray-100 hover:border-blue-200'
-                                                                )}
-                                                            >
-                                                                <div className='flex flex-col gap-1.5'>
-                                                                    <div className='flex items-center justify-between'>
-                                                                        <span className='text-[9px] text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full font-bold whitespace-nowrap shadow-sm border border-blue-100/50'>
-                                                                            {source.startTime}
-                                                                        </span>
-                                                                        <div className='flex items-center gap-1.5'>
-                                                                            <Tooltip>
-                                                                                <TooltipTrigger asChild>
-                                                                                    <button
-                                                                                        onClick={() => onSeek?.(source.startTime || '0')}
-                                                                                        className='w-8 h-8 rounded-lg bg-gray-50 text-gray-400 hover:bg-blue-600 hover:text-white transition-all flex items-center justify-center shrink-0 border border-gray-100 hover:border-blue-600 shadow-sm'
-                                                                                        type='button'
-                                                                                    >
-                                                                                        <Sparkles className='w-3.5 h-3.5' />
-                                                                                    </button>
-                                                                                </TooltipTrigger>
-                                                                                <TooltipContent side="top">
-                                                                                    <p>Xem trên video chính tại {source.startTime}</p>
-                                                                                </TooltipContent>
-                                                                            </Tooltip>
-                                                                            
-                                                                            <Tooltip>
-                                                                                <TooltipTrigger asChild>
-                                                                                    <button
-                                                                                        onClick={() => setActivePlayerKey(isPlayerOpen ? null : playerKey)}
-                                                                                        className={cn(
-                                                                                            'w-8 h-8 rounded-lg transition-all flex items-center justify-center shrink-0 border shadow-sm',
-                                                                                            isPlayerOpen
-                                                                                                ? 'bg-blue-600 text-white border-blue-600 shadow-blue-200'
-                                                                                                : 'bg-gray-50 text-gray-400 border-gray-100 hover:bg-blue-600 hover:text-white hover:border-blue-600'
-                                                                                        )}
-                                                                                        type='button'
-                                                                                    >
-                                                                                        <Play className={cn('w-3.5 h-3.5 fill-current ml-0.5', isPlayerOpen && 'animate-pulse')} />
-                                                                                    </button>
-                                                                                </TooltipTrigger>
-                                                                                <TooltipContent side="top">
-                                                                                    <p>{isPlayerOpen ? 'Đóng trình phát' : 'Xem đoạn trích video'}</p>
-                                                                                </TooltipContent>
-                                                                            </Tooltip>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div className='text-[12px] font-bold text-slate-800 line-clamp-2 leading-relaxed'>
-                                                                        {source.title || `Đoạn ${idx + 1}`}
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-
-                                                            <Collapsible open={isPlayerOpen}>
-                                                                <CollapsibleContent>
-                                                                    <div className='animate-in fade-in slide-in-from-top-2 duration-300'>
-                                                                        <RemediationVideoPlayer
-                                                                            lessonId={lessonId}
-                                                                            chunk={chunk}
-                                                                            subtitlesRaw={subtitlesRaw}
-                                                                        />
-                                                                    </div>
-                                                                </CollapsibleContent>
-                                                            </Collapsible>
-                                                        </div>
-                                                    )
-                                                })}
-                                            </div>
                                         </div>
                                     )}
                                 </div>

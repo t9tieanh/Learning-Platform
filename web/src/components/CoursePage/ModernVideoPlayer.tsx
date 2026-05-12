@@ -21,12 +21,14 @@ const ModernVideoPlayer = forwardRef<VideoPlayerRef, {
     subtitlesRaw?: string
     chunks?: LessonChunk[]
     onShowChunkDetails?: (chunkId: string) => void
+    onProgress?: (percent: number) => void
 }>(({
     lesson,
     markDoneVideo,
     subtitlesRaw,
     chunks = [],
-    onShowChunkDetails
+    onShowChunkDetails,
+    onProgress
 }, ref) => {
     const { data } = useAuthStore()
     const videoRef = useRef<HTMLVideoElement>(null)
@@ -40,13 +42,18 @@ const ModernVideoPlayer = forwardRef<VideoPlayerRef, {
     const shownQuizIds = useRef<Set<string>>(new Set())
     const lastCheckTime = useRef(0)
 
+    const [maxTimeWatched, setMaxTimeWatched] = useState(0)
+    const isCompleted = lesson.completionStatus === 'COMPLETED'
+
     const COMPLETION_THRESHOLD = 0.9
 
     useImperativeHandle(ref, () => ({
         seekTo: (time: number) => {
             if (videoRef.current) {
+                // Allow seeking back or seeking to max reached time
+                const targetTime = isCompleted ? time : Math.min(time, maxTimeWatched + 1)
                 setShowVideo(true)
-                videoRef.current.currentTime = time
+                videoRef.current.currentTime = targetTime
                 videoRef.current.play().catch(() => { })
             }
         }
@@ -87,9 +94,16 @@ const ModernVideoPlayer = forwardRef<VideoPlayerRef, {
         const { currentTime, duration } = video
         if (!duration) return
 
+        // Track max time reached in this session
+        if (currentTime > maxTimeWatched && !isCompleted) {
+            setMaxTimeWatched(currentTime)
+        }
+
+        const currentPercent = (currentTime / duration) * 100
+        onProgress?.(currentPercent)
+
         if (!videoCompletionMarked.current) {
-            const progress = currentTime / duration
-            if (progress >= COMPLETION_THRESHOLD) {
+            if (currentPercent >= COMPLETION_THRESHOLD * 100) {
                 videoCompletionMarked.current = true
                 markDoneVideo()
             }
@@ -106,13 +120,21 @@ const ModernVideoPlayer = forwardRef<VideoPlayerRef, {
             }
         }
         lastCheckTime.current = currentTime
-    }, [markDoneVideo, chunks, currentChunkTitle])
+    }, [markDoneVideo, chunks, currentChunkTitle, maxTimeWatched, isCompleted, onProgress])
 
     const handleSeekingSync = useCallback(() => {
-        if (videoRef.current) {
-            lastCheckTime.current = videoRef.current.currentTime
+        if (!videoRef.current || isCompleted) return
+
+        // If user tries to seek forward beyond what they've watched
+        if (videoRef.current.currentTime > maxTimeWatched + 1) {
+            videoRef.current.currentTime = maxTimeWatched
+            toast.warning('Vui lòng xem tuần tự nội dung bài học. Bạn có thể làm bài kiểm tra sau khi xem đạt 70%.', {
+                id: 'seek-blocked',
+                duration: 3000
+            })
         }
-    }, [])
+        lastCheckTime.current = videoRef.current.currentTime
+    }, [maxTimeWatched, isCompleted])
 
     const startQuiz = () => {
         const video = videoRef.current

@@ -27,7 +27,8 @@ export const TabNavigation = ({
   onSeek,
   activeTab: externalActiveTab,
   onTabChange,
-  selectedChunkId
+  selectedChunkId,
+  watchedPercent
 }: {
   currentLecture: Lesson
   thumbnailUri: string
@@ -38,6 +39,7 @@ export const TabNavigation = ({
   activeTab: string
   onTabChange: (tab: string) => void
   selectedChunkId?: string | null
+  watchedPercent: number
 }) => {
   const activeTab = externalActiveTab
   const setActiveTab = onTabChange
@@ -65,7 +67,7 @@ export const TabNavigation = ({
           label: 'Ghi chú',
           icon: <NotebookPen className='w-3.5 h-3.5' />
         },
-        ...(lessonTestTabVisible
+        ...(lessonTestTabVisible && (watchedPercent >= 70 || currentLecture.completionStatus === 'COMPLETED')
           ? [
             {
               label: 'Bài kiểm tra',
@@ -140,10 +142,11 @@ export const TabNavigation = ({
   }, [analysisData, activeTab, setActiveTab])
 
   useEffect(() => {
-    if (!lessonTestTabVisible && activeTab === 'Bài kiểm tra') {
+    const isQuizUnlocked = watchedPercent >= 70 || currentLecture.completionStatus === 'COMPLETED'
+    if ((!lessonTestTabVisible || !isQuizUnlocked) && activeTab === 'Bài kiểm tra') {
       setActiveTab('Tổng quan')
     }
-  }, [lessonTestTabVisible, activeTab, setActiveTab])
+  }, [lessonTestTabVisible, activeTab, setActiveTab, watchedPercent, currentLecture.completionStatus])
 
   return (
     <div className='border-b border-border'>

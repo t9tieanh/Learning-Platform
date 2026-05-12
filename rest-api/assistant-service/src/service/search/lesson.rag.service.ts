@@ -67,7 +67,7 @@ export class LessonRAGService {
       const sessionActive = sessionId != null && sessionId !== '';
 
       const [chunks, recentData, semanticHits, sessionDetail] = await Promise.all([
-        searchService.searchChunks(lessonId, question, 10),
+        searchService.searchChunks(lessonId, question, 5),
         sessionActive
           ? lessonChatHistoryService.buildRecentTranscriptForRag(sessionId!)
           : Promise.resolve({ transcript: '', messageIds: [] as string[] }),
