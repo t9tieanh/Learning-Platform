@@ -1,22 +1,26 @@
-import React, { useState } from 'react'
+import React, { useState, memo, useMemo, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { CheckCircle2, XCircle, ArrowRight, SkipForward, PlayCircle } from 'lucide-react'
 import { LessonChunk } from '@/types/ai'
 import CustomButton from '@/components/common/Button'
 import { timeToSeconds } from '@/utils/time/time.utils'
+import QuizChoiceItem from './QuizChoiceItem'
+import QuizChunkItem from './QuizChunkItem'
 
 interface VideoQuizOverlayProps {
     chunk: LessonChunk
     allChunks: LessonChunk[]
+    maxTimeWatched: number
     onSkip: () => void
     onContinue: () => void
     onClose: () => void
     onSeek: (time: number) => void
 }
 
-const VideoQuizOverlay: React.FC<VideoQuizOverlayProps> = ({
+const VideoQuizOverlay: React.FC<VideoQuizOverlayProps> = memo(({
     chunk: initialChunk,
     allChunks,
+    maxTimeWatched,
     onSkip,
     onContinue,
     onClose,
@@ -26,6 +30,13 @@ const VideoQuizOverlay: React.FC<VideoQuizOverlayProps> = ({
     const [currentQuizIndex, setCurrentQuizIndex] = useState(0)
     const [selectedChoiceId, setSelectedChoiceId] = useState<string | null>(null)
     const [isAnswered, setIsAnswered] = useState(false)
+ 
+    React.useEffect(() => {
+        setActiveChunkId(initialChunk.id)
+        setCurrentQuizIndex(0)
+        setSelectedChoiceId(null)
+        setIsAnswered(false)
+    }, [initialChunk.id])
 
     const activeChunk = allChunks.find(c => c.id === activeChunkId) || initialChunk
     const quizzes = activeChunk.quizzes || []
@@ -70,10 +81,8 @@ const VideoQuizOverlay: React.FC<VideoQuizOverlayProps> = ({
             <div className='absolute inset-0 bg-black/40 backdrop-blur-[1px]' onClick={onClose} />
 
             <motion.div
-                key={activeChunkId + currentQuizIndex}
                 initial={{ scale: 0.95, opacity: 0, y: 10 }}
                 animate={{ scale: 1, opacity: 1, y: 0 }}
-                exit={{ scale: 0.95, opacity: 0, y: 10 }}
                 className='relative w-full max-lg bg-white/95 backdrop-blur-xl rounded-[2rem] border border-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.2)] overflow-hidden flex flex-col'
                 style={{ maxWidth: '40rem' }}
             >
@@ -92,80 +101,72 @@ const VideoQuizOverlay: React.FC<VideoQuizOverlayProps> = ({
                         </span>
                     </div>
 
-                    <div className='flex items-center gap-1.5 mb-6 overflow-x-auto pb-1 scrollbar-hide no-scrollbar'>
+                    <div 
+                        className='flex items-center gap-1.5 mb-6 overflow-x-auto pb-1 scrollbar-hide'
+                        style={{ 
+                            msOverflowStyle: 'none', 
+                            scrollbarWidth: 'none',
+                            WebkitOverflowScrolling: 'touch'
+                        }}
+                    >
+                        <style>{`
+                            .scrollbar-hide::-webkit-scrollbar {
+                                display: none;
+                            }
+                        `}</style>
                         {allChunks.filter(c => c.quizzes && c.quizzes.length > 0).map((c, idx) => (
-                            <button
+                            <QuizChunkItem 
                                 key={c.id}
-                                onClick={() => handleChunkSwitch(c.id)}
-                                className={`px-3.5 py-2 rounded-xl text-[9px] font-bold uppercase tracking-tight transition-all whitespace-nowrap border flex flex-col items-start gap-0.5 ${activeChunkId === c.id
-                                        ? 'bg-white text-blue-600 border-white shadow-lg'
-                                        : 'bg-white/10 text-white/60 border-white/10 hover:bg-white/20'
-                                    }`}
-                            >
-                                <span className={`text-[8px] opacity-70 ${activeChunkId === c.id ? 'text-blue-500' : 'text-white/40'}`}>
-                                    Phần {idx + 1}
-                                </span>
-                                <span className='truncate max-w-[120px]'>{c.title}</span>
-                            </button>
+                                chunk={c}
+                                idx={idx}
+                                isActive={activeChunkId === c.id}
+                                isLocked={timeToSeconds(c.startTime) > maxTimeWatched + 2}
+                                onSelect={handleChunkSwitch}
+                            />
                         ))}
                     </div>
 
-                    <h3 className='text-base md:text-lg font-bold leading-snug mb-2'>
-                        {currentQuiz.question}
-                    </h3>
-                    <div className='flex items-center gap-2'>
-                        <span className='px-2.5 py-0.5 bg-white/20 rounded-lg text-[10px] font-bold border border-white/10 backdrop-blur-sm'>
-                            Chuyên đề: {activeChunk.title}
-                        </span>
-                    </div>
+                    <AnimatePresence mode='wait'>
+                        <motion.div
+                            key={activeChunkId + currentQuizIndex}
+                            initial={{ opacity: 0, x: 10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -10 }}
+                            transition={{ duration: 0.2 }}
+                        >
+                            <h3 className='text-base md:text-lg font-bold leading-snug mb-2'>
+                                {currentQuiz.question}
+                            </h3>
+                            <div className='flex items-center gap-2'>
+                                <span className='px-2.5 py-0.5 bg-white/20 rounded-lg text-[10px] font-bold border border-white/10 backdrop-blur-sm'>
+                                    Chuyên đề: {activeChunk.title}
+                                </span>
+                            </div>
+                        </motion.div>
+                    </AnimatePresence>
                 </div>
 
                 <div className='p-7 flex flex-col flex-1'>
-                    <div className='grid grid-cols-1 md:grid-cols-2 gap-3 mb-6'>
-                        {currentQuiz.choices.map((choice) => {
-                            const isCorrect = choice.isCorrect
-                            const isSelected = selectedChoiceId === choice.id
-
-                            let styleClass = 'border-slate-100 bg-slate-50/50 hover:border-blue-300 hover:bg-blue-50/50 text-slate-700'
-                            if (isAnswered) {
-                                if (isCorrect) styleClass = 'border-emerald-200 bg-emerald-50/80 text-emerald-900 shadow-[0_0_15px_rgba(16,185,129,0.1)]'
-                                else if (isSelected) styleClass = 'border-rose-200 bg-rose-50/80 text-rose-900 shadow-[0_0_15px_rgba(244,63,94,0.1)]'
-                                else styleClass = 'opacity-40 border-slate-50'
-                            }
-
-                            return (
-                                <motion.button
+                    <AnimatePresence mode='wait'>
+                        <motion.div
+                            key={activeChunkId + currentQuizIndex}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            transition={{ duration: 0.2, delay: 0.1 }}
+                            className='grid grid-cols-1 md:grid-cols-2 gap-3 mb-6'
+                        >
+                            {currentQuiz.choices.map((choice) => (
+                                <QuizChoiceItem 
                                     key={choice.id}
-                                    whileHover={!isAnswered ? { x: 4 } : {}}
-                                    whileTap={!isAnswered ? { scale: 0.985 } : {}}
-                                    onClick={() => handleChoiceSelect(choice.id)}
-                                    className={`w-full text-left px-5 py-4 rounded-2xl border transition-all flex items-center justify-between gap-4 group cursor-pointer ${styleClass}`}
-                                    disabled={isAnswered}
-                                >
-                                    <span className='text-sm font-medium tracking-tight leading-relaxed'>
-                                        {choice.text}
-                                    </span>
-                                    {isAnswered && (
-                                        <motion.div
-                                            initial={{ scale: 0, opacity: 0 }}
-                                            animate={{ scale: 1, opacity: 1 }}
-                                            className='flex-shrink-0'
-                                        >
-                                            {isCorrect ? (
-                                                <div className='w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center'>
-                                                    <CheckCircle2 className='w-4 h-4 text-white' />
-                                                </div>
-                                            ) : isSelected ? (
-                                                <div className='w-6 h-6 rounded-full bg-rose-500 flex items-center justify-center'>
-                                                    <XCircle className='w-4 h-4 text-white' />
-                                                </div>
-                                            ) : null}
-                                        </motion.div>
-                                    )}
-                                </motion.button>
-                            )
-                        })}
-                    </div>
+                                    choice={choice}
+                                    isAnswered={isAnswered}
+                                    isSelected={selectedChoiceId === choice.id}
+                                    onSelect={handleChoiceSelect}
+                                />
+                            ))}
+                        </motion.div>
+                    </AnimatePresence>
 
                     <AnimatePresence mode='wait'>
                         {isAnswered && (
@@ -186,8 +187,7 @@ const VideoQuizOverlay: React.FC<VideoQuizOverlayProps> = ({
                                         onClick={() => onSeek(timeToSeconds(activeChunk.startTime))}
                                         className='flex items-center gap-2 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-lg shadow-blue-500/20 transition-all text-[10px] font-bold uppercase tracking-tight whitespace-nowrap'
                                     >
-                                        <PlayCircle className='w-4 h-4' />
-                                        Xem lại đoạn này
+                                        <PlayCircle className='w-4 h-4' /> Xem lại đoạn này
                                     </motion.button>
                                 </div>
                                 <p className='text-xs text-slate-600 leading-relaxed font-normal'>
@@ -200,7 +200,7 @@ const VideoQuizOverlay: React.FC<VideoQuizOverlayProps> = ({
                     <div className='flex items-center justify-end gap-3 mt-auto'>
                         <CustomButton
                             variant='ghost'
-                            className='text-slate-400 hover:text-slate-600 text-[11px] font-semibold uppercase tracking-wider'
+                            className='text-slate-400 hover:text-slate-600 text-[11px] font-semibold tracking-wider'
                             onClick={onSkip}
                             label='Bỏ qua tất cả'
                             icon={<SkipForward className='w-3.5 h-3.5' />}
@@ -209,7 +209,7 @@ const VideoQuizOverlay: React.FC<VideoQuizOverlayProps> = ({
                         {isAnswered && (
                             <CustomButton
                                 variant='default'
-                                className='bg-blue-600 hover:bg-blue-700 text-white rounded-xl px-6 font-bold text-[11px] uppercase tracking-wider shadow-lg shadow-blue-500/20'
+                                className='bg-blue-600 hover:bg-blue-700 text-white rounded-xl px-6 font-bold text-[11px] tracking-wider shadow-lg shadow-blue-500/20'
                                 onClick={handleNextAction}
                                 label={isLastQuiz ? 'Hoàn thành & Xem tiếp' : 'Câu hỏi tiếp theo'}
                                 icon={<ArrowRight className='w-4 h-4' />}
@@ -221,6 +221,8 @@ const VideoQuizOverlay: React.FC<VideoQuizOverlayProps> = ({
             </motion.div>
         </motion.div>
     )
-}
+})
+
+VideoQuizOverlay.displayName = 'VideoQuizOverlay'
 
 export default VideoQuizOverlay

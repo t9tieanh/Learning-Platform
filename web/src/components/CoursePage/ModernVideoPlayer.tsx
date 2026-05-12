@@ -10,6 +10,7 @@ import { timeToSeconds } from '@/utils/time/time.utils'
 import { AnimatePresence, motion } from 'framer-motion'
 import { CheckCircle2, ChevronLeft, ChevronRight } from 'lucide-react'
 import VideoQuizOverlay from './VideoQuizOverlay'
+import { useLessonProgressStore } from '@/stores/useLessonProgressStore'
 
 export interface VideoPlayerRef {
     seekTo: (time: number) => void
@@ -21,12 +22,14 @@ const ModernVideoPlayer = forwardRef<VideoPlayerRef, {
     subtitlesRaw?: string
     chunks?: LessonChunk[]
     onShowChunkDetails?: (chunkId: string) => void
+    onProgress?: (percent: number) => void
 }>(({
     lesson,
     markDoneVideo,
     subtitlesRaw,
     chunks = [],
-    onShowChunkDetails
+    onShowChunkDetails,
+    onProgress
 }, ref) => {
     const { data } = useAuthStore()
     const videoRef = useRef<HTMLVideoElement>(null)
@@ -40,13 +43,31 @@ const ModernVideoPlayer = forwardRef<VideoPlayerRef, {
     const shownQuizIds = useRef<Set<string>>(new Set())
     const lastCheckTime = useRef(0)
 
-    const COMPLETION_THRESHOLD = 0.9
+    const updateProgress = useLessonProgressStore(state => state.updateProgress)
+    const getProgress = useLessonProgressStore(state => state.getProgress)
+    
+    // Use a ref to store saved progress to avoid re-renders when it changes in the store
+    const savedProgressRef = useRef(getProgress(lesson.id))
+    const [maxTimeWatched, setMaxTimeWatched] = useState(savedProgressRef.current.maxTimeWatched)
+    const isSeekingToSaved = useRef(false)
+    useEffect(() => {
+        const progress = getProgress(lesson.id)
+        savedProgressRef.current = progress
+        setMaxTimeWatched(progress.maxTimeWatched)
+        isSeekingToSaved.current = false
+    }, [lesson.id, getProgress])
+
+    const isCompleted = lesson.completionStatus === 'COMPLETED'
+
+    const COMPLETION_THRESHOLD = 0.6
 
     useImperativeHandle(ref, () => ({
         seekTo: (time: number) => {
             if (videoRef.current) {
+                // Allow seeking back or seeking to max reached time
+                const targetTime = isCompleted ? time : Math.min(time, maxTimeWatched + 1)
                 setShowVideo(true)
-                videoRef.current.currentTime = time
+                videoRef.current.currentTime = targetTime
                 videoRef.current.play().catch(() => { })
             }
         }
@@ -75,6 +96,17 @@ const ModernVideoPlayer = forwardRef<VideoPlayerRef, {
         fetchVideoData()
     }, [lesson.id, lesson.introductionVideo, data?.accessToken])
 
+    // Auto resume video from last position - ONLY ONCE when URL is ready
+    useEffect(() => {
+        if (actualVideoUrl && videoRef.current && !isSeekingToSaved.current) {
+            const progress = getProgress(lesson.id)
+            if (progress.lastCurrentTime > 0) {
+                isSeekingToSaved.current = true
+                videoRef.current.currentTime = progress.lastCurrentTime
+            }
+        }
+    }, [actualVideoUrl, lesson.id, getProgress])
+
     const parsedSubtitles = useMemo(() => {
         if (!subtitlesRaw) return []
         return parseSRT(subtitlesRaw)
@@ -87,9 +119,23 @@ const ModernVideoPlayer = forwardRef<VideoPlayerRef, {
         const { currentTime, duration } = video
         if (!duration) return
 
+        // Track max time reached in this session
+        if (currentTime > maxTimeWatched && !isCompleted) {
+            setMaxTimeWatched(currentTime)
+            updateProgress(lesson.id, { maxTimeWatched: currentTime })
+        }
+
+        // Periodically update current progress (every 2 seconds)
+        if (Math.abs(currentTime - lastCheckTime.current) > 2) {
+            updateProgress(lesson.id, { lastCurrentTime: currentTime })
+            lastCheckTime.current = currentTime
+        }
+
+        const currentPercent = (currentTime / duration) * 100
+        onProgress?.(currentPercent)
+
         if (!videoCompletionMarked.current) {
-            const progress = currentTime / duration
-            if (progress >= COMPLETION_THRESHOLD) {
+            if (currentPercent >= COMPLETION_THRESHOLD * 100) {
                 videoCompletionMarked.current = true
                 markDoneVideo()
             }
@@ -106,15 +152,23 @@ const ModernVideoPlayer = forwardRef<VideoPlayerRef, {
             }
         }
         lastCheckTime.current = currentTime
-    }, [markDoneVideo, chunks, currentChunkTitle])
+    }, [markDoneVideo, chunks, currentChunkTitle, maxTimeWatched, isCompleted, onProgress])
 
     const handleSeekingSync = useCallback(() => {
-        if (videoRef.current) {
-            lastCheckTime.current = videoRef.current.currentTime
-        }
-    }, [])
+        if (!videoRef.current || isCompleted) return
 
-    const startQuiz = () => {
+        // If user tries to seek forward beyond what they've watched
+        if (videoRef.current.currentTime > maxTimeWatched + 1) {
+            videoRef.current.currentTime = maxTimeWatched
+            toast.warning('Vui lòng xem tuần tự nội dung bài học. Bạn có thể làm bài kiểm tra sau khi xem đạt 70%.', {
+                id: 'seek-blocked',
+                duration: 3000
+            })
+        }
+        lastCheckTime.current = videoRef.current.currentTime
+    }, [maxTimeWatched, isCompleted])
+
+    const startQuiz = useCallback(() => {
         const video = videoRef.current
         if (!video || chunks.length === 0) return
 
@@ -134,18 +188,18 @@ const ModernVideoPlayer = forwardRef<VideoPlayerRef, {
             video.pause()
             setCurrentQuizChunk(chunkWithQuizzes)
         }
-    }
+    }, [chunks])
 
-    const finishQuiz = (chunkId: string) => {
+    const finishQuiz = useCallback((chunkId: string) => {
         shownQuizIds.current.add(chunkId)
         setCurrentQuizChunk(null)
         videoRef.current?.play().catch(() => { })
-    }
+    }, [])
 
-    const closeQuiz = () => {
+    const closeQuiz = useCallback(() => {
         setCurrentQuizChunk(null)
         videoRef.current?.play().catch(() => { })
-    }
+    }, [])
 
     return (
         <div className='w-full h-full relative group/modern-player overflow-hidden rounded-[2rem] shadow-2xl'>
@@ -231,6 +285,7 @@ const ModernVideoPlayer = forwardRef<VideoPlayerRef, {
                             <VideoQuizOverlay
                                 chunk={currentQuizChunk}
                                 allChunks={chunks}
+                                maxTimeWatched={maxTimeWatched}
                                 onSkip={() => finishQuiz(currentQuizChunk.id)}
                                 onContinue={() => finishQuiz(currentQuizChunk.id)}
                                 onClose={closeQuiz}

@@ -16,8 +16,9 @@ export const LessonViewer = forwardRef<VideoPlayerRef, {
   isInvalid?: boolean;
   qualityReason?: string | null;
   onShowChunkDetails?: (chunkId: string) => void;
+  onProgress?: (percent: number) => void;
 }>(
-  ({ lesson, subtitlesRaw, chunks = [], isInvalid, qualityReason, onShowChunkDetails }, ref) => {
+  ({ lesson, subtitlesRaw, chunks = [], isInvalid, qualityReason, onShowChunkDetails, onProgress }, ref) => {
     const { id } = lesson
 
     const markDoneLesson = useCallback(async () => {
@@ -57,7 +58,7 @@ export const LessonViewer = forwardRef<VideoPlayerRef, {
     return (
       <div className='w-full aspect-video bg-black rounded-[2rem] overflow-hidden relative group shadow-2xl'>
         {lesson.type === 'video' ? (
-          <ModernVideoPlayer ref={ref} lesson={lesson} markDoneVideo={markDoneLesson} subtitlesRaw={subtitlesRaw || undefined} chunks={chunks} onShowChunkDetails={onShowChunkDetails} />
+          <ModernVideoPlayer ref={ref} lesson={lesson} markDoneVideo={markDoneLesson} subtitlesRaw={subtitlesRaw || undefined} chunks={chunks} onShowChunkDetails={onShowChunkDetails} onProgress={onProgress} />
         ) : lesson.type === 'article' ? (
           <PDFViewer lesson={lesson} markDoneVideo={markDoneLesson} />
         ) : (

@@ -34,6 +34,7 @@ const CoursePage = () => {
   const [activeTab, setActiveTab] = useState('Tổng quan')
   const [selectedChunkId, setSelectedChunkId] = useState<string | null>(null)
   const [activeMobileTab, setActiveMobileTab] = useState<'content' | 'ai' | null>(null)
+  const [watchedPercent, setWatchedPercent] = useState(0)
   const navigate = useNavigate()
   const viewerRef = useRef<import('@/components/CoursePage/VideoPlayer').VideoPlayerRef>(null)
 
@@ -152,6 +153,7 @@ const CoursePage = () => {
       type: lecture.type === 'article' ? 'article' : 'video',
       completionStatus: lecture.completionStatus || 'NOT_STARTED'
     })
+    setWatchedPercent(0) // Reset for new lecture
   }
 
   // Initialize the first lecture as current
@@ -230,6 +232,7 @@ const CoursePage = () => {
                   isInvalid={analysisData?.status?.toLowerCase() === 'failed'}
                   qualityReason={analysisData?.qualityReason}
                   onShowChunkDetails={handleShowChunkDetails}
+                  onProgress={(percent) => setWatchedPercent(Math.max(watchedPercent, percent))}
                 />
               </div>
               <div className='mt-2 mx-auto w-full'>
@@ -243,6 +246,7 @@ const CoursePage = () => {
                   activeTab={activeTab}
                   onTabChange={setActiveTab}
                   selectedChunkId={selectedChunkId}
+                  watchedPercent={watchedPercent}
                 />
               </div>
             </>

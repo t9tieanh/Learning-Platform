@@ -2,7 +2,7 @@ import prismaService from '~/service/utils/prisma.service';
 import { lessonChatMessageRoleDisplayLabel } from '~/utils/lessonChatMessageRole.labels';
 
 /** Max chat messages pulled as verbatim recent context for RAG */
-const DEFAULT_MAX_MESSAGES = 10;
+const DEFAULT_MAX_MESSAGES = 5
 /** Bound per-message size to limit prompt growth */
 const MAX_CONTENT_CHARS_PER_MESSAGE = 2000;
 
