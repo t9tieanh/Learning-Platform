@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { AxiosError } from 'axios'
 import {
   ArrowLeft,
+  CheckCircle2,
   ChevronDown,
   ClipboardList,
   Eye,
@@ -16,6 +17,7 @@ import {
   Sparkles,
   Trash2,
   Undo2,
+  TableProperties,
 } from 'lucide-react'
 import { LessonChunk } from '@/types/ai'
 import { LessonType } from '@/types/lesson'
@@ -35,6 +37,7 @@ import LessonExamBlueprintHelpPanel from './LessonExamBlueprintHelpPanel'
 import LessonExamBlueprintTargetTotalCard from './LessonExamBlueprintTargetTotalCard'
 import LessonExamBlueprintRowMetaInlineEditor from './LessonExamBlueprintRowMetaInlineEditor'
 import LessonExamBlueprintTestPreviewPanel from './LessonExamBlueprintTestPreviewPanel'
+import LessonExamBlueprintMatrixAnalysis from './LessonExamBlueprintMatrixAnalysis'
 import lessonTestService from '@/services/assistant/lessonTest.service'
 import quizService from '@/services/assistant/quiz.service'
 import type {
@@ -120,9 +123,6 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
   const [rows, setRows] = useState<ExamBlueprintRow[]>(() =>
     buildDefaultExamBlueprintRows(chunks)
   )
-  const [targetTotal, setTargetTotal] = useState(() =>
-    getDefaultTargetTotalQuestionCount(chunks)
-  )
   const [isGenerating, setIsGenerating] = useState(false)
   /** Server chunk-group ids aligned with last successful bulk sync (for “regenerate this group”). */
   const [groupIdsByRowId, setGroupIdsByRowId] = useState<Record<string, string>>({})
@@ -146,6 +146,7 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
   const [rowOpen, setRowOpen] = useState<Record<string, boolean>>({})
   /** Chunk-group PATCH save in flight (`PATCH …/lesson-test/chunk-groups/:groupId`). */
   const [savingGroupRowId, setSavingGroupRowId] = useState<string | null>(null)
+  const [showAnalysis, setShowAnalysis] = useState(false)
   /** Row whose header meta is being edited inline (title, count, prompt). */
   const [metaInlineEditRowId, setMetaInlineEditRowId] = useState<string | null>(null)
   const [lessonTestHeaderStatus, setLessonTestHeaderStatus] = useState<LessonTestStatus>(() => {
@@ -287,41 +288,26 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
 
       if (nextRows.length === 0) {
         setRows(buildDefaultExamBlueprintRows(chunks))
-        setTargetTotal(getDefaultTargetTotalQuestionCount(chunks))
         setGroupIdsByRowId({})
         setBulkSyncSignature(null)
         return
       }
 
       setRows(nextRows)
-      const sumQuestions = nextRows.reduce((s, r) => s + r.questionCount, 0)
-      const tt =
-        persistedLessonTest?.targetTotalQuestions != null
-          ? clampTargetTotalForGroups(
-            persistedLessonTest.targetTotalQuestions,
-            nextRows.length
-          )
-          : clampTargetTotalForGroups(sumQuestions, nextRows.length)
-      setTargetTotal(tt)
-
-      const gidMap: Record<string, string> = {}
-      for (const r of nextRows) {
-        gidMap[r.id] = r.id
-      }
-      setGroupIdsByRowId(gidMap)
+      setGroupIdsByRowId(
+        Object.fromEntries(
+          persistedLessonTestChunkGroups.map((g) => {
+            const rowId = nextRows.find((r) => r.id === g.id)?.id || g.id
+            return [rowId, g.id]
+          })
+        )
+      )
       setBulkSyncSignature(blueprintSyncSignature(nextRows, chunks))
       return
     }
 
     setRows((prev) => {
-      const next = normalizeExamBlueprintRowsWhenChunksChange(prev, chunks)
-      if (!prev.length && next.length) {
-        const sum = next.reduce((s, r) => s + r.questionCount, 0)
-        queueMicrotask(() => {
-          setTargetTotal(clampTargetTotalForGroups(sum, next.length))
-        })
-      }
-      return next
+      return normalizeExamBlueprintRowsWhenChunksChange(prev, chunks)
     })
   }, [
     chunkIdsKey,
@@ -330,14 +316,41 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
     persistedLessonTestChunkGroups,
     persistedLessonTest,
   ])
+  
+  const matrixRows = useMemo(() => {
+    let globalIndex = 1
+    return rows.map((row, idx) => {
+      const quizzes = lessonTestQuizzesByRowId[row.id] || []
+      const start = globalIndex
+      const end = globalIndex + quizzes.length - 1
+      const label = row.groupTitle.trim() || `Nhóm nội dung ${idx + 1}`
+      
+      const questionRange = quizzes.length > 0
+        ? quizzes.length === 1 
+          ? `Câu ${start}` 
+          : `Câu ${start} - ${end}`
+        : '—'
 
-  const sumRowQuestionCounts = useMemo(
+      globalIndex += quizzes.length
+      
+      return {
+        id: row.id,
+        label,
+        questionRange,
+        hasQuizzes: quizzes.length > 0,
+        chunks: resolveExamBlueprintChunkIds(row, chunks)
+          .map((cid) => chunks.find((c) => c.id === cid))
+          .filter((c): c is LessonChunk => !!c),
+      }
+    })
+  }, [rows, lessonTestQuizzesByRowId, chunks])
+
+  const targetTotal = useMemo(
     () => rows.reduce((s, r) => s + r.questionCount, 0),
     [rows]
   )
-  const countsMatchTarget = sumRowQuestionCounts === targetTotal
-  const minTotalForLayout = rows.length
-  const maxTotalForLayout = 50 * Math.max(1, rows.length)
+  const sumRowQuestionCounts = targetTotal
+  const countsMatchTarget = true
 
   useEffect(() => {
     setRowOpen((prev) => {
@@ -398,22 +411,6 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
     []
   )
 
-  const applyTargetTotal = useCallback((raw: number) => {
-    setRows((prev) => {
-      if (prev.length === 0) {
-        return prev
-      }
-      const t = clampTargetTotalForGroups(raw, prev.length)
-      setTargetTotal(t)
-      return redistributeQuestionCountsToMatchTotal(prev, t)
-    })
-  }, [])
-
-  const syncTargetTotalToGroupSums = useCallback(() => {
-    setTargetTotal(
-      clampTargetTotalForGroups(sumRowQuestionCounts, Math.max(1, rows.length))
-    )
-  }, [rows.length, sumRowQuestionCounts])
 
   const setRowChunkIds = useCallback(
     (rowId: string, nextIds: string[]) => {
@@ -432,13 +429,8 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
   )
 
   const addRow = useCallback(() => {
-    setRows((prev) => {
-      const withNew = [...prev, makeEmptyExamBlueprintRow(chunks)]
-      const t = clampTargetTotalForGroups(targetTotal, withNew.length)
-      setTargetTotal(t)
-      return redistributeQuestionCountsToMatchTotal(withNew, t)
-    })
-  }, [chunks, targetTotal])
+    setRows((prev) => [...prev, makeEmptyExamBlueprintRow(chunks)])
+  }, [chunks])
 
   const removeRow = useCallback((id: string) => {
     setRows((prev) => {
@@ -449,11 +441,9 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
       if (next.length === 0) {
         return prev
       }
-      const t = clampTargetTotalForGroups(targetTotal, next.length)
-      setTargetTotal(t)
-      return redistributeQuestionCountsToMatchTotal(next, t)
+      return next
     })
-  }, [targetTotal])
+  }, [])
 
   const commitGroupMeta = useCallback(
     async (
@@ -918,13 +908,13 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
             <LessonExamBlueprintTargetTotalCard
               chunkCount={chunks.length}
               targetTotal={targetTotal}
-              onTargetTotalChange={applyTargetTotal}
-              minTotal={minTotalForLayout}
-              maxTotal={maxTotalForLayout}
+              totalGenerated={Object.values(lessonTestQuizzesByRowId).reduce(
+                (acc, quizzes) => acc + quizzes.length,
+                0
+              )}
+              isGenerating={isGenerating}
               sumRowQuestionCounts={sumRowQuestionCounts}
               countsMatchTarget={countsMatchTarget}
-              isGenerating={isGenerating}
-              onSyncTargetToGroupSums={syncTargetTotalToGroupSums}
             />
 
             <div className='space-y-4 md:space-y-5'>
@@ -1041,10 +1031,22 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
                                     />
                                     {row.groupTitle.trim() || `Nhóm nội dung ${labelIdx}`}
                                   </span>
-                                  {!isRowOpen && (
+                                  {isRowOpen ? (
+                                    <p className='mt-1 text-[11px] font-medium text-blue-200/90 flex items-center gap-1.5 animate-in fade-in slide-in-from-top-1 duration-300'>
+                                      <CheckCircle2 className='w-3 h-3' />
+                                      Đã sinh:{' '}
+                                      {(lessonTestQuizzesByRowId[row.id] || [])
+                                        .length}
+                                      /{row.questionCount} câu hỏi
+                                    </p>
+                                  ) : (
                                     <p className='mt-1.5 text-[12px] leading-snug text-blue-100/95'>
-                                      <span className='font-semibold text-white/95'>Phân đoạn: </span>
-                                      <span className='text-white/90 [overflow-wrap:anywhere]'>{chunkSummaryLine}</span>
+                                      <span className='font-semibold text-white/95'>
+                                        Phân đoạn:{' '}
+                                      </span>
+                                      <span className='text-white/90 [overflow-wrap:anywhere]'>
+                                        {chunkSummaryLine}
+                                      </span>
                                       <span className='ml-2 font-bold tabular-nums text-blue-200'>
                                         · {row.questionCount} câu
                                       </span>
@@ -1295,21 +1297,36 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
                 type='button'
                 variant='outline'
                 label='Thêm nhóm nội dung'
-                icon={<Plus className='w-3.5 h-3.5' strokeWidth={2.5} />}
-                className='h-8 font-bold border-dashed border-gray-200 text-gray-600 bg-gray-50/50 hover:bg-white rounded-xl'
+                icon={<Plus className='w-3 h-3' strokeWidth={2.5} />}
+                className='h-7.5 text-[12px] font-bold border-dashed border-gray-200 text-gray-600 bg-gray-50/50 hover:bg-white rounded-xl px-3'
                 onClick={addRow}
                 disabled={isGenerating || rowOpsLocked}
               />
               <div className='flex items-center gap-2'>
                 {hasServerChunkGroups && (
-                  <CustomButton
-                    type='button'
-                    variant='outline'
-                    label='Xem toàn bài'
-                    icon={<Eye className='w-3.5 h-3.5' />}
-                    className='h-8 font-bold border-blue-200 text-blue-600 bg-blue-50/50 hover:bg-blue-50 rounded-xl px-4'
-                    onClick={() => setShowPreview(true)}
-                  />
+                  <>
+                    <CustomButton
+                      type='button'
+                      variant='outline'
+                      label='Ma trận đề thi'
+                      icon={<TableProperties className='w-3 h-3' />}
+                      className={cn(
+                        'h-7.5 text-[12px] font-bold border-indigo-200 rounded-xl px-3 transition-all',
+                        showAnalysis 
+                          ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm shadow-indigo-100' 
+                          : 'text-indigo-600 bg-indigo-50/50 hover:bg-indigo-50'
+                      )}
+                      onClick={() => setShowAnalysis(!showAnalysis)}
+                    />
+                    <CustomButton
+                      type='button'
+                      variant='outline'
+                      label='Xem toàn bài'
+                      icon={<Eye className='w-3 h-3' />}
+                      className='h-7.5 text-[12px] font-bold border-blue-200 text-blue-700 bg-blue-50/80 hover:bg-blue-100 rounded-xl px-3'
+                      onClick={() => setShowPreview(true)}
+                    />
+                  </>
                 )}
                 <CustomButton
                   type='button'
@@ -1322,12 +1339,12 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
                   }
                   icon={
                     isGenerating ? (
-                      <Loader2 className='w-3.5 h-3.5 animate-spin' />
+                      <Loader2 className='w-3 h-3 animate-spin' />
                     ) : (
-                      <Sparkles className='w-3.5 h-3.5' />
+                      <Sparkles className='w-3 h-3' />
                     )
                   }
-                  className='h-8 font-bold bg-blue-600 hover:bg-blue-700 text-white rounded-xl px-6 shadow-md shadow-blue-100'
+                  className='h-7.5 text-[12px] font-bold bg-blue-600 hover:bg-blue-700 text-white rounded-xl px-4 shadow-md shadow-blue-100'
                   onClick={() => void runGenerate()}
                   disabled={
                     isGenerating ||
@@ -1337,6 +1354,7 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
                 />
               </div>
             </div>
+            {showAnalysis && <LessonExamBlueprintMatrixAnalysis rows={matrixRows} />}
           </div>
         </HighGlossBackground>
       )}
