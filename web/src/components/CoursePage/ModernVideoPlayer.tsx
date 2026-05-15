@@ -296,6 +296,7 @@ const ModernVideoPlayer = forwardRef<VideoPlayerRef, {
                                         closeQuiz()
                                     }
                                 }}
+                                isCompleted={isCompleted}
                             />
                         )}
                     </AnimatePresence>

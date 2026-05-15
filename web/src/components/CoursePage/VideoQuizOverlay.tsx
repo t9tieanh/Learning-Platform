@@ -15,6 +15,7 @@ interface VideoQuizOverlayProps {
     onContinue: () => void
     onClose: () => void
     onSeek: (time: number) => void
+    isCompleted?: boolean
 }
 
 const VideoQuizOverlay: React.FC<VideoQuizOverlayProps> = memo(({
@@ -24,7 +25,8 @@ const VideoQuizOverlay: React.FC<VideoQuizOverlayProps> = memo(({
     onSkip,
     onContinue,
     onClose,
-    onSeek
+    onSeek,
+    isCompleted = false
 }) => {
     const [activeChunkId, setActiveChunkId] = useState(initialChunk.id)
     const [currentQuizIndex, setCurrentQuizIndex] = useState(0)
@@ -120,7 +122,7 @@ const VideoQuizOverlay: React.FC<VideoQuizOverlayProps> = memo(({
                                 chunk={c}
                                 idx={idx}
                                 isActive={activeChunkId === c.id}
-                                isLocked={timeToSeconds(c.startTime) > maxTimeWatched + 2}
+                                isLocked={!isCompleted && timeToSeconds(c.startTime) > maxTimeWatched + 2}
                                 onSelect={handleChunkSwitch}
                             />
                         ))}
