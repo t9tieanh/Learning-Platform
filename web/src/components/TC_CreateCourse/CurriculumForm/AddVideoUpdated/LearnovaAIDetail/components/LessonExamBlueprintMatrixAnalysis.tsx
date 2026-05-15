@@ -1,7 +1,8 @@
 import React from 'react'
-import { TableProperties, Info } from 'lucide-react'
+import { TableProperties, Info, Eye, RefreshCw } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { LessonChunk } from '@/types/ai'
+import CustomButton from '@/components/common/Button'
 import {
   Tooltip,
   TooltipContent,
@@ -19,33 +20,52 @@ export interface MatrixRowData {
 
 export interface LessonExamBlueprintMatrixAnalysisProps {
   rows: MatrixRowData[]
+  onViewDetail?: (rowId: string) => void
+  onRefresh?: () => void
+  isRefreshing?: boolean
 }
 
 const LessonExamBlueprintMatrixAnalysis: React.FC<
   LessonExamBlueprintMatrixAnalysisProps
-> = ({ rows }) => {
+> = ({ rows, onViewDetail, onRefresh, isRefreshing }) => {
   return (
     <div className='mt-8 pt-6 border-t border-gray-100/80 animate-in fade-in slide-in-from-top-2 duration-500'>
-      <div className='flex items-center gap-2 mb-4'>
-        <div className='p-1.5 rounded-lg bg-indigo-50'>
-          <TableProperties className='w-4 h-4 text-indigo-600' />
+      <div className='flex items-center justify-between mb-4'>
+        <div className='flex items-center gap-2'>
+          <div className='p-1.5 rounded-lg bg-indigo-50'>
+            <TableProperties className='w-4 h-4 text-indigo-600' />
+          </div>
+          <div>
+            <h3 className='text-[14px] font-bold text-slate-800 leading-none'>
+              Ánh xạ chuẩn đầu ra ↔ Câu hỏi
+            </h3>
+            <p className='text-[11px] text-slate-500 mt-1 font-medium'>
+              Phân tích ma trận năng lực dựa trên cấu hình các nhóm nội dung
+            </p>
+          </div>
         </div>
-        <div>
-          <h3 className='text-[14px] font-bold text-slate-800 leading-none'>
-            Ánh xạ chuẩn đầu ra ↔ Câu hỏi
-          </h3>
-          <p className='text-[11px] text-slate-500 mt-1 font-medium'>
-            Phân tích ma trận năng lực dựa trên cấu hình các nhóm nội dung
-          </p>
-        </div>
+
+        {onRefresh && (
+          <CustomButton
+            type='button'
+            variant='ghost'
+            size='sm'
+            label='Làm mới'
+            isLoader={isRefreshing}
+            icon={isRefreshing ? undefined : <RefreshCw className='w-3.5 h-3.5' />}
+            onClick={onRefresh}
+            className='h-8 text-[11px] font-bold text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all px-2.5'
+          />
+        )}
       </div>
 
       <div className='overflow-hidden rounded-xl border border-slate-100 shadow-sm'>
         <table className='w-full text-left text-[13px] border-collapse bg-white'>
           <thead className='bg-slate-50/80 border-b border-slate-100'>
             <tr>
-              <th className='px-4 py-3 font-semibold text-slate-700 w-2/3'>Chuẩn đầu ra của học phần</th>
+              <th className='px-4 py-3 font-semibold text-slate-700 w-1/2 sm:w-[55%]'>Chuẩn đầu ra của học phần</th>
               <th className='px-4 py-3 font-semibold text-slate-700 text-center'>Câu hỏi</th>
+              <th className='px-4 py-3 font-semibold text-slate-700 text-center'>Thao tác</th>
             </tr>
           </thead>
           <tbody className='divide-y divide-slate-50'>
@@ -87,6 +107,16 @@ const LessonExamBlueprintMatrixAnalysis: React.FC<
                   )}>
                     {row.questionRange}
                   </span>
+                </td>
+                <td className='px-4 py-3.5 text-center align-top'>
+                  <button
+                    type='button'
+                    onClick={() => onViewDetail?.(row.id)}
+                    className='inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white border border-slate-200 text-[11px] font-bold text-slate-600 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-100 transition-all shadow-sm'
+                  >
+                    <Eye className='w-3.5 h-3.5' />
+                    Xem chi tiết
+                  </button>
                 </td>
               </tr>
             ))}

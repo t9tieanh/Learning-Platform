@@ -75,11 +75,10 @@ const QuizTeacherInlineEditor: React.FC<QuizTeacherInlineEditorProps> = ({
 }) => {
   const [question, setQuestion] = useState(quiz.question)
   const [explanation, setExplanation] = useState(quiz.explanation ?? '')
-  const [type, setType] = useState<QuestionType>(() => initialEditorType(quiz))
-  const [difficulty, setDifficulty] = useState<QuizDifficulty>(quiz.difficulty)
   const [choices, setChoices] = useState<DraftChoice[]>(() =>
     initialEditorChoices(quiz)
   )
+  const [difficulty, setDifficulty] = useState<QuizDifficulty>(quiz.difficulty)
   const [saving, setSaving] = useState(false)
 
   // Mentions logic
@@ -160,8 +159,10 @@ const QuizTeacherInlineEditor: React.FC<QuizTeacherInlineEditorProps> = ({
     }
   }
 
-  const setCorrectExclusive = (key: string) => {
-    setChoices((prev) => prev.map((c) => ({ ...c, isCorrect: c.key === key })))
+  const toggleCorrect = (key: string) => {
+    setChoices((prev) =>
+      prev.map((c) => (c.key === key ? { ...c, isCorrect: !c.isCorrect } : c))
+    )
   }
 
   const addChoice = () => {
@@ -208,17 +209,20 @@ const QuizTeacherInlineEditor: React.FC<QuizTeacherInlineEditorProps> = ({
       return
     }
     const nCorrect = payloadChoices.filter((c) => c.isCorrect).length
-    if (nCorrect !== 1) {
-      toast.error('Phải chọn đúng một đáp án đúng.')
+    if (nCorrect === 0) {
+      toast.error('Phải chọn ít nhất một đáp án đúng.')
       return
     }
+
+    const determinedType =
+      nCorrect > 1 ? QuestionType.MULTIPLE_CHOICE : QuestionType.TRUE_FALSE
 
     setSaving(true)
     try {
       const res = await quizService.updateQuiz(quiz.id, {
         question: trimmedQ,
         explanation: explanation.trim(),
-        type,
+        type: determinedType,
         difficulty,
         choices: payloadChoices,
       })
@@ -237,9 +241,9 @@ const QuizTeacherInlineEditor: React.FC<QuizTeacherInlineEditorProps> = ({
 
   return (
     <div className='mt-4 pt-4 border-t border-slate-100 space-y-4'>
-      <p className='text-[13px] md:text-[14px] font-bold text-blue-900 flex items-center gap-1.5 px-0.5'>
+      <p className='text-[12px] md:text-[13px] font-bold text-blue-900 flex items-center gap-1.5 px-0.5'>
         <PencilLine
-          className='w-4.5 h-4.5 shrink-0'
+          className='w-3 h-3 shrink-0'
           strokeWidth={2.25}
           aria-hidden
         />
@@ -259,38 +263,7 @@ const QuizTeacherInlineEditor: React.FC<QuizTeacherInlineEditorProps> = ({
       </div>
 
       <div className='grid grid-cols-1 sm:grid-cols-2 gap-2'>
-        <div className='space-y-1'>
-          <Label className='text-[12px] font-semibold text-gray-600'>
-            Dạng câu
-          </Label>
-          <Select
-            value={type}
-            onValueChange={(v) => {
-              const next = v as QuestionType
-              setType(next)
-              if (choices.length < 2) {
-                setChoices([
-                  { key: `n1-${Date.now()}`, text: '', isCorrect: true },
-                  { key: `n2-${Date.now()}`, text: '', isCorrect: false },
-                ])
-              }
-            }}
-          >
-            <SelectTrigger size='sm' className='h-9.5 text-[13px]'>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {QUESTION_TYPES.map((t) => (
-                <SelectItem key={t} value={t} className='text-[14px]'>
-                  {t === QuestionType.MULTIPLE_CHOICE
-                    ? 'Trắc nghiệm'
-                    : 'Đúng / Sai'}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className='space-y-1'>
+        <div className='space-y-1 col-span-full'>
           <Label className='text-[12px] font-semibold text-gray-600'>
             Độ khó
           </Label>
@@ -406,7 +379,7 @@ const QuizTeacherInlineEditor: React.FC<QuizTeacherInlineEditorProps> = ({
             <li key={c.key} className='flex items-center gap-2'>
               <button
                 type='button'
-                onClick={() => setCorrectExclusive(c.key)}
+                onClick={() => toggleCorrect(c.key)}
                 className={cn(
                   'w-9 h-9 rounded-lg border flex items-center justify-center shrink-0 transition-colors',
                   c.isCorrect

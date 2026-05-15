@@ -77,15 +77,16 @@ class LessonTestService {
    * Xóa một chunk group trên assistant-service.
    * DELETE `assistant/analysis/lesson-test/chunk-groups/:groupId`
    */
-  async deleteChunkGroup(groupId: string): Promise<void> {
+  async deleteChunkGroup(groupId: string): Promise<ApiResponse<void>> {
     try {
-      await axiosClient.axiosInstance.delete(
+      const res = await axiosClient.axiosInstance.delete(
         `assistant/analysis/lesson-test/chunk-groups/${groupId}`
       )
+      return res.data as ApiResponse<void>
     } catch (e) {
       const err = e as AxiosError
       if (err.response?.status === 404) {
-        return
+        return { code: 200, message: 'Group not found' }
       }
       throw e
     }
