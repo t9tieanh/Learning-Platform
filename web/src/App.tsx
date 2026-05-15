@@ -21,8 +21,12 @@ const App: FC = () => {
           toastOptions={{
             style: {
               background: 'white',
+              color: '#1f2937',
               width: 'fit-content',
-              padding: '15px 20px 15px 20px'
+              padding: '12px 20px',
+              borderRadius: '16px',
+              border: '1px solid #f3f4f6',
+              boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)'
             },
             classNames: {
               success: 'bg-green-500 text-white',

@@ -1,5 +1,5 @@
 import React from 'react'
-import { Trash2, Sparkles, ArrowRight } from 'lucide-react'
+import { Trash2, Sparkles, ArrowRight, Check } from 'lucide-react'
 import { Quiz } from '@/types/ai'
 import { QuizDifficulty, BloomLevel } from '@/types/quiz'
 import CustomButton from '@/components/common/Button'
@@ -10,29 +10,54 @@ interface QuizCardProps {
     index: number
     onEdit: (index: number) => void
     onDelete: (index: number, e: React.MouseEvent) => void
+    isSelected?: boolean
+    onSelect?: (id: string, e: React.MouseEvent) => void
 }
 
-const QuizCard: React.FC<QuizCardProps> = ({ quiz, index, onEdit, onDelete }) => {
+const QuizCard: React.FC<QuizCardProps> = ({ quiz, index, onEdit, onDelete, isSelected, onSelect }) => {
     return (
         <div
             onClick={() => onEdit(index)}
-            className='group flex flex-col p-6 rounded-2xl border border-gray-100 bg-gray-50/20 hover:bg-white hover:border-blue-200 hover:shadow-xl transition-all cursor-pointer relative overflow-hidden h-full'
+            className={cn(
+                'group flex flex-col p-6 rounded-2xl border transition-all cursor-pointer relative overflow-hidden h-full',
+                isSelected 
+                    ? 'bg-blue-50/40 border-blue-400 shadow-lg shadow-blue-100/50' 
+                    : 'bg-gray-50/20 border-gray-100 hover:bg-white hover:border-blue-200 hover:shadow-xl'
+            )}
         >
             <div className='flex items-center justify-between mb-4'>
-                <div className='flex items-center gap-2'>
-                    <span className='w-6 h-6 rounded-lg bg-blue-600 text-white flex items-center justify-center text-[10px] font-bold shadow-md shadow-blue-100'>
-                        {index + 1}
-                    </span>
-                    {quiz.aiGenerated && (
-                        <div className='flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-blue-50 text-blue-600 text-[8px] font-semibold border border-blue-100'>
-                            <Sparkles className='w-2 h-2' /> AI {quiz.aiConfidence ? `• ${Math.round(quiz.aiConfidence * 100)}%` : ''}
+                <div className='flex items-center gap-3'>
+                    {quiz.id && onSelect && (
+                        <div 
+                            className={cn(
+                                'w-5 h-5 rounded-md border-2 transition-all flex items-center justify-center cursor-pointer shadow-sm',
+                                isSelected 
+                                    ? 'bg-blue-600 border-blue-600 text-white' 
+                                    : 'bg-white border-gray-300 hover:border-blue-400'
+                            )}
+                            onClick={(e) => {
+                                e.stopPropagation()
+                                onSelect(quiz.id!, e)
+                            }}
+                        >
+                            {isSelected && <Check className='w-3.5 h-3.5' />}
                         </div>
                     )}
-                    {!quiz.isApproved && quiz.aiGenerated && (
-                        <div className='px-1.5 py-0.5 rounded-md bg-amber-50 text-amber-600 text-[8px] font-semibold border border-amber-100'>
-                            Chờ duyệt
-                        </div>
-                    )}
+                    <div className='flex items-center gap-2'>
+                        <span className='w-6 h-6 rounded-lg bg-blue-600 text-white flex items-center justify-center text-[10px] font-bold shadow-md shadow-blue-100'>
+                            {index + 1}
+                        </span>
+                        {quiz.aiGenerated && (
+                            <div className='flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-blue-50 text-blue-600 text-[8px] font-semibold border border-blue-100'>
+                                <Sparkles className='w-2 h-2' /> AI {quiz.aiConfidence ? `• ${Math.round(quiz.aiConfidence * 100)}%` : ''}
+                            </div>
+                        )}
+                        {!quiz.isApproved && quiz.aiGenerated && (
+                            <div className='px-1.5 py-0.5 rounded-md bg-amber-50 text-amber-600 text-[8px] font-semibold border border-amber-100'>
+                                Chờ duyệt
+                            </div>
+                        )}
+                    </div>
                 </div>
                 <CustomButton
                     type='button'

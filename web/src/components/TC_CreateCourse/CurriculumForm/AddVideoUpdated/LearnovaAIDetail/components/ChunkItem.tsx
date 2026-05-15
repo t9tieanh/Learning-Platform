@@ -17,7 +17,7 @@ import CustomButton from '@/components/common/Button'
 import { AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion'
 import LearnovaQuizBuilder from './QuizBuilder'
 import SummaryEditor from './SummaryEditor'
-import DistributionPicker, { QUIZ_DISTRIBUTION_PRESETS } from './DistributionPicker'
+import DistributionPicker from './DistributionPicker'
 import {
     Popover,
     PopoverContent,
@@ -42,6 +42,7 @@ interface ChunkItemProps {
     handleStartEdit: (chunk: LessonChunk) => void
     handleCancelEdit: () => void
     handleSave: (chunkId: string) => void
+    lessonTitle?: string
 }
 
 const ChunkItem: React.FC<ChunkItemProps> = ({
@@ -55,6 +56,7 @@ const ChunkItem: React.FC<ChunkItemProps> = ({
     handleStartEdit,
     handleCancelEdit,
     handleSave,
+    lessonTitle
 }) => {
     const [chunkQuizzes, setChunkQuizzes] = useState<Quiz[]>(chunk.quizzes || [])
     const [isQuizVisible, setIsQuizVisible] = useState(false)
@@ -117,7 +119,9 @@ const ChunkItem: React.FC<ChunkItemProps> = ({
             setIsBulkGenerating(true)
             setIsPickerOpen(false)
             const count = distribution.reduce((sum, item) => sum + item.count, 0)
-            toast.loading(`Đang tạo ${count} câu hỏi từ AI...`)
+            toast.loading(`Learnova AI đang tạo ${count} câu hỏi ôn tập cho bài học "${lessonTitle || '...'}"`, {
+                description: 'Vui lòng chờ trong giây lát...'
+            })
 
             const response = await quizService.generateBatchQuizzes(chunk.id, { count, distribution, userPrompt })
 
@@ -341,6 +345,7 @@ const ChunkItem: React.FC<ChunkItemProps> = ({
                                     initialQuizzes={chunkQuizzes}
                                     onSave={handleSaveQuizzes}
                                     onGenerateAI={handleGenerateBatch}
+                                    lessonTitle={lessonTitle}
                                 />
                             </motion.div>
                         )}
