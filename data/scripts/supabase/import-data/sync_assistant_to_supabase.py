@@ -18,7 +18,7 @@ except ImportError:
 
 # Configuration
 # The script can target a specific course to sync analysis data to all its video lessons
-TARGET_COURSE_ID = "00d36904-928e-41cd-b5c5-752e42d16e31"
+TARGET_COURSE_ID = "011c5746-1359-4c2f-9810-ce132e566cc8"
 
 # MySQL Database Configuration (Source of lessons)
 MYSQL_HOST = os.getenv('DB_HOST', 'localhost')
@@ -69,11 +69,11 @@ def sync_data():
     # 1. Load exported analysis data to use as template
     script_dir = Path(__file__).parent
     # We use the latest exported lesson as the standard template for seeding
-    sample_json_path = script_dir.parent / 'data-template' / 'lesson_527bff0d-cf33-406b-9794-3e2c68bfae2e.json'
+    sample_json_path = script_dir.parent / 'data-template' / 'lesson_5d5d9206-4a7f-49c3-8272-7e04b2f01c8c.json'
     
     if not sample_json_path.exists():
         # Fallback to the other common template if first one is missing
-        sample_json_path = script_dir.parent / 'data-template' / 'lesson_527bff0d-cf33-406b-9794-3e2c68bfae2e.json'
+        sample_json_path = script_dir.parent / 'data-template' / 'lesson_5d5d9206-4a7f-49c3-8272-7e04b2f01c8c.json'
     
     if not sample_json_path.exists():
         print(f"Error: Sample JSON not found at {sample_json_path}")
