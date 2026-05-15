@@ -88,7 +88,7 @@ const StudentExplanationRemediation: React.FC<StudentExplanationRemediationProps
                     </button>
                     
                     <span className='text-[11px] font-bold text-blue-700 select-none'>
-                      {chunk.timestamp}
+                      {chunk.title || `Phân đoạn ${chunk.chunkIndex + 1}`}
                     </span>
 
                     {onSeek && (
@@ -107,7 +107,7 @@ const StudentExplanationRemediation: React.FC<StudentExplanationRemediationProps
                   </span>
                 </TooltipTrigger>
                 <TooltipContent side='top' className='bg-slate-900 text-white border-none text-[10px] px-2 py-1'>
-                  <p className='font-bold uppercase tracking-tight'>{chunk.title || 'Nội dung kiến thức'}</p>
+                  <p className='font-bold uppercase tracking-tight'>{chunk.timestamp}</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
