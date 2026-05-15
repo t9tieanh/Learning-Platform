@@ -343,7 +343,7 @@ const QuizTeacherInlineEditor: React.FC<QuizTeacherInlineEditorProps> = ({
 
         {explanation.trim() && (
           <div className='mt-2 p-2 rounded-lg bg-blue-50/40 border border-blue-100/50 backdrop-blur-sm transition-all'>
-            <div className='text-[11px] md:text-[12px] text-blue-900 leading-snug line-clamp-2'>
+            <div className='text-[11px] md:text-[12px] text-blue-900 leading-snug'>
               <span className='font-bold text-blue-800 opacity-70 mr-1.5'>
                 Hiển thị:
               </span>
