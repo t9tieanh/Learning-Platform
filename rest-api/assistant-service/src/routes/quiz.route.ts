@@ -6,6 +6,7 @@ import checkQuizGenerationVip from '~/middleware/checkQuizGenerationVip.middlewa
 import validateDto from '~/middleware/validateDto.midleware';
 import { GenerateQuizDto, GenerateBatchQuizzesDto } from '~/dto/request/quiz-generation.dto';
 import { UpdateQuizDto } from '~/dto/request/quiz-update.dto';
+import { CreateManualQuizDto } from '~/dto/request/quiz-create.dto';
 
 const quizRouter: Router = express.Router();
 
@@ -39,6 +40,16 @@ quizRouter.post(
   checkQuizGenerationVip,
   validateDto(GenerateQuizDto),
   quizController.generateSingleQuiz
+);
+
+/**
+ * POST /assistant/quizzes/chunks/:chunkId/quizzes/manual
+ */
+quizRouter.post(
+  '/chunks/:chunkId/quizzes/manual',
+  Authentication(true),
+  validateDto(CreateManualQuizDto),
+  quizController.createManualQuiz
 );
 
 /**
@@ -151,6 +162,42 @@ quizRouter.patch(
   Authentication(true),
   validateDto(UpdateQuizDto),
   quizController.updateQuiz
+);
+
+/**
+ * PATCH /assistant/quizzes/quiz/:quizId/approve
+ */
+quizRouter.patch(
+  '/quiz/:quizId/approve',
+  Authentication(true),
+  quizController.approveQuiz
+);
+
+/**
+ * POST /assistant/quizzes/bulk-approve
+ */
+quizRouter.post(
+  '/bulk-approve',
+  Authentication(true),
+  quizController.bulkApproveQuizzes
+);
+
+/**
+ * DELETE /assistant/quizzes/quiz/:quizId
+ */
+quizRouter.delete(
+  '/quiz/:quizId',
+  Authentication(true),
+  quizController.deleteQuiz
+);
+
+/**
+ * POST /assistant/quizzes/bulk-delete
+ */
+quizRouter.post(
+  '/bulk-delete',
+  Authentication(true),
+  quizController.bulkDeleteQuizzes
 );
 
 export default quizRouter;

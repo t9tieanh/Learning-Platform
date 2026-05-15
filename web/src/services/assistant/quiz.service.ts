@@ -56,6 +56,20 @@ class QuizService {
   }
 
   /**
+   * Create a manually written quiz for a chunk
+   */
+  async createManualQuiz(
+    chunkId: string,
+    request: any
+  ): Promise<ApiResponse<GeneratedQuiz>> {
+    const res = await axiosClient.axiosInstance.post(
+      `assistant/quizzes/chunks/${chunkId}/quizzes/manual`,
+      request
+    )
+    return res.data as ApiResponse<GeneratedQuiz>
+  }
+
+  /**
    * Generate multiple quizzes for a chunk with batch distribution
    * (by difficulty and Bloom level)
    */
@@ -97,6 +111,38 @@ class QuizService {
   async updateQuiz(quizId: string, body: UpdateQuizPayload): Promise<ApiResponse<GeneratedQuiz>> {
     const res = await axiosClient.axiosInstance.patch(`assistant/quizzes/quiz/${quizId}`, body)
     return res.data as ApiResponse<GeneratedQuiz>
+  }
+
+  /**
+   * Approve a quiz (set isApproved to true)
+   */
+  async approveQuiz(quizId: string): Promise<ApiResponse<GeneratedQuiz>> {
+    const res = await axiosClient.axiosInstance.patch(`assistant/quizzes/quiz/${quizId}/approve`)
+    return res.data as ApiResponse<GeneratedQuiz>
+  }
+
+  /**
+   * Bulk approve quizzes
+   */
+  async bulkApproveQuizzes(quizIds: string[]): Promise<ApiResponse<void>> {
+    const res = await axiosClient.axiosInstance.post(`assistant/quizzes/bulk-approve`, { quizIds })
+    return res.data as ApiResponse<void>
+  }
+
+  /**
+   * Delete a quiz
+   */
+  async deleteQuiz(quizId: string): Promise<ApiResponse<void>> {
+    const res = await axiosClient.axiosInstance.delete(`assistant/quizzes/quiz/${quizId}`)
+    return res.data as ApiResponse<void>
+  }
+
+  /**
+   * Bulk delete quizzes
+   */
+  async bulkDeleteQuizzes(quizIds: string[]): Promise<ApiResponse<void>> {
+    const res = await axiosClient.axiosInstance.post(`assistant/quizzes/bulk-delete`, { quizIds })
+    return res.data as ApiResponse<void>
   }
 }
 

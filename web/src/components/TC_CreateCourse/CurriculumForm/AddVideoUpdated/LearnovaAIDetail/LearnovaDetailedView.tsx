@@ -29,6 +29,7 @@ interface LearnovaDetailedViewProps {
     mainWrapperRef?: React.RefObject<HTMLDivElement | null>
     onSaveSummary: (chunkId: string, newSummary: string) => Promise<void>
     onAfterExamGenerate?: () => void
+    lessonTitle?: string
 }
 
 const LearnovaDetailedView: React.FC<LearnovaDetailedViewProps> = ({
@@ -39,7 +40,8 @@ const LearnovaDetailedView: React.FC<LearnovaDetailedViewProps> = ({
     handleSeek,
     mainWrapperRef,
     onSaveSummary,
-    onAfterExamGenerate
+    onAfterExamGenerate,
+    lessonTitle
 }) => {
     const chunks: LessonChunk[] = analysisData?.chunks || []
     /** Toggle: lecture structure vs lesson-test blueprint — avoids stacking both on one long page. */
@@ -187,6 +189,7 @@ const LearnovaDetailedView: React.FC<LearnovaDetailedViewProps> = ({
                                             handleStartEdit={handleStartEdit}
                                             handleCancelEdit={handleCancelEdit}
                                             handleSave={handleSave}
+                                            lessonTitle={lessonTitle}
                                         />
                                     ))}
                                 </Accordion>
@@ -205,6 +208,7 @@ const LearnovaDetailedView: React.FC<LearnovaDetailedViewProps> = ({
                         lessonType={analysisData.lessonType ?? undefined}
                         onAfterGenerate={onAfterExamGenerate}
                         onBackToStructure={() => setDetailMainPanel('structure')}
+                        lessonTitle={lessonTitle}
                     />
                 ) : null}
             </div>

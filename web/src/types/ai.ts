@@ -13,7 +13,7 @@ export interface ConversationLoadResponse {
   result: ConversationMessage[]
 }
 
-import { QuizDifficulty, BloomLevel } from './quiz'
+import { QuizDifficulty, BloomLevel, QuestionType } from './quiz'
 
 export interface QuizChoice {
   id: string
@@ -27,6 +27,7 @@ export interface Quiz {
   question: string
   choices: QuizChoice[]
   explanation: string
+  type?: QuestionType
   difficulty?: QuizDifficulty
   bloomLevel?: BloomLevel
   aiGenerated?: boolean

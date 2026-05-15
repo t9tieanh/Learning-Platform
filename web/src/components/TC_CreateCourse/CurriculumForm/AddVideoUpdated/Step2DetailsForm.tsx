@@ -190,6 +190,7 @@ const Step2DetailsForm: React.FC<Step2DetailsFormProps> = ({
       <LearnovaDetailedView
         analysisData={analysisData}
         videoSrc={videoSrc}
+        lessonTitle={watch('title')}
         onBack={() => setIsDetailedView(false)}
         detailedVideoRef={detailedVideoRef}
         chunkQuestions={chunkQuestions}

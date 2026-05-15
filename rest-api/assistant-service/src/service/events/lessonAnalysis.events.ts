@@ -139,9 +139,10 @@ export class LessonAnalysisEvents {
         // 2 - 95 / 3 - 95 for e5base
         // 3 - 95 for openai
         const chunks = await this.chunkingService.processRawText(subtitles, {
-            bufferSize: 3,
-            percentileThreshold: 95,
+            bufferSize: 4,
+            percentileThreshold: 98,
             isSrt,
+            chunkSize: 100,
         });
         Logger.info(
             `Chunking produced ${chunks.length} chunk(s) for lessonId=${lessonId}`

@@ -108,6 +108,45 @@ export class SemanticAnalyzer {
     }
 
     /**
+     * Helper to create and add a chunk to the chunks array.
+     */
+    private addChunk(
+        sentenceObjectArray: SentenceObject[],
+        start: number,
+        end: number,
+        chunks: SemanticChunk[]
+    ): void {
+        const group = sentenceObjectArray.slice(start, end + 1);
+        const combinedText = group.map((item) => item.sentence).join(" ");
+
+        const firstSentence = group[0];
+        const lastSentence = group[group.length - 1];
+
+        const chunkMetadata: SemanticChunk['metadata'] = {
+            sentenceCount: group.length,
+            startSentenceIndex: firstSentence.index,
+            endSentenceIndex: lastSentence.index,
+        };
+
+        if (firstSentence.metadata) {
+            chunkMetadata.subtitleIndex = firstSentence.metadata.subtitleIndex;
+            chunkMetadata.startTime = firstSentence.metadata.startTime;
+        }
+
+        if (lastSentence.metadata) {
+            chunkMetadata.endTime = lastSentence.metadata.endTime;
+            if (chunkMetadata.startTime && chunkMetadata.endTime) {
+                chunkMetadata.timestamp = `${chunkMetadata.startTime} --> ${chunkMetadata.endTime}`;
+            }
+        }
+
+        chunks.push({
+            content: combinedText,
+            metadata: chunkMetadata,
+        });
+    }
+
+    /**
    * Groups sentences into semantic chunks based on specified shift indices.
    * Returns chunks with aggregated metadata from the constituent sentences.
    *
@@ -137,7 +176,8 @@ export class SemanticAnalyzer {
    */
     groupSentencesIntoChunks(
         sentenceObjectArray: SentenceObject[],
-        shiftIndices: number[]
+        shiftIndices: number[],
+        maxSentencesPerChunk: number = 100
     ): SemanticChunk[] {
         let startIdx = 0; // Initialize the start index
         const chunks: SemanticChunk[] = []; // Create an array to hold the grouped sentences
@@ -150,39 +190,19 @@ export class SemanticAnalyzer {
 
         // Iterate through the breakpoints to slice and accumulate sentences into chunks
         adjustedBreakpoints.forEach((breakpoint) => {
-            // Extract the sentences from the current start index to the breakpoint (inclusive)
-            const group = sentenceObjectArray.slice(startIdx, breakpoint + 1);
-            const combinedText = group.map((item) => item.sentence).join(" "); // Combine the sentences
+            let currentStart = startIdx;
 
-            // Aggregate metadata from first and last sentences in the group
-            const firstSentence = group[0];
-            const lastSentence = group[group.length - 1];
-
-            const chunkMetadata: SemanticChunk['metadata'] = {
-                sentenceCount: group.length,
-                startSentenceIndex: firstSentence.index,
-                endSentenceIndex: lastSentence.index,
-            };
-
-            // Add subtitle metadata if available
-            if (firstSentence.metadata) {
-                chunkMetadata.subtitleIndex = firstSentence.metadata.subtitleIndex;
-                chunkMetadata.startTime = firstSentence.metadata.startTime;
+            // While the current group is larger than maxSentencesPerChunk, split it
+            while (breakpoint - currentStart + 1 > maxSentencesPerChunk) {
+                const subBreakpoint = currentStart + maxSentencesPerChunk - 1;
+                this.addChunk(sentenceObjectArray, currentStart, subBreakpoint, chunks);
+                currentStart = subBreakpoint + 1;
             }
 
-            if (lastSentence.metadata) {
-                chunkMetadata.endTime = lastSentence.metadata.endTime;
-
-                // Create combined timestamp if both start and end times exist
-                if (chunkMetadata.startTime && chunkMetadata.endTime) {
-                    chunkMetadata.timestamp = `${chunkMetadata.startTime} --> ${chunkMetadata.endTime}`;
-                }
+            // Add the remaining part of the group
+            if (currentStart <= breakpoint) {
+                this.addChunk(sentenceObjectArray, currentStart, breakpoint, chunks);
             }
-
-            chunks.push({
-                content: combinedText,
-                metadata: chunkMetadata,
-            });
 
             startIdx = breakpoint + 1; // Update the start index for the next group
         });
@@ -198,7 +218,7 @@ export class SemanticAnalyzer {
      * @param {SemanticChunk[]} chunks - Array of semantic chunks to process
      * @returns {SemanticChunk[]} Array of chunks with short chunks merged
      */
-    private mergeShortChunks(chunks: SemanticChunk[], minSentences: number = 2): SemanticChunk[] {
+    private mergeShortChunks(chunks: SemanticChunk[], minSentences: number = 5): SemanticChunk[] {
         if (chunks.length === 0) return chunks;
 
         const mergedChunks: SemanticChunk[] = [];
