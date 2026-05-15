@@ -203,6 +203,29 @@ class LessonTestController {
     }
   };
 
+  getLessonExamBlueprintStats = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const lessonId = String(req.params.lessonId);
+      const stats = await lessonTestService.getExamBlueprintStats(lessonId);
+      if (!stats) {
+        sendResponse(res, {
+          code: StatusCodes.NOT_FOUND,
+          message: 'Lesson test blueprint not found',
+          result: null,
+        });
+        return;
+      }
+
+      sendResponse(res, {
+        code: StatusCodes.OK,
+        message: 'OK',
+        result: stats,
+      });
+    } catch (e) {
+      next(e);
+    }
+  };
+
 }
 
 export default new LessonTestController();

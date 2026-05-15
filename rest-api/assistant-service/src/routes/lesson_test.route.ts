@@ -19,6 +19,13 @@ lessonTestRouter.get(
   lessonTestController.getLessonTest
 );
 
+lessonTestRouter.get(
+  '/lesson-tests/:lessonId/stats',
+  Authentication(true),
+  checkLessonOwnership,
+  lessonTestController.getLessonExamBlueprintStats
+);
+
 lessonTestRouter.put(
   '/lessons/:lessonId/lesson-test',
   Authentication(true),

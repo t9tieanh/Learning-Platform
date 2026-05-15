@@ -219,6 +219,87 @@ export class LessonTestService {
     return row;
   }
 
+  async getExamBlueprintStats(lessonId: string) {
+    const lessonTest = await prismaService.lessonTest.findUnique({
+      where: { lessonId },
+      include: {
+        chunkGroups: {
+          orderBy: { createdAt: 'asc' },
+        },
+      },
+    });
+
+    if (!lessonTest) return null;
+
+    const allChunks = await prismaService.lessonChunk.findMany({
+      where: { lessonId },
+    });
+    const chunkMap = new Map(allChunks.map((c) => [c.id, c]));
+
+    const quizCounts = await prismaService.quiz.groupBy({
+      by: ['lessonTestChunkGroupId'],
+      where: {
+        lessonTestChunkGroup: { lessonId },
+        quizScope: QuizScope.LESSON_TEST,
+      },
+      _count: { _all: true },
+    });
+    const countMap = new Map(
+      quizCounts
+        .filter((c): c is typeof c & { lessonTestChunkGroupId: string } => c.lessonTestChunkGroupId != null)
+        .map((c) => [c.lessonTestChunkGroupId, c._count._all])
+    );
+
+    let globalIndex = 1;
+    const matrix = lessonTest.chunkGroups.map((group, idx) => {
+      const count = countMap.get(group.id) ?? 0;
+      const start = globalIndex;
+      const end = globalIndex + count - 1;
+      const questionRange =
+        count > 0 ? (count === 1 ? `Câu ${start}` : `Câu ${start} - ${end}`) : '—';
+
+      globalIndex += count;
+
+      const chunkIds = this.parseStoredChunkIds(group.chunkIds);
+      const chunks = chunkIds
+        .map((id) => chunkMap.get(id))
+        .filter((c) => !!c)
+        .map((c) => ({
+          id: c!.id,
+          chunkIndex: c!.chunkIndex,
+          title: c!.title,
+          summary: c!.summary,
+          timestamp: c!.timestamp,
+          startTime: c!.startTime,
+          endTime: c!.endTime,
+        }));
+
+      return {
+        id: group.id,
+        label: group.label?.trim() || `Nhóm nội dung ${idx + 1}`,
+        questionRange,
+        hasQuizzes: count > 0,
+        chunks,
+      };
+    });
+
+    const generatedTotal = Array.from(countMap.values()).reduce((a, b) => a + b, 0);
+
+    return {
+      lessonId,
+      targetTotalQuestions: lessonTest.targetTotalQuestions,
+      generatedTotalQuestions: generatedTotal,
+      matrix,
+    };
+  }
+
+  async getLessonChunks(lessonId: string) {
+    return prismaService.lessonChunk.findMany({
+      where: { lessonId },
+      orderBy: { chunkIndex: 'asc' },
+    });
+  }
+
   parseStoredChunkIds(chunkIdsJson: unknown): string[] {
     return lessonTestMergedContextService.parseChunkIds(chunkIdsJson);
   }

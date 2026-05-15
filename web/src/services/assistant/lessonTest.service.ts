@@ -64,6 +64,16 @@ class LessonTestService {
   }
 
   /**
+   * Pre-calculated stats for matrix analysis (ranges, chunk summaries, totals).
+   */
+  async fetchBlueprintStats(lessonId: string): Promise<ApiResponse<any>> {
+    const res = await axiosClient.axiosInstance.get(
+      `assistant/analysis/lesson-tests/${lessonId}/stats`
+    )
+    return res.data as ApiResponse<any>
+  }
+
+  /**
    * Xóa một chunk group trên assistant-service.
    * DELETE `assistant/analysis/lesson-test/chunk-groups/:groupId`
    */

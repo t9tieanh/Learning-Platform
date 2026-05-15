@@ -147,6 +147,18 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
   /** Chunk-group PATCH save in flight (`PATCH …/lesson-test/chunk-groups/:groupId`). */
   const [savingGroupRowId, setSavingGroupRowId] = useState<string | null>(null)
   const [showAnalysis, setShowAnalysis] = useState(false)
+  const [blueprintStats, setBlueprintStats] = useState<{
+    targetTotalQuestions: number | null
+    generatedTotalQuestions: number
+    matrix: any[]
+  } | null>(null)
+  const [blueprintStatsLoading, setBlueprintStatsLoading] = useState(false)
+  const [blueprintStatsTick, setBlueprintStatsTick] = useState(0)
+
+  const refreshBlueprintStats = useCallback(() => {
+    setBlueprintStatsTick((t) => t + 1)
+  }, [])
+
   /** Row whose header meta is being edited inline (title, count, prompt). */
   const [metaInlineEditRowId, setMetaInlineEditRowId] = useState<string | null>(null)
   const [lessonTestHeaderStatus, setLessonTestHeaderStatus] = useState<LessonTestStatus>(() => {
@@ -208,6 +220,8 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
         if (st === LessonTestStatus.PUBLISHED) setLessonTestHeaderStatus(LessonTestStatus.PUBLISHED)
         else if (st === LessonTestStatus.ARCHIVED) setLessonTestHeaderStatus(LessonTestStatus.ARCHIVED)
         else if (bundle?.lessonTest) setLessonTestHeaderStatus(LessonTestStatus.DRAFT)
+
+        refreshBlueprintStats()
       })
       .catch(() => {
         if (cancelled) return
@@ -222,6 +236,28 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
       cancelled = true
     }
   }, [lessonId, hasServerChunkGroups, flatLessonTestPreviewTick])
+
+  useEffect(() => {
+    if (!lessonId || !hasServerChunkGroups) return
+
+    let cancelled = false
+    setBlueprintStatsLoading(true)
+
+    lessonTestService.fetchBlueprintStats(lessonId)
+      .then((res) => {
+        if (cancelled) return
+        if (res.code === 200 && res.result) {
+          setBlueprintStats(res.result)
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setBlueprintStatsLoading(false)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [lessonId, hasServerChunkGroups, blueprintStatsTick, showAnalysis])
 
   useEffect(() => {
     setLessonTestQuizzesByRowId({})
@@ -621,6 +657,7 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
               const labelIdx = valid.findIndex((v) => v.id === rowId) + 1
               toast.success(`Nhóm ${labelIdx}: đã sinh ${list.length} câu — hiển thị ngay bên dưới nhóm.`)
               refreshFlatLessonTestPreview()
+              refreshBlueprintStats()
             } catch {
               bulkHandledCompletedGroupIdsRef.current.delete(item.groupId)
             }
@@ -653,6 +690,7 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
     } finally {
       setIsGenerating(false)
       refreshFlatLessonTestPreview()
+      refreshBlueprintStats()
     }
   }, [
     chunks,
@@ -725,6 +763,7 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
       } finally {
         setSingleGroupRowId(null)
         refreshFlatLessonTestPreview()
+        refreshBlueprintStats()
       }
     },
     [
@@ -805,6 +844,7 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
         }))
         toast.success('Đã xóa câu hỏi.')
         refreshFlatLessonTestPreview()
+        refreshBlueprintStats()
       } else {
         toast.error(res.message || 'Không thể xóa câu hỏi.')
       }
@@ -908,7 +948,7 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
             <LessonExamBlueprintTargetTotalCard
               chunkCount={chunks.length}
               targetTotal={targetTotal}
-              totalGenerated={Object.values(lessonTestQuizzesByRowId).reduce(
+              totalGenerated={blueprintStats?.generatedTotalQuestions ?? Object.values(lessonTestQuizzesByRowId).reduce(
                 (acc, quizzes) => acc + quizzes.length,
                 0
               )}
@@ -1316,7 +1356,11 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
                           ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm shadow-indigo-100' 
                           : 'text-indigo-600 bg-indigo-50/50 hover:bg-indigo-50'
                       )}
-                      onClick={() => setShowAnalysis(!showAnalysis)}
+                      onClick={() => {
+                        const next = !showAnalysis
+                        setShowAnalysis(next)
+                        if (next) refreshBlueprintStats()
+                      }}
                     />
                     <CustomButton
                       type='button'
@@ -1354,7 +1398,9 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
                 />
               </div>
             </div>
-            {showAnalysis && <LessonExamBlueprintMatrixAnalysis rows={matrixRows} />}
+            {showAnalysis && blueprintStats && (
+          <LessonExamBlueprintMatrixAnalysis rows={blueprintStats.matrix} />
+        )}
           </div>
         </HighGlossBackground>
       )}

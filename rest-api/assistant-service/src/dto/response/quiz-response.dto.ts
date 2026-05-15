@@ -8,7 +8,7 @@ export class QuizChoiceResponse {
   }
   text: string
   isCorrect: boolean
-  
+
   id?: string
   order?: number
   feedback?: string
@@ -29,7 +29,7 @@ export class GeneratedQuizResponse {
   bloomLevel: BloomLevel | string
   choices: QuizChoiceResponse[]
   explanation: string
-  
+
   // Optional fields
   id?: string
   chunkId?: string
@@ -53,4 +53,4 @@ export class BatchGeneratedQuizzesResponse {
   quizzes: GeneratedQuizResponse[]
 }
 
-export class ListQuizzesResponse extends Array<GeneratedQuizResponse> {}
+export class ListQuizzesResponse extends Array<GeneratedQuizResponse> { }
