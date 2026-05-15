@@ -50,8 +50,8 @@ const LessonExamBlueprintHelpPanel: React.FC = () => {
             </p>
             <p>
               Tính năng này được thiết kế theo <strong className='font-semibold text-gray-800'>cùng tinh thần quy
-              chuẩn</strong> như khi bạn lập <strong>ma trận: chuẩn đầu ra môn học (CLO) – câu hỏi đánh
-              giá</strong>: mỗi mục tiêu/ mảng nội dung tương ứng một nhóm câu hỏi phục vụ kiểm tra. Bảng
+                chuẩn</strong> như khi bạn lập <strong>ma trận: chuẩn đầu ra môn học (CLO) – câu hỏi đánh
+                  giá</strong>: mỗi mục tiêu/ mảng nội dung tương ứng một nhóm câu hỏi phục vụ kiểm tra. Bảng
               minh hoạ bên dưới (trích từ quy ước thường dùng trong soạn bài) giúp bạn hình dung vì sao
               chúng tôi cho phép cấu hình từng <strong className='font-semibold text-gray-800'>nhóm nội dung</strong> và gắn gợi ý cách ra đề.
             </p>
@@ -90,7 +90,7 @@ const LessonExamBlueprintHelpPanel: React.FC = () => {
             </div>
             <p className='text-[11px] md:text-[12px] text-gray-500 font-medium italic border-l-2 border-blue-200 pl-2 leading-snug'>
               Trong giao diện tạo bài, bạn cấu hình <strong className='font-semibold text-gray-700'>nhóm nội dung tương ứng từng phân đoạn/ mảng
-              kiến thức</strong> và tổng câu — tương tự cách bạn quy ước ở cột trái bảng trên, rồi ánh
+                kiến thức</strong> và tổng câu — tương tự cách bạn quy ước ở cột trái bảng trên, rồi ánh
               xạ sang các câu ở cột phải sau khi sinh xong từ nội dung từng phần.
             </p>
             <p className='text-[12px] md:text-[13px] font-semibold text-gray-800'>Các bước theo từng nhóm nội dung</p>

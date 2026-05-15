@@ -68,14 +68,14 @@ const LearnovaQuizBuilder: React.FC<LearnovaQuizBuilderProps> = ({
         try {
             const correctCount = updatedQuiz.choices.filter(c => c.isCorrect).length
             const determinedType = correctCount > 1 ? QuestionType.MULTIPLE_CHOICE : QuestionType.TRUE_FALSE
-            
+
             const quizWithCorrectType = {
                 ...updatedQuiz,
                 type: determinedType
             }
 
             const isNew = !updatedQuiz.id || updatedQuiz.id.length < 15
-            
+
             let response
             if (isNew) {
                 const { id: _, ...createPayload } = quizWithCorrectType
@@ -108,7 +108,7 @@ const LearnovaQuizBuilder: React.FC<LearnovaQuizBuilderProps> = ({
     const handleDeleteQuiz = async (index: number, e: React.MouseEvent) => {
         e.stopPropagation()
         const targetQuiz = quizzes[index]
-        
+
         // If it's a temporary quiz not yet saved to DB, just filter it out
         const isNew = !targetQuiz.id || targetQuiz.id.length < 15
 
@@ -136,19 +136,19 @@ const LearnovaQuizBuilder: React.FC<LearnovaQuizBuilderProps> = ({
         const updatedQuizzes = quizzes.filter((_, i) => i !== index)
         setQuizzes(updatedQuizzes)
         onSave(updatedQuizzes)
-        
+
         if (activeIndex === index) {
             setIsEditing(false)
         } else if (activeIndex > index) {
             setActiveIndex(prev => prev - 1)
         }
-        
+
         toast.success('Đã xóa câu hỏi')
     }
 
     const handleToggleSelect = (id: string, e: React.MouseEvent) => {
         e.stopPropagation()
-        setSelectedIds(prev => 
+        setSelectedIds(prev =>
             prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
         )
     }
@@ -162,12 +162,12 @@ const LearnovaQuizBuilder: React.FC<LearnovaQuizBuilderProps> = ({
             cancelLabel: 'Quay lại'
         })
         if (!confirmed) return
-        
+
         try {
             setIsBulkApproving(true)
             const response = await quizService.bulkApproveQuizzes(selectedIds)
             if (response.code === 200) {
-                const updatedQuizzes = quizzes.map(q => 
+                const updatedQuizzes = quizzes.map(q =>
                     q.id && selectedIds.includes(q.id) ? { ...q, isApproved: true } : q
                 )
                 setQuizzes(updatedQuizzes)

@@ -208,6 +208,7 @@ const LearnovaDetailedView: React.FC<LearnovaDetailedViewProps> = ({
                         lessonType={analysisData.lessonType ?? undefined}
                         onAfterGenerate={onAfterExamGenerate}
                         onBackToStructure={() => setDetailMainPanel('structure')}
+                        lessonTitle={lessonTitle}
                     />
                 ) : null}
             </div>
