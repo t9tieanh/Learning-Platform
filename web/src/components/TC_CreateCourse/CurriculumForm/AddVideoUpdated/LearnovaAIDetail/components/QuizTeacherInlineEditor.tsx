@@ -296,7 +296,7 @@ const QuizTeacherInlineEditor: React.FC<QuizTeacherInlineEditorProps> = ({
             onChange={handleExplanationChange}
             onKeyDown={handleKeyDown}
             rows={3}
-            className='text-[12px] md:text-[13px] resize-y min-h-[80px] pb-10'
+            className='text-[12px] md:text-[13px] resize-y min-h-[80px]'
             placeholder='Gõ @ để nhắc đến một phân đoạn bài giảng…'
           />
 
@@ -339,23 +339,23 @@ const QuizTeacherInlineEditor: React.FC<QuizTeacherInlineEditorProps> = ({
               )}
             </div>
           )}
-
-          {explanation.trim() && (
-            <div className='absolute bottom-2 left-2 right-2 p-2 rounded-lg bg-blue-50/40 border border-blue-100/50 backdrop-blur-sm transition-all pointer-events-none'>
-              <div className='text-[11px] md:text-[12px] text-blue-900 leading-snug line-clamp-2'>
-                <span className='font-bold text-blue-800 opacity-70 mr-1.5'>
-                  Hiển thị:
-                </span>
-                <ExplanationCitation
-                  text={explanation}
-                  chunks={chunks}
-                  handleSeek={handleSeek}
-                  lessonType={lessonType}
-                />
-              </div>
-            </div>
-          )}
         </div>
+
+        {explanation.trim() && (
+          <div className='mt-2 p-2 rounded-lg bg-blue-50/40 border border-blue-100/50 backdrop-blur-sm transition-all'>
+            <div className='text-[11px] md:text-[12px] text-blue-900 leading-snug line-clamp-2'>
+              <span className='font-bold text-blue-800 opacity-70 mr-1.5'>
+                Hiển thị:
+              </span>
+              <ExplanationCitation
+                text={explanation}
+                chunks={chunks}
+                handleSeek={handleSeek}
+                lessonType={lessonType}
+              />
+            </div>
+          </div>
+        )}
       </div>
 
       <div className='space-y-2'>

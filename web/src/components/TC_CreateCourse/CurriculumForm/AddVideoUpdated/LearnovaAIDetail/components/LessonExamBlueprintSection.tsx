@@ -259,9 +259,6 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
         if (cancelled) return
         if (res.code === 200 && res.result) {
           setBlueprintStats(res.result)
-          if (blueprintStatsTick > 0) {
-            toast.success('Đã cập nhật ma trận đề thi.')
-          }
         }
       })
       .finally(() => {

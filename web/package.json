@@ -95,6 +95,7 @@
     "@babel/preset-env": "^7.20.2",
     "@babel/preset-react": "^7.18.6",
     "@babel/preset-typescript": "^7.18.6",
+    "@rollup/rollup-linux-x64-gnu": "^4.60.4",
     "@tailwindcss/postcss": "^4.1.11",
     "@types/lodash": "^4.17.20",
     "@types/react": "^19.0.0",
