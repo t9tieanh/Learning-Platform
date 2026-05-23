@@ -1,7 +1,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Phone, Video, MoreVertical, Send, Image, Paperclip, ChevronLeft, Copy } from 'lucide-react'
+import { MoreVertical, Send, ChevronLeft, Copy, BookOpen, ChevronDown } from 'lucide-react'
 import { useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { cn } from '@/lib/utils'
@@ -11,7 +11,7 @@ import { useAuthStore } from '@/stores/useAuth.stores'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { toast } from 'sonner'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import courseUserService, { EnrolledCourseItem } from '@/services/course/course-user.service'
 import useLoading from '@/hooks/useLoading.hook'
 import noPhoto from '@/assets/images/no-photo.avif'
@@ -65,6 +65,7 @@ export const ChatArea = ({
   const { data } = useAuthStore()
   const myId = data?.userId
   const [enrolledCourses, setEnrolledCourses] = useState<EnrolledCourseItem[]>([])
+  const [coursesPopoverOpen, setCoursesPopoverOpen] = useState(false)
   const location = useLocation()
   const navigate = useNavigate()
   const { loading: sendingMessage, startLoading: startSending, stopLoading: stopSending } = useLoading()
@@ -431,33 +432,10 @@ export const ChatArea = ({
     }
   }
 
-  const tooltipTitle = myRole === 'instructor' ? 'Khóa học đã tham gia' : 'Khóa học đang mở bán'
-
-  const courseList = (
-    <div className='flex flex-col gap-2 p-2 w-64 max-h-[300px] overflow-y-auto'>
-      {enrolledCourses.length === 0 && <div className='text-xs text-gray-400 px-1 py-2'>Không có khóa học</div>}
-
-      {enrolledCourses.length > 0 && (
-        <p className='text-base pl-1 font-semibold bg-gradient-to-r from-cyan-500 to-blue-500 bg-clip-text text-transparent'>
-          {tooltipTitle}
-        </p>
-      )}
-
-      {enrolledCourses.map((course) => (
-        // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
-        <div
-          key={course.id}
-          onClick={() => handleCourseClick(course.id)}
-          className='flex items-center gap-3 p-1 rounded-md hover:bg-gray-100 transition cursor-pointer'
-        >
-          <img src={course.thumbnailUrl || ''} alt={course.title} className='w-10 h-10 rounded-md object-cover' />
-          <span className='text-sm font-medium text-gray-800 truncate'>{course.title}</span>
-        </div>
-      ))}
-    </div>
-  )
+  const sharedCoursesTitle = myRole === 'instructor' ? 'Khóa học đã tham gia' : 'Khóa học đang mở bán'
 
   const handleCourseClick = (id: string) => {
+    setCoursesPopoverOpen(false)
     if (myRole === 'instructor') {
       navigate(`/teacher/course-details/${id}`)
     } else {
@@ -468,38 +446,71 @@ export const ChatArea = ({
   return (
     <div className='flex flex-col flex-1 h-full min-h-0 bg-gray-50'>
       {/* Header */}
-      <div className='flex items-center justify-between px-4 py-3 bg-white border-b shadow-sm'>
+      <div className='flex shrink-0 items-center justify-between px-4 py-3 bg-white border-b shadow-sm'>
         <div className='flex items-center gap-3'>
           {onBack && (
             <Button variant='ghost' size='icon' className='md:hidden text-gray-600 hover:bg-gray-100' onClick={onBack}>
               <ChevronLeft className='h-5 w-5' />
             </Button>
           )}
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className='flex items-center gap-3 cursor-pointer'>
-                  <Avatar className='h-10 w-10'>
-                    <AvatarImage src={peerAvatar} />
-                    <AvatarFallback>{(peerName || peerId || 'N')[0]}</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <h3 className='font-semibold text-gray-800'>{peerName || peerId}</h3>
-                  </div>
-                </div>
-              </TooltipTrigger>
-              <TooltipContent side='bottom' className='bg-white shadow-xl border rounded-xl p-0'>
-                {courseList}
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <div className='flex items-center gap-3 min-w-0'>
+            <Avatar className='h-10 w-10 shrink-0'>
+              <AvatarImage src={peerAvatar} />
+              <AvatarFallback>{(peerName || peerId || 'N')[0]}</AvatarFallback>
+            </Avatar>
+            <div className='min-w-0'>
+              <h3 className='font-semibold text-gray-800 truncate'>{peerName || peerId}</h3>
+              {enrolledCourses.length > 0 ? (
+                <Popover open={coursesPopoverOpen} onOpenChange={setCoursesPopoverOpen}>
+                  <PopoverTrigger asChild>
+                    <button
+                      type='button'
+                      className='mt-0.5 flex items-center gap-1 text-xs text-slate-500 hover:text-[#1FA2FF] transition-colors'
+                    >
+                      <BookOpen className='h-3.5 w-3.5 shrink-0' />
+                      <span>{sharedCoursesTitle}</span>
+                      <ChevronDown className='h-3.5 w-3.5 shrink-0 opacity-60' />
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    align='start'
+                    side='bottom'
+                    sideOffset={6}
+                    className='w-80 p-0 border-slate-200 shadow-lg rounded-xl overflow-hidden'
+                  >
+                    <div className='max-h-[280px] overflow-y-auto p-1.5 scrollbar-thin scrollbar-thumb-slate-200'>
+                      {enrolledCourses.map((course) => (
+                        <button
+                          key={course.id}
+                          type='button'
+                          onClick={() => handleCourseClick(course.id)}
+                          className='flex w-full items-center gap-3 rounded-lg p-2 text-left transition-colors hover:bg-slate-50'
+                        >
+                          <img
+                            src={course.thumbnailUrl || noPhoto}
+                            alt={course.title}
+                            className='h-11 w-11 shrink-0 rounded-lg object-cover ring-1 ring-slate-100'
+                          />
+                          <span className='text-sm font-medium text-slate-700 line-clamp-2 leading-snug'>
+                            {course.title}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              ) : (
+                <p className='mt-0.5 text-xs text-slate-400'>Không có khóa học</p>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Messages */}
       <div
         ref={scrollContainerRef}
-        className='flex-1 overflow-y-auto px-4 py-4 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent'
+        className='flex-1 min-h-0 overflow-y-auto px-4 py-4 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent'
       >
         <div className='space-y-4'>
           {messages.map((msg, index) => {
@@ -593,8 +604,8 @@ export const ChatArea = ({
         })()}
       </div>
 
-      {/* Input */}
-      <div className='p-4 bg-white border-t shadow-sm'>
+      {/* Input — luôn cố định ở đáy vùng chat */}
+      <div className='shrink-0 p-4 bg-white border-t shadow-[0_-4px_12px_rgba(0,0,0,0.06)]'>
         <div className='flex items-center gap-3'>
           <Input
             placeholder='Nhập tin nhắn...'
