@@ -34,11 +34,25 @@ class CourseHandler {
             // Fire-and-forget: notification & cart cleanup failure should NOT trigger rollback
             orderService.getOrderInfo(order.user_id, message.orderId)
                 .then(async (orderData) => {
-                    await this.sendMessage(
-                        CourseMessageType.NOTIFICATION_SEND,
-                        { ...orderData, orderType: 'COURSE' },
-                        `order-${order.id}`
-                    );
+                    const correlationId = `order-${order.id}`;
+                    await Promise.all([
+                        this.sendMessage(
+                            CourseMessageType.NOTIFICATION_SEND,
+                            { ...orderData, orderType: 'COURSE' },
+                            correlationId
+                        ),
+                        this.sendMessage(
+                            CourseMessageType.COURSE_PURCHASED_SYNC,
+                            {
+                                user_id: orderData.user_id,
+                                order_id: message.orderId,
+                                items: orderData.items.map((item) => ({
+                                    course_id: item.course_id
+                                }))
+                            },
+                            correlationId
+                        )
+                    ]);
                     try {
                         const cartId = await cartService.getCartId(orderData.user_id);
                         orderData.items.forEach((item) => {

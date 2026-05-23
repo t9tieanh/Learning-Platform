@@ -4,7 +4,8 @@ export const CourseMessageType = {
     REGISTER_UPDATE_FAILED: 'register.update.failed.v1',
     ORDER_COMPLETED: 'order.completed.v1',
     ORDER_COMPLETION_FAILED: 'order.completion.failed.v1',
-    NOTIFICATION_SEND: 'notification.send.v1'
+    NOTIFICATION_SEND: 'notification.send.v1',
+    COURSE_PURCHASED_SYNC: 'course.purchased.sync.v1'
 } as const
 
 export type CourseMessageTypeKey = keyof typeof CourseMessageType
