@@ -1,3 +1,5 @@
+import CourseSectionsSkeleton from '@/components/Course/CourseContent/detail/Sections/CourseSectionsSkeleton'
+
 const CourseLoadingSkeleton = () => {
   return (
     <div className='course-page bg-white'>
@@ -15,40 +17,31 @@ const CourseLoadingSkeleton = () => {
       </div>
 
       {/* Course Content Skeleton */}
-      <div className='grid grid-cols-1 lg:grid-cols-3 gap-6 bg-white p-6 md:p-8'>
+      <div className='grid grid-cols-1 gap-6 bg-white px-4 py-6 md:grid-cols-3 md:p-8'>
         {/* Left Column - Course Content */}
         <div className='lg:col-span-2'>
+          {/* Nội dung khóa học — 2 chapter cards, mobile-friendly */}
+          <div className='mb-10'>
+            <div className='mb-4 h-8 max-w-[min(100%,20rem)] animate-pulse rounded-r-3xl bg-gray-200 pl-4 md:pl-12' />
+            <CourseSectionsSkeleton />
+          </div>
+
           {/* Requirements Section */}
           <div className='mb-10'>
-            <div className='h-8 w-48 mb-6 rounded-lg bg-gray-200 animate-pulse' />
-            <div className='space-y-3 pl-2'>
-              {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className='h-5 w-full rounded-md bg-gray-200 animate-pulse' />
+            <div className='mb-4 h-8 max-w-[min(100%,12rem)] animate-pulse rounded-r-3xl bg-gray-200 pl-4 md:pl-12' />
+            <div className='ml-0 space-y-3 md:ml-20'>
+              {Array.from({ length: 2 }).map((_, i) => (
+                <div key={i} className='h-5 w-full max-w-md animate-pulse rounded-md bg-gray-200' />
               ))}
             </div>
           </div>
 
-          {/* Course Content Sections */}
-          <div className='mb-10'>
-            <div className='h-8 w-64 mb-6 rounded-lg bg-gray-200 animate-pulse' />
-            {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className='mb-8 pl-2'>
-                <div className='h-7 w-48 mb-4 rounded-lg bg-gray-200 animate-pulse' />
-                <div className='space-y-3 ml-6'>
-                  {Array.from({ length: 2 }).map((_, j) => (
-                    <div key={j} className='h-5 w-full rounded-md bg-gray-200 animate-pulse' />
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-
           {/* Description Section */}
-          <div className='pl-2'>
-            <div className='h-8 w-40 mb-6 rounded-lg bg-gray-200 animate-pulse' />
-            <div className='space-y-3'>
-              {Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className='h-5 w-full rounded-md bg-gray-200 animate-pulse' />
+          <div>
+            <div className='mb-4 h-8 max-w-[min(100%,10rem)] animate-pulse rounded-r-3xl bg-gray-200 pl-4 md:pl-12' />
+            <div className='ml-0 space-y-3 md:ml-20'>
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className='h-5 w-full animate-pulse rounded-md bg-gray-200' />
               ))}
             </div>
           </div>

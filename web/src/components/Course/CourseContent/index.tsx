@@ -1,5 +1,4 @@
 import CourseSection, { Section } from './detail/Sections'
-import './style.scss'
 import Requirement from './detail/Requirements'
 import TeacherInfo from './detail/TeacherInfo'
 import { Accordion } from '@/components/ui/accordion'
