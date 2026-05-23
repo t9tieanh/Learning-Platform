@@ -36,12 +36,11 @@ export const ConversationList = ({ selected, onSelect, desiredPeerId }: Conversa
         if (mounted) {
           const list = res.result || []
           setConversations(list)
-          // Tự động chọn hội thoại đầu tiên khi lần đầu vào trang nếu chưa chọn
-          if (!selected && list.length > 0) {
-            if (desiredPeerId) {
-              const found = list.find((c) => c.peerId === desiredPeerId)
-              if (found) onSelect(found)
-            }
+          if (!selected && desiredPeerId && list.length > 0) {
+            const found = list.find(
+              (c) => c.peerId === desiredPeerId || c.conversationId === desiredPeerId
+            )
+            if (found) onSelect(found)
           }
         }
       } catch (e) {
@@ -55,13 +54,15 @@ export const ConversationList = ({ selected, onSelect, desiredPeerId }: Conversa
     }
   }, [])
 
-  // Khi desiredPeerId thay đổi (đi theo URL), cố gắng chọn đúng hội thoại
+  // Đồng bộ từ URL khi route đổi hoặc danh sách vừa load — không phụ thuộc mỗi lần reorder socket
   useEffect(() => {
-    if (!desiredPeerId) return
-    if (selected?.peerId === desiredPeerId) return
-    const found = conversations.find((c) => c.peerId === desiredPeerId)
+    if (!desiredPeerId || conversations.length === 0) return
+    if (selected?.peerId === desiredPeerId || selected?.conversationId === desiredPeerId) return
+    const found = conversations.find(
+      (c) => c.peerId === desiredPeerId || c.conversationId === desiredPeerId
+    )
     if (found) onSelect(found)
-  }, [desiredPeerId, conversations])
+  }, [desiredPeerId, conversations.length])
 
   // Lắng nghe socket để cập nhật last message realtime và move-to-top
   useEffect(() => {

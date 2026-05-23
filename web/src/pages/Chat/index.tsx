@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useLocation, useParams, useNavigate } from 'react-router-dom'
 import { ConversationList } from '@/components/Chat/ConversationList'
 import { ChatArea } from '@/components/Chat/ChatArea'
@@ -8,7 +8,7 @@ const Chat = () => {
   const [selectedConversation, setSelectedConversation] = useState<ConversationListItem | null>(null)
   const location = useLocation()
   const navigate = useNavigate()
-  const { id: peerIdParam } = useParams<{ id?: string }>()
+  const { id: routeChatId } = useParams<{ id?: string }>()
   const forcedRole: 'instructor' | 'student' = location.pathname.startsWith('/teacher') ? 'instructor' : 'student'
 
   const handleSelect = (c: ConversationListItem) => {
@@ -23,7 +23,11 @@ const Chat = () => {
       <div
         className={`w-full md:w-96 lg:w-[400px] h-full min-h-0 ${selectedConversation ? 'hidden md:block' : 'block'}`}
       >
-        <ConversationList selected={selectedConversation} onSelect={handleSelect} desiredPeerId={peerIdParam} />
+        <ConversationList
+          selected={selectedConversation}
+          onSelect={handleSelect}
+          desiredPeerId={routeChatId}
+        />
       </div>
 
       {/* Chat area */}
