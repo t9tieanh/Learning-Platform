@@ -1,38 +1,43 @@
 import { createHash } from 'node:crypto'
-import { Prisma } from '@prisma/client'
 import prismaService from '~/service/utils/prisma.service'
 import Logger from '~/utils/logger'
 import type { CoursePurchasedSyncPayload } from '~/sagas/course-purchase/dtos'
 
 type PurchasedCourseRecord = {
-  id: bigint
+  id: string
   userId: string
   courseId: string
   purchasedAt: Date
 }
 
+/** PostgreSQL bigint is signed int64; max positive value is 2^63 - 1. */
+const PG_BIGINT_MAX = 0x7fffffffffffffffn
+
 class UserPurchasedCourseService {
-  private purchasedCourseId(userId: string, courseId: string): bigint {
+  /** Stable numeric id as string — cast to bigint in SQL (Prisma client cannot pass JS BigInt reliably). */
+  private purchasedCourseId(userId: string, courseId: string): string {
     const hex = createHash('sha256')
       .update(`${userId}\0${courseId}`)
       .digest('hex')
       .slice(0, 16)
-    return BigInt(`0x${hex}`)
+    const id = BigInt(`0x${hex}`) & PG_BIGINT_MAX
+    return id.toString()
   }
 
   private async bulkUpsertPurchasedCourses(records: PurchasedCourseRecord[]): Promise<void> {
-    const values = Prisma.join(
-      records.map(
-        (row) =>
-          Prisma.sql`(${row.id}, ${row.userId}, ${row.courseId}, ${row.purchasedAt})`
-      )
-    )
-
-    await prismaService.$executeRaw`
-      INSERT INTO user_purchased_courses (id, user_id, course_id, purchased_at)
-      VALUES ${values}
-      ON CONFLICT (id) DO UPDATE SET purchased_at = EXCLUDED.purchased_at
-    `
+    await prismaService.$transaction(async (tx) => {
+      for (const row of records) {
+        await tx.$executeRawUnsafe(
+          `INSERT INTO public.user_purchased_courses (id, user_id, course_id, purchased_at)
+           VALUES ($1::bigint, $2::text, $3::text, $4::timestamp without time zone)
+           ON CONFLICT (id) DO UPDATE SET purchased_at = EXCLUDED.purchased_at`,
+          row.id,
+          row.userId,
+          row.courseId,
+          row.purchasedAt
+        )
+      }
+    })
   }
 
   async syncFromOrder(payload: CoursePurchasedSyncPayload): Promise<void> {
