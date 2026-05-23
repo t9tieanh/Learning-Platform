@@ -1,19 +1,20 @@
+const LESSON_SKELETON_COUNT = 2
+
 const LessonSkeleton = () => {
   return (
-    <div className='space-y-3'>
-      {[...Array(3)].map((_, idx) => (
-        <div key={idx} className='flex items-center justify-between gap-3 p-3 rounded-lg bg-muted/50 animate-pulse'>
-          <div className='flex items-center gap-3 flex-1'>
-            {/* Icon skeleton */}
-            <div className='w-6 h-6 bg-gray-200 rounded-full' />
-            {/* Title skeleton */}
-            <div className='h-4 w-40 bg-gray-200 rounded-md' />
+    <div className='space-y-2 md:space-y-3'>
+      {Array.from({ length: LESSON_SKELETON_COUNT }).map((_, idx) => (
+        <div
+          key={idx}
+          className='flex animate-pulse items-center justify-between gap-2 rounded-md bg-gray-50 p-2 md:gap-3 md:p-3'
+        >
+          <div className='flex min-w-0 flex-1 items-center gap-2 md:gap-3'>
+            <div className='h-5 w-5 shrink-0 rounded-full bg-gray-200 md:h-6 md:w-6' />
+            <div className='h-3.5 min-w-0 flex-1 rounded-md bg-gray-200 sm:max-w-[55%] md:max-w-[65%]' />
           </div>
-          <div className='flex items-center gap-2'>
-            {/* Badge skeleton */}
-            <div className='h-6 w-20 bg-gray-200 rounded-full' />
-            {/* Duration skeleton */}
-            <div className='h-4 w-12 bg-gray-200 rounded-md' />
+          <div className='flex shrink-0 items-center gap-1.5 md:gap-2'>
+            <div className='hidden h-5 w-16 rounded-full bg-gray-200 sm:block' />
+            <div className='h-3 w-10 rounded bg-gray-200 md:w-12' />
           </div>
         </div>
       ))}

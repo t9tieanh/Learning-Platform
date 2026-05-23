@@ -182,14 +182,13 @@ def import_course_tags(cursor, file_path):
     print(f"Importing Course Tags from {file_path}...")
     with open(file_path, 'r', encoding='utf-8') as f:
         reader = csv.DictReader(f)
-        # Schema: id, course_id, tag_id
         sql = """
-        INSERT IGNORE INTO course_tag (id, course_id, tag_id) 
-        VALUES (%s, %s, %s)
+        INSERT IGNORE INTO course_tag (course_id, tag_id)
+        VALUES (%s, %s)
         """
         data = []
         for row in reader:
-            data.append((row['id'], row['course_id'], row['tag_id']))
+            data.append((row['course_id'], row['tag_id']))
         
         cursor.executemany(sql, data)
         print(f"Inserted {cursor.rowcount} course-tag relations.")
@@ -199,13 +198,13 @@ def import_course_outcomes(cursor, file_path):
     with open(file_path, 'r', encoding='utf-8') as f:
         reader = csv.DictReader(f)
         sql = """
-        INSERT INTO course_outcomes (id, course_id, outcome) 
-        VALUES (%s, %s, %s)
+        INSERT INTO course_outcomes (course_id, outcome)
+        VALUES (%s, %s)
         ON DUPLICATE KEY UPDATE outcome=VALUES(outcome)
         """
         data = []
         for row in reader:
-            data.append((row['id'], row['course_id'], row['outcome']))
+            data.append((row['course_id'], row['outcome']))
         
         cursor.executemany(sql, data)
         print(f"Inserted {cursor.rowcount} course outcomes.")
@@ -215,13 +214,13 @@ def import_course_requirements(cursor, file_path):
     with open(file_path, 'r', encoding='utf-8') as f:
         reader = csv.DictReader(f)
         sql = """
-        INSERT INTO course_requirements (id, course_id, requirement) 
-        VALUES (%s, %s, %s)
+        INSERT INTO course_requirements (course_id, requirement)
+        VALUES (%s, %s)
         ON DUPLICATE KEY UPDATE requirement=VALUES(requirement)
         """
         data = []
         for row in reader:
-            data.append((row['id'], row['course_id'], row['requirement']))
+            data.append((row['course_id'], row['requirement']))
         
         cursor.executemany(sql, data)
         print(f"Inserted {cursor.rowcount} course requirements.")

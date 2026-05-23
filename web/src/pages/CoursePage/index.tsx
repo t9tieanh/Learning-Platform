@@ -15,6 +15,7 @@ import { CourseSidebarSkeleton } from '@/components/CoursePage/CourseSidebarSkel
 import { AnalysisResult } from '@/services/assistant/analysis.service'
 import assistantAnalysisService from '@/services/assistant/analysis.service'
 import HighGlossBackground from '@/components/common/HighGlossBackground'
+import CoursePageHeaderUser from '@/components/CoursePage/CoursePageHeaderUser'
 
 const CoursePage = () => {
   type UILecture = {
@@ -177,7 +178,7 @@ const CoursePage = () => {
       {/* Header */}
       <header className='z-50 sticky top-0'>
         <HighGlossBackground className='shadow-lg text-white border-b border-white/10 px-3 md:px-6 py-2 md:py-3 overflow-hidden'>
-          <div className='flex items-center justify-between w-full h-full relative z-10'>
+          <div className='flex h-8 items-center justify-between w-full md:h-9'>
             <div className='flex items-center gap-2 md:gap-4 min-w-0'>
               <button
                 className='ml-1 md:ml-2 flex items-center gap-2 text-white hover:text-blue-300 transition-colors flex-shrink-0'
@@ -205,6 +206,8 @@ const CoursePage = () => {
                 </div>
               </Button>
             </div>
+
+            <CoursePageHeaderUser />
           </div>
         </HighGlossBackground>
       </header>

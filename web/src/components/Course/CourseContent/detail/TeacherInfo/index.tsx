@@ -1,11 +1,14 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import React from 'react'
+import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Card, CardContent } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Star, BookOpen } from 'lucide-react'
+import { Star, BookOpen, ChevronDown, ChevronUp } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+
+const EXPERTISE_VISIBLE_LIMIT = 10
 
 interface Teacher {
   id: string
@@ -32,21 +35,31 @@ interface Teacher {
 
 const TeacherInfo = ({ teacher }: { teacher: Teacher }) => {
   const navigate = useNavigate()
+  const [expertiseExpanded, setExpertiseExpanded] = useState(false)
+  const expertiseList = teacher?.expertise ?? []
+  const hasMoreExpertise = expertiseList.length > EXPERTISE_VISIBLE_LIMIT
+  const visibleExpertise =
+    expertiseExpanded || !hasMoreExpertise
+      ? expertiseList
+      : expertiseList.slice(0, EXPERTISE_VISIBLE_LIMIT)
+
   return (
     <Card className='ml-0 md:ml-20 border-none'>
       <CardContent className='p-6'>
         <div className='flex flex-col md:flex-row gap-6'>
           {/* Teacher Avatar and Basic Info */}
           <div className='flex flex-col items-center md:items-start gap-4 md:w-1/3'>
-            <Avatar className='w-20 h-20 shadow-lg'>
-              <AvatarImage src={teacher?.image} alt={teacher?.name} />
-              <AvatarFallback className='text-2xl font-semibold bg-gradient-primary text-primary-foreground'>
-                {teacher?.name
-                  .split(' ')
-                  .map((n) => n[0])
-                  .join('')}
-              </AvatarFallback>
-            </Avatar>
+            <div className='rounded-full bg-gradient-to-br from-[#17EAD9] to-[#1FA2FF] p-[3px] shadow-md shadow-[#1FA2FF]/20'>
+              <Avatar className='h-20 w-20 border-2 border-white shadow-inner'>
+                <AvatarImage src={teacher?.image} alt={teacher?.name} className='object-cover' />
+                <AvatarFallback className='bg-gradient-to-br from-[#17EAD9] to-[#1FA2FF] text-lg font-semibold text-white'>
+                  {teacher?.name
+                    .split(' ')
+                    .map((n) => n[0])
+                    .join('')}
+                </AvatarFallback>
+              </Avatar>
+            </div>
 
             <div className='text-center md:text-left'>
               <h3 className='text-xl font-bold text-foreground'>{teacher?.name}</h3>
@@ -83,9 +96,9 @@ const TeacherInfo = ({ teacher }: { teacher: Teacher }) => {
             <div>
               <h4 className='font-semibold text-foreground mb-3'>Chuyên môn</h4>
               <div className='flex flex-wrap gap-2'>
-                {teacher?.expertise?.map((skill, index) => (
+                {visibleExpertise.map((skill) => (
                   <Badge
-                    key={index}
+                    key={skill.id}
                     variant='secondary'
                     className='bg-white shadow-lg text-black p-1 px-2 hover:bg-primary/20'
                   >
@@ -102,6 +115,27 @@ const TeacherInfo = ({ teacher }: { teacher: Teacher }) => {
                   </Badge>
                 ))}
               </div>
+              {hasMoreExpertise && (
+                <Button
+                  type='button'
+                  variant='ghost'
+                  size='sm'
+                  className='mt-2 h-8 px-2 text-primary hover:text-primary hover:bg-primary/10'
+                  onClick={() => setExpertiseExpanded((prev) => !prev)}
+                >
+                  {expertiseExpanded ? (
+                    <>
+                      Thu gọn
+                      <ChevronUp className='ml-1 h-4 w-4' />
+                    </>
+                  ) : (
+                    <>
+                      Xem thêm ({expertiseList.length - EXPERTISE_VISIBLE_LIMIT})
+                      <ChevronDown className='ml-1 h-4 w-4' />
+                    </>
+                  )}
+                </Button>
+              )}
             </div>
             <div>
               <h4 className='font-semibold text-foreground mb-3'>Chứng chỉ</h4>

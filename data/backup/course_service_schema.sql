@@ -102,9 +102,9 @@ DROP TABLE IF EXISTS `course_outcomes`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `course_outcomes` (
-  `id` varchar(255) NOT NULL PRIMARY KEY,
   `course_id` varchar(255) NOT NULL,
-  `outcome` text,
+  `outcome` varchar(255) NOT NULL,
+  PRIMARY KEY (`course_id`, `outcome`),
   KEY `FKq8u25isnaaswsfiv0yt8sl6p4` (`course_id`),
   CONSTRAINT `FKq8u25isnaaswsfiv0yt8sl6p4` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -117,9 +117,9 @@ DROP TABLE IF EXISTS `course_requirements`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `course_requirements` (
-  `id` varchar(255) NOT NULL PRIMARY KEY,
   `course_id` varchar(255) NOT NULL,
-  `requirement` text,
+  `requirement` varchar(255) NOT NULL,
+  PRIMARY KEY (`course_id`, `requirement`),
   KEY `FKbh8ta744mcx845fv5oa5dtyyi` (`course_id`),
   CONSTRAINT `FKbh8ta744mcx845fv5oa5dtyyi` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -133,9 +133,9 @@ DROP TABLE IF EXISTS `course_tag`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `course_tag` (
-  `id` varchar(255) NOT NULL PRIMARY KEY,
   `course_id` varchar(255) NOT NULL,
   `tag_id` varchar(255) NOT NULL,
+  PRIMARY KEY (`course_id`, `tag_id`),
   KEY `FK4xljwd6thh893y5t81btpen5q` (`tag_id`),
   KEY `FK7om0f3y4q6v90v5mv8femot2g` (`course_id`),
   CONSTRAINT `FK4xljwd6thh893y5t81btpen5q` FOREIGN KEY (`tag_id`) REFERENCES `tags` (`id`),
