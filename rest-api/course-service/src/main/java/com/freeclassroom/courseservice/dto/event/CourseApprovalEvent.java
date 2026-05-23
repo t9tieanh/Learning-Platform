@@ -26,4 +26,6 @@ public class CourseApprovalEvent {
     private Double originalPrice;
     private Double finalPrice;
     private List<TagResponse> tags;
+    private String categoryName;
+    private String instructorName;
 }

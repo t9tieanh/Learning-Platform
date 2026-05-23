@@ -24,6 +24,7 @@ public class RabbitMQConfig {
     public static final String COURSE_APPROVAL_QUEUE = "course.approval.queue";
     public static final String COURSE_APPROVAL_EXCHANGE = "course.approval.exchange";
     public static final String COURSE_APPROVAL_ROUTING_KEY = "course.approval.#";
+    public static final String ASSISTANT_COURSE_EMBEDDING_QUEUE = "assistant.course.embedding.queue";
 
     @Bean
     public Queue registerCourseQueue () {
@@ -58,6 +59,19 @@ public class RabbitMQConfig {
     public Binding bindingCourseApproval(Queue courseApprovalQueue, TopicExchange courseApprovalExchange) {
         return BindingBuilder
                 .bind(courseApprovalQueue)
+                .to(courseApprovalExchange)
+                .with(COURSE_APPROVAL_ROUTING_KEY);
+    }
+
+    @Bean
+    public Queue assistantCourseEmbeddingQueue() {
+        return new Queue(ASSISTANT_COURSE_EMBEDDING_QUEUE, true);
+    }
+
+    @Bean
+    public Binding bindingAssistantCourseEmbedding(Queue assistantCourseEmbeddingQueue, TopicExchange courseApprovalExchange) {
+        return BindingBuilder
+                .bind(assistantCourseEmbeddingQueue)
                 .to(courseApprovalExchange)
                 .with(COURSE_APPROVAL_ROUTING_KEY);
     }
