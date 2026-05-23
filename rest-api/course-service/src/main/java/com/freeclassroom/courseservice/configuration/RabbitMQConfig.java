@@ -20,6 +20,11 @@ public class RabbitMQConfig {
     //routingkey for order.serivce.queue
     public static final String ORDER_SERVICE_QUEUE_ROUTING_KEY = "register.updated.v1";
 
+    // --- study reminder (daily email) ---
+    public static final String USER_NOTIFICATION_EXCHANGE = "user-notification-exchange";
+    public static final String STUDY_REMINDER_QUEUE = "study-reminder.queue";
+    public static final String STUDY_REMINDER_ROUTING_KEY = "course.study.reminder";
+
     // --- config course approval/reject ---
     public static final String COURSE_APPROVAL_QUEUE = "course.approval.queue";
     public static final String COURSE_APPROVAL_EXCHANGE = "course.approval.exchange";
@@ -34,6 +39,24 @@ public class RabbitMQConfig {
     @Bean
     public TopicExchange sagaExchange() {
         return new TopicExchange(SAGA_EXCHANGE, true, false);
+    }
+
+    @Bean
+    public DirectExchange userNotificationExchange() {
+        return new DirectExchange(USER_NOTIFICATION_EXCHANGE, true, false);
+    }
+
+    @Bean
+    public Queue studyReminderQueue() {
+        return new Queue(STUDY_REMINDER_QUEUE, true);
+    }
+
+    @Bean
+    public Binding bindingStudyReminder(Queue studyReminderQueue, DirectExchange userNotificationExchange) {
+        return BindingBuilder
+                .bind(studyReminderQueue)
+                .to(userNotificationExchange)
+                .with(STUDY_REMINDER_ROUTING_KEY);
     }
 
     @Bean

@@ -1,15 +1,18 @@
 package com.freeclassroom.courseservice.repository.entity;
 
 import com.freeclassroom.courseservice.entity.member.EnrollmentsEntity;
+import com.freeclassroom.courseservice.enums.entity.EnumCompletionStatus;
+import com.freeclassroom.courseservice.enums.entity.EnumCourseStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
-
-import java.util.List;
 
 public interface EnrollmentRepository extends JpaRepository<EnrollmentsEntity, String> {
     boolean existsByUserIdAndCourse_Id(String userId, String courseId);
@@ -22,5 +25,20 @@ public interface EnrollmentRepository extends JpaRepository<EnrollmentsEntity, S
     @Modifying
     @Query("DELETE FROM EnrollmentsEntity e WHERE e.userId = :userId AND e.course.id IN :courseIds")
     int deleteAllByUserIdAndCourseIds(String userId, List<String> courseIds);
+
+    @Query("""
+            SELECT e FROM EnrollmentsEntity e
+            JOIN FETCH e.course c
+            WHERE c.status = :publishedStatus
+            AND e.userId <> c.instructorId
+            AND (e.status IS NULL OR e.status <> :completedStatus)
+            AND (e.progress IS NULL OR e.progress < 100.0)
+            ORDER BY e.userId ASC, c.title ASC
+            """)
+    Page<EnrollmentsEntity> findActiveEnrollmentsForStudyReminder(
+            @Param("publishedStatus") EnumCourseStatus publishedStatus,
+            @Param("completedStatus") EnumCompletionStatus completedStatus,
+            Pageable pageable
+    );
 
 }

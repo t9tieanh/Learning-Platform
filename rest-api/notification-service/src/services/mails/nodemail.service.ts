@@ -93,6 +93,40 @@ class NodeMailService {
         templateData = orderNotification.payload || orderNotification
         break
       }
+      case QueueNameEnum.STUDY_REMINDER: {
+        const reminder = notification as {
+          email?: string
+          userName?: string
+          courses?: Array<{
+            title: string
+            courseUrl: string
+            thumbnailUrl?: string
+            progress?: number
+          }>
+        }
+
+        subject = 'Đừng quên học hôm nay trên Learnova 🎓'
+        to = reminder.email || notification.email
+        templateName = 'study-reminder.html'
+        templateData = {
+          userName: reminder.userName || 'bạn',
+          year: new Date().getFullYear(),
+          courses: (reminder.courses || []).map((course) => {
+            const progress =
+              course.progress != null
+                ? Math.min(100, Math.max(0, Math.round(course.progress)))
+                : 0
+            return {
+              ...course,
+              progress,
+              progressRemaining: 100 - progress,
+              progressLabel: course.progress != null ? `${progress}%` : 'Chưa bắt đầu',
+              hasThumbnail: Boolean(course.thumbnailUrl)
+            }
+          })
+        }
+        break
+      }
       case QueueNameEnum.COURSE_APPROVAL: {
         const event = notification as unknown as CourseApprovalEvent
         // Lấy email instructor qua userGrpc
