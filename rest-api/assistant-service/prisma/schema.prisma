@@ -252,11 +252,12 @@ model SystemProfileEmbedding {
   @@map("system_profile_embeddings")
 }
 
+/// Supabase: public.user_purchased_courses (id bigint PK, user_id/course_id text, purchased_at timestamp)
 model UserPurchasedCourse {
   id          BigInt    @id
-  userId      String    @map("user_id")
-  courseId    String    @map("course_id")
-  purchasedAt DateTime? @default(now()) @map("purchased_at") @db.Timestamp(6)
+  userId      String    @map("user_id") @db.Text
+  courseId    String    @map("course_id") @db.Text
+  purchasedAt DateTime? @default(now()) @map("purchased_at") @db.Timestamp()
 
   @@map("user_purchased_courses")
 }

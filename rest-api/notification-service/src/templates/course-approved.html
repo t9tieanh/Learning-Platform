@@ -1,69 +1,53 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="UTF-8" />
-    <title>Khóa học đã được duyệt!</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <style>
-      body {
-        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-        background-color: #f7f9fc;
-        margin: 0;
-        padding: 20px;
-      }
-      .container {
-        max-width: 480px;
-        margin: 0 auto;
-        background-color: #ffffff;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-        padding: 30px;
-      }
-      .title {
-        font-size: 20px;
-        color: #1d4e8f;
-        margin-bottom: 16px;
-      }
-      .course-img {
-        width: 100%;
-        max-height: 180px;
-        object-fit: cover;
-        border-radius: 8px;
-        margin-bottom: 16px;
-      }
-      .header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 20px;
-      }
-      .brand {
-        font-size: 18px;
-        font-weight: 700;
-        color: #1d4e8f;
-      }
-      .footer {
-        font-size: 12px;
-        color: #999999;
-        margin-top: 30px;
-        text-align: center;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="container">
-      <div class="header">
-        <div class="brand">Learnova</div>
+{{> wrapper-start}}
+{{> header}}
+{{> body-start}}
+
+<table
+  role="presentation"
+  width="100%"
+  cellspacing="0"
+  cellpadding="0"
+  border="0"
+  style="
+    margin-bottom: 20px;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.04);
+  "
+>
+  <tr>
+    <td style="padding: 0">
+      {{#if hasThumbnail}}
+      <img
+        src="{{thumbnailUrl}}"
+        alt="{{title}}"
+        width="600"
+        style="display: block; width: 100%; max-height: 200px; object-fit: cover; border: 0"
+      />
+      {{else}}
+      <div style="height: 160px; background: linear-gradient(145deg, #d1fae5 0%, #a7f3d0 100%)"></div>
+      {{/if}}
+      <div style="padding: 20px 22px">
+        <p style="margin: 0 0 10px; font-size: 18px; line-height: 1.4; font-weight: 700; color: #0f172a">
+          {{title}}
+        </p>
+        {{#if shortDescription}}
+        <p style="margin: 0 0 14px; font-size: 14px; line-height: 1.6; color: #64748b">{{shortDescription}}</p>
+        {{/if}}
+        <p style="margin: 0; font-size: 15px; color: #0f172a">
+          <span style="color: #64748b">Giá bán:</span>
+          <strong style="color: #059669">{{formatCurrency finalPrice}} VND</strong>
+        </p>
       </div>
-      <h2 class="title">Khóa học của bạn đã được duyệt!</h2>
-      <img class="course-img" src="{{thumbnailUrl}}" alt="Course Thumbnail" />
-      <p><strong>{{title}}</strong></p>
-      <p>{{shortDescription}}</p>
-      <p><strong>Giá bán:</strong> {{formatCurrency finalPrice}} VND</p>
-      <p>Chúc mừng bạn! Khóa học đã được duyệt và sẽ sớm xuất hiện trên hệ thống. Hãy kiểm tra lại thông tin khóa học để đảm bảo mọi thứ đã sẵn sàng.</p>
-      <div class="footer">
-        © 2025 FreeClassRoom - dev by PhamTienAnh. All rights reserved.
-      </div>
-    </div>
-  </body>
-</html>
+    </td>
+  </tr>
+</table>
+
+<p style="margin: 0; font-size: 15px; line-height: 1.65; color: #475569">
+  Khóa học đã được duyệt và sẽ sớm hiển thị trên hệ thống. Hãy kiểm tra lại nội dung để đảm bảo mọi thứ đã sẵn sàng cho học viên.
+</p>
+
+{{> body-end}}
+{{> footer}}
+{{> wrapper-end}}

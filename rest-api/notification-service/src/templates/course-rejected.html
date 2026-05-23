@@ -1,76 +1,61 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="UTF-8" />
-    <title>Khóa học bị từ chối</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <style>
-      body {
-        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-        background-color: #f7f9fc;
-        margin: 0;
-        padding: 20px;
-      }
-      .container {
-        max-width: 480px;
-        margin: 0 auto;
-        background-color: #ffffff;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-        padding: 30px;
-      }
-      .title {
-        font-size: 20px;
-        color: #d32f2f;
-        margin-bottom: 16px;
-      }
-      .course-img {
-        width: 100%;
-        max-height: 180px;
-        object-fit: cover;
-        border-radius: 8px;
-        margin-bottom: 16px;
-      }
-      .reason {
-        color: #d32f2f;
-        background: #fff0f0;
-        border-left: 4px solid #d32f2f;
-        padding: 12px 16px;
-        margin: 16px 0;
-        border-radius: 6px;
-      }
-      .header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 20px;
-      }
-      .brand {
-        font-size: 18px;
-        font-weight: 700;
-        color: #1d4e8f;
-      }
-      .footer {
-        font-size: 12px;
-        color: #999999;
-        margin-top: 30px;
-        text-align: center;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="container">
-      <div class="header">
-        <div class="brand">Learnova</div>
+{{> wrapper-start}}
+{{> header}}
+{{> body-start}}
+
+<table
+  role="presentation"
+  width="100%"
+  cellspacing="0"
+  cellpadding="0"
+  border="0"
+  style="
+    margin-bottom: 20px;
+    border: 1px solid #fecaca;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 10px 24px rgba(239, 68, 68, 0.08);
+  "
+>
+  <tr>
+    <td style="padding: 0">
+      {{#if hasThumbnail}}
+      <img
+        src="{{thumbnailUrl}}"
+        alt="{{title}}"
+        width="600"
+        style="display: block; width: 100%; max-height: 200px; object-fit: cover; border: 0; opacity: 0.85"
+      />
+      {{else}}
+      <div style="height: 120px; background: linear-gradient(145deg, #fee2e2 0%, #fecaca 100%)"></div>
+      {{/if}}
+      <div style="padding: 20px 22px">
+        <p style="margin: 0 0 12px; font-size: 18px; line-height: 1.4; font-weight: 700; color: #0f172a">
+          {{title}}
+        </p>
+        <table
+          role="presentation"
+          width="100%"
+          cellspacing="0"
+          cellpadding="0"
+          border="0"
+          style="background-color: #fef2f2; border-radius: 10px; border-left: 4px solid #ef4444"
+        >
+          <tr>
+            <td style="padding: 14px 16px">
+              <p style="margin: 0 0 4px; font-size: 12px; font-weight: 600; color: #b91c1c">Lý do từ chối</p>
+              <p style="margin: 0; font-size: 14px; line-height: 1.55; color: #7f1d1d">{{reason}}</p>
+            </td>
+          </tr>
+        </table>
       </div>
-      <h2 class="title">Khóa học của bạn đã bị từ chối</h2>
-      <img class="course-img" src="{{thumbnailUrl}}" alt="Course Thumbnail" />
-      <p><strong>{{title}}</strong></p>
-      <div class="reason">Lý do: {{reason}}</div>
-      <p>Vui lòng chỉnh sửa lại nội dung khóa học và gửi lại để được xét duyệt.</p>
-      <div class="footer">
-        © 2025 FreeClassRoom - dev by PhamTienAnh. All rights reserved.
-      </div>
-    </div>
-  </body>
-</html>
+    </td>
+  </tr>
+</table>
+
+<p style="margin: 0; font-size: 15px; line-height: 1.65; color: #475569">
+  Vui lòng chỉnh sửa nội dung khóa học theo góp ý và gửi lại để được xét duyệt.
+</p>
+
+{{> body-end}}
+{{> footer}}
+{{> wrapper-end}}
