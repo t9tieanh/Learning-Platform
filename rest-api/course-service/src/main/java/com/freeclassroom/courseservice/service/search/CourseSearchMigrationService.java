@@ -5,6 +5,7 @@ import co.elastic.clients.elasticsearch._types.ElasticsearchException;
 import co.elastic.clients.elasticsearch._types.mapping.Property;
 import co.elastic.clients.elasticsearch.core.BulkRequest;
 import co.elastic.clients.elasticsearch.core.BulkResponse;
+import co.elastic.clients.elasticsearch.core.DeleteByQueryResponse;
 import co.elastic.clients.elasticsearch.core.bulk.BulkOperation;
 import com.freeclassroom.courseservice.dto.search.CourseEsDocument;
 import com.freeclassroom.courseservice.entity.course.CourseEntity;
@@ -15,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -47,9 +49,9 @@ public class CourseSearchMigrationService {
     public void migrateAllCoursesIdAndTags() throws IOException {
         if (recreateIndexOnStartup) {
             recreateIndex();
-            deleteUserPersonalizationSignalsIndex();
         } else if (createIndexIfMissing) {
             ensureIndexExists();
+            ensureUserPersonalizationSignalsIndexExists();
         }
 
         int pageNumber = 0;
@@ -142,16 +144,35 @@ public class CourseSearchMigrationService {
         log.info("Elasticsearch index '{}' created.", indexName);
     }
 
-    private void deleteUserPersonalizationSignalsIndex() throws IOException {
+    private void ensureUserPersonalizationSignalsIndexExists() throws IOException {
         boolean exists = elasticsearchClient.indices().exists(e -> e.index(userPersonalizationSignalsIndexName)).value();
-        if (!exists) {
-            log.info("Elasticsearch index '{}' not found. Skip deleting.", userPersonalizationSignalsIndexName);
+        if (exists) {
             return;
         }
 
-        log.info("Deleting Elasticsearch index '{}' on startup...", userPersonalizationSignalsIndexName);
-        elasticsearchClient.indices().delete(d -> d.index(userPersonalizationSignalsIndexName));
-        log.info("Elasticsearch index '{}' deleted.", userPersonalizationSignalsIndexName);
+        log.info("Elasticsearch index '{}' not found. Creating empty index...", userPersonalizationSignalsIndexName);
+        elasticsearchClient.indices().create(c -> c.index(userPersonalizationSignalsIndexName));
+        log.info("Elasticsearch index '{}' created (empty).", userPersonalizationSignalsIndexName);
+    }
+
+    @Scheduled(cron = "${app.migration.elasticsearch.user-signals-cleanup-cron:0 0 0 * * *}", zone = "${app.migration.elasticsearch.user-signals-cleanup-zone:Asia/Bangkok}")
+    public void cleanUserPersonalizationSignalsIndexDataDaily() {
+        try {
+            boolean exists = elasticsearchClient.indices().exists(e -> e.index(userPersonalizationSignalsIndexName)).value();
+            if (!exists) {
+                log.info("Elasticsearch index '{}' not found. Skip cleaning.", userPersonalizationSignalsIndexName);
+                return;
+            }
+
+            DeleteByQueryResponse response = elasticsearchClient.deleteByQuery(d -> d
+                    .index(userPersonalizationSignalsIndexName)
+                    .query(q -> q.matchAll(m -> m))
+            );
+            log.info("Cleaned data in Elasticsearch index '{}'. Deleted documents: {}",
+                    userPersonalizationSignalsIndexName, response.deleted());
+        } catch (Exception ex) {
+            log.error("Failed to clean data in Elasticsearch index '{}'", userPersonalizationSignalsIndexName, ex);
+        }
     }
 
     private BulkResponse bulkUpsertCourses(List<CourseEntity> courses) throws IOException {
