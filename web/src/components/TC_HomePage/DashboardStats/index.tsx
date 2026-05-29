@@ -74,6 +74,7 @@ const DashboardStats: React.FC = () => {
   const formatCompact = (value: number) =>
     new Intl.NumberFormat('vi-VN', { notation: 'compact', maximumFractionDigits: 1 }).format(value)
   const formatCurrency = (value: number) => `${new Intl.NumberFormat('vi-VN').format(Math.round(value))} đ`
+  const toMillion = (value: number) => Number((value / 1_000_00).toFixed(2))
 
   const options: ApexCharts.ApexOptions = {
     chart: {
@@ -112,7 +113,7 @@ const DashboardStats: React.FC = () => {
     },
     yaxis: {
       labels: {
-        formatter: (value: number) => formatCompact(value),
+        formatter: (value: number) => `${value.toFixed(1)}M`,
         style: {
           fontSize: '12px',
           fontWeight: 500,
@@ -158,15 +159,18 @@ const DashboardStats: React.FC = () => {
         formatter: (value) => `Tháng ${value}`
       },
       y: {
-        formatter: (value: number, { seriesIndex }) => (seriesIndex === 2 ? `${Math.round(value)} học viên` : formatCurrency(value))
+        formatter: (value: number, { seriesIndex }) => {
+          if (seriesIndex === 2) return `${Math.round(value)} học viên`
+          return formatCurrency(value * 1_000_000)
+        }
       }
     }
   }
 
   const series = useMemo(
     () => [
-      { name: 'Doanh thu', data: revenueData },
-      { name: 'Lợi nhuận', data: profitData },
+      { name: 'Doanh thu', data: revenueData.map(toMillion) },
+      { name: 'Lợi nhuận', data: profitData.map(toMillion) },
       { name: 'Học viên', data: studentData }
     ],
     [revenueData, profitData, studentData]
@@ -199,8 +203,8 @@ const DashboardStats: React.FC = () => {
       <div className='w-full rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_8px_24px_rgba(15,23,42,0.06)] sm:p-5'>
         <div className='mb-4 flex flex-col gap-3 sm:mb-5 sm:flex-row sm:items-center sm:justify-between'>
           <div className='space-y-1'>
-            <h3 className='text-lg font-semibold tracking-tight text-slate-900'>Business Performance</h3>
-            <p className='text-sm text-slate-500'>Revenue, profit and student trends by month</p>
+            <h3 className='text-lg font-semibold tracking-tight text-slate-900'>Hiệu suất khóa học</h3>
+            <p className='text-sm text-slate-500'>Thống kê doanh thu và số lượng học viên theo thời gian</p>
           </div>
 
           <label className='group relative inline-flex items-center'>

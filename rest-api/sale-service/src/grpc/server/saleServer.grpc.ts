@@ -20,6 +20,8 @@ const packageDef = protoLoader.loadSync(PROTO_PATH, {
 });
 
 const proto = grpc.loadPackageDefinition(packageDef);
+const safeJson = (value: unknown) =>
+    JSON.stringify(value, (_, v) => (typeof v === 'bigint' ? v.toString() : v));
 
 const saleServiceImpl = {
     getRevenueAndProfit: async (call: any, callback: any) => {
@@ -44,15 +46,15 @@ const saleServiceImpl = {
 
             const monthRows: Array<{ month: number; revenue: number }> = await prismaService.$queryRaw(
                 Prisma.sql`SELECT MONTH(oi.created_at) AS month, COALESCE(SUM(oi.price),0) AS revenue
-                            FROM \`Order_Item\` oi
-                            INNER JOIN \`Order\` o ON oi.order_id = o.id
+                            FROM \`order_items\` oi
+                            INNER JOIN \`orders\` o ON oi.order_id = o.id
                             WHERE oi.course_id IN (${Prisma.join(coursesId)})
                             AND o.status = 'Completed'
                             AND YEAR(oi.created_at) = ${normalizedYear}
                             GROUP BY MONTH(oi.created_at)`
             ) as any;
             Logger.info(
-                `[getRevenueAndProfit] year=${normalizedYear}, courseCount=${coursesId.length}, monthRows=${monthRows.length}, sample=${JSON.stringify(monthRows[0] || null)}`
+                `[getRevenueAndProfit] year=${normalizedYear}, courseCount=${coursesId.length}, monthRows=${monthRows.length}, sample=${safeJson(monthRows[0] || null)}`
             );
 
 
@@ -61,11 +63,11 @@ const saleServiceImpl = {
                 monthMap[row.month] = row.revenue;
             }
 
-            // Xây danh sách 12 tháng: revenue = tổng giá bán, profit = 10% revenue
             const dataList = [];
             for (let month = 1; month <= 12; month++) {
-                const revenue = Number(monthMap[month] ?? 0);
-                const profit = Number((revenue * 0.1).toFixed(2));
+                const rawRevenue = Number(monthMap[month] ?? 0);
+                const revenue = Number((rawRevenue).toFixed(2));
+                const profit = Number((revenue * 0.8).toFixed(2));
 
                 dataList.push({ month, revenue, profit });
             }
@@ -87,8 +89,8 @@ const saleServiceImpl = {
 
             const rows: Array<{ course_id: string }> = await prismaService.$queryRaw(
                 Prisma.sql`SELECT DISTINCT oi.course_id
-                           FROM \`Order_Item\` oi
-                           INNER JOIN \`Order\` o ON oi.order_id = o.id
+                           FROM \`order_items\` oi
+                           INNER JOIN \`orders\` o ON oi.order_id = o.id
                            WHERE oi.course_id IN (${Prisma.join(coursesId)})
                              AND o.status = 'Completed'`
             ) as any;
