@@ -60,6 +60,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS).permitAll()
                         .requestMatchers(HttpMethod.GET, PUBLIC_ENDPOINTS).permitAll()
                         .requestMatchers(HttpMethod.GET, "/lesson-student/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/courses-instructor/analytics/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
