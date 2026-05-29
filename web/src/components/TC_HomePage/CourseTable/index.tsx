@@ -120,7 +120,6 @@ const CourseTable = () => {
           {/* Headers */}
           <div className='grid grid-cols-2 md:grid-cols-5 gap-2 md:gap-4 py-2 text-xs md:text-sm font-semibold text-zinc-600 dark:text-zinc-300 border-b border-zinc-200 dark:border-zinc-700'>
             <div className='pl-3'>Tên khóa</div>
-            <div>Thể loại</div>
             <div className='hidden md:block'>Trạng thái</div>
             <div className='hidden md:block'>Hoàn thành</div>
             <div></div>
@@ -144,16 +143,6 @@ const CourseTable = () => {
                   <div className='flex items-center gap-2 pl-3'>
                     <Layers className='text-primary' size={18} />
                     <span className='font-semibold text-primary text-base line-clamp-1'>{course.name}</span>
-                  </div>
-
-                  {/* Loại */}
-                  <div>
-                    <Badge
-                      variant='outline'
-                      className='text-xs px-2 py-0.5 rounded-md text-zinc-600 dark:text-zinc-300'
-                    >
-                      {course.type}
-                    </Badge>
                   </div>
 
                   {/* Trạng thái */}

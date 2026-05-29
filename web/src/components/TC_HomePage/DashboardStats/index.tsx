@@ -1,12 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { Users, BookOpen, Newspaper } from 'lucide-react'
+import { Users, BookOpen, Newspaper, ChevronDown } from 'lucide-react'
 import { StatsCard } from '../StatsCard'
 import instructorService from '@/services/instructor/instructor.service'
 import { useAuthStore } from '@/stores/useAuth.stores'
 import Chart from 'react-apexcharts'
 
 const DashboardStats: React.FC = () => {
-  const [year, setYear] = useState<number>(2025)
+  const [year, setYear] = useState<number>(2026)
   const userId = useAuthStore((s) => s.data?.userId)
   const [stats, setStats] = useState<{ totalCourse: number; totalStudent: number; totalBlog: number } | null>(null)
   const [loadingStats, setLoadingStats] = useState(false)
@@ -16,6 +16,7 @@ const DashboardStats: React.FC = () => {
   const [studentData, setStudentData] = useState<number[]>(Array(12).fill(0))
   const [loadingChart, setLoadingChart] = useState(false)
   const [errorChart, setErrorChart] = useState<string | null>(null)
+  const monthLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
   useEffect(() => {
     if (!userId) return
@@ -70,31 +71,95 @@ const DashboardStats: React.FC = () => {
     }
   }, [userId, year])
 
+  const formatCompact = (value: number) =>
+    new Intl.NumberFormat('vi-VN', { notation: 'compact', maximumFractionDigits: 1 }).format(value)
+  const formatCurrency = (value: number) => `${new Intl.NumberFormat('vi-VN').format(Math.round(value))} đ`
+
   const options: ApexCharts.ApexOptions = {
     chart: {
       id: 'dashboard-line-chart',
       toolbar: { show: false },
-      zoom: { enabled: false }
+      zoom: { enabled: false },
+      foreColor: '#64748b',
+      animations: {
+        enabled: true,
+        easing: 'easeinout',
+        speed: 500
+      }
     },
-    stroke: { curve: 'smooth', width: 3 },
+    grid: {
+      borderColor: '#e2e8f0',
+      strokeDashArray: 5,
+      xaxis: { lines: { show: false } }
+    },
+    stroke: { curve: 'smooth', width: [3.5, 3, 3] },
+    markers: {
+      size: 0,
+      strokeWidth: 0,
+      hover: { size: 6, sizeOffset: 3 }
+    },
     xaxis: {
-      categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+      categories: monthLabels,
+      axisBorder: { show: false },
+      axisTicks: { show: false },
+      labels: {
+        style: {
+          fontSize: '12px',
+          fontWeight: 500,
+          colors: '#94a3b8'
+        }
+      }
     },
-    colors: ['#34d399', '#f59e0b', '#a78bfa'],
+    yaxis: {
+      labels: {
+        formatter: (value: number) => formatCompact(value),
+        style: {
+          fontSize: '12px',
+          fontWeight: 500,
+          colors: '#94a3b8'
+        }
+      }
+    },
+    colors: ['#0f766e', '#d97706', '#a78bfa'],
     fill: {
       type: 'gradient',
       gradient: {
-        shadeIntensity: 1,
+        shadeIntensity: 0.85,
         type: 'vertical',
-        opacityFrom: 0.6,
-        opacityTo: 0.1,
+        opacityFrom: 0.35,
+        opacityTo: 0.04,
         stops: [0, 100]
       }
     },
     dataLabels: { enabled: false },
-    legend: { position: 'top' },
+    legend: {
+      position: 'top',
+      horizontalAlign: 'left',
+      labels: {
+        colors: '#334155'
+      },
+      markers: {
+        width: 10,
+        height: 10,
+        radius: 12
+      },
+      itemMargin: {
+        horizontal: 12,
+        vertical: 6
+      }
+    },
     tooltip: {
-      y: { formatter: (val: number) => `${val}` }
+      shared: true,
+      intersect: false,
+      style: {
+        fontSize: '12px'
+      },
+      x: {
+        formatter: (value) => `Tháng ${value}`
+      },
+      y: {
+        formatter: (value: number, { seriesIndex }) => (seriesIndex === 2 ? `${Math.round(value)} học viên` : formatCurrency(value))
+      }
     }
   }
 
@@ -108,9 +173,8 @@ const DashboardStats: React.FC = () => {
   )
 
   return (
-    <div className='flex flex-col md:flex-row gap-6 items-start mb-4'>
-      {/* Stats cards */}
-      <div className='flex flex-col gap-4'>
+    <div className='mb-4 space-y-4'>
+      <div className='grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3'>
         <StatsCard
           title='Khóa học'
           value={loadingStats ? '...' : String(stats?.totalCourse ?? 0)}
@@ -129,27 +193,44 @@ const DashboardStats: React.FC = () => {
           icon={Newspaper}
           variant='warning'
         />
-        {errorStats && <p className='text-xs text-red-600'>Lỗi: {errorStats}</p>}
       </div>
+      {errorStats && <p className='text-xs text-red-600'>Lỗi: {errorStats}</p>}
 
-      {/* Chart với chọn năm */}
-      <div className='flex-1 bg-white dark:bg-zinc-900 p-4 rounded-lg shadow border-slate-200'>
-        <div className='flex justify-end mb-2 text-base items-center gap-3'>
-          Năm
-          <select
-            value={year}
-            onChange={(e) => setYear(Number(e.target.value))}
-            className='border rounded px-2 border-slate-600 py-1 bg-800 dark:text-white '
-          >
-            {[2020, 2021, 2022, 2023, 2024, 2025].map((y) => (
-              <option key={y} value={y}>
-                {y}
-              </option>
-            ))}
-          </select>
+      <div className='w-full rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_8px_24px_rgba(15,23,42,0.06)] sm:p-5'>
+        <div className='mb-4 flex flex-col gap-3 sm:mb-5 sm:flex-row sm:items-center sm:justify-between'>
+          <div className='space-y-1'>
+            <h3 className='text-lg font-semibold tracking-tight text-slate-900'>Business Performance</h3>
+            <p className='text-sm text-slate-500'>Revenue, profit and student trends by month</p>
+          </div>
+
+          <label className='group relative inline-flex items-center'>
+            <span className='mr-3 text-sm font-medium text-slate-600'>Year</span>
+            <select
+              value={year}
+              onChange={(e) => setYear(Number(e.target.value))}
+              className='appearance-none rounded-xl border border-slate-300 bg-slate-50 py-2 pl-3 pr-9 text-sm font-medium text-slate-800 outline-none transition duration-200 hover:border-slate-400 focus:border-slate-500 focus:bg-white'
+            >
+              {[2020, 2021, 2022, 2023, 2024, 2025, 2026].map((y) => (
+                <option key={y} value={y}>
+                  {y}
+                </option>
+              ))}
+            </select>
+            <ChevronDown className='pointer-events-none absolute right-3 size-4 text-slate-500 transition duration-200 group-hover:text-slate-700' />
+          </label>
         </div>
 
-        <Chart options={options} series={series} type='area' height={260} />
+        <div className='rounded-xl border border-slate-100 bg-white p-2 transition duration-200 hover:shadow-sm'>
+          {loadingChart ? (
+            <div className='h-[320px] animate-pulse rounded-lg bg-slate-100' />
+          ) : errorChart ? (
+            <div className='flex h-[320px] items-center justify-center rounded-lg border border-rose-200 bg-rose-50 px-4 text-sm text-rose-700'>
+              {errorChart}
+            </div>
+          ) : (
+            <Chart options={options} series={series} type='area' height={320} />
+          )}
+        </div>
       </div>
     </div>
   )

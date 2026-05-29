@@ -5,7 +5,7 @@ import prismaService from "~/service/utils/prisma.service";
 import { Prisma } from '@prisma/client';
 import Logger from '~/utils/logger';
 
-const GRPC_PORT = 9093;
+const GRPC_PORT = 50053;
 const APP_HOST = process.env.APP_HOST || '0.0.0.0';
 
 // __dirname và __filename có sẵn trong CommonJS
@@ -28,15 +28,32 @@ const saleServiceImpl = {
 
             if (!year) throw new Error('Year is required');
             if (!Array.isArray(coursesId)) throw new Error('coursesId must be array');
+            const normalizedYear = Number((year as any)?.low ?? year);
+            if (!Number.isInteger(normalizedYear)) throw new Error('Year must be a valid integer');
+
+            if (coursesId.length === 0) {
+                Logger.info(`[getRevenueAndProfit] no courses for year=${normalizedYear}`);
+                const emptyDataList = Array.from({ length: 12 }, (_, i) => ({
+                    month: i + 1,
+                    revenue: 0,
+                    profit: 0,
+                }));
+                callback(null, { dataList: emptyDataList });
+                return;
+            }
 
             const monthRows: Array<{ month: number; revenue: number }> = await prismaService.$queryRaw(
                 Prisma.sql`SELECT MONTH(oi.created_at) AS month, COALESCE(SUM(oi.price),0) AS revenue
                             FROM \`Order_Item\` oi
                             INNER JOIN \`Order\` o ON oi.order_id = o.id
                             WHERE oi.course_id IN (${Prisma.join(coursesId)})
-                            AND YEAR(oi.created_at) = ${year.low}
+                            AND o.status = 'Completed'
+                            AND YEAR(oi.created_at) = ${normalizedYear}
                             GROUP BY MONTH(oi.created_at)`
             ) as any;
+            Logger.info(
+                `[getRevenueAndProfit] year=${normalizedYear}, courseCount=${coursesId.length}, monthRows=${monthRows.length}, sample=${JSON.stringify(monthRows[0] || null)}`
+            );
 
 
             const monthMap: Record<number, number> = {};
@@ -44,11 +61,11 @@ const saleServiceImpl = {
                 monthMap[row.month] = row.revenue;
             }
 
-            // Xây danh sách 12 tháng. Định nghĩa: revenue = tổng giá bán, profit = 10% revenue (tuỳ chỉnh nếu cần)
+            // Xây danh sách 12 tháng: revenue = tổng giá bán, profit = 10% revenue
             const dataList = [];
             for (let month = 1; month <= 12; month++) {
-                const profit = Number((monthMap[month] / 1000000).toFixed(2)) || 0;
-                const revenue = Number((profit + profit * 0.1).toFixed(2));
+                const revenue = Number(monthMap[month] ?? 0);
+                const profit = Number((revenue * 0.1).toFixed(2));
 
                 dataList.push({ month, revenue, profit });
             }
@@ -56,6 +73,29 @@ const saleServiceImpl = {
             callback(null, { dataList });
         } catch (err) {
             Logger.error(`getRevenueAndProfit error: ${err}`);
+            callback(err, null);
+        }
+    },
+    getCompletedCourseIds: async (call: any, callback: any) => {
+        try {
+            const { coursesId } = call.request;
+            if (!Array.isArray(coursesId)) throw new Error('coursesId must be array');
+            if (coursesId.length === 0) {
+                callback(null, { courseIds: [] });
+                return;
+            }
+
+            const rows: Array<{ course_id: string }> = await prismaService.$queryRaw(
+                Prisma.sql`SELECT DISTINCT oi.course_id
+                           FROM \`Order_Item\` oi
+                           INNER JOIN \`Order\` o ON oi.order_id = o.id
+                           WHERE oi.course_id IN (${Prisma.join(coursesId)})
+                             AND o.status = 'Completed'`
+            ) as any;
+
+            callback(null, { courseIds: rows.map((r) => r.course_id) });
+        } catch (err) {
+            Logger.error(`getCompletedCourseIds error: ${err}`);
             callback(err, null);
         }
     }

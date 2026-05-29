@@ -18,3 +18,11 @@ message GetRevenueAndProfitList {
   double revenue = 2;
   double profit = 3;
 }
+
+message GetCompletedCourseIdsRequest {
+  repeated string coursesId = 1;
+}
+
+message GetCompletedCourseIdsResponse {
+  repeated string courseIds = 1;
+}

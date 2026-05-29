@@ -217,9 +217,20 @@ public class CourseGrpcService extends CourseServiceImplBase {
     public void getTotalCoursesAndStudent(GetUserRequest request, StreamObserver<GetCourseAndStudentResponse> responseObserver) {
         try {
             List<CourseEntity> courseEntities = courseRepo.findAllByInstructorIdWithEnrollments(request.getId());
+            List<String> coursesId = courseEntities.stream()
+                    .map(CourseEntity::getId)
+                    .filter(Objects::nonNull)
+                    .toList();
+
+            Set<String> completedCourseIds = new HashSet<>(
+                    saleGrpcClient.getCompletedCourseIds(coursesId).getCourseIdsList()
+            );
 
             Set<EnrollmentsEntity> enrollmentsEntities = new HashSet<>();
             for (CourseEntity course : courseEntities) {
+                if (!completedCourseIds.contains(course.getId())) {
+                    continue;
+                }
                 if (course.getEnrollments() != null) {
                     enrollmentsEntities.addAll(course.getEnrollments());
                 }
@@ -269,11 +280,12 @@ public class CourseGrpcService extends CourseServiceImplBase {
             }
 
             for (int month = 1; month <= 12; month++) {
-                long studentCount = monthToEnrollmentCount.getOrDefault(month, 0L);
-
                 GetRevenueAndProfitList saleItem = monthToRevenueProfit.get(month);
                 double revenue = saleItem != null ? saleItem.getRevenue() : 0L;
                 double profit  = saleItem != null ? saleItem.getProfit()  : 0L;
+                long enrollmentCount = monthToEnrollmentCount.getOrDefault(month, 0L);
+                // Keep chart consistent with paid/completed flow: if no revenue, don't show student count.
+                long studentCount = revenue > 0 ? enrollmentCount : 0L;
 
                 MonthlyChartData monthly = MonthlyChartData.newBuilder()
                         .setMonth(month)
