@@ -18,3 +18,26 @@ message GetRevenueAndProfitList {
   double revenue = 2;
   double profit = 3;
 }
+
+message GetCompletedCourseIdsRequest {
+  repeated string coursesId = 1;
+}
+
+message GetCompletedCourseIdsResponse {
+  repeated string courseIds = 1;
+}
+
+message GetTopCoursesRevenueRequest {
+  repeated string coursesId = 1;
+  int64 year = 2;
+  int64 limit = 3;
+}
+
+message TopCourseRevenueItem {
+  string courseId = 1;
+  double revenue = 2;
+}
+
+message GetTopCoursesRevenueResponse {
+  repeated TopCourseRevenueItem items = 1;
+}

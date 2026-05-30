@@ -129,36 +129,41 @@ class TC_Course extends Component<TC_CourseProps, State> {
     })
 
     return (
-      <div className='flex flex-col min-h-[calc(100vh-100px)] p-6 pt-16 lg:pt-6'>
-        <div className='flex-1 flex flex-col space-y-6'>
+      <div className='relative min-h-[100dvh] px-4 pb-4 pt-8 sm:px-6 lg:px-8 lg:pt-4'>
+        <div className='pointer-events-none absolute inset-x-0 top-0 -z-10 h-32 bg-gradient-to-r from-cyan-50 via-blue-50/70 to-indigo-50 blur-3xl' />
+
+        <div className='mx-auto flex h-[calc(100dvh-88px)] w-full max-w-[1440px] flex-1 flex-col gap-3'>
           <CourseSearchBar
             onSearch={(v) => this.setState({ search: v })}
             onCourseCreated={this.handleCourseCreated}
             createModalOpen={createModalOpen}
             onCreateModalOpenChange={this.handleCreateModalOpenChange}
           />
-          {this.state.loading ? (
-            <CoursesTableSkeleton />
-          ) : (
-            <CoursesTable
-              courses={filtered}
-              statusFilter={this.state.statusFilter}
-              onChangeStatusFilter={(s) => this.setState({ statusFilter: s as State['statusFilter'] })}
-              fetchCourses={this.fetchCourses}
-              onRequestCreate={() => this.props.onCreateModalOpenChange(true)}
-            />
+
+          <div className='min-h-0 flex-1 overflow-hidden'>
+            {this.state.loading ? (
+              <CoursesTableSkeleton />
+            ) : (
+              <CoursesTable
+                courses={filtered}
+                statusFilter={this.state.statusFilter}
+                onChangeStatusFilter={(s) => this.setState({ statusFilter: s as State['statusFilter'] })}
+                fetchCourses={this.fetchCourses}
+                onRequestCreate={() => this.props.onCreateModalOpenChange(true)}
+              />
+            )}
+          </div>
+
+          {courses.length > 0 && (
+            <div className='mt-auto border-t border-slate-200/70 pt-3'>
+              <CoursePagination
+                pages={this.state.totalPages}
+                current={this.state.page}
+                onChange={(p) => this.fetchCourses(p)}
+              />
+            </div>
           )}
         </div>
-
-        {courses.length > 0 && (
-          <div className='mt-8 pt-4 border-t border-gray-100'>
-            <CoursePagination
-              pages={this.state.totalPages}
-              current={this.state.page}
-              onChange={(p) => this.fetchCourses(p)}
-            />
-          </div>
-        )}
       </div>
     )
   }

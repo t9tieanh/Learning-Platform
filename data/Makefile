@@ -4,7 +4,7 @@ PYTHON_VENV = venv
 PYTHON = $(PYTHON_VENV)/bin/python
 PIP = $(PYTHON_VENV)/bin/pip
 
-.PHONY: bootstrap clean-env pipeline clean-all normalize import sync help clean-supabase clean-courses translate-titles translate-descriptions
+.PHONY: bootstrap clean-env pipeline clean-all normalize import sync help clean-supabase clean-courses translate-titles translate-descriptions import-feedback-json
 
 help:
 	@echo "Available commands:"
@@ -17,6 +17,7 @@ help:
 	@echo "  translate-descriptions - Translate course descriptions"
 	@echo "  normalize         - Run all normalization scripts"
 	@echo "  import            - Import data to MySQL and MongoDB"
+	@echo "  import-feedback-json - Import feedbacks from JSON seed file via standalone shell script"
 	@echo "  sync-supabase     - Sync lesson analysis to Supabase"
 	@echo "  import-supabase   - Import normalized courses to Supabase embeddings table"
 	@echo "  clean-supabase    - Clear all course data from Supabase"
@@ -54,6 +55,9 @@ import:
 	$(PYTHON) scripts/import-data/import_to_mysql.py
 	$(PYTHON) scripts/import-data/import_blogs.py
 	$(PYTHON) scripts/import-data/import_feedbacks.py
+
+import-feedback-json:
+	bash scripts/import-data/import_feedbacks_from_json.sh
 
 sync-supabase:
 	$(PYTHON) scripts/supabase/import-data/sync_assistant_to_supabase.py

@@ -58,6 +58,19 @@ class CourseGrpcClient {
     })
   }
 
+  async getCourse(courseId: string): Promise<{ id: string; instructor?: { id?: string } }> {
+    return new Promise((resolve, reject) => {
+      const req = { id: courseId }
+      this.courseClient.getCourse(req, (err: any, response: any) => {
+        if (err) {
+          Logger.error(`grpc getCourse error: ${err}`)
+          return reject(err)
+        }
+        resolve(response || { id: courseId })
+      })
+    })
+  }
+
   // Update course rating
   async updateCourseRating(courseId: string, newRating: number): Promise<boolean> {
     {

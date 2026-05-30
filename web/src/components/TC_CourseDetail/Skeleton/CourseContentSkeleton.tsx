@@ -3,46 +3,42 @@ import { Skeleton } from '@/components/ui/skeleton'
 export const CourseContentSkeleton = () => {
   return (
     <div className='space-y-8'>
-      {/* Summary */}
-      <div className='space-y-4'>
-        <Skeleton className='h-20 w-full rounded-lg' />
-        <div className='flex gap-4'>
-          <Skeleton className='h-16 w-32 rounded-lg' />
-          <Skeleton className='h-16 w-32 rounded-lg' />
-          <Skeleton className='h-16 w-32 rounded-lg' />
+      <div className='rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_10px_28px_rgba(15,23,42,0.05)] space-y-4'>
+        <Skeleton className='h-6 w-40 bg-slate-200' />
+        <Skeleton className='h-16 w-full rounded-xl bg-slate-200' />
+        <div className='flex gap-3'>
+          <Skeleton className='h-8 w-24 rounded-md bg-slate-200' />
+          <Skeleton className='h-8 w-24 rounded-md bg-slate-200' />
         </div>
       </div>
 
-      {/* Learning Outcomes */}
-      <div className='space-y-4 border p-6 rounded-xl'>
-        <Skeleton className='h-6 w-48' />
-        <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
+      <div className='rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_10px_28px_rgba(15,23,42,0.05)] space-y-4'>
+        <Skeleton className='h-6 w-48 bg-slate-200' />
+        <div className='grid grid-cols-1 gap-3 md:grid-cols-2'>
           {[1, 2, 3, 4].map((i) => (
             <div key={i} className='flex gap-2'>
-              <Skeleton className='h-5 w-5 rounded-full flex-shrink-0' />
-              <Skeleton className='h-5 w-full' />
+              <Skeleton className='h-5 w-5 shrink-0 rounded-full bg-slate-200' />
+              <Skeleton className='h-5 w-full bg-slate-200' />
             </div>
           ))}
         </div>
       </div>
 
-      {/* Curriculum */}
-      <div className='space-y-4'>
-        <Skeleton className='h-6 w-32' />
+      <div className='rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_10px_28px_rgba(15,23,42,0.05)] space-y-4'>
+        <Skeleton className='h-6 w-32 bg-slate-200' />
         <div className='space-y-2'>
           {[1, 2, 3].map((i) => (
-            <Skeleton key={i} className='h-14 w-full rounded-lg' />
+            <Skeleton key={i} className='h-14 w-full rounded-xl bg-slate-200' />
           ))}
         </div>
       </div>
 
-      {/* Description */}
-      <div className='space-y-4'>
-        <Skeleton className='h-6 w-40' />
+      <div className='rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_10px_28px_rgba(15,23,42,0.05)] space-y-4'>
+        <Skeleton className='h-6 w-40 bg-slate-200' />
         <div className='space-y-2'>
-          <Skeleton className='h-4 w-full' />
-          <Skeleton className='h-4 w-full' />
-          <Skeleton className='h-4 w-3/4' />
+          <Skeleton className='h-4 w-full bg-slate-200' />
+          <Skeleton className='h-4 w-full bg-slate-200' />
+          <Skeleton className='h-4 w-3/4 bg-slate-200' />
         </div>
       </div>
     </div>

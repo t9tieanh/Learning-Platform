@@ -1,0 +1,401 @@
+{
+  "period": {
+    "start": "2025-01",
+    "end": "2026-12"
+  },
+  "revenue_share": {
+    "instructor_pct": 0.9,
+    "admin_pct": 0.1
+  },
+  "payment_defaults": {
+    "method": "VNPAY",
+    "status": "SUCCESS"
+  },
+  "rules": {
+    "max_items_per_order": 2,
+    "allow_repeat_purchase_same_course": false,
+    "created_at_timezone": "Asia/Bangkok",
+    "seed": 20260529
+  },
+  "instructors": [
+    {
+      "id": "879791bc-3ca8-4ae0-8d7f-f9b5a03115cf",
+      "name": "Lawrence Carin"
+    }
+  ],
+  "students": [
+    {
+      "id": "2f52891c-e30b-43d6-88d6-1dd9e113c609",
+      "name": "(ISC)² Education & Training",
+      "email": "isc²educationtraining_194385@example.com"
+    },
+    {
+      "id": "f76dee57-8f12-482b-90a9-128aaf9ebefe",
+      "name": "A. Ka Tat Tsang",
+      "email": "akatattsang_194394@example.com"
+    },
+    {
+      "id": "34fec919-adbb-4e04-a102-65658499e2bb",
+      "name": "A/Professor Iain Hay",
+      "email": "aprofessoriainhay_194389@example.com"
+    },
+    {
+      "id": "9bcdfc97-2a84-40a1-8aa0-5f9ea8f70269",
+      "name": "Abel Rodriguez",
+      "email": "abelrodriguez_194401@example.com"
+    },
+    {
+      "id": "848004cc-040c-44f6-8201-0f5ca7fbb672",
+      "name": "Aije Egwaikhide",
+      "email": "aijeegwaikhide_194384@example.com"
+    },
+    {
+      "id": "c2c2bdfb-24db-4dfa-a66d-b40f43eaedf3",
+      "name": "Akos Ledeczi",
+      "email": "akosledeczi_194386@example.com"
+    },
+    {
+      "id": "a4126b4f-9c17-493a-bee7-dcbb81fb22f8",
+      "name": "Al Pisano",
+      "email": "alpisano_194409@example.com"
+    },
+    {
+      "id": "76418a09-98f0-4ced-a503-0e2d9085193c",
+      "name": "Alan Benson",
+      "email": "alanbenson_194412@example.com"
+    },
+    {
+      "id": "a0c21215-d1e7-4025-a366-467a8617c111",
+      "name": "Alan Paradise",
+      "email": "alanparadise_194406@example.com"
+    },
+    {
+      "id": "8974e167-fe84-4493-9c5d-d927146a8b1d",
+      "name": "Alex Aklson",
+      "email": "alexaklson_194391@example.com"
+    },
+    {
+      "id": "a21b3b8d-064e-455e-849d-a85aaf8b66e7",
+      "name": "Alex Bottle",
+      "email": "alexbottle_194387@example.com"
+    },
+    {
+      "id": "262b70f7-a812-44d4-962c-1955992033f8",
+      "name": "Alex Cowan",
+      "email": "alexcowan_194384@example.com"
+    },
+    {
+      "id": "13896119-a028-4d2b-83fe-50e46c873bb4",
+      "name": "Alex Fosdick",
+      "email": "alexfosdick_194393@example.com"
+    },
+    {
+      "id": "dbe39d1a-7bb0-44b4-b66d-db5201b5a456",
+      "name": "Alex Mannella",
+      "email": "alexmannella_194384@example.com"
+    },
+    {
+      "id": "7869f652-8f9e-4fcb-abe3-7d32b4d74006",
+      "name": "Alex Roediger",
+      "email": "alexroediger_194395@example.com"
+    },
+    {
+      "id": "522a84bc-1580-4efb-8046-4e2fd540850d",
+      "name": "Alexander S. Kulikov",
+      "email": "alexanderskulikov_194387@example.com"
+    },
+    {
+      "id": "af25596e-2a9d-4983-98da-f96aa50f4ae3",
+      "name": "Alfredo Deza",
+      "email": "alfredodeza_194396@example.com"
+    },
+    {
+      "id": "c7a15bc3-9bcd-4e39-a099-18a50cf28328",
+      "name": "Allyson Pippin",
+      "email": "allysonpippin_194391@example.com"
+    },
+    {
+      "id": "455b2112-a3a4-41a0-896b-95074ff75a3a",
+      "name": "Alma Moon Novotny",
+      "email": "almamoonnovotny_194388@example.com"
+    },
+    {
+      "id": "abb26b7d-4f7a-46ad-a2d5-de5ff2547d9b",
+      "name": "Amalia B. Stephens",
+      "email": "amaliabstephens_194393@example.com"
+    },
+    {
+      "id": "7c151c29-00b1-41a7-8ef5-d795a0632f6c",
+      "name": "Amanda Wang",
+      "email": "amandawang_194389@example.com"
+    },
+    {
+      "id": "32ad2379-58ef-482b-af5f-65a51bcb55dd",
+      "name": "Amanda Monaco",
+      "email": "amandamonaco_194410@example.com"
+    },
+    {
+      "id": "81d1164d-a8ef-4847-ac4c-6818082a01e8",
+      "name": "Amarnath Gupta",
+      "email": "amarnathgupta_194396@example.com"
+    },
+    {
+      "id": "a8462395-5f12-450e-a221-47e4bb2d0ecf",
+      "name": "Amber Gould",
+      "email": "ambergould_194391@example.com"
+    },
+    {
+      "id": "9872df1e-fb76-4ee8-ab5e-761f302eb1ec",
+      "name": "Ameya Sathe",
+      "email": "ameyasathe_194393@example.com"
+    },
+    {
+      "id": "73fd9ea5-8bb0-4dd2-b4a5-6f208370efd7",
+      "name": "Amit Yadav",
+      "email": "amityadav_194395@example.com"
+    },
+    {
+      "id": "8467a0b5-0c60-4d44-b2f1-85f0542de630",
+      "name": "Amy Giaculli",
+      "email": "amygiaculli_194389@example.com"
+    },
+    {
+      "id": "fcfb1c2b-cdb0-4004-8cb0-14abd71ca85e",
+      "name": "Amy Nichols",
+      "email": "amynichols_194393@example.com"
+    },
+    {
+      "id": "d0f129d7-4874-45a6-8c5b-a24369f800af",
+      "name": "Amy Simon",
+      "email": "amysimon_194408@example.com"
+    },
+    {
+      "id": "dec1e5fd-3700-4d90-a8fe-e6b2eb654f8a",
+      "name": "Amy Taylor",
+      "email": "amytaylor_194411@example.com"
+    },
+    {
+      "id": "a5a077a1-018a-40bb-9a22-73b312146179",
+      "name": "Andrea Eliassen",
+      "email": "andreaeliassen_194388@example.com"
+    },
+    {
+      "id": "65fc3f09-6b87-46a5-b85b-353e90f3587d",
+      "name": "Andrea Rurale",
+      "email": "andrearurale_194393@example.com"
+    },
+    {
+      "id": "46a46a86-da66-4385-b6ff-c1845640b11d",
+      "name": "Andrew D. Hilton",
+      "email": "andrewdhilton_194387@example.com"
+    },
+    {
+      "id": "2abddb12-d1ae-4c72-bcee-7a627aeb0895",
+      "name": "Andrew Dennis",
+      "email": "andrewdennis_194389@example.com"
+    },
+    {
+      "id": "ff571f14-cc89-45c7-8969-dceab81c4d14",
+      "name": "Andrew Kandel",
+      "email": "andrewkandel_194385@example.com"
+    },
+    {
+      "id": "c3f7470e-03f0-472f-91bc-4599c1e91206",
+      "name": "Andrew Ng",
+      "email": "andrewng_194384@example.com"
+    },
+    {
+      "id": "76d192ce-e45a-4016-985b-075efdbc7fb2",
+      "name": "Andrew Wu",
+      "email": "andrewwu_194411@example.com"
+    },
+    {
+      "id": "19e6c186-8bd1-4f13-a06d-e1e6c8e9433a",
+      "name": "Angela Wright",
+      "email": "angelawright_194387@example.com"
+    },
+    {
+      "id": "2f2e0ba7-2c5f-444f-9307-1541afb900e2",
+      "name": "Angus Corbett",
+      "email": "anguscorbett_194406@example.com"
+    },
+    {
+      "id": "c155828d-feaa-46e3-86ca-c3f761427fbb",
+      "name": "Anh Le",
+      "email": "anhle_194389@example.com"
+    },
+    {
+      "id": "4a4f2ea5-e0e2-499f-a1c3-cf8b573eb2ea",
+      "name": "Anita Allen",
+      "email": "anitaallen_194391@example.com"
+    },
+    {
+      "id": "9eb33afc-35ef-4fd2-bbda-4d043b494d08",
+      "name": "Anke Audenaert",
+      "email": "ankeaudenaert_194389@example.com"
+    }
+  ],
+  "courses": [
+    {
+      "id": "007e4b3c-9ac7-482a-839f-3a153a899d12",
+      "instructor_id": "879791bc-3ca8-4ae0-8d7f-f9b5a03115cf",
+      "price": 200000
+    },
+    {
+      "id": "005ca76e-1280-49b1-be69-ba8744c528e2",
+      "instructor_id": "879791bc-3ca8-4ae0-8d7f-f9b5a03115cf",
+      "price": 201000
+    },
+    {
+      "id": "0017fdb0-df8a-4f44-bf25-fcd6ee926ab6",
+      "instructor_id": "879791bc-3ca8-4ae0-8d7f-f9b5a03115cf",
+      "price": 201000
+    }
+  ],
+  "monthly_plan": [
+    {
+      "month": "2025-01",
+      "completed_orders": 2,
+      "pending_orders": 1,
+      "cancel_orders": 0
+    },
+    {
+      "month": "2025-02",
+      "completed_orders": 2,
+      "pending_orders": 0,
+      "cancel_orders": 0
+    },
+    {
+      "month": "2025-03",
+      "completed_orders": 3,
+      "pending_orders": 1,
+      "cancel_orders": 0
+    },
+    {
+      "month": "2025-04",
+      "completed_orders": 3,
+      "pending_orders": 0,
+      "cancel_orders": 1
+    },
+    {
+      "month": "2025-05",
+      "completed_orders": 4,
+      "pending_orders": 1,
+      "cancel_orders": 0
+    },
+    {
+      "month": "2025-06",
+      "completed_orders": 4,
+      "pending_orders": 1,
+      "cancel_orders": 1
+    },
+    {
+      "month": "2025-07",
+      "completed_orders": 3,
+      "pending_orders": 1,
+      "cancel_orders": 0
+    },
+    {
+      "month": "2025-08",
+      "completed_orders": 4,
+      "pending_orders": 1,
+      "cancel_orders": 0
+    },
+    {
+      "month": "2025-09",
+      "completed_orders": 3,
+      "pending_orders": 0,
+      "cancel_orders": 1
+    },
+    {
+      "month": "2025-10",
+      "completed_orders": 4,
+      "pending_orders": 1,
+      "cancel_orders": 0
+    },
+    {
+      "month": "2025-11",
+      "completed_orders": 5,
+      "pending_orders": 1,
+      "cancel_orders": 1
+    },
+    {
+      "month": "2025-12",
+      "completed_orders": 6,
+      "pending_orders": 1,
+      "cancel_orders": 1
+    },
+    {
+      "month": "2026-01",
+      "completed_orders": 2,
+      "pending_orders": 1,
+      "cancel_orders": 0
+    },
+    {
+      "month": "2026-02",
+      "completed_orders": 2,
+      "pending_orders": 0,
+      "cancel_orders": 0
+    },
+    {
+      "month": "2026-03",
+      "completed_orders": 3,
+      "pending_orders": 1,
+      "cancel_orders": 0
+    },
+    {
+      "month": "2026-04",
+      "completed_orders": 3,
+      "pending_orders": 1,
+      "cancel_orders": 1
+    },
+    {
+      "month": "2026-05",
+      "completed_orders": 4,
+      "pending_orders": 1,
+      "cancel_orders": 0
+    },
+    {
+      "month": "2026-06",
+      "completed_orders": 4,
+      "pending_orders": 1,
+      "cancel_orders": 1
+    },
+    {
+      "month": "2026-07",
+      "completed_orders": 3,
+      "pending_orders": 1,
+      "cancel_orders": 0
+    },
+    {
+      "month": "2026-08",
+      "completed_orders": 4,
+      "pending_orders": 1,
+      "cancel_orders": 0
+    },
+    {
+      "month": "2026-09",
+      "completed_orders": 3,
+      "pending_orders": 0,
+      "cancel_orders": 1
+    },
+    {
+      "month": "2026-10",
+      "completed_orders": 4,
+      "pending_orders": 1,
+      "cancel_orders": 0
+    },
+    {
+      "month": "2026-11",
+      "completed_orders": 5,
+      "pending_orders": 1,
+      "cancel_orders": 1
+    },
+    {
+      "month": "2026-12",
+      "completed_orders": 7,
+      "pending_orders": 1,
+      "cancel_orders": 1
+    }
+  ]
+}

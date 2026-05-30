@@ -11,6 +11,7 @@ import Logger from '~/utils/logger'
 interface LeanFeedback {
   _id: Types.ObjectId
   userId: string
+  instructorId?: string
   courseId: string
   rating: number
   message: string
@@ -24,6 +25,7 @@ interface LeanFeedback {
 
 interface Feedback {
   userId: string
+  instructorId?: string
   courseId: string
   rating: number
   message: string
@@ -39,6 +41,28 @@ interface FeedbackListResult {
   items: LeanFeedback[]
   hasMore: boolean
   nextCursor: string | null
+}
+
+interface InstructorFeedbackOverviewResult {
+  feedbackMetrics: {
+    averageRating: number
+    totalReviews: number
+    trend: { value: number; positive: boolean }
+  }
+  sentimentSummary: {
+    positive: number
+    neutral: number
+    negative: number
+  }
+  recentReviews: Array<{
+    id: string
+    userId: string
+    rating: number
+    comment: string
+    date: string
+    user: string
+    userAvatar: string
+  }>
 }
 
 const gets = async (request: GetFeedBackDTO): Promise<FeedbackListResult> => {
@@ -73,6 +97,92 @@ const gets = async (request: GetFeedBackDTO): Promise<FeedbackListResult> => {
   }
 
   return { items, hasMore, nextCursor }
+}
+
+const getInstructorOverview = async (request: {
+  instructorId: string
+  limit?: number
+}): Promise<InstructorFeedbackOverviewResult> => {
+  const instructorId = String(request.instructorId || '').trim()
+  const limit = Math.min(Math.max(Number(request.limit || 10), 1), 50)
+
+  if (!instructorId) throw new Error('instructorId is required')
+
+  const [summaryAgg, recentDocs] = await Promise.all([
+    Feedback.aggregate([
+      { $match: { instructorId } },
+      {
+        $group: {
+          _id: null,
+          totalReviews: { $sum: 1 },
+          averageRating: { $avg: '$rating' },
+          positiveCount: {
+            $sum: { $cond: [{ $gte: ['$rating', 4] }, 1, 0] }
+          },
+          neutralCount: {
+            $sum: { $cond: [{ $eq: ['$rating', 3] }, 1, 0] }
+          },
+          negativeCount: {
+            $sum: { $cond: [{ $lte: ['$rating', 2] }, 1, 0] }
+          }
+        }
+      }
+    ]),
+    Feedback.find(
+      { instructorId },
+      { _id: 1, userId: 1, rating: 1, message: 1, createdAt: 1 }
+    )
+      .sort({ createdAt: -1, _id: -1 })
+      .limit(limit)
+      .lean()
+  ])
+
+  const summary = summaryAgg[0]
+  const totalReviews = summary?.totalReviews ?? 0
+  const averageRating = totalReviews > 0 ? Number((summary.averageRating ?? 0).toFixed(1)) : 0
+  const positiveCount = summary?.positiveCount ?? 0
+  const neutralCount = summary?.neutralCount ?? 0
+  const negativeCount = summary?.negativeCount ?? 0
+
+  const toPercent = (count: number) => {
+    if (!totalReviews) return 0
+    return Math.round((count / totalReviews) * 100)
+  }
+
+  const uniqueUserIds = Array.from(new Set(recentDocs.map((item: any) => item.userId).filter(Boolean)))
+  const userMap = new Map<string, { name: string; image: string }>()
+  await Promise.all(
+    uniqueUserIds.map(async (uid) => {
+      try {
+        const user = await getUser(uid)
+        userMap.set(uid, { name: user.name || '', image: user.image || '' })
+      } catch (err) {
+        Logger.error(`Error fetching user info for userId=${uid}: ${err}`)
+      }
+    })
+  )
+
+  return {
+    feedbackMetrics: {
+      averageRating,
+      totalReviews,
+      trend: { value: 0, positive: true }
+    },
+    sentimentSummary: {
+      positive: toPercent(positiveCount),
+      neutral: toPercent(neutralCount),
+      negative: toPercent(negativeCount)
+    },
+    recentReviews: recentDocs.map((item: any) => ({
+      id: String(item._id),
+      userId: item.userId,
+      rating: item.rating,
+      comment: item.message,
+      date: item.createdAt instanceof Date ? item.createdAt.toISOString() : new Date(item.createdAt).toISOString(),
+      user: userMap.get(item.userId)?.name || 'Học viên',
+      userAvatar: userMap.get(item.userId)?.image || ''
+    }))
+  }
 }
 
 // Get feedbacks by courseId
@@ -116,6 +226,8 @@ const addFeedBack = async (request: {
 }> => {
 
   const { userId, courseId, rating, message } = request
+  const courseInfo = await courseClient.getCourse(courseId)
+  const instructorId = String(courseInfo?.instructor?.id ?? '')
 
   //check course exists and user has purchased the course
   const hasPurchased = await courseClient.checkHasPurchased(courseId, userId)
@@ -130,12 +242,13 @@ const addFeedBack = async (request: {
     // update existing feedback
     await Feedback.updateOne(
       { _id: existing._id },
-      { $set: { rating, message, updatedAt: new Date() } }
+      { $set: { rating, message, instructorId, updatedAt: new Date() } }
     )
   } else {
     // insert new feedback
     await Feedback.create({
       userId,
+      instructorId,
       courseId,
       rating,
       message
@@ -171,6 +284,7 @@ const getFeedbackByUserIdAndCourseId = async (userId: string, courseId: string):
 
 const FeedbackService = {
   gets,
+  getInstructorOverview,
   addFeedBack,
   getFeedbackByCourseId,
   getFeedbackByUserIdAndCourseId

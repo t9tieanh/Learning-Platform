@@ -34,23 +34,24 @@ const CourseSearchBar: FC<CourseSearchBarProps> = ({
   )
 
   return (
-    <div className='flex flex-col sm:flex-row justify-between items-center gap-4'>
-      <div className='relative w-full sm:w-1/3'>
-        <Search className='absolute left-3 top-3 w-5 h-5 text-blue-400 peer-focus:text-blue-600 transition-colors' />
+    <div className='flex flex-col gap-3 md:flex-row md:items-center md:justify-between'>
+      <div className='relative w-full md:max-w-md'>
+        <Search className='pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 transition-colors' />
         <input
           type='text'
           placeholder='Tìm kiếm khóa học...'
-          className='peer w-full pl-10 pr-3 py-2.5 rounded-xl border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-sm transition'
+          className='h-11 w-full rounded-2xl border border-slate-200/80 bg-white/90 pl-11 pr-4 text-sm font-medium text-slate-700 shadow-sm outline-none transition-all placeholder:text-slate-400 focus:border-blue-300 focus:ring-2 focus:ring-blue-100'
           onChange={(e) => onSearch?.(e.target.value)}
         />
       </div>
 
       <CustomButton
-        className='bg-gradient-to-r from-indigo-500 to-blue-500 text-white px-6 py-2.5 rounded-xl shadow-md hover:shadow-lg hover:scale-105 transition'
+        className='h-11 rounded-2xl bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-500 px-5 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(37,99,235,0.28)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_16px_30px_rgba(37,99,235,0.35)] active:scale-[0.98]'
         onClick={() => setOpen(true)}
         label='Tạo khóa học mới'
-        icon={<IoAddCircle className='h-6 w-6 mr-2' />}
+        icon={<IoAddCircle className='mr-2 h-5 w-5' />}
       />
+
       <CustomDialog
         open={open}
         setOpen={(v) => setOpen(v)}
@@ -58,8 +59,8 @@ const CourseSearchBar: FC<CourseSearchBarProps> = ({
         hideHeader
         noPadding
         description=''
-        className='w-[95vw] max-w-5xl p-0 overflow-hidden border-0 shadow-2xl rounded-3xl gap-0 border-none'
-        contentClassName='p-0 m-0 w-full max-h-[95vh] overflow-y-auto'
+        className='w-[95vw] max-w-5xl gap-0 overflow-hidden rounded-[2rem] border-0 p-0 shadow-[0_30px_80px_rgba(15,23,42,0.24)]'
+        contentClassName='m-0 max-h-[95vh] w-full overflow-y-auto p-0'
         size='xl'
       >
         <CreateCourseModal onCourseCreated={onCourseCreated} />

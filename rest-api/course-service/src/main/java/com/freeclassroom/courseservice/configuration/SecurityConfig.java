@@ -61,6 +61,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, PUBLIC_ENDPOINTS).permitAll()
                         .requestMatchers(HttpMethod.GET, "/lesson-student/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/course-certificates/verify/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/courses-instructor/analytics/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/courses-instructor/analytics/revenue").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session

@@ -7,6 +7,7 @@ interface StatCardProps {
   subtitle?: string
   icon: ComponentType<{ size?: string | number; strokeWidth?: string | number; className?: string }>
   trend?: { value: number; positive: boolean }
+  trendLabel?: string
   variant?: 'default' | 'primary' | 'success' | 'warning'
 }
 
@@ -34,7 +35,7 @@ const accentStyles: Record<string, string> = {
   warning: 'from-amber-300/60 to-transparent'
 }
 
-const StatCard = ({ title, value, subtitle, icon: Icon, trend, variant = 'default' }: StatCardProps) => {
+const StatCard = ({ title, value, subtitle, icon: Icon, trend, trendLabel = 'so với tháng trước', variant = 'default' }: StatCardProps) => {
   return (
     <div
       className={`group relative overflow-hidden rounded-[28px] border p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_22px_50px_-28px_rgba(15,23,42,0.32)] ${cardStyles[variant]}`}
@@ -63,7 +64,7 @@ const StatCard = ({ title, value, subtitle, icon: Icon, trend, variant = 'defaul
               }`}
             >
               {trend.positive ? <TrendingUp size={13} /> : <TrendingDown size={13} />}
-              {Math.abs(trend.value)}% so với tháng trước
+              {Math.abs(trend.value)}% {trendLabel}
             </div>
           )}
         </div>
