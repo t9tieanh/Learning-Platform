@@ -18,12 +18,12 @@ const CoursePagination: FC<CoursePaginationProps> = ({ pages = 4, current = 1, o
   const canPrev = current > 1
   const canNext = current < pages
   return (
-    <Pagination className='pt-6 flex justify-center'>
-      <PaginationContent className='gap-1 sm:gap-2'>
+    <Pagination className='flex justify-center'>
+      <PaginationContent className='gap-1.5 sm:gap-2'>
         <PaginationItem>
           <PaginationPrevious
             href='#'
-            className='sm:px-3 py-1 text-xs sm:text-sm text-blue-600 transition hover:bg-transparent hover:text-blue-600 hover:scale-105 hover:underline'
+            className='rounded-xl border border-slate-200 bg-white px-3 text-sm font-medium text-slate-600 shadow-sm transition-all hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700'
             aria-disabled={!canPrev}
             onClick={(e) => {
               e.preventDefault()
@@ -31,15 +31,16 @@ const CoursePagination: FC<CoursePaginationProps> = ({ pages = 4, current = 1, o
             }}
           />
         </PaginationItem>
+
         {Array.from({ length: pages }, (_, i) => i + 1).map((page) => (
           <PaginationItem key={page}>
             <PaginationLink
               href='#'
               isActive={page === current}
-              className={`rounded-full w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center font-medium shadow-sm text-xs sm:text-sm transition-transform duration-300 ease-in-out hover:scale-110 ${
+              className={`h-9 w-9 rounded-xl border text-sm font-semibold transition-all duration-200 sm:h-10 sm:w-10 ${
                 page === current
-                  ? 'bg-blue-400 text-white hover:bg-blue-600'
-                  : 'bg-blue-100 text-blue-600 hover:bg-blue-600 hover:text-white'
+                  ? 'border-blue-500 bg-blue-600 text-white shadow-[0_10px_20px_rgba(37,99,235,0.28)] hover:bg-blue-600'
+                  : 'border-slate-200 bg-white text-slate-600 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700'
               }`}
               onClick={(e) => {
                 e.preventDefault()
@@ -50,10 +51,11 @@ const CoursePagination: FC<CoursePaginationProps> = ({ pages = 4, current = 1, o
             </PaginationLink>
           </PaginationItem>
         ))}
+
         <PaginationItem>
           <PaginationNext
             href='#'
-            className='sm:px-3 py-1 text-xs sm:text-sm text-blue-600 transition hover:bg-transparent hover:text-blue-600 hover:scale-105 hover:underline'
+            className='rounded-xl border border-slate-200 bg-white px-3 text-sm font-medium text-slate-600 shadow-sm transition-all hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700'
             aria-disabled={!canNext}
             onClick={(e) => {
               e.preventDefault()

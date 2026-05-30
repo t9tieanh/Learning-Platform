@@ -88,7 +88,6 @@ export default function CourseDetailPage() {
     navigate('/teacher/course/' + id)
   }
 
-  // Fetch data
   useEffect(() => {
     let mounted = true
     async function fetchCourse() {
@@ -111,7 +110,6 @@ export default function CourseDetailPage() {
         const mapped: CourseResponseDTO = {
           id: data.id,
           title: data.title,
-          // coverImage ưu tiên thumbnailUrl
           thumbnailUrl: data.thumbnailUrl || data.image || data.coverImage,
           shortDescription: data.shortDescription || data.description,
           description: data.longDescription || data.description || '',
@@ -165,35 +163,40 @@ export default function CourseDetailPage() {
   const goBack = () => navigate(-1)
 
   return (
-    <div className='min-h-screen bg-white-200'>
-      {/* Header */}
+    <div className='relative min-h-[100dvh] bg-slate-50'>
+      <div className='pointer-events-none absolute inset-x-0 top-0 -z-10 h-40 bg-gradient-to-r from-cyan-50 via-blue-50/70 to-indigo-50 blur-3xl' />
+
       {!isAdminPage && (
-        <>
-          <header className='sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60'>
-            <div className='container mx-auto px-4 py-4'>
-              <div className='flex items-center justify-between'>
-                <Button variant='ghost' size='sm' className='gap-2' onClick={goBack}>
-                  <ArrowLeft className='h-4 w-4' /> Quay lại
-                </Button>
-              </div>
+        <header className='sticky top-0 z-40 border-b border-slate-200/80 bg-white/85 backdrop-blur-xl'>
+          <div className='mx-auto w-full max-w-[1400px] px-4 py-3 sm:px-6'>
+            <div className='flex items-center justify-between'>
+              <Button
+                variant='ghost'
+                size='sm'
+                className='gap-2 rounded-xl border border-slate-200 bg-white/80 text-slate-600 hover:bg-blue-50 hover:text-blue-700'
+                onClick={goBack}
+              >
+                <ArrowLeft className='h-4 w-4' /> Quay lại
+              </Button>
             </div>
-          </header>
-        </>
+          </div>
+        </header>
       )}
-      {/* Main Content */}
-      <main className='container mx-auto px-4 py-8'>
+
+      <main className='mx-auto w-full max-w-[1400px] px-4 py-8 sm:px-6'>
         {loading && <TC_CourseDetailSkeleton />}
+
         {!loading && error && (
-          <div className='flex flex-col items-center justify-center py-20 gap-4'>
-            <p className='text-destructive font-medium'>Không tải được khoá học: {error}</p>
-            <Button variant='outline' onClick={() => window.location.reload()}>
+          <div className='flex flex-col items-center justify-center gap-4 rounded-2xl border border-rose-200 bg-white px-6 py-20 text-center shadow-sm'>
+            <p className='font-medium text-rose-600'>Không tải được khoá học: {error}</p>
+            <Button variant='outline' className='border-slate-200 hover:bg-slate-50' onClick={() => window.location.reload()}>
               Thử lại
             </Button>
           </div>
         )}
+
         {!loading && !error && course && (
-          <div className={isAdminPage ? 'grid gap-8 lg:grid-cols-1' : 'grid gap-8 lg:grid-cols-[1fr_320px]'}>
-            {/* Left Column - Main Content */}
+          <div className={isAdminPage ? 'grid gap-8 lg:grid-cols-1' : 'grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px]'}>
             <div className='space-y-8'>
               <CourseHero
                 title={course.title}
@@ -247,7 +250,7 @@ export default function CourseDetailPage() {
                 courseId={course.id}
               />
             </div>
-            {/* Right Column - Sidebar */}
+
             {!isAdminPage && (
               <aside className='hidden lg:block'>
                 <StatsSidebar
@@ -261,7 +264,7 @@ export default function CourseDetailPage() {
           </div>
         )}
       </main>
-      {/* Video Modal */}
+
       {currentVideo && (
         <VideoModal
           isOpen={videoModalOpen}

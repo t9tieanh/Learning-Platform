@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
 import { useState } from 'react'
-import { Play, Calendar, Edit, Check, BadgeCheck, PlayCircle } from 'lucide-react'
+import { Play, Calendar, Edit, Check, BadgeCheck, PlayCircle, CircleDollarSign } from 'lucide-react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import CustomDialog from '@/components/common/Dialog'
@@ -9,7 +9,6 @@ import courseAdminService from '@/services/course/course-admin.service'
 import { toast } from 'sonner'
 import { AiFillDislike } from 'react-icons/ai'
 import useLoading from '@/hooks/useLoading.hook'
-import HighGlossBackground from '@/components/common/HighGlossBackground'
 
 interface CourseHeroProps {
   title: string
@@ -35,17 +34,17 @@ enum EnumCourseStatus {
 function getStatusColor(status: EnumCourseStatus | string) {
   switch (status.toString().toLowerCase()) {
     case 'draft':
-      return 'bg-gray-500 text-white'
+      return 'border-zinc-200 bg-zinc-100 text-zinc-700'
     case 'pending_review':
-      return 'bg-yellow-400 text-black'
+      return 'border-amber-200 bg-amber-50 text-amber-700'
     case 'published':
-      return 'bg-blue-500 text-white'
+      return 'border-emerald-200 bg-emerald-50 text-emerald-700'
     case 'rejected':
-      return 'bg-red-500 text-white'
+      return 'border-rose-200 bg-rose-50 text-rose-700'
     case 'archived':
-      return 'bg-gray-700 text-white'
+      return 'border-zinc-300 bg-zinc-100 text-zinc-700'
     default:
-      return 'bg-gray-300 text-black'
+      return 'border-slate-200 bg-slate-100 text-slate-700'
   }
 }
 
@@ -62,7 +61,7 @@ function getStatusLabel(status: string | EnumCourseStatus) {
     case 'archived':
       return 'Đã lưu trữ'
     default:
-      return status.replace('_', ' ') // fallback
+      return status.replace('_', ' ')
   }
 }
 
@@ -132,153 +131,146 @@ export function CourseHero({
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className='relative'
-    >
-      <HighGlossBackground className='rounded-2xl shadow-lg'>
-        <div className='relative grid gap-6 p-8 lg:grid-cols-2 lg:gap-8'>
-          <div className='flex flex-col space-y-6'>
-            <h1 className='text-3xl font-black tracking-tight lg:text-4xl xl:text-4xl text-white'>{title}</h1>
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className='relative overflow-hidden rounded-[1.5rem] border border-slate-200/90 bg-white/95 p-5 shadow-[0_14px_32px_rgba(15,23,42,0.06)] lg:p-6'>
+      <div className='pointer-events-none absolute inset-0 bg-[radial-gradient(120%_80%_at_0%_0%,rgba(96,165,250,0.16),transparent_55%),radial-gradient(100%_70%_at_90%_100%,rgba(167,139,250,0.12),transparent_60%)]' />
 
-            <div className='flex items-center gap-3 flex-wrap'>
-              <Badge className={`${getStatusColor(status)} text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider`}>
-                {getStatusLabel(status)}
-              </Badge>
+      <div className='relative grid gap-6 lg:grid-cols-2 lg:gap-8'>
+        <div className='flex flex-col space-y-5'>
+          <h1 className='text-2xl font-semibold leading-tight tracking-tight text-slate-900 lg:max-w-[14ch] lg:text-4xl'>{title}</h1>
 
-              <div className='flex items-center gap-2 text-xs font-bold text-blue-100 bg-white/10 backdrop-blur-md px-3 py-1 rounded-full border border-white/10'>
-                <Calendar className='h-3 w-3' />
-                <span>{new Date(publishedAt).toLocaleDateString('vi-VN')}</span>
+          <div className='flex flex-wrap items-center gap-2.5'>
+            <Badge className={`rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-wide ${getStatusColor(status)}`}>
+              {getStatusLabel(status)}
+            </Badge>
+
+            <div className='flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 shadow-sm'>
+              <Calendar className='h-3.5 w-3.5' />
+              <span>{new Date(publishedAt).toLocaleDateString('vi-VN')}</span>
+            </div>
+
+            {price && (
+              <div className='flex items-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-xs font-semibold text-indigo-700 shadow-sm'>
+                <CircleDollarSign className='h-4 w-4' />
+                {price.toLocaleString('vi-VN')}đ
               </div>
-
-              {price && (
-                <div className='text-xs font-black text-white bg-orange-500/80 backdrop-blur-md px-3 py-1 rounded-full border border-orange-400/30'>
-                  {price.toLocaleString('vi-VN')}đ
-                </div>
-              )}
-            </div>
-
-            <div className='flex gap-3 flex-wrap'>
-              {isAdminRoute ? (
-                <>
-                  {courseStatus === 'pending_review' && (
-                    <Button
-                      onClick={() => setOpenApproveModal(true)}
-                      size='lg'
-                      className='bg-white text-blue-700 hover:bg-blue-50 font-black rounded-xl'
-                    >
-                      <Check className='mr-2 h-4 w-4' />
-                      {courseStatus === 'pending_review' && 'Phê duyệt khóa học'}
-                    </Button>
-                  )}
-
-                  <CustomDialog
-                    open={openApproveModal}
-                    setOpen={setOpenApproveModal}
-                    title={
-                      <span className='flex items-center gap-1 font-black'>
-                        <BadgeCheck />
-                        Phê duyệt / Từ chối khoá học
-                      </span>
-                    }
-                    size='md'
-                    description='Bạn có thể phê duyệt khoá học này để nó được xuất bản trên nền tảng hoặc từ chối với lý do cụ thể.'
-                  >
-                    <div className='space-y-4'>
-                      <div className='flex flex-col gap-2'>
-                        <textarea
-                          placeholder='Nếu từ chối, ghi lý do ở đây (tùy chọn)'
-                          value={rejectReason}
-                          onChange={(e) => setRejectReason(e.target.value)}
-                          className='w-full min-h-[80px] p-2 border rounded-md text-sm'
-                        />
-                      </div>
-                      <div className='flex items-center justify-end gap-2'>
-                        <Button size='sm' className='bg-red-500 text-white hover:bg-red-600' onClick={handleRejectCourse}>
-                          <AiFillDislike /> {rejecting ? 'Đang...' : 'Từ chối'}
-                        </Button>
-                        <Button
-                          size='sm'
-                          className='bg-blue-600 text-white hover:bg-blue-700'
-                          onClick={handleApproveCourse}
-                        >
-                          <Check /> {approving ? 'Đang...' : 'Phê duyệt'}
-                        </Button>
-                      </div>
-                    </div>
-                  </CustomDialog>
-                </>
-              ) : courseStatus !== 'published' ? (
-                <Button onClick={onEdit} size='lg' className='bg-white text-blue-700 hover:bg-blue-50 font-black rounded-xl'>
-                  <Edit className='mr-2 h-4 w-4' />
-                  Chỉnh sửa
-                </Button>
-              ) : (
-                <Button
-                  className='bg-white text-blue-700 hover:bg-blue-50 font-black rounded-xl px-4 py-2 flex items-center gap-2'
-                  onClick={() => navigate(`/course-page/${id}`)}
-                >
-                  <PlayCircle className='w-5 h-5' />
-                  Xem chi tiết
-                </Button>
-              )}
-            </div>
+            )}
           </div>
 
-          <div className='relative group'>
-            <motion.div
-              whileHover={{ scale: 1.02 }}
-              transition={{ duration: 0.3 }}
-              className='relative aspect-video overflow-hidden rounded-2xl shadow-2xl border-4 border-white/10'
-            >
-              <img src={coverImage} alt={title} className='h-full w-full object-cover' />
-              <div className='absolute inset-0 bg-gradient-to-t from-black/60 to-transparent' />
+          <p className='max-w-[52ch] text-base leading-relaxed text-slate-500'>
+            Khóa học giúp bạn xây dựng chiến lược cạnh tranh hiệu quả, tạo lợi thế bền vững và tăng trưởng vượt trội trong mọi thị trường.
+          </p>
 
-              {introductoryVideo && (
-                <>
+          <div className='flex flex-wrap gap-3'>
+            {isAdminRoute ? (
+              <>
+                {courseStatus === 'pending_review' && (
                   <Button
-                    onClick={() => {
-                      setOpenPreview(true)
-                      try {
-                        onPlayIntro()
-                      } catch (e) {
-                        // ignore
-                      }
-                    }}
+                    onClick={() => setOpenApproveModal(true)}
                     size='lg'
-                    className='absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full h-16 w-16 p-0 bg-white/90 text-blue-600 shadow-2xl hover:scale-110 transition-transform'
+                    className='rounded-xl bg-blue-600 font-semibold text-white hover:bg-blue-700'
                   >
-                    <Play className='h-6 w-6 ml-1' />
+                    <Check className='mr-2 h-4 w-4' />
+                    {courseStatus === 'pending_review' && 'Phê duyệt khóa học'}
                   </Button>
+                )}
 
-                  <CustomDialog
-                    open={openPreview}
-                    setOpen={setOpenPreview}
-                    title={
-                      <div className='flex items-center gap-2 font-black'>
-                        <Play className='w-5 h-5' /> Giới thiệu khóa học
-                      </div>
-                    }
-                    size='lg'
-                    className='bg-indigo-950 border-none text-white'
-                  >
-                    {introductoryVideo ? (
-                      <div className='w-full'>
-                        <video src={`${introductoryVideo}`} controls autoPlay className='w-full max-h-[500px] rounded-xl shadow-2xl'>
-                          <track kind='captions' srcLang='en' label='English captions' src={`${introductoryVideo}.vtt`} />
-                        </video>
-                      </div>
-                    ) : (
-                      <div className='text-sm text-blue-100/50'>Không có video để xem trước</div>
-                    )}
-                  </CustomDialog>
-                </>
-              )}
-            </motion.div>
+                <CustomDialog
+                  open={openApproveModal}
+                  setOpen={setOpenApproveModal}
+                  title={
+                    <span className='flex items-center gap-1 font-semibold'>
+                      <BadgeCheck />
+                      Phê duyệt / Từ chối khoá học
+                    </span>
+                  }
+                  size='md'
+                  description='Bạn có thể phê duyệt khoá học này để nó được xuất bản trên nền tảng hoặc từ chối với lý do cụ thể.'
+                >
+                  <div className='space-y-4'>
+                    <div className='flex flex-col gap-2'>
+                      <textarea
+                        placeholder='Nếu từ chối, ghi lý do ở đây (tùy chọn)'
+                        value={rejectReason}
+                        onChange={(e) => setRejectReason(e.target.value)}
+                        className='min-h-[96px] w-full rounded-lg border border-slate-200 p-3 text-sm text-slate-700 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100'
+                      />
+                    </div>
+                    <div className='flex items-center justify-end gap-2'>
+                      <Button size='sm' className='bg-rose-500 text-white hover:bg-rose-600' onClick={handleRejectCourse}>
+                        <AiFillDislike /> {rejecting ? 'Đang...' : 'Từ chối'}
+                      </Button>
+                      <Button size='sm' className='bg-blue-600 text-white hover:bg-blue-700' onClick={handleApproveCourse}>
+                        <Check /> {approving ? 'Đang...' : 'Phê duyệt'}
+                      </Button>
+                    </div>
+                  </div>
+                </CustomDialog>
+              </>
+            ) : courseStatus !== 'published' ? (
+              <Button onClick={onEdit} size='lg' className='rounded-xl bg-white text-blue-700 hover:bg-blue-50 border border-blue-200'>
+                <Edit className='mr-2 h-4 w-4' />
+                Chỉnh sửa
+              </Button>
+            ) : (
+              <Button
+                className='flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-600 via-indigo-500 to-violet-500 px-5 py-2.5 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(79,70,229,0.3)] hover:brightness-105'
+                onClick={() => navigate(`/course-page/${id}`)}
+              >
+                <PlayCircle className='h-5 w-5' />
+                Xem chi tiết
+              </Button>
+            )}
           </div>
         </div>
-      </HighGlossBackground>
+
+        <div className='relative group'>
+          <motion.div whileHover={{ scale: 1.01 }} transition={{ duration: 0.25 }} className='relative aspect-video overflow-hidden rounded-2xl border border-slate-200 shadow-[0_14px_28px_rgba(15,23,42,0.16)]'>
+            <img src={coverImage} alt={title} className='h-full w-full object-cover' />
+            <div className='absolute inset-0 bg-gradient-to-t from-slate-900/50 to-transparent' />
+
+            {introductoryVideo && (
+              <>
+                <Button
+                  onClick={() => {
+                    setOpenPreview(true)
+                    try {
+                      onPlayIntro()
+                    } catch (e) {
+                      // ignore
+                    }
+                  }}
+                  size='lg'
+                  className='absolute left-1/2 top-1/2 h-16 w-16 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/95 p-0 text-blue-600 shadow-[0_12px_22px_rgba(15,23,42,0.24)] transition-transform hover:scale-105'
+                >
+                  <Play className='ml-0.5 h-5 w-5' />
+                </Button>
+
+                <CustomDialog
+                  open={openPreview}
+                  setOpen={setOpenPreview}
+                  title={
+                    <div className='flex items-center gap-2 font-semibold text-slate-900'>
+                      <Play className='h-5 w-5' /> Giới thiệu khóa học
+                    </div>
+                  }
+                  size='lg'
+                  className='border-slate-200 bg-white'
+                >
+                  {introductoryVideo ? (
+                    <div className='w-full'>
+                      <video src={`${introductoryVideo}`} controls autoPlay className='max-h-[500px] w-full rounded-xl border border-slate-200'>
+                        <track kind='captions' srcLang='en' label='English captions' src={`${introductoryVideo}.vtt`} />
+                      </video>
+                    </div>
+                  ) : (
+                    <div className='text-sm text-slate-500'>Không có video để xem trước</div>
+                  )}
+                </CustomDialog>
+              </>
+            )}
+          </motion.div>
+        </div>
+      </div>
     </motion.div>
   )
 }

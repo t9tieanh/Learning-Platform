@@ -8,7 +8,6 @@ const HomePage = () => {
       <main className='p-4 md:p-8 pt-16 lg:pt-8'>
         <DashboardHeader />
         <DashboardStats />
-        <CourseTable />
       </main>
     </div>
   )

@@ -1,13 +1,11 @@
 import { useState } from 'react'
 import { BarChart3, Target, DollarSign, MessageSquare, GraduationCap } from 'lucide-react'
 import AnalyticsTab from '@/components/TC_Statistics/AnalyticsTab'
-import ProgressTab from '@/components/TC_Statistics/ProgressTab'
 import RevenueTab from '@/components/TC_Statistics/RevenueTab'
 import FeedbackTab from '@/components/TC_Statistics/FeedbackTab'
 
 const tabs = [
   { id: 'analytics', label: 'Phân tích học viên', icon: BarChart3 },
-  { id: 'progress', label: 'Theo dõi tiến độ', icon: Target },
   { id: 'revenue', label: 'Doanh thu', icon: DollarSign },
   { id: 'feedback', label: 'Phản hồi', icon: MessageSquare }
 ] as const
@@ -16,7 +14,6 @@ type TabId = (typeof tabs)[number]['id']
 
 const tabContent: Record<TabId, JSX.Element> = {
   analytics: <AnalyticsTab />,
-  progress: <ProgressTab />,
   revenue: <RevenueTab />,
   feedback: <FeedbackTab />
 }

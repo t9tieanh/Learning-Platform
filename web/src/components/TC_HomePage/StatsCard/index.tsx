@@ -38,16 +38,17 @@ export function StatsCard({ title, value, subtitle, icon: Icon, variant = 'defau
   const styles = getVariantStyles()
 
   return (
-    <Card className='w-52 hover:shadow-md transform transition-transform duration-300 hover:scale-105'>
-      <CardContent>
+    <Card className='w-full rounded-2xl border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md'>
+      <CardContent className='p-x-2'>
         <div className='flex items-center gap-4'>
-          <div className={`p-3 rounded-lg flex items-center justify-center ${styles.iconBg}`}>
+          <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${styles.iconBg}`}>
             <Icon className={`h-5 w-5 ${styles.iconColor}`} />
           </div>
 
           <div className='flex flex-col gap-2'>
-            <span className='text-sm font-medium text-muted-foreground break-all'>{title}</span>
-            <span className='block text-lg font-bold text-foreground break-all'>{value}</span>
+            <span className='text-sm font-medium text-slate-500'>{title}</span>
+            <span className='block text-2xl font-bold leading-none text-slate-900'>{value}</span>
+            {subtitle ? <span className='text-xs text-slate-400'>{subtitle}</span> : null}
           </div>
         </div>
       </CardContent>
