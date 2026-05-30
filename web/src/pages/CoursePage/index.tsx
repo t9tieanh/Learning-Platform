@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect, useRef } from 'react'
+import { useMemo, useState, useEffect, useRef, useCallback } from 'react'
 import { ChevronLeft } from 'lucide-react'
 import { LessonViewer } from '@/components/CoursePage/LessonViewer'
 import { TabNavigation } from '@/components/CoursePage/TabNavigation'
@@ -16,6 +16,8 @@ import { AnalysisResult } from '@/services/assistant/analysis.service'
 import assistantAnalysisService from '@/services/assistant/analysis.service'
 import HighGlossBackground from '@/components/common/HighGlossBackground'
 import CoursePageHeaderUser from '@/components/CoursePage/CoursePageHeaderUser'
+import { CertificateJourneyProgress } from '@/components/CoursePage/CertificateJourneyProgress'
+import CourseCompletionCelebration from '@/components/CoursePage/CourseCompletionCelebration'
 
 const CoursePage = () => {
   type UILecture = {
@@ -41,6 +43,7 @@ const CoursePage = () => {
 
   const [analysisData, setAnalysisData] = useState<AnalysisResult | null>(null)
   const [isLoadingAnalysis, setIsLoadingAnalysis] = useState(false)
+  const [showCourseCompletionModal, setShowCourseCompletionModal] = useState(false)
 
   const handleSeek = (timestamp: string) => {
     if (!viewerRef.current) return
@@ -65,16 +68,37 @@ const CoursePage = () => {
     setActiveTab('AI Phân tích')
   }
 
-  useEffect(() => {
-    const fetchCourseInfo = async () => {
-      if (!courseId) return
-      setIsLoading(true)
-      try {
-        const response = await courseService.getCourseDetails(courseId)
-        if (response && response.code === 200 && response.result) {
-          setCourseData(response.result)
+  const currentLectureIdRef = useRef(currentLecture?.id)
+  currentLectureIdRef.current = currentLecture?.id
 
-          // select lecture introduction
+  const fetchCourseInfo = useCallback(async (preserveLectureId?: string, options?: { silent?: boolean }) => {
+    if (!courseId) return
+    if (!options?.silent) setIsLoading(true)
+    try {
+      const response = await courseService.getCourseDetails(courseId)
+      if (response && response.code === 200 && response.result) {
+        setCourseData(response.result)
+
+        const lectureIdToKeep = preserveLectureId ?? currentLectureIdRef.current
+        if (lectureIdToKeep && lectureIdToKeep !== 'introduction') {
+          for (const ch of response.result.chapters ?? []) {
+            const found = ch.lessons?.find((l) => l.id === lectureIdToKeep)
+            if (found) {
+              setCurrentLecture({
+                id: found.id,
+                title: found.title,
+                content: found.content,
+                duration: found.duration ?? null,
+                position: found.position ?? null,
+                type: found.type === 'article' ? 'article' : 'video',
+                completionStatus: found.completionStatus ?? 'NOT_STARTED'
+              })
+              return
+            }
+          }
+        }
+
+        if (!options?.silent) {
           setCurrentLecture({
             id: 'introduction',
             title: 'Giới thiệu khóa học',
@@ -87,15 +111,25 @@ const CoursePage = () => {
             thumbnailUrl: response.result.thumbnailUrl as string
           })
         }
-      } catch (error) {
-        console.error('Failed to fetch course details', error)
-      } finally {
-        setIsLoading(false)
       }
+    } catch (error) {
+      console.error('Failed to fetch course details', error)
+    } finally {
+      if (!options?.silent) setIsLoading(false)
     }
-
-    fetchCourseInfo()
   }, [courseId])
+
+  useEffect(() => {
+    fetchCourseInfo()
+  }, [fetchCourseInfo])
+
+  const handleLessonCompleted = useCallback(() => {
+    fetchCourseInfo(currentLectureIdRef.current, { silent: true })
+  }, [fetchCourseInfo])
+
+  const handleCourseCompleted = useCallback(() => {
+    setShowCourseCompletionModal(true)
+  }, [])
 
   useEffect(() => {
     const fetchAnalysis = async () => {
@@ -236,6 +270,8 @@ const CoursePage = () => {
                   qualityReason={analysisData?.qualityReason}
                   onShowChunkDetails={handleShowChunkDetails}
                   onProgress={(percent) => setWatchedPercent(Math.max(watchedPercent, percent))}
+                  onLessonCompleted={handleLessonCompleted}
+                  onCourseCompleted={handleCourseCompleted}
                 />
               </div>
               <div className='mt-2 mx-auto w-full'>
@@ -257,17 +293,24 @@ const CoursePage = () => {
         </div>
 
         {/* Right Column - Course Sidebar (Desktop) */}
-        <div className='hidden lg:flex lg:flex-col lg:w-96 flex-shrink-0 border-l border-border'>
+        <div className='hidden lg:flex lg:flex-col lg:w-96 flex-shrink-0 border-l border-border overflow-y-auto'>
           {isLoading ? (
             <CourseSidebarSkeleton />
           ) : (
-            <CourseSidebar
-              sections={uiSections}
-              currentLectureId={currentLecture?.id || ''}
-              onSelectLecture={handleSelectLecture}
-              onSeek={handleSeek}
-              subtitlesRaw={analysisData?.subtitles}
-            />
+            <>
+              {courseData?.certificateJourney && (
+                <div className='p-3 border-b border-border'>
+                  <CertificateJourneyProgress journey={courseData.certificateJourney} />
+                </div>
+              )}
+              <CourseSidebar
+                sections={uiSections}
+                currentLectureId={currentLecture?.id || ''}
+                onSelectLecture={handleSelectLecture}
+                onSeek={handleSeek}
+                subtitlesRaw={analysisData?.subtitles}
+              />
+            </>
           )}
         </div>
 
@@ -283,6 +326,13 @@ const CoursePage = () => {
           subtitlesRaw={analysisData?.subtitles}
         />
       </div>
+
+      <CourseCompletionCelebration
+        open={showCourseCompletionModal}
+        onOpenChange={setShowCourseCompletionModal}
+        courseTitle={courseData?.title}
+        courseThumbnailUrl={courseData?.thumbnailUrl}
+      />
     </div>
   )
 }

@@ -36,6 +36,7 @@ import AD_Courses from './pages/AD_Courses'
 import AD_CourseDetails from './pages/AD_CourseDetails'
 import AD_Instructor from './pages/AD_Instructor'
 import AD_Certificates from './pages/AD_Certificates'
+import CertificateVerify from './pages/CertificateVerify'
 import AD_Blogs from './pages/AD_Blogs'
 import AD_BlogDetails from './pages/AD_BlogDetails'
 import Home2 from './pages/Home2'
@@ -69,7 +70,8 @@ const router = createBrowserRouter([
           { path: 'about', element: <About /> },
           { path: 'check-out', element: <CheckoutPage /> },
           { path: 'check-out/:id', element: <CheckoutPage /> },
-          { path: 'check-out/vip-success/:id', element: <VipSuccess /> }
+          { path: 'check-out/vip-success/:id', element: <VipSuccess /> },
+          { path: 'certificate/verify/:code', element: <CertificateVerify /> }
         ]
       },
       { path: 'auth', element: <AuthLayout /> },

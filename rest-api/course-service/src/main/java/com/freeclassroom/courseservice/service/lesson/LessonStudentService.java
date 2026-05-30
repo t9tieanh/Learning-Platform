@@ -4,6 +4,7 @@ import com.freeclassroom.courseservice.configuration.CustomJwtDecoder;
 import com.freeclassroom.courseservice.dto.request.lesson.MakeNoteForLessonRequest;
 import com.freeclassroom.courseservice.dto.response.ApiResponse;
 import com.freeclassroom.courseservice.dto.response.common.CreationResponse;
+import com.freeclassroom.courseservice.dto.response.lesson.MarkDoneLessonResponse;
 import com.freeclassroom.courseservice.dto.response.course.CloudFrontCookieResponse;
 import com.freeclassroom.courseservice.dto.response.course.LessonInfoResponse;
 import com.freeclassroom.courseservice.dto.response.course.student.LessonOverviewResponse;
@@ -18,6 +19,7 @@ import com.freeclassroom.courseservice.repository.entity.EnrollmentRepository;
 import com.freeclassroom.courseservice.repository.entity.LessonProgressRepository;
 import com.freeclassroom.courseservice.repository.entity.LessonRepository;
 import com.freeclassroom.courseservice.service.utils.cloudfront.ICloudFrontService;
+import com.freeclassroom.courseservice.service.certificate.ICourseCompletionCertificateService;
 import com.freeclassroom.courseservice.service.utils.other.FileUtils;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +35,7 @@ import org.springframework.http.MediaTypeFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -46,6 +49,7 @@ public class LessonStudentService implements ILessonStudentService {
     CustomJwtDecoder customJwtDecoder;
     LessonStudentMapper lessonMapper;
     FileUtils fileUtils;
+    ICourseCompletionCertificateService courseCompletionCertificateService;
 
     @Value("${server.backendUri}")
     @NonFinal
@@ -113,9 +117,9 @@ public class LessonStudentService implements ILessonStudentService {
         // get note of student
         EnrollmentsEntity enrollment = enrollmentRepo.findByUserIdAndCourse_Chapters_Lessons_Id(userId, lessonId)
                 .orElseThrow(() -> new CustomExeption(ErrorCode.UNAUTHORIZED));
-        LessonProgressEntity lessonProgress = lessonProgressRepo.findByLesson_IdAndEnrollment_Id(
-                lessonId, enrollment.getId()
-        );
+        LessonProgressEntity lessonProgress = lessonProgressRepo
+                .findFirstByLesson_IdAndEnrollment_IdOrderByUpdatedAtDesc(lessonId, enrollment.getId())
+                .orElse(null);
 
         if (lessonProgress != null) {
             response.setNote(lessonProgress.getNote());
@@ -129,13 +133,16 @@ public class LessonStudentService implements ILessonStudentService {
     }
 
     @Override
-    public ApiResponse<CreationResponse> markDone(String lessonId, String userId) {
+    @Transactional
+    public ApiResponse<MarkDoneLessonResponse> markDone(String lessonId, String userId) {
         EnrollmentsEntity enrollment = enrollmentRepo.findByUserIdAndCourse_Chapters_Lessons_Id(userId, lessonId)
                 .orElseThrow(() -> new CustomExeption(ErrorCode.UNAUTHORIZED));
 
-        LessonProgressEntity lessonProgress = lessonProgressRepo.findByLesson_IdAndEnrollment_Id(
-                lessonId, enrollment.getId()
-        );
+        double previousProgress = enrollment.getProgress() != null ? enrollment.getProgress() : 0.0;
+
+        LessonProgressEntity lessonProgress = lessonProgressRepo
+                .findFirstByLesson_IdAndEnrollment_IdOrderByUpdatedAtDesc(lessonId, enrollment.getId())
+                .orElse(null);
 
         if (lessonProgress == null) {
             lessonProgress = LessonProgressEntity.builder()
@@ -147,6 +154,10 @@ public class LessonStudentService implements ILessonStudentService {
                     .build();
         } else {
             lessonProgress.setProgress(EnumLessonProgress.COMPLETED);
+            final String keepProgressId = lessonProgress.getId();
+            lessonProgressRepo.findAllByLesson_IdAndEnrollment_Id(lessonId, enrollment.getId()).stream()
+                    .filter(lp -> !lp.getId().equals(keepProgressId))
+                    .forEach(lessonProgressRepo::delete);
         }
 
         lessonProgressRepo.save(lessonProgress);
@@ -156,20 +167,28 @@ public class LessonStudentService implements ILessonStudentService {
                 .flatMap(chapter -> chapter.getLessons().stream())
                 .map(lesson -> lesson.getId())
                 .toList().size();
-                
-        // number of completed lessons
+
         long completedLessons = lessonProgressRepo.findByEnrollment_Id(enrollment.getId()).stream()
                 .filter(lp -> lp.getProgress() == EnumLessonProgress.COMPLETED)
+                .map(lp -> lp.getLesson().getId())
+                .distinct()
                 .count();
 
         double progress = totalLessons > 0 ? (double) completedLessons / totalLessons : 0.0;
         enrollment.setProgress(progress);
         enrollmentRepo.save(enrollment);
 
-        return ApiResponse.<CreationResponse>builder()
+        if (progress >= 1.0) {
+            courseCompletionCertificateService.issueIfEligible(enrollment);
+        }
+
+        boolean isCompletedCourse = previousProgress < 1.0 && progress >= 1.0;
+
+        return ApiResponse.<MarkDoneLessonResponse>builder()
                 .result(
-                        CreationResponse.builder()
+                        MarkDoneLessonResponse.builder()
                                 .id(lessonId)
+                                .completedCourse(isCompletedCourse)
                                 .build()
                 )
                 .code(200)
@@ -182,9 +201,9 @@ public class LessonStudentService implements ILessonStudentService {
         EnrollmentsEntity enrollment = enrollmentRepo.findByUserIdAndCourse_Chapters_Lessons_Id(userId, lessonId)
                 .orElseThrow(() -> new CustomExeption(ErrorCode.UNAUTHORIZED));
 
-        LessonProgressEntity lessonProgress = lessonProgressRepo.findByLesson_IdAndEnrollment_Id(
-                lessonId, enrollment.getId()
-        );
+        LessonProgressEntity lessonProgress = lessonProgressRepo
+                .findFirstByLesson_IdAndEnrollment_IdOrderByUpdatedAtDesc(lessonId, enrollment.getId())
+                .orElse(null);
 
         if (lessonProgress == null) {
             lessonProgress = LessonProgressEntity.builder()

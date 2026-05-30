@@ -11,7 +11,12 @@ import lombok.experimental.SuperBuilder;
 @Getter
 @Setter
 @Entity
-@Table(name = "lesson_progress")
+@Table(
+        name = "lesson_progress",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"enrollment_id", "lesson_id"})
+        }
+)
 @AllArgsConstructor
 @NoArgsConstructor(force = true)
 @SuperBuilder

@@ -53,6 +53,7 @@
     "cmdk": "^1.1.1",
     "embla-carousel-react": "^8.6.0",
     "framer-motion": "^12.23.12",
+    "html2canvas": "^1.4.1",
     "lexical": "^0.38.2",
     "lodash": "^4.17.21",
     "lucide-react": "^0.552.0",

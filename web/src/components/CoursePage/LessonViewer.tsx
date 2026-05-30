@@ -3,7 +3,7 @@ import { Lesson } from '@/types/course-student'
 import ModernVideoPlayer from './ModernVideoPlayer'
 import { VideoPlayerRef } from './VideoPlayer'
 import PDFViewer from './PDFViewer'
-import { useCallback, forwardRef } from 'react'
+import { useCallback, forwardRef, useRef } from 'react'
 import lessonStudentService from '@/services/course/lesson-student.service'
 import { toast } from 'sonner'
 
@@ -17,9 +17,15 @@ export const LessonViewer = forwardRef<VideoPlayerRef, {
   qualityReason?: string | null;
   onShowChunkDetails?: (chunkId: string) => void;
   onProgress?: (percent: number) => void;
+  onLessonCompleted?: () => void;
+  onCourseCompleted?: () => void;
 }>(
-  ({ lesson, subtitlesRaw, chunks = [], isInvalid, qualityReason, onShowChunkDetails, onProgress }, ref) => {
+  ({ lesson, subtitlesRaw, chunks = [], isInvalid, qualityReason, onShowChunkDetails, onProgress, onLessonCompleted, onCourseCompleted }, ref) => {
     const { id } = lesson
+    const onLessonCompletedRef = useRef(onLessonCompleted)
+    onLessonCompletedRef.current = onLessonCompleted
+    const onCourseCompletedRef = useRef(onCourseCompleted)
+    onCourseCompletedRef.current = onCourseCompleted
 
     const markDoneLesson = useCallback(async () => {
       if (lesson.completionStatus === 'COMPLETED') return
@@ -27,6 +33,10 @@ export const LessonViewer = forwardRef<VideoPlayerRef, {
         const response = await lessonStudentService.markDone(lesson.id)
         if (response?.code === 200) {
           toast.success(response.message)
+          onLessonCompletedRef.current?.()
+          if (response.result?.isCompletedCourse) {
+            onCourseCompletedRef.current?.()
+          }
         }
       } catch (error) {
         console.error('Failed to mark lesson as completed', error)
