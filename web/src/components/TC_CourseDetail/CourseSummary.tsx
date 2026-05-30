@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { Users, Star, Tag } from 'lucide-react'
+import { Tag } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 
 interface CourseSummaryProps {
@@ -17,26 +17,27 @@ export function CourseSummary({ shortDescription, category, tags = [] }: CourseS
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.1 }}
-      className='rounded-xl bg-card p-6 shadow-md'
+      className='relative isolate overflow-hidden rounded-xl border border-slate-200/80 bg-white p-5 shadow-[0_8px_22px_rgba(15,23,42,0.05)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_14px_28px_rgba(15,23,42,0.09)]'
     >
-      <div className='flex items-center justify-between'>
-        <h2 className='text-xl font-bold'>Tổng quan</h2>
-      </div>
-      <p className='text-sm leading-relaxed text-foreground mb-6 mt-2'>{shortDescription}</p>
+      <div className='pointer-events-none absolute inset-x-0 top-0 -z-10 h-12 bg-gradient-to-r from-violet-100/60 via-fuchsia-100/40 to-transparent' />
+      <h2 className='text-lg font-semibold tracking-tight text-slate-900'>Tổng quan</h2>
+      <p className='mt-2 text-sm leading-relaxed text-slate-600'>{shortDescription}</p>
 
-      <div className='flex flex-wrap items-center gap-6 mb-6'>
-        {category && (
-          <div className='flex items-center gap-2'>
-            <Tag className='h-5 w-5 text-primary' />
-            <span className='text-sm font-medium'>Thể loại: {category}</span>
-          </div>
-        )}
-      </div>
+      {category && (
+        <div className='mt-4 flex items-center gap-2 text-sm text-slate-600'>
+          <Tag className='h-4 w-4 text-violet-600' />
+          <span>
+            Thể loại: <strong className='font-semibold text-slate-800'>{category}</strong>
+          </span>
+        </div>
+      )}
 
       {tags.length > 0 && (
-        <div className='flex flex-wrap gap-2'>
+        <div className='mt-4 flex flex-wrap gap-2'>
           {tags.map((tag) => (
-            <Badge key={tag}>{tag}</Badge>
+            <Badge key={tag} className='rounded-md border border-violet-200 bg-violet-50 px-2 py-0.5 text-[11px] font-medium text-violet-700'>
+              {tag}
+            </Badge>
           ))}
         </div>
       )}

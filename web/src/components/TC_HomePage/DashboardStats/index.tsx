@@ -4,6 +4,7 @@ import { StatsCard } from '../StatsCard'
 import instructorService from '@/services/instructor/instructor.service'
 import { useAuthStore } from '@/stores/useAuth.stores'
 import Chart from 'react-apexcharts'
+import StatCard from '../../TC_Statistics/StatCard'
 
 const DashboardStats: React.FC = () => {
   const [year, setYear] = useState<number>(2026)
@@ -16,7 +17,7 @@ const DashboardStats: React.FC = () => {
   const [studentData, setStudentData] = useState<number[]>(Array(12).fill(0))
   const [loadingChart, setLoadingChart] = useState(false)
   const [errorChart, setErrorChart] = useState<string | null>(null)
-  const monthLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+  const monthLabels = ['Th1', 'Th2', 'Th3', 'Th4', 'Th5', 'Th6', 'Th7', 'Th8', 'Th9', 'Th10', 'Th11', 'Th12']
 
   useEffect(() => {
     if (!userId) return
@@ -179,19 +180,19 @@ const DashboardStats: React.FC = () => {
   return (
     <div className='mb-4 space-y-4'>
       <div className='grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3'>
-        <StatsCard
+        <StatCard
           title='Khóa học'
           value={loadingStats ? '...' : String(stats?.totalCourse ?? 0)}
           icon={BookOpen}
           variant='primary'
         />
-        <StatsCard
-          title='Học viên'
+        <StatCard
+          title='Học viên ghi danh'
           value={loadingStats ? '...' : String(stats?.totalStudent ?? 0)}
           icon={Users}
           variant='success'
         />
-        <StatsCard
+        <StatCard
           title='Bài viết'
           value={loadingStats ? '...' : String(stats?.totalBlog ?? 0)}
           icon={Newspaper}
@@ -208,7 +209,7 @@ const DashboardStats: React.FC = () => {
           </div>
 
           <label className='group relative inline-flex items-center'>
-            <span className='mr-3 text-sm font-medium text-slate-600'>Year</span>
+            <span className='mr-3 text-sm font-medium text-slate-600'>Năm</span>
             <select
               value={year}
               onChange={(e) => setYear(Number(e.target.value))}

@@ -15,18 +15,15 @@ interface CurriculumAccordionProps {
 export function CurriculumAccordion({ sections, courseId, onPlayLesson }: CurriculumAccordionProps) {
   const [openSections, setOpenSections] = useState<string[]>([])
 
-  // Load saved state from localStorage
   useEffect(() => {
     const saved = localStorage.getItem(`course-${courseId}-sections`)
     if (saved) {
       setOpenSections(JSON.parse(saved))
     } else {
-      // Default: open first section
       setOpenSections(sections.length > 0 ? [sections[0].id] : [])
     }
   }, [courseId, sections])
 
-  // Save state to localStorage
   useEffect(() => {
     localStorage.setItem(`course-${courseId}-sections`, JSON.stringify(openSections))
   }, [openSections, courseId])
@@ -36,46 +33,38 @@ export function CurriculumAccordion({ sections, courseId, onPlayLesson }: Curric
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.2 }}
-      className='rounded-xl bg-card p-6 shadow-md space-y-4'
+      className='relative isolate overflow-hidden rounded-xl border border-slate-200/80 bg-white p-5 shadow-[0_8px_22px_rgba(15,23,42,0.05)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_14px_28px_rgba(15,23,42,0.09)]'
     >
-      <div className='flex items-center justify-between'>
-        <h2 className='text-lg font-bold'>Nội dung khóa học</h2>
-      </div>
+      <div className='pointer-events-none absolute inset-x-0 top-0 -z-10 h-12 bg-gradient-to-r from-cyan-100/70 via-blue-100/45 to-transparent' />
+      <h2 className='mb-4 text-lg font-semibold tracking-tight text-slate-900'>Nội dung khóa học</h2>
 
-      <Accordion type='multiple' value={openSections} onValueChange={setOpenSections} className='space-y-4'>
+      <Accordion type='multiple' value={openSections} onValueChange={setOpenSections} className='space-y-3'>
         {sections.map((section, index) => (
           <AccordionItem
             key={section.id}
             value={section.id}
-            className='border border-border rounded-lg bg-card hover:shadow-soft transition-all duration-300'
+            className='rounded-lg border border-slate-200 bg-white transition-all duration-300 hover:border-blue-200 hover:bg-blue-50/30'
           >
-            <AccordionTrigger className='px-6 py-4 hover:no-underline group'>
-              <div className='flex items-center justify-between w-full text-left'>
-                <div className='flex items-center gap-4'>
-                  <div className='w-10 h-10 bg-primary rounded-lg flex items-center justify-center text-primary-foreground font-semibold'>
+            <AccordionTrigger className='group px-4 py-3.5 hover:no-underline'>
+              <div className='flex w-full items-center justify-between text-left'>
+                <div className='flex items-center gap-3'>
+                  <div className='flex h-8 w-8 items-center justify-center rounded-md bg-gradient-to-br from-cyan-500 to-blue-600 text-xs font-semibold text-white'>
                     {index + 1}
                   </div>
                   <div>
-                    <h3 className='font-semibold text-foreground group-hover:text-primary transition-colors'>
-                      {section.title}
-                    </h3>
-                    <div className='flex items-center gap-4 mt-1 text-sm text-muted-foreground'>
+                    <h3 className='font-semibold text-slate-800 transition-colors group-hover:text-blue-700'>{section.title}</h3>
+                    <div className='mt-1 flex items-center gap-3 text-xs text-slate-500'>
                       <div className='flex items-center gap-1'>
-                        <FileText className='w-4 h-4' />
+                        <FileText className='h-3.5 w-3.5' />
                         <span>{section.lessons.length} bài học</span>
                       </div>
                       <div className='flex items-center gap-1'>
-                        <Clock className='w-4 h-4' />
+                        <Clock className='h-3.5 w-3.5' />
                         <span>
                           {(() => {
-                            const totalSeconds = section.lessons.reduce(
-                              (acc, l) => acc + (l.duration ? parseInt(l.duration) : 0),
-                              0
-                            )
-
+                            const totalSeconds = section.lessons.reduce((acc, l) => acc + (l.duration ? parseInt(l.duration) : 0), 0)
                             const hours = Math.floor(totalSeconds / 3600)
                             const minutes = Math.floor((totalSeconds % 3600) / 60)
-
                             return `${hours > 0 ? `${hours} giờ ` : ''}${minutes} phút`
                           })()}
                         </span>
@@ -83,35 +72,30 @@ export function CurriculumAccordion({ sections, courseId, onPlayLesson }: Curric
                     </div>
                   </div>
                 </div>
-                <Badge className='hidden sm:inline-flex'>{section.lessons.length} bài</Badge>
+                <Badge className='hidden rounded-full border border-blue-200 bg-blue-50 text-xs font-medium text-blue-700 sm:inline-flex'>
+                  {section.lessons.length} bài
+                </Badge>
               </div>
             </AccordionTrigger>
-            <AccordionContent className='px-6 pb-6'>
-              <div className='ml-20 space-y-3'>
+
+            <AccordionContent className='px-4 pb-4'>
+              <div className='ml-10 space-y-2'>
                 {section.lessons.map((lesson) => {
                   const canPlay = lesson.type === 'video' && lesson.videoUrl
                   return (
-                    <div
-                      key={lesson.id}
-                      className='flex items-center gap-3 p-3 rounded-lg bg-slate-100 hover:bg-muted transition-colors'
-                    >
-                      <div className='w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center'>
+                    <div key={lesson.id} className='flex items-center gap-3 rounded-lg border border-slate-200 bg-slate-50/70 p-2.5 transition-colors hover:border-blue-200 hover:bg-blue-50/60'>
+                      <div className='flex h-6 w-6 items-center justify-center rounded-full bg-blue-100 text-blue-600'>
                         {canPlay && (
-                          <Button
-                            size='icon'
-                            variant='ghost'
-                            onClick={() => onPlayLesson(lesson)}
-                            aria-label={`Phát ${lesson.title}`}
-                          >
-                            <PlayCircle className='h-4 w-4' />
+                          <Button size='icon' variant='ghost' className='h-5 w-5 rounded-full hover:bg-blue-200/60' onClick={() => onPlayLesson(lesson)} aria-label={`Phát ${lesson.title}`}>
+                            <PlayCircle className='h-3.5 w-3.5' />
                           </Button>
                         )}
                       </div>
-                      <span className='text-muted-foreground flex-1 truncate'>{lesson.title}</span>
-                      <Badge variant='secondary' className='text-xs'>
+                      <span className='flex-1 truncate text-sm text-slate-700'>{lesson.title}</span>
+                      <Badge variant='secondary' className='rounded-md bg-white text-[11px] text-slate-600'>
                         {lesson.type === 'video' ? 'Video' : lesson.type === 'article' ? 'Bài viết' : 'Nội dung'}
                       </Badge>
-                      <span className='text-xs text-muted-foreground'>
+                      <span className='text-xs text-slate-500'>
                         {(() => {
                           const seconds = Math.floor(Number(lesson.duration) || 0)
                           const hours = Math.floor(seconds / 3600)

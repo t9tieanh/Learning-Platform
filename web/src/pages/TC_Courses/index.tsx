@@ -129,14 +129,17 @@ class TC_Course extends Component<TC_CourseProps, State> {
     })
 
     return (
-      <div className='flex flex-col min-h-[calc(100vh-100px)] p-6 pt-16 lg:pt-6'>
-        <div className='flex-1 flex flex-col space-y-6'>
+      <div className='relative min-h-[calc(100vh-100px)] px-4 pb-6 pt-16 sm:px-6 lg:px-8 lg:pt-6'>
+        <div className='pointer-events-none absolute inset-x-0 top-0 -z-10 h-32 bg-gradient-to-r from-cyan-50 via-blue-50/70 to-indigo-50 blur-3xl' />
+
+        <div className='mx-auto flex w-full max-w-[1440px] flex-1 flex-col gap-6'>
           <CourseSearchBar
             onSearch={(v) => this.setState({ search: v })}
             onCourseCreated={this.handleCourseCreated}
             createModalOpen={createModalOpen}
             onCreateModalOpenChange={this.handleCreateModalOpenChange}
           />
+
           {this.state.loading ? (
             <CoursesTableSkeleton />
           ) : (
@@ -148,17 +151,17 @@ class TC_Course extends Component<TC_CourseProps, State> {
               onRequestCreate={() => this.props.onCreateModalOpenChange(true)}
             />
           )}
-        </div>
 
-        {courses.length > 0 && (
-          <div className='mt-8 pt-4 border-t border-gray-100'>
-            <CoursePagination
-              pages={this.state.totalPages}
-              current={this.state.page}
-              onChange={(p) => this.fetchCourses(p)}
-            />
-          </div>
-        )}
+          {courses.length > 0 && (
+            <div className='mt-2 border-t border-slate-200/70 pt-5'>
+              <CoursePagination
+                pages={this.state.totalPages}
+                current={this.state.page}
+                onChange={(p) => this.fetchCourses(p)}
+              />
+            </div>
+          )}
+        </div>
       </div>
     )
   }
