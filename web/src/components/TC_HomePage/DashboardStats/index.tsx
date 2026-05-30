@@ -52,8 +52,9 @@ const DashboardStats: React.FC = () => {
       .getChart({ year, userId })
       .then((chart) => {
         if (!mounted) return
+        const monthlyData = Array.isArray(chart?.monthlyData) ? chart.monthlyData : []
         const byMonth: Record<number, { revenue: number; profit: number; studentCount: number }> = {}
-        chart.monthlyData.forEach((m) => {
+        monthlyData.forEach((m) => {
           byMonth[m.month] = {
             revenue: Number(m.revenue) || 0,
             profit: Number(m.profit) || 0,
@@ -65,7 +66,10 @@ const DashboardStats: React.FC = () => {
         setProfitData(months.map((m) => byMonth[m]?.profit ?? 0))
         setStudentData(months.map((m) => byMonth[m]?.studentCount ?? 0))
       })
-      .catch((e) => setErrorChart(e?.message || 'Không lấy được dữ liệu biểu đồ'))
+      .catch((e) => {
+        if (!mounted) return
+        setErrorChart(e?.message || 'Không lấy được dữ liệu biểu đồ')
+      })
       .finally(() => mounted && setLoadingChart(false))
     return () => {
       mounted = false

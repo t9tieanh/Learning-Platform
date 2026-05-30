@@ -60,7 +60,18 @@ const RevenueTab = () => {
         if (mounted) setData(res)
       })
       .catch((e) => {
-        if (mounted) setError(e?.message || 'Không lấy được dữ liệu doanh thu')
+        if (!mounted) return
+        const status = e?.response?.status
+
+        // Backend trả 400 khi chưa có dữ liệu thống kê cho năm hiện tại.
+        // Khi đó hiển thị state rỗng thay vì lỗi kỹ thuật.
+        if (status === 400) {
+          setData(null)
+          setError(null)
+          return
+        }
+
+        setError(e?.message || 'Không lấy được dữ liệu doanh thu')
       })
       .finally(() => {
         if (mounted) setLoading(false)
@@ -89,7 +100,10 @@ const RevenueTab = () => {
     [data]
   )
 
-  const isEmpty = !data || (data.monthlyRevenue.every((m) => m.revenue === 0) && data.topCoursesByRevenue.length === 0)
+  const isEmpty =
+    !data ||
+    (((data?.monthlyRevenue ?? []).every((m) => Number(m.revenue) === 0) &&
+      (data?.topCoursesByRevenue ?? []).length === 0))
 
   if (loading) {
     return (
