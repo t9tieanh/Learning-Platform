@@ -12,6 +12,21 @@ export interface Lesson {
   thumbnailUrl?: string | null
 }
 
+export interface CertificateSummary {
+  id: string
+  certificateCode: string
+  issuedAt: string
+  status: string
+}
+
+export interface CertificateJourney {
+  completedLessons: number
+  totalLessons: number
+  progressPercent: number
+  certificateIssued: boolean
+  certificate: CertificateSummary | null
+}
+
 export interface Chapter {
   id: string
   title: string
@@ -31,5 +46,7 @@ export interface CourseDetail {
   rating: number | null
   status: string
   instructor: string | null
+  progress?: number | null
+  certificateJourney?: CertificateJourney | null
   chapters: Chapter[]
 }

@@ -1,0 +1,177 @@
+{{> wrapper-start}}
+{{> header}}
+{{> body-start}}
+
+<p
+  style="
+    margin: 0 0 20px;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #64748b;
+  "
+>
+  Khóa học của bạn
+</p>
+
+{{#each courses}}
+<table
+  role="presentation"
+  width="100%"
+  cellspacing="0"
+  cellpadding="0"
+  border="0"
+  style="
+    margin-bottom: 16px;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.04);
+  "
+>
+  <tr>
+    <td style="padding: 0">
+      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+        <tr>
+          {{#if hasThumbnail}}
+          <td
+            width="140"
+            valign="top"
+            style="
+              width: 140px;
+              min-width: 140px;
+              max-width: 140px;
+              padding: 0;
+              font-size: 0;
+              line-height: 0;
+              background-color: #dbeafe;
+              background-image: url('{{this.thumbnailUrl}}');
+              background-repeat: no-repeat;
+              background-position: center center;
+              background-size: cover;
+            "
+          >
+            <!--[if mso]>
+            <img
+              src="{{this.thumbnailUrl}}"
+              alt="{{this.title}}"
+              width="140"
+              height="140"
+              style="display: block; width: 140px; height: 140px; border: 0"
+            />
+            <![endif]-->
+            <!--[if !mso]><!-->
+            <div style="width: 140px; font-size: 0; line-height: 0">&nbsp;</div>
+            <img
+              src="{{this.thumbnailUrl}}"
+              alt="{{this.title}}"
+              width="1"
+              height="1"
+              style="display: block; width: 1px; height: 1px; opacity: 0; overflow: hidden; border: 0"
+            />
+            <!--<![endif]-->
+          </td>
+          {{else}}
+          <td
+            width="140"
+            valign="top"
+            style="
+              width: 140px;
+              min-width: 140px;
+              padding: 0;
+              background: linear-gradient(145deg, #dbeafe 0%, #bfdbfe 100%);
+            "
+          >
+            <div style="width: 140px; min-height: 140px; line-height: 140px; font-size: 0">&nbsp;</div>
+          </td>
+          {{/if}}
+          <td valign="middle" style="padding: 16px 18px 16px 16px">
+            <p
+              style="
+                margin: 0 0 10px;
+                font-size: 16px;
+                line-height: 1.4;
+                font-weight: 700;
+                color: #0f172a;
+              "
+            >
+              {{this.title}}
+            </p>
+            <table
+              role="presentation"
+              width="100%"
+              cellspacing="0"
+              cellpadding="0"
+              border="0"
+              style="margin-bottom: 14px"
+            >
+              <tr>
+                <td>
+                  <span style="font-size: 12px; color: #64748b">Tiến độ</span>
+                  <span style="float: right; font-size: 12px; font-weight: 700; color: #2563eb"
+                    >{{this.progressLabel}}</span
+                  >
+                </td>
+              </tr>
+              <tr>
+                <td style="padding-top: 6px">
+                  <table
+                    role="presentation"
+                    width="100%"
+                    cellspacing="0"
+                    cellpadding="0"
+                    border="0"
+                    style="
+                      height: 8px;
+                      background-color: #e2e8f0;
+                      border-radius: 999px;
+                      overflow: hidden;
+                    "
+                  >
+                    <tr>
+                      <td
+                        width="{{this.progress}}%"
+                        style="height: 8px; background-color: #2563eb; font-size: 0; line-height: 0"
+                      >
+                        &nbsp;
+                      </td>
+                      <td
+                        width="{{this.progressRemaining}}%"
+                        style="height: 8px; font-size: 0; line-height: 0"
+                      >
+                        &nbsp;
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+            <a
+              href="{{this.courseUrl}}"
+              target="_blank"
+              rel="noopener noreferrer"
+              style="
+                display: inline-block;
+                padding: 10px 20px;
+                font-size: 14px;
+                font-weight: 600;
+                color: #ffffff !important;
+                text-decoration: none;
+                background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+                border-radius: 999px;
+                box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+              "
+              >Vào học ngay</a
+            >
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+{{/each}}
+
+{{> body-end}}
+{{> footer}}
+{{> wrapper-end}}

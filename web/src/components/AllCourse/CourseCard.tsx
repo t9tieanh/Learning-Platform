@@ -1,4 +1,6 @@
 import { ClockIcon, ReaderIcon, StarIcon } from '@radix-ui/react-icons'
+import { Send } from 'lucide-react'
+import CustomButton from '@/components/common/Button'
 import { Card } from '@/components/ui/card'
 import { useNavigate } from 'react-router-dom'
 
@@ -54,13 +56,16 @@ export const CourseCard = ({
 
   return (
     <Card
-      className='group cursor-pointer overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_10px_24px_rgba(15,23,42,0.04)] transition-all duration-200 ease-in-out hover:-translate-y-0.5 hover:shadow-[0_16px_36px_rgba(15,23,42,0.08)]'
+      className='group cursor-pointer overflow-hidden rounded-2xl border border-slate-200 bg-white p-0 py-0 shadow-[0_10px_24px_rgba(15,23,42,0.04)] transition-all duration-200 ease-in-out hover:-translate-y-0.5 hover:shadow-[0_16px_36px_rgba(15,23,42,0.08)]'
       onClick={handleClickCourse}
     >
-      <div className={isGrid ? 'flex flex-col' : 'flex flex-col md:flex-row md:items-stretch md:min-h-[200px]'}>
+      <div className={isGrid ? 'flex flex-col' : 'flex flex-col md:flex-row md:items-stretch md:h-[240px]'}>
         <div
-          className={`relative overflow-hidden bg-blue-100 ${isGrid ? 'w-full aspect-[4/3]' : 'h-52 w-full md:h-auto md:w-[18rem] lg:w-[19rem]'
-            }`}
+          className={`relative overflow-hidden bg-blue-100 shrink-0 ${
+            isGrid
+              ? 'w-full aspect-[4/3]'
+              : 'w-full h-48 md:h-full md:w-[20rem]'
+          }`}
         >
           <img
             src={thumbnail}
@@ -75,15 +80,15 @@ export const CourseCard = ({
         </div>
 
         <div className={`flex min-w-0 flex-1 flex-col justify-between ${isGrid ? 'gap-4 p-5' : 'gap-3 p-5 md:p-6'}`}>
-          <div className='space-y-3'>
+          <div className='space-y-2'>
             <div>
-              <h3 className='line-clamp-2 text-base font-bold leading-snug text-slate-900 transition-colors duration-200 group-hover:text-blue-600 md:text-lg'>
+              <h3 className='line-clamp-2 text-sm font-bold leading-snug text-slate-900 transition-colors duration-200 group-hover:text-blue-600 md:text-base'>
                 {title}
               </h3>
-              <p className='mt-2 line-clamp-2 text-sm leading-6 text-slate-500'>{description}</p>
+              <p className='mt-0.5 line-clamp-2 text-[13px] leading-relaxed text-slate-500'>{description}</p>
             </div>
 
-            <div className='flex flex-wrap items-center gap-x-3 gap-y-2 text-xs text-slate-500'>
+            <div className='flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[11px] text-slate-500'>
               <div className='flex items-center gap-2'>
                 <img
                   src={instructor.avatar}
@@ -116,17 +121,21 @@ export const CourseCard = ({
 
           <div className={`flex items-center justify-between ${isGrid ? 'pt-1' : ''}`}>
             <div>
-              <p className={`font-bold text-orange-500/80 ${isGrid ? 'text-lg' : 'text-xl'}`}>{formatPrice(salePrice)}</p>
+              <p className={`font-bold text-orange-500/80 ${isGrid ? 'text-base' : 'text-lg'}`}>{formatPrice(salePrice)}</p>
               {originalPrice > salePrice && (
-                <p className='text-xs font-medium text-slate-400 line-through'>{formatPrice(originalPrice)}</p>
+                <p className='text-[10px] font-medium text-slate-400 line-through'>{formatPrice(originalPrice)}</p>
               )}
             </div>
-            <button
-              type='button'
-              className='inline-flex h-10 min-w-[118px] items-center justify-center rounded-full border border-blue-100 bg-white px-4 text-xs font-semibold text-blue-600 shadow-[0_6px_18px_rgba(15,23,42,0.06)] transition-all duration-200 ease-in-out hover:border-blue-200 hover:bg-blue-50 hover:shadow-[0_10px_24px_rgba(37,99,235,0.12)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-100 active:scale-95'
-            >
-              Xem chi tiết
-            </button>
+            <CustomButton
+              label='Xem chi tiết'
+              icon={<Send className='h-3.5 w-3.5' />}
+              iconPosition='right'
+              className='inline-flex h-10 min-w-[118px] items-center justify-center rounded-full bg-blue-600 px-4 text-xs font-semibold text-white shadow-[0_6px_18px_rgba(37,99,235,0.12)] transition-all duration-200 ease-in-out hover:bg-blue-700 hover:shadow-[0_10px_24px_rgba(37,99,235,0.2)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-100 active:scale-95'
+              onClick={(e) => {
+                e.stopPropagation()
+                handleClickCourse()
+              }}
+            />
           </div>
         </div>
       </div>

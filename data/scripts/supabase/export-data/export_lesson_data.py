@@ -31,6 +31,19 @@ def date_serializer(obj):
         return obj.isoformat()
     raise TypeError(f"Type {type(obj)} not serializable")
 
+def fetch_quizzes_with_choices(cur, filter_col, filter_val):
+    """Helper to fetch quizzes and their choices based on a filter column"""
+    # Use double quotes for column names to handle mixed case if necessary, 
+    # though here we know the mapping from schema.prisma
+    cur.execute(f'SELECT * FROM quizzes WHERE "{filter_col}" = %s', (filter_val,))
+    quizzes = cur.fetchall()
+    
+    for quiz in quizzes:
+        cur.execute('SELECT * FROM quiz_choices WHERE "quizId" = %s ORDER BY "order" ASC', (quiz['id'],))
+        quiz['choices'] = cur.fetchall()
+    
+    return quizzes
+
 def export_lesson_data(lesson_id):
     conn = None
     try:
@@ -69,32 +82,36 @@ def export_lesson_data(lesson_id):
             else:
                 chunk['embedding'] = None
             del chunk['embedding_str']
+            
+            # Fetch CHUNK_STANDALONE quizzes (review questions)
+            chunk['quizzes'] = fetch_quizzes_with_choices(cur, "chunkId", chunk['id'])
         
-        # 3. For each chunk, fetch quizzes
-        for chunk in chunks:
-            cur.execute("""
-                SELECT * FROM quizzes WHERE "chunkId" = %s
-            """, (chunk['id'],))
-            quizzes = cur.fetchall()
+        # 3. Fetch LessonTest (Blueprint Header)
+        # Prisma @map("lesson_id")
+        cur.execute('SELECT * FROM lesson_tests WHERE "lesson_id" = %s', (lesson_id,))
+        lesson_test = cur.fetchone()
+        
+        # 4. Fetch LessonTestChunkGroups & their quizzes (test questions)
+        chunk_groups = []
+        if lesson_test:
+            # Prisma @map("lesson_id")
+            cur.execute('SELECT * FROM lesson_test_chunk_groups WHERE "lesson_id" = %s ORDER BY "created_at" ASC', (lesson_id,))
+            chunk_groups = cur.fetchall()
             
-            # 4. For each quiz, fetch choices
-            for quiz in quizzes:
-                cur.execute("""
-                    SELECT * FROM quiz_choices WHERE "quizId" = %s ORDER BY "order" ASC
-                """, (quiz['id'],))
-                choices = cur.fetchall()
-                quiz['choices'] = choices
-            
-            chunk['quizzes'] = quizzes
-            
+            for group in chunk_groups:
+                # Prisma @map("lesson_test_chunk_group_id")
+                group['quizzes'] = fetch_quizzes_with_choices(cur, "lesson_test_chunk_group_id", group['id'])
+
         data = {
             "lesson": lesson,
-            "chunks": chunks
+            "chunks": chunks,
+            "lessonTest": lesson_test,
+            "lessonTestChunkGroups": chunk_groups
         }
         
-        # Determine output directory: data/scripts/supabase/data
+        # Determine output directory: data/scripts/supabase/data-template
         script_dir = Path(__file__).parent
-        output_dir = script_dir.parent / 'data'
+        output_dir = script_dir.parent / 'data-template'
         output_dir.mkdir(parents=True, exist_ok=True)
         
         # Save to file
@@ -102,16 +119,17 @@ def export_lesson_data(lesson_id):
         with open(output_path, 'w', encoding='utf-8') as f:
             json.dump(data, f, indent=4, ensure_ascii=False, default=date_serializer)
             
-        print(f"Successfully exported data to {output_path}")
+        print(f"✅ Successfully exported all analysis data to {output_path}")
         
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"❌ Error: {e}")
     finally:
         if conn:
             conn.close()
 
 if __name__ == "__main__":
-    target_id = "208126fd-3544-4551-8c9b-5110c33261af"
+    # Default ID for testing
+    target_id = "5d5d9206-4a7f-49c3-8272-7e04b2f01c8c"
     if len(sys.argv) > 1:
         target_id = sys.argv[1]
     

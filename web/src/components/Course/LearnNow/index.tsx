@@ -45,7 +45,7 @@ const LearnNow = ({ courseId, instructorId }: { courseId: string; instructorId: 
 
         <div className='flex items-center gap-3 text-[11px] font-bold text-gray-400'>
           <div className='flex-1 h-px bg-gray-50' />
-          <span className='uppercase tracking-widest'>Learnova - Học nữa học mãi</span>
+          <span className='tracking-widest'>Learnova - Học nữa học mãi</span>
           <div className='flex-1 h-px bg-gray-50' />
         </div>
       </div>

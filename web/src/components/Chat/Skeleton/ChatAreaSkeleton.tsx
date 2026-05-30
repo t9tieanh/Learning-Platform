@@ -2,9 +2,9 @@ import { Skeleton } from '@/components/ui/skeleton'
 
 export const ChatAreaSkeleton = () => {
   return (
-    <div className='flex flex-col flex-1 h-full bg-gray-50 animate-pulse'>
+    <div className='flex flex-col flex-1 h-full min-h-0 bg-gray-50 animate-pulse'>
       {/* Header Skeleton */}
-      <div className='flex items-center justify-between px-4 py-3 bg-white border-b shadow-sm'>
+      <div className='flex shrink-0 items-center justify-between px-4 py-3 bg-white border-b shadow-sm'>
         <div className='flex items-center gap-3'>
           <Skeleton className='h-10 w-10 rounded-full' />
           <Skeleton className='h-5 w-32 rounded' />
@@ -12,7 +12,7 @@ export const ChatAreaSkeleton = () => {
       </div>
 
       {/* Messages Skeleton */}
-      <div className='flex-1 overflow-y-auto px-4 py-4 space-y-6'>
+      <div className='flex-1 min-h-0 overflow-y-auto px-4 py-4 space-y-6'>
         {Array.from({ length: 4 }).map((_, i) => (
           <div key={i} className={`flex gap-2 ${i % 2 === 0 ? 'justify-start' : 'justify-end'}`}>
             {i % 2 === 0 && <Skeleton className='h-8 w-8 rounded-full' />}
@@ -27,7 +27,7 @@ export const ChatAreaSkeleton = () => {
       </div>
 
       {/* Input Skeleton */}
-      <div className='p-4 bg-white border-t shadow-sm'>
+      <div className='shrink-0 p-4 bg-white border-t shadow-sm'>
         <div className='flex items-center gap-3'>
           <Skeleton className='flex-1 h-10 rounded-full' />
           <Skeleton className='h-10 w-10 rounded-full' />

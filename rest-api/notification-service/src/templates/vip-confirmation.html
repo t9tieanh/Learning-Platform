@@ -1,194 +1,74 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="UTF-8" />
-    <title>Đăng ký VIP thành công</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <style>
-      body {
-        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-        background-color: #f7f9fc;
-        margin: 0;
-        padding: 20px;
-      }
+{{> wrapper-start}}
+{{> header}}
+{{> body-start}}
 
-      .container {
-        max-width: 680px;
-        margin: 0 auto;
-        background-color: #ffffff;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-        padding: 30px;
-      }
+<p style="margin: 0 0 20px; font-size: 15px; line-height: 1.65; color: #475569">
+  Gói VIP của bạn đã được kích hoạt. Trải nghiệm toàn bộ đặc quyền học tập premium trên Learnova ngay hôm nay.
+</p>
 
-      .header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 20px;
-      }
-
-      .brand {
-        font-size: 18px;
-        font-weight: 700;
-        color: #d4af37; /* Gold color for VIP */
-      }
-
-      .title {
-        font-size: 20px;
-        color: #333333;
-        margin-bottom: 8px;
-      }
-
-      .meta {
-        font-size: 13px;
-        color: #666666;
-        margin-bottom: 18px;
-      }
-
-      .items {
-        border-top: 1px solid #eef2f6;
-        margin-top: 10px;
-      }
-
-      .item {
-        display: flex;
-        gap: 14px;
-        padding: 16px 0;
-        align-items: center;
-        border-bottom: 1px solid #f2f6f9;
-        background-color: #fdfaf0;
-        border-radius: 8px;
-      }
-
-      .item img {
-        width: 80px;
-        height: 56px;
-        object-fit: cover;
-        border-radius: 6px;
-      }
-
-      .item .info {
-        flex: 1;
-        margin-left: 12px;
-      }
-
-      .item .info .name {
-        font-size: 16px;
-        color: #111827;
-        font-weight: bold;
-        margin-bottom: 6px;
-      }
-
-      .item .info .instructor {
-        font-size: 13px;
-        color: #6b7280;
-        margin-bottom: 6px;
-      }
-
-      .price {
-        font-weight: 700;
-        color: #d4af37;
-        font-size: 16px;
-        margin-right: 15px;
-      }
-
-      .summary {
-        margin-top: 20px;
-        display: block;
-      }
-
-      .summary .label {
-        color: #6b7280;
-        font-size: 13px;
-        margin-bottom: 2px;
-      }
-
-      .summary .value {
-        font-weight: 700;
-        color: #111827;
-        font-size: 14px;
-        margin-bottom: 12px;
-      }
-
-      .cta {
-        text-align: center;
-        margin-top: 26px;
-      }
-
-      .btn {
-        display: inline-block;
-        padding: 12px 28px;
-        background-color: #d4af37;
-        color: #fff;
-        border-radius: 6px;
-        text-decoration: none;
-        font-size: 15px;
-        font-weight: 600;
-      }
-
-      .footer {
-        font-size: 12px;
-        color: #999999;
-        margin-top: 30px;
-        text-align: center;
-      }
-
-      @media (max-width: 520px) {
-        .container { padding: 20px; }
-        .item img { width: 64px; height: 48px; }
-      }
-    </style>
-  </head>
-
-  <body>
-    <div class="container">
-      <div class="header">
-        <div class="brand">Learnova VIP</div>
-      </div>
-
-      <h2 class="title">Cảm ơn {{customer_name}} — Thành viên VIP của Learnova</h2>
-      <div class="meta">Email: {{customer_email}} • Tổng tiền thanh toán: {{total}} VND</div>
-
-      <div class="items">
-        {{#each items}}
-        <div class="item">
-          <!-- Optional icon/placeholder for VIP -->
-          <div class="info">
-            <div class="name">Gói đặc quyền VIP</div>
-            <div class="instructor">Thành viên: {{../customer_name}}</div>
-            <div class="instructor">Mã hóa đơn: {{../orderId}}</div>
-          </div>
-
-          <div class="price">{{formatCurrency this.price}} VND</div>
-        </div>
-        {{/each}}
-      </div>
-
-      <div class="summary">
-        {{#if discount.code}}
-        <div>
-          <div class="label">Mã Giảm Giá</div>
-          <div class="value">{{discount.code}} — {{formatCurrency discount.value}}</div>
-        </div>
-        {{/if}}
-        <div>
-          <div class="label">Tổng Thanh Toán</div>
-          <div class="value">{{formatCurrency total}} VND</div>
-        </div>
-      </div>
-
-      <p style="color: #666; font-size: 14px; line-height: 1.5; margin-top: 20px;">
-        Gói VIP của bạn đã được kích hoạt thành công. Bạn đã có thể bắt đầu sử dụng toàn bộ chức năng đặc quyền trên nền tảng.
+<table
+  role="presentation"
+  width="100%"
+  cellspacing="0"
+  cellpadding="0"
+  border="0"
+  style="
+    margin-bottom: 20px;
+    border: 1px solid #fde68a;
+    border-radius: 16px;
+    overflow: hidden;
+    background: linear-gradient(180deg, #fffbeb 0%, #ffffff 100%);
+    box-shadow: 0 10px 24px rgba(245, 158, 11, 0.12);
+  "
+>
+  <tr>
+    <td style="padding: 20px 22px">
+      <p style="margin: 0 0 8px; font-size: 18px; font-weight: 800; color: #92400e">Gói Learnova VIP</p>
+      <p style="margin: 0 0 6px; font-size: 14px; color: #78716c">Thành viên: <strong>{{customer_name}}</strong></p>
+      {{#if orderId}}
+      <p style="margin: 0 0 14px; font-size: 12px; color: #a8a29e">Mã hóa đơn: {{orderId}}</p>
+      {{/if}}
+      {{#each items}}
+      <p style="margin: 0; font-size: 20px; font-weight: 800; color: #d97706">
+        {{formatCurrency this.price}} VND
       </p>
+      {{/each}}
+    </td>
+  </tr>
+</table>
 
-      <div class="cta">
-        <a href="{{order_url}}" class="btn" target="_blank">Trải Nghiệm VIP Ngay</a>
-      </div>
+<table
+  role="presentation"
+  width="100%"
+  cellspacing="0"
+  cellpadding="0"
+  border="0"
+  style="margin-bottom: 20px; padding: 16px 18px; background-color: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0"
+>
+  {{#if discount.code}}
+  <tr>
+    <td style="padding-bottom: 10px">
+      <span style="font-size: 13px; color: #64748b">Mã giảm giá</span>
+      <span style="float: right; font-size: 14px; font-weight: 600; color: #0f172a"
+        >{{discount.code}} — {{formatCurrency discount.value}}</span
+      >
+    </td>
+  </tr>
+  {{/if}}
+  <tr>
+    <td>
+      <span style="font-size: 13px; color: #64748b">Tổng thanh toán</span>
+      <span style="float: right; font-size: 18px; font-weight: 800; color: #d97706"
+        >{{formatCurrency total}} VND</span
+      >
+    </td>
+  </tr>
+</table>
 
-      <div class="footer">
-        © 2025 FreeClassRoom - dev by PhamTienAnh. All rights reserved.
-      </div>
-    </div>
-  </body>
-</html>
+{{#if order_url}}
+{{> button}}
+{{/if}}
+
+{{> body-end}}
+{{> footer}}
+{{> wrapper-end}}

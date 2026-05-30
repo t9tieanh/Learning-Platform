@@ -3,7 +3,7 @@ import { Lesson } from '@/types/course-student'
 import ModernVideoPlayer from './ModernVideoPlayer'
 import { VideoPlayerRef } from './VideoPlayer'
 import PDFViewer from './PDFViewer'
-import { useCallback, forwardRef } from 'react'
+import { useCallback, forwardRef, useRef } from 'react'
 import lessonStudentService from '@/services/course/lesson-student.service'
 import { toast } from 'sonner'
 
@@ -16,9 +16,16 @@ export const LessonViewer = forwardRef<VideoPlayerRef, {
   isInvalid?: boolean;
   qualityReason?: string | null;
   onShowChunkDetails?: (chunkId: string) => void;
+  onProgress?: (percent: number) => void;
+  onLessonCompleted?: () => void;
+  onCourseCompleted?: (certificate?: { id: string; certificateCode: string }) => void;
 }>(
-  ({ lesson, subtitlesRaw, chunks = [], isInvalid, qualityReason, onShowChunkDetails }, ref) => {
+  ({ lesson, subtitlesRaw, chunks = [], isInvalid, qualityReason, onShowChunkDetails, onProgress, onLessonCompleted, onCourseCompleted }, ref) => {
     const { id } = lesson
+    const onLessonCompletedRef = useRef(onLessonCompleted)
+    onLessonCompletedRef.current = onLessonCompleted
+    const onCourseCompletedRef = useRef(onCourseCompleted)
+    onCourseCompletedRef.current = onCourseCompleted
 
     const markDoneLesson = useCallback(async () => {
       if (lesson.completionStatus === 'COMPLETED') return
@@ -26,6 +33,15 @@ export const LessonViewer = forwardRef<VideoPlayerRef, {
         const response = await lessonStudentService.markDone(lesson.id)
         if (response?.code === 200) {
           toast.success(response.message)
+          onLessonCompletedRef.current?.()
+          if (response.result?.isCompletedCourse) {
+            const { certificateId, certificateCode } = response.result
+            if (certificateId && certificateCode) {
+              onCourseCompletedRef.current?.({ id: certificateId, certificateCode })
+            } else {
+              onCourseCompletedRef.current?.()
+            }
+          }
         }
       } catch (error) {
         console.error('Failed to mark lesson as completed', error)
@@ -57,7 +73,7 @@ export const LessonViewer = forwardRef<VideoPlayerRef, {
     return (
       <div className='w-full aspect-video bg-black rounded-[2rem] overflow-hidden relative group shadow-2xl'>
         {lesson.type === 'video' ? (
-          <ModernVideoPlayer ref={ref} lesson={lesson} markDoneVideo={markDoneLesson} subtitlesRaw={subtitlesRaw || undefined} chunks={chunks} onShowChunkDetails={onShowChunkDetails} />
+          <ModernVideoPlayer ref={ref} lesson={lesson} markDoneVideo={markDoneLesson} subtitlesRaw={subtitlesRaw || undefined} chunks={chunks} onShowChunkDetails={onShowChunkDetails} onProgress={onProgress} />
         ) : lesson.type === 'article' ? (
           <PDFViewer lesson={lesson} markDoneVideo={markDoneLesson} />
         ) : (

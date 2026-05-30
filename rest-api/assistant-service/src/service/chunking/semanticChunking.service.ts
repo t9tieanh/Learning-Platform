@@ -2,7 +2,7 @@
 import Logger from '~/utils/logger';
 import { DocumentLoader } from "~/service/chunking/documentLoader.service";
 import { SentenceProcessor } from "~/service/chunking/sentenceProcessor.service";
-import { EmbeddingE5Service } from "~/service/embedding/embeddingE5.service";
+import { EmbeddingOpenAIService } from "~/service/embedding/embeddingOpenai.service";
 import { SemanticAnalyzer } from "~/service/chunking/semanticAnalyzer.service";
 import { SemanticChunk } from "~/service/chunking/types";
 
@@ -30,13 +30,13 @@ export interface SemanticChunkingConfig {
 export class SemanticChunkingService {
     private documentLoader: DocumentLoader;
     private sentenceProcessor: SentenceProcessor;
-    private embeddingService: EmbeddingE5Service;
+    private embeddingService: EmbeddingOpenAIService;
     private semanticAnalyzer: SemanticAnalyzer;
 
     constructor() {
         this.documentLoader = new DocumentLoader();
         this.sentenceProcessor = new SentenceProcessor();
-        this.embeddingService = new EmbeddingE5Service();
+        this.embeddingService = new EmbeddingOpenAIService();
         this.semanticAnalyzer = new SemanticAnalyzer();
     }
 
@@ -69,9 +69,10 @@ export class SemanticChunkingService {
         config: SemanticChunkingConfig = {}
     ): Promise<SemanticChunk[]> {
         const {
-            bufferSize = 3,
-            percentileThreshold = 95,
+            bufferSize = 4,
+            percentileThreshold = 98,
             isSrt = true,
+            chunkSize = 100,
         } = config;
 
         // Step 1: Structure sentences from raw text.
@@ -100,7 +101,8 @@ export class SemanticChunkingService {
         // Step 4: Group sentences into semantic chunks based on the detected shifts
         const semanticChunks = this.semanticAnalyzer.groupSentencesIntoChunks(
             updatedArray,
-            significantShiftIndices
+            significantShiftIndices,
+            chunkSize
         );
 
         this.logSemanticChunks(semanticChunks);

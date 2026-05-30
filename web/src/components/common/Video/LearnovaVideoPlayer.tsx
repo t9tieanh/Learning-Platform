@@ -3,7 +3,7 @@ import { motion, AnimatePresence, useMotionValue, useSpring } from 'framer-motio
 import { LoadingDots } from '@/components/common/Loading/LoadingDots'
 import learnovaLogo from '@/assets/images/logo1.png'
 import { cn } from '@/lib/utils'
-import { Play, Pause, Volume2, VolumeX, Maximize, Sparkles, Bot } from 'lucide-react'
+import { Play, Pause, Volume2, VolumeX, Maximize, Sparkles, Bot, Languages, MessageSquare } from 'lucide-react'
 import { LessonChunk } from '@/types/ai'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { formatVideoTime, timeToSeconds } from '@/utils/time/time.utils'
@@ -25,11 +25,14 @@ interface LearnovaVideoPlayerProps {
     onSeeking?: (e: React.SyntheticEvent<HTMLVideoElement>) => void
     onTimeUpdate?: (e: React.SyntheticEvent<HTMLVideoElement>) => void
     onShowChunkDetails?: (chunkId: string) => void
+    clipStartTime?: number
+    clipEndTime?: number
+    defaultShowSubtitles?: boolean
 }
 
 
 const LearnovaVideoPlayer = forwardRef<HTMLVideoElement | null, LearnovaVideoPlayerProps>(
-    ({ src, subtitles = [], chunks = [], isPiPEnabled = false, isSeekingAllowed = true, className = '', containerClassName = '', onSeeking, onTimeUpdate, onShowChunkDetails }, ref) => {
+    ({ src, subtitles = [], chunks = [], isPiPEnabled = false, isSeekingAllowed = true, className = '', containerClassName = '', onSeeking, onTimeUpdate, onShowChunkDetails, clipStartTime, clipEndTime, defaultShowSubtitles }, ref) => {
         const [isVideoLoading, setIsVideoLoading] = useState(true)
         const [isPlaying, setIsPlaying] = useState(false)
         const [duration, setDuration] = useState(0)
@@ -41,6 +44,7 @@ const LearnovaVideoPlayer = forwardRef<HTMLVideoElement | null, LearnovaVideoPla
         const [isPiP, setIsPiP] = useState(false)
         const [isBuffering, setIsBuffering] = useState(false)
         const [lastAction, setLastAction] = useState<'play' | 'pause' | null>(null)
+        const [showSubtitles, setShowSubtitles] = useState(defaultShowSubtitles ?? true)
 
         // Tooltip States
         const [hoverTime, setHoverTime] = useState<number | null>(null)
@@ -98,7 +102,20 @@ const LearnovaVideoPlayer = forwardRef<HTMLVideoElement | null, LearnovaVideoPla
         }
 
         const handleInternalTimeUpdate = (e: React.SyntheticEvent<HTMLVideoElement>) => {
-            const time = e.currentTarget.currentTime
+            const video = e.currentTarget
+            const time = video.currentTime
+            
+            // Clip boundary enforcement
+            if (clipEndTime && time >= clipEndTime) {
+                video.pause()
+                video.currentTime = clipStartTime || 0
+                setIsPlaying(false)
+                return
+            }
+            if (clipStartTime && time < clipStartTime) {
+                video.currentTime = clipStartTime
+            }
+
             setCurrentTime(time)
 
             const sub = subtitles.find((s) => time >= s.start && time <= s.end)
@@ -130,6 +147,10 @@ const LearnovaVideoPlayer = forwardRef<HTMLVideoElement | null, LearnovaVideoPla
 
         // Timeline Segments Calculation
         const segments = useMemo(() => {
+            if (clipStartTime !== undefined && clipEndTime !== undefined) {
+                return [{ id: 'clip', start: clipStartTime, end: clipEndTime, title: 'Đoạn trích', summary: null }]
+            }
+
             if (chunks.length === 0 || duration === 0) {
                 return [{ id: 'default', start: 0, end: duration, title: 'Bài học', summary: null }]
             }
@@ -193,19 +214,22 @@ const LearnovaVideoPlayer = forwardRef<HTMLVideoElement | null, LearnovaVideoPla
 
                     {/* Subtitles Overlay */}
                     <AnimatePresence>
-                        {activeSubtitle && (
+                        {showSubtitles && activeSubtitle && (
                             <motion.div
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: 20 }}
                                 className={cn(
                                     'absolute left-0 right-0 flex justify-center px-8 z-20 pointer-events-none',
-                                    isPiP ? 'bottom-16' : 'bottom-24'
+                                    isPiP ? 'bottom-16' : 
+                                    clipStartTime !== undefined ? 'bottom-20' : 'bottom-24'
                                 )}
                             >
                                 <div className={cn(
                                     'bg-black/60 backdrop-blur-xl text-white text-center font-bold shadow-2xl border border-white/10',
-                                    isPiP ? 'px-3 py-1.5 rounded-xl text-[10px] leading-tight max-w-[90%]' : 'px-6 py-3 rounded-2xl text-lg md:text-xl'
+                                    isPiP ? 'px-3 py-1.5 rounded-xl text-[10px] leading-tight max-w-[90%]' : 
+                                    clipStartTime !== undefined ? 'px-4 py-2 rounded-xl text-xs md:text-sm max-w-[85%]' :
+                                    'px-6 py-3 rounded-2xl text-lg md:text-xl'
                                 )}>
                                     {activeSubtitle}
                                 </div>
@@ -338,12 +362,16 @@ const LearnovaVideoPlayer = forwardRef<HTMLVideoElement | null, LearnovaVideoPla
 
                             <div className='absolute inset-0 flex gap-0.5 items-end'>
                                 {segments.map((seg: any, i: number) => {
-                                    const startPct = (seg.start / duration) * 100
-                                    const endPct = (seg.end / duration) * 100
+                                    const isClip = clipStartTime !== undefined && clipEndTime !== undefined
+                                    const baseDuration = isClip ? (clipEndTime - clipStartTime) : duration
+                                    const startPct = isClip ? 0 : (seg.start / duration) * 100
+                                    const endPct = isClip ? 100 : (seg.end / duration) * 100
                                     const widthPct = endPct - startPct
                                     const isPlayed = currentTime >= seg.end
                                     const isCurrent = currentTime >= seg.start && currentTime < seg.end
-                                    const playedPct = isCurrent ? ((currentTime - seg.start) / (seg.end - seg.start)) * 100 : (isPlayed ? 100 : 0)
+                                    const playedPct = isCurrent 
+                                        ? ((currentTime - seg.start) / (seg.end - seg.start)) * 100 
+                                        : (isPlayed ? 100 : 0)
 
                                     return (
                                         <div
@@ -376,15 +404,23 @@ const LearnovaVideoPlayer = forwardRef<HTMLVideoElement | null, LearnovaVideoPla
 
                         {/* Control Buttons */}
                         <div className='flex items-center justify-between'>
-                            <div className='flex items-center gap-5'>
+                            <div className='flex items-center gap-3 md:gap-5'>
                                 <button onClick={togglePlay} className='text-white hover:text-blue-400 transition-colors'>
                                     {isPlaying ? <Pause className='w-6 h-6 fill-current' /> : <Play className='w-6 h-6 fill-current' />}
                                 </button>
 
-                                <div className='flex items-center gap-3 text-white font-normal text-[11px] tabular-nums'>
-                                    <span className='text-blue-400'>{formatVideoTime(currentTime)}</span>
+                                <div className='flex items-center gap-2 md:gap-3 text-white font-normal text-[11px] tabular-nums'>
+                                    <span className='text-blue-400'>
+                                        {clipStartTime !== undefined 
+                                            ? formatVideoTime(Math.max(0, currentTime - clipStartTime)) 
+                                            : formatVideoTime(currentTime)}
+                                    </span>
                                     <span className='opacity-30'>/</span>
-                                    <span>{formatVideoTime(duration)}</span>
+                                    <span>
+                                        {clipStartTime !== undefined && clipEndTime !== undefined
+                                            ? formatVideoTime(clipEndTime - clipStartTime)
+                                            : formatVideoTime(duration)}
+                                    </span>
                                 </div>
 
                                 <div className='flex items-center gap-3 group/volume'>
@@ -405,19 +441,30 @@ const LearnovaVideoPlayer = forwardRef<HTMLVideoElement | null, LearnovaVideoPla
                                     />
                                 </div>
 
-                                {!isPiP && (
+                                {!isPiP && clipStartTime === undefined && (
                                     <div className='hidden sm:flex items-center gap-2 border-l border-white/10 pl-5 ml-2'>
                                         <Sparkles className='w-3 h-3 text-blue-400' />
-                                        <span className='text-[10px] text-white/70 font-medium truncate max-w-[200px]'>
+                                        <span className='text-[10px] text-white/70 font-medium truncate max-w-[150px]'>
                                             {currentSegment.title}
                                         </span>
                                     </div>
                                 )}
-                                <div className='flex items-center gap-5'>
-                                    <button onClick={handleFullscreen} className='text-white hover:text-blue-400 transition-colors'>
-                                        <Maximize className='w-5 h-5' />
-                                    </button>
-                                </div>
+                            </div>
+
+                            <div className='flex items-center gap-3 md:gap-5'>
+                                <button 
+                                    onClick={() => setShowSubtitles(!showSubtitles)} 
+                                    className={cn(
+                                        'transition-colors',
+                                        showSubtitles ? 'text-blue-400' : 'text-white/60 hover:text-white'
+                                    )}
+                                    title={showSubtitles ? 'Tắt phụ đề' : 'Bật phụ đề'}
+                                >
+                                    <Languages className='w-5 h-5' />
+                                </button>
+                                <button onClick={handleFullscreen} className='text-white hover:text-blue-400 transition-colors'>
+                                    {isPiP ? <Bot className='w-5 h-5' /> : <Maximize className='w-5 h-5' />}
+                                </button>
                             </div>
                         </div>
                     </div>

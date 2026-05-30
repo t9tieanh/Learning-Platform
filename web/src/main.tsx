@@ -36,6 +36,7 @@ import AD_Courses from './pages/AD_Courses'
 import AD_CourseDetails from './pages/AD_CourseDetails'
 import AD_Instructor from './pages/AD_Instructor'
 import AD_Certificates from './pages/AD_Certificates'
+import CertificateVerify from './pages/CertificateVerify'
 import AD_Blogs from './pages/AD_Blogs'
 import AD_BlogDetails from './pages/AD_BlogDetails'
 import Home2 from './pages/Home2'
@@ -44,7 +45,6 @@ import DiscountsAdmin from './pages/AD_Discounts'
 import AuthenticationGate from '@/components/auth-gate/AuthenticationGate'
 import VipSuccess from './pages/VipSuccess'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { VipUpgradeProvider } from '@/contexts/VipUpgradeContext'
 
 const queryClient = new QueryClient()
 
@@ -70,7 +70,8 @@ const router = createBrowserRouter([
           { path: 'about', element: <About /> },
           { path: 'check-out', element: <CheckoutPage /> },
           { path: 'check-out/:id', element: <CheckoutPage /> },
-          { path: 'check-out/vip-success/:id', element: <VipSuccess /> }
+          { path: 'check-out/vip-success/:id', element: <VipSuccess /> },
+          { path: 'certificate/verify/:code', element: <CertificateVerify /> }
         ]
       },
       { path: 'auth', element: <AuthLayout /> },
@@ -86,6 +87,7 @@ const router = createBrowserRouter([
           { path: '', element: <TCHomePage /> },
           { path: 'course', element: <TC_Course /> },
           { path: 'course-details/:id', element: <TC_CourseDetail /> },
+          { path: 'chat', element: <Chat /> },
           { path: 'chat/:id', element: <Chat /> },
           { path: 'blogs', element: <TC_Blog /> },
           { path: 'create-blog', element: <TC_CreateBlog /> },
@@ -128,9 +130,7 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <>
     <QueryClientProvider client={queryClient}>
       <SocketProvider>
-        <VipUpgradeProvider>
-          <RouterProvider router={router} />
-        </VipUpgradeProvider>
+        <RouterProvider router={router} />
       </SocketProvider>
     </QueryClientProvider>
   </>

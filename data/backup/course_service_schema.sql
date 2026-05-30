@@ -45,7 +45,7 @@ CREATE TABLE `chapters` (
   `created_at` datetime(6) DEFAULT NULL,
   `deleted` bit(1) DEFAULT NULL,
   `updated_at` datetime(6) DEFAULT NULL,
-  `description` varchar(255) DEFAULT NULL,
+  `description` text,
   `is_open` bit(1) DEFAULT NULL,
   `position` bigint DEFAULT NULL,
   `title` varchar(255) DEFAULT NULL,
@@ -102,9 +102,9 @@ DROP TABLE IF EXISTS `course_outcomes`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `course_outcomes` (
-  `id` varchar(255) NOT NULL PRIMARY KEY,
   `course_id` varchar(255) NOT NULL,
-  `outcome` varchar(255) DEFAULT NULL,
+  `outcome` varchar(255) NOT NULL,
+  PRIMARY KEY (`course_id`, `outcome`),
   KEY `FKq8u25isnaaswsfiv0yt8sl6p4` (`course_id`),
   CONSTRAINT `FKq8u25isnaaswsfiv0yt8sl6p4` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -117,9 +117,9 @@ DROP TABLE IF EXISTS `course_requirements`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `course_requirements` (
-  `id` varchar(255) NOT NULL PRIMARY KEY,
   `course_id` varchar(255) NOT NULL,
-  `requirement` varchar(255) DEFAULT NULL,
+  `requirement` varchar(255) NOT NULL,
+  PRIMARY KEY (`course_id`, `requirement`),
   KEY `FKbh8ta744mcx845fv5oa5dtyyi` (`course_id`),
   CONSTRAINT `FKbh8ta744mcx845fv5oa5dtyyi` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -133,9 +133,9 @@ DROP TABLE IF EXISTS `course_tag`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `course_tag` (
-  `id` varchar(255) NOT NULL PRIMARY KEY,
   `course_id` varchar(255) NOT NULL,
   `tag_id` varchar(255) NOT NULL,
+  PRIMARY KEY (`course_id`, `tag_id`),
   KEY `FK4xljwd6thh893y5t81btpen5q` (`tag_id`),
   KEY `FK7om0f3y4q6v90v5mv8femot2g` (`course_id`),
   CONSTRAINT `FK4xljwd6thh893y5t81btpen5q` FOREIGN KEY (`tag_id`) REFERENCES `tags` (`id`),
@@ -157,17 +157,17 @@ CREATE TABLE `courses` (
   `final_price` double DEFAULT NULL,
   `instructor_id` varchar(255) NOT NULL,
   `language` varchar(255) DEFAULT NULL,
-  `long_description` varchar(255) DEFAULT NULL,
+  `long_description` text,
   `original_price` double DEFAULT NULL,
   `progress_step` enum('INTRO','CURRICULUM','PRICING','SETTINGS','COMPLETED') DEFAULT NULL,
-  `short_description` varchar(255) DEFAULT NULL,
+  `short_description` text,
   `status` enum('DRAFT','PENDING_REVIEW','PUBLISHED','REJECTED','ARCHIVED') DEFAULT NULL,
-  `thumbnail_url` varchar(255) DEFAULT NULL,
+  `thumbnail_url` text,
   `title` varchar(255) DEFAULT NULL,
   `category_id` varchar(255) DEFAULT NULL,
-  `introductory_video` varchar(255) DEFAULT NULL,
+  `introductory_video` text,
   `rating` double DEFAULT NULL,
-  `reason` varchar(255) DEFAULT NULL,
+  `reason` text,
   PRIMARY KEY (`id`),
   KEY `FK72l5dj585nq7i6xxv1vj51lyn` (`category_id`),
   CONSTRAINT `FK72l5dj585nq7i6xxv1vj51lyn` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`)
@@ -234,13 +234,13 @@ CREATE TABLE `lessons` (
   `created_at` datetime(6) DEFAULT NULL,
   `deleted` bit(1) DEFAULT NULL,
   `updated_at` datetime(6) DEFAULT NULL,
-  `content` varchar(255) DEFAULT NULL,
+  `content` text,
   `duration` bigint DEFAULT NULL,
   `is_public` bit(1) DEFAULT NULL,
   `position` bigint DEFAULT NULL,
   `title` varchar(255) DEFAULT NULL,
   `type` enum('video','article') DEFAULT NULL,
-  `url` varchar(255) DEFAULT NULL,
+  `url` text,
   `chapter_id` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `FKmb78vk1f2oljr16oj1hpo45ma` (`chapter_id`),
@@ -260,7 +260,7 @@ CREATE TABLE `tags` (
   `created_at` datetime(6) DEFAULT NULL,
   `deleted` bit(1) DEFAULT NULL,
   `updated_at` datetime(6) DEFAULT NULL,
-  `image_url` varchar(255) DEFAULT NULL,
+  `image_url` text,
   `name` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

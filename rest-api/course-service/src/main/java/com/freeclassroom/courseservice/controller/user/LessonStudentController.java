@@ -4,6 +4,7 @@ import com.freeclassroom.courseservice.dto.request.lesson.MakeNoteForLessonReque
 import com.freeclassroom.courseservice.dto.response.ApiResponse;
 import com.freeclassroom.courseservice.dto.response.common.CreationResponse;
 import com.freeclassroom.courseservice.dto.response.course.CloudFrontCookieResponse;
+import com.freeclassroom.courseservice.dto.response.lesson.MarkDoneLessonResponse;
 import com.freeclassroom.courseservice.dto.response.course.LessonInfoResponse;
 import com.freeclassroom.courseservice.dto.response.course.student.LessonOverviewResponse;
 import com.freeclassroom.courseservice.service.lesson.ILessonStudentService;
@@ -82,7 +83,7 @@ public class LessonStudentController {
     }
 
     @PostMapping("/{id}/mark-done")
-    public ApiResponse<CreationResponse> markDone(@PathVariable String id) {
+    public ApiResponse<MarkDoneLessonResponse> markDone(@PathVariable String id) {
         String userId = SecurityContextHolder.getContext().getAuthentication().getName();
         return lessonStudentService.markDone(id, userId);
     }

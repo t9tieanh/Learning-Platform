@@ -24,6 +24,8 @@ export async function initSagas() {
   await RabbitClient.bindQueueToExchange(CourseQueueName.ORDER_SERVICE_QUEUE, 'app_events', 'register.#', 'topic')
   // Notifications
   await RabbitClient.bindQueueToExchange(CourseQueueName.NOTIFICATION_SERVICE_QUEUE, 'app_events', 'notification.#', 'topic')
+  // Assistant: sync user purchased courses
+  await RabbitClient.bindQueueToExchange(CourseQueueName.ASSISTANT_COURSE_PURCHASE_QUEUE, 'app_events', 'course.purchased.#', 'topic')
 
   // ─── VIP Domain ────────────────────────────────────────────────────────────
   // Outbound: sale-service → user-service  (vip.register.created.v1)

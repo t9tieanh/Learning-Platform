@@ -1,4 +1,4 @@
-import { LessonTestStatus, Prisma } from '@prisma/client';
+import { LessonTestStatus, Prisma, QuizScope } from '@prisma/client';
 import { StatusCodes } from 'http-status-codes';
 import ApiError from '~/middleware/ApiError';
 import prismaService from '~/service/utils/prisma.service';
@@ -16,6 +16,43 @@ export class LessonTestService {
     return lessonTest;
   }
 
+  async assertLessonTestPublishable(lessonId: string): Promise<void> {
+    const bundle = await this.getLessonTestBundle(lessonId);
+    if (!bundle) {
+      throw new ApiError(StatusCodes.NOT_FOUND, 'Lesson test blueprint not found');
+    }
+    if (bundle.chunkGroups.length === 0) {
+      throw new ApiError(
+        StatusCodes.BAD_REQUEST,
+        'Cần ít nhất một nhóm nội dung trước khi xuất bản bài kiểm tra.'
+      );
+    }
+    const groupIds = bundle.chunkGroups.map((g) => g.id);
+    const counts = await prismaService.quiz.groupBy({
+      by: ['lessonTestChunkGroupId'],
+      where: {
+        lessonTestChunkGroupId: { in: groupIds },
+        quizScope: QuizScope.LESSON_TEST,
+      },
+      _count: { _all: true },
+    });
+    const countByGroup = new Map(
+      counts
+        .filter((c): c is typeof c & { lessonTestChunkGroupId: string } => c.lessonTestChunkGroupId != null)
+        .map((c) => [c.lessonTestChunkGroupId, c._count._all])
+    );
+    for (const g of bundle.chunkGroups) {
+      const n = countByGroup.get(g.id) ?? 0;
+      if (n < 1) {
+        const label = g.label?.trim() || 'Một nhóm nội dung';
+        throw new ApiError(
+          StatusCodes.BAD_REQUEST,
+          `Chưa thể xuất bản: « ${label} » chưa có câu hỏi. Hãy sinh câu hoặc kiểm tra lại nhóm.`
+        );
+      }
+    }
+  }
+
   async upsertLessonTestHeader(
     lessonId: string,
     userId: string,
@@ -26,6 +63,9 @@ export class LessonTestService {
       notes?: string | null;
     }
   ) {
+    if (body.status === LessonTestStatus.PUBLISHED) {
+      await this.assertLessonTestPublishable(lessonId);
+    }
     return prismaService.lessonTest.upsert({
       where: { lessonId },
       create: {
@@ -177,6 +217,87 @@ export class LessonTestService {
       throw new ApiError(StatusCodes.NOT_FOUND, 'Chunk group not found');
     }
     return row;
+  }
+
+  async getExamBlueprintStats(lessonId: string) {
+    const lessonTest = await prismaService.lessonTest.findUnique({
+      where: { lessonId },
+      include: {
+        chunkGroups: {
+          orderBy: { createdAt: 'asc' },
+        },
+      },
+    });
+
+    if (!lessonTest) return null;
+
+    const allChunks = await prismaService.lessonChunk.findMany({
+      where: { lessonId },
+    });
+    const chunkMap = new Map(allChunks.map((c) => [c.id, c]));
+
+    const quizCounts = await prismaService.quiz.groupBy({
+      by: ['lessonTestChunkGroupId'],
+      where: {
+        lessonTestChunkGroup: { lessonId },
+        quizScope: QuizScope.LESSON_TEST,
+      },
+      _count: { _all: true },
+    });
+    const countMap = new Map(
+      quizCounts
+        .filter((c): c is typeof c & { lessonTestChunkGroupId: string } => c.lessonTestChunkGroupId != null)
+        .map((c) => [c.lessonTestChunkGroupId, c._count._all])
+    );
+
+    let globalIndex = 1;
+    const matrix = lessonTest.chunkGroups.map((group, idx) => {
+      const count = countMap.get(group.id) ?? 0;
+      const start = globalIndex;
+      const end = globalIndex + count - 1;
+      const questionRange =
+        count > 0 ? (count === 1 ? `Câu ${start}` : `Câu ${start} - ${end}`) : '—';
+
+      globalIndex += count;
+
+      const chunkIds = this.parseStoredChunkIds(group.chunkIds);
+      const chunks = chunkIds
+        .map((id) => chunkMap.get(id))
+        .filter((c) => !!c)
+        .map((c) => ({
+          id: c!.id,
+          chunkIndex: c!.chunkIndex,
+          title: c!.title,
+          summary: c!.summary,
+          timestamp: c!.timestamp,
+          startTime: c!.startTime,
+          endTime: c!.endTime,
+        }));
+
+      return {
+        id: group.id,
+        label: group.label?.trim() || `Nhóm nội dung ${idx + 1}`,
+        questionRange,
+        hasQuizzes: count > 0,
+        chunks,
+      };
+    });
+
+    const generatedTotal = Array.from(countMap.values()).reduce((a, b) => a + b, 0);
+
+    return {
+      lessonId,
+      targetTotalQuestions: lessonTest.targetTotalQuestions,
+      generatedTotalQuestions: generatedTotal,
+      matrix,
+    };
+  }
+
+  async getLessonChunks(lessonId: string) {
+    return prismaService.lessonChunk.findMany({
+      where: { lessonId },
+      orderBy: { chunkIndex: 'asc' },
+    });
   }
 
   parseStoredChunkIds(chunkIdsJson: unknown): string[] {

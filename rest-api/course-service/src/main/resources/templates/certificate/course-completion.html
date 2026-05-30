@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Chứng chỉ hoàn thành khóa học</title>
+    <style>
+        @page {
+            size: 297mm 210mm;
+            margin: 0;
+        }
+
+        html {
+            -fs-page-width: 297mm;
+            -fs-page-height: 210mm;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Work Sans', sans-serif;
+            color: #0f172a;
+            background: #ffffff;
+        }
+
+        table {
+            border-collapse: collapse;
+            border-spacing: 0;
+        }
+
+        p {
+            margin: 0;
+        }
+
+        .page {
+            width: 100%;
+        }
+
+        .header-cell {
+            background-color: #1d4ed8;
+            color: #ffffff;
+            padding: 10mm 14mm 9mm 14mm;
+        }
+
+        .body-cell {
+            background-color: #ffffff;
+            padding: 8mm 14mm 10mm 14mm;
+        }
+
+        .brand-logo-wrap {
+            width: 40mm;
+            border: 0.4mm solid #bfdbfe;
+            background: #ffffff;
+            padding: 1.5mm 2mm;
+            text-align: center;
+        }
+
+        .brand-logo {
+            height: 7mm;
+            width: 36mm;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .brand-title {
+            font-size: 3.4mm;
+            font-weight: 700;
+            letter-spacing: 0.8mm;
+            text-transform: uppercase;
+            color: #ffffff;
+        }
+
+        .brand-subtitle {
+            font-size: 2.8mm;
+            color: #dbeafe;
+            margin-top: 1mm;
+        }
+
+        .code-label {
+            font-size: 2.2mm;
+            color: #bfdbfe;
+            text-transform: uppercase;
+            letter-spacing: 0.4mm;
+            margin-bottom: 1mm;
+            text-align: right;
+        }
+
+        .code-value {
+            font-size: 3.4mm;
+            color: #ffffff;
+            text-align: right;
+            font-weight: 700;
+        }
+
+        .frame-inner {
+            border: 0.5mm solid #bfdbfe;
+            padding: 6mm 7mm 5mm 7mm;
+        }
+
+        .visual-cell {
+            width: 40mm;
+            vertical-align: top;
+            padding-right: 8mm;
+        }
+
+        .course-thumb {
+            width: 34mm;
+            height: 34mm;
+            display: block;
+        }
+
+        .course-fallback {
+            width: 34mm;
+            height: 34mm;
+            text-align: center;
+            line-height: 34mm;
+            font-size: 12mm;
+            font-weight: 700;
+            color: #1d4ed8;
+            background: #eff6ff;
+            border: 0.5mm solid #bfdbfe;
+        }
+
+        .badge-cell {
+            background: #f59e0b;
+            color: #ffffff;
+            text-align: center;
+            font-size: 2.6mm;
+            font-weight: 700;
+            padding: 1mm 0;
+            border: 0.5mm solid #bfdbfe;
+            border-top: 0;
+        }
+
+        .label {
+            font-size: 2.8mm;
+            letter-spacing: 0.6mm;
+            text-transform: uppercase;
+            color: #2563eb;
+            font-weight: 700;
+            margin-bottom: 2.5mm;
+        }
+
+        .recipient {
+            font-family: 'Lora', serif;
+            font-size: 11mm;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 2mm;
+            line-height: 1.15;
+        }
+
+        .subtitle {
+            font-size: 3.6mm;
+            color: #64748b;
+            margin-bottom: 5mm;
+        }
+
+        .course-box {
+            background: #eff6ff;
+            border: 0.4mm solid #bfdbfe;
+            padding: 3mm 4mm;
+            margin-bottom: 5mm;
+        }
+
+        .course-title {
+            font-size: 5mm;
+            font-weight: 700;
+            color: #1e3a8a;
+        }
+
+        .instructor-avatar {
+            width: 10mm;
+            height: 10mm;
+            border: 0.4mm solid #dbeafe;
+            display: block;
+        }
+
+        .instructor-fallback {
+            width: 10mm;
+            height: 10mm;
+            background: #dbeafe;
+            color: #1d4ed8;
+            text-align: center;
+            line-height: 10mm;
+            font-size: 4mm;
+            font-weight: 700;
+            border: 0.4mm solid #bfdbfe;
+        }
+
+        .instructor-label {
+            font-size: 2.2mm;
+            text-transform: uppercase;
+            letter-spacing: 0.3mm;
+            color: #94a3b8;
+            font-weight: 700;
+        }
+
+        .instructor-name {
+            font-size: 3.6mm;
+            color: #334155;
+            font-weight: 700;
+            margin-top: 0.5mm;
+        }
+
+        .verified-badge {
+            background: #eff6ff;
+            border: 0.4mm solid #bfdbfe;
+            padding: 2mm 3mm;
+            text-align: center;
+        }
+
+        .verified-text {
+            font-size: 2.4mm;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.3mm;
+            color: #1d4ed8;
+        }
+
+        .footer-wrap {
+            margin-top: 6mm;
+            padding-top: 4mm;
+            border-top: 0.4mm solid #e2e8f0;
+        }
+
+        .meta-label {
+            font-size: 2.2mm;
+            text-transform: uppercase;
+            letter-spacing: 0.3mm;
+            color: #94a3b8;
+            font-weight: 700;
+            margin-bottom: 1mm;
+        }
+
+        .meta-value {
+            font-size: 3.2mm;
+            color: #334155;
+            font-weight: 700;
+        }
+
+        .verify-note {
+            font-size: 2.4mm;
+            color: #64748b;
+            margin-top: 3mm;
+            text-align: center;
+        }
+
+        .verify-url {
+            color: #2563eb;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body style="margin: 0; padding: 0;">
+<table class="page" width="100%" cellspacing="0" cellpadding="0">
+    <tr>
+        <td class="header-cell" bgcolor="#1d4ed8">
+            <table width="100%" cellspacing="0" cellpadding="0">
+                <tr>
+                    <td width="44mm" style="width: 44mm; vertical-align: middle;">
+                        <table class="brand-logo-wrap" cellspacing="0" cellpadding="0">
+                            <tr>
+                                <td style="text-align: center;">
+                                    <img class="brand-logo"
+                                         th:if="${cert.logoDataUri != null}"
+                                         th:src="${cert.logoDataUri}"
+                                         alt="Learnova"/>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                    <td style="padding-left: 4mm; vertical-align: middle;">
+                        <p class="brand-title">Learnova Certificate</p>
+                        <p class="brand-subtitle">Chứng nhận hoàn thành khóa học</p>
+                    </td>
+                    <td width="52mm" style="width: 52mm; vertical-align: middle;">
+                        <p class="code-label">Mã chứng chỉ</p>
+                        <p class="code-value" th:text="${cert.certificateCode}">LNV-XXXXXXXX</p>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td class="body-cell" bgcolor="#ffffff">
+            <table width="100%" cellspacing="0" cellpadding="0">
+                <tr>
+                    <td class="frame-inner">
+                        <table width="100%" cellspacing="0" cellpadding="0">
+                            <tr>
+                                <td class="visual-cell">
+                                    <table width="34mm" cellspacing="0" cellpadding="0" style="width: 34mm;">
+                                        <tr>
+                                            <td style="padding: 0;">
+                                                <img th:if="${cert.hasCourseThumbnail}"
+                                                     class="course-thumb"
+                                                     th:src="${cert.courseThumbnailDataUri}"
+                                                     alt="Course thumbnail"/>
+                                                <div th:unless="${cert.hasCourseThumbnail}"
+                                                     class="course-fallback"
+                                                     th:text="${#strings.substring(cert.courseTitle, 0, 1)}">C</div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="badge-cell">Chứng chỉ hợp lệ</td>
+                                        </tr>
+                                    </table>
+                                </td>
+                                <td style="vertical-align: top;">
+                                    <p class="label">Chứng nhận trao tặng</p>
+                                    <p class="recipient" th:text="${cert.recipientName}">Học viên</p>
+                                    <p class="subtitle">đã hoàn thành khóa học</p>
+
+                                    <table class="course-box" cellspacing="0" cellpadding="0" width="100%">
+                                        <tr>
+                                            <td style="padding: 3mm 4mm;">
+                                                <p class="course-title" th:text="${cert.courseTitle}">Tên khóa học</p>
+                                            </td>
+                                        </tr>
+                                    </table>
+
+                                    <table cellspacing="0" cellpadding="0">
+                                        <tr>
+                                            <td width="12mm" style="width: 12mm; vertical-align: middle;">
+                                                <img th:if="${cert.hasInstructorAvatar}"
+                                                     class="instructor-avatar"
+                                                     th:src="${cert.instructorAvatarDataUri}"
+                                                     alt="Instructor"/>
+                                                <div th:unless="${cert.hasInstructorAvatar}"
+                                                     class="instructor-fallback"
+                                                     th:text="${#strings.substring(cert.instructorName, 0, 1)}">G</div>
+                                            </td>
+                                            <td style="padding-left: 3mm; vertical-align: middle;">
+                                                <p class="instructor-label">Giảng viên</p>
+                                                <p class="instructor-name" th:text="${cert.instructorName}">Giảng viên</p>
+                                            </td>
+                                            <td width="28mm" style="width: 28mm; padding-left: 6mm; vertical-align: middle;">
+                                                <table class="verified-badge" cellspacing="0" cellpadding="0">
+                                                    <tr>
+                                                        <td style="padding: 2mm 3mm; text-align: center;">
+                                                            <p class="verified-text">Verified</p>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <table width="100%" cellspacing="0" cellpadding="0" class="footer-wrap">
+                            <tr>
+                                <td style="padding-top: 4mm; border-top: 0.4mm solid #e2e8f0;">
+                                    <table width="100%" cellspacing="0" cellpadding="0">
+                                        <tr>
+                                            <td width="33%" style="width: 33%; vertical-align: top;">
+                                                <p class="meta-label">Ngày cấp</p>
+                                                <p class="meta-value" th:text="${cert.issuedAtFormatted}">01 tháng 1 năm 2026</p>
+                                            </td>
+                                            <td width="34%" style="width: 34%; vertical-align: top;">
+                                                <p class="meta-label">Nền tảng</p>
+                                                <p class="meta-value">Learnova Learning Platform</p>
+                                            </td>
+                                            <td width="33%" style="width: 33%; vertical-align: top;">
+                                                <p class="meta-label">Tra cứu</p>
+                                                <p class="meta-value" th:text="${cert.certificateCode}">LNV-XXXXXXXX</p>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                    <p class="verify-note">
+                                        Xác minh tại
+                                        <span class="verify-url" th:text="${cert.verifyUrl}">https://learnernova.com/certificate/verify/LNV-XXXXXXXX</span>
+                                    </p>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+</body>
+</html>

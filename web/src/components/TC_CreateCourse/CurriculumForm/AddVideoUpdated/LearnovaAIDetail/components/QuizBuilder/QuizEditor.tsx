@@ -21,7 +21,7 @@ import { Quiz, QuizChoice } from '@/types/ai'
 import CustomButton from '@/components/common/Button'
 import CustomTextarea from '@/components/common/Textarea'
 import CustomInput from '@/components/common/Input'
-import DistributionPicker, { QUIZ_DISTRIBUTION_PRESETS } from '../DistributionPicker'
+import DistributionPicker from '../DistributionPicker'
 import { useAuthStore } from '@/stores/useAuth.stores'
 import { useVipUpgrade } from '@/contexts/VipUpgradeContext'
 import quizService, { SingleQuizGenerationRequest } from '@/services/assistant/quiz.service'
@@ -38,6 +38,7 @@ interface QuizEditorProps {
     onCancel: () => void
     onPrev: () => void
     onNext: () => void
+    lessonTitle?: string
 }
 
 const QuizEditor: React.FC<QuizEditorProps> = ({
@@ -48,7 +49,8 @@ const QuizEditor: React.FC<QuizEditorProps> = ({
     onSave,
     onCancel,
     onPrev,
-    onNext
+    onNext,
+    lessonTitle
 }) => {
     const [draft, setDraft] = useState<Quiz>({ ...quiz })
     const [choiceInput, setChoiceInput] = useState('')
@@ -76,10 +78,9 @@ const QuizEditor: React.FC<QuizEditorProps> = ({
     const handleToggleCorrect = (choiceId: string) => {
         setDraft(prev => ({
             ...prev,
-            choices: prev.choices.map(c => ({
-                ...c,
-                isCorrect: c.id === choiceId
-            }))
+            choices: prev.choices.map(c => (
+                c.id === choiceId ? { ...c, isCorrect: !c.isCorrect } : c
+            ))
         }))
     }
 
@@ -108,10 +109,12 @@ const QuizEditor: React.FC<QuizEditorProps> = ({
     const handleExecuteGeneration = async (distribution: QuizBatchDistributionItem[]) => {
         if (!distribution || distribution.length === 0) return
 
+        const toastId = toast.loading(`Learnova AI đang soạn thảo câu hỏi ôn tập cho bài học "${lessonTitle || '...'}"`, {
+            description: 'Vui lòng chờ trong giây lát...',
+        })
         try {
             setIsGenerating(true)
             setIsPickerOpen(false)
-            toast.loading('AI đang gợi ý nội dung bài tập...')
 
             // Use the first rule of the distribution to define settings for 1 question
             const rule = distribution[0]
@@ -137,19 +140,34 @@ const QuizEditor: React.FC<QuizEditorProps> = ({
                     difficulty: q.difficulty as QuizDifficulty,
                     bloomLevel: q.bloomLevel as BloomLevel,
                     aiGenerated: true,
-                    aiConfidence: q.aiConfidence
+                    aiConfidence: q.aiConfidence,
+                    isApproved: false // Newly generated AI quizzes start as unapproved
                 }))
-                toast.dismiss()
-                toast.success('✓ AI đã gợi ý nội dung mới cho câu hỏi này!')
+                toast.success('✓ AI đã gợi ý nội dung mới cho câu hỏi này!', { id: toastId })
             } else {
-                toast.dismiss()
-                toast.error(response.message || 'Lỗi khi tạo câu hỏi')
+                toast.error(response.message || 'Lỗi khi tạo câu hỏi', { id: toastId })
             }
         } catch (error) {
-            toast.dismiss()
-            toast.error(error instanceof Error ? error.message : 'Lỗi khi tạo câu hỏi từ AI')
+            toast.error(error instanceof Error ? error.message : 'Lỗi khi tạo câu hỏi từ AI', { id: toastId })
         } finally {
             setIsGenerating(false)
+        }
+    }
+
+    const handleApprove = async () => {
+        if (!draft.id) return
+        try {
+            const response = await quizService.approveQuiz(draft.id)
+            if (response.code === 200) {
+                setDraft(prev => ({ ...prev, isApproved: true }))
+                toast.success('Đã duyệt câu hỏi thành công')
+                // Update parent list as well
+                onSave({ ...draft, isApproved: true })
+            } else {
+                toast.error('Lỗi khi duyệt câu hỏi')
+            }
+        } catch (error) {
+            toast.error('Lỗi kết nối máy chủ')
         }
     }
 
@@ -344,10 +362,7 @@ const QuizEditor: React.FC<QuizEditorProps> = ({
                             {draft.aiGenerated && (
                                 <div className='absolute bottom-3 right-3 flex items-center gap-1.5 px-2 py-1 bg-blue-50 rounded-lg border border-blue-100'>
                                     <Sparkles className='w-2.5 h-2.5 text-blue-500' />
-                                    <div className='flex flex-col'>
-                                        <span className='text-[8px] font-semibold text-blue-600 leading-none'>Tối ưu AI</span>
-                                        {draft.aiConfidence && <span className='text-[7px] text-blue-400 font-medium mt-0.5 leading-none'>{Math.round(draft.aiConfidence * 100)}% độ tin cậy</span>}
-                                    </div>
+                                    {draft.aiConfidence && <span className='text-[7px] text-blue-400 font-medium mt-0.5 leading-none'>{Math.round(draft.aiConfidence * 100)}% độ tin cậy</span>}
                                 </div>
                             )}
                         </div>
@@ -355,6 +370,16 @@ const QuizEditor: React.FC<QuizEditorProps> = ({
 
                     {/* Footer Actions */}
                     <div className='flex items-center justify-end gap-3 pt-8 border-t border-blue-100/50 mt-4'>
+                        {draft.aiGenerated && !draft.isApproved && draft.id && (
+                            <CustomButton
+                                type='button'
+                                onClick={handleApprove}
+                                label='Duyệt câu hỏi'
+                                variant='outline'
+                                icon={<CheckCircle2 className='w-3.5 h-3.5' />}
+                                className='h-7.5 px-5 text-[10.5px] font-bold border-green-200 text-green-600 bg-green-50/30 hover:bg-green-600 hover:text-white rounded-lg transition-all shadow-sm'
+                            />
+                        )}
                         <CustomButton
                             type='button'
                             onClick={onCancel}

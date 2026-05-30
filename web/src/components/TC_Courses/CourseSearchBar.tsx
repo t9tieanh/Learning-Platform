@@ -1,28 +1,37 @@
-import { FC, useState, useEffect } from 'react'
+import { FC, useState, useCallback } from 'react'
 import { Search } from 'lucide-react'
 import CustomButton from '@/components/common/Button'
 import { IoAddCircle } from 'react-icons/io5'
 import CustomDialog from '@/components/common/Dialog'
 import CreateCourseModal from './createCourseModal'
-import { useSearchParams } from 'react-router-dom'
+import type { Course } from '@/components/TC_Courses/CourseTypes'
 
 interface CourseSearchBarProps {
   onSearch?: (value: string) => void
   onFilterChange?: (status: string) => void
+  onCourseCreated?: (course: Course) => void
+  createModalOpen?: boolean
+  onCreateModalOpenChange?: (open: boolean) => void
 }
 
-const CourseSearchBar: FC<CourseSearchBarProps> = ({ onSearch }) => {
-  const [open, setOpen] = useState(false)
-  const [searchParams, setSearchParams] = useSearchParams()
-
-  useEffect(() => {
-    if (searchParams.get('openCreate') === 'true') {
-      setOpen(true)
-      const newParams = new URLSearchParams(searchParams)
-      newParams.delete('openCreate')
-      setSearchParams(newParams, { replace: true })
-    }
-  }, [searchParams, setSearchParams])
+const CourseSearchBar: FC<CourseSearchBarProps> = ({
+  onSearch,
+  onCourseCreated,
+  createModalOpen: controlledOpen,
+  onCreateModalOpenChange
+}) => {
+  const [internalOpen, setInternalOpen] = useState(false)
+  const isControlled = controlledOpen !== undefined
+  const open = isControlled ? controlledOpen : internalOpen
+  const setOpen = useCallback(
+    (next: boolean) => {
+      onCreateModalOpenChange?.(next)
+      if (!isControlled) {
+        setInternalOpen(next)
+      }
+    },
+    [isControlled, onCreateModalOpenChange]
+  )
 
   return (
     <div className='flex flex-col sm:flex-row justify-between items-center gap-4'>
@@ -44,7 +53,7 @@ const CourseSearchBar: FC<CourseSearchBarProps> = ({ onSearch }) => {
       />
       <CustomDialog
         open={open}
-        setOpen={setOpen}
+        setOpen={(v) => setOpen(v)}
         title='Tạo khóa học mới'
         hideHeader
         noPadding
@@ -53,7 +62,7 @@ const CourseSearchBar: FC<CourseSearchBarProps> = ({ onSearch }) => {
         contentClassName='p-0 m-0 w-full max-h-[95vh] overflow-y-auto'
         size='xl'
       >
-        <CreateCourseModal />
+        <CreateCourseModal onCourseCreated={onCourseCreated} />
       </CustomDialog>
     </div>
   )

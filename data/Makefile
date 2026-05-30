@@ -47,6 +47,7 @@ normalize:
 	$(PYTHON) scripts/normalize/normalize_tags.py
 	$(PYTHON) scripts/normalize/normalize_blogs.py
 	$(PYTHON) scripts/normalize/normalize_feedbacks.py
+	$(PYTHON) scripts/normalize/normalize_expertise.py
 	$(PYTHON) scripts/supabase/normalize_courses_for_supabase.py
 
 import:

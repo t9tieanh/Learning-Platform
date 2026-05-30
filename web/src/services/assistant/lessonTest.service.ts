@@ -64,18 +64,29 @@ class LessonTestService {
   }
 
   /**
+   * Pre-calculated stats for matrix analysis (ranges, chunk summaries, totals).
+   */
+  async fetchBlueprintStats(lessonId: string): Promise<ApiResponse<any>> {
+    const res = await axiosClient.axiosInstance.get(
+      `assistant/analysis/lesson-tests/${lessonId}/stats`
+    )
+    return res.data as ApiResponse<any>
+  }
+
+  /**
    * Xóa một chunk group trên assistant-service.
    * DELETE `assistant/analysis/lesson-test/chunk-groups/:groupId`
    */
-  async deleteChunkGroup(groupId: string): Promise<void> {
+  async deleteChunkGroup(groupId: string): Promise<ApiResponse<void>> {
     try {
-      await axiosClient.axiosInstance.delete(
+      const res = await axiosClient.axiosInstance.delete(
         `assistant/analysis/lesson-test/chunk-groups/${groupId}`
       )
+      return res.data as ApiResponse<void>
     } catch (e) {
       const err = e as AxiosError
       if (err.response?.status === 404) {
-        return
+        return { code: 200, message: 'Group not found' }
       }
       throw e
     }
@@ -177,6 +188,7 @@ class LessonTestService {
     const maxWaitMs = opts?.maxWaitMs ?? 600_000
     const deadline = Date.now() + maxWaitMs
 
+    let currentInterval = intervalMs
     while (Date.now() < deadline) {
       const res = await this.getBulkGenerationStatus(lessonId, jobIds)
       if (res.code !== 200 || !res.result?.items || res.result.items.length !== jobIds.length) {
@@ -207,7 +219,8 @@ class LessonTestService {
         return { allOk: allCompleted }
       }
 
-      await new Promise((r) => setTimeout(r, intervalMs))
+      await new Promise((r) => setTimeout(r, currentInterval))
+      currentInterval = Math.min(currentInterval * 1.5, 15000)
     }
 
     return { allOk: false, failedReason: 'Hết thời gian chờ sinh câu.' }
@@ -224,11 +237,13 @@ class LessonTestService {
     const maxWaitMs = opts?.maxWaitMs ?? 600_000
     const deadline = Date.now() + maxWaitMs
 
+    let currentInterval = 500
     while (Date.now() < deadline) {
       const res = await this.getGroupGenerationStatus(groupId, jobId)
       const payload = res.result
       if (!payload || typeof payload !== 'object' || !('status' in payload)) {
-        await new Promise((r) => setTimeout(r, 600))
+        await new Promise((r) => setTimeout(r, currentInterval))
+        currentInterval = Math.min(currentInterval * 1.5, 10000)
         continue
       }
 
@@ -239,7 +254,8 @@ class LessonTestService {
         return { ok: false, message: payload.reason }
       }
 
-      await new Promise((r) => setTimeout(r, 400))
+      await new Promise((r) => setTimeout(r, currentInterval))
+      currentInterval = Math.min(currentInterval * 1.5, 10000)
     }
 
     return { ok: false, message: 'Hết thời gian chờ sinh câu cho nhóm này.' }

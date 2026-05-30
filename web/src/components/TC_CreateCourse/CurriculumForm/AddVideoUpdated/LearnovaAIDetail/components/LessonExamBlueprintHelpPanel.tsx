@@ -50,36 +50,36 @@ const LessonExamBlueprintHelpPanel: React.FC = () => {
             </p>
             <p>
               Tính năng này được thiết kế theo <strong className='font-semibold text-gray-800'>cùng tinh thần quy
-              chuẩn</strong> như khi bạn lập <strong>ma trận: chuẩn đầu ra môn học (CLO) – câu hỏi đánh
-              giá</strong>: mỗi mục tiêu/ mảng nội dung tương ứng một nhóm câu hỏi phục vụ kiểm tra. Bảng
+                chuẩn</strong> như khi bạn lập <strong>ma trận: chuẩn đầu ra môn học (CLO) – câu hỏi đánh
+                  giá</strong>: mỗi mục tiêu/ mảng nội dung tương ứng một nhóm câu hỏi phục vụ kiểm tra. Bảng
               minh hoạ bên dưới (trích từ quy ước thường dùng trong soạn bài) giúp bạn hình dung vì sao
               chúng tôi cho phép cấu hình từng <strong className='font-semibold text-gray-800'>nhóm nội dung</strong> và gắn gợi ý cách ra đề.
             </p>
-            <div className='overflow-x-auto rounded-lg border border-amber-200/80 bg-white/60 shadow-sm'>
+            <div className='overflow-x-auto rounded-lg border border-blue-200/80 bg-white/60 shadow-sm'>
               <table className='w-full min-w-[280px] text-left text-[11px] md:text-[12px] border-collapse'>
                 <thead>
-                  <tr className='border-b border-amber-200/90 bg-amber-50/50'>
+                  <tr className='border-b border-blue-200/90 bg-blue-50/50'>
                     <th
                       scope='col'
-                      className='p-2 font-semibold text-red-600 align-top w-1/2 sm:w-[55%] border-r border-amber-200/80'
+                      className='p-2 font-semibold text-blue-600 align-top w-1/2 sm:w-[55%] border-r border-blue-200/80'
                     >
                       Chuẩn đầu ra của học phần
                     </th>
-                    <th scope='col' className='p-2 font-semibold text-red-600 align-top'>
+                    <th scope='col' className='p-2 font-semibold text-blue-600 align-top'>
                       Câu hỏi
                     </th>
                   </tr>
                 </thead>
                 <tbody className='text-gray-700'>
-                  <tr className='border-b border-amber-100/90'>
-                    <td className='p-2 align-top border-r border-amber-100/80'>
+                  <tr className='border-b border-blue-100/90'>
+                    <td className='p-2 align-top border-r border-blue-100/80'>
                       <span className='font-semibold text-gray-800'>[G1.1]</span> Giải thích được các nội
                       dung lập trình cơ bản như: mệnh đề if, vòng lặp, mảng.
                     </td>
                     <td className='p-2 align-top text-gray-800'>Câu 1, câu 2, câu 3</td>
                   </tr>
                   <tr>
-                    <td className='p-2 align-top border-r border-amber-100/80'>
+                    <td className='p-2 align-top border-r border-blue-100/80'>
                       <span className='font-semibold text-gray-800'>[G2.1]</span> Viết được các chương trình
                       giải quyết những vấn đề kỹ thuật cơ bản sử dụng ngôn ngữ lập trình Python.
                     </td>
@@ -90,7 +90,7 @@ const LessonExamBlueprintHelpPanel: React.FC = () => {
             </div>
             <p className='text-[11px] md:text-[12px] text-gray-500 font-medium italic border-l-2 border-blue-200 pl-2 leading-snug'>
               Trong giao diện tạo bài, bạn cấu hình <strong className='font-semibold text-gray-700'>nhóm nội dung tương ứng từng phân đoạn/ mảng
-              kiến thức</strong> và tổng câu — tương tự cách bạn quy ước ở cột trái bảng trên, rồi ánh
+                kiến thức</strong> và tổng câu — tương tự cách bạn quy ước ở cột trái bảng trên, rồi ánh
               xạ sang các câu ở cột phải sau khi sinh xong từ nội dung từng phần.
             </p>
             <p className='text-[12px] md:text-[13px] font-semibold text-gray-800'>Các bước theo từng nhóm nội dung</p>

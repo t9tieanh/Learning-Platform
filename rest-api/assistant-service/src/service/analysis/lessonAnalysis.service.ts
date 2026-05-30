@@ -107,11 +107,13 @@ class LessonAnalysisService {
             update: {
                 url: event.fileUrl,
                 transcriptId: transcript.id,
+                type: event.fileType,
             },
             create: {
                 id: event.lessonId,
                 url: event.fileUrl,
                 transcriptId: transcript.id,
+                type: event.fileType,
             },
         });
 
@@ -126,8 +128,17 @@ class LessonAnalysisService {
 
         await prismaService.lesson.upsert({
             where: { id: event.lessonId },
-            update: { url: event.fileUrl, transcript: content },
-            create: { id: event.lessonId, url: event.fileUrl, transcript: content },
+            update: {
+                url: event.fileUrl,
+                transcript: content,
+                type: event.fileType,
+            },
+            create: {
+                id: event.lessonId,
+                url: event.fileUrl,
+                transcript: content,
+                type: event.fileType,
+            },
         });
 
         Logger.info(`Lesson ${event.lessonId} updated with content.`);
@@ -198,6 +209,7 @@ class LessonAnalysisService {
                 transcript: transcriptText,
                 subtitles,
                 url: audioUrl,
+                type: LessonTypeEnum.VIDEO,
             },
         });
 

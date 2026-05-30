@@ -7,7 +7,7 @@ import Logger from '~/utils/logger';
 
 class ChatbotService {
     private axiosInstance = axios.create({
-        timeout: 30000,
+        timeout: env.N8N_WEBHOOK_TIMEOUT_MS,
         httpsAgent: new https.Agent({
             family: 4
         })
@@ -45,7 +45,16 @@ class ChatbotService {
                 }
             });
 
-            const reply = response.data.data.reply ? response.data.data.reply : CHATBOT_ERROR_MESSAGE;
+            const reply =
+                response.data?.data?.reply ??
+                (typeof response.data?.reply === 'string' ? response.data.reply : null) ??
+                CHATBOT_ERROR_MESSAGE;
+
+            if (reply === CHATBOT_ERROR_MESSAGE) {
+                Logger.warn(
+                    `N8N webhook returned unexpected shape: ${JSON.stringify(response.data)?.slice(0, 500)}`
+                );
+            }
 
             // Save chat history to Redis asynchronously
             const key = `${CHATBOT_STORES_KEY}:${userId}`;

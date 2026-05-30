@@ -96,6 +96,27 @@ export class QuizService {
   }
 
   /**
+   * Creates a manual quiz for a lesson chunk.
+   */
+  async createManualQuiz(
+    chunkId: string,
+    userId: string,
+    data: any
+  ): Promise<any> {
+    Logger.info(
+      `[QuizService] Creating manual quiz for chunkId=${chunkId}, userId=${userId}`
+    );
+
+    const savedQuiz = await quizPersistenceService.createManualQuiz(
+      chunkId,
+      userId,
+      data
+    );
+
+    return this.mapQuizRowsToListResponse([savedQuiz])[0];
+  }
+
+  /**
    * Generates multiple quizzes for a lesson chunk with distribution requirements.
    * 
    * @param chunkId - The lesson chunk ID
@@ -272,6 +293,43 @@ export class QuizService {
       throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, 'Failed to map updated quiz');
     }
     return row;
+  }
+
+  /**
+   * Approves a quiz by ID.
+   */
+  async approveQuizById(quizId: string): Promise<any> {
+    const existing = await quizPersistenceService.getQuizById(quizId);
+    if (!existing) {
+      throw new ApiError(StatusCodes.NOT_FOUND, `Quiz not found: id=${quizId}`);
+    }
+    const updated = await quizPersistenceService.approveQuiz(quizId);
+    return this.mapQuizRowsToListResponse([updated])[0];
+  }
+
+  /**
+   * Approves multiple quizzes in bulk.
+   */
+  async approveQuizzesBulk(quizIds: string[]): Promise<void> {
+    await quizPersistenceService.approveQuizzes(quizIds);
+  }
+
+  /**
+   * Deletes a quiz by ID.
+   */
+  async deleteQuizById(quizId: string): Promise<void> {
+    const existing = await quizPersistenceService.getQuizById(quizId);
+    if (!existing) {
+      throw new ApiError(StatusCodes.NOT_FOUND, `Quiz not found: id=${quizId}`);
+    }
+    await quizPersistenceService.deleteQuiz(quizId);
+  }
+
+  /**
+   * Deletes multiple quizzes in bulk.
+   */
+  async deleteQuizzesBulk(quizIds: string[]): Promise<void> {
+    await quizPersistenceService.deleteQuizzes(quizIds);
   }
 
   /**

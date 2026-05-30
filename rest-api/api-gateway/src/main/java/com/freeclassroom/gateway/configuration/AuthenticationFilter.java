@@ -42,9 +42,11 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
             new PublicEndpoint("/learning/storage.*", "ALL"),
             new PublicEndpoint("/learning/chapters-user.*", "ALL"),
             new PublicEndpoint("/learning/lesson-student.*", "ALL"),
+            new PublicEndpoint("/learning/course-certificates/verify.*", "GET"),
             new PublicEndpoint("/notify/blog.*", "GET"), // chỉ GET blog là public
             new PublicEndpoint("/sale.*", "ALL"),
-            new PublicEndpoint("/notify/ai.*", "ALL")
+            new PublicEndpoint("/notify/ai.*", "ALL"),
+            new PublicEndpoint("/socket.io.*", "ALL")
     );
 
     ObjectMapper objectMapper;

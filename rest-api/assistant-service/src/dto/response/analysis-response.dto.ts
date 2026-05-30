@@ -83,6 +83,7 @@ export interface AnalysisResponseDto {
     suggestedTitle: string | null
     transcript: string | null
     subtitles: string | null
+    lessonType: string | null
     chunks: ChunkDto[]
     /** Present when a `lesson_tests` row exists for this lesson */
     lessonTest: AnalysisLessonTestHeaderDto | null
@@ -179,6 +180,7 @@ export function toAnalysisResponseDto(
         suggestedTitle: lesson.suggestedTitle,
         transcript: lesson.transcript,
         subtitles: lesson.subtitles,
+        lessonType: lesson.type,
         chunks: lesson.chunks
             .sort((a: LessonChunk, b: LessonChunk) => a.chunkIndex - b.chunkIndex)
             .map(toChunkDto),

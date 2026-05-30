@@ -1,8 +1,9 @@
-import { useMemo, useState, useEffect, useRef } from 'react'
+import { useMemo, useState, useEffect, useRef, useCallback } from 'react'
 import { ChevronLeft } from 'lucide-react'
 import { LessonViewer } from '@/components/CoursePage/LessonViewer'
 import { TabNavigation } from '@/components/CoursePage/TabNavigation'
 import { CourseSidebar } from '@/components/CoursePage/CourseSidebar'
+import { MobileCourseDrawer } from '@/components/CoursePage/MobileCourseDrawer'
 import { CourseDetail, Lesson } from '@/types/course-student'
 import courseService from '@/services/course/course-student.service'
 import { useParams, useNavigate } from 'react-router-dom'
@@ -14,6 +15,9 @@ import { CourseSidebarSkeleton } from '@/components/CoursePage/CourseSidebarSkel
 import { AnalysisResult } from '@/services/assistant/analysis.service'
 import assistantAnalysisService from '@/services/assistant/analysis.service'
 import HighGlossBackground from '@/components/common/HighGlossBackground'
+import CoursePageHeaderUser from '@/components/CoursePage/CoursePageHeaderUser'
+import { CertificateJourneyProgress } from '@/components/CoursePage/CertificateJourneyProgress'
+import CourseCompletionCelebration from '@/components/CoursePage/CourseCompletionCelebration'
 
 const CoursePage = () => {
   type UILecture = {
@@ -32,11 +36,15 @@ const CoursePage = () => {
   const [currentLecture, setCurrentLecture] = useState<Lesson>()
   const [activeTab, setActiveTab] = useState('Tổng quan')
   const [selectedChunkId, setSelectedChunkId] = useState<string | null>(null)
+  const [activeMobileTab, setActiveMobileTab] = useState<'content' | 'ai' | null>(null)
+  const [watchedPercent, setWatchedPercent] = useState(0)
   const navigate = useNavigate()
   const viewerRef = useRef<import('@/components/CoursePage/VideoPlayer').VideoPlayerRef>(null)
 
   const [analysisData, setAnalysisData] = useState<AnalysisResult | null>(null)
   const [isLoadingAnalysis, setIsLoadingAnalysis] = useState(false)
+  const [showCourseCompletionModal, setShowCourseCompletionModal] = useState(false)
+  const [completedCertificate, setCompletedCertificate] = useState<{ id: string; certificateCode: string } | null>(null)
 
   const handleSeek = (timestamp: string) => {
     if (!viewerRef.current) return
@@ -61,16 +69,37 @@ const CoursePage = () => {
     setActiveTab('AI Phân tích')
   }
 
-  useEffect(() => {
-    const fetchCourseInfo = async () => {
-      if (!courseId) return
-      setIsLoading(true)
-      try {
-        const response = await courseService.getCourseDetails(courseId)
-        if (response && response.code === 200 && response.result) {
-          setCourseData(response.result)
+  const currentLectureIdRef = useRef(currentLecture?.id)
+  currentLectureIdRef.current = currentLecture?.id
 
-          // select lecture introduction
+  const fetchCourseInfo = useCallback(async (preserveLectureId?: string, options?: { silent?: boolean }) => {
+    if (!courseId) return
+    if (!options?.silent) setIsLoading(true)
+    try {
+      const response = await courseService.getCourseDetails(courseId)
+      if (response && response.code === 200 && response.result) {
+        setCourseData(response.result)
+
+        const lectureIdToKeep = preserveLectureId ?? currentLectureIdRef.current
+        if (lectureIdToKeep && lectureIdToKeep !== 'introduction') {
+          for (const ch of response.result.chapters ?? []) {
+            const found = ch.lessons?.find((l) => l.id === lectureIdToKeep)
+            if (found) {
+              setCurrentLecture({
+                id: found.id,
+                title: found.title,
+                content: found.content,
+                duration: found.duration ?? null,
+                position: found.position ?? null,
+                type: found.type === 'article' ? 'article' : 'video',
+                completionStatus: found.completionStatus ?? 'NOT_STARTED'
+              })
+              return
+            }
+          }
+        }
+
+        if (!options?.silent) {
           setCurrentLecture({
             id: 'introduction',
             title: 'Giới thiệu khóa học',
@@ -83,15 +112,26 @@ const CoursePage = () => {
             thumbnailUrl: response.result.thumbnailUrl as string
           })
         }
-      } catch (error) {
-        console.error('Failed to fetch course details', error)
-      } finally {
-        setIsLoading(false)
       }
+    } catch (error) {
+      console.error('Failed to fetch course details', error)
+    } finally {
+      if (!options?.silent) setIsLoading(false)
     }
-
-    fetchCourseInfo()
   }, [courseId])
+
+  useEffect(() => {
+    fetchCourseInfo()
+  }, [fetchCourseInfo])
+
+  const handleLessonCompleted = useCallback(() => {
+    fetchCourseInfo(currentLectureIdRef.current, { silent: true })
+  }, [fetchCourseInfo])
+
+  const handleCourseCompleted = useCallback((certificate?: { id: string; certificateCode: string }) => {
+    setCompletedCertificate(certificate ?? null)
+    setShowCourseCompletionModal(true)
+  }, [])
 
   useEffect(() => {
     const fetchAnalysis = async () => {
@@ -150,6 +190,7 @@ const CoursePage = () => {
       type: lecture.type === 'article' ? 'article' : 'video',
       completionStatus: lecture.completionStatus || 'NOT_STARTED'
     })
+    setWatchedPercent(0) // Reset for new lecture
   }
 
   // Initialize the first lecture as current
@@ -173,14 +214,14 @@ const CoursePage = () => {
       {/* Header */}
       <header className='z-50 sticky top-0'>
         <HighGlossBackground className='shadow-lg text-white border-b border-white/10 px-3 md:px-6 py-2 md:py-3 overflow-hidden'>
-          <div className='flex items-center justify-between w-full h-full relative z-10'>
+          <div className='flex h-8 items-center justify-between w-full md:h-9'>
             <div className='flex items-center gap-2 md:gap-4 min-w-0'>
               <button
                 className='ml-1 md:ml-2 flex items-center gap-2 text-white hover:text-blue-300 transition-colors flex-shrink-0'
                 onClick={() => navigate(-1)}
               >
                 <ChevronLeft className='w-4 md:w-5 h-4 md:h-5' />
-                <span className='text-xs md:text-sm cursor-pointer font-bold tracking-tight uppercase hidden sm:inline'>
+                <span className='text-xs md:text-sm cursor-pointer font-bold tracking-tight  hidden sm:inline'>
                   Trở lại
                 </span>
               </button>
@@ -196,11 +237,13 @@ const CoursePage = () => {
                   </Avatar>
                   <div className='flex flex-col items-start min-w-0'>
                     <span className='truncate w-full tracking-tight'>{courseData?.title}</span>
-                    <span className='text-[9px] text-blue-200/60 uppercase tracking-widest'>Đang trong lộ trình học</span>
+                    <span className='text-[9px] text-blue-200/60  tracking-widest'>Đang trong lộ trình học</span>
                   </div>
                 </div>
               </Button>
             </div>
+
+            <CoursePageHeaderUser />
           </div>
         </HighGlossBackground>
       </header>
@@ -208,7 +251,7 @@ const CoursePage = () => {
       {/* Main Content */}
       <div className='flex-1 flex overflow-hidden flex-col lg:flex-row'>
         {/* Left Column - Video & Tabs */}
-        <div className='flex-1 flex flex-col overflow-y-auto px-3 md:px-6 py-3 md:py-4 lg:border-r lg:border-border'>
+        <div className='flex-1 flex flex-col overflow-y-auto px-3 md:px-6 py-3 md:py-4 lg:border-r lg:border-border pb-20 lg:pb-4'>
           {isLoading ? (
             <>
               <CourseSkeleton />
@@ -217,16 +260,22 @@ const CoursePage = () => {
               </div>
             </>
           ) : currentLecture ? (
-            <div className='animate-in fade-in slide-in-from-bottom-2 duration-500'>
-              <LessonViewer
-                ref={viewerRef}
-                lesson={currentLecture!}
-                subtitlesRaw={analysisData?.subtitles ?? undefined}
-                chunks={analysisData?.chunks ?? []}
-                isInvalid={analysisData?.status?.toLowerCase() === 'failed'}
-                qualityReason={analysisData?.qualityReason}
-                onShowChunkDetails={handleShowChunkDetails}
-              />
+            <>
+              {/* Chỉ animate LessonViewer — transform trên ancestor làm hỏng sticky trong TabNavigation (Bản đồ câu) */}
+              <div className='animate-in fade-in slide-in-from-bottom-2 duration-500'>
+                <LessonViewer
+                  ref={viewerRef}
+                  lesson={currentLecture!}
+                  subtitlesRaw={analysisData?.subtitles ?? undefined}
+                  chunks={analysisData?.chunks ?? []}
+                  isInvalid={analysisData?.status?.toLowerCase() === 'failed'}
+                  qualityReason={analysisData?.qualityReason}
+                  onShowChunkDetails={handleShowChunkDetails}
+                  onProgress={(percent) => setWatchedPercent(Math.max(watchedPercent, percent))}
+                  onLessonCompleted={handleLessonCompleted}
+                  onCourseCompleted={handleCourseCompleted}
+                />
+              </div>
               <div className='mt-2 mx-auto w-full'>
                 <TabNavigation
                   currentLecture={currentLecture!}
@@ -238,40 +287,56 @@ const CoursePage = () => {
                   activeTab={activeTab}
                   onTabChange={setActiveTab}
                   selectedChunkId={selectedChunkId}
+                  watchedPercent={watchedPercent}
                 />
               </div>
-            </div>
+            </>
           ) : null}
         </div>
 
         {/* Right Column - Course Sidebar (Desktop) */}
-        <div className='hidden lg:flex lg:flex-col lg:w-96 flex-shrink-0 border-l border-border'>
+        <div className='hidden lg:flex lg:flex-col lg:w-96 flex-shrink-0 border-l border-border overflow-y-auto'>
           {isLoading ? (
             <CourseSidebarSkeleton />
           ) : (
-            <CourseSidebar
-              sections={uiSections}
-              currentLectureId={currentLecture?.id || ''}
-              onSelectLecture={handleSelectLecture}
-              onSeek={handleSeek}
-            />
+            <>
+              {courseData?.certificateJourney && (
+                <div className='p-3 border-b border-border'>
+                  <CertificateJourneyProgress journey={courseData.certificateJourney} />
+                </div>
+              )}
+              <CourseSidebar
+                sections={uiSections}
+                currentLectureId={currentLecture?.id || ''}
+                onSelectLecture={handleSelectLecture}
+                onSeek={handleSeek}
+                subtitlesRaw={analysisData?.subtitles}
+              />
+            </>
           )}
         </div>
 
-        {/* Mobile Sidebar (Below video on mobile, beside on desktop) */}
-        <div className='w-full lg:hidden lg:w-96 flex-shrink-0 border-t lg:border-l lg:border-t-0 border-border'>
-          {isLoading ? (
-            <CourseSidebarSkeleton />
-          ) : (
-            <CourseSidebar
-              sections={uiSections}
-              currentLectureId={currentLecture?.id || ''}
-              onSelectLecture={handleSelectLecture}
-              onSeek={handleSeek}
-            />
-          )}
-        </div>
+        {/* Mobile Sidebar (Expandable Bottom Drawer) */}
+        <MobileCourseDrawer
+          activeMobileTab={activeMobileTab}
+          setActiveMobileTab={setActiveMobileTab}
+          uiSections={uiSections}
+          currentLectureId={currentLecture?.id || ''}
+          onSelectLecture={handleSelectLecture}
+          onSeek={handleSeek}
+          isLoading={isLoading}
+          subtitlesRaw={analysisData?.subtitles}
+        />
       </div>
+
+      <CourseCompletionCelebration
+        open={showCourseCompletionModal}
+        onOpenChange={setShowCourseCompletionModal}
+        courseTitle={courseData?.title}
+        courseThumbnailUrl={courseData?.thumbnailUrl}
+        certificateId={completedCertificate?.id}
+        certificateCode={completedCertificate?.certificateCode}
+      />
     </div>
   )
 }

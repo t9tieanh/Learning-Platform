@@ -31,6 +31,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -73,6 +74,7 @@ public class CourseAdminService implements ICourseAdminService {
     }
 
     @Override
+    @Transactional
     public ApiResponse<CreationResponse> approveCourse(String courseId) {
         CourseEntity course = courseRepo.findById(courseId).orElseThrow(
             () -> new CustomExeption(ErrorCode.COURSE_NOT_FOUND)
@@ -95,10 +97,14 @@ public class CourseAdminService implements ICourseAdminService {
         // save
         courseRepo.save(course);
 
-        // Map to event
+        // Map to event (notification + assistant course embedding index)
         CourseApprovalEvent event = courseApprovalEventMapper.toEvent(course, CourseApprovalAction.APPROVED, null);
         event.setAction(CourseApprovalAction.APPROVED);
         event.setReason(course.getReason());
+        if (course.getCategory() != null) {
+            event.setCategoryName(course.getCategory().getName());
+        }
+        event.setInstructorName(userClient.getUserName(course.getInstructorId()));
         rabbitTemplate.convertAndSend(RabbitMQConfig.COURSE_APPROVAL_EXCHANGE, RabbitMQConfig.COURSE_APPROVAL_ROUTING_KEY, event);
 
         return ApiResponse.<CreationResponse>builder()

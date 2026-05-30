@@ -137,13 +137,14 @@ export const QuizPrompts = {
     'You are an expert educational content creator specializing in generating multiple high-quality multiple-choice quiz questions. ' +
     'Your task is to create diverse quiz questions that test various levels of understanding, aligned with Bloom\'s taxonomy. ' +
     '\n\nREQUIREMENTS:\n' +
-    '1. Each question must be clear, concise, and test different aspects of the content\n' +
+    '1. Each question must be clear, concise, and test different aspects of the content. **PRIORITIZE questions that synthesize knowledge from MULTIPLE chunks within the provided context to test deeper understanding.**\n' +
     '2. Each question must provide exactly 4 answer choices (only one correct)\n' +
     '3. The correct answer must be unambiguous and well-supported by the content\n' +
     '4. Incorrect options should be plausible but clearly distinguishable from the correct answer\n' +
-    '5. Include detailed explanations for each question\n' +
+    '5. Include HIGHLY DETAILED explanations for each question. Within the "explanation", you MUST cite EVERY relevant chunk using the marker @{{chunkId}}@ (e.g., "This connects the concept from @{{uuid1}}@ with the results in @{{uuid2}}@..."). If a question combines multiple chunks, it MUST have multiple markers.\n' +
     '6. Ensure questions cover different difficulty levels and Bloom\'s levels as specified\n' +
-    '7. Format output as valid JSON array (no markdown formatting, code fences, or extra text)\n' +
+    '7. For each question, identify the primary source chunk and return its UUID in the "groundedChunkId" field.\n' +
+    '8. Format output as valid JSON array (no markdown formatting, code fences, or extra text)\n' +
     '\n' +
     'You MUST respond with a strictly valid JSON array only.\n' +
     'Do NOT include markdown, code fences, comments, explanations, or extra text.\n' +
@@ -157,13 +158,14 @@ export const QuizPrompts = {
     'Nhiệm vụ của bạn là tạo các câu hỏi quiz đa dạng kiểm tra các mức độ hiểu biết khác nhau, phù hợp với phân loại Bloom. ' +
     '\n\n**QUAN TRỌNG: TẤT CẢ NỘI DUNG PHẢI ĐƯỢC VIẾT BẰNG TIẾNG VIỆT. KHÔNG DÙNG TIẾNG ANH.**' +
     '\n\nYÊU CẦU:\n' +
-    '1. Mỗi câu hỏi phải rõ ràng, ngắn gọn và kiểm tra các khía cạnh khác nhau của nội dung\n' +
+    '1. Mỗi câu hỏi phải rõ ràng, ngắn gọn và kiểm tra các khía cạnh khác nhau của nội dung. **ƯU TIÊN tạo các câu hỏi mang tính TỔNG HỢP kiến thức từ NHIỀU phân đoạn (chunk) khác nhau trong ngữ cảnh để kiểm tra mức độ hiểu sâu.**\n' +
     '2. Mỗi câu hỏi phải cung cấp chính xác 4 lựa chọn trả lời (chỉ có một đáp án đúng)\n' +
     '3. Đáp án đúng phải rõ ràng và được hỗ trợ tốt bởi nội dung\n' +
     '4. Các lựa chọn sai phải có khả năng nhưng phân biệt rõ ràng với đáp án đúng\n' +
-    '5. Đưa ra giải thích chi tiết cho mỗi câu hỏi\n' +
+    '5. Đưa ra giải thích CỰC KỲ CHI TIẾT cho mỗi câu hỏi. Trong phần "explanation", bạn BẮT BUỘC phải trích dẫn TẤT CẢ các phân đoạn liên quan bằng marker @{{chunkId}}@ (VD: "Kiến thức này kết hợp giữa khái niệm tại @{{uuid1}}@ và ví dụ tại @{{uuid2}}@..."). Nếu câu hỏi tổng hợp từ nhiều chunk, phải có đầy đủ các marker tương ứng.\n' +
     '6. Đảm bảo câu hỏi bao gồm các mức độ khó khác nhau và các mức Bloom như được chỉ định\n' +
-    '7. Định dạng kết quả dưới dạng mảng JSON hợp lệ (không có markdown, code fences hoặc văn bản bổ sung)\n' +
+    '7. Với mỗi câu hỏi, hãy xác định chunk nguồn chính và trả về UUID của nó trong trường "groundedChunkId".\n' +
+    '8. Định dạng kết quả dưới dạng mảng JSON hợp lệ (không có markdown, code fences hoặc văn bản bổ sung)\n' +
     '\n' +
     'BẠN PHẢI trả lời bằng một mảng JSON hoàn toàn hợp lệ.\n' +
     'KHÔNG bao gồm markdown, code fences, nhận xét, giải thích hoặc văn bản bổ sung.\n' +
@@ -199,7 +201,8 @@ export const QuizPrompts = {
     '      { "text": "Plausible wrong answer 2", "isCorrect": false },\n' +
     '      { "text": "Plausible wrong answer 3", "isCorrect": false }\n' +
     '    ],\n' +
-    '    "explanation": "Detailed explanation",\n' +
+    '    "explanation": "Extremely detailed explanation synthesizing information from @{{uuid1}}@ and @{{uuid2}}@. Explain the logical connection between them.",\n' +
+    '    "groundedChunkId": "UUID_OF_THE_SOURCE_CHUNK",\n' +
     '    "confidence": 0.95\n' +
     '  },\n' +
     '  // ... more questions following the distribution\n' +
@@ -238,7 +241,8 @@ export const QuizPrompts = {
     '      { "text": "Đáp án sai có khả năng 2 (TIẾNG VIỆT)", "isCorrect": false },\n' +
     '      { "text": "Đáp án sai có khả năng 3 (TIẾNG VIỆT)", "isCorrect": false }\n' +
     '    ],\n' +
-    '    "explanation": "Giải thích chi tiết (TIẾNG VIỆT)",\n' +
+    '    "explanation": "Giải thích cực kỳ chi tiết, tổng hợp kiến thức từ @{{uuid1}}@ và @{{uuid2}}@. Giải thích rõ mối liên hệ logic giữa các phần này.",\n' +
+    '    "groundedChunkId": "UUID_CỦA_CHUNK_NGUỒN",\n' +
     '    "confidence": 0.95\n' +
     '  },\n' +
     '  // ... các câu hỏi tiếp theo theo phân bố\n' +

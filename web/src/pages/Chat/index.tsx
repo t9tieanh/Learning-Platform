@@ -1,15 +1,17 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useLocation, useParams, useNavigate } from 'react-router-dom'
 import { ConversationList } from '@/components/Chat/ConversationList'
 import { ChatArea } from '@/components/Chat/ChatArea'
 import { ConversationListItem } from '@/types/chat.type'
+import { cn } from '@/lib/utils'
 
 const Chat = () => {
   const [selectedConversation, setSelectedConversation] = useState<ConversationListItem | null>(null)
   const location = useLocation()
   const navigate = useNavigate()
-  const { peerId: peerIdParam } = useParams<{ peerId?: string }>()
+  const { id: routeChatId } = useParams<{ id?: string }>()
   const forcedRole: 'instructor' | 'student' = location.pathname.startsWith('/teacher') ? 'instructor' : 'student'
+  const isTeacherLayout = location.pathname.startsWith('/teacher')
 
   const handleSelect = (c: ConversationListItem) => {
     setSelectedConversation(c)
@@ -18,12 +20,21 @@ const Chat = () => {
   }
 
   return (
-    <div className='flex h-screen overflow-hidden min-h-0'>
+    <div
+      className={cn(
+        'flex overflow-hidden min-h-0',
+        isTeacherLayout ? 'h-screen' : 'h-[calc(100dvh-var(--main-header-height,72px))]'
+      )}
+    >
       {/* Sidebar */}
       <div
         className={`w-full md:w-96 lg:w-[400px] h-full min-h-0 ${selectedConversation ? 'hidden md:block' : 'block'}`}
       >
-        <ConversationList selected={selectedConversation} onSelect={handleSelect} desiredPeerId={peerIdParam} />
+        <ConversationList
+          selected={selectedConversation}
+          onSelect={handleSelect}
+          desiredPeerId={routeChatId}
+        />
       </div>
 
       {/* Chat area */}

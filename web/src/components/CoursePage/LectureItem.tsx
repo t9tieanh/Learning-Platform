@@ -1,4 +1,5 @@
 import { PlayCircle, FileText, CheckCircle2 } from 'lucide-react'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 
 interface LectureItemProps {
   lecture: {
@@ -47,14 +48,26 @@ export const LectureItem = ({ lecture, isActive, onSelect }: LectureItemProps) =
         </div>
 
         <div className='flex items-center gap-2 mt-1'>
-          <span className={`text-[10px] font-bold uppercase tracking-wider ${isActive ? 'text-blue-100' : 'text-gray-400'
-            }`}>
-            {lecture.type === 'video' ? 'Video' : 'Bài viết'}
-          </span>
-          <span className={`text-[10px] font-bold ${isActive ? 'text-blue-200/50' : 'text-gray-300'
-            }`}>•</span>
-          <span className={`text-[10px] font-bold uppercase tracking-wider ${isActive ? 'text-blue-100' : 'text-blue-400/80'
-            }`}>
+          {lecture.type === 'video' ? (
+            <span className={`text-[10px] font-bold tracking-wider ${isActive ? 'text-blue-100' : 'text-gray-400'}`}>
+              Video
+            </span>
+          ) : (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className={`text-[10px] font-bold  tracking-wider truncate max-w-[150px] inline-block align-bottom ${isActive ? 'text-blue-100' : 'text-gray-400'}`}>
+                    {lecture.content || 'Bài viết'}
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="max-w-[300px] text-[11px] font-medium p-2">
+                  {lecture.content || 'Bài viết'}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+          <span className={`text-[10px] font-bold ${isActive ? 'text-blue-200/50' : 'text-gray-300'}`}>•</span>
+          <span className={`text-[10px] font-bold  tracking-wider ${isActive ? 'text-blue-100' : 'text-blue-400/80'}`}>
             {lecture.duration || '0:00'}
           </span>
         </div>

@@ -5,6 +5,8 @@ import nodemailService from '~/services/mails/nodemail.service'
 import { VerifyEmail } from '~/dto/request/notification.dto'
 import { CourseApprovalEvent } from '~/dto/event/course-approval-event.dto'
 import { handleCourseApprovalEvent } from '~/services/course.service'
+import { handleStudyReminderEvent } from '~/services/studyReminder.service'
+import type { StudyReminderEvent } from '~/dto/event/study-reminder-event.dto'
 import Logger from '~/utils/logger'
 
 const RabbitMQConf = {
@@ -146,6 +148,10 @@ class RabbitClient {
     // COURSE_APPROVAL
     await RabbitClient.channel.assertQueue(QueueNameEnum.COURSE_APPROVAL, { durable: true })
     this.consumeQueue<CourseApprovalEvent>(QueueNameEnum.COURSE_APPROVAL, handleCourseApprovalEvent)
+
+    // STUDY_REMINDER (daily learning nudge from course-service)
+    await RabbitClient.channel.assertQueue(QueueNameEnum.STUDY_REMINDER, { durable: true })
+    this.consumeQueue<StudyReminderEvent>(QueueNameEnum.STUDY_REMINDER, handleStudyReminderEvent)
   }
 
   private static async setupDynamicConsumer(consumer: ConsumerDef) {

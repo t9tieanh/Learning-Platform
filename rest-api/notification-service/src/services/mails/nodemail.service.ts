@@ -4,8 +4,17 @@ import { NotificationDto, VerifyEmail } from '~/dto/request/notification.dto'
 import { CourseApprovalEvent } from '~/dto/event/course-approval-event.dto'
 import { QueueNameEnum } from '~/enums/rabbitQueue.enum'
 import { getUser } from '~/grpc/userClient'
-import { renderTemplate } from '~/utils/templateUtil'
+import { EMAIL_GRADIENTS, renderTemplate } from '~/utils/templateUtil'
 import Logger from '~/utils/logger'
+
+function withEmailLayout(data: Record<string, unknown>): Record<string, unknown> {
+  return {
+    year: new Date().getFullYear(),
+    headerGradient: EMAIL_GRADIENTS.brand,
+    buttonGradient: EMAIL_GRADIENTS.brand,
+    ...data
+  }
+}
 
 // Interface cho options gửi mail
 export interface SendEmailOptions {
@@ -62,7 +71,18 @@ class NodeMailService {
         subject = 'Hãy xác thực tài khoản của bạn'
         to = emailNotification.email
         templateName = 'email-verification.html'
-        templateData = { name: emailNotification.name, token: emailNotification.token }
+        templateData = withEmailLayout({
+          pageTitle: 'Xác thực tài khoản · Learnova',
+          badge: 'Xác thực',
+          headerTitle: `Xin chào ${emailNotification.name}!`,
+          headerSubtitle: 'Hoàn tất xác thực để bắt đầu học trên Learnova.',
+          ctaUrl: emailNotification.token,
+          ctaLabel: 'Xác thực tài khoản',
+          footerNote: 'Email bảo mật tài khoản · Learnova',
+          name: emailNotification.name,
+          token: emailNotification.token,
+          isPasswordReset: false
+        })
         break
       }
 
@@ -72,7 +92,18 @@ class NodeMailService {
         subject = 'Đặt lại mật khẩu của bạn'
         to = passwordNotification.email
         templateName = 'email-verification.html'
-        templateData = { name: passwordNotification.name, token: passwordNotification.token }
+        templateData = withEmailLayout({
+          pageTitle: 'Đặt lại mật khẩu · Learnova',
+          badge: 'Bảo mật',
+          headerTitle: `Xin chào ${passwordNotification.name}!`,
+          headerSubtitle: 'Tạo mật khẩu mới cho tài khoản Learnova của bạn.',
+          ctaUrl: passwordNotification.token,
+          ctaLabel: 'Đặt lại mật khẩu',
+          footerNote: 'Email bảo mật tài khoản · Learnova',
+          name: passwordNotification.name,
+          token: passwordNotification.token,
+          isPasswordReset: true
+        })
         break
       }
 
@@ -90,7 +121,78 @@ class NodeMailService {
         subject = isVipOrder ? 'Cảm ơn bạn đã đăng ký VIP!' : 'Xác nhận đơn hàng của bạn'
         to = orderNotification.email || orderNotification.to || []
         templateName = isVipOrder ? 'vip-confirmation.html' : 'order-confirmation.html'
-        templateData = orderNotification.payload || orderNotification
+        const orderPayload = (orderNotification.payload || orderNotification) as Record<string, any>
+        const orderTotal = Number(orderPayload.total)
+        const formattedTotal = isNaN(orderTotal) ? orderPayload.total : orderTotal.toLocaleString('vi-VN')
+
+        if (isVipOrder) {
+          templateData = withEmailLayout({
+            ...orderPayload,
+            pageTitle: 'Đăng ký VIP · Learnova',
+            badge: 'VIP',
+            headerGradient: EMAIL_GRADIENTS.vip,
+            buttonGradient: EMAIL_GRADIENTS.vip,
+            headerTitle: `Cảm ơn ${orderPayload.customer_name || 'bạn'}!`,
+            headerSubtitle: `Email: ${orderPayload.customer_email || ''} · Tổng ${formattedTotal} VND`,
+            ctaUrl: orderPayload.order_url,
+            ctaLabel: 'Trải nghiệm VIP ngay',
+            footerNote: 'Xác nhận gói VIP · Learnova'
+          })
+        } else {
+          templateData = withEmailLayout({
+            ...orderPayload,
+            pageTitle: 'Xác nhận đơn hàng · Learnova',
+            badge: 'Đơn hàng',
+            headerTitle: `Cảm ơn ${orderPayload.customer_name || 'bạn'}!`,
+            headerSubtitle: `Email: ${orderPayload.customer_email || ''} · Tổng ${formattedTotal} VND`,
+            ctaUrl: orderPayload.order_url,
+            ctaLabel: 'Xem đơn hàng',
+            footerNote: 'Xác nhận thanh toán · Learnova',
+            items: (orderPayload.items || []).map((item: Record<string, unknown>) => ({
+              ...item,
+              hasThumbnail: Boolean(item.image)
+            }))
+          })
+        }
+        break
+      }
+      case QueueNameEnum.STUDY_REMINDER: {
+        const reminder = notification as {
+          email?: string
+          userName?: string
+          courses?: Array<{
+            title: string
+            courseUrl: string
+            thumbnailUrl?: string
+            progress?: number
+          }>
+        }
+
+        subject = 'Đừng quên học hôm nay trên Learnova 🎓'
+        to = reminder.email || notification.email
+        templateName = 'study-reminder.html'
+        templateData = withEmailLayout({
+          pageTitle: 'Nhắc học hôm nay · Learnova',
+          badge: 'Nhắc học',
+          headerTitle: `Chào ${reminder.userName || 'bạn'}, tiếp tục hành trình học tập nhé!`,
+          headerSubtitle:
+            'Bạn còn khóa học đang học dở — dành vài phút hôm nay để giữ nhịp và hoàn thành mục tiêu.',
+          footerNote: 'Email nhắc học tự động mỗi ngày · Learnova',
+          userName: reminder.userName || 'bạn',
+          courses: (reminder.courses || []).map((course) => {
+            const progress =
+              course.progress != null
+                ? Math.min(100, Math.max(0, Math.round(course.progress)))
+                : 0
+            return {
+              ...course,
+              progress,
+              progressRemaining: 100 - progress,
+              progressLabel: course.progress != null ? `${progress}%` : 'Chưa bắt đầu',
+              hasThumbnail: Boolean(course.thumbnailUrl)
+            }
+          })
+        })
         break
       }
       case QueueNameEnum.COURSE_APPROVAL: {
@@ -108,20 +210,34 @@ class NodeMailService {
         if (event.action === 'APPROVED') {
           subject = 'Khóa học của bạn đã được duyệt!'
           templateName = 'course-approved.html'
-          templateData = {
+          templateData = withEmailLayout({
+            pageTitle: 'Khóa học đã duyệt · Learnova',
+            badge: 'Đã duyệt',
+            headerGradient: EMAIL_GRADIENTS.success,
+            headerTitle: 'Khóa học của bạn đã được duyệt!',
+            headerSubtitle: 'Chúc mừng! Khóa học đã pass quy trình kiểm duyệt.',
+            footerNote: 'Thông báo giảng viên · Learnova',
             title: event.title,
             shortDescription: event.shortDescription,
             finalPrice: event.finalPrice,
-            thumbnailUrl: event.thumbnailUrl
-          }
+            thumbnailUrl: event.thumbnailUrl,
+            hasThumbnail: Boolean(event.thumbnailUrl)
+          })
         } else if (event.action === 'REJECTED') {
           subject = 'Khóa học của bạn bị từ chối'
           templateName = 'course-rejected.html'
-          templateData = {
+          templateData = withEmailLayout({
+            pageTitle: 'Khóa học bị từ chối · Learnova',
+            badge: 'Từ chối',
+            headerGradient: EMAIL_GRADIENTS.danger,
+            headerTitle: 'Khóa học cần chỉnh sửa',
+            headerSubtitle: 'Vui lòng xem lý do và cập nhật nội dung trước khi gửi lại.',
+            footerNote: 'Thông báo giảng viên · Learnova',
             title: event.title,
             reason: event.reason,
-            thumbnailUrl: event.thumbnailUrl
-          }
+            thumbnailUrl: event.thumbnailUrl,
+            hasThumbnail: Boolean(event.thumbnailUrl)
+          })
         } else {
           Logger.info(`Không xác định action cho course approval: ${JSON.stringify(event)}`)
           return

@@ -20,10 +20,16 @@ public class RabbitMQConfig {
     //routingkey for order.serivce.queue
     public static final String ORDER_SERVICE_QUEUE_ROUTING_KEY = "register.updated.v1";
 
+    // --- study reminder (daily email) ---
+    public static final String USER_NOTIFICATION_EXCHANGE = "user-notification-exchange";
+    public static final String STUDY_REMINDER_QUEUE = "study-reminder.queue";
+    public static final String STUDY_REMINDER_ROUTING_KEY = "course.study.reminder";
+
     // --- config course approval/reject ---
     public static final String COURSE_APPROVAL_QUEUE = "course.approval.queue";
     public static final String COURSE_APPROVAL_EXCHANGE = "course.approval.exchange";
     public static final String COURSE_APPROVAL_ROUTING_KEY = "course.approval.#";
+    public static final String ASSISTANT_COURSE_EMBEDDING_QUEUE = "assistant.course.embedding.queue";
 
     @Bean
     public Queue registerCourseQueue () {
@@ -33,6 +39,24 @@ public class RabbitMQConfig {
     @Bean
     public TopicExchange sagaExchange() {
         return new TopicExchange(SAGA_EXCHANGE, true, false);
+    }
+
+    @Bean
+    public DirectExchange userNotificationExchange() {
+        return new DirectExchange(USER_NOTIFICATION_EXCHANGE, true, false);
+    }
+
+    @Bean
+    public Queue studyReminderQueue() {
+        return new Queue(STUDY_REMINDER_QUEUE, true);
+    }
+
+    @Bean
+    public Binding bindingStudyReminder(Queue studyReminderQueue, DirectExchange userNotificationExchange) {
+        return BindingBuilder
+                .bind(studyReminderQueue)
+                .to(userNotificationExchange)
+                .with(STUDY_REMINDER_ROUTING_KEY);
     }
 
     @Bean
@@ -58,6 +82,19 @@ public class RabbitMQConfig {
     public Binding bindingCourseApproval(Queue courseApprovalQueue, TopicExchange courseApprovalExchange) {
         return BindingBuilder
                 .bind(courseApprovalQueue)
+                .to(courseApprovalExchange)
+                .with(COURSE_APPROVAL_ROUTING_KEY);
+    }
+
+    @Bean
+    public Queue assistantCourseEmbeddingQueue() {
+        return new Queue(ASSISTANT_COURSE_EMBEDDING_QUEUE, true);
+    }
+
+    @Bean
+    public Binding bindingAssistantCourseEmbedding(Queue assistantCourseEmbeddingQueue, TopicExchange courseApprovalExchange) {
+        return BindingBuilder
+                .bind(assistantCourseEmbeddingQueue)
                 .to(courseApprovalExchange)
                 .with(COURSE_APPROVAL_ROUTING_KEY);
     }

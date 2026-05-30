@@ -250,8 +250,9 @@ export function getValidExamBlueprintRows(
 }
 
 /**
- * Fingerprint of the current valid blueprint rows after a successful lesson-test sync.
- * If the user edits chunks/counts/instructions, this changes and per-group “regenerate” is cleared.
+ * Fingerprint of chunk-group **layout** after a successful lesson-test sync (row id + which chunks belong to each row).
+ * Meta edits (title, batch prompt, question count) intentionally do **not** affect this — otherwise optimistic `updateRow`
+ * during PATCH would briefly diverge from `bulkSyncSignature` and wipe cached quizzes.
  */
 export function blueprintSyncSignature(
   rows: ExamBlueprintRow[],
@@ -259,10 +260,10 @@ export function blueprintSyncSignature(
 ): string {
   const valid = getValidExamBlueprintRows(rows, chunks)
   return valid
-    .map(
-      (r) =>
-        `${r.id}:${r.chunkIds.join(',')}:${r.questionCount}:${r.instruction.trim()}:${r.groupTitle.trim()}`
-    )
+    .map((r) => {
+      const ids = [...r.chunkIds].sort().join(',')
+      return `${r.id}:${ids}`
+    })
     .join('|')
 }
 

@@ -3,9 +3,10 @@ import { StatusCodes } from 'http-status-codes';
 import sendResponse from '~/dto/response/send-response';
 import quizService from '~/service/analysis/quiz.service';
 import { GenerateQuizDto, GenerateBatchQuizzesDto } from '~/dto/request/quiz-generation.dto';
+import { CreateManualQuizDto } from '~/dto/request/quiz-create.dto';
 import { UpdateQuizDto, NormalizedQuizChoiceInput, UpdateQuizPersistPayload } from '~/dto/request/quiz-update.dto';
-import ApiError from '~/middleware/ApiError';
 import { QuestionType } from '~/enums/quizStatus.enum';
+import ApiError from '~/middleware/ApiError';
 
 /**
  * QuizController handles quiz-related HTTP endpoints.
@@ -82,6 +83,42 @@ class QuizController {
         code: StatusCodes.CREATED,
         message: 'Quiz generated successfully',
         result: this.formatQuiz(quiz),
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * POST /assistant/chunks/:chunkId/quizzes/manual
+   */
+  createManualQuiz = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    try {
+      const chunkId = String(req.params.chunkId);
+      const userId = String(req.user?.sub);
+      const body = req.body as CreateManualQuizDto;
+
+      const choicesNorm: NormalizedQuizChoiceInput[] = (body.choices ?? []).map((c) => ({
+        text: c.text.trim(),
+        isCorrect: c.isCorrect,
+        feedback: c.feedback ?? null,
+      }));
+
+      QuizController.assertObjectiveQuizChoices(body.type, choicesNorm);
+
+      const quiz = await quizService.createManualQuiz(chunkId, userId, {
+        ...body,
+        choices: choicesNorm,
+      });
+
+      sendResponse(res, {
+        code: StatusCodes.CREATED,
+        message: 'Manual quiz created successfully',
+        result: quiz,
       });
     } catch (error) {
       next(error);
@@ -271,16 +308,14 @@ class QuizController {
         feedback: c.feedback ?? null,
       }));
 
-      if (body.type !== QuestionType.SHORT_ANSWER) {
-        QuizController.assertObjectiveQuizChoices(choicesNorm);
-      }
+      QuizController.assertObjectiveQuizChoices(body.type, choicesNorm);
 
       const persistPayload: UpdateQuizPersistPayload = {
         question: body.question.trim(),
         explanation: (body.explanation ?? '').trim(),
         type: body.type,
         difficulty: body.difficulty,
-        choices: body.type === QuestionType.SHORT_ANSWER ? [] : choicesNorm,
+        choices: choicesNorm,
       };
       if (body.bloomLevel !== undefined) {
         persistPayload.bloomLevel = body.bloomLevel;
@@ -299,18 +334,117 @@ class QuizController {
   };
 
   /**
-   * Trắc nghiệm / đúng-sai: ít nhất 2 lựa chọn và đúng một đáp án đúng.
+   * PATCH /assistant/quizzes/quiz/:quizId/approve
    */
-  private static assertObjectiveQuizChoices(choices: NormalizedQuizChoiceInput[]): void {
+  approveQuiz = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    try {
+      const quizId = String(req.params.quizId);
+      const quiz = await quizService.approveQuizById(quizId);
+
+      sendResponse(res, {
+        code: StatusCodes.OK,
+        message: 'Quiz approved successfully',
+        result: quiz,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * POST /assistant/quizzes/bulk-approve
+   */
+  bulkApproveQuizzes = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    try {
+      const { quizIds } = req.body;
+      if (!Array.isArray(quizIds)) {
+        throw new ApiError(StatusCodes.BAD_REQUEST, 'quizIds must be an array');
+      }
+
+      await quizService.approveQuizzesBulk(quizIds);
+
+      sendResponse(res, {
+        code: StatusCodes.OK,
+        message: 'Quizzes approved successfully',
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * DELETE /assistant/quizzes/quiz/:quizId
+   */
+  deleteQuiz = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    try {
+      const quizId = String(req.params.quizId);
+      await quizService.deleteQuizById(quizId);
+
+      sendResponse(res, {
+        code: StatusCodes.OK,
+        message: 'Quiz deleted successfully',
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * POST /assistant/quizzes/bulk-delete
+   */
+  bulkDeleteQuizzes = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    try {
+      const { quizIds } = req.body;
+      if (!Array.isArray(quizIds)) {
+        throw new ApiError(StatusCodes.BAD_REQUEST, 'quizIds must be an array');
+      }
+
+      await quizService.deleteQuizzesBulk(quizIds);
+
+      sendResponse(res, {
+        code: StatusCodes.OK,
+        message: 'Quizzes deleted successfully',
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * Trắc nghiệm / đúng-sai: ít nhất 2 lựa chọn.
+   * TRUE_FALSE: đúng 1 đáp án đúng.
+   * MULTIPLE_CHOICE: ít nhất 1 đáp án đúng (có thể nhiều).
+   */
+  private static assertObjectiveQuizChoices(type: QuestionType, choices: NormalizedQuizChoiceInput[]): void {
     if (choices.length < 2) {
       throw new ApiError(
         StatusCodes.BAD_REQUEST,
-        'Cần ít nhất 2 lựa chọn cho câu trắc nghiệm / đúng-sai.'
+        'Cần ít nhất 2 lựa chọn cho câu hỏi.'
       );
     }
     const correctCount = choices.filter((c) => c.isCorrect).length;
-    if (correctCount !== 1) {
-      throw new ApiError(StatusCodes.BAD_REQUEST, 'Phải có đúng một đáp án đúng.');
+    if (correctCount < 1) {
+      throw new ApiError(StatusCodes.BAD_REQUEST, 'Phải có ít nhất một đáp án đúng.');
+    }
+
+    if (type === QuestionType.TRUE_FALSE && correctCount !== 1) {
+      throw new ApiError(StatusCodes.BAD_REQUEST, 'Câu hỏi Đúng/Sai (hoặc Single Choice) phải có đúng một đáp án đúng.');
     }
   }
 

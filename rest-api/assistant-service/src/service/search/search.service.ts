@@ -50,13 +50,7 @@ export class SearchService {
                 `[SearchService] Searching chunks for lessonId=${lessonId}, query="${query}", limit=${limit}`
             );
 
-            // Step 1: Generate embedding for the query
-            // e5-base-v2 expects "query: " prefix for search queries (vs "passage: " for docs)
-            const queryWithPrefix = `query: ${query}`;
-            const embeddingsMap = await this.embeddingService.generateEmbeddingsForChunkContents([
-                queryWithPrefix,
-            ]);
-            const queryEmbedding = embeddingsMap.get(0);
+            const queryEmbedding = await this.embeddingService.embedQuery(query);
 
             if (!queryEmbedding) {
                 throw new Error(
@@ -105,6 +99,26 @@ export class SearchService {
                 `[SearchService.searchChunks] Error searching chunks – lessonId=${lessonId}, query="${query}" – ${error}`
             );
             throw error;
+        }
+    }
+
+    /**
+     * Fetch full chunk details for a given list of IDs.
+     * Useful for recovering sources cited by LLM from previous conversation turns.
+     */
+    async getChunksByIds(ids: string[]): Promise<SearchChunkResult[]> {
+        if (ids.length === 0) return [];
+        try {
+            const chunksFromDb = await prismaService.lessonChunk.findMany({
+                where: { id: { in: ids } }
+            });
+
+            return chunksFromDb.map(c => new SearchChunkResponseDto(c, 1.0));
+        } catch (error) {
+            Logger.error(
+                `[SearchService.getChunksByIds] Error fetching chunks by IDs – ${error}`
+            );
+            return [];
         }
     }
 }

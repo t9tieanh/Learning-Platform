@@ -21,16 +21,23 @@ public interface LessonRepository extends JpaRepository<LessonEntity,String> {
         l.duration,
         l.position,
         l.type,
-
         COALESCE(
-            lp.progress, 
+            (
+                SELECT lp.progress
+                FROM LessonProgressEntity lp
+                WHERE lp.lesson.id = l.id
+                  AND lp.enrollment.id = :enrollmentId
+                  AND lp.updatedAt = (
+                      SELECT MAX(lp2.updatedAt)
+                      FROM LessonProgressEntity lp2
+                      WHERE lp2.lesson.id = l.id
+                        AND lp2.enrollment.id = :enrollmentId
+                  )
+            ),
             com.freeclassroom.courseservice.enums.entity.EnumLessonProgress.NOT_STARTED
         )
-        
     )
     FROM LessonEntity l
-    LEFT JOIN LessonProgressEntity lp
-        ON lp.lesson.id = l.id AND lp.enrollment.id = :enrollmentId
     WHERE l.chapter.id = :chapterId
     ORDER BY l.position ASC
 """)

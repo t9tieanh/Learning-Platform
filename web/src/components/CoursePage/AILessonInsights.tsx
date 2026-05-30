@@ -48,7 +48,7 @@ export const AILessonInsights = ({ lessonId, summary, subtitles, chunks, onSeek,
                             <h2 className='text-white font-bold text-[15px] tracking-tight leading-tight'>
                                 Phân tích bài giảng chuyên sâu
                             </h2>
-                            <p className='text-[11px] text-blue-100/60 mt-1 flex items-center gap-2 font-bold uppercase tracking-widest'>
+                            <p className='text-[11px] text-blue-100/60 mt-1 flex items-center gap-2 font-bold tracking-widest'>
                                 <Sparkles className='w-3 h-3 text-blue-300 animate-pulse' /> Learnova AI Insight
                             </p>
                         </div>
@@ -59,7 +59,7 @@ export const AILessonInsights = ({ lessonId, summary, subtitles, chunks, onSeek,
                     <CustomButton
                         variant='ghost'
                         onClick={() => setActiveSubTab('summary')}
-                        className={`py-6 px-5 h-auto text-[11px] font-bold uppercase tracking-widest transition-all relative flex items-center gap-2.5 rounded-none border-none hover:bg-transparent ${activeSubTab === 'summary' ? 'text-white' : 'text-blue-100/40 hover:text-blue-100'
+                        className={`py-6 px-5 h-auto text-[11px] font-bold tracking-widest transition-all relative flex items-center gap-2.5 rounded-none border-none hover:bg-transparent ${activeSubTab === 'summary' ? 'text-white' : 'text-blue-100/40 hover:text-blue-100'
                             }`}
                         label='Tóm tắt'
                         icon={<FileText className='w-3.5 h-3.5' />}
@@ -168,16 +168,6 @@ export const AILessonInsights = ({ lessonId, summary, subtitles, chunks, onSeek,
                                                     <p className='text-[12px] text-gray-600 leading-relaxed font-medium'>
                                                         {chunk.summary}
                                                     </p>
-                                                    <div className='mt-4 flex justify-end'>
-                                                        <CustomButton
-                                                            variant='default'
-                                                            size='sm'
-                                                            onClick={() => onSeek?.(chunk.startTime || '00:00')}
-                                                            label='Đi tới đoạn này'
-                                                            className='bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-[10px] uppercase tracking-wider px-5 h-8 shadow-lg shadow-blue-500/20'
-                                                            icon={<Brain className='w-3 h-3' />}
-                                                        />
-                                                    </div>
                                                 </div>
                                             </div>
                                         </AccordionContent>

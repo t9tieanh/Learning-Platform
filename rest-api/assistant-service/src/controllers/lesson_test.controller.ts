@@ -30,18 +30,18 @@ class LessonTestController {
 
       const hints = await lessonTestGenerationService.generationHintsForLesson(lessonId, bundle.chunkGroups);
 
-      const chunkGroups = bundle.chunkGroups.map((g: LessonTestChunkGroup) => {
-        const h = hints.get(g.id) ?? { state: 'idle', jobId: null };
+      const chunkGroups = bundle.chunkGroups.map((group: LessonTestChunkGroup) => {
+        const h = hints.get(group.id) ?? { state: 'idle', jobId: null };
         return {
-          id: g.id,
-          lessonId: g.lessonId,
-          chunkIds: lessonTestService.parseStoredChunkIds(g.chunkIds),
-          questionCount: g.questionCount,
-          label: g.label,
-          distribution: g.distribution,
-          batchUserPrompt: g.batchUserPrompt,
-          createdAt: g.createdAt.toISOString(),
-          updatedAt: g.updatedAt.toISOString(),
+          id: group.id,
+          lessonId: group.lessonId,
+          chunkIds: lessonTestService.parseStoredChunkIds(group.chunkIds),
+          questionCount: group.questionCount,
+          label: group.label,
+          distribution: group.distribution,
+          batchUserPrompt: group.batchUserPrompt,
+          createdAt: group.createdAt.toISOString(),
+          updatedAt: group.updatedAt.toISOString(),
           generation: {
             state: h.state,
             jobId: h.jobId,
@@ -197,6 +197,29 @@ class LessonTestController {
           createdAt: row.createdAt.toISOString(),
           updatedAt: row.updatedAt.toISOString(),
         },
+      });
+    } catch (e) {
+      next(e);
+    }
+  };
+
+  getLessonExamBlueprintStats = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const lessonId = String(req.params.lessonId);
+      const stats = await lessonTestService.getExamBlueprintStats(lessonId);
+      if (!stats) {
+        sendResponse(res, {
+          code: StatusCodes.NOT_FOUND,
+          message: 'Lesson test blueprint not found',
+          result: null,
+        });
+        return;
+      }
+
+      sendResponse(res, {
+        code: StatusCodes.OK,
+        message: 'OK',
+        result: stats,
       });
     } catch (e) {
       next(e);

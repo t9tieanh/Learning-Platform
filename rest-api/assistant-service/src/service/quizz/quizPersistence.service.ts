@@ -2,7 +2,7 @@ import prismaService from '~/service/utils/prisma.service';
 import Logger from '~/utils/logger';
 import { GeneratedQuizResponse, BatchGeneratedQuizzesResponse } from '~/dto/response/quiz-response.dto';
 import { Prisma, Quiz, QuizChoice, QuizScope } from '@prisma/client';
-import { QuestionType, DifficultyLevel, BloomLevel } from '~/enums/quizStatus.enum';
+import { QuestionType, DifficultyLevel, BloomLevel, QuizStatus } from '~/enums/quizStatus.enum';
 
 /** Quiz row including nested choices (matches Prisma `include: { choices: true }`). */
 export type QuizWithChoices = Prisma.QuizGetPayload<{ include: { choices: true } }>;
@@ -125,6 +125,52 @@ export class QuizPersistenceService {
   }
 
   /**
+   * Saves a manually created quiz with its choices to the database.
+   */
+  async createManualQuiz(
+    chunkId: string,
+    userId: string,
+    data: {
+      question: string;
+      explanation: string;
+      type: QuestionType;
+      difficulty: DifficultyLevel;
+      bloomLevel: BloomLevel;
+      choices: Array<{ text: string; isCorrect: boolean; feedback?: string | null }>;
+    }
+  ): Promise<QuizWithChoices> {
+    Logger.info(
+      `[QuizPersistenceService] Creating manual quiz for chunkId=${chunkId}, userId=${userId}`
+    );
+
+    const savedQuiz = await prismaService.quiz.create({
+      data: {
+        chunkId,
+        question: data.question,
+        explanation: data.explanation,
+        type: data.type,
+        difficulty: data.difficulty,
+        bloomLevel: data.bloomLevel,
+        createdBy: userId,
+        aiGenerated: false,
+        isApproved: true,
+        status: QuizStatus.ACTIVE,
+        choices: {
+          create: data.choices.map((choice, index) => ({
+            text: choice.text,
+            isCorrect: choice.isCorrect,
+            order: index,
+            feedback: choice.feedback ?? null,
+          })),
+        },
+      },
+      include: { choices: true },
+    });
+
+    return savedQuiz;
+  }
+
+  /**
    * Saves batch quizzes for lesson-test scope (merged chunk-group generation).
    * `chunkId` is null; linkage is `lessonTestChunkGroupId` (+ optional group JSON chunk list on the group row).
    */
@@ -141,7 +187,7 @@ export class QuizPersistenceService {
     for (const quiz of batchQuizzes.quizzes) {
       const row = await prismaService.quiz.create({
         data: {
-          chunkId: null,
+          chunkId: quiz.groundedChunkId || null,
           quizScope: QuizScope.LESSON_TEST,
           lessonTestChunkGroupId,
           question: quiz.question,
@@ -302,6 +348,37 @@ export class QuizPersistenceService {
 
       Logger.info(`[QuizPersistenceService] Updated quiz id=${quizId} choices=${updated.choices.length}`);
       return updated as QuizWithChoices;
+    });
+  }
+
+  /**
+   * Approves a quiz (sets isApproved to true).
+   */
+  async approveQuiz(quizId: string): Promise<QuizWithChoices> {
+    const quiz = await prismaService.quiz.update({
+      where: { id: quizId },
+      data: { isApproved: true },
+      include: { choices: true },
+    });
+    return quiz;
+  }
+
+  /**
+   * Approves multiple quizzes by ID.
+   */
+  async approveQuizzes(quizIds: string[]): Promise<void> {
+    await prismaService.quiz.updateMany({
+      where: { id: { in: quizIds } },
+      data: { isApproved: true },
+    });
+  }
+
+  /**
+   * Deletes multiple quizzes by ID.
+   */
+  async deleteQuizzes(quizIds: string[]): Promise<void> {
+    await prismaService.quiz.deleteMany({
+      where: { id: { in: quizIds } },
     });
   }
 

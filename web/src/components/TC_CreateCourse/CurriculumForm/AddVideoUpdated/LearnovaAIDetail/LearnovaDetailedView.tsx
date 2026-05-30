@@ -4,6 +4,7 @@ import { LessonChunk } from '@/types/ai'
 import { AnalysisResult } from '@/services/assistant/analysis.service'
 import { SubtitleEntry } from '@/components/common/Video/LearnovaVideoPlayer'
 import { parseSRT } from '@/utils/srtParser'
+import { LessonType } from '@/types/lesson'
 import { Accordion } from '@/components/ui/accordion'
 import CustomButton from '@/components/common/Button'
 
@@ -28,6 +29,7 @@ interface LearnovaDetailedViewProps {
     mainWrapperRef?: React.RefObject<HTMLDivElement | null>
     onSaveSummary: (chunkId: string, newSummary: string) => Promise<void>
     onAfterExamGenerate?: () => void
+    lessonTitle?: string
 }
 
 const LearnovaDetailedView: React.FC<LearnovaDetailedViewProps> = ({
@@ -38,7 +40,8 @@ const LearnovaDetailedView: React.FC<LearnovaDetailedViewProps> = ({
     handleSeek,
     mainWrapperRef,
     onSaveSummary,
-    onAfterExamGenerate
+    onAfterExamGenerate,
+    lessonTitle
 }) => {
     const chunks: LessonChunk[] = analysisData?.chunks || []
     /** Toggle: lecture structure vs lesson-test blueprint — avoids stacking both on one long page. */
@@ -97,17 +100,27 @@ const LearnovaDetailedView: React.FC<LearnovaDetailedViewProps> = ({
             <Header onBack={onBack} />
 
             <div className='max-w-6xl mx-auto w-full px-4'>
-                <VideoPreview
-                    videoSrc={videoSrc}
-                    detailedVideoRef={detailedVideoRef}
-                    subtitles={subtitles}
-                />
+                {analysisData?.lessonType !== LessonType.VIDEO ? (
+                    <div className='relative w-full aspect-video bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm'>
+                        <iframe
+                            src={videoSrc || ''}
+                            className='w-full h-full'
+                            title='Document Preview'
+                        />
+                    </div>
+                ) : (
+                    <VideoPreview
+                        videoSrc={videoSrc}
+                        detailedVideoRef={detailedVideoRef}
+                        subtitles={subtitles}
+                    />
+                )}
             </div>
 
             <div className='max-w-5xl mx-auto w-full px-4'>
                 {detailMainPanel === 'structure' ? (
                     <div className='space-y-6'>
-                        <HighGlossBackground className='rounded-2xl shadow-xl border border-blue-400/20 overflow-hidden'>
+                        <HighGlossBackground className='rounded-2xl shadow-lg shadow-blue-900/15 overflow-hidden'>
                             <div className='px-6 py-5 md:py-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
                                 <div className='flex items-start gap-4 md:gap-5 min-w-0'>
                                     <div className='w-10 h-10 md:w-12 md:h-12 mt-0.5 shrink-0 bg-white/10 rounded-2xl flex items-center justify-center text-white shadow-xl backdrop-blur-md border border-white/20'>
@@ -155,41 +168,47 @@ const LearnovaDetailedView: React.FC<LearnovaDetailedViewProps> = ({
                             </div>
                         </HighGlossBackground>
 
-                        <div className='w-full rounded-2xl border border-gray-100 bg-white/80 backdrop-blur-sm shadow-sm p-4 md:p-6'>
-                            <Accordion
-                                type='single'
-                                collapsible
-                                defaultValue={chunks[0]?.id}
-                                className='space-y-4 md:space-y-5'
-                            >
-                                {chunks.map((chunk, idx) => (
-                                    <ChunkItem
-                                        key={chunk.id}
-                                        chunk={chunk}
-                                        idx={idx}
-                                        handleSeek={handleSeek}
-                                        editingSummaryId={editingSummaryId}
-                                        draftSummary={draftSummary}
-                                        setDraftSummary={setDraftSummary}
-                                        isSavingSummary={isSavingSummary}
-                                        handleStartEdit={handleStartEdit}
-                                        handleCancelEdit={handleCancelEdit}
-                                        handleSave={handleSave}
-                                    />
-                                ))}
-                            </Accordion>
-                        </div>
+                        <HighGlossBackground className='rounded-2xl shadow-lg shadow-blue-900/10'>
+                            <div className='rounded-[13px] bg-white p-4 md:p-6 border-0'>
+                                <Accordion
+                                    type='single'
+                                    collapsible
+                                    defaultValue={chunks[0]?.id}
+                                    className='space-y-4 md:space-y-5'
+                                >
+                                    {chunks.map((chunk, idx) => (
+                                        <ChunkItem
+                                            key={chunk.id}
+                                            chunk={chunk}
+                                            idx={idx}
+                                            handleSeek={handleSeek}
+                                            editingSummaryId={editingSummaryId}
+                                            draftSummary={draftSummary}
+                                            setDraftSummary={setDraftSummary}
+                                            isSavingSummary={isSavingSummary}
+                                            handleStartEdit={handleStartEdit}
+                                            handleCancelEdit={handleCancelEdit}
+                                            handleSave={handleSave}
+                                            lessonTitle={lessonTitle}
+                                        />
+                                    ))}
+                                </Accordion>
+                            </div>
+                        </HighGlossBackground>
                     </div>
                 ) : canOpenLessonExam && analysisData?.lessonId ? (
                     <LessonExamBlueprintSection
                         lessonId={analysisData.lessonId}
                         chunks={chunks}
+                        handleSeek={handleSeek}
                         persistedLessonTest={analysisData.lessonTest ?? null}
                         persistedLessonTestChunkGroups={
                             analysisData.lessonTestChunkGroups ?? []
                         }
+                        lessonType={analysisData.lessonType ?? undefined}
                         onAfterGenerate={onAfterExamGenerate}
                         onBackToStructure={() => setDetailMainPanel('structure')}
+                        lessonTitle={lessonTitle}
                     />
                 ) : null}
             </div>

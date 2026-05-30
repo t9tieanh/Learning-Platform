@@ -2,6 +2,7 @@ package com.freeclassroom.courseservice.dto.response.course.student;
 
 import com.freeclassroom.courseservice.service.utils.cloudfront.SignedUrl;
 import com.freeclassroom.courseservice.dto.response.user.InstructorResponse;
+import com.freeclassroom.courseservice.dto.response.certificate.CertificateJourneyResponse;
 import com.freeclassroom.courseservice.enums.entity.EnumCourseStatus;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -27,6 +28,9 @@ public class CourseDetailResponse {
 
     EnumCourseStatus status;
     InstructorResponse instructor;
+
+    Double progress;
+    CertificateJourneyResponse certificateJourney;
 
     List<ChapterResponse> chapters;
 }

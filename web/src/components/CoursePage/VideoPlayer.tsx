@@ -39,7 +39,7 @@ const VideoPlayer = forwardRef<VideoPlayerRef, {
 
   const SKIP_DETECTION_WINDOW = 10000
   const SKIP_THRESHOLD = 3
-  const COMPLETION_THRESHOLD = 0.9
+  const COMPLETION_THRESHOLD = 0.7
 
   // Expose seekTo method
   useImperativeHandle(ref, () => ({
@@ -62,33 +62,9 @@ const VideoPlayer = forwardRef<VideoPlayerRef, {
 
       if (lesson.id && data?.accessToken) {
         try {
-          // Senior Logic: Detect if we can use Cookies or must fallback to Signed URL
-          const currentHost = window.location.hostname
-
-          // Call cookie API first to get domain info
-          const response = await lessonStudentService.getPresignedCookies(lesson.id)
-
-          if (response.code === 200 && response.result) {
-            const { policy, signature, keyPairId, expires, domain, url } = response.result
-
-            // Check if we can realistically set cookies (must share a base domain and not be a public suffix)
-            const canUseCookies = !domain.endsWith('.cloudfront.net') &&
-              (currentHost.endsWith(domain.split('.').slice(-2).join('.')) || currentHost === 'localhost')
-
-            if (canUseCookies && currentHost !== 'localhost') {
-              const cookieSettings = `; domain=.${domain}; path=/; Secure; SameSite=None`
-              if (policy) document.cookie = `CloudFront-Policy=${policy}${cookieSettings}`
-              if (expires) document.cookie = `CloudFront-Expires=${expires}${cookieSettings}`
-              document.cookie = `CloudFront-Signature=${signature}${cookieSettings}`
-              document.cookie = `CloudFront-Key-Pair-Id=${keyPairId}${cookieSettings}`
-              setActualVideoUrl(url)
-            } else {
-              // Fallback to Signed URL for .cloudfront.net or localhost
-              const urlResponse = await lessonStudentService.getPresignedUrl(lesson.id)
-              if (urlResponse.code === 200) {
-                setActualVideoUrl(urlResponse.result || '')
-              }
-            }
+          const urlResponse = await lessonStudentService.getPresignedUrl(lesson.id)
+          if (urlResponse.code === 200) {
+            setActualVideoUrl(urlResponse.result || '')
           }
         } catch (error) {
           console.error('Video access error:', error)

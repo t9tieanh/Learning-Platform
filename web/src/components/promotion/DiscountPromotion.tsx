@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react'
-import { Ticket, ArrowRight, Tag, Percent, Sparkles, Clock } from 'lucide-react'
+import { ArrowRight, Tag, Percent, Sparkles, Clock } from 'lucide-react'
 import CustomDialog from '@/components/common/Dialog'
 import CustomButton from '@/components/common/Button'
 import discountService from '@/services/sale/discount.service'
 import { toast } from 'sonner'
 import bannerImg from '@/assets/images/cover-discount.jpg'
-import logo from '@/assets/images/logo1.png'
 
 interface Discount {
     id: string
@@ -112,9 +111,6 @@ const DiscountPromotion: React.FC<DiscountPromotionProps> = ({ open, onOpenChang
                                     <p className='text-gray-400 text-sm md:text-[15px] font-semibold tracking-tight leading-relaxed max-w-sm'>
                                         Khám phá tri thức cùng Learnova với mã ưu đãi <span className='text-blue-600 font-black'>{selectedDiscount.code}</span> áp dụng ngay hôm nay.
                                     </p>
-                                    <div className='pt-2 opacity-50'>
-                                        <img src={logo} className='h-4 w-auto object-contain' alt='Learnova Logo' />
-                                    </div>
                                 </div>
                             ) : (
                                 <div className='h-32 flex items-center justify-center bg-gray-50 rounded-3xl animate-pulse'>

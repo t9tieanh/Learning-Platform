@@ -84,6 +84,37 @@ model LessonTestChunkGroup {
   @@map("lesson_test_chunk_groups")
 }
 
+model LessonTestSubmission {
+  id           String   @id @default(uuid())
+  lessonId     String   @map("lesson_id")
+  userId       String   @map("user_id")
+  earnedPoints Float    @map("earned_points")
+  maxPoints    Int      @map("max_points")
+  percent      Float
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  lesson  Lesson                       @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  answers LessonTestSubmissionAnswer[]
+
+  @@index([lessonId, userId])
+  @@map("lesson_test_submissions")
+}
+
+model LessonTestSubmissionAnswer {
+  id                String   @id @default(uuid())
+  submissionId      String   @map("submission_id")
+  quizId            String   @map("quiz_id")
+  selectedChoiceIds Json     @map("selected_choice_ids")
+  isCorrect         Boolean  @map("is_correct")
+  pointsEarned      Float    @map("points_earned")
+
+  submission LessonTestSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  quiz       Quiz                 @relation(fields: [quizId], references: [id], onDelete: Cascade)
+
+  @@index([submissionId])
+  @@map("lesson_test_submission_answers")
+}
+
 model Lesson {
   id             String         @id @default(uuid())
   title          String?
@@ -105,10 +136,44 @@ model Lesson {
   isQualityValid Boolean?       @default(true)
   qualityReason  String?
   status         AnalysisStatus @default(PROCESSING)
-  chunks         LessonChunk[]
-  lessonTest     LessonTest?
+  chunks                  LessonChunk[]
+  lessonTest              LessonTest?
+  lessonTestSubmissions   LessonTestSubmission[]
 
   @@map("lessons")
+}
+
+/// Chat threads per (logical) lesson id from the platform. No FK to `lessons` — ids may exist before analysis ingests the row.
+model LessonChatSession {
+  id          String   @id @default(uuid())
+  lessonId    String   @map("lesson_id")
+  userId      String   @map("user_id")
+  title       String?
+  summaryLast String?  @map("summary_last")
+  notes       String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  messages LessonChatMessage[]
+
+  @@index([lessonId, userId])
+  @@map("lesson_chat_sessions")
+}
+
+
+model LessonChatMessage {
+  id        String                @id @default(uuid())
+  sessionId String                @map("session_id")
+  role      LessonChatMessageRole
+  content   String                @db.Text
+  metadata  Json?
+  embedding Unsupported("vector")?
+  createdAt DateTime              @default(now()) @map("created_at")
+
+  session LessonChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+  @@map("lesson_chat_messages")
 }
 
 model NavigatorEmbedding {
@@ -162,6 +227,7 @@ model Quiz {
   choices                 QuizChoice[]
   chunk                   LessonChunk?          @relation(fields: [chunkId], references: [id], onDelete: Cascade)
   lessonTestChunkGroup    LessonTestChunkGroup? @relation(fields: [lessonTestChunkGroupId], references: [id], onDelete: SetNull)
+  lessonTestSubmissionAnswers LessonTestSubmissionAnswer[]
 
   @@index([aiGenerated])
   @@index([chunkId])
@@ -186,11 +252,12 @@ model SystemProfileEmbedding {
   @@map("system_profile_embeddings")
 }
 
+/// Supabase: public.user_purchased_courses (id bigint PK, user_id/course_id text, purchased_at timestamp)
 model UserPurchasedCourse {
   id          BigInt    @id
-  userId      String    @map("user_id")
-  courseId    String    @map("course_id")
-  purchasedAt DateTime? @default(now()) @map("purchased_at") @db.Timestamp(6)
+  userId      String    @map("user_id") @db.Text
+  courseId    String    @map("course_id") @db.Text
+  purchasedAt DateTime? @default(now()) @map("purchased_at") @db.Timestamp()
 
   @@map("user_purchased_courses")
 }
@@ -243,4 +310,10 @@ enum LessonTestStatus {
 enum QuizScope {
   CHUNK_STANDALONE
   LESSON_TEST
+}
+
+enum LessonChatMessageRole {
+  USER
+  ASSISTANT
+  SYSTEM
 }

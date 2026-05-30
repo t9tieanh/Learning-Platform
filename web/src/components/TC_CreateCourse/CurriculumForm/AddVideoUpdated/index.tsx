@@ -14,6 +14,7 @@ import lessonService from '@/services/course/lesson.service'
 import { toast } from 'sonner'
 import useLoading from '@/hooks/useLoading.hook'
 import { Upload, ArrowRight, ArrowLeft, X, Trash2 } from 'lucide-react'
+import { LessonType } from '@/types/lesson'
 
 interface AddVideoFormProps {
   lessonId?: string
@@ -23,7 +24,7 @@ interface AddVideoFormProps {
   fetchChapters: () => Promise<void>
   initialData?: Lesson
   mode?: 'create' | 'edit'
-  initialType?: 'video' | 'document'
+  initialType?: LessonType
   handleDelLesson?: (lessonId: string) => Promise<void>
 }
 
@@ -35,7 +36,7 @@ const AddVideoForm: React.FC<AddVideoFormProps> = ({
   fetchChapters,
   initialData,
   mode = 'create',
-  initialType = 'video',
+  initialType = LessonType.VIDEO,
   handleDelLesson
 }) => {
   const {
@@ -60,7 +61,9 @@ const AddVideoForm: React.FC<AddVideoFormProps> = ({
   const [uploadId, setUploadId] = useState<string | null>(null)
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
-  const [contentType, setContentType] = useState<'video' | 'document'>(mode === 'edit' ? initialType : 'video')
+  const [contentType, setContentType] = useState<LessonType>(
+    mode === 'edit' ? (initialType as LessonType) : LessonType.VIDEO
+  )
   const [step, setStep] = useState<0 | 1 | 2>(mode === 'edit' ? 2 : 0)
 
   // Find current upload being processed
@@ -87,19 +90,19 @@ const AddVideoForm: React.FC<AddVideoFormProps> = ({
     const file = event.target.files?.[0]
     if (file) {
       // Validate file type
-      if (contentType === 'video' && !file.type.startsWith('video/')) {
+      if (contentType === LessonType.VIDEO && !file.type.startsWith('video/')) {
         toast.error('Vui lòng chọn file video')
         return
       }
-      if (contentType === 'document' && file.type !== 'application/pdf') {
+      if (contentType === LessonType.ARTICLE && file.type !== 'application/pdf') {
         toast.error('Vui lòng chọn file PDF')
         return
       }
 
       // Validate file size
-      const maxSize = contentType === 'video' ? 500 * 1024 * 1024 : 50 * 1024 * 1024
+      const maxSize = contentType === LessonType.VIDEO ? 500 * 1024 * 1024 : 50 * 1024 * 1024
       if (file.size > maxSize) {
-        toast.error(`File quá lớn. Dung lượng tối đa: ${contentType === 'video' ? '500MB' : '50MB'}`)
+        toast.error(`File quá lớn. Dung lượng tối đa: ${contentType === LessonType.VIDEO ? '500MB' : '50MB'}`)
         return
       }
 
@@ -177,7 +180,7 @@ const AddVideoForm: React.FC<AddVideoFormProps> = ({
       // Step 3: Complete upload - pass uploadId, fileType, and metadata
       const result = await chunkedUpload.completeUpload(
         newUploadId,
-        'video', // fileType: 'video' for this component
+        contentType,
         currentTitle || selectedFile.name || 'Bài giảng chưa có tiêu đề',
         currentContent,
         duration ?? undefined

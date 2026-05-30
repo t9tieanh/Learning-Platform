@@ -3,6 +3,7 @@ import 'dotenv/config';
 import express from 'express';
 import { errorHandlingMiddleware } from './middleware/error-handler.midleware'
 import RabbitMQService from './service/utils/rabbitmq.service';
+import { initSagas } from '~/sagas/init/initSaga';
 import initializeBullProcessors from '~/service/jobs/bullProcessorInit';
 import { env } from './config/env';
 import indexRoute from '~/routes';
@@ -25,11 +26,14 @@ app.use(errorHandlingMiddleware);
 
 const PORT = env.PORT || 4000;
 
-RabbitMQService.getInstance().then(async (rabbitClient) => {
-    Logger.info('Connected to RabbitMQ');
-}).catch((error) => {
-    Logger.error(`Failed to connect to RabbitMQ: ${error}`);
-});
+RabbitMQService.getInstance()
+    .then(async () => {
+        Logger.info('Connected to RabbitMQ');
+        await initSagas();
+    })
+    .catch((error) => {
+        Logger.error(`Failed to connect to RabbitMQ: ${error}`);
+    });
 
 // Initialize Bull job processors for lesson analysis pipeline
 initializeBullProcessors().catch((error) => {

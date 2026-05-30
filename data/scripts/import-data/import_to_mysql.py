@@ -106,6 +106,37 @@ def import_tags(cursor, file_path):
         cursor.executemany(sql, data)
         print(f"Inserted {cursor.rowcount} tags.")
 
+def import_expertise(cursor, file_path):
+    print(f"Importing Expertise from {file_path}...")
+    with open(file_path, 'r', encoding='utf-8') as f:
+        reader = csv.DictReader(f)
+        sql = """
+        INSERT INTO expertise (id, image, name) 
+        VALUES (%s, %s, %s)
+        ON DUPLICATE KEY UPDATE name=VALUES(name)
+        """
+        data = []
+        for row in reader:
+            data.append((row['id'], row['image'], row['name']))
+        
+        cursor.executemany(sql, data)
+        print(f"Inserted {cursor.rowcount} expertise.")
+
+def import_user_expertise(cursor, file_path):
+    print(f"Importing User Expertise from {file_path}...")
+    with open(file_path, 'r', encoding='utf-8') as f:
+        reader = csv.DictReader(f)
+        sql = """
+        INSERT IGNORE INTO user_expertise (user_id, expertise_id) 
+        VALUES (%s, %s)
+        """
+        data = []
+        for row in reader:
+            data.append((row['user_id'], row['expertise_id']))
+        
+        cursor.executemany(sql, data)
+        print(f"Inserted {cursor.rowcount} user-expertise relations.")
+
 def import_courses(cursor, file_path):
     print(f"Importing Courses from {file_path}...")
     with open(file_path, 'r', encoding='utf-8') as f:
@@ -133,8 +164,8 @@ def import_courses(cursor, file_path):
             language = 'en'
             progress_step = 'COMPLETED'
             status = 'PUBLISHED'
-            long_description = row['short_description'][:255] if row['short_description'] else None # Default long to short, truncated
-            short_description = row['short_description'][:255] if row['short_description'] else None
+            long_description = row['short_description'] if row['short_description'] else None # Default long to short
+            short_description = row['short_description'] if row['short_description'] else None
 
             data.append((
                 row['id'], row['created_at'], deleted, row['updated_at'], 
@@ -151,14 +182,13 @@ def import_course_tags(cursor, file_path):
     print(f"Importing Course Tags from {file_path}...")
     with open(file_path, 'r', encoding='utf-8') as f:
         reader = csv.DictReader(f)
-        # Schema: id, course_id, tag_id
         sql = """
-        INSERT IGNORE INTO course_tag (id, course_id, tag_id) 
-        VALUES (%s, %s, %s)
+        INSERT IGNORE INTO course_tag (course_id, tag_id)
+        VALUES (%s, %s)
         """
         data = []
         for row in reader:
-            data.append((row['id'], row['course_id'], row['tag_id']))
+            data.append((row['course_id'], row['tag_id']))
         
         cursor.executemany(sql, data)
         print(f"Inserted {cursor.rowcount} course-tag relations.")
@@ -168,13 +198,13 @@ def import_course_outcomes(cursor, file_path):
     with open(file_path, 'r', encoding='utf-8') as f:
         reader = csv.DictReader(f)
         sql = """
-        INSERT INTO course_outcomes (id, course_id, outcome) 
-        VALUES (%s, %s, %s)
+        INSERT INTO course_outcomes (course_id, outcome)
+        VALUES (%s, %s)
         ON DUPLICATE KEY UPDATE outcome=VALUES(outcome)
         """
         data = []
         for row in reader:
-            data.append((row['id'], row['course_id'], row['outcome']))
+            data.append((row['course_id'], row['outcome']))
         
         cursor.executemany(sql, data)
         print(f"Inserted {cursor.rowcount} course outcomes.")
@@ -184,13 +214,13 @@ def import_course_requirements(cursor, file_path):
     with open(file_path, 'r', encoding='utf-8') as f:
         reader = csv.DictReader(f)
         sql = """
-        INSERT INTO course_requirements (id, course_id, requirement) 
-        VALUES (%s, %s, %s)
+        INSERT INTO course_requirements (course_id, requirement)
+        VALUES (%s, %s)
         ON DUPLICATE KEY UPDATE requirement=VALUES(requirement)
         """
         data = []
         for row in reader:
-            data.append((row['id'], row['course_id'], row['requirement']))
+            data.append((row['course_id'], row['requirement']))
         
         cursor.executemany(sql, data)
         print(f"Inserted {cursor.rowcount} course requirements.")
@@ -256,6 +286,8 @@ def main():
     course_requirements_csv = os.path.join(data_root, 'data', 'normalized', 'course_requirements.csv')
     chapters_csv = os.path.join(data_root, 'data', 'normalized', 'chapters.csv')
     lessons_csv = os.path.join(data_root, 'data', 'normalized', 'lessons.csv')
+    expertise_csv = os.path.join(data_root, 'data', 'normalized', 'expertise.csv')
+    user_expertise_csv = os.path.join(data_root, 'data', 'normalized', 'user_expertise.csv')
     
     # Schemas
     user_schema = os.path.join(data_root, 'backup', 'user_service_schema.sql')
@@ -277,6 +309,8 @@ def main():
         
         # Import Users
         import_users(cursor, users_csv)
+        import_expertise(cursor, expertise_csv)
+        import_user_expertise(cursor, user_expertise_csv)
         conn.commit()
         
         # 2. Setup Course Service

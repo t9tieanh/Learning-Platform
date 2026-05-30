@@ -41,7 +41,47 @@ analysisRouter.patch('/lessons/:lessonId/chunks/:chunkId/summary', Authenticatio
  * 6. Return answer + source references
  * 
  * Body: { "question": "User's question about the lesson" }
+ *
+ * Routes below are ordered so `/chat/sessions/...` is matched before `/chat`.
  */
+
+/** Messages in one session */
+analysisRouter.get(
+    '/lessons/:lessonId/chat/sessions/:sessionId/messages',
+    Authentication(true),
+    checkViewLesson,
+    analysisController.getLessonChatMessages
+)
+
+/** Create a new empty chat session */
+analysisRouter.post(
+    '/lessons/:lessonId/chat/sessions',
+    Authentication(true),
+    checkViewLesson,
+    analysisController.createLessonChatSession
+)
+
+analysisRouter.patch(
+    '/lessons/:lessonId/chat/sessions/:sessionId/title',
+    Authentication(true),
+    checkViewLesson,
+    analysisController.updateLessonChatSessionTitle
+)
+
+analysisRouter.patch(
+    '/lessons/:lessonId/chat/sessions/:sessionId/notes',
+    Authentication(true),
+    checkViewLesson,
+    analysisController.updateLessonChatSessionNotes
+)
+
+analysisRouter.get(
+    '/lessons/:lessonId/chat/sessions',
+    Authentication(true),
+    checkViewLesson,
+    analysisController.listLessonChatSessions
+)
+
 analysisRouter.post(
     '/lessons/:lessonId/chat',
     Authentication(true),

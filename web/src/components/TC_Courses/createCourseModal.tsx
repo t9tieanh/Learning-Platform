@@ -5,39 +5,23 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import { CreateCourseFormValues, CreateCourseSchema } from '@/utils/create-course/createCourse'
 import CustomInput from '../common/Input'
 import CustomButton from '../common/Button'
-import { Send, BookOpen, Sparkles, Users, BarChart3, Zap, GraduationCap, ArrowRight } from 'lucide-react'
+import { Sparkles, Zap, GraduationCap, ArrowRight } from 'lucide-react'
 import CustomCombobox from '../common/Combobox'
 import useCategory from '@/hooks/useCategory.hook'
 import courseService from '@/services/course/course.service'
 import useLoading from '@/hooks/useLoading.hook'
 import { toast } from 'sonner'
-import learnovaLogo from '@/assets/images/logo1.png'
 import bgInspiration from '@/assets/images/cover-create-course-form.jpg'
+import { cn } from '@/lib/utils'
+import type { Course } from '@/components/TC_Courses/CourseTypes'
 
-const courseFeatures = [
-  {
-    icon: <BookOpen className='w-3 h-3' />,
-    title: 'Quản lý nội dung',
-    description: 'Tổ chức video, tài liệu và bài tập'
-  },
-  {
-    icon: <Sparkles className='w-3 h-3' />,
-    title: 'AI phân tích tự động',
-    description: 'Tạo tóm tắt và gợi ý tiêu đề'
-  },
-  {
-    icon: <Users className='w-3 h-3' />,
-    title: 'Tương tác học viên',
-    description: 'Bài tập, câu hỏi, trực tiếp'
-  },
-  {
-    icon: <BarChart3 className='w-3 h-3' />,
-    title: 'Thống kê chi tiết',
-    description: 'Theo dõi tiến độ học viên'
-  }
-]
+const createFlowSteps = ['Thông tin', 'Giới thiệu', 'Giáo trình', 'Định giá'] as const
 
-const CreateCourseModal: React.FC = () => {
+type CreateCourseModalProps = {
+  onCourseCreated?: (course: Course) => void
+}
+
+const CreateCourseModal: React.FC<CreateCourseModalProps> = ({ onCourseCreated }) => {
   const {
     register,
     handleSubmit,
@@ -61,7 +45,36 @@ const CreateCourseModal: React.FC = () => {
 
       if (response?.code === 200 && response?.result?.id) {
         toast.success('Tạo khóa học thành công !')
-        navigator(`/teacher/course/${response?.result?.id}`)
+        const id = String(response.result.id)
+        const created: Course = {
+          id,
+          title: data.courseTitle,
+          shortDescription: data.subtitle,
+          longDescription: null,
+          thumbnailUrl: null,
+          language: null,
+          originalPrice: null,
+          finalPrice: null,
+          status: 'DRAFT',
+          instructorId: null,
+          chapterIds: null,
+          enrollmentIds: null,
+          tagNames: null,
+          categoryName: null,
+          progressStep: null,
+          outcomes: null,
+          requirements: null,
+          image: undefined,
+          tags: undefined,
+          duration: undefined,
+          students: undefined,
+          createdAt: new Date().toLocaleDateString()
+        }
+        if (onCourseCreated) {
+          onCourseCreated(created)
+        } else {
+          navigator(`/teacher/course/${id}`)
+        }
       } else {
         console.error('Failed to create course:', response?.message)
         toast.error(response?.message || 'Tạo khóa học thất bại !')
@@ -75,70 +88,59 @@ const CreateCourseModal: React.FC = () => {
 
   return (
     <div className='flex flex-col md:flex-row w-full h-full md:h-[780px] overflow-hidden bg-white relative'>
-      {/* Left Pane - Inspiration & Features */}
-      <div className='hidden md:flex w-1/2 relative bg-gray-100 overflow-hidden flex-col p-10 justify-between h-full group'>
-        {/* Background Image & Decor */}
+      <div className='hidden md:flex w-1/2 relative bg-gray-100 overflow-hidden flex-col p-10 h-full group'>
         <img
           src={bgInspiration}
           className='absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105'
-          alt='Inspiration'
+          alt=''
         />
-        <div className='absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent' />
+        <div className='absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-black/10' />
 
-        {/* Top Indicator - Keeping it minimal */}
-        <div className='relative z-10'>
+        <div className='relative z-10 flex flex-col h-full min-h-0 justify-between'>
           <div className='bg-white/10 backdrop-blur-md w-fit p-3 rounded-xl border border-white/20 shadow-xl'>
-            <GraduationCap className='w-5 h-5 text-white' />
+            <GraduationCap className='w-5 h-5 text-white' aria-hidden />
           </div>
-        </div>
 
-        {/* Bottom Floating Console */}
-        <div className='relative z-10 space-y-6'>
-          <div className='p-8 bg-white/5 backdrop-blur-2xl border border-white/10 rounded-[2.5rem] shadow-2xl'>
-            <div className='mb-8'>
-              <h2 className='text-3xl lg:text-4xl font-black text-white leading-[1.1] tracking-tight mb-3'>
-                Kiến tạo <br />
-                Tri thức mới
-              </h2>
-              <p className='text-white/80 font-bold text-[13px] leading-relaxed'>
-                Xây dựng bài giảng chuyên nghiệp và tiếp cận hàng ngàn học viên.
-              </p>
-            </div>
-
-            {/* Compact Feature Grid */}
-            <div className='grid grid-cols-2 gap-3 pb-2'>
-              {courseFeatures.map((feature, index) => (
-                <div key={index} className='flex items-center gap-3 p-3 rounded-xl bg-white/10 border border-white/5'>
-                  <div className='w-6 h-6 rounded-lg bg-blue-600 flex items-center justify-center text-white shrink-0 shadow-lg shadow-blue-500/20'>
-                    {feature.icon}
-                  </div>
-                  <span className='text-white font-bold text-[11px] leading-none tracking-tight'>{feature.title}</span>
-                </div>
+          <div className='rounded-xl border border-white/20 bg-white/10 backdrop-blur-md px-4 py-3 space-y-2 shadow-lg max-w-md'>
+            <p className='text-[9px] font-bold uppercase tracking-[0.2em] text-white/55'>Lộ trình tiếp theo</p>
+            <div className='flex flex-wrap items-center gap-x-0.5 gap-y-1'>
+              {createFlowSteps.map((label, i) => (
+                <React.Fragment key={label}>
+                  {i > 0 ? (
+                    <span className='text-white/25 select-none text-[10px] px-0.5' aria-hidden>
+                      ·
+                    </span>
+                  ) : null}
+                  <span
+                    className={cn(
+                      'text-[9px] font-bold uppercase tracking-wide',
+                      i === 0 ? 'text-sky-300' : 'text-white/45'
+                    )}
+                  >
+                    {label}
+                  </span>
+                </React.Fragment>
               ))}
             </div>
           </div>
         </div>
       </div>
 
-      {/* Right Pane - The Form */}
+      {/* Right Pane - Form */}
       <div className='flex-1 p-8 md:p-14 flex flex-col justify-between overflow-y-auto h-full bg-white'>
         <div className='space-y-10'>
           <div className='space-y-2'>
             <div className='inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-600 border border-blue-100 mb-2'>
               <Zap className='w-2.5 h-2.5 fill-blue-600' />
-              <span className='text-[9px] font-bold uppercase tracking-[0.2em]'>Bắt đầu ngay</span>
+              <span className='text-[9px] font-bold tracking-[0.2em]'>Bắt đầu ngay</span>
             </div>
             <h3 className='text-2xl md:text-3xl font-black text-gray-900 tracking-tight'>Thông tin khóa học</h3>
             <p className='text-gray-400 text-xs font-semibold'>Hãy khởi đầu hành trình giảng dạy của bạn</p>
-
-            <div className='pt-2 opacity-50'>
-              <img src={learnovaLogo} alt='Learnova' className='h-4 w-auto object-contain' />
-            </div>
           </div>
 
           <form className='space-y-6'>
             <div className='space-y-2'>
-              <label className='text-[10px] font-black text-gray-400 uppercase tracking-[0.15em]'>Tiêu đề khóa học</label>
+              <label className='text-[10px] font-black text-gray-400 tracking-[0.15em]'>Tiêu đề khóa học</label>
               <CustomInput
                 placeholder='Vd: Mastering React with AI'
                 {...register('courseTitle')}
@@ -150,7 +152,7 @@ const CreateCourseModal: React.FC = () => {
             </div>
 
             <div className='space-y-2'>
-              <label className='text-[10px] font-black text-gray-400 uppercase tracking-[0.15em]'>Mô tả nổi bật</label>
+              <label className='text-[10px] font-black text-gray-400 tracking-[0.15em]'>Mô tả nổi bật</label>
               <CustomInput
                 placeholder='Tóm tắt nội dung hấp dẫn'
                 {...register('subtitle')}
@@ -162,7 +164,7 @@ const CreateCourseModal: React.FC = () => {
             </div>
 
             <div className='space-y-2'>
-              <label className='text-[10px] font-black text-gray-400 uppercase tracking-[0.15em]'>Lĩnh vực giảng dạy</label>
+              <label className='text-[10px] font-black text-gray-400 tracking-[0.15em]'>Lĩnh vực giảng dạy</label>
               <Controller
                 control={control}
                 name='categoryId'
