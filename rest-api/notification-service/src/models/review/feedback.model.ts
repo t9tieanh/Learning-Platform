@@ -2,6 +2,7 @@ import mongoose, { Schema, Document, Model } from 'mongoose'
 
 export interface IFeedback extends Document {
   userId: string
+  instructorId: string
   courseId: string
   rating: number
   message: string
@@ -11,6 +12,7 @@ export interface IFeedback extends Document {
 
 const FeedbackSchema: Schema = new Schema({
   userId: { type: String, required: true },
+  instructorId: { type: String, required: true, index: true },
   courseId: { type: String, required: true },
   rating: { type: Number, required: true },
   message: { type: String, required: true },
@@ -25,6 +27,10 @@ const FeedbackSchema: Schema = new Schema({
 
 // Index phục vụ truy vấn phân trang theo course + _id (cursor)
 FeedbackSchema.index({ courseId: 1, _id: -1 })
+// Index phục vụ dashboard feedback theo instructor.
+FeedbackSchema.index({ instructorId: 1, _id: -1 })
+FeedbackSchema.index({ instructorId: 1, rating: 1 })
+FeedbackSchema.index({ instructorId: 1, createdAt: -1, _id: -1 })
 
 const Feedback: Model<IFeedback> = mongoose.model<IFeedback>('Feedback', FeedbackSchema)
 

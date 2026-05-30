@@ -30,9 +30,21 @@ export class AddFeedBackDTO {
   comment?: string
 }
 
+export class GetInstructorFeedbackOverviewDTO {
+  @IsString()
+  @IsNotEmpty()
+  instructorId: string
+
+  @IsOptional()
+  @Type(() => Number)
+  @Min(1, { message: 'limit must be a positive number' })
+  limit?: number = 10
+}
+
 export interface FeedbackDto {
   id: string
   userId: string
+  instructorId?: string
   courseId: string
   rating: number
   message: string

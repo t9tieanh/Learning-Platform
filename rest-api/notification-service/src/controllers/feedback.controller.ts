@@ -34,6 +34,27 @@ const gets = async (req: Request & { data?: FeedbackRequestContext }, res: Respo
   }
 }
 
+const getInstructorOverview = async (req: Request, res: Response) => {
+  try {
+    const instructorId = String(req.query.instructorId || '')
+    const limit = req.query.limit ? Number(req.query.limit) : 10
+    const result = await FeedbackService.getInstructorOverview({ instructorId, limit })
+
+    sendResponse(res, {
+      code: StatusCodes.OK,
+      message: 'Lấy thống kê feedback giảng viên thành công',
+      result
+    })
+  } catch (e) {
+    const err = e as Error
+    sendResponse(res, {
+      code: StatusCodes.BAD_REQUEST,
+      message: err.message || 'Lỗi lấy thống kê feedback giảng viên',
+      result: null
+    })
+  }
+}
+
 // add feedback controller
 const addFeedback = async (req: Request, res: Response) => {
   try {
@@ -81,6 +102,7 @@ const getFeedbackByUserAndCourse = async (req: Request, res: Response) => {
 
 const FeedbackController = {
   gets,
+  getInstructorOverview,
   addFeedback,
   getFeedbackByUserAndCourse
 }
