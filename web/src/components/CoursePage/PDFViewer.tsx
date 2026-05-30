@@ -1,6 +1,6 @@
 import { Lesson } from '@/types/course-student'
 import { useAuthStore } from '@/stores/useAuth.stores'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import logo from '@/assets/images/logo1.png'
 import { LoadingDots } from '@/components/common/Loading/LoadingDots'
 import lessonStudentService from '@/services/course/lesson-student.service'
@@ -11,23 +11,34 @@ const PDFViewer = ({ lesson, markDoneVideo }: { lesson: Lesson; markDoneVideo: (
   const [isLoading, setIsLoading] = useState(true)
   const [pdfSrc, setPdfSrc] = useState<string>('')
 
+  const markDoneVideoRef = useRef(markDoneVideo)
+  markDoneVideoRef.current = markDoneVideo
+  const markDoneRequestedForLessonRef = useRef<string | null>(null)
+  const presignedRequestedForLessonRef = useRef<string | null>(null)
+
   useEffect(() => {
-    markDoneVideo()
-  }, [markDoneVideo, lesson])
+    if (lesson.completionStatus === 'COMPLETED') return
+    if (markDoneRequestedForLessonRef.current === lesson.id) return
+    markDoneRequestedForLessonRef.current = lesson.id
+    void markDoneVideoRef.current()
+  }, [lesson.id, lesson.completionStatus])
 
   useEffect(() => {
     const fetchPdfData = async () => {
-      if (lesson.id && data?.accessToken) {
-        setIsLoading(true)
-        try {
-          const urlResponse = await lessonStudentService.getPresignedUrl(lesson.id)
-          if (urlResponse.code === 200) {
-            setPdfSrc(urlResponse.result || '')
-          }
-        } catch (error) {
-          console.error('PDF access error:', error)
-          toast.error('Không thể xác thực quyền truy cập tài liệu.')
+      if (!lesson.id || !data?.accessToken) return
+      if (presignedRequestedForLessonRef.current === lesson.id) return
+      presignedRequestedForLessonRef.current = lesson.id
+
+      setIsLoading(true)
+      try {
+        const urlResponse = await lessonStudentService.getPresignedUrl(lesson.id)
+        if (urlResponse.code === 200) {
+          setPdfSrc(urlResponse.result || '')
         }
+      } catch (error) {
+        console.error('PDF access error:', error)
+        toast.error('Không thể xác thực quyền truy cập tài liệu.')
+        presignedRequestedForLessonRef.current = null
       }
     }
 

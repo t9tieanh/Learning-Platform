@@ -1,12 +1,15 @@
 import { ApiResponse } from '@/types/response.type'
 import axiosClient from '@/lib/axiosClient.lib'
 
+export interface MarkDoneLessonResult {
+  id: string
+  isCompletedCourse: boolean
+  certificateId?: string | null
+  certificateCode?: string | null
+}
+
 class LessonStudentService {
-  async markDone(lessonId: string): Promise<
-    ApiResponse<{
-      id: string
-    }>
-  > {
+  async markDone(lessonId: string): Promise<ApiResponse<MarkDoneLessonResult>> {
     const response = await axiosClient.axiosInstance.post(`/learning/lesson-student/${lessonId}/mark-done`)
     return response.data
   }

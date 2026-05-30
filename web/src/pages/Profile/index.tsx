@@ -1,28 +1,55 @@
-import { useState } from 'react'
-import { User, BookOpen, FileClock } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
+import { User, BookOpen, FileClock, Award } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import PersonalInfo from '@/components/Profile/personal-info'
 import CourseStudied from '@/components/Profile/my-course'
 import OrderHistory from '@/components/Profile/orderHistory'
+import CourseCertificateList from '@/components/Profile/CourseCertificateList'
+
+const VALID_MODES = ['info', 'courses', 'cert', 'order-history'] as const
+type ProfileMode = (typeof VALID_MODES)[number]
 
 const Profile = () => {
-  const [activeSection, setActiveSection] = useState<string>('info')
+  const [searchParams, setSearchParams] = useSearchParams()
+  const modeParam = searchParams.get('mode')
+  const initialMode: ProfileMode =
+    modeParam && VALID_MODES.includes(modeParam as ProfileMode) ? (modeParam as ProfileMode) : 'info'
+  const [activeSection, setActiveSection] = useState<ProfileMode>(initialMode)
+
+  useEffect(() => {
+    const mode = searchParams.get('mode')
+    if (mode && VALID_MODES.includes(mode as ProfileMode)) {
+      setActiveSection(mode as ProfileMode)
+    }
+  }, [searchParams])
+
+  const handleSectionChange = (id: ProfileMode) => {
+    setActiveSection(id)
+    setSearchParams({ mode: id })
+  }
 
   const navigationItems = [
     {
-      id: 'info',
+      id: 'info' as const,
       title: 'Thông tin cá nhân',
       icon: User,
       description: 'Xem và chỉnh sửa thông tin'
     },
     {
-      id: 'courses',
+      id: 'courses' as const,
       title: 'Khóa học của tôi',
       icon: BookOpen,
       description: 'Lịch sử học tập'
     },
     {
-      id: 'order-history',
+      id: 'cert' as const,
+      title: 'Chứng chỉ khóa học',
+      icon: Award,
+      description: 'Chứng chỉ đã nhận'
+    },
+    {
+      id: 'order-history' as const,
       title: 'Lịch sử đơn hàng',
       icon: FileClock,
       description: 'Xem lịch sử đơn hàng của bạn'
@@ -35,6 +62,8 @@ const Profile = () => {
         return <PersonalInfo />
       case 'courses':
         return <CourseStudied />
+      case 'cert':
+        return <CourseCertificateList />
       case 'order-history':
         return <OrderHistory />
       default:
@@ -46,7 +75,6 @@ const Profile = () => {
     <div className='max-w-7xl mx-auto bg-gray-50 py-6 min-h-screen'>
       <div className='container mx-auto p-6'>
         <div className='grid grid-cols-1 lg:grid-cols-4 gap-6'>
-          {/* Navigation Sidebar */}
           <div className='lg:col-span-1'>
             <Card className='sticky top-6 shadow-md'>
               <CardHeader>
@@ -63,7 +91,7 @@ const Profile = () => {
                     return (
                       <button
                         key={item.id}
-                        onClick={() => setActiveSection(item.id)}
+                        onClick={() => handleSectionChange(item.id)}
                         className={`w-full shadow-sm flex items-center gap-3 px-4 py-3 text-left transition-colors rounded-lg mx-2 ${
                           isActive
                             ? 'bg-primary text-primary-foreground shadow-sm'

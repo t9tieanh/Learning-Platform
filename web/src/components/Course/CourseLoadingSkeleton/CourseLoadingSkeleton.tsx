@@ -17,9 +17,10 @@ const CourseLoadingSkeleton = () => {
       </div>
 
       {/* Course Content Skeleton */}
-      <div className='grid grid-cols-1 gap-6 bg-white px-4 py-6 md:grid-cols-3 md:p-8'>
+      <div className='grid grid-cols-1 gap-4 bg-white px-4 md:grid-cols-3 md:px-0'>
         {/* Left Column - Course Content */}
-        <div className='lg:col-span-2'>
+        <div className='min-w-0 overflow-hidden md:col-span-2'>
+          <div className='course-content-container min-h-24 pb-12 pt-0'>
           {/* Nội dung khóa học — 2 chapter cards, mobile-friendly */}
           <div className='mb-10'>
             <div className='mb-4 h-8 max-w-[min(100%,20rem)] animate-pulse rounded-r-3xl bg-gray-200 pl-4 md:pl-12' />
@@ -45,11 +46,12 @@ const CourseLoadingSkeleton = () => {
               ))}
             </div>
           </div>
+          </div>
         </div>
 
         {/* Right Column - Sidebar */}
-        <div className='lg:col-span-1'>
-          <div className='sticky top-24 space-y-5'>
+        <div className='col-span-1 mt-6 md:mt-0 md:sticky md:top-4 md:h-fit'>
+          <div className='space-y-5'>
             {/* Purchase Button Skeleton */}
             <div className='h-12 w-full rounded-lg bg-gray-200 animate-pulse' />
             {/* Course Details Box Skeleton */}

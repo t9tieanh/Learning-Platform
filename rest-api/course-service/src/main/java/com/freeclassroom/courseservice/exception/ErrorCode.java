@@ -51,7 +51,10 @@ public enum ErrorCode {
     LESSON_UPLOAD_TOO_MANY_PARTS(1404, "Số lượng phần upload vượt quá giới hạn !", HttpStatus.OK),
 
     // admin
-    COURSE_NOT_DONE(1234561231, "Khóa học chưa được khởi tạo xong !", HttpStatus.OK);
+    COURSE_NOT_DONE(1234561231, "Khóa học chưa được khởi tạo xong !", HttpStatus.OK),
+
+    CERTIFICATE_NOT_FOUND(1500, "Không tìm thấy chứng chỉ", HttpStatus.OK),
+    CERTIFICATE_ACCESS_DENIED(1501, "Bạn không có quyền truy cập chứng chỉ này", HttpStatus.UNAUTHORIZED),
     ;
 
     private final int code;

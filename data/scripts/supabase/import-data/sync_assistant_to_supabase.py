@@ -18,7 +18,7 @@ except ImportError:
 
 # Configuration
 # The script can target a specific course to sync analysis data to all its video lessons
-TARGET_COURSE_ID = "011c5746-1359-4c2f-9810-ce132e566cc8"
+TARGET_COURSE_ID = "0014f3ea-575d-41a3-85c8-3106d99e3f0a"
 
 # MySQL Database Configuration (Source of lessons)
 MYSQL_HOST = os.getenv('DB_HOST', 'localhost')
