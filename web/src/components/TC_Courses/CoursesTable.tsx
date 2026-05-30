@@ -110,8 +110,8 @@ const CoursesTable: FC<CoursesTableProps> = ({
   if (courses.length === 0 && !statusFilter) return <EmptyState onRequestCreate={onRequestCreate} />
 
   return (
-    <div className='overflow-hidden rounded-[1.75rem] border border-slate-200/80 bg-white/95 shadow-[0_8px_24px_rgba(15,23,42,0.05)]'>
-      <div className='overflow-x-auto'>
+    <div className='h-[720px] overflow-hidden rounded-[1.75rem] border border-slate-200/80 bg-white/95 shadow-[0_8px_24px_rgba(15,23,42,0.05)]'>
+      <div className='h-full overflow-auto'>
         <Table className='min-w-[860px] table-fixed'>
           <colgroup>
             <col className='w-[42%]' />

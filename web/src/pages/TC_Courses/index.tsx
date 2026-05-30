@@ -129,10 +129,10 @@ class TC_Course extends Component<TC_CourseProps, State> {
     })
 
     return (
-      <div className='relative min-h-[calc(100vh-100px)] px-4 pb-6 pt-16 sm:px-6 lg:px-8 lg:pt-6'>
+      <div className='relative min-h-[100dvh] px-4 pb-4 pt-8 sm:px-6 lg:px-8 lg:pt-4'>
         <div className='pointer-events-none absolute inset-x-0 top-0 -z-10 h-32 bg-gradient-to-r from-cyan-50 via-blue-50/70 to-indigo-50 blur-3xl' />
 
-        <div className='mx-auto flex w-full max-w-[1440px] flex-1 flex-col gap-6'>
+        <div className='mx-auto flex h-[calc(100dvh-88px)] w-full max-w-[1440px] flex-1 flex-col gap-3'>
           <CourseSearchBar
             onSearch={(v) => this.setState({ search: v })}
             onCourseCreated={this.handleCourseCreated}
@@ -140,20 +140,22 @@ class TC_Course extends Component<TC_CourseProps, State> {
             onCreateModalOpenChange={this.handleCreateModalOpenChange}
           />
 
-          {this.state.loading ? (
-            <CoursesTableSkeleton />
-          ) : (
-            <CoursesTable
-              courses={filtered}
-              statusFilter={this.state.statusFilter}
-              onChangeStatusFilter={(s) => this.setState({ statusFilter: s as State['statusFilter'] })}
-              fetchCourses={this.fetchCourses}
-              onRequestCreate={() => this.props.onCreateModalOpenChange(true)}
-            />
-          )}
+          <div className='min-h-0 flex-1 overflow-hidden'>
+            {this.state.loading ? (
+              <CoursesTableSkeleton />
+            ) : (
+              <CoursesTable
+                courses={filtered}
+                statusFilter={this.state.statusFilter}
+                onChangeStatusFilter={(s) => this.setState({ statusFilter: s as State['statusFilter'] })}
+                fetchCourses={this.fetchCourses}
+                onRequestCreate={() => this.props.onCreateModalOpenChange(true)}
+              />
+            )}
+          </div>
 
           {courses.length > 0 && (
-            <div className='mt-2 border-t border-slate-200/70 pt-5'>
+            <div className='mt-auto border-t border-slate-200/70 pt-3'>
               <CoursePagination
                 pages={this.state.totalPages}
                 current={this.state.page}

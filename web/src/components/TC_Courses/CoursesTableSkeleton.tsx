@@ -3,7 +3,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 
 const CoursesTableSkeleton = () => {
   return (
-    <div className='overflow-x-auto rounded-[1.75rem] border border-slate-200/80 bg-white/95 shadow-[0_16px_42px_rgba(15,23,42,0.08)]'>
+    <div className='h-[720px] overflow-auto rounded-[1.75rem] border border-slate-200/80 bg-white/95 shadow-[0_16px_42px_rgba(15,23,42,0.08)]'>
       <Table className='min-w-[860px]'>
         <TableHeader>
           <TableRow className='border-b border-slate-200 bg-slate-50/75 hover:bg-slate-50/75'>
