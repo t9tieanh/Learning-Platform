@@ -1,9 +1,12 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Award, ArrowRight, PartyPopper, Sparkles } from 'lucide-react'
+import { Award, ArrowRight, Download, Loader2, PartyPopper, Sparkles } from 'lucide-react'
 import CustomDialog from '@/components/common/Dialog'
 import CustomButton from '@/components/common/Button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import CelebrationFireworks from '@/components/common/CelebrationFireworks'
+import courseCertificateService from '@/services/certificate/course-certificate.service'
+import { toast } from 'sonner'
 import logo from '@/assets/images/logo1.png'
 
 interface CourseCompletionCelebrationProps {
@@ -11,19 +14,45 @@ interface CourseCompletionCelebrationProps {
   onOpenChange: (open: boolean) => void
   courseTitle?: string
   courseThumbnailUrl?: string | null
+  certificateId?: string
+  certificateCode?: string
 }
 
 export default function CourseCompletionCelebration({
   open,
   onOpenChange,
   courseTitle,
-  courseThumbnailUrl
+  courseThumbnailUrl,
+  certificateId,
+  certificateCode
 }: CourseCompletionCelebrationProps) {
   const navigate = useNavigate()
+  const [downloading, setDownloading] = useState(false)
 
   const handleViewCertificate = () => {
     onOpenChange(false)
     navigate('/me?mode=cert')
+  }
+
+  const handleDownloadPdf = async () => {
+    if (!certificateId) {
+      handleViewCertificate()
+      return
+    }
+
+    try {
+      setDownloading(true)
+      await courseCertificateService.downloadCertificatePdf(
+        certificateId,
+        certificateCode ? `Learnova-Chung-chi-${certificateCode}.pdf` : undefined
+      )
+      toast.success('Đã tải chứng chỉ PDF')
+    } catch (error) {
+      console.error('Failed to download certificate PDF', error)
+      toast.error('Không thể tải file PDF. Vui lòng thử lại.')
+    } finally {
+      setDownloading(false)
+    }
   }
 
   return (
@@ -41,7 +70,6 @@ export default function CourseCompletionCelebration({
         contentClassName='my-0 w-full'
       >
         <div className='flex flex-col md:flex-row h-auto md:h-[560px] max-h-[90vh] overflow-y-auto md:overflow-hidden'>
-          {/* Left: course visual */}
           <div className='w-full md:w-[42%] h-[240px] md:h-full relative overflow-hidden group shrink-0 bg-gradient-to-br from-blue-700 via-blue-800 to-indigo-950'>
             {courseThumbnailUrl ? (
               <img
@@ -81,7 +109,6 @@ export default function CourseCompletionCelebration({
             </div>
           </div>
 
-          {/* Right: celebration content */}
           <div className='flex-1 p-8 md:p-14 flex flex-col justify-center relative bg-white'>
             <div className='absolute top-0 right-0 w-64 h-64 bg-blue-50/40 rounded-bl-full -z-10 blur-3xl' />
 
@@ -100,7 +127,7 @@ export default function CourseCompletionCelebration({
                     </span>
                   </h2>
                   <p className='text-gray-500 text-sm md:text-[14px] leading-relaxed font-semibold max-w-sm'>
-                    Chứng chỉ hoàn thành đã được cấp. Hãy xem và chia sẻ thành tích học tập của bạn ngay!
+                    Chứng chỉ hoàn thành đã được cấp. Tải PDF ngay hoặc xem trong hồ sơ của bạn.
                   </p>
                 </div>
               </div>
@@ -110,7 +137,15 @@ export default function CourseCompletionCelebration({
                 <div className='min-w-0'>
                   <p className='text-[11px] font-black text-blue-800 uppercase tracking-wider'>Learnova Certificate</p>
                   <p className='text-xs text-gray-600 font-medium truncate'>
-                    {courseTitle ? `"${courseTitle}"` : 'Chứng chỉ khóa học của bạn'}
+                    {certificateCode ? (
+                      <>
+                        Mã chứng chỉ: <span className='font-mono text-blue-700'>{certificateCode}</span>
+                      </>
+                    ) : courseTitle ? (
+                      `"${courseTitle}"`
+                    ) : (
+                      'Chứng chỉ khóa học của bạn'
+                    )}
                   </p>
                 </div>
                 <Sparkles className='w-5 h-5 text-amber-500 shrink-0 animate-pulse' />
@@ -118,10 +153,22 @@ export default function CourseCompletionCelebration({
 
               <div className='flex flex-col sm:flex-row gap-3 pt-1'>
                 <CustomButton
+                  onClick={handleDownloadPdf}
+                  label={downloading ? 'Đang tải PDF...' : 'Tải chứng chỉ PDF'}
+                  icon={
+                    downloading ? (
+                      <Loader2 className='w-4.5 h-4.5 animate-spin' />
+                    ) : (
+                      <Download className='w-4.5 h-4.5' />
+                    )
+                  }
+                  className='flex-1 h-14 md:h-16 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl text-[14px] md:text-[15px] font-black transition-all hover:-translate-y-0.5 active:scale-[0.98] flex items-center justify-center gap-3 disabled:opacity-70'
+                />
+                <CustomButton
                   onClick={handleViewCertificate}
-                  label='Xem chứng chỉ ngay'
+                  label='Xem trong hồ sơ'
                   icon={<Award className='w-4.5 h-4.5' />}
-                  className='flex-1 h-14 md:h-16 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl text-[14px] md:text-[15px] font-black transition-all hover:-translate-y-0.5 active:scale-[0.98] flex items-center justify-center gap-3'
+                  className='flex-1 h-14 md:h-16 bg-white hover:bg-blue-50 text-blue-700 border-2 border-blue-100 rounded-2xl text-[14px] md:text-[15px] font-black transition-all active:scale-[0.98] flex items-center justify-center gap-3'
                 />
                 <CustomButton
                   onClick={() => onOpenChange(false)}

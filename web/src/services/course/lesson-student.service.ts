@@ -4,6 +4,8 @@ import axiosClient from '@/lib/axiosClient.lib'
 export interface MarkDoneLessonResult {
   id: string
   isCompletedCourse: boolean
+  certificateId?: string | null
+  certificateCode?: string | null
 }
 
 class LessonStudentService {

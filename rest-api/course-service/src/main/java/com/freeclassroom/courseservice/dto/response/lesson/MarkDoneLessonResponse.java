@@ -14,4 +14,8 @@ public class MarkDoneLessonResponse {
 
     @JsonProperty("isCompletedCourse")
     boolean completedCourse;
+
+    String certificateId;
+
+    String certificateCode;
 }

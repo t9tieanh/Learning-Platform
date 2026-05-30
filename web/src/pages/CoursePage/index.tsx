@@ -44,6 +44,7 @@ const CoursePage = () => {
   const [analysisData, setAnalysisData] = useState<AnalysisResult | null>(null)
   const [isLoadingAnalysis, setIsLoadingAnalysis] = useState(false)
   const [showCourseCompletionModal, setShowCourseCompletionModal] = useState(false)
+  const [completedCertificate, setCompletedCertificate] = useState<{ id: string; certificateCode: string } | null>(null)
 
   const handleSeek = (timestamp: string) => {
     if (!viewerRef.current) return
@@ -127,7 +128,8 @@ const CoursePage = () => {
     fetchCourseInfo(currentLectureIdRef.current, { silent: true })
   }, [fetchCourseInfo])
 
-  const handleCourseCompleted = useCallback(() => {
+  const handleCourseCompleted = useCallback((certificate?: { id: string; certificateCode: string }) => {
+    setCompletedCertificate(certificate ?? null)
     setShowCourseCompletionModal(true)
   }, [])
 
@@ -332,6 +334,8 @@ const CoursePage = () => {
         onOpenChange={setShowCourseCompletionModal}
         courseTitle={courseData?.title}
         courseThumbnailUrl={courseData?.thumbnailUrl}
+        certificateId={completedCertificate?.id}
+        certificateCode={completedCertificate?.certificateCode}
       />
     </div>
   )

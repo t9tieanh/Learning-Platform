@@ -1,12 +1,16 @@
-import { useState } from 'react'
-import { Award, ExternalLink, CalendarDays } from 'lucide-react'
+import { useMemo, useState } from 'react'
+import { Award, CalendarDays, Copy, Download, ExternalLink, X } from 'lucide-react'
 import { CourseCompletionCertificate } from '@/types/course-certificate'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import CustomButton from '@/components/common/Button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import CustomDialog from '@/components/common/Dialog'
 import CertificateDetailCard from '@/components/Certificate/CertificateDetailCard'
-import { Link } from 'react-router-dom'
+import courseCertificateService from '@/services/certificate/course-certificate.service'
+import { Link, useNavigate } from 'react-router-dom'
 import { cn } from '@/lib/utils'
+import { toast } from 'sonner'
 
 interface Props {
   cert: CourseCompletionCertificate
@@ -40,8 +44,41 @@ function CertificateCourseAvatar({ title, thumbnailUrl }: { title: string; thumb
 }
 
 export default function CourseCertificateItem({ cert }: Props) {
+  const navigate = useNavigate()
   const [open, setOpen] = useState(false)
+  const [downloading, setDownloading] = useState(false)
   const { courseSnapshot } = cert
+
+  const publicVerifyUrl = useMemo(
+    () => `${window.location.origin}/certificate/verify/${cert.certificateCode}`,
+    [cert.certificateCode]
+  )
+
+  const handleCopyPublicLink = async () => {
+    try {
+      await navigator.clipboard.writeText(publicVerifyUrl)
+      toast.success('Đã sao chép link công khai')
+    } catch (error) {
+      console.error('Failed to copy certificate link', error)
+      toast.error('Không thể sao chép link. Vui lòng thử lại.')
+    }
+  }
+
+  const handleDownloadPdf = async () => {
+    try {
+      setDownloading(true)
+      await courseCertificateService.downloadCertificatePdf(
+        cert.id,
+        `Learnova-Chung-chi-${cert.certificateCode}.pdf`
+      )
+      toast.success('Đã tải chứng chỉ PDF')
+    } catch (error) {
+      console.error('Failed to download certificate PDF', error)
+      toast.error('Không thể tải file PDF. Vui lòng thử lại.')
+    } finally {
+      setDownloading(false)
+    }
+  }
 
   return (
     <>
@@ -116,43 +153,72 @@ export default function CourseCertificateItem({ cert }: Props) {
         className='w-[95vw] max-w-3xl p-0 overflow-hidden bg-white border border-slate-200 rounded-2xl gap-0'
         contentClassName='my-0 w-full'
       >
-        <div className='p-4 sm:p-6 max-h-[90vh] overflow-y-auto'>
-          <div className='flex items-center justify-between gap-3 mb-5 pb-4 border-b border-slate-100'>
-            <div>
-              <h2 className='text-lg font-bold text-slate-900'>Chứng chỉ của bạn</h2>
-              <p className='text-xs text-slate-500 mt-0.5'>Xem trước chứng chỉ hoàn thành khóa học</p>
-            </div>
-            <Link
-              to={`/certificate/verify/${cert.certificateCode}`}
-              onClick={() => setOpen(false)}
-              className='inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-800 px-3 py-2 rounded-xl border border-blue-100 bg-blue-50/50 hover:bg-blue-50 transition-colors shrink-0'
-            >
-              <ExternalLink className='w-3.5 h-3.5' />
-              Link tra cứu
-            </Link>
+        <div className='p-4 sm:p-5'>
+          <div className='mb-3 pb-3 border-b border-slate-100'>
+            <h2 className='text-base font-bold text-slate-900'>Chứng chỉ của bạn</h2>
+            <p className='text-xs text-slate-500 mt-0.5'>Xem trước chứng chỉ hoàn thành khóa học</p>
           </div>
 
-          <CertificateDetailCard
-            data={{
-              certificateCode: cert.certificateCode,
-              issuedAt: cert.issuedAt,
-              recipientName: cert.recipientSnapshot.name,
-              courseTitle: courseSnapshot.title,
-              courseThumbnailUrl: courseSnapshot.thumbnailUrl,
-              instructorName: courseSnapshot.instructorName,
-              instructorAvatarUrl: courseSnapshot.instructorAvatarUrl
-            }}
-          />
+          <div className='max-w-[720px] mx-auto w-full'>
+            <CertificateDetailCard
+              compact
+              data={{
+                certificateCode: cert.certificateCode,
+                issuedAt: cert.issuedAt,
+                recipientName: cert.recipientSnapshot.name,
+                courseTitle: courseSnapshot.title,
+                courseThumbnailUrl: courseSnapshot.thumbnailUrl,
+                instructorName: courseSnapshot.instructorName,
+                instructorAvatarUrl: courseSnapshot.instructorAvatarUrl
+              }}
+            />
 
-          <div className='flex flex-col-reverse sm:flex-row gap-2 sm:justify-end mt-5 pt-4 border-t border-slate-100'>
-            <Button variant='outline' className='rounded-xl border-slate-200' onClick={() => setOpen(false)}>
-              Đóng
-            </Button>
-            <Button asChild className='rounded-xl bg-blue-600 hover:bg-blue-700'>
-              <Link to={`/certificate/verify/${cert.certificateCode}`} onClick={() => setOpen(false)}>
-                Mở trang tra cứu công khai
-              </Link>
-            </Button>
+            <div className='mt-3'>
+              <p className='text-xs font-semibold text-slate-500 mb-1.5'>Link tra cứu công khai</p>
+              <div className='flex w-full min-w-0 items-center gap-2'>
+                <Input
+                  readOnly
+                  value={publicVerifyUrl}
+                  className='min-w-0 flex-1 rounded-xl border-slate-200 bg-slate-50 text-xs font-mono text-slate-700 h-9 px-3'
+                  onFocus={(e) => e.target.select()}
+                />
+                <CustomButton
+                  variant='outline'
+                  label='Sao chép'
+                  icon={<Copy className='w-4 h-4' />}
+                  className='h-9 shrink-0 rounded-xl border-blue-100 px-3 font-semibold text-blue-700 hover:bg-blue-50'
+                  onClick={handleCopyPublicLink}
+                />
+              </div>
+            </div>
+
+            <div className='mt-3 flex flex-col-reverse gap-2 border-t border-slate-100 pt-3 sm:flex-row sm:justify-end'>
+              <CustomButton
+                variant='outline'
+                label='Đóng'
+                icon={<X className='w-4 h-4' />}
+                className='h-9 rounded-xl border-slate-200 px-4 font-semibold'
+                onClick={() => setOpen(false)}
+              />
+              <CustomButton
+                variant='outline'
+                label='Tải PDF'
+                icon={<Download className='w-4 h-4' />}
+                isLoader={downloading}
+                disabled={downloading}
+                className='h-9 rounded-xl border-blue-100 px-4 font-semibold text-blue-700 hover:bg-blue-50'
+                onClick={handleDownloadPdf}
+              />
+              <CustomButton
+                label='Tra cứu công khai'
+                icon={<ExternalLink className='w-4 h-4' />}
+                className='h-9 rounded-xl bg-blue-600 px-4 font-semibold text-white hover:bg-blue-700'
+                onClick={() => {
+                  setOpen(false)
+                  navigate(`/certificate/verify/${cert.certificateCode}`)
+                }}
+              />
+            </div>
           </div>
         </div>
       </CustomDialog>

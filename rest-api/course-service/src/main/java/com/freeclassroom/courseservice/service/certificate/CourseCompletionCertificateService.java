@@ -20,11 +20,17 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -36,22 +42,23 @@ public class CourseCompletionCertificateService implements ICourseCompletionCert
     CourseCompletionCertificateRepository certificateRepository;
     CourseCompletionCertificateMapper certificateMapper;
     UserGrpcClient userGrpcClient;
+    CertificatePdfService certificatePdfService;
 
     @Override
     @Transactional
-    public void issueIfEligible(EnrollmentsEntity enrollment) {
+    public Optional<CourseCompletionCertificateEntity> issueIfEligible(EnrollmentsEntity enrollment) {
         Double progress = enrollment.getProgress();
         if (progress == null || progress < 1.0) {
-            return;
+            return Optional.empty();
         }
 
         if (certificateRepository.existsByEnrollmentId(enrollment.getId())) {
-            return;
+            return certificateRepository.findByEnrollmentId(enrollment.getId());
         }
 
         CourseEntity course = enrollment.getCourse();
         if (course == null || !EnumCourseStatus.PUBLISHED.equals(course.getStatus())) {
-            return;
+            return Optional.empty();
         }
 
         GetUserResponse student = userGrpcClient.getUser(enrollment.getUserId());
@@ -81,6 +88,7 @@ public class CourseCompletionCertificateService implements ICourseCompletionCert
 
         certificateRepository.save(cert);
         log.info("Issued course completion certificate {} for enrollment {}", cert.getCertificateCode(), enrollment.getId());
+        return Optional.of(cert);
     }
 
     @Override
@@ -131,6 +139,41 @@ public class CourseCompletionCertificateService implements ICourseCompletionCert
                 .message("Chứng chỉ hợp lệ")
                 .result(response)
                 .build();
+    }
+
+    @Override
+    public ResponseEntity<byte[]> downloadPdfById(String id, String userId) {
+        CourseCompletionCertificateEntity cert = certificateRepository
+                .findByIdAndUserId(id, userId)
+                .orElseThrow(() -> new CustomExeption(ErrorCode.CERTIFICATE_NOT_FOUND));
+
+        return buildPdfResponse(cert);
+    }
+
+    @Override
+    public ResponseEntity<byte[]> downloadPdfByCode(String code) {
+        CourseCompletionCertificateEntity cert = certificateRepository
+                .findByCertificateCode(code)
+                .filter(c -> EnumCertificateStatus.ISSUED.equals(c.getStatus()))
+                .orElseThrow(() -> new CustomExeption(ErrorCode.CERTIFICATE_NOT_FOUND));
+
+        return buildPdfResponse(cert);
+    }
+
+    private ResponseEntity<byte[]> buildPdfResponse(CourseCompletionCertificateEntity cert) {
+        byte[] pdfBytes = certificatePdfService.generatePdf(cert);
+        String filename = certificatePdfService.buildDownloadFilename(cert.getCertificateCode());
+
+        String encodedFilename = URLEncoder.encode(filename, StandardCharsets.UTF_8).replace("+", "%20");
+
+        return ResponseEntity.ok()
+                .header(
+                        HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"" + filename + "\"; filename*=UTF-8''" + encodedFilename
+                )
+                .contentType(MediaType.APPLICATION_PDF)
+                .contentLength(pdfBytes.length)
+                .body(pdfBytes);
     }
 
     private String generateCertificateCode() {

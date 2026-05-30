@@ -8,6 +8,7 @@ import com.freeclassroom.courseservice.dto.response.lesson.MarkDoneLessonRespons
 import com.freeclassroom.courseservice.dto.response.course.CloudFrontCookieResponse;
 import com.freeclassroom.courseservice.dto.response.course.LessonInfoResponse;
 import com.freeclassroom.courseservice.dto.response.course.student.LessonOverviewResponse;
+import com.freeclassroom.courseservice.entity.certificate.CourseCompletionCertificateEntity;
 import com.freeclassroom.courseservice.entity.course.LessonEntity;
 import com.freeclassroom.courseservice.entity.member.EnrollmentsEntity;
 import com.freeclassroom.courseservice.entity.member.LessonProgressEntity;
@@ -36,6 +37,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -178,8 +181,9 @@ public class LessonStudentService implements ILessonStudentService {
         enrollment.setProgress(progress);
         enrollmentRepo.save(enrollment);
 
+        Optional<CourseCompletionCertificateEntity> issuedCertificate = Optional.empty();
         if (progress >= 1.0) {
-            courseCompletionCertificateService.issueIfEligible(enrollment);
+            issuedCertificate = courseCompletionCertificateService.issueIfEligible(enrollment);
         }
 
         boolean isCompletedCourse = previousProgress < 1.0 && progress >= 1.0;
@@ -189,6 +193,8 @@ public class LessonStudentService implements ILessonStudentService {
                         MarkDoneLessonResponse.builder()
                                 .id(lessonId)
                                 .completedCourse(isCompletedCourse)
+                                .certificateId(isCompletedCourse ? issuedCertificate.map(CourseCompletionCertificateEntity::getId).orElse(null) : null)
+                                .certificateCode(isCompletedCourse ? issuedCertificate.map(CourseCompletionCertificateEntity::getCertificateCode).orElse(null) : null)
                                 .build()
                 )
                 .code(200)

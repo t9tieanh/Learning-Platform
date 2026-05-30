@@ -1,17 +1,40 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { Award, Home, Loader2, SearchX, ShieldAlert } from 'lucide-react'
+import { Award, Download, Home, Loader2, SearchX, ShieldAlert } from 'lucide-react'
 import courseCertificateService from '@/services/certificate/course-certificate.service'
 import { CertificateVerifyResult } from '@/types/course-certificate'
 import { Button } from '@/components/ui/button'
 import HighGlossBackground from '@/components/common/HighGlossBackground'
 import CertificateDetailCard, { CertificateValidBadge } from '@/components/Certificate/CertificateDetailCard'
+import { useAuthStore } from '@/stores/useAuth.stores'
+import { toast } from 'sonner'
 
 export default function CertificateVerifyPage() {
   const { code } = useParams<{ code: string }>()
+  const currentUserId = useAuthStore((state) => state.data?.userId)
   const [result, setResult] = useState<CertificateVerifyResult | null>(null)
   const [error, setError] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [downloadingPdf, setDownloadingPdf] = useState(false)
+
+  const isCertificateOwner = useMemo(
+    () => Boolean(currentUserId && result?.recipientSnapshot.userId === currentUserId),
+    [currentUserId, result?.recipientSnapshot.userId]
+  )
+
+  const handleDownloadPdf = async () => {
+    if (!code) return
+    try {
+      setDownloadingPdf(true)
+      await courseCertificateService.downloadCertificatePdfByCode(code)
+      toast.success('Đã tải chứng chỉ PDF')
+    } catch (err) {
+      console.error('Failed to download certificate PDF', err)
+      toast.error('Không thể tải file PDF. Vui lòng thử lại.')
+    } finally {
+      setDownloadingPdf(false)
+    }
+  }
 
   useEffect(() => {
     const verify = async () => {
@@ -53,13 +76,6 @@ export default function CertificateVerifyPage() {
           </HighGlossBackground>
 
           <div className='p-5 sm:p-8'>
-            {code && (
-              <div className='mb-6 flex items-center justify-center'>
-                <span className='inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-200 bg-slate-50 text-xs font-mono text-slate-600'>
-                  Mã tra cứu: <strong className='text-slate-800'>{code}</strong>
-                </span>
-              </div>
-            )}
 
             {loading ? (
               <div className='flex flex-col items-center justify-center py-16 gap-4'>
@@ -86,10 +102,6 @@ export default function CertificateVerifyPage() {
               </div>
             ) : (
               <div className='space-y-6'>
-                <div className='flex justify-center'>
-                  <CertificateValidBadge />
-                </div>
-
                 <CertificateDetailCard
                   showHeader={false}
                   data={{
@@ -110,7 +122,21 @@ export default function CertificateVerifyPage() {
                   </p>
                 </div>
 
-                <div className='flex justify-center pt-2'>
+                <div className='flex flex-wrap justify-center gap-3 pt-2'>
+                  {isCertificateOwner && (
+                    <Button
+                      className='rounded-xl bg-blue-600 hover:bg-blue-700 h-10 px-5'
+                      onClick={handleDownloadPdf}
+                      disabled={downloadingPdf}
+                    >
+                      {downloadingPdf ? (
+                        <Loader2 className='w-4 h-4 mr-2 animate-spin' />
+                      ) : (
+                        <Download className='w-4 h-4 mr-2' />
+                      )}
+                      Tải PDF
+                    </Button>
+                  )}
                   <Button asChild variant='outline' className='rounded-xl border-slate-200 h-10 px-5'>
                     <Link to='/'>
                       <Home className='w-4 h-4 mr-2' />

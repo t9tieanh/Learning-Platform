@@ -7,6 +7,7 @@ import com.freeclassroom.courseservice.service.certificate.ICourseCompletionCert
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,9 +27,20 @@ public class CourseCompletionCertificateController {
         return certificateService.getMyCertificates(userId);
     }
 
+    @GetMapping("/verify/{code}/download")
+    public ResponseEntity<byte[]> downloadPdfByCode(@PathVariable String code) {
+        return certificateService.downloadPdfByCode(code);
+    }
+
     @GetMapping("/verify/{code}")
     public ApiResponse<CertificateVerifyResponse> verifyByCode(@PathVariable String code) {
         return certificateService.verifyByCode(code);
+    }
+
+    @GetMapping("/{id}/download")
+    public ResponseEntity<byte[]> downloadPdfById(@PathVariable String id) {
+        String userId = SecurityContextHolder.getContext().getAuthentication().getName();
+        return certificateService.downloadPdfById(id, userId);
     }
 
     @GetMapping("/{id}")
