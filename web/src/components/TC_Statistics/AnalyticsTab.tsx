@@ -7,7 +7,7 @@ import { useAuthStore } from '@/stores/useAuth.stores'
 import instructorAnalyticsService from '@/services/instructor/instructor-analytics.service'
 import type { LearnerAnalytics } from '@/types/instructor-analytics.type'
 
-const monthLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+const monthLabels = ['Th1', 'Th2', 'Th3', 'Th4', 'Th5', 'Th6', 'Th7', 'Th8', 'Th9', 'Th10', 'Th11', 'Th12']
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload?.length) return null

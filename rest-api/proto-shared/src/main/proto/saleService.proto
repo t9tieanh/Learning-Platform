@@ -9,4 +9,5 @@ option java_outer_classname = "SaleServiceProto";
 service SaleService {
   rpc getRevenueAndProfit (GetRevenueAndProfitRequest) returns (GetRevenueAndProfitResponse);
   rpc getCompletedCourseIds (GetCompletedCourseIdsRequest) returns (GetCompletedCourseIdsResponse);
+  rpc getTopCoursesRevenue (GetTopCoursesRevenueRequest) returns (GetTopCoursesRevenueResponse);
 }

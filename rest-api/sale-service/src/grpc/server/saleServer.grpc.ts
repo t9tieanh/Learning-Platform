@@ -100,6 +100,46 @@ const saleServiceImpl = {
             Logger.error(`getCompletedCourseIds error: ${err}`);
             callback(err, null);
         }
+    },
+    getTopCoursesRevenue: async (call: any, callback: any) => {
+        try {
+            const { coursesId, year, limit } = call.request;
+            if (!Array.isArray(coursesId)) throw new Error('coursesId must be array');
+
+            const normalizedYear = Number((year as any)?.low ?? year);
+            if (!Number.isInteger(normalizedYear)) throw new Error('Year must be a valid integer');
+
+            const normalizedLimit = Number((limit as any)?.low ?? limit ?? 5);
+            const topLimit = Number.isInteger(normalizedLimit) && normalizedLimit > 0 ? normalizedLimit : 5;
+
+            if (coursesId.length === 0) {
+                callback(null, { items: [] });
+                return;
+            }
+
+            const rows: Array<{ courseId: string; revenue: number }> = await prismaService.$queryRaw(
+                Prisma.sql`SELECT oi.course_id AS courseId,
+                                  COALESCE(SUM(oi.price), 0) AS revenue
+                           FROM \`order_items\` oi
+                           INNER JOIN \`orders\` o ON oi.order_id = o.id
+                           WHERE oi.course_id IN (${Prisma.join(coursesId)})
+                             AND o.status = 'Completed'
+                             AND YEAR(oi.created_at) = ${normalizedYear}
+                           GROUP BY oi.course_id
+                           ORDER BY revenue DESC
+                           LIMIT ${topLimit}`
+            ) as any;
+
+            callback(null, {
+                items: rows.map((r) => ({
+                    courseId: r.courseId,
+                    revenue: Number(Number(r.revenue ?? 0).toFixed(2)),
+                })),
+            });
+        } catch (err) {
+            Logger.error(`getTopCoursesRevenue error: ${err}`);
+            callback(err, null);
+        }
     }
 };
 
