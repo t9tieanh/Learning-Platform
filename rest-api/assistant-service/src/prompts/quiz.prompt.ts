@@ -1,13 +1,6 @@
 /**
- * Prompts used by QuizGenerationService for AI-powered quiz generation.
- *
- * These prompts are optimized for:
- * - Generating high-quality multiple-choice questions
- * - Context-aware generation with lesson and chunk summaries
- * - Structured JSON output for easy parsing
- * - Educational best practices (Bloom's taxonomy alignment)
- * - Reducing ambiguity in answer choices
- * - Multi-language support (English and Vietnamese)
+ * Prompts for review/practice (ôn tập) quiz generation — single and batch.
+ * Lesson-test (bài kiểm tra) prompts live in `lesson-test.prompt.ts`.
  */
 
 export type QuizLanguage = 'en' | 'vi';
@@ -141,10 +134,9 @@ export const QuizPrompts = {
     '2. Each question must provide exactly 4 answer choices (only one correct)\n' +
     '3. The correct answer must be unambiguous and well-supported by the content\n' +
     '4. Incorrect options should be plausible but clearly distinguishable from the correct answer\n' +
-    '5. Include HIGHLY DETAILED explanations for each question. Within the "explanation", you MUST cite EVERY relevant chunk using the marker @{{chunkId}}@ (e.g., "This connects the concept from @{{uuid1}}@ with the results in @{{uuid2}}@..."). If a question combines multiple chunks, it MUST have multiple markers.\n' +
+    '5. Include detailed explanations for each question explaining why the correct answer is right and why others are wrong\n' +
     '6. Ensure questions cover different difficulty levels and Bloom\'s levels as specified\n' +
-    '7. For each question, identify the primary source chunk and return its UUID in the "groundedChunkId" field.\n' +
-    '8. Format output as valid JSON array (no markdown formatting, code fences, or extra text)\n' +
+    '7. Format output as valid JSON array (no markdown formatting, code fences, or extra text)\n' +
     '\n' +
     'You MUST respond with a strictly valid JSON array only.\n' +
     'Do NOT include markdown, code fences, comments, explanations, or extra text.\n' +
@@ -162,10 +154,9 @@ export const QuizPrompts = {
     '2. Mỗi câu hỏi phải cung cấp chính xác 4 lựa chọn trả lời (chỉ có một đáp án đúng)\n' +
     '3. Đáp án đúng phải rõ ràng và được hỗ trợ tốt bởi nội dung\n' +
     '4. Các lựa chọn sai phải có khả năng nhưng phân biệt rõ ràng với đáp án đúng\n' +
-    '5. Đưa ra giải thích CỰC KỲ CHI TIẾT cho mỗi câu hỏi. Trong phần "explanation", bạn BẮT BUỘC phải trích dẫn TẤT CẢ các phân đoạn liên quan bằng marker @{{chunkId}}@ (VD: "Kiến thức này kết hợp giữa khái niệm tại @{{uuid1}}@ và ví dụ tại @{{uuid2}}@..."). Nếu câu hỏi tổng hợp từ nhiều chunk, phải có đầy đủ các marker tương ứng.\n' +
+    '5. Đưa ra giải thích chi tiết cho mỗi câu hỏi về lý do đáp án đúng là đúng và tại sao các đáp án khác là sai\n' +
     '6. Đảm bảo câu hỏi bao gồm các mức độ khó khác nhau và các mức Bloom như được chỉ định\n' +
-    '7. Với mỗi câu hỏi, hãy xác định chunk nguồn chính và trả về UUID của nó trong trường "groundedChunkId".\n' +
-    '8. Định dạng kết quả dưới dạng mảng JSON hợp lệ (không có markdown, code fences hoặc văn bản bổ sung)\n' +
+    '7. Định dạng kết quả dưới dạng mảng JSON hợp lệ (không có markdown, code fences hoặc văn bản bổ sung)\n' +
     '\n' +
     'BẠN PHẢI trả lời bằng một mảng JSON hoàn toàn hợp lệ.\n' +
     'KHÔNG bao gồm markdown, code fences, nhận xét, giải thích hoặc văn bản bổ sung.\n' +
@@ -201,8 +192,7 @@ export const QuizPrompts = {
     '      { "text": "Plausible wrong answer 2", "isCorrect": false },\n' +
     '      { "text": "Plausible wrong answer 3", "isCorrect": false }\n' +
     '    ],\n' +
-    '    "explanation": "Extremely detailed explanation synthesizing information from @{{uuid1}}@ and @{{uuid2}}@. Explain the logical connection between them.",\n' +
-    '    "groundedChunkId": "UUID_OF_THE_SOURCE_CHUNK",\n' +
+    '    "explanation": "Detailed explanation of the correct answer and why others are incorrect",\n' +
     '    "confidence": 0.95\n' +
     '  },\n' +
     '  // ... more questions following the distribution\n' +
@@ -241,8 +231,7 @@ export const QuizPrompts = {
     '      { "text": "Đáp án sai có khả năng 2 (TIẾNG VIỆT)", "isCorrect": false },\n' +
     '      { "text": "Đáp án sai có khả năng 3 (TIẾNG VIỆT)", "isCorrect": false }\n' +
     '    ],\n' +
-    '    "explanation": "Giải thích cực kỳ chi tiết, tổng hợp kiến thức từ @{{uuid1}}@ và @{{uuid2}}@. Giải thích rõ mối liên hệ logic giữa các phần này.",\n' +
-    '    "groundedChunkId": "UUID_CỦA_CHUNK_NGUỒN",\n' +
+    '    "explanation": "Giải thích chi tiết về lý do đáp án đúng là đúng và tại sao các đáp án khác là sai (TIẾNG VIỆT)",\n' +
     '    "confidence": 0.95\n' +
     '  },\n' +
     '  // ... các câu hỏi tiếp theo theo phân bố\n' +
@@ -277,13 +266,17 @@ export const QuizPrompts = {
   },
 
   /**
-   * Helper function to build batch quiz prompt (always Vietnamese)
+   * Helper function to build batch quiz prompt for review/practice (ôn tập).
    */
   buildBatchQuizPrompt: (
     chunkContent: string,
     chunkSummary: string,
     lessonSummary: string,
-    options: { count: number; distribution: Array<{ difficulty?: string; bloomLevel?: string; count?: number }>; userPrompt?: string },
+    options: {
+      count: number;
+      distribution: Array<{ difficulty?: string; bloomLevel?: string; count?: number }>;
+      userPrompt?: string;
+    },
     language: QuizLanguage = 'vi'
   ) => {
     const systemPrompt = QuizPrompts.batchSystemVi();
