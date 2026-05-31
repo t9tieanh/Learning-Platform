@@ -10,6 +10,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
+import chunkCitationUtil from '@/utils/chunkCitation.util'
 
 interface StudentExplanationRemediationProps {
   explanation: string
@@ -29,21 +30,22 @@ const StudentExplanationRemediation: React.FC<StudentExplanationRemediationProps
   const [openChunkId, setOpenChunkId] = useState<string | null>(null)
 
   const parts = useMemo(() => {
+    const normalized = chunkCitationUtil.normalizeChunkCitationText(explanation)
     const regex = /@{{([0-9a-fA-F-]+)}}@/g
     const result: (string | { chunkId: string })[] = []
     let lastIndex = 0
     let match
 
-    while ((match = regex.exec(explanation)) !== null) {
+    while ((match = regex.exec(normalized)) !== null) {
       if (match.index > lastIndex) {
-        result.push(explanation.substring(lastIndex, match.index))
+        result.push(normalized.substring(lastIndex, match.index))
       }
       result.push({ chunkId: match[1] })
       lastIndex = regex.lastIndex
     }
 
-    if (lastIndex < explanation.length) {
-      result.push(explanation.substring(lastIndex))
+    if (lastIndex < normalized.length) {
+      result.push(normalized.substring(lastIndex))
     }
 
     return result

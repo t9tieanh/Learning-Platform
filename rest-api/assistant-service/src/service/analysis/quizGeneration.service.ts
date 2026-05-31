@@ -9,8 +9,9 @@ import {
   BatchGeneratedQuizzesResponse
 } from '~/dto/response/quiz-response.dto';
 import { QuizPrompts, QuizLanguage } from '~/prompts/quiz.prompt';
-import { LessonTestQuizPrompts } from '~/prompts/lessonTest.quiz.prompt';
+import { LessonTestPrompts } from '~/prompts/lesson-test.prompt';
 import openaiQueueService from '~/service/queue/openaiQueue.service';
+import chunkCitationUtil from '~/utils/chunkCitation.util';
 
 /**
  * QuizGenerationService handles OpenAI integration for quiz generation.
@@ -102,14 +103,7 @@ export class QuizGenerationService {
   }
 
   /**
-   * Generates multiple quiz questions in a batch with specific distribution requirements.
-   * 
-   * @param chunkContent - The lesson chunk content
-   * @param chunkSummary - Summary of the chunk
-   * @param lessonSummary - Summary of the lesson
-   * @param batchOptions - Batch generation options with distribution requirements
-   * @param language - Language for quiz generation ('en' for English, 'vi' for Vietnamese)
-   * @returns Array of generated quizzes
+   * Batch generation for review/practice (ôn tập) — plain explanations, no chunk citations.
    */
   async generateBatchQuizzes(
     chunkContent: string,
@@ -119,7 +113,7 @@ export class QuizGenerationService {
     language: QuizLanguage = 'en'
   ): Promise<BatchGeneratedQuizzesResponse> {
     Logger.info(
-      `[QuizGenerationService] Starting batch quiz generation for ${batchOptions.count} quizzes, language=${language}`
+      `[QuizGenerationService] Starting review batch quiz generation for ${batchOptions.count} quizzes, language=${language}`
     );
 
     const prompt = QuizPrompts.buildBatchQuizPrompt(
@@ -130,24 +124,64 @@ export class QuizGenerationService {
       language
     );
 
+    return this.mapBatchQuizResponse(
+      await openaiQueueService.queueQuizGeneration(prompt.systemPrompt, prompt.userPrompt, true),
+      batchOptions
+    );
+  }
+
+  /**
+   * Batch generation for a merged lesson-test chunk group (bài kiểm tra) — explanations include @{{chunkId}}@ citations.
+   */
+  async generateLessonTestGroupBatch(
+    mergedContext: string,
+    lessonSummary: string,
+    batchOptions: GenerateBatchQuizzesDto,
+    language: QuizLanguage = 'vi'
+  ): Promise<BatchGeneratedQuizzesResponse> {
+    const mergedChunkTopic =
+      language === 'vi' ? LessonTestPrompts.mergedChunkTopicVi() : LessonTestPrompts.mergedChunkTopicEn();
+
+    const chunkIds = chunkCitationUtil.extractChunkIdsFromMergedContext(mergedContext);
+
+    Logger.info(
+      `[QuizGenerationService] Starting lesson-test batch for ${batchOptions.count} quizzes, chunkIds=${chunkIds.length}`
+    );
+
+    const prompt = LessonTestPrompts.buildBatchQuizPrompt(
+      mergedContext,
+      mergedChunkTopic,
+      lessonSummary || '',
+      {
+        distribution: batchOptions.distribution,
+        userPrompt: batchOptions.userPrompt,
+        chunkIds,
+      },
+      language
+    );
+
     const response = await openaiQueueService.queueQuizGeneration(
       prompt.systemPrompt,
       prompt.userPrompt,
-      true  // Batch quiz generation
+      true
     );
 
-    // Parse the response
-    const parsedResponse = openaiQueueService.parseQuizResponse(response);
+    return this.mapBatchQuizResponse(response, batchOptions, chunkIds);
+  }
 
-    // Response should be an array of quizzes
+  private mapBatchQuizResponse(
+    response: Awaited<ReturnType<typeof openaiQueueService.queueQuizGeneration>>,
+    batchOptions: GenerateBatchQuizzesDto,
+    citationChunkIds?: string[]
+  ): BatchGeneratedQuizzesResponse {
+    const parsedResponse = openaiQueueService.parseQuizResponse(response);
     const quizzes = Array.isArray(parsedResponse) ? parsedResponse : [parsedResponse];
 
     Logger.info(
       `[QuizGenerationService] Successfully generated ${quizzes.length} quizzes in batch`
     );
 
-    // Map distribution for defaults
-    const distributionMap = new Map<number, any>();
+    const distributionMap = new Map<number, (typeof batchOptions.distribution)[number]>();
     let distIndex = 0;
 
     for (const dist of batchOptions.distribution) {
@@ -157,12 +191,18 @@ export class QuizGenerationService {
       }
     }
 
+    const normalizeCitations = citationChunkIds != null && citationChunkIds.length > 0;
+
     return {
       quizzes: quizzes.map((q, index) => {
         const dist = distributionMap.get(index) || batchOptions.distribution[0];
+        const explanation = normalizeCitations
+          ? chunkCitationUtil.normalizeChunkCitationMarkers(q.explanation, citationChunkIds)
+          : q.explanation;
+
         return {
           question: q.question,
-          explanation: q.explanation,
+          explanation,
           type: q.type || 'MULTIPLE_CHOICE',
           difficulty: q.difficulty || dist?.difficulty || 'MEDIUM',
           bloomLevel: q.bloomLevel || dist?.bloomLevel || 'UNDERSTAND',
@@ -175,27 +215,6 @@ export class QuizGenerationService {
       }),
       count: quizzes.length,
     };
-  }
-
-  /**
-   * Batch generation for a merged lesson-test chunk group context (multiple chunks in one prompt).
-   */
-  async generateLessonTestGroupBatch(
-    mergedContext: string,
-    lessonSummary: string,
-    batchOptions: GenerateBatchQuizzesDto,
-    language: QuizLanguage = 'vi'
-  ): Promise<BatchGeneratedQuizzesResponse> {
-    const mergedChunkTopic =
-      language === 'vi' ? LessonTestQuizPrompts.mergedChunkTopicVi() : LessonTestQuizPrompts.mergedChunkTopicEn();
-
-    return this.generateBatchQuizzes(
-      mergedContext,
-      mergedChunkTopic,
-      lessonSummary || '',
-      batchOptions,
-      language
-    );
   }
 }
 
