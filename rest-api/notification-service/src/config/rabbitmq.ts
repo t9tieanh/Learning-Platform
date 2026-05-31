@@ -9,6 +9,10 @@ import { handleStudyReminderEvent } from '~/services/studyReminder.service'
 import type { StudyReminderEvent } from '~/dto/event/study-reminder-event.dto'
 import Logger from '~/utils/logger'
 
+const USER_NOTIFICATION_EXCHANGE = 'user-notification-exchange'
+const VERIFY_REGISTER_ROUTING_KEY = 'user.verify.register'
+const FORGOT_PASSWORD_ROUTING_KEY = 'user.forgot.password'
+
 const RabbitMQConf = {
   protocol: 'amqp',
   hostname: env.RABBIT_MQ_HOST,
@@ -133,15 +137,27 @@ class RabbitClient {
   private static async setupStaticConsumers() {
     if (!RabbitClient.channel) return
 
-    // VERIFY_EMAIL
-    await RabbitClient.channel.assertQueue(QueueNameEnum.VERIFY_EMAIL, { durable: true })
+    // VERIFY_EMAIL (user-service -> user-notification-exchange -> register-user-queue)
+    await RabbitClient.bindQueueToExchange(
+      QueueNameEnum.VERIFY_EMAIL,
+      USER_NOTIFICATION_EXCHANGE,
+      VERIFY_REGISTER_ROUTING_KEY,
+      'direct'
+    )
     this.consumeQueue<VerifyEmail>(QueueNameEnum.VERIFY_EMAIL, async (parsed) => {
+      parsed.type = QueueNameEnum.VERIFY_EMAIL
       await nodemailService.sendMail(parsed)
     })
 
-    // RESET_PASSWORD
-    await RabbitClient.channel.assertQueue(QueueNameEnum.RESET_PASSWORD, { durable: true })
+    // RESET_PASSWORD (user-service -> user-notification-exchange -> forgot-password-queue)
+    await RabbitClient.bindQueueToExchange(
+      QueueNameEnum.RESET_PASSWORD,
+      USER_NOTIFICATION_EXCHANGE,
+      FORGOT_PASSWORD_ROUTING_KEY,
+      'direct'
+    )
     this.consumeQueue<VerifyEmail>(QueueNameEnum.RESET_PASSWORD, async (parsed) => {
+      parsed.type = QueueNameEnum.RESET_PASSWORD
       await nodemailService.sendMail(parsed)
     })
 
