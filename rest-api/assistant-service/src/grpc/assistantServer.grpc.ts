@@ -1,39 +1,33 @@
-import * as grpc from '@grpc/grpc-js';
-import * as protoLoader from '@grpc/proto-loader';
-import path from 'path';
+const grpc = require('@grpc/grpc-js');
+const protoLoader = require('@grpc/proto-loader');
+const path = require('path');
 import { env } from '~/config/env';
 import Logger from '~/utils/logger';
 import lessonTestEligibilityService from '~/service/lessonTest/lessonTestEligibility.service';
 
-const PROTO_PATH = path.join(__dirname, '../../../proto-shared/src/main/proto/assistantService.proto');
-const PROTO_INCLUDE = path.join(__dirname, '../../../proto-shared/src/main/proto');
+const GRPC_PORT = env.ASSISTANT_GRPC_PORT;
+const APP_HOST = env.APP_HOST || '0.0.0.0';
+
+const PROTO_PATH = path.join(
+  __dirname,
+  '..',
+  '..',
+  '..',
+  'proto-shared',
+  'src',
+  'main',
+  'proto',
+  'assistantService.proto'
+);
 
 const packageDef = protoLoader.loadSync(PROTO_PATH, {
-  keepCase: true,
-  longs: String,
-  enums: String,
-  defaults: true,
-  oneofs: true,
-  includeDirs: [PROTO_INCLUDE],
+  includeDirs: [path.join(__dirname, '..', '..', '..', 'proto-shared', 'src', 'main', 'proto')],
 });
 
-const grpcObject = grpc.loadPackageDefinition(packageDef) as grpc.GrpcObject;
-
-function findAssistantService(root: grpc.GrpcObject): grpc.ServiceDefinition | null {
-  if (!root) return null;
-  const direct = root.AssistantService as grpc.ServiceDefinition | undefined;
-  if (direct) return direct;
-  for (const key of Object.keys(root)) {
-    const ns = root[key] as grpc.GrpcObject;
-    if (ns && ns.AssistantService) {
-      return ns.AssistantService as grpc.ServiceDefinition;
-    }
-  }
-  return null;
-}
+const proto = grpc.loadPackageDefinition(packageDef);
 
 const assistantServiceImpl = {
-  batchGetLessonTestEligibility: async (call: grpc.ServerUnaryCall<any, any>, callback: grpc.sendUnaryData<any>) => {
+  batchGetLessonTestEligibility: async (call: any, callback: any) => {
     try {
       const userId = String(call.request.user_id ?? call.request.userId ?? '');
       const lessonIds: string[] = call.request.lesson_ids ?? call.request.lessonIds ?? [];
@@ -73,25 +67,38 @@ const assistantServiceImpl = {
   },
 };
 
-export function startAssistantGrpcServer(): void {
-  const serviceDef = findAssistantService(grpcObject);
-  if (!serviceDef) {
-    Logger.error(`AssistantService not found in proto. Keys: ${Object.keys(grpcObject)}`);
-    throw new Error('AssistantService not found in proto definition');
+function findAssistantService(protoRoot: any) {
+  if (!protoRoot) return null;
+  if (protoRoot.AssistantService) return protoRoot.AssistantService;
+  for (const key of Object.keys(protoRoot)) {
+    const ns = protoRoot[key];
+    if (ns && ns.AssistantService) return ns.AssistantService;
+  }
+  return null;
+}
+
+function startAssistantGrpcServer() {
+  const server = new grpc.Server();
+  Logger.info('start server');
+
+  const assistantService = findAssistantService(proto);
+  if (!assistantService) {
+    Logger.error(`Failed to find AssistantService in loaded proto. Available top-level keys: ${Object.keys(proto)}`);
+    for (const key of Object.keys(proto)) {
+      const child = proto[key];
+      Logger.error(`- ${key}: ${child && typeof child === 'object' ? Object.keys(child) : typeof child}`);
+    }
+    throw new Error(
+      'AssistantService not found in proto definition. Check PROTO_PATH and package/service names in .proto file.'
+    );
   }
 
-  const server = new grpc.Server();
-  const impl = (serviceDef as unknown as { service: grpc.ServiceDefinition }).service ?? serviceDef;
-  server.addService(impl, assistantServiceImpl);
+  const serviceDef = assistantService.service || assistantService;
+  server.addService(serviceDef, assistantServiceImpl);
 
-  const host = env.APP_HOST || '0.0.0.0';
-  const port = env.ASSISTANT_GRPC_PORT;
-
-  server.bindAsync(`${host}:${port}`, grpc.ServerCredentials.createInsecure(), (err) => {
-    if (err) {
-      Logger.error(`Assistant gRPC server bind failed: ${err.message}`);
-      return;
-    }
-    Logger.info(`Assistant gRPC server running at ${host}:${port}`);
+  server.bindAsync(`${APP_HOST}:${GRPC_PORT}`, grpc.ServerCredentials.createInsecure(), () => {
+    Logger.info(`gRPC Assistant server running at ${APP_HOST}:${GRPC_PORT}`);
   });
 }
+
+export { startAssistantGrpcServer };

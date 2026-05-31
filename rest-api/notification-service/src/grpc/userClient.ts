@@ -11,7 +11,7 @@ const packageDef = protoLoader.loadSync(PROTO_PATH, {
   enums: String,
   defaults: true,
   oneofs: true,
-  includeDirs: [path.join(__dirname, '../../../proto-shared/src/main/proto')]
+  includeDirs: [path.join(__dirname, '../../../proto-shared/src/main/proto')] 
 })
 
 interface UserGrpcProfile {
