@@ -9,6 +9,11 @@ orderRouter.get('/verify-order/vnpay', orderController.verifyOrderForVnpay);
 orderRouter.get('/verify-order/momo', orderController.verifyOrderForMomo);
 orderRouter.get('/verify-vip-order/vnpay', orderController.verifyVipOrderForVnpay);
 orderRouter.get('/verify-vip-order/momo', orderController.verifyVipOrderForMomo);
+orderRouter.get('/verify-order/payos', orderController.verifyOrderForPayos);
+orderRouter.get('/verify-vip-order/payos', orderController.verifyVipOrderForPayos);
+orderRouter.get('/cancel-order/payos', orderController.cancelOrderForPayos);
+orderRouter.get('/cancel-vip-order/payos', orderController.cancelOrderForPayos);
+orderRouter.post('/payment/payos/webhook', orderController.payosWebhook);
 orderRouter.use(Authentication());
 
 orderRouter.post('/', validateDto(CreateOrderDto), orderController.createOrder);

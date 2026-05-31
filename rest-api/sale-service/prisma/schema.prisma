@@ -40,6 +40,7 @@ model Order {
   customer_name String
   customer_email String
   total Float
+  payos_order_code BigInt? @unique
 
   items       Order_Item[]
   payment     Payment?

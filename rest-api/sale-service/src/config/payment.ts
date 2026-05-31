@@ -14,3 +14,13 @@ export const momoConfig = {
   ipnUrl: process.env.MOMO_IPN_URL || 'http://localhost:8888/api/payment/momo/ipn',
   redirectUrl: process.env.MOMO_REDIRECT_URL ||'http://localhost:4000/api/orders/verify'
 }
+
+export const payosConfig = {
+  clientId: process.env.PAYOS_CLIENT_ID || '',
+  apiKey: process.env.PAYOS_API_KEY || '',
+  checksumKey: process.env.PAYOS_CHECKSUM_KEY || '',
+  returnUrl:
+    process.env.PAYOS_RETURN_URL || 'http://localhost:3005/orders/verify-order/payos',
+  cancelUrl:
+    process.env.PAYOS_CANCEL_URL || 'http://localhost:3005/orders/cancel-order/payos',
+}

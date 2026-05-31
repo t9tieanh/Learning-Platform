@@ -8,6 +8,7 @@ import {
 } from '@/components/ui/tooltip'
 import { LessonChunk } from '@/types/ai'
 import { LessonType } from '@/types/lesson'
+import chunkCitationUtil from '@/utils/chunkCitation.util'
 
 interface ExplanationCitationProps {
   text: string
@@ -23,22 +24,23 @@ const ExplanationCitation: React.FC<ExplanationCitationProps> = ({
   lessonType,
 }) => {
   const parts = useMemo(() => {
+    const normalized = chunkCitationUtil.normalizeChunkCitationText(text)
     // Regex for @{{uuid}}@
     const regex = /@{{([a-f0-9-]{36})}}@/gi
     const result: (string | { chunkId: string })[] = []
     let lastIndex = 0
     let match
 
-    while ((match = regex.exec(text)) !== null) {
+    while ((match = regex.exec(normalized)) !== null) {
       if (match.index > lastIndex) {
-        result.push(text.substring(lastIndex, match.index))
+        result.push(normalized.substring(lastIndex, match.index))
       }
       result.push({ chunkId: match[1] })
       lastIndex = regex.lastIndex
     }
 
-    if (lastIndex < text.length) {
-      result.push(text.substring(lastIndex))
+    if (lastIndex < normalized.length) {
+      result.push(normalized.substring(lastIndex))
     }
 
     return result
