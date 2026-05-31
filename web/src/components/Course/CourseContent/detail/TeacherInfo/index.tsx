@@ -82,6 +82,13 @@ const TeacherInfo = ({ teacher }: { teacher: Teacher }) => {
                 <p className='text-xs text-muted-foreground'>Khóa học</p>
               </div>
             </div>
+            <Button
+              type='button'
+              className='w-full rounded-full bg-blue-600 text-white hover:bg-blue-700'
+              onClick={() => navigate(`/instructors/${teacher?.id}/courses`)}
+            >
+              Xem tất cả khóa học
+            </Button>
           </div>
 
           {/* Teacher Details */}

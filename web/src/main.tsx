@@ -17,6 +17,7 @@ import TCHomePage from './pages/TC_HomePage'
 import ForgotPass from './pages/ForgotPass'
 import CoursePage from './pages/CoursePage'
 import AllCourse from './pages/AllCourse'
+import InstructorCoursesPage from './pages/InstructorCourses'
 import About from './pages/AboutUs'
 import Chat from './pages/Chat'
 import Blog from './pages/Blog'
@@ -62,6 +63,7 @@ const router = createBrowserRouter([
           { path: 'my-cart', element: <CartPage /> },
           { path: 'me', element: <Profile /> },
           { path: 'courses', element: <AllCourse /> },
+          { path: 'instructors/:instructorId/courses', element: <InstructorCoursesPage /> },
           { path: 'chat/:id', element: <Chat />, handle: { hideFooter: true, hideBubble: true } },
           { path: 'blog', element: <Blog /> },
           { path: 'blogs', element: <BlogList /> },

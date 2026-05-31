@@ -3,10 +3,12 @@ package com.freeclassroom.courseservice.service.course;
 import com.example.grpc.user.GetTeachersResponse;
 import com.example.grpc.user.GetUserResponse;
 import com.example.grpc.user.Teacher;
+import com.example.grpc.user.TeacherDetail;
 import com.freeclassroom.courseservice.dto.response.ApiResponse;
 import com.freeclassroom.courseservice.dto.response.common.Pagination;
 import com.freeclassroom.courseservice.dto.response.common.PagingResponse;
 import com.freeclassroom.courseservice.dto.response.course.*;
+import com.freeclassroom.courseservice.dto.response.course.instructor.*;
 import com.freeclassroom.courseservice.dto.response.user.InstructorResponse;
 import com.freeclassroom.courseservice.entity.course.CourseEntity;
 import com.freeclassroom.courseservice.entity.member.EnrollmentsEntity;
@@ -41,6 +43,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -421,6 +424,105 @@ public class CourseUserService implements ICourseUserService{
                     .result(0)
                     .build();
         }
+    }
+
+    @Override
+    public ApiResponse<InstructorCoursesPageResponse> getPublicCoursesByInstructor(
+            String instructorId,
+            int page,
+            int limit,
+            String search,
+            String sortBy,
+            String sortDirection
+    ) {
+        int normalizedPage = Math.max(page, 1);
+        int normalizedLimit = Math.min(Math.max(limit, 1), 50);
+        String normalizedSearch = search != null && !search.trim().isEmpty() ? search.trim() : null;
+        InstructorCourseSortBy sort = InstructorCourseSortBy.from(sortBy);
+        boolean isAsc = "asc".equalsIgnoreCase(sortDirection);
+
+        Pageable pageable = switch (sort) {
+            case RATING -> PageRequest.of(normalizedPage - 1, normalizedLimit,
+                    Sort.by(isAsc ? Sort.Direction.ASC : Sort.Direction.DESC, "rating")
+                            .and(Sort.by(Sort.Direction.DESC, "createdAt")));
+            case LATEST -> PageRequest.of(normalizedPage - 1, normalizedLimit,
+                    Sort.by(isAsc ? Sort.Direction.ASC : Sort.Direction.DESC, "createdAt"));
+            default -> PageRequest.of(normalizedPage - 1, normalizedLimit);
+        };
+
+        Page<InstructorCourseRowProjection> pageData = switch (sort) {
+            case STUDENTS, BEST_SELLER -> isAsc
+                    ? courseRepo.findPublicInstructorCoursesOrderByStudentsAsc(instructorId, normalizedSearch, pageable)
+                    : courseRepo.findPublicInstructorCoursesOrderByStudentsDesc(instructorId, normalizedSearch, pageable);
+            default -> courseRepo.findPublicInstructorCourses(instructorId, normalizedSearch, pageable);
+        };
+
+        InstructorCourseStatsProjection statsProjection = courseRepo.getPublicInstructorCourseStats(instructorId);
+
+        List<String> courseIds = pageData.getContent()
+                .stream()
+                .map(InstructorCourseRowProjection::getId)
+                .filter(Objects::nonNull)
+                .toList();
+        Map<String, Long> lessonCountMap = courseIds.isEmpty()
+                ? Collections.emptyMap()
+                : courseRepo.countLessonsByCourseIds(courseIds)
+                        .stream()
+                        .collect(Collectors.toMap(
+                                CourseLessonCountProjection::getCourseId,
+                                p -> p.getLessonsCount() == null ? 0L : p.getLessonsCount()
+                        ));
+
+        TeacherDetail instructor;
+        try {
+            instructor = userGrpcClient.getTeacherDetail(instructorId);
+        } catch (Exception e) {
+            throw new CustomExeption(ErrorCode.USER_NOT_FOUND);
+        }
+
+        List<InstructorCourseCardResponse> courses = pageData.getContent().stream()
+                .map(c -> InstructorCourseCardResponse.builder()
+                        .id(c.getId())
+                        .title(c.getTitle())
+                        .shortDescription(c.getShortDescription())
+                        .thumbnailUrl(c.getThumbnailUrl())
+                        .originalPrice(c.getOriginalPrice())
+                        .finalPrice(c.getFinalPrice())
+                        .rating(c.getRating() == null ? 0.0 : c.getRating())
+                        .studentsCount(c.getStudentsCount() == null ? 0L : c.getStudentsCount())
+                        .lessonsCount(lessonCountMap.getOrDefault(c.getId(), 0L))
+                        .createdAt(c.getCreatedAt())
+                        .isBestSeller(sort == InstructorCourseSortBy.BEST_SELLER)
+                        .build())
+                .toList();
+
+        InstructorCoursesPageResponse result = InstructorCoursesPageResponse.builder()
+                .instructor(InstructorPublicInfoResponse.builder()
+                        .id(instructor.getId())
+                        .name(instructor.getName())
+                        .email(instructor.getEmail())
+                        .image(instructor.getImage())
+                        .description(instructor.getDescription())
+                        .build())
+                .stats(InstructorCourseStatsResponse.builder()
+                        .totalCourses(statsProjection != null && statsProjection.getTotalCourses() != null ? statsProjection.getTotalCourses() : 0L)
+                        .averageRating(statsProjection != null && statsProjection.getAverageRating() != null ? statsProjection.getAverageRating() : 0.0)
+                        .build())
+                .courses(courses)
+                .pagination(InstructorCoursePaginationResponse.builder()
+                        .page(normalizedPage)
+                        .limit(normalizedLimit)
+                        .totalItems(pageData.getTotalElements())
+                        .totalPages(pageData.getTotalPages())
+                        .hasNext(pageData.hasNext())
+                        .build())
+                .build();
+
+        return ApiResponse.<InstructorCoursesPageResponse>builder()
+                .code(HttpStatus.OK.value())
+                .message("Lấy danh sách khóa học giảng viên thành công")
+                .result(result)
+                .build();
     }
 
     // general code

@@ -2,6 +2,7 @@ package com.freeclassroom.courseservice.controller.user;
 
 import com.freeclassroom.courseservice.dto.response.ApiResponse;
 import com.freeclassroom.courseservice.dto.response.course.*;
+import com.freeclassroom.courseservice.dto.response.course.instructor.InstructorCoursesPageResponse;
 import com.freeclassroom.courseservice.service.course.ICourseService;
 import com.freeclassroom.courseservice.service.course.ICourseUserService;
 import lombok.AccessLevel;
@@ -61,5 +62,24 @@ public class CourseUserController {
     @GetMapping("/count")
     ApiResponse<Integer> countInstructorCourseValid (@RequestParam String instructorId) {
         return courseUserService.countInstructorCourseValid(instructorId);
+    }
+
+    @GetMapping("/instructors/{instructorId}")
+    ApiResponse<InstructorCoursesPageResponse> getPublicCoursesByInstructor(
+            @PathVariable String instructorId,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "12") int limit,
+            @RequestParam(required = false) String search,
+            @RequestParam(defaultValue = "latest") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDirection
+    ) {
+        return courseUserService.getPublicCoursesByInstructor(
+                instructorId,
+                page,
+                limit,
+                search,
+                sortBy,
+                sortDirection
+        );
     }
 }
