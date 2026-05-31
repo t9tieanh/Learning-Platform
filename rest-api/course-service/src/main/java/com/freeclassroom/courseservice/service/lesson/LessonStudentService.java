@@ -20,7 +20,8 @@ import com.freeclassroom.courseservice.repository.entity.EnrollmentRepository;
 import com.freeclassroom.courseservice.repository.entity.LessonProgressRepository;
 import com.freeclassroom.courseservice.repository.entity.LessonRepository;
 import com.freeclassroom.courseservice.service.utils.cloudfront.ICloudFrontService;
-import com.freeclassroom.courseservice.service.certificate.ICourseCompletionCertificateService;
+import com.freeclassroom.courseservice.service.certificate.CertificateEligibilityService;
+import com.freeclassroom.courseservice.dto.certificate.CertificateEligibilityTryResult;
 import com.freeclassroom.courseservice.service.utils.other.FileUtils;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -52,7 +53,7 @@ public class LessonStudentService implements ILessonStudentService {
     CustomJwtDecoder customJwtDecoder;
     LessonStudentMapper lessonMapper;
     FileUtils fileUtils;
-    ICourseCompletionCertificateService courseCompletionCertificateService;
+    CertificateEligibilityService certificateEligibilityService;
 
     @Value("${server.backendUri}")
     @NonFinal
@@ -141,8 +142,6 @@ public class LessonStudentService implements ILessonStudentService {
         EnrollmentsEntity enrollment = enrollmentRepo.findByUserIdAndCourse_Chapters_Lessons_Id(userId, lessonId)
                 .orElseThrow(() -> new CustomExeption(ErrorCode.UNAUTHORIZED));
 
-        double previousProgress = enrollment.getProgress() != null ? enrollment.getProgress() : 0.0;
-
         LessonProgressEntity lessonProgress = lessonProgressRepo
                 .findFirstByLesson_IdAndEnrollment_IdOrderByUpdatedAtDesc(lessonId, enrollment.getId())
                 .orElse(null);
@@ -181,12 +180,9 @@ public class LessonStudentService implements ILessonStudentService {
         enrollment.setProgress(progress);
         enrollmentRepo.save(enrollment);
 
-        Optional<CourseCompletionCertificateEntity> issuedCertificate = Optional.empty();
-        if (progress >= 1.0) {
-            issuedCertificate = courseCompletionCertificateService.issueIfEligible(enrollment);
-        }
-
-        boolean isCompletedCourse = previousProgress < 1.0 && progress >= 1.0;
+        CertificateEligibilityTryResult tryResult = certificateEligibilityService.tryIssue(enrollment);
+        boolean isCompletedCourse = tryResult.isNewlyIssued();
+        Optional<CourseCompletionCertificateEntity> issuedCertificate = tryResult.getCertificate();
 
         return ApiResponse.<MarkDoneLessonResponse>builder()
                 .result(

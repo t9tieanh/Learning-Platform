@@ -10,6 +10,10 @@ interface ImportMetaEnv {
   /** true = show checkout payment methods without dev password */
   readonly VITE_ENABLE_CHECKOUT_PAYMENT?: string
   readonly VITE_CHECKOUT_PAYMENT_DEV_PASSWORD?: string
+  /** `dev` only — omit or any other value => production (default) */
+  readonly VITE_LESSON_VIDEO_URL_MODE?: string
+  readonly VITE_LESSON_VIDEO_DEV_BASIC_USERNAME?: string
+  readonly VITE_LESSON_VIDEO_DEV_BASIC_PASSWORD?: string
 }
 
 interface ImportMeta {

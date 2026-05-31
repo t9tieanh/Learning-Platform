@@ -21,6 +21,40 @@ public interface EnrollmentRepository extends JpaRepository<EnrollmentsEntity, S
     Optional<EnrollmentsEntity> findByUserIdAndCourse_Chapters_Lessons_Id(String userId, String courseId);
     Optional<EnrollmentsEntity> findByUserIdAndCourse_Id(String userId, String courseId);
 
+    @Query("""
+            SELECT e FROM EnrollmentsEntity e
+            JOIN FETCH e.course
+            WHERE e.id = :enrollmentId
+            """)
+    Optional<EnrollmentsEntity> findByIdWithCourse(@Param("enrollmentId") String enrollmentId);
+
+    @Query("""
+            SELECT e FROM EnrollmentsEntity e
+            JOIN FETCH e.course c
+            WHERE e.userId = :userId
+              AND EXISTS (
+                  SELECT 1 FROM LessonEntity l
+                  JOIN l.chapter ch
+                  WHERE l.id = :lessonId AND ch.course = c
+              )
+            """)
+    Optional<EnrollmentsEntity> findByUserIdAndLessonIdWithCourse(
+            @Param("userId") String userId,
+            @Param("lessonId") String lessonId
+    );
+
+    @Query("""
+            SELECT e FROM EnrollmentsEntity e
+            JOIN FETCH e.course c
+            LEFT JOIN FETCH c.chapters ch
+            LEFT JOIN FETCH ch.lessons
+            WHERE e.userId = :userId AND c.id = :courseId
+            """)
+    Optional<EnrollmentsEntity> findByUserIdAndCourseIdWithCurriculum(
+            @Param("userId") String userId,
+            @Param("courseId") String courseId
+    );
+
     @Transactional
     @Modifying
     @Query("DELETE FROM EnrollmentsEntity e WHERE e.userId = :userId AND e.course.id IN :courseIds")

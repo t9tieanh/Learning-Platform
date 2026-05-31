@@ -3,6 +3,7 @@ import { Award } from 'lucide-react'
 import courseCertificateService from '@/services/certificate/course-certificate.service'
 import { CourseCompletionCertificate } from '@/types/course-certificate'
 import CourseCertificateItem from './CourseCertificateItem'
+import CourseCertificateListSkeleton from './CourseCertificateListSkeleton'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 export default function CourseCertificateList() {
@@ -38,7 +39,7 @@ export default function CourseCertificateList() {
       </CardHeader>
       <CardContent className='pt-5'>
         {loading ? (
-          <p className='text-muted-foreground text-sm'>Đang tải...</p>
+          <CourseCertificateListSkeleton />
         ) : certificates.length === 0 ? (
           <div className='text-center py-12 text-muted-foreground'>
             <Award className='w-12 h-12 mx-auto mb-3 opacity-30' />

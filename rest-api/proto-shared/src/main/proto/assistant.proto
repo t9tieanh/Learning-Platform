@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.example.grpc.assistant";
+option java_outer_classname = "AssistantProto";
+
+message BatchLessonTestEligibilityRequest {
+  string user_id = 1;
+  repeated string lesson_ids = 2;
+  double min_pass_percent = 3;
+}
+
+message LessonTestEligibilityItem {
+  string lesson_id = 1;
+  bool has_published_test = 2;
+  double best_percent = 3;
+  bool passed = 4;
+  double best_earned_points = 5;
+  int32 max_points = 6;
+}
+
+message BatchLessonTestEligibilityResponse {
+  repeated LessonTestEligibilityItem items = 1;
+}

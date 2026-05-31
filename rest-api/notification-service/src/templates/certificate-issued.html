@@ -1,0 +1,59 @@
+{{> wrapper-start}}
+{{> header}}
+{{> body-start}}
+
+<table
+  role="presentation"
+  width="100%"
+  cellspacing="0"
+  cellpadding="0"
+  border="0"
+  style="
+    margin-bottom: 20px;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.04);
+  "
+>
+  <tr>
+    <td style="padding: 0">
+      {{#if hasThumbnail}}
+      <img
+        src="{{courseThumbnailUrl}}"
+        alt="{{courseTitle}}"
+        width="600"
+        style="display: block; width: 100%; max-height: 200px; object-fit: cover; border: 0"
+      />
+      {{else}}
+      <div style="height: 160px; background: linear-gradient(145deg, #dbeafe 0%, #bfdbfe 100%)"></div>
+      {{/if}}
+      <div style="padding: 20px 22px">
+        <p style="margin: 0 0 10px; font-size: 18px; line-height: 1.4; font-weight: 700; color: #0f172a">
+          {{courseTitle}}
+        </p>
+        {{#if certificateCode}}
+        <p style="margin: 0; font-size: 14px; line-height: 1.6; color: #64748b">
+          Mã chứng chỉ:
+          <strong style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: #1d4ed8">
+            {{certificateCode}}
+          </strong>
+        </p>
+        {{/if}}
+      </div>
+    </td>
+  </tr>
+</table>
+
+<p style="margin: 0 0 18px; font-size: 15px; line-height: 1.65; color: #475569">
+  Bạn đã hoàn thành toàn bộ bài học và vượt qua các bài kiểm tra bắt buộc. Chứng chỉ đã được lưu trong hồ sơ Learnova
+  của bạn — hãy tải PDF hoặc chia sẻ thành tích này ngay hôm nay.
+</p>
+
+{{#if profileUrl}}
+{{> button ctaUrl=profileUrl ctaLabel="Xem chứng chỉ của tôi"}}
+{{/if}}
+
+{{> body-end}}
+{{> footer}}
+{{> wrapper-end}}

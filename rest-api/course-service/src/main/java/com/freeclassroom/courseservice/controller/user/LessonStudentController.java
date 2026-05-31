@@ -25,6 +25,15 @@ import org.springframework.web.bind.annotation.*;
 public class LessonStudentController {
     ILessonStudentService lessonStudentService;
 
+    /**
+     * Local/dev: CloudFront signed URL without IP binding (same policy as {@code @SignedUrl} on course intro).
+     * Protected by HTTP Basic Auth — path {@link com.freeclassroom.courseservice.configuration.BasicAuthProperties#PATH_LESSON_DEV_PRESIGNED_URL}, see {@code app.basic-auth.*}.
+     */
+    @GetMapping("/{id}/dev-presigned-url")
+    public ApiResponse<String> getDevPresignedUrl(@PathVariable String id) {
+        return lessonStudentService.getPresignedUrlNoIp(id);
+    }
+
     @GetMapping("/{id}/presigned-url")
     @PreAuthorize("@lessonStudentService.canViewLesson(#id, authentication.name)")
     public ApiResponse<String> getPresignedUrl(
