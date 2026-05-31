@@ -13,6 +13,10 @@ import ApiError from '~/middleware/ApiError';
 import prismaService from '~/service/utils/prisma.service';
 import lessonTestService from '~/service/lessonTest/lessonTest.service';
 import { shuffleArray, stringSetsEqual } from '~/utils/array.util';
+import courseClient from '~/grpc/courseClient.grpc';
+import Logger from '~/utils/logger';
+
+const MIN_PASS_PERCENT_FOR_CERTIFICATE = 50;
 
 /** MCQ + true/false only; short answer is out of scope for auto-grading v1. */
 const GRADABLE_TYPES: QuestionType[] = [QuestionType.MULTIPLE_CHOICE, QuestionType.TRUE_FALSE];
@@ -303,6 +307,29 @@ export class LessonTestStudentService {
       return sub;
     });
 
+    let certificatePayload: {
+      isCompletedCourse: boolean;
+      certificateId: string | null;
+      certificateCode: string | null;
+    } = {
+      isCompletedCourse: false,
+      certificateId: null,
+      certificateCode: null,
+    };
+
+    if (percent >= MIN_PASS_PERCENT_FOR_CERTIFICATE) {
+      try {
+        const issueResult = await courseClient.tryIssueCourseCompletionCertificate(userId, lessonId);
+        certificatePayload = {
+          isCompletedCourse: issueResult.isNewlyCompletedCourse,
+          certificateId: issueResult.certificateId,
+          certificateCode: issueResult.certificateCode,
+        };
+      } catch (error) {
+        Logger.error(`Failed to try issue certificate after lesson test submit: ${error}`);
+      }
+    }
+
     return {
       submissionId: submission.id,
       lessonId,
@@ -314,6 +341,7 @@ export class LessonTestStudentService {
       items,
       chunks: lesson.chunks,
       subtitles: lesson.subtitles,
+      ...certificatePayload,
     };
   }
 

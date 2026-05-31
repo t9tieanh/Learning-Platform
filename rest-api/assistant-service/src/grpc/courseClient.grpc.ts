@@ -129,6 +129,41 @@ class CourseGrpcClient {
             })
         })
     }
+
+    async tryIssueCourseCompletionCertificate(
+        userId: string,
+        lessonId: string
+    ): Promise<TryIssueCourseCompletionCertificateResult> {
+        return new Promise((resolve, reject) => {
+            const req = { user_id: userId, lesson_id: lessonId }
+            this.courseClient.tryIssueCourseCompletionCertificate(req, (err: any, response: any) => {
+                if (err) {
+                    Logger.error(`grpc tryIssueCourseCompletionCertificate error: ${err}`)
+                    return reject(err)
+                }
+
+                resolve({
+                    issued: Boolean(response?.issued),
+                    isNewlyCompletedCourse: Boolean(
+                        response?.is_newly_completed_course ?? response?.isNewlyCompletedCourse
+                    ),
+                    certificateId: response?.certificate_id ?? response?.certificateId ?? null,
+                    certificateCode: response?.certificate_code ?? response?.certificateCode ?? null,
+                    lessonsComplete: Boolean(response?.lessons_complete ?? response?.lessonsComplete),
+                    testsComplete: Boolean(response?.tests_complete ?? response?.testsComplete),
+                })
+            })
+        })
+    }
+}
+
+export interface TryIssueCourseCompletionCertificateResult {
+    issued: boolean
+    isNewlyCompletedCourse: boolean
+    certificateId: string | null
+    certificateCode: string | null
+    lessonsComplete: boolean
+    testsComplete: boolean
 }
 
 export interface CourseDto {

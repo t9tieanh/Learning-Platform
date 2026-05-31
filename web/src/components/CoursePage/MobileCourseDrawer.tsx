@@ -4,6 +4,8 @@ import { TableOfContents, Sparkles } from 'lucide-react'
 import Button from '@/components/common/Button'
 import { CourseSidebar } from './CourseSidebar'
 import { CourseSidebarSkeleton } from './CourseSidebarSkeleton'
+import { CertificateJourneyProgress } from './CertificateJourneyProgress'
+import { CertificateJourney } from '@/types/course-student'
 
 interface MobileCourseDrawerProps {
   activeMobileTab: 'content' | 'ai' | null
@@ -14,6 +16,8 @@ interface MobileCourseDrawerProps {
   onSeek: (timestamp: string) => void
   isLoading: boolean
   subtitlesRaw?: string | null
+  certificateJourney?: CertificateJourney | null
+  onNavigateToLessonTest?: (lessonId: string) => void
 }
 
 export const MobileCourseDrawer: React.FC<MobileCourseDrawerProps> = ({
@@ -24,7 +28,9 @@ export const MobileCourseDrawer: React.FC<MobileCourseDrawerProps> = ({
   onSelectLecture,
   onSeek,
   isLoading,
-  subtitlesRaw
+  subtitlesRaw,
+  certificateJourney,
+  onNavigateToLessonTest,
 }) => {
   return (
     <div className='lg:hidden fixed bottom-0 left-0 right-0 z-[60]'>
@@ -94,22 +100,34 @@ export const MobileCourseDrawer: React.FC<MobileCourseDrawerProps> = ({
         </div>
 
         {/* Content Body */}
-        <div className='flex-1 overflow-hidden min-h-0'>
+        <div className='flex-1 overflow-hidden min-h-0 flex flex-col'>
           {isLoading ? (
             <CourseSidebarSkeleton />
           ) : (
-            <CourseSidebar
-              sections={uiSections}
-              currentLectureId={currentLectureId}
-              onSelectLecture={(l) => {
-                onSelectLecture(l)
-                setActiveMobileTab(null)
-              }}
-              onSeek={onSeek}
-              hideHeader={true}
-              initialTab={activeMobileTab === 'ai' ? 'ai' : 'content'}
-              subtitlesRaw={subtitlesRaw}
-            />
+            <>
+              {certificateJourney && (
+                <div className='p-3 border-b border-border shrink-0'>
+                  <CertificateJourneyProgress
+                    journey={certificateJourney}
+                    onNavigateToLessonTest={onNavigateToLessonTest}
+                  />
+                </div>
+              )}
+              <div className='flex-1 min-h-0 overflow-hidden'>
+                <CourseSidebar
+                  sections={uiSections}
+                  currentLectureId={currentLectureId}
+                  onSelectLecture={(l) => {
+                    onSelectLecture(l)
+                    setActiveMobileTab(null)
+                  }}
+                  onSeek={onSeek}
+                  hideHeader={true}
+                  initialTab={activeMobileTab === 'ai' ? 'ai' : 'content'}
+                  subtitlesRaw={subtitlesRaw}
+                />
+              </div>
+            </>
           )}
         </div>
       </motion.div>

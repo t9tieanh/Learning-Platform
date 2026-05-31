@@ -25,6 +25,10 @@ public class RabbitMQConfig {
     public static final String STUDY_REMINDER_QUEUE = "study-reminder.queue";
     public static final String STUDY_REMINDER_ROUTING_KEY = "course.study.reminder";
 
+    // --- course completion certificate issued ---
+    public static final String CERTIFICATE_ISSUED_QUEUE = "certificate-issued.queue";
+    public static final String CERTIFICATE_ISSUED_ROUTING_KEY = "course.certificate.issued";
+
     // --- config course approval/reject ---
     public static final String COURSE_APPROVAL_QUEUE = "course.approval.queue";
     public static final String COURSE_APPROVAL_EXCHANGE = "course.approval.exchange";
@@ -57,6 +61,19 @@ public class RabbitMQConfig {
                 .bind(studyReminderQueue)
                 .to(userNotificationExchange)
                 .with(STUDY_REMINDER_ROUTING_KEY);
+    }
+
+    @Bean
+    public Queue certificateIssuedQueue() {
+        return new Queue(CERTIFICATE_ISSUED_QUEUE, true);
+    }
+
+    @Bean
+    public Binding bindingCertificateIssued(Queue certificateIssuedQueue, DirectExchange userNotificationExchange) {
+        return BindingBuilder
+                .bind(certificateIssuedQueue)
+                .to(userNotificationExchange)
+                .with(CERTIFICATE_ISSUED_ROUTING_KEY);
     }
 
     @Bean

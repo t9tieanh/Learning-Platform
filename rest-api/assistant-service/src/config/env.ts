@@ -25,8 +25,10 @@ export const env = {
   WEB_URL: process.env.WEB_URL || 'http://localhost:3000/check-out/',
   COURSE_PUBLIC_BASE_URL:
     process.env.COURSE_PUBLIC_BASE_URL || 'https://learnova.t9tieanh.io.vn/course',
-  COURSE_GRPC_URL: process.env.COURSE_GRPC_URL || 'course-service:9091',
+  COURSE_GRPC_URL: process.env.COURSE_GRPC_URL || 'localhost:50054',
   USER_GRPC_URL: process.env.USER_GRPC_URL || 'user-service:9090',
+  ASSISTANT_GRPC_PORT: parseInt(process.env.ASSISTANT_GRPC_PORT || '50055', 10),
+  APP_HOST: process.env.APP_HOST || '0.0.0.0',
   N8N_BASE_URL: process.env.N8N_BASE_URL || '',
   N8N_WEBHOOK_PATH: process.env.N8N_WEBHOOK_PATH || '',
   N8N_AUTH_HEADER: process.env.N8N_AUTH_HEADER || '',

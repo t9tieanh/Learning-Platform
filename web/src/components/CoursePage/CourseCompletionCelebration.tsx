@@ -151,30 +151,30 @@ export default function CourseCompletionCelebration({
                 <Sparkles className='w-5 h-5 text-amber-500 shrink-0 animate-pulse' />
               </div>
 
-              <div className='flex flex-col sm:flex-row gap-3 pt-1'>
+              <div className='flex flex-wrap gap-2 pt-1'>
                 <CustomButton
                   onClick={handleDownloadPdf}
-                  label={downloading ? 'Đang tải PDF...' : 'Tải chứng chỉ PDF'}
+                  label={downloading ? 'Đang tải...' : 'Tải PDF'}
                   icon={
                     downloading ? (
-                      <Loader2 className='w-4.5 h-4.5 animate-spin' />
+                      <Loader2 className='w-3.5 h-3.5 animate-spin' />
                     ) : (
-                      <Download className='w-4.5 h-4.5' />
+                      <Download className='w-3.5 h-3.5' />
                     )
                   }
-                  className='flex-1 h-14 md:h-16 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl text-[14px] md:text-[15px] font-black transition-all hover:-translate-y-0.5 active:scale-[0.98] flex items-center justify-center gap-3 disabled:opacity-70'
+                  className='h-10 flex-1 min-w-[calc(50%-0.25rem)] sm:min-w-0 basis-[calc(33.333%-0.375rem)] bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all hover:-translate-y-0.5 active:scale-[0.98] flex items-center justify-center gap-2 px-3 disabled:opacity-70'
                 />
                 <CustomButton
                   onClick={handleViewCertificate}
-                  label='Xem trong hồ sơ'
-                  icon={<Award className='w-4.5 h-4.5' />}
-                  className='flex-1 h-14 md:h-16 bg-white hover:bg-blue-50 text-blue-700 border-2 border-blue-100 rounded-2xl text-[14px] md:text-[15px] font-black transition-all active:scale-[0.98] flex items-center justify-center gap-3'
+                  label='Xem hồ sơ'
+                  icon={<Award className='w-3.5 h-3.5' />}
+                  className='h-10 flex-1 min-w-[calc(50%-0.25rem)] sm:min-w-0 basis-[calc(33.333%-0.375rem)] bg-white hover:bg-blue-50 text-blue-700 border border-blue-200 rounded-xl text-xs font-bold transition-all active:scale-[0.98] flex items-center justify-center gap-2 px-3'
                 />
                 <CustomButton
                   onClick={() => onOpenChange(false)}
                   label='Tiếp tục học'
-                  icon={<ArrowRight className='w-4.5 h-4.5' />}
-                  className='flex-1 h-14 md:h-16 bg-white hover:bg-gray-50 text-gray-700 border-2 border-gray-200 rounded-2xl text-[14px] md:text-[15px] font-black transition-all active:scale-[0.98] flex items-center justify-center gap-3'
+                  icon={<ArrowRight className='w-3.5 h-3.5' />}
+                  className='h-10 flex-1 min-w-full sm:min-w-0 basis-[calc(33.333%-0.375rem)] bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 rounded-xl text-xs font-bold transition-all active:scale-[0.98] flex items-center justify-center gap-2 px-3'
                 />
               </div>
             </div>
