@@ -159,8 +159,8 @@ def import_courses(cursor, file_path):
             deleted = 1 if row.get('deleted') == 'True' or row.get('deleted') == '1' else 0
             
             # Defaults
-            final_price = float(row.get('final_price', 194000.0))
-            original_price = float(row.get('original_price', 300000.0))
+            final_price = float(5000.0)
+            original_price = float(row.get('original_price', 10000.0))
             language = 'en'
             progress_step = 'COMPLETED'
             status = 'PUBLISHED'

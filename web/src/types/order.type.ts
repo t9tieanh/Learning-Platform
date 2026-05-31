@@ -1,3 +1,5 @@
+export type PaymentMethod = 'MOMO' | 'VNPAY' | 'PAYOS'
+
 export interface OrderItem {
   course_id: string
   title: string

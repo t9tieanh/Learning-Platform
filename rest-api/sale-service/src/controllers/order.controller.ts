@@ -150,6 +150,50 @@ class OrderController {
         }
     }
 
+    async verifyOrderForPayos(req: Request, res: Response, next: NextFunction) {
+        try {
+            const query = req.query;
+            const verificationResult = await orderPaymentService.verifyOrderForPayos(query);
+            if (!verificationResult.isSuccess) {
+                sendResponse(res, {
+                    code: 400,
+                    message: 'Xác thực đơn hàng thất bại !',
+                    result: verificationResult
+                });
+                return;
+            }
+            return res.redirect(env.WEB_URL + verificationResult.orderId);
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async verifyVipOrderForPayos(req: Request, res: Response, next: NextFunction) {
+        try {
+            const query = req.query;
+            const verificationResult = await orderPaymentService.verifyVipOrderForPayos(query);
+            if (!verificationResult.isSuccess) {
+                return res.redirect(env.WEB_URL + verificationResult.orderId);
+            }
+            return res.redirect(env.WEB_URL + 'vip-success/' + verificationResult.orderId);
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async cancelOrderForPayos(req: Request, res: Response, next: NextFunction) {
+        try {
+            return res.redirect(env.WEB_URL);
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async payosWebhook(req: Request, res: Response) {
+        console.log('[PayOS webhook]', JSON.stringify(req.body));
+        return res.status(200).json({ error: 0, message: 'Ok' });
+    }
+
     async getOrderInfo(req: Request, res: Response, next: NextFunction) {
         try {
             const { orderId } = req.params;

@@ -9,6 +9,7 @@ import discountService from './discount.service';
 import vnpayService from '../../service/utils/vnpay.service'
 import { OrderDto } from '~/dto/response/order.dto';
 import momoService from '../utils/momo.service';
+import payosService from '../utils/payos.service';
 
 class OrderService {
     async createOrder(orderData: CreateOrderDto, userId: string): Promise<{
@@ -164,6 +165,11 @@ class OrderService {
                 orderId: createdOrder.id,
                 ipAddr: ipAddress || '127.0.0.1'
             });
+        } else if (paymentMethod === 'PAYOS') {
+            payUri = await payosService.createPayment({
+                amount,
+                orderId: createdOrder.id,
+            });
         }
 
         return {
@@ -217,6 +223,12 @@ class OrderService {
                 orderId: createdOrder.id,
                 ipAddr: ipAddress || '127.0.0.1',
                 type: OrderType.VIP_SUBSCRIPTION
+            });
+        } else if (paymentMethod === 'PAYOS') {
+            payUri = await payosService.createPayment({
+                amount: vipPrice,
+                orderId: createdOrder.id,
+                type: OrderType.VIP_SUBSCRIPTION,
             });
         }
 

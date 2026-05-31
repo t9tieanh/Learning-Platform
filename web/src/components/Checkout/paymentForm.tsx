@@ -1,6 +1,7 @@
 import CustomButton from '@/components/common/Button'
 import CustomInput from '@/components/common/Input'
 import VnPayLogo from '@/assets/images/Icon-VNPAY-QR.webp'
+import PayOSLogo from '@/assets/images/payos-icon.png'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import momoLogo from '@/assets/images/momo-logo.webp'
 import { User, WalletCards } from 'lucide-react'
@@ -77,6 +78,34 @@ const PaymentForm = ({ order }: { order: Order | null }) => {
     }
   }
 
+  const handlePayWithPayos = async () => {
+    const confirmed = await showConfirmToast({
+      title: (
+        <div className='flex items-center gap-2'>
+          Xác nhận thanh toán
+          <img src={PayOSLogo} alt='PayOS Logo' className='h-5 w-auto' />
+        </div>
+      ),
+      description: 'Bạn sắp thanh toán qua chuyển khoản VietQR (PayOS). Bạn có chắc chắn muốn tiếp tục?',
+      confirmLabel: 'Có, tiếp tục',
+      cancelLabel: 'Hủy'
+    })
+
+    if (!confirmed) return
+
+    try {
+      const response = await orderService.processPayment('PAYOS', receiveEmail)
+      if (response && response.code === 200 && response.result) {
+        toast.success('Đang chuyển đến trang thanh toán PayOS...')
+        window.location.href = response.result.payment.payUrl
+      } else {
+        toast.error(response.message || 'Không thể khởi tạo thanh toán PayOS. Vui lòng thử lại.')
+      }
+    } catch (error: any) {
+      toast.error(error?.response?.data.message || 'Đã có lỗi xảy ra, vui lòng thử lại sau.')
+    }
+  }
+
   return (
     <div className='payment-form space-y-6'>
       <Card className='shadow-sm'>
@@ -132,6 +161,17 @@ const PaymentForm = ({ order }: { order: Order | null }) => {
             icon={
               <>
                 <img src={VnPayLogo} alt='VnPay Logo' className='h-6 w-auto' />
+              </>
+            }
+          />
+          <CustomButton
+            type='submit'
+            className='bg-emerald-100 text-black py-2 rounded-md hover:bg-gray-200 shadow-sm'
+            label='Thanh toán PayOS (VietQR)'
+            onClick={handlePayWithPayos}
+            icon={
+              <>
+                <img src={PayOSLogo} alt='PayOS Logo' className='h-6 w-auto' />
               </>
             }
           />
