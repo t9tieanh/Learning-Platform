@@ -1,6 +1,6 @@
 import axiosClient from '@/lib/axiosClient.lib'
 import { ApiResponse } from '@/types/response.type'
-import { Order, OrderItem, OrderResponse } from '@/types/order.type'
+import { Order, OrderItem, OrderResponse, PaymentMethod } from '@/types/order.type'
 import { HistoryOrder } from '@/types/order-history'
 
 class OrderService {
@@ -34,14 +34,14 @@ class OrderService {
     return response.data
   }
 
-  async processPayment(paymentMethod: 'MOMO' | 'VNPAY', email: string): Promise<ApiResponse<OrderResponse>> {
+  async processPayment(paymentMethod: PaymentMethod, email: string): Promise<ApiResponse<OrderResponse>> {
     const response = await axiosClient.axiosInstance.post(`/sale/orders/payment/${paymentMethod}`, {
       email
     })
     return response.data
   }
 
-  async processVipPayment(paymentMethod: 'MOMO' | 'VNPAY', email: string): Promise<ApiResponse<OrderResponse>> {
+  async processVipPayment(paymentMethod: PaymentMethod, email: string): Promise<ApiResponse<OrderResponse>> {
     const response = await axiosClient.axiosInstance.post(`/sale/orders/vip-payment/${paymentMethod}`, {
       email
     })

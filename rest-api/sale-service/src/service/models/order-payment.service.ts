@@ -4,6 +4,7 @@ import { OrderStatus } from '@prisma/client';
 import { StatusCodes } from 'http-status-codes';
 import vnpayService from '~/service/utils/vnpay.service';
 import momoService from '../utils/momo.service';
+import payosService, { PayosReturnQuery } from '../utils/payos.service';
 import rabbitMQService from '~/service/utils/rabbitmq.service';
 import redisService, { SagaResult } from '~/service/utils/redis.service';
 import { createEnvelope } from '~/sagas/events/envelope';
@@ -32,18 +33,29 @@ class OrderPaymentService {
         return this.handleVerifyVip(query, 'vnpay');
     }
 
+    async verifyOrderForPayos(query: any) {
+        return this.handleVerify(query, 'payos');
+    }
+
+    async verifyVipOrderForPayos(query: any) {
+        return this.handleVerifyVip(query, 'payos');
+    }
+
     /** 
-     * Core shared verify flow for both MoMo and VNPay
+     * Core shared verify flow for MoMo, VNPay and PayOS
      */
-    private async handleVerify(query: any, provider: 'momo' | 'vnpay') {
+    private async handleVerify(query: any, provider: 'momo' | 'vnpay' | 'payos') {
         let orderId = '';
         try {
             // Step 1. Validate callback and fetch order
-            const { order, orderId: id } =
-                provider === 'momo'
-                    ? await this.validateMomoCallback(query)
-                    : await this.validateVnpayCallback(query);
+            const { order, orderId: id } = await this.validatePaymentCallback(query, provider);
             orderId = id;
+
+            const lockKey = `payment:lock:${orderId}`;
+            const locked = await redisService.setLock(lockKey, { provider }, 120);
+            if (!locked) {
+                throw new ApiError(StatusCodes.CONFLICT, 'Đơn hàng đang được xử lý');
+            }
 
             // Step 2. Mark order as processing
             const updated = await prismaService.order.update({
@@ -110,15 +122,18 @@ class OrderPaymentService {
     /** 
      * Core shared verify flow for VIP subscriptions
      */
-    private async handleVerifyVip(query: any, provider: 'momo' | 'vnpay') {
+    private async handleVerifyVip(query: any, provider: 'momo' | 'vnpay' | 'payos') {
         let orderId = '';
         try {
             // Step 1. Validate callback and fetch order
-            const { order, orderId: id } =
-                provider === 'momo'
-                    ? await this.validateMomoCallback(query)
-                    : await this.validateVnpayCallback(query);
+            const { order, orderId: id } = await this.validatePaymentCallback(query, provider);
             orderId = id;
+
+            const lockKey = `payment:lock:${orderId}`;
+            const locked = await redisService.setLock(lockKey, { provider }, 120);
+            if (!locked) {
+                throw new ApiError(StatusCodes.CONFLICT, 'Đơn hàng đang được xử lý');
+            }
 
             // Step 2. Subscribe BEFORE publishing to avoid race condition
             const sagaResultPromise = redisService.waitForMessage<SagaResult>(
@@ -175,6 +190,24 @@ class OrderPaymentService {
     }
 
     /** ========== VALIDATORS ========== */
+    private async validatePaymentCallback(
+        query: any,
+        provider: 'momo' | 'vnpay' | 'payos'
+    ) {
+        if (provider === 'momo') return this.validateMomoCallback(query);
+        if (provider === 'vnpay') return this.validateVnpayCallback(query);
+        return this.validatePayosCallback(query);
+    }
+
+    private async validatePayosCallback(query: PayosReturnQuery) {
+        const result = await payosService.verifyReturnQuery(query);
+        const order = await this.getOrder(result.orderId);
+        if (order.total !== result.amount) {
+            throw new ApiError(StatusCodes.BAD_REQUEST, 'Số tiền không hợp lệ');
+        }
+        return { orderId: result.orderId, amount: result.amount, order };
+    }
+
     private async validateMomoCallback(query: any) {
         const result = await momoService.verifyCallback(query);
         if (!result.signatureValid) throw new ApiError(StatusCodes.BAD_REQUEST, 'Chữ ký không hợp lệ');
