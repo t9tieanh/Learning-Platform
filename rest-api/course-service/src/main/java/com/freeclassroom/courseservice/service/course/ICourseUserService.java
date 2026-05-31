@@ -3,6 +3,7 @@ package com.freeclassroom.courseservice.service.course;
 import com.freeclassroom.courseservice.dto.response.ApiResponse;
 import com.freeclassroom.courseservice.dto.response.common.PagingResponse;
 import com.freeclassroom.courseservice.dto.response.course.*;
+import com.freeclassroom.courseservice.dto.response.course.instructor.InstructorCoursesPageResponse;
 
 import java.util.List;
 
@@ -16,4 +17,12 @@ public interface ICourseUserService {
 
     ApiResponse<List<CourseResponse>> getEnrolledCourses(String userRole,String studentId,String instructorId);
     ApiResponse<Integer> countInstructorCourseValid(String instructorId);
+    ApiResponse<InstructorCoursesPageResponse> getPublicCoursesByInstructor(
+            String instructorId,
+            int page,
+            int limit,
+            String search,
+            String sortBy,
+            String sortDirection
+    );
 }

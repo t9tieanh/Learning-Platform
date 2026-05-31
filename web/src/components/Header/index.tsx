@@ -4,7 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
 import CustomButton from '../common/Button'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import './style.scss'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/stores/useAuth.stores'
 import { useCartStore } from '@/stores/useCart.stores'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
@@ -12,27 +12,31 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import {
   LogIn,
   UserPlus,
-  House,
-  BookOpen,
-  Building2,
-  StickyNote,
   ShoppingCart,
   Menu as MenuIcon,
   Crown,
-  ChevronRight
+  ChevronRight,
+  House,
+  BookOpen,
+  GraduationCap,
+  StickyNote,
+  Building2
 } from 'lucide-react'
 import Menu from './menu'
 import logo from '@/assets/images/logo1.png'
 import { useVipUpgrade } from '@/contexts/VipUpgradeContext'
+import { AnimatePresence, motion } from 'framer-motion'
 
 const Header: FC = () => {
   const navigate = useNavigate()
+  const location = useLocation()
   const rootRef = useRef<HTMLDivElement | null>(null)
   const { data } = useAuthStore()
   const count = useCartStore((s) => s.count)
   const refresh = useCartStore((s) => s.refresh)
   const [isOpen, setIsOpen] = useState(false)
   const [isProfileOpen, setIsProfileOpen] = useState(false)
+  const [isScrolled, setIsScrolled] = useState(false)
   const { openVipDialog } = useVipUpgrade()
 
   useEffect(() => {
@@ -55,39 +59,68 @@ const Header: FC = () => {
     return () => window.removeEventListener('resize', setVar)
   }, [])
 
+  useEffect(() => {
+    const onScroll = () => setIsScrolled(window.scrollY > 8)
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
   const menuItems = [
-    { icon: <House className='w-5 h-5' />, label: 'Trang chủ', value: 'home', path: '/' },
-    { icon: <BookOpen className='w-5 h-5' />, label: 'Khóa học', value: 'course', path: '/courses' },
-    { icon: <Building2 className='w-5 h-5' />, label: 'Về chúng tôi', value: 'about', path: '/about' },
-    { icon: <StickyNote className='w-5 h-5' />, label: 'Bài viết', value: 'blog', path: '/blog' }
+    { icon: <House className='h-4 w-4' />, label: 'Trang chủ', value: 'home', path: '/' },
+    { icon: <BookOpen className='h-4 w-4' />, label: 'Khóa học', value: 'course', path: '/courses' },
+    { icon: <StickyNote className='h-4 w-4' />, label: 'Bài viết', value: 'blog', path: '/blog' },
+    { icon: <Building2 className='h-4 w-4' />, label: 'Về chúng tôi', value: 'about', path: '/about' }
   ]
+  const activeMenu = menuItems.find(
+    (item) => location.pathname === item.path || location.pathname.startsWith(`${item.path}/`)
+  )?.value
 
   return (
-    <div ref={rootRef} className='p-3 w-full bg-white sticky top-0 z-50 shadow-sm'>
+    <div
+      ref={rootRef}
+      className={`sticky top-0 z-50 w-full border-b border-slate-200/60 bg-white/80 px-4 py-3 backdrop-blur-md transition-all duration-300 ${
+        isScrolled ? 'shadow-[0_14px_35px_rgba(15,23,42,0.1)]' : 'shadow-none'
+      }`}
+    >
       <NavigationMenu className='min-w-full mx-0'>
-        <div className='max-w-7xl mx-auto flex items-center justify-between w-full p-1'>
+        <div className='mx-auto flex w-full max-w-7xl items-center justify-between rounded-2xl border border-slate-200 bg-white/90 px-4 py-2'>
           {/* Logo */}
           <NavigationMenuList className='text-left'>
-            <button onClick={() => navigate('/')} className='p-0 border-none bg-transparent cursor-pointer'>
-              <img src={logo} alt='LEARNOVA logo' className='h-8 md:h-10 w-auto select-none object-contain' />
+            <button
+              onClick={() => navigate('/')}
+              className='group flex cursor-pointer items-center gap-2 rounded-xl border-none bg-transparent px-1 py-1.5'
+            >
+              <img src={logo} alt='LEARNOVA logo' className='h-9 w-auto select-none object-contain md:h-10' />
             </button>
           </NavigationMenuList>
 
           {/* Desktop Navigation */}
-          <NavigationMenuList className='hidden md:block mx-auto bg-transparent'>
+          <NavigationMenuList className='mx-auto hidden bg-transparent text-blue-500 md:block'>
             <NavigationMenuItem>
-              <Tabs defaultValue='home' className='w-full'>
-                <TabsList className='flex gap-4 md:gap-6 bg-transparent px-4 py-2'>
+              <Tabs value={activeMenu} className='w-full'>
+                <TabsList className='rounded-2xl border border-transparent bg-transparent p-1'>
                   {menuItems.map((item) => (
-                    <TabsTrigger
+                    <motion.div
                       key={item.value}
-                      value={item.value}
-                      onClick={() => navigate(item.path)}
-                      className='tab-page font-semibold px-3 md:px-4 py-2 md:py-4 rounded-lg transition-colors duration-200 hover:bg-blue-100 hover:text-blue-700 data-[state=active]:bg-blue-500 data-[state=active]:text-white flex items-center gap-2'
+                      whileHover={{ y: -1 }}
+                      transition={{ duration: 0.25, ease: 'easeOut' }}
                     >
-                      {item.icon}
-                      {item.label}
-                    </TabsTrigger>
+                      <TabsTrigger
+                        value={item.value}
+                        onClick={() => navigate(item.path)}
+                        className='tab-page relative flex items-center gap-2 rounded-xl px-5 py-2.5 text-base font-semibold text-blue-500 transition-all duration-300 hover:text-blue-600 data-[state=active]:bg-transparent data-[state=active]:text-blue-700 data-[state=active]:shadow-none'
+                      >
+                        {item.label}
+                        {activeMenu === item.value && (
+                          <motion.span
+                            layoutId='header-active-pill'
+                            className='absolute inset-x-2 -bottom-[1px] h-0.5 rounded-full bg-blue-500'
+                            transition={{ type: 'spring', stiffness: 260, damping: 26 }}
+                          />
+                        )}
+                      </TabsTrigger>
+                    </motion.div>
                   ))}
                 </TabsList>
               </Tabs>
@@ -95,44 +128,50 @@ const Header: FC = () => {
           </NavigationMenuList>
 
           {/* Right Section */}
-          <NavigationMenuList className='flex items-center gap-2 md:gap-4'>
+          <NavigationMenuList className='flex items-center gap-2 md:gap-3'>
             {/* Cart Icon */}
-            <button
+            <motion.button
               onClick={() => navigate('/my-cart')}
-              className='relative p-2 hover:bg-gray-100 rounded-full transition-colors'
+              whileHover={{ y: -1 }}
+              whileTap={{ scale: 0.98 }}
+              transition={{ duration: 0.2 }}
+              className='relative rounded-xl border border-slate-200 bg-white p-2.5 text-slate-700 transition-all duration-300 hover:border-cyan-200 hover:bg-cyan-50 hover:text-cyan-700'
               aria-label='Giỏ hàng'
             >
-              <ShoppingCart className='w-5 h-5' />
+              <ShoppingCart className='h-5 w-5' />
               {count > 0 && (
-                <span className='absolute -top-1 -right-1 bg-blue-500 text-white rounded-full text-xs w-5 h-5 flex items-center justify-center'>
+                <span className='absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-cyan-600 px-1 text-xs font-semibold text-white'>
                   {count}
                 </span>
               )}
-            </button>
+            </motion.button>
 
             {/* User Menu / Auth Buttons */}
             {data ? (
               <div className='flex items-center gap-3 md:gap-5'>
                 {/* Explore VIP Button — desktop only */}
                 {!data.isVip && (
-                  <button
+                  <motion.button
                     onClick={openVipDialog}
-                    className='hidden md:flex items-center gap-1.5 px-3.5 py-1.5 text-sm font-semibold text-yellow-700 bg-gradient-to-r from-yellow-100 to-amber-100 hover:from-yellow-200 hover:to-amber-200 border border-yellow-200 rounded-full transition-all hover:scale-105 shadow-sm'
+                    whileHover={{ y: -1 }}
+                    whileTap={{ scale: 0.98 }}
+                    transition={{ duration: 0.2 }}
+                    className='hidden items-center gap-1.5 rounded-full border border-amber-200 bg-gradient-to-r from-amber-200 via-yellow-200 to-orange-200 px-4 py-2 text-sm font-semibold text-amber-800 shadow-sm transition-all duration-300 hover:shadow-md md:flex'
                   >
-                    <Crown className='w-4 h-4' />
+                    <Crown className='h-4 w-4' />
                     <span>Khám phá VIP</span>
-                  </button>
+                  </motion.button>
                 )}
 
                 <div className='profile flex gap-2 text-sm font-bold items-center'>
                   <Popover open={isProfileOpen} onOpenChange={setIsProfileOpen}>
-                    <PopoverTrigger className='flex gap-2 items-center outline-none'>
-                      <p className='hidden md:block mt-0.5'>
-                        <span className='text-red-500 italic font-base'>Xin chào</span> {data.name}
+                    <PopoverTrigger className='flex items-center gap-2 rounded-2xl border border-cyan-200/80 bg-gradient-to-r from-cyan-50 via-white to-blue-50 px-2.5 py-1.5 outline-none shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-cyan-300 hover:shadow-md'>
+                      <p className='mt-0.5 hidden text-sm font-medium text-slate-800 md:block'>
+                        <span className='font-semibold text-cyan-700'>Xin chào,</span> {data.name}
                       </p>
                       <div className='relative'>
                         <Avatar
-                          className={`rounded-3xl w-8 h-8 md:w-10 md:h-10 transition-transform hover:scale-105 ${
+                          className={`h-9 w-9 rounded-3xl border border-white transition-transform duration-300 hover:scale-105 md:h-10 md:w-10 ${
                             data.isVip ? 'ring-2 ring-yellow-400 ring-offset-2' : ''
                           }`}
                         >
@@ -146,7 +185,7 @@ const Header: FC = () => {
                         )}
                       </div>
                     </PopoverTrigger>
-                    <PopoverContent className='w-80'>
+                    <PopoverContent className='w-88 rounded-2xl border border-slate-200 bg-white p-3 shadow-xl'>
                       <Menu
                         username={data.username as string}
                         name={data.name as string}
@@ -159,23 +198,26 @@ const Header: FC = () => {
               </div>
             ) : (
               <div className='flex items-center gap-2'>
-                <button
+                <motion.button
                   type='button'
                   onClick={openVipDialog}
-                  className='hidden md:flex items-center gap-1.5 px-3.5 py-1.5 text-sm font-semibold text-yellow-700 bg-gradient-to-r from-yellow-100 to-amber-100 hover:from-yellow-200 hover:to-amber-200 border border-yellow-200 rounded-full transition-all hover:scale-105 shadow-sm'
+                  whileHover={{ y: -1 }}
+                  whileTap={{ scale: 0.98 }}
+                  transition={{ duration: 0.2 }}
+                  className='hidden items-center gap-1.5 rounded-full border border-amber-200 bg-gradient-to-r from-amber-200 via-yellow-200 to-orange-200 px-4 py-2 text-sm font-semibold text-amber-800 shadow-sm transition-all duration-300 hover:shadow-md md:flex'
                 >
                   <Crown className='w-4 h-4 shrink-0' aria-hidden />
                   <span>Khám phá VIP</span>
-                </button>
+                </motion.button>
                 <CustomButton
                   label='Đăng ký'
                   icon={<UserPlus className='w-4 h-4' />}
-                  className='hidden md:flex signup-btn shadow-sm bg-white-100 text-blue-700 hover:text-white hover:bg-blue-800 rounded-xl font-base hover:scale-105 transition-transform duration-300 ease-in-out'
+                  className='signup-btn hidden rounded-xl border border-slate-200 bg-white px-3 text-slate-700 shadow-sm transition-all duration-300 ease-in-out hover:-translate-y-0.5 hover:border-cyan-200 hover:bg-cyan-50 hover:text-cyan-700 md:flex'
                   onClick={() => navigate('/auth?mode=signup')}
                 />
                 <CustomButton
                   label='Đăng nhập'
-                  className='hidden md:flex btn-primary shadow-lg login-btn bg-blue-600 hover:bg-blue-800 font-base rounded-xl hover:scale-105 transition-transform duration-300 ease-in-out'
+                  className='btn-primary login-btn hidden rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 px-3 shadow-md transition-all duration-300 ease-in-out hover:-translate-y-0.5 hover:from-cyan-700 hover:to-blue-700 md:flex'
                   onClick={() => navigate('/auth')}
                   icon={<LogIn className='w-4 h-4' />}
                 />
@@ -185,7 +227,10 @@ const Header: FC = () => {
             {/* Mobile Hamburger Menu */}
             <Sheet open={isOpen} onOpenChange={setIsOpen}>
               <SheetTrigger asChild className='md:hidden'>
-                <button className='p-2 hover:bg-gray-100 rounded-full transition-colors' aria-label='Mở menu'>
+                <button
+                  className='rounded-xl border border-slate-200 bg-white p-2.5 transition-all duration-300 hover:border-cyan-200 hover:bg-cyan-50'
+                  aria-label='Mở menu'
+                >
                   <MenuIcon className='w-5 h-5' />
                 </button>
               </SheetTrigger>
@@ -280,17 +325,29 @@ const Header: FC = () => {
                   {/* Navigation Links */}
                   <nav className='flex flex-col gap-1 px-3 py-3'>
                     {menuItems.map((item) => (
-                      <button
+                      <motion.button
                         key={item.value}
+                        whileHover={{ x: 2 }}
+                        transition={{ duration: 0.2 }}
                         onClick={() => {
                           navigate(item.path)
                           setIsOpen(false)
                         }}
-                        className='flex items-center gap-3 px-4 py-3 hover:bg-blue-50 rounded-xl transition-colors text-sm font-medium hover:text-blue-600 text-left w-full'
+                        className='flex items-center gap-3 px-4 py-3 hover:bg-cyan-50 rounded-xl transition-all duration-300 text-sm font-medium hover:text-cyan-700 text-left w-full text-slate-700'
                       >
-                        <span className='w-5 h-5 flex items-center justify-center text-gray-500'>{item.icon}</span>
+                        <span className='w-5 h-5 flex items-center justify-center text-slate-500'>{item.icon}</span>
                         <span>{item.label}</span>
-                      </button>
+                        <AnimatePresence>
+                          {(location.pathname === item.path || location.pathname.startsWith(`${item.path}/`)) && (
+                            <motion.span
+                              initial={{ opacity: 0, x: -4 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              exit={{ opacity: 0, x: -4 }}
+                              className='ml-auto h-2 w-2 rounded-full bg-cyan-500'
+                            />
+                          )}
+                        </AnimatePresence>
+                      </motion.button>
                     ))}
                   </nav>
                 </div>
