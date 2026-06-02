@@ -3,6 +3,7 @@ package com.freeclassroom.userservice.grpc.client;
 import com.example.grpc.course.GetChartDataRequest;
 import com.example.grpc.course.GetChartDataResponse;
 import com.example.grpc.course.GetCourseAdminDataResponse;
+import com.example.grpc.course.GetAdminCourseModerationCountsResponse;
 import com.example.grpc.course.GetCourseAndStudentResponse;
 import com.example.grpc.course.GetCourseRequest;
 import com.example.grpc.course.GetCourseTagsRequest;
@@ -26,6 +27,10 @@ public class CourseGrpcClient {
 
     public GetActiveAdminCoursesResponse getActiveAdminCourses() {
         return courseStub.getActiveAdminCourses(Empty.getDefaultInstance());
+    }
+
+    public GetAdminCourseModerationCountsResponse getAdminCourseModerationCounts() {
+        return courseStub.getAdminCourseModerationCounts(Empty.getDefaultInstance());
     }
 
     public GetCourseAndStudentResponse getTotalCoursesAndStudent(String userId) {

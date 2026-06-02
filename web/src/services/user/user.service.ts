@@ -1,7 +1,14 @@
 import axiosClient from '../../lib/axiosClient.lib'
 import { ApiResponse } from '@/types/response.type'
 import { Profile, VipStatusResult } from '@/types/profile'
-import { DataAdminHome, TopCourseAdminItem, TopInstructorAdminItem } from '@/types/user'
+import {
+  AdminBusinessPerformance,
+  AdminBusinessPerformanceRange,
+  AdminPendingActions,
+  DataAdminHome,
+  TopCourseAdminItem,
+  TopInstructorAdminItem
+} from '@/types/user'
 
 class UserService {
   async signUp(newUser: {
@@ -152,9 +159,23 @@ class UserService {
     return response.data
   }
 
+  async getAdminPendingActions(): Promise<ApiResponse<AdminPendingActions>> {
+    const response = await axiosClient.axiosInstance.get('user/admin/pending-actions')
+    return response.data
+  }
+
   async getAdminTopInstructors(limit = 5): Promise<ApiResponse<TopInstructorAdminItem[]>> {
     const response = await axiosClient.axiosInstance.get('user/admin/top-instructors', {
       params: { limit }
+    })
+    return response.data
+  }
+
+  async getAdminBusinessPerformance(
+    range: AdminBusinessPerformanceRange = '12m'
+  ): Promise<ApiResponse<AdminBusinessPerformance>> {
+    const response = await axiosClient.axiosInstance.get('learning/admin/business-performance', {
+      params: { range }
     })
     return response.data
   }

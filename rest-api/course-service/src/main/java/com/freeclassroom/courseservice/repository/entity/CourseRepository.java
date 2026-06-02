@@ -37,6 +37,14 @@ public interface CourseRepository extends JpaRepository<CourseEntity, String> {
     Long countActiveInstructorsForAdmin();
 
     @Query("""
+        SELECT COUNT(c)
+        FROM CourseEntity c
+        WHERE c.status = :status
+          AND c.deleted = false
+    """)
+    Long countByStatusForAdmin(@Param("status") EnumCourseStatus status);
+
+    @Query("""
         SELECT
             c.id AS courseId,
             c.instructorId AS instructorId,
@@ -52,6 +60,15 @@ public interface CourseRepository extends JpaRepository<CourseEntity, String> {
         GROUP BY c.id, c.instructorId, c.title, c.thumbnailUrl, c.rating
     """)
     List<AdminActiveCourseProjection> findActiveAdminCourseStats();
+
+    @Query("""
+        SELECT c.id
+        FROM CourseEntity c
+        WHERE c.status = com.freeclassroom.courseservice.enums.entity.EnumCourseStatus.PUBLISHED
+          AND c.progressStep = com.freeclassroom.courseservice.enums.entity.EnumCourseProgressStep.COMPLETED
+          AND c.deleted = false
+    """)
+    List<String> findActiveCourseIdsForAdmin();
 
     Optional<CourseEntity> findByIdAndInstructorId(String id, String instructorId);
     boolean existsByIdAndInstructorId(String id, String instructorId);

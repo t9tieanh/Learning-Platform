@@ -56,6 +56,11 @@ message GetActiveAdminCoursesResponse {
   repeated ActiveAdminCourseStat items = 1;
 }
 
+message GetAdminCourseModerationCountsResponse {
+  int64 pendingReviewCount = 1;
+  int64 rejectedCount = 2;
+}
+
 message GetCourseAndStudentResponse {
   int64 totalCourse = 1;
   int64 totalStudent = 2;

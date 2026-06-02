@@ -23,6 +23,16 @@ const proto = grpc.loadPackageDefinition(packageDef);
 const safeJson = (value: unknown) =>
     JSON.stringify(value, (_, v) => (typeof v === 'bigint' ? v.toString() : v));
 
+const normalizeGrpcNumber = (value: any, fallback = 0) => {
+    const normalized = Number(value?.low ?? value ?? fallback);
+    return Number.isFinite(normalized) ? normalized : fallback;
+};
+
+const normalizeBucketType = (bucketType: unknown) => {
+    const normalized = String(bucketType || '').trim().toUpperCase();
+    return normalized === 'DAY' ? 'DAY' : 'MONTH';
+};
+
 const saleServiceImpl = {
     getRevenueAndProfit: async (call: any, callback: any) => {
         try {
@@ -170,6 +180,51 @@ const saleServiceImpl = {
             });
         } catch (err) {
             Logger.error(`getCoursesRevenue error: ${err}`);
+            callback(err, null);
+        }
+    },
+    getAdminBusinessRevenue: async (call: any, callback: any) => {
+        try {
+            const { coursesId, startDate, endDate, bucketType } = call.request;
+            if (!Array.isArray(coursesId)) throw new Error('coursesId must be array');
+            if (!startDate || !endDate) throw new Error('startDate and endDate are required');
+
+            if (coursesId.length === 0) {
+                callback(null, { items: [] });
+                return;
+            }
+
+            const normalizedBucketType = normalizeBucketType(bucketType);
+            const bucketExpression =
+                normalizedBucketType === 'DAY'
+                    ? Prisma.sql`DATE_FORMAT(oi.created_at, '%Y-%m-%d')`
+                    : Prisma.sql`DATE_FORMAT(oi.created_at, '%Y-%m')`;
+
+            const rows: Array<{ bucketKey: string; revenue: number }> = await prismaService.$queryRaw(
+                Prisma.sql`SELECT ${bucketExpression} AS bucketKey,
+                                  COALESCE(SUM(oi.price), 0) AS revenue
+                           FROM \`order_items\` oi
+                           INNER JOIN \`orders\` o ON oi.order_id = o.id
+                           WHERE oi.course_id IN (${Prisma.join(coursesId)})
+                             AND o.status = 'Completed'
+                             AND oi.created_at >= ${startDate}
+                             AND oi.created_at < ${endDate}
+                           GROUP BY bucketKey
+                           ORDER BY bucketKey ASC`
+            ) as any;
+
+            Logger.info(
+                `[getAdminBusinessRevenue] bucketType=${normalizedBucketType}, courseCount=${coursesId.length}, start=${startDate}, end=${endDate}, rows=${rows.length}, sample=${safeJson(rows[0] || null)}`
+            );
+
+            callback(null, {
+                items: rows.map((r) => ({
+                    bucketKey: String(r.bucketKey),
+                    revenue: Number(normalizeGrpcNumber(r.revenue).toFixed(2))
+                }))
+            });
+        } catch (err) {
+            Logger.error(`getAdminBusinessRevenue error: ${err}`);
             callback(err, null);
         }
     }

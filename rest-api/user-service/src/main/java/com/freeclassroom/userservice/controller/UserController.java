@@ -8,6 +8,7 @@ import com.freeclassroom.userservice.dto.request.personal.TrackingEventRequest;
 import com.freeclassroom.userservice.dto.request.user.CreationUserRequest;
 import com.freeclassroom.userservice.dto.request.user.UpdateUserRequest;
 import com.freeclassroom.userservice.dto.response.ApiResponse;
+import com.freeclassroom.userservice.dto.response.admin.AdminPendingActionsResponse;
 import com.freeclassroom.userservice.dto.response.admin.DataAdminHome;
 import com.freeclassroom.userservice.dto.response.admin.TopCourseAdminItem;
 import com.freeclassroom.userservice.dto.response.admin.TopInstructorAdminItem;
@@ -95,6 +96,11 @@ public class UserController {
     @GetMapping("/home-admin")
     ApiResponse<DataAdminHome> getAdminData() {
         return userService.getAdminData();
+    }
+
+    @GetMapping("/admin/pending-actions")
+    ApiResponse<AdminPendingActionsResponse> getAdminPendingActions() {
+        return userService.getAdminPendingActions();
     }
 
     @GetMapping("/admin/top-courses")

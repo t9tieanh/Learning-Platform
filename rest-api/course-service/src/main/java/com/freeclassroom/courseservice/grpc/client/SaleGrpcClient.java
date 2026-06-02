@@ -4,12 +4,15 @@ import com.example.grpc.user.GetRevenueAndProfitRequest;
 import com.example.grpc.user.GetRevenueAndProfitResponse;
 import com.example.grpc.user.GetCompletedCourseIdsRequest;
 import com.example.grpc.user.GetCompletedCourseIdsResponse;
+import com.example.grpc.user.GetAdminBusinessRevenueRequest;
+import com.example.grpc.user.GetAdminBusinessRevenueResponse;
 import com.example.grpc.user.GetTopCoursesRevenueRequest;
 import com.example.grpc.user.GetTopCoursesRevenueResponse;
 import com.example.grpc.user.SaleServiceGrpc;
 import net.devh.boot.grpc.client.inject.GrpcClient;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -41,5 +44,21 @@ public class SaleGrpcClient {
                 .build();
 
         return saleStub.getTopCoursesRevenue(request);
+    }
+
+    public GetAdminBusinessRevenueResponse getAdminBusinessRevenue(
+            List<String> coursesId,
+            LocalDate startDate,
+            LocalDate endDate,
+            String bucketType
+    ) {
+        GetAdminBusinessRevenueRequest request = GetAdminBusinessRevenueRequest.newBuilder()
+                .addAllCoursesId(coursesId)
+                .setStartDate(startDate.toString())
+                .setEndDate(endDate.toString())
+                .setBucketType(bucketType)
+                .build();
+
+        return saleStub.getAdminBusinessRevenue(request);
     }
 }

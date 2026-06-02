@@ -3,6 +3,7 @@ package com.freeclassroom.userservice.service.user;
 import com.example.grpc.course.GetCourseAdminDataResponse;
 import com.example.grpc.course.ActiveAdminCourseStat;
 import com.example.grpc.course.GetActiveAdminCoursesResponse;
+import com.example.grpc.course.GetAdminCourseModerationCountsResponse;
 import com.example.grpc.course.TotalBlogResponse;
 import com.example.grpc.user.GetCoursesRevenueResponse;
 import com.example.grpc.user.TopCourseRevenueItem;
@@ -14,6 +15,7 @@ import com.freeclassroom.userservice.dto.request.personal.TrackingEventRequest;
 import com.freeclassroom.userservice.dto.request.user.CreationUserRequest;
 import com.freeclassroom.userservice.dto.request.user.UpdateUserRequest;
 import com.freeclassroom.userservice.dto.response.ApiResponse;
+import com.freeclassroom.userservice.dto.response.admin.AdminPendingActionsResponse;
 import com.freeclassroom.userservice.dto.response.admin.DataAdminHome;
 import com.freeclassroom.userservice.dto.response.admin.TopCourseAdminItem;
 import com.freeclassroom.userservice.dto.response.admin.TopInstructorAdminItem;
@@ -391,6 +393,42 @@ public class UserService implements IUserService {
                     .result(data)
                     .build();
         }
+    }
+
+    @Override
+    public ApiResponse<AdminPendingActionsResponse> getAdminPendingActions() {
+        long coursePendingReviewCount = 0L;
+        long rejectedCourseCount = 0L;
+        long certificatePendingCount = 0L;
+
+        try {
+            Long count = certificateRepository.countByStatus(CertificateStatus.PENDING);
+            certificatePendingCount = count == null ? 0L : count;
+        } catch (Exception certificateEx) {
+            log.warn("Failed to load pending certificate count for admin pending actions", certificateEx);
+        }
+
+        try {
+            GetAdminCourseModerationCountsResponse courseCounts = courseGrpcClient.getAdminCourseModerationCounts();
+            if (courseCounts != null) {
+                coursePendingReviewCount = courseCounts.getPendingReviewCount();
+                rejectedCourseCount = courseCounts.getRejectedCount();
+            }
+        } catch (Exception courseEx) {
+            log.warn("Failed to load course moderation counts for admin pending actions", courseEx);
+        }
+
+        AdminPendingActionsResponse result = AdminPendingActionsResponse.builder()
+                .coursePendingReviewCount(coursePendingReviewCount)
+                .certificatePendingCount(certificatePendingCount)
+                .rejectedCourseCount(rejectedCourseCount)
+                .build();
+
+        return ApiResponse.<AdminPendingActionsResponse>builder()
+                .code(HttpStatus.OK.value())
+                .message("Lấy dữ liệu cần xử lý thành công!")
+                .result(result)
+                .build();
     }
 
     @Override

@@ -5,6 +5,7 @@ import com.freeclassroom.userservice.dto.request.personal.TrackingEventRequest;
 import com.freeclassroom.userservice.dto.request.user.CreationUserRequest;
 import com.freeclassroom.userservice.dto.request.user.UpdateUserRequest;
 import com.freeclassroom.userservice.dto.response.ApiResponse;
+import com.freeclassroom.userservice.dto.response.admin.AdminPendingActionsResponse;
 import com.freeclassroom.userservice.dto.response.admin.DataAdminHome;
 import com.freeclassroom.userservice.dto.response.admin.TopCourseAdminItem;
 import com.freeclassroom.userservice.dto.response.admin.TopInstructorAdminItem;
@@ -26,6 +27,7 @@ public interface IUserService {
     ApiResponse<MyProfileResponse> geyMyProfile(String id);
     ApiResponse<GetUserResponse> updateUser(String id, UpdateUserRequest request);
     ApiResponse<DataAdminHome> getAdminData();
+    ApiResponse<AdminPendingActionsResponse> getAdminPendingActions();
     ApiResponse<List<TopCourseAdminItem>> getAdminTopCourses(int limit);
     ApiResponse<List<TopInstructorAdminItem>> getAdminTopInstructors(int limit);
     ApiResponse<VipStatusResponse> getVipStatus(String userId);

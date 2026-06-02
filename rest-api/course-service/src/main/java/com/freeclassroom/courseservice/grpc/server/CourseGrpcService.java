@@ -234,6 +234,35 @@ public class CourseGrpcService extends CourseServiceImplBase {
     }
 
     @Override
+    public void getAdminCourseModerationCounts(
+            Empty request,
+            StreamObserver<GetAdminCourseModerationCountsResponse> responseObserver
+    ) {
+        try {
+            long pendingReviewCount = Optional
+                    .ofNullable(courseRepo.countByStatusForAdmin(EnumCourseStatus.PENDING_REVIEW))
+                    .orElse(0L);
+            long rejectedCount = Optional
+                    .ofNullable(courseRepo.countByStatusForAdmin(EnumCourseStatus.REJECTED))
+                    .orElse(0L);
+
+            GetAdminCourseModerationCountsResponse response = GetAdminCourseModerationCountsResponse.newBuilder()
+                    .setPendingReviewCount(pendingReviewCount)
+                    .setRejectedCount(rejectedCount)
+                    .build();
+
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+        } catch (Exception e) {
+            responseObserver.onError(
+                    Status.INTERNAL
+                            .withDescription("Failed to load admin course moderation counts: " + e.getMessage())
+                            .asRuntimeException()
+            );
+        }
+    }
+
+    @Override
     public void getTotalCoursesAndStudent(GetUserRequest request, StreamObserver<GetCourseAndStudentResponse> responseObserver) {
         try {
             List<CourseEntity> courseEntities = courseRepo.findAllByInstructorIdWithEnrollments(request.getId());

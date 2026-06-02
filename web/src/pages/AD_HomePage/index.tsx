@@ -16,7 +16,14 @@ import {
 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import userService from '@/services/user/user.service'
-import { DataAdminHome, TopCourseAdminItem, TopInstructorAdminItem } from '@/types/user'
+import {
+  AdminBusinessPerformance,
+  AdminBusinessPerformanceRange,
+  AdminPendingActions,
+  DataAdminHome,
+  TopCourseAdminItem,
+  TopInstructorAdminItem
+} from '@/types/user'
 import { toast } from 'sonner'
 import courseImage from '@/assets/images/course.jpg'
 import user1 from '@/assets/images/user1.jpg'
@@ -25,7 +32,7 @@ import user3 from '@/assets/images/user3.jpg'
 import user4 from '@/assets/images/user4.jpg'
 import user5 from '@/assets/images/user5.jpeg'
 
-type RangeKey = '7d' | '30d' | '90d' | '12m'
+type RangeKey = AdminBusinessPerformanceRange
 
 type PerformancePoint = {
   label: string
@@ -35,64 +42,6 @@ type PerformancePoint = {
 
 const baseCardClass =
   'rounded-2xl border border-slate-200/70 bg-gradient-to-br from-white via-slate-50/80 to-slate-100/70 shadow-sm transition-all duration-300 hover:shadow-md'
-
-const mockPerformanceData: Record<RangeKey, PerformancePoint[]> = {
-  '7d': [
-    { label: 'T2', revenue: 36, students: 22 },
-    { label: 'T3', revenue: 42, students: 28 },
-    { label: 'T4', revenue: 40, students: 25 },
-    { label: 'T5', revenue: 48, students: 31 },
-    { label: 'T6', revenue: 52, students: 36 },
-    { label: 'T7', revenue: 50, students: 33 },
-    { label: 'CN', revenue: 57, students: 39 }
-  ],
-  '30d': [
-    { label: 'W1', revenue: 112, students: 72 },
-    { label: 'W2', revenue: 126, students: 81 },
-    { label: 'W3', revenue: 121, students: 77 },
-    { label: 'W4', revenue: 141, students: 91 }
-  ],
-  '90d': [
-    { label: 'Thg 1', revenue: 336, students: 198 },
-    { label: 'Thg 2', revenue: 371, students: 212 },
-    { label: 'Thg 3', revenue: 418, students: 248 }
-  ],
-  '12m': [
-    { label: 'T1', revenue: 112, students: 71 },
-    { label: 'T2', revenue: 124, students: 75 },
-    { label: 'T3', revenue: 119, students: 69 },
-    { label: 'T4', revenue: 131, students: 82 },
-    { label: 'T5', revenue: 145, students: 91 },
-    { label: 'T6', revenue: 161, students: 97 },
-    { label: 'T7', revenue: 156, students: 95 },
-    { label: 'T8', revenue: 174, students: 108 },
-    { label: 'T9', revenue: 186, students: 117 },
-    { label: 'T10', revenue: 193, students: 121 },
-    { label: 'T11', revenue: 205, students: 131 },
-    { label: 'T12', revenue: 221, students: 142 }
-  ]
-}
-
-const mockPendingActions = [
-  {
-    label: 'Khóa học chờ duyệt',
-    value: 8,
-    icon: BookOpen,
-    tone: 'text-amber-700 bg-amber-50 border-amber-200'
-  },
-  {
-    label: 'Chứng chỉ chờ xác minh',
-    value: 14,
-    icon: ShieldAlert,
-    tone: 'text-orange-700 bg-orange-50 border-orange-200'
-  },
-  {
-    label: 'Báo cáo vi phạm',
-    value: 3,
-    icon: AlertTriangle,
-    tone: 'text-rose-700 bg-rose-50 border-rose-200'
-  }
-]
 
 const mockRecentActivity = [
   {
@@ -160,9 +109,12 @@ export default function Dashboard() {
   const [data, setData] = useState<DataAdminHome | null>(null)
   const [topCourses, setTopCourses] = useState<TopCourseAdminItem[]>([])
   const [topInstructors, setTopInstructors] = useState<TopInstructorAdminItem[]>([])
+  const [pendingActions, setPendingActions] = useState<AdminPendingActions | null>(null)
   const [loading, setLoading] = useState(false)
+  const [performanceLoading, setPerformanceLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [range, setRange] = useState<RangeKey>('12m')
+  const [businessPerformance, setBusinessPerformance] = useState<AdminBusinessPerformance | null>(null)
 
   useEffect(() => {
     let active = true
@@ -170,13 +122,15 @@ export default function Dashboard() {
       try {
         setLoading(true)
         setError(null)
-        const [homeRes, topCourseRes, topInstructorRes] = await Promise.all([
+        const [homeRes, pendingActionsRes, topCourseRes, topInstructorRes] = await Promise.all([
           userService.getAdminHome(),
+          userService.getAdminPendingActions(),
           userService.getAdminTopCourses(5),
           userService.getAdminTopInstructors(5)
         ])
         if (!active) return
         setData(homeRes.result ?? null)
+        setPendingActions(pendingActionsRes.result ?? null)
         setTopCourses(topCourseRes.result ?? [])
         setTopInstructors(topInstructorRes.result ?? [])
       } catch (e: any) {
@@ -194,7 +148,39 @@ export default function Dashboard() {
     }
   }, [])
 
-  const performanceData = useMemo(() => mockPerformanceData[range], [range])
+  useEffect(() => {
+    let active = true
+    const fetchBusinessPerformance = async () => {
+      try {
+        setPerformanceLoading(true)
+        const response = await userService.getAdminBusinessPerformance(range)
+        if (!active) return
+        setBusinessPerformance(response.result ?? null)
+      } catch (e: any) {
+        if (!active) return
+        const msg = e?.response?.data?.message || e?.message || 'Không thể tải dữ liệu hiệu suất kinh doanh'
+        toast.error(msg)
+        setBusinessPerformance(null)
+      } finally {
+        if (active) setPerformanceLoading(false)
+      }
+    }
+
+    fetchBusinessPerformance()
+    return () => {
+      active = false
+    }
+  }, [range])
+
+  const performanceData = useMemo<PerformancePoint[]>(
+    () =>
+      (businessPerformance?.points ?? []).map((point) => ({
+        label: point.label,
+        revenue: Math.round((point.revenue / 1_000_000) * 100) / 100,
+        students: point.studentCount
+      })),
+    [businessPerformance]
+  )
 
   const metricCards = [
     {
@@ -223,7 +209,28 @@ export default function Dashboard() {
     }
   ]
 
-  const hasPendingActions = mockPendingActions.some((item) => item.value > 0)
+  const actionItems = [
+    {
+      label: 'Khóa học chờ duyệt',
+      value: pendingActions?.coursePendingReviewCount ?? 0,
+      icon: BookOpen,
+      tone: 'text-amber-700 bg-amber-50 border-amber-200'
+    },
+    {
+      label: 'Chứng chỉ chờ xác minh',
+      value: pendingActions?.certificatePendingCount ?? 0,
+      icon: ShieldAlert,
+      tone: 'text-orange-700 bg-orange-50 border-orange-200'
+    },
+    {
+      label: 'Báo cáo vi phạm',
+      value: pendingActions?.rejectedCourseCount ?? 0,
+      icon: AlertTriangle,
+      tone: 'text-rose-700 bg-rose-50 border-rose-200'
+    }
+  ]
+
+  const hasPendingActions = loading || actionItems.some((item) => item.value > 0)
 
   return (
     <div className='space-y-5'>
@@ -275,7 +282,10 @@ export default function Dashboard() {
             <div className='flex flex-wrap items-start justify-between gap-3'>
               <div>
                 <CardTitle className='text-lg font-semibold text-slate-900'>Hiệu suất kinh doanh</CardTitle>
-                <CardDescription>Doanh thu và tăng trưởng học viên theo thời gian</CardDescription>
+                <CardDescription>
+                  Doanh thu và tăng trưởng học viên theo thời gian
+                  {performanceLoading ? <span className='ml-2 text-cyan-600'>Đang cập nhật...</span> : null}
+                </CardDescription>
               </div>
               <div className='flex flex-wrap items-center gap-2'>
                 {ranges.map((item) => (
@@ -297,9 +307,9 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent className='px-5 pb-4 pt-1'>
             <div className='grid gap-4 lg:grid-cols-2'>
-              <div className='h-[220px] rounded-xl border border-slate-100 bg-gradient-to-br from-white via-sky-50/60 to-cyan-100/40 p-3'>
+              <div className='relative h-[220px] rounded-xl border border-slate-100 bg-gradient-to-br from-white via-sky-50/60 to-cyan-100/40 p-3'>
                 <p className='mb-2 text-xs font-medium text-slate-500'>Doanh thu (triệu VND)</p>
-                <ResponsiveContainer width='100%' height='100%'>
+                <ResponsiveContainer width='100%' height='100%' className={cn(performanceLoading && 'opacity-60')}>
                   <LineChart data={performanceData}>
                     <CartesianGrid strokeDasharray='3 3' stroke='#e2e8f0' vertical={false} />
                     <XAxis dataKey='label' tickLine={false} axisLine={false} tick={{ fontSize: 12, fill: '#64748b' }} />
@@ -311,10 +321,15 @@ export default function Dashboard() {
                     <Line type='monotone' dataKey='revenue' stroke='#0284c7' strokeWidth={2.5} dot={false} />
                   </LineChart>
                 </ResponsiveContainer>
+                {!performanceLoading && performanceData.length === 0 ? (
+                  <div className='absolute inset-0 flex items-center justify-center text-sm font-medium text-slate-500'>
+                    Chưa có dữ liệu doanh thu
+                  </div>
+                ) : null}
               </div>
-              <div className='h-[220px] rounded-xl border border-slate-100 bg-gradient-to-br from-white via-cyan-50/60 to-teal-100/40 p-3'>
+              <div className='relative h-[220px] rounded-xl border border-slate-100 bg-gradient-to-br from-white via-cyan-50/60 to-teal-100/40 p-3'>
                 <p className='mb-2 text-xs font-medium text-slate-500'>Học viên mới</p>
-                <ResponsiveContainer width='100%' height='100%'>
+                <ResponsiveContainer width='100%' height='100%' className={cn(performanceLoading && 'opacity-60')}>
                   <AreaChart data={performanceData}>
                     <defs>
                       <linearGradient id='studentsFill' x1='0' y1='0' x2='0' y2='1'>
@@ -338,6 +353,11 @@ export default function Dashboard() {
                     />
                   </AreaChart>
                 </ResponsiveContainer>
+                {!performanceLoading && performanceData.length === 0 ? (
+                  <div className='absolute inset-0 flex items-center justify-center text-sm font-medium text-slate-500'>
+                    Chưa có dữ liệu học viên
+                  </div>
+                ) : null}
               </div>
             </div>
           </CardContent>
@@ -353,7 +373,7 @@ export default function Dashboard() {
           <CardContent className='px-5 pb-4 pt-1'>
             {hasPendingActions ? (
               <div className='space-y-2'>
-                {mockPendingActions.map((item) => {
+                {actionItems.map((item) => {
                   const Icon = item.icon
                   return (
                     <div
@@ -449,68 +469,6 @@ export default function Dashboard() {
                   Chưa có dữ liệu khóa học nổi bật
                 </p>
               ) : null}
-            </div>
-          </CardContent>
-        </Card>
-      </section>
-
-      <section className='grid gap-4 xl:grid-cols-2'>
-        <Card className={cn(baseCardClass, 'bg-gradient-to-br from-white via-emerald-50/60 to-teal-100/50')}>
-          <CardHeader className='px-5 py-4'>
-            <CardTitle className='text-lg font-semibold text-slate-900'>Hoạt động gần đây</CardTitle>
-            <CardDescription>Dòng sự kiện vận hành mới nhất</CardDescription>
-          </CardHeader>
-          <CardContent className='px-5 pb-4 pt-1'>
-            <div className='space-y-3'>
-              {mockRecentActivity.map((item, idx) => (
-                <div key={item.id} className='relative flex gap-3 rounded-xl border border-slate-100 p-3'>
-                  {idx < mockRecentActivity.length - 1 ? (
-                    <span className='absolute left-[27px] top-10 h-7 w-px bg-slate-200' />
-                  ) : null}
-                  <Avatar className='h-9 w-9 border border-slate-200'>
-                    <AvatarImage src={item.avatar} alt={item.fallback} />
-                    <AvatarFallback>{item.fallback}</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className='text-sm font-medium text-slate-800'>{item.content}</p>
-                    <p className='mt-1 text-xs text-slate-500'>{item.time}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className={cn(baseCardClass, 'bg-gradient-to-br from-white via-cyan-50/60 to-emerald-100/50')}>
-          <CardHeader className='px-5 py-4'>
-            <CardTitle className='text-lg font-semibold text-slate-900'>Tình trạng hệ thống</CardTitle>
-            <CardDescription>Tình trạng hệ thống và chất lượng học tập</CardDescription>
-          </CardHeader>
-          <CardContent className='px-5 pb-4 pt-1'>
-            <div className='space-y-3'>
-              {mockPlatformHealth.map((item) => (
-                <div key={item.label} className='rounded-xl border border-slate-100 p-3'>
-                  <div className='mb-2 flex items-center justify-between'>
-                    <p className='text-sm font-medium text-slate-700'>{item.label}</p>
-                    <p className='text-sm font-semibold text-slate-900'>
-                      {typeof item.value === 'number' && item.value % 1 !== 0
-                        ? item.value.toFixed(2)
-                        : formatNumber(item.value)}
-                      {item.unit}
-                    </p>
-                  </div>
-                  <div className='h-2 overflow-hidden rounded-full bg-slate-100'>
-                    <div
-                      className='h-full rounded-full bg-gradient-to-r from-cyan-500 to-emerald-500 transition-all duration-500'
-                      style={{ width: `${item.progress}%` }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className='mt-3 flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700'>
-              <CheckCircle2 className='h-4 w-4' />
-              Hệ thống hoạt động ổn định và trong ngưỡng an toàn.
             </div>
           </CardContent>
         </Card>
