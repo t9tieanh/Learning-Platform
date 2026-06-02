@@ -43,6 +43,19 @@ message GetCourseAdminDataResponse {
   int64 totalInstructor = 2;
 }
 
+message ActiveAdminCourseStat {
+  string courseId = 1;
+  string instructorId = 2;
+  string title = 3;
+  string thumbnailUrl = 4;
+  double rating = 5;
+  int64 studentCount = 6;
+}
+
+message GetActiveAdminCoursesResponse {
+  repeated ActiveAdminCourseStat items = 1;
+}
+
 message GetCourseAndStudentResponse {
   int64 totalCourse = 1;
   int64 totalStudent = 2;
@@ -131,4 +144,3 @@ message GetCourseTagsResponse {
   repeated string tags = 1;
   string category = 2;
 }
-

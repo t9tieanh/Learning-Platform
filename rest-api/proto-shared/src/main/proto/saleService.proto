@@ -10,4 +10,5 @@ service SaleService {
   rpc getRevenueAndProfit (GetRevenueAndProfitRequest) returns (GetRevenueAndProfitResponse);
   rpc getCompletedCourseIds (GetCompletedCourseIdsRequest) returns (GetCompletedCourseIdsResponse);
   rpc getTopCoursesRevenue (GetTopCoursesRevenueRequest) returns (GetTopCoursesRevenueResponse);
+  rpc getCoursesRevenue (GetCoursesRevenueRequest) returns (GetCoursesRevenueResponse);
 }

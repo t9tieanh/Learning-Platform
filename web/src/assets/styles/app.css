@@ -61,6 +61,12 @@
   }
 }
 
+html.admin-scroll-lock,
+body.admin-scroll-lock {
+  height: 100%;
+  overflow: hidden;
+}
+
 .ql-container.ql-snow {
   border: none !important;
   box-shadow: none !important;

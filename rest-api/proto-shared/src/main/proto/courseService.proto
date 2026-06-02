@@ -13,6 +13,7 @@ service CourseService {
   rpc getBulkCourses (GetCoursesRequest) returns (GetCoursesResponse);
   rpc listEnrolledCourses (EnrolledCoursesRequest) returns (GetCoursesResponse);
   rpc getCourseAdminData (google.protobuf.Empty) returns (GetCourseAdminDataResponse);
+  rpc getActiveAdminCourses (google.protobuf.Empty) returns (GetActiveAdminCoursesResponse);
   rpc getTotalCoursesAndStudent (GetUserRequest) returns (GetCourseAndStudentResponse);
   rpc getChartData (GetChartDataRequest) returns (GetChartDataResponse);
   rpc checkHasPurchased(HasPurchasedCourseRequest) returns (HasPurchasedCourseResponse);

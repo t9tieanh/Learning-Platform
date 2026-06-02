@@ -6,6 +6,7 @@ import com.example.grpc.user.CourseServiceGrpc.CourseServiceImplBase;
 import com.freeclassroom.courseservice.entity.course.CourseEntity;
 import com.freeclassroom.courseservice.entity.member.EnrollmentsEntity;
 import com.freeclassroom.courseservice.entity.category.TagEntity;
+import com.freeclassroom.courseservice.dto.response.admin.AdminActiveCourseProjection;
 import com.freeclassroom.courseservice.enums.entity.EnumCourseStatus;
 import com.freeclassroom.courseservice.exception.CustomExeption;
 import com.freeclassroom.courseservice.exception.ErrorCode;
@@ -188,14 +189,8 @@ public class CourseGrpcService extends CourseServiceImplBase {
             StreamObserver<GetCourseAdminDataResponse> responseObserve
     ) {
         try {
-            List<CourseEntity> courses = courseRepo.findAll();
-            long totalCourse = courses.size();
-
-            long totalInstructor = courses.stream()
-                    .map(CourseEntity::getInstructorId)
-                    .filter(Objects::nonNull)
-                    .distinct()
-                    .count();
+            long totalCourse = Optional.ofNullable(courseRepo.countActiveCoursesForAdmin()).orElse(0L);
+            long totalInstructor = Optional.ofNullable(courseRepo.countActiveInstructorsForAdmin()).orElse(0L);
 
             GetCourseAdminDataResponse response = GetCourseAdminDataResponse.newBuilder()
                     .setTotalCourse(totalCourse)
@@ -208,6 +203,31 @@ public class CourseGrpcService extends CourseServiceImplBase {
             responseObserve.onError(
                     Status.INTERNAL
                             .withDescription("Failed to load admin data: " + e.getMessage())
+                            .asRuntimeException()
+            );
+        }
+    }
+
+    @Override
+    public void getActiveAdminCourses(Empty request, StreamObserver<GetActiveAdminCoursesResponse> responseObserver) {
+        try {
+            List<ActiveAdminCourseStat> items = courseRepo.findActiveAdminCourseStats().stream()
+                    .map(stat -> ActiveAdminCourseStat.newBuilder()
+                            .setCourseId(stat.getCourseId() == null ? "" : stat.getCourseId())
+                            .setInstructorId(stat.getInstructorId() == null ? "" : stat.getInstructorId())
+                            .setTitle(stat.getTitle() == null ? "" : stat.getTitle())
+                            .setThumbnailUrl(stat.getThumbnailUrl() == null ? "" : stat.getThumbnailUrl())
+                            .setRating(stat.getRating() == null ? 0D : stat.getRating())
+                            .setStudentCount(stat.getStudentCount() == null ? 0L : stat.getStudentCount())
+                            .build())
+                    .toList();
+
+            responseObserver.onNext(GetActiveAdminCoursesResponse.newBuilder().addAllItems(items).build());
+            responseObserver.onCompleted();
+        } catch (Exception e) {
+            responseObserver.onError(
+                    Status.INTERNAL
+                            .withDescription("Failed to load active admin courses: " + e.getMessage())
                             .asRuntimeException()
             );
         }

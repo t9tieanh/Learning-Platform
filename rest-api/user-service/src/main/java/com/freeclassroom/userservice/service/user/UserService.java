@@ -1,7 +1,11 @@
 package com.freeclassroom.userservice.service.user;
 
 import com.example.grpc.course.GetCourseAdminDataResponse;
+import com.example.grpc.course.ActiveAdminCourseStat;
+import com.example.grpc.course.GetActiveAdminCoursesResponse;
 import com.example.grpc.course.TotalBlogResponse;
+import com.example.grpc.user.GetCoursesRevenueResponse;
+import com.example.grpc.user.TopCourseRevenueItem;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.freeclassroom.userservice.configuration.RabbitMQConfig;
@@ -11,6 +15,8 @@ import com.freeclassroom.userservice.dto.request.user.CreationUserRequest;
 import com.freeclassroom.userservice.dto.request.user.UpdateUserRequest;
 import com.freeclassroom.userservice.dto.response.ApiResponse;
 import com.freeclassroom.userservice.dto.response.admin.DataAdminHome;
+import com.freeclassroom.userservice.dto.response.admin.TopCourseAdminItem;
+import com.freeclassroom.userservice.dto.response.admin.TopInstructorAdminItem;
 import com.freeclassroom.userservice.dto.response.auth.CheckForgotPasswordResponse;
 import com.freeclassroom.userservice.dto.response.user.GetUserResponse;
 import com.freeclassroom.userservice.dto.response.user.MyProfileResponse;
@@ -26,6 +32,7 @@ import com.freeclassroom.userservice.exception.CustomExeption;
 import com.freeclassroom.userservice.exception.ErrorCode;
 import com.freeclassroom.userservice.grpc.client.BlogGrpcClient;
 import com.freeclassroom.userservice.grpc.client.CourseGrpcClient;
+import com.freeclassroom.userservice.grpc.client.SaleGrpcClient;
 import com.freeclassroom.userservice.mapper.user.UserMapper;
 import com.freeclassroom.userservice.repository.entity.CertificateRepository;
 import com.freeclassroom.userservice.repository.entity.UserRepository;
@@ -37,6 +44,8 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Range;
@@ -54,7 +63,13 @@ import java.time.temporal.ChronoUnit;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 import static com.freeclassroom.userservice.enums.RedisStreamEnum.EVENT_USER;
@@ -63,6 +78,11 @@ import static com.freeclassroom.userservice.enums.RedisStreamEnum.EVENT_USER;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserService implements IUserService {
+    private static final Logger log = LoggerFactory.getLogger(UserService.class);
+    private static final int DEFAULT_TOP_LIMIT = 5;
+    private static final int MAX_TOP_LIMIT = 50;
+    private static final long CACHE_TTL_MILLIS = 45_000L;
+
     PendingUserRepository pendingUserRepo;
     OTPForgetPasswordRepository otpForgetPasswordRepo;
     UserMapper userMapper;
@@ -71,6 +91,7 @@ public class UserService implements IUserService {
 
     CourseGrpcClient courseGrpcClient;
     BlogGrpcClient blogGrpcClient;
+    SaleGrpcClient saleGrpcClient;
 
     // template rabbitmq
     RabbitTemplate rabbitTemplate;
@@ -91,6 +112,34 @@ public class UserService implements IUserService {
 
     private final UserRepository userRepository;
     private final CertificateRepository certificateRepository;
+
+    private final Map<Integer, CacheEntry<List<TopCourseAdminItem>>> topCourseCache = new ConcurrentHashMap<>();
+    private final Map<Integer, CacheEntry<List<TopInstructorAdminItem>>> topInstructorCache = new ConcurrentHashMap<>();
+
+    private record CacheEntry<T>(T value, long expiresAt) {}
+
+    private static class InstructorAggregate {
+        long studentCount;
+        long courseCount;
+        double revenue;
+    }
+
+    private int normalizeLimit(int limit) {
+        if (limit <= 0) return DEFAULT_TOP_LIMIT;
+        return Math.min(limit, MAX_TOP_LIMIT);
+    }
+
+    private <T> T getValidCache(Map<Integer, CacheEntry<T>> cache, int limit) {
+        CacheEntry<T> entry = cache.get(limit);
+        if (entry == null || entry.expiresAt() < System.currentTimeMillis()) {
+            return null;
+        }
+        return entry.value();
+    }
+
+    private <T> void putCache(Map<Integer, CacheEntry<T>> cache, int limit, T value) {
+        cache.put(limit, new CacheEntry<>(value, System.currentTimeMillis() + CACHE_TTL_MILLIS));
+    }
 
     public ApiResponse<UserResponse> registerUser(CreationUserRequest request) {
         // check user exits
@@ -297,25 +346,36 @@ public class UserService implements IUserService {
         DataAdminHome data = new DataAdminHome();
 
         try {
-            // gRPC Course length and User length
-            GetCourseAdminDataResponse courseResponse = courseGrpcClient.getCourseAdminData();
-            if (courseResponse != null) {
-                data.setCourseCnt(courseResponse.getTotalCourse());
-                data.setInstructorCnt(courseResponse.getTotalInstructor());
-            } else {
-                data.setCourseCnt(0);
-                data.setInstructorCnt(0);
+            data.setCourseCnt(0);
+            data.setInstructorCnt(0);
+            data.setBlogCnt(0);
+            data.setCertificateCnt(0);
+
+            try {
+                GetCourseAdminDataResponse courseResponse = courseGrpcClient.getCourseAdminData();
+                if (courseResponse != null) {
+                    data.setCourseCnt(courseResponse.getTotalCourse());
+                    data.setInstructorCnt(courseResponse.getTotalInstructor());
+                }
+            } catch (Exception courseEx) {
+                log.warn("Failed to load admin course stats via gRPC", courseEx);
             }
-            System.out.println("RESPONSE COURSE GRPC: " + courseResponse);
 
-            // gRPC Blogs length
-            TotalBlogResponse blogResponse = blogGrpcClient.getTotalBlog();
-            data.setBlogCnt(blogResponse != null ? blogResponse.getTotal() : 0);
-            System.out.println("RESPONSE BLOG GRPC: " + blogResponse);
+            try {
+                TotalBlogResponse blogResponse = blogGrpcClient.getTotalBlog();
+                if (blogResponse != null) {
+                    data.setBlogCnt(blogResponse.getTotal());
+                }
+            } catch (Exception blogEx) {
+                log.warn("Failed to load admin blog stats via gRPC", blogEx);
+            }
 
-            // Lấy chứng chỉ có status PENDING
-            List<Certificate> certificateList = certificateRepository.findCertificatePending(CertificateStatus.PENDING);
-            data.setCertificateCnt(certificateList != null ? certificateList.size() : 0);
+            try {
+                Long certificateCnt = certificateRepository.countByStatus(CertificateStatus.PENDING);
+                data.setCertificateCnt(certificateCnt != null ? certificateCnt : 0);
+            } catch (Exception certificateEx) {
+                log.warn("Failed to load admin certificate stats", certificateEx);
+            }
 
             return ApiResponse.<DataAdminHome>builder()
                     .code(HttpStatus.OK.value())
@@ -324,12 +384,199 @@ public class UserService implements IUserService {
                     .build();
 
         } catch (Exception e) {
-            // Log lỗi chi tiết
-            e.printStackTrace();
+            log.error("Failed to aggregate admin home data", e);
             return ApiResponse.<DataAdminHome>builder()
                     .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
                     .message("Lấy data thất bại: " + e.getMessage())
                     .result(data)
+                    .build();
+        }
+    }
+
+    @Override
+    public ApiResponse<List<TopCourseAdminItem>> getAdminTopCourses(int limit) {
+        int normalizedLimit = normalizeLimit(limit);
+        List<TopCourseAdminItem> cached = getValidCache(topCourseCache, normalizedLimit);
+        if (cached != null) {
+            return ApiResponse.<List<TopCourseAdminItem>>builder()
+                    .code(HttpStatus.OK.value())
+                    .message("Lấy top khóa học thành công! (cache)")
+                    .result(cached)
+                    .build();
+        }
+
+        try {
+            GetActiveAdminCoursesResponse activeCoursesResponse = courseGrpcClient.getActiveAdminCourses();
+            List<ActiveAdminCourseStat> activeCourses = activeCoursesResponse == null
+                    ? List.of()
+                    : activeCoursesResponse.getItemsList();
+
+            if (activeCourses.isEmpty()) {
+                List<TopCourseAdminItem> empty = List.of();
+                putCache(topCourseCache, normalizedLimit, empty);
+                return ApiResponse.<List<TopCourseAdminItem>>builder()
+                        .code(HttpStatus.OK.value())
+                        .message("Không có dữ liệu khóa học nổi bật")
+                        .result(empty)
+                        .build();
+            }
+
+            List<String> courseIds = activeCourses.stream()
+                    .map(ActiveAdminCourseStat::getCourseId)
+                    .filter(id -> id != null && !id.isBlank())
+                    .toList();
+
+            Map<String, Double> revenueMap = new HashMap<>();
+            try {
+                GetCoursesRevenueResponse revenueResponse = saleGrpcClient.getCoursesRevenue(courseIds);
+                if (revenueResponse != null) {
+                    for (TopCourseRevenueItem item : revenueResponse.getItemsList()) {
+                        revenueMap.put(item.getCourseId(), item.getRevenue());
+                    }
+                }
+            } catch (Exception saleEx) {
+                log.warn("Failed to load course revenues for top courses", saleEx);
+            }
+
+            List<TopCourseAdminItem> result = activeCourses.stream()
+                    .map(course -> TopCourseAdminItem.builder()
+                            .courseId(course.getCourseId())
+                            .title(course.getTitle())
+                            .thumbnailUrl(course.getThumbnailUrl())
+                            .studentCount(course.getStudentCount())
+                            .rating(course.getRating())
+                            .revenue(revenueMap.getOrDefault(course.getCourseId(), 0D))
+                            .build())
+                    .sorted(Comparator
+                            .comparingLong(TopCourseAdminItem::getStudentCount).reversed()
+                            .thenComparing(Comparator.comparingDouble(TopCourseAdminItem::getRevenue).reversed())
+                            .thenComparing(Comparator.comparingDouble(TopCourseAdminItem::getRating).reversed()))
+                    .limit(normalizedLimit)
+                    .toList();
+
+            putCache(topCourseCache, normalizedLimit, result);
+
+            return ApiResponse.<List<TopCourseAdminItem>>builder()
+                    .code(HttpStatus.OK.value())
+                    .message("Lấy top khóa học thành công!")
+                    .result(result)
+                    .build();
+        } catch (Exception e) {
+            log.error("Failed to aggregate top courses", e);
+            return ApiResponse.<List<TopCourseAdminItem>>builder()
+                    .code(HttpStatus.OK.value())
+                    .message("Không thể lấy top khóa học, trả dữ liệu rỗng")
+                    .result(List.of())
+                    .build();
+        }
+    }
+
+    @Override
+    public ApiResponse<List<TopInstructorAdminItem>> getAdminTopInstructors(int limit) {
+        int normalizedLimit = normalizeLimit(limit);
+        List<TopInstructorAdminItem> cached = getValidCache(topInstructorCache, normalizedLimit);
+        if (cached != null) {
+            return ApiResponse.<List<TopInstructorAdminItem>>builder()
+                    .code(HttpStatus.OK.value())
+                    .message("Lấy top giảng viên thành công! (cache)")
+                    .result(cached)
+                    .build();
+        }
+
+        try {
+            GetActiveAdminCoursesResponse activeCoursesResponse = courseGrpcClient.getActiveAdminCourses();
+            List<ActiveAdminCourseStat> activeCourses = activeCoursesResponse == null
+                    ? List.of()
+                    : activeCoursesResponse.getItemsList();
+
+            if (activeCourses.isEmpty()) {
+                List<TopInstructorAdminItem> empty = List.of();
+                putCache(topInstructorCache, normalizedLimit, empty);
+                return ApiResponse.<List<TopInstructorAdminItem>>builder()
+                        .code(HttpStatus.OK.value())
+                        .message("Không có dữ liệu giảng viên nổi bật")
+                        .result(empty)
+                        .build();
+            }
+
+            List<String> courseIds = activeCourses.stream()
+                    .map(ActiveAdminCourseStat::getCourseId)
+                    .filter(id -> id != null && !id.isBlank())
+                    .toList();
+
+            Map<String, Double> revenueMap = new HashMap<>();
+            try {
+                GetCoursesRevenueResponse revenueResponse = saleGrpcClient.getCoursesRevenue(courseIds);
+                if (revenueResponse != null) {
+                    for (TopCourseRevenueItem item : revenueResponse.getItemsList()) {
+                        revenueMap.put(item.getCourseId(), item.getRevenue());
+                    }
+                }
+            } catch (Exception saleEx) {
+                log.warn("Failed to load course revenues for top instructors", saleEx);
+            }
+
+            Map<String, InstructorAggregate> aggregates = new HashMap<>();
+            Set<String> instructorIds = new HashSet<>();
+
+            for (ActiveAdminCourseStat course : activeCourses) {
+                String instructorId = course.getInstructorId();
+                if (instructorId == null || instructorId.isBlank()) continue;
+                instructorIds.add(instructorId);
+
+                InstructorAggregate agg = aggregates.computeIfAbsent(instructorId, id -> new InstructorAggregate());
+                agg.courseCount += 1;
+                agg.studentCount += course.getStudentCount();
+                agg.revenue += revenueMap.getOrDefault(course.getCourseId(), 0D);
+            }
+
+            Map<String, UserEntity> instructorProfileMap = new HashMap<>();
+            if (!instructorIds.isEmpty()) {
+                List<UserEntity> instructors = userRepository.findAllById(instructorIds);
+                for (UserEntity instructor : instructors) {
+                    instructorProfileMap.put(instructor.getId(), instructor);
+                }
+            }
+
+            List<TopInstructorAdminItem> sorted = new ArrayList<>(aggregates.entrySet().stream()
+                    .map(entry -> {
+                        String instructorId = entry.getKey();
+                        InstructorAggregate agg = entry.getValue();
+                        UserEntity profile = instructorProfileMap.get(instructorId);
+                        return TopInstructorAdminItem.builder()
+                                .instructorId(instructorId)
+                                .instructorName(profile != null ? profile.getName() : "Giảng viên")
+                                .instructorAvatar(profile != null ? profile.getImage() : "")
+                                .studentCount(agg.studentCount)
+                                .courseCount(agg.courseCount)
+                                .revenue(agg.revenue)
+                                .build();
+                    })
+                    .sorted(Comparator
+                            .comparingDouble(TopInstructorAdminItem::getRevenue).reversed()
+                            .thenComparing(Comparator.comparingLong(TopInstructorAdminItem::getStudentCount).reversed())
+                            .thenComparing(Comparator.comparingLong(TopInstructorAdminItem::getCourseCount).reversed()))
+                    .limit(normalizedLimit)
+                    .toList());
+
+            for (int i = 0; i < sorted.size(); i++) {
+                sorted.get(i).setRank(i + 1);
+            }
+
+            List<TopInstructorAdminItem> result = List.copyOf(sorted);
+            putCache(topInstructorCache, normalizedLimit, result);
+
+            return ApiResponse.<List<TopInstructorAdminItem>>builder()
+                    .code(HttpStatus.OK.value())
+                    .message("Lấy top giảng viên thành công!")
+                    .result(result)
+                    .build();
+        } catch (Exception e) {
+            log.error("Failed to aggregate top instructors", e);
+            return ApiResponse.<List<TopInstructorAdminItem>>builder()
+                    .code(HttpStatus.OK.value())
+                    .message("Không thể lấy top giảng viên, trả dữ liệu rỗng")
+                    .result(List.of())
                     .build();
         }
     }

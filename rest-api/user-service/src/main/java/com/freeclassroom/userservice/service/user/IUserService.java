@@ -6,11 +6,15 @@ import com.freeclassroom.userservice.dto.request.user.CreationUserRequest;
 import com.freeclassroom.userservice.dto.request.user.UpdateUserRequest;
 import com.freeclassroom.userservice.dto.response.ApiResponse;
 import com.freeclassroom.userservice.dto.response.admin.DataAdminHome;
+import com.freeclassroom.userservice.dto.response.admin.TopCourseAdminItem;
+import com.freeclassroom.userservice.dto.response.admin.TopInstructorAdminItem;
 import com.freeclassroom.userservice.dto.response.auth.CheckForgotPasswordResponse;
 import com.freeclassroom.userservice.dto.response.user.GetUserResponse;
 import com.freeclassroom.userservice.dto.response.user.MyProfileResponse;
 import com.freeclassroom.userservice.dto.response.user.UserResponse;
 import com.freeclassroom.userservice.dto.response.user.VipStatusResponse;
+
+import java.util.List;
 
 public interface IUserService {
     ApiResponse<UserResponse> registerUser(CreationUserRequest request);
@@ -22,6 +26,8 @@ public interface IUserService {
     ApiResponse<MyProfileResponse> geyMyProfile(String id);
     ApiResponse<GetUserResponse> updateUser(String id, UpdateUserRequest request);
     ApiResponse<DataAdminHome> getAdminData();
+    ApiResponse<List<TopCourseAdminItem>> getAdminTopCourses(int limit);
+    ApiResponse<List<TopInstructorAdminItem>> getAdminTopInstructors(int limit);
     ApiResponse<VipStatusResponse> getVipStatus(String userId);
     ApiResponse<Void> trackingEvent(Identity identity, TrackingEventRequest request);
 }

@@ -1,20 +1,168 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
-import { BookOpen, Users, FileText, Clock, ArrowUpRight, ShieldCheck, Sparkles } from 'lucide-react'
-import { Link } from 'react-router-dom'
-import { useEffect, useState } from 'react'
+import { cn } from '@/lib/utils'
+import { Area, AreaChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+import {
+  AlertTriangle,
+  BookOpen,
+  CheckCircle2,
+  Clock,
+  FileText,
+  ShieldAlert,
+  Sparkles,
+  Star,
+  Users
+} from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
 import userService from '@/services/user/user.service'
-import { DataAdminHome } from '@/types/user'
+import { DataAdminHome, TopCourseAdminItem, TopInstructorAdminItem } from '@/types/user'
 import { toast } from 'sonner'
+import courseImage from '@/assets/images/course.jpg'
+import user1 from '@/assets/images/user1.jpg'
+import user2 from '@/assets/images/user2.jpg'
+import user3 from '@/assets/images/user3.jpg'
+import user4 from '@/assets/images/user4.jpg'
+import user5 from '@/assets/images/user5.jpeg'
 
-const metricCardClass =
-  'group rounded-[28px] border border-slate-200/80 bg-white/95 shadow-[0_18px_40px_-30px_rgba(15,23,42,0.2)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_26px_60px_-36px_rgba(15,23,42,0.28)]'
+type RangeKey = '7d' | '30d' | '90d' | '12m'
+
+type PerformancePoint = {
+  label: string
+  revenue: number
+  students: number
+}
+
+const baseCardClass =
+  'rounded-2xl border border-slate-200/70 bg-gradient-to-br from-white via-slate-50/80 to-slate-100/70 shadow-sm transition-all duration-300 hover:shadow-md'
+
+const mockPerformanceData: Record<RangeKey, PerformancePoint[]> = {
+  '7d': [
+    { label: 'T2', revenue: 36, students: 22 },
+    { label: 'T3', revenue: 42, students: 28 },
+    { label: 'T4', revenue: 40, students: 25 },
+    { label: 'T5', revenue: 48, students: 31 },
+    { label: 'T6', revenue: 52, students: 36 },
+    { label: 'T7', revenue: 50, students: 33 },
+    { label: 'CN', revenue: 57, students: 39 }
+  ],
+  '30d': [
+    { label: 'W1', revenue: 112, students: 72 },
+    { label: 'W2', revenue: 126, students: 81 },
+    { label: 'W3', revenue: 121, students: 77 },
+    { label: 'W4', revenue: 141, students: 91 }
+  ],
+  '90d': [
+    { label: 'Thg 1', revenue: 336, students: 198 },
+    { label: 'Thg 2', revenue: 371, students: 212 },
+    { label: 'Thg 3', revenue: 418, students: 248 }
+  ],
+  '12m': [
+    { label: 'T1', revenue: 112, students: 71 },
+    { label: 'T2', revenue: 124, students: 75 },
+    { label: 'T3', revenue: 119, students: 69 },
+    { label: 'T4', revenue: 131, students: 82 },
+    { label: 'T5', revenue: 145, students: 91 },
+    { label: 'T6', revenue: 161, students: 97 },
+    { label: 'T7', revenue: 156, students: 95 },
+    { label: 'T8', revenue: 174, students: 108 },
+    { label: 'T9', revenue: 186, students: 117 },
+    { label: 'T10', revenue: 193, students: 121 },
+    { label: 'T11', revenue: 205, students: 131 },
+    { label: 'T12', revenue: 221, students: 142 }
+  ]
+}
+
+const mockPendingActions = [
+  {
+    label: 'Khóa học chờ duyệt',
+    value: 8,
+    icon: BookOpen,
+    tone: 'text-amber-700 bg-amber-50 border-amber-200'
+  },
+  {
+    label: 'Chứng chỉ chờ xác minh',
+    value: 14,
+    icon: ShieldAlert,
+    tone: 'text-orange-700 bg-orange-50 border-orange-200'
+  },
+  {
+    label: 'Báo cáo vi phạm',
+    value: 3,
+    icon: AlertTriangle,
+    tone: 'text-rose-700 bg-rose-50 border-rose-200'
+  }
+]
+
+const mockRecentActivity = [
+  {
+    id: 'a1',
+    avatar: user1,
+    fallback: 'NA',
+    content: 'Nguyễn Văn A tạo khóa học ReactJS Mastery',
+    time: '5 phút trước'
+  },
+  {
+    id: 'a2',
+    avatar: user2,
+    fallback: 'TH',
+    content: 'Trần Hải Nam đăng ký khóa học UI/UX Fundamentals',
+    time: '12 phút trước'
+  },
+  {
+    id: 'a3',
+    avatar: user3,
+    fallback: 'QT',
+    content: 'Khóa học Node.js API được duyệt',
+    time: '27 phút trước'
+  },
+  {
+    id: 'a4',
+    avatar: user4,
+    fallback: 'LM',
+    content: 'Chứng chỉ Frontend Pro được xác minh',
+    time: '48 phút trước'
+  },
+  {
+    id: 'a5',
+    avatar: user5,
+    fallback: 'PL',
+    content: 'Blog “AI for Education 2026” được xuất bản',
+    time: '1 giờ trước'
+  }
+]
+
+const mockPlatformHealth = [
+  { label: 'Người dùng đang hoạt động', value: 12480, unit: '', progress: 78 },
+  { label: 'Khóa học đang mở bán', value: 328, unit: '', progress: 72 },
+  { label: 'Tỷ lệ hoàn thành khóa học', value: 68, unit: '%', progress: 68 },
+  { label: 'Tỷ lệ đánh giá tích cực', value: 94, unit: '%', progress: 94 },
+  { label: 'Tỷ lệ uptime', value: 99.97, unit: '%', progress: 100 }
+]
+
+const formatNumber = (value: number) => new Intl.NumberFormat('vi-VN').format(value)
+const formatCurrency = (value: number) =>
+  new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 }).format(value)
+
+const formatCompactCurrency = (value: number) => {
+  if (value >= 1000) return `${value}M`
+  return `${value}M`
+}
+
+const ranges: { key: RangeKey; label: string }[] = [
+  { key: '7d', label: '7 ngày' },
+  { key: '30d', label: '30 ngày' },
+  { key: '90d', label: '90 ngày' },
+  { key: '12m', label: '12 tháng' }
+]
 
 export default function Dashboard() {
   const [data, setData] = useState<DataAdminHome | null>(null)
+  const [topCourses, setTopCourses] = useState<TopCourseAdminItem[]>([])
+  const [topInstructors, setTopInstructors] = useState<TopInstructorAdminItem[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const hasPendingCourses = false
+  const [range, setRange] = useState<RangeKey>('12m')
 
   useEffect(() => {
     let active = true
@@ -22,9 +170,15 @@ export default function Dashboard() {
       try {
         setLoading(true)
         setError(null)
-        const res = await userService.getAdminHome()
+        const [homeRes, topCourseRes, topInstructorRes] = await Promise.all([
+          userService.getAdminHome(),
+          userService.getAdminTopCourses(5),
+          userService.getAdminTopInstructors(5)
+        ])
         if (!active) return
-        setData(res.result ?? null)
+        setData(homeRes.result ?? null)
+        setTopCourses(topCourseRes.result ?? [])
+        setTopInstructors(topInstructorRes.result ?? [])
       } catch (e: any) {
         if (!active) return
         const msg = e?.response?.data?.message || e?.message || 'Không thể tải dữ liệu admin'
@@ -40,191 +194,330 @@ export default function Dashboard() {
     }
   }, [])
 
+  const performanceData = useMemo(() => mockPerformanceData[range], [range])
+
   const metricCards = [
     {
       title: 'Tổng khóa học',
       value: data?.courseCnt ?? (loading ? '…' : 0),
       icon: BookOpen,
-      iconClass: 'bg-sky-50 text-sky-600',
-      accentClass: 'from-sky-100/80 to-transparent'
+      iconClass: 'bg-sky-50 text-sky-600'
     },
     {
       title: 'Giảng viên',
       value: data?.instructorCnt ?? (loading ? '…' : 0),
       icon: Users,
-      iconClass: 'bg-violet-50 text-violet-600',
-      accentClass: 'from-violet-100/80 to-transparent'
+      iconClass: 'bg-cyan-50 text-cyan-600'
     },
     {
       title: 'Chứng chỉ chờ duyệt',
       value: data?.certificateCnt ?? (loading ? '…' : 0),
       icon: Clock,
-      iconClass: 'bg-amber-50 text-amber-600',
-      accentClass: 'from-amber-100/80 to-transparent'
+      iconClass: 'bg-amber-50 text-amber-600'
     },
     {
-      title: 'Bài blog',
+      title: 'Bài viết',
       value: data?.blogCnt ?? (loading ? '…' : 0),
       icon: FileText,
-      iconClass: 'bg-emerald-50 text-emerald-600',
-      accentClass: 'from-emerald-100/80 to-transparent'
+      iconClass: 'bg-emerald-50 text-emerald-600'
     }
   ]
 
+  const hasPendingActions = mockPendingActions.some((item) => item.value > 0)
+
   return (
-    <div className='space-y-8'>
-      <section className='relative overflow-hidden rounded-[32px] border border-slate-200/80 bg-gradient-to-br from-slate-950 via-slate-900 to-sky-950 px-6 py-7 text-white shadow-[0_24px_60px_-34px_rgba(15,23,42,0.55)]'>
-        <div className='absolute -right-6 top-0 h-44 w-44 rounded-full bg-sky-400/15 blur-3xl' />
-        <div className='absolute bottom-0 left-12 h-28 w-28 rounded-full bg-cyan-300/10 blur-3xl' />
-        <div className='relative flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between'>
-          <div className='max-w-2xl'>
-            <p className='text-xs font-semibold uppercase tracking-[0.28em] text-sky-200/80'>Platform overview</p>
-            <h1 className='mt-3 text-3xl font-semibold tracking-tight'>Tổng quan hệ thống</h1>
-            <p className='mt-2 text-sm leading-6 text-slate-300'>
-              Theo dõi những chỉ số quan trọng nhất của nền tảng trong một dashboard gọn, rõ và sẵn sàng cho vận hành
-              hằng ngày.
-            </p>
-          </div>
+    <div className='space-y-5'>
+      <section className='flex items-center justify-between rounded-2xl border border-slate-200/70 bg-white px-5 py-4 shadow-sm'>
+        <div>
+          <p className='text-xs font-semibold uppercase tracking-[0.22em] text-slate-500'>Tổng quan nền tảng</p>
+          <h1 className='mt-1 text-2xl font-semibold tracking-tight text-slate-900'>Bảng điều khiển quản trị</h1>
+          <p className='mt-1 text-sm text-slate-500'>Theo dõi hiệu suất vận hành và tăng trưởng toàn nền tảng.</p>
         </div>
+        <Badge className='rounded-full border border-cyan-200 bg-cyan-50 px-3 py-1 text-cyan-700'>
+          <Sparkles className='mr-1.5 h-3.5 w-3.5' />
+          Dữ liệu trực quan
+        </Badge>
       </section>
 
       {error ? (
-        <div className='rounded-[28px] border border-rose-200 bg-rose-50/80 px-6 py-5 text-sm font-medium text-rose-700'>
+        <div className='rounded-2xl border border-rose-200 bg-rose-50/80 px-4 py-3 text-sm font-medium text-rose-700'>
           {error}
         </div>
       ) : null}
 
-      <section className='grid gap-5 md:grid-cols-2 xl:grid-cols-4'>
+      <section className='grid gap-4 md:grid-cols-2 xl:grid-cols-4'>
         {metricCards.map((item) => {
           const Icon = item.icon
           return (
-            <Card key={item.title} className={metricCardClass}>
-              <CardHeader className='relative overflow-hidden pb-3'>
-                <div
-                  className={`absolute -right-10 top-0 h-24 w-24 rounded-full bg-gradient-to-br ${item.accentClass} blur-2xl`}
-                />
-                <div className='relative flex items-start justify-between gap-4'>
+            <Card
+              key={item.title}
+              className={cn(baseCardClass, 'bg-gradient-to-br from-white via-sky-50/70 to-cyan-100/60')}
+            >
+              <CardContent className='p-3.5'>
+                <div className='flex items-start justify-between gap-3'>
                   <div>
-                    <CardDescription className='text-sm font-medium text-slate-500'>{item.title}</CardDescription>
-                    <CardTitle className='mt-3 text-4xl font-semibold tracking-tight text-slate-950'>
-                      {item.value}
-                    </CardTitle>
+                    <p className='text-xs font-medium text-slate-500'>{item.title}</p>
+                    <p className='mt-1.5 text-2xl font-semibold tracking-tight text-slate-900'>{item.value}</p>
                   </div>
-                  <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${item.iconClass}`}>
-                    <Icon className='h-5 w-5' />
+                  <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${item.iconClass}`}>
+                    <Icon className='h-4.5 w-4.5' />
                   </div>
                 </div>
-              </CardHeader>
+              </CardContent>
             </Card>
           )
         })}
       </section>
 
-      <section className='grid gap-6 xl:grid-cols-[1.2fr_0.8fr]'>
-        <Card className='overflow-hidden rounded-[30px] border border-slate-200/80 bg-white/95 shadow-[0_22px_55px_-36px_rgba(15,23,42,0.24)]'>
-          <CardHeader className='border-b border-slate-200/80 bg-slate-50/80 px-6 py-5'>
-            <div className='flex items-center gap-3'>
-              <div className='flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-50 text-amber-600'>
-                <Clock className='h-5 w-5' />
-              </div>
+      <section className='grid gap-4 lg:grid-cols-10'>
+        <Card className={cn(baseCardClass, 'bg-gradient-to-br from-white via-cyan-50/60 to-sky-100/50 lg:col-span-7')}>
+          <CardHeader className='px-5 py-4'>
+            <div className='flex flex-wrap items-start justify-between gap-3'>
               <div>
-                <CardTitle className='text-lg font-semibold tracking-tight text-slate-950'>
-                  Khóa học chờ duyệt
-                </CardTitle>
-                <CardDescription className='mt-1 text-sm text-slate-500'>
-                  {data?.courseCnt ?? 0} khóa học đang chờ được xem xét
-                </CardDescription>
+                <CardTitle className='text-lg font-semibold text-slate-900'>Hiệu suất kinh doanh</CardTitle>
+                <CardDescription>Doanh thu và tăng trưởng học viên theo thời gian</CardDescription>
+              </div>
+              <div className='flex flex-wrap items-center gap-2'>
+                {ranges.map((item) => (
+                  <button
+                    key={item.key}
+                    onClick={() => setRange(item.key)}
+                    className={cn(
+                      'rounded-full border px-3 py-1 text-xs font-semibold transition-all',
+                      range === item.key
+                        ? 'border-slate-900 bg-slate-900 text-white'
+                        : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
+                    )}
+                  >
+                    {item.label}
+                  </button>
+                ))}
               </div>
             </div>
           </CardHeader>
-          <CardContent className='px-6 py-6'>
-            {!hasPendingCourses ? (
-              <div className='flex min-h-[220px] flex-col items-center justify-center rounded-[24px] border border-dashed border-slate-200 bg-slate-50/70 px-6 text-center'>
-                <div className='flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-400'>
-                  <BookOpen className='h-6 w-6' />
-                </div>
-                <p className='mt-4 text-base font-medium text-slate-700'>Không có khóa học nào chờ duyệt</p>
-                <p className='mt-2 max-w-md text-sm leading-6 text-slate-500'>
-                  Khi có yêu cầu mới, khu vực này sẽ giúp bạn theo dõi và xử lý nhanh hơn.
-                </p>
+          <CardContent className='px-5 pb-4 pt-1'>
+            <div className='grid gap-4 lg:grid-cols-2'>
+              <div className='h-[220px] rounded-xl border border-slate-100 bg-gradient-to-br from-white via-sky-50/60 to-cyan-100/40 p-3'>
+                <p className='mb-2 text-xs font-medium text-slate-500'>Doanh thu (triệu VND)</p>
+                <ResponsiveContainer width='100%' height='100%'>
+                  <LineChart data={performanceData}>
+                    <CartesianGrid strokeDasharray='3 3' stroke='#e2e8f0' vertical={false} />
+                    <XAxis dataKey='label' tickLine={false} axisLine={false} tick={{ fontSize: 12, fill: '#64748b' }} />
+                    <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 12, fill: '#64748b' }} />
+                    <Tooltip
+                      formatter={(value: number) => [`${formatCompactCurrency(value)}`, 'Doanh thu']}
+                      contentStyle={{ borderRadius: 12, border: '1px solid #e2e8f0' }}
+                    />
+                    <Line type='monotone' dataKey='revenue' stroke='#0284c7' strokeWidth={2.5} dot={false} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+              <div className='h-[220px] rounded-xl border border-slate-100 bg-gradient-to-br from-white via-cyan-50/60 to-teal-100/40 p-3'>
+                <p className='mb-2 text-xs font-medium text-slate-500'>Học viên mới</p>
+                <ResponsiveContainer width='100%' height='100%'>
+                  <AreaChart data={performanceData}>
+                    <defs>
+                      <linearGradient id='studentsFill' x1='0' y1='0' x2='0' y2='1'>
+                        <stop offset='5%' stopColor='#0e7490' stopOpacity={0.35} />
+                        <stop offset='95%' stopColor='#0e7490' stopOpacity={0.05} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray='3 3' stroke='#e2e8f0' vertical={false} />
+                    <XAxis dataKey='label' tickLine={false} axisLine={false} tick={{ fontSize: 12, fill: '#64748b' }} />
+                    <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 12, fill: '#64748b' }} />
+                    <Tooltip
+                      formatter={(value: number) => [formatNumber(value), 'Học viên']}
+                      contentStyle={{ borderRadius: 12, border: '1px solid #e2e8f0' }}
+                    />
+                    <Area
+                      type='monotone'
+                      dataKey='students'
+                      stroke='#0e7490'
+                      fill='url(#studentsFill)'
+                      strokeWidth={2.5}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card
+          className={cn(baseCardClass, 'bg-gradient-to-br from-white via-amber-50/70 to-orange-100/50 lg:col-span-3')}
+        >
+          <CardHeader className='px-5 py-4'>
+            <CardTitle className='text-lg font-semibold text-slate-900'>Cần xử lý</CardTitle>
+            <CardDescription>Các mục cần admin xử lý ưu tiên</CardDescription>
+          </CardHeader>
+          <CardContent className='px-5 pb-4 pt-1'>
+            {hasPendingActions ? (
+              <div className='space-y-2'>
+                {mockPendingActions.map((item) => {
+                  const Icon = item.icon
+                  return (
+                    <div
+                      key={item.label}
+                      className={cn('flex items-center justify-between rounded-xl border px-3 py-2.5', item.tone)}
+                    >
+                      <div className='flex items-center gap-2.5'>
+                        <div className='flex h-8 w-8 items-center justify-center rounded-lg bg-white/70'>
+                          <Icon className='h-4 w-4' />
+                        </div>
+                        <p className='text-sm font-medium'>{item.label}</p>
+                      </div>
+                      <span className='text-base font-semibold'>{item.value}</span>
+                    </div>
+                  )
+                })}
               </div>
             ) : (
-              <div className='space-y-3'>
-                {[].map((course: any) => (
-                  <Link
-                    key={course.id}
-                    to={`/courses/${course.id}`}
-                    className='group flex items-center justify-between rounded-2xl border border-slate-200 bg-white p-4 transition-all hover:border-sky-200 hover:bg-sky-50/40'
-                  >
-                    <div className='flex items-start gap-3'>
-                      <div className='flex h-10 w-10 items-center justify-center rounded-xl bg-sky-50 text-sky-600'>
-                        <BookOpen className='h-4 w-4' />
-                      </div>
-                      <div>
-                        <p className='font-semibold text-slate-900 transition-colors group-hover:text-sky-700'>
-                          {course.title}
-                        </p>
-                        <p className='mt-1 text-sm text-slate-500'>Người đăng: {course.instructor}</p>
-                      </div>
-                    </div>
-                    <Badge variant='secondary' className='rounded-full border-amber-200 bg-amber-50 text-amber-700'>
-                      Chờ duyệt
-                    </Badge>
-                  </Link>
-                ))}
+              <div className='flex min-h-[220px] items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50 text-sm font-medium text-slate-500'>
+                Không có tác vụ cần xử lý
               </div>
             )}
           </CardContent>
         </Card>
+      </section>
 
-        <Card className='overflow-hidden rounded-[30px] border border-slate-200/80 bg-white/95 shadow-[0_22px_55px_-36px_rgba(15,23,42,0.24)]'>
-          <CardHeader className='border-b border-slate-200/80 bg-slate-50/80 px-6 py-5'>
-            <div className='flex items-center gap-3'>
-              <div className='flex h-11 w-11 items-center justify-center rounded-2xl bg-violet-50 text-violet-600'>
-                <Sparkles className='h-5 w-5' />
-              </div>
-              <div>
-                <CardTitle className='text-lg font-semibold tracking-tight text-slate-950'>Điểm nhấn nhanh</CardTitle>
-                <CardDescription className='mt-1 text-sm text-slate-500'>
-                  Một số chỉ số nổi bật để nắm tình hình trong vài giây.
-                </CardDescription>
-              </div>
-            </div>
+      <section className='grid gap-4 xl:grid-cols-2'>
+        <Card className={cn(baseCardClass, 'bg-gradient-to-br from-white via-violet-50/60 to-indigo-100/40')}>
+          <CardHeader className='px-5 py-4'>
+            <CardTitle className='text-lg font-semibold text-slate-900'>Giảng viên hàng đầu</CardTitle>
+            <CardDescription>Leaderboard giảng viên có hiệu suất cao nhất</CardDescription>
           </CardHeader>
-          <CardContent className='space-y-4 px-6 py-6'>
-            <div className='rounded-2xl border border-slate-200 bg-slate-50/70 p-4'>
-              <div className='flex items-center justify-between gap-4'>
-                <div>
-                  <p className='text-sm font-medium text-slate-500'>Nội dung đang quản lý</p>
-                  <p className='mt-2 text-2xl font-semibold text-slate-950'>{data?.blogCnt ?? (loading ? '…' : 0)}</p>
+          <CardContent className='px-5 pb-4 pt-1'>
+            <div className='space-y-2.5'>
+              {topInstructors.map((ins, index) => (
+                <div key={ins.instructorId} className='flex items-center gap-3 rounded-xl border border-slate-100 p-3'>
+                  <div className='flex h-8 w-8 items-center justify-center rounded-full bg-slate-900 text-xs font-bold text-white'>
+                    #{ins.rank || index + 1}
+                  </div>
+                  <Avatar className='h-10 w-10 border border-slate-200'>
+                    <AvatarImage src={ins.instructorAvatar || user1} alt={ins.instructorName} />
+                    <AvatarFallback>{ins.instructorName.slice(0, 2).toUpperCase()}</AvatarFallback>
+                  </Avatar>
+                  <div className='min-w-0 flex-1'>
+                    <p className='truncate text-sm font-semibold text-slate-900'>{ins.instructorName}</p>
+                    <div className='mt-1 flex flex-wrap items-center gap-3 text-xs text-slate-600'>
+                      <span>{formatNumber(ins.studentCount)} học viên</span>
+                      <span>{ins.courseCount} khóa học</span>
+                    </div>
+                  </div>
+                  <p className='text-sm font-semibold text-emerald-700'>{formatCurrency(ins.revenue)}</p>
                 </div>
-                <ArrowUpRight className='h-5 w-5 text-slate-400' />
-              </div>
-            </div>
-            <div className='rounded-2xl border border-slate-200 bg-slate-50/70 p-4'>
-              <div className='flex items-center justify-between gap-4'>
-                <div>
-                  <p className='text-sm font-medium text-slate-500'>Đội ngũ giảng viên</p>
-                  <p className='mt-2 text-2xl font-semibold text-slate-950'>
-                    {data?.instructorCnt ?? (loading ? '…' : 0)}
-                  </p>
-                </div>
-                <ArrowUpRight className='h-5 w-5 text-slate-400' />
-              </div>
-            </div>
-            <div className='rounded-2xl border border-slate-200 bg-slate-50/70 p-4'>
-              <div className='flex items-center justify-between gap-4'>
-                <div>
-                  <p className='text-sm font-medium text-slate-500'>Yêu cầu chứng chỉ</p>
-                  <p className='mt-2 text-2xl font-semibold text-slate-950'>
-                    {data?.certificateCnt ?? (loading ? '…' : 0)}
-                  </p>
-                </div>
-                <ArrowUpRight className='h-5 w-5 text-slate-400' />
-              </div>
+              ))}
+              {topInstructors.length === 0 ? (
+                <p className='rounded-xl border border-dashed border-slate-200 px-3 py-4 text-center text-sm text-slate-500'>
+                  Chưa có dữ liệu giảng viên nổi bật
+                </p>
+              ) : null}
             </div>
           </CardContent>
         </Card>
+
+        <Card className={cn(baseCardClass, 'bg-gradient-to-br from-white via-blue-50/60 to-sky-100/50')}>
+          <CardHeader className='px-5 py-4'>
+            <CardTitle className='text-lg font-semibold text-slate-900'>Khóa học nổi bật</CardTitle>
+            <CardDescription>Top 5 theo học viên, rating và doanh thu</CardDescription>
+          </CardHeader>
+          <CardContent className='px-5 pb-4 pt-1'>
+            <div className='space-y-3'>
+              {topCourses.map((course) => (
+                <div key={course.courseId} className='flex gap-3 rounded-xl border border-slate-100 p-3'>
+                  <img
+                    src={course.thumbnailUrl || courseImage}
+                    alt={course.title}
+                    className='h-16 w-24 rounded-lg object-cover'
+                  />
+                  <div className='min-w-0 flex-1'>
+                    <p className='truncate text-sm font-semibold text-slate-900'>{course.title}</p>
+                    <div className='mt-2 flex flex-wrap items-center gap-3 text-xs text-slate-600'>
+                      <span className='inline-flex items-center gap-1'>
+                        <Users className='h-3.5 w-3.5' /> {formatNumber(course.studentCount)} học viên
+                      </span>
+                      <span className='inline-flex items-center gap-1'>
+                        <Star className='h-3.5 w-3.5 fill-amber-400 text-amber-400' /> {course.rating}
+                      </span>
+                      <span className='font-semibold text-emerald-700'>{formatCurrency(course.revenue)}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              {topCourses.length === 0 ? (
+                <p className='rounded-xl border border-dashed border-slate-200 px-3 py-4 text-center text-sm text-slate-500'>
+                  Chưa có dữ liệu khóa học nổi bật
+                </p>
+              ) : null}
+            </div>
+          </CardContent>
+        </Card>
+      </section>
+
+      <section className='grid gap-4 xl:grid-cols-2'>
+        <Card className={cn(baseCardClass, 'bg-gradient-to-br from-white via-emerald-50/60 to-teal-100/50')}>
+          <CardHeader className='px-5 py-4'>
+            <CardTitle className='text-lg font-semibold text-slate-900'>Hoạt động gần đây</CardTitle>
+            <CardDescription>Dòng sự kiện vận hành mới nhất</CardDescription>
+          </CardHeader>
+          <CardContent className='px-5 pb-4 pt-1'>
+            <div className='space-y-3'>
+              {mockRecentActivity.map((item, idx) => (
+                <div key={item.id} className='relative flex gap-3 rounded-xl border border-slate-100 p-3'>
+                  {idx < mockRecentActivity.length - 1 ? (
+                    <span className='absolute left-[27px] top-10 h-7 w-px bg-slate-200' />
+                  ) : null}
+                  <Avatar className='h-9 w-9 border border-slate-200'>
+                    <AvatarImage src={item.avatar} alt={item.fallback} />
+                    <AvatarFallback>{item.fallback}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className='text-sm font-medium text-slate-800'>{item.content}</p>
+                    <p className='mt-1 text-xs text-slate-500'>{item.time}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className={cn(baseCardClass, 'bg-gradient-to-br from-white via-cyan-50/60 to-emerald-100/50')}>
+          <CardHeader className='px-5 py-4'>
+            <CardTitle className='text-lg font-semibold text-slate-900'>Tình trạng hệ thống</CardTitle>
+            <CardDescription>Tình trạng hệ thống và chất lượng học tập</CardDescription>
+          </CardHeader>
+          <CardContent className='px-5 pb-4 pt-1'>
+            <div className='space-y-3'>
+              {mockPlatformHealth.map((item) => (
+                <div key={item.label} className='rounded-xl border border-slate-100 p-3'>
+                  <div className='mb-2 flex items-center justify-between'>
+                    <p className='text-sm font-medium text-slate-700'>{item.label}</p>
+                    <p className='text-sm font-semibold text-slate-900'>
+                      {typeof item.value === 'number' && item.value % 1 !== 0
+                        ? item.value.toFixed(2)
+                        : formatNumber(item.value)}
+                      {item.unit}
+                    </p>
+                  </div>
+                  <div className='h-2 overflow-hidden rounded-full bg-slate-100'>
+                    <div
+                      className='h-full rounded-full bg-gradient-to-r from-cyan-500 to-emerald-500 transition-all duration-500'
+                      style={{ width: `${item.progress}%` }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className='mt-3 flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700'>
+              <CheckCircle2 className='h-4 w-4' />
+              Hệ thống hoạt động ổn định và trong ngưỡng an toàn.
+            </div>
+          </CardContent>
+        </Card>
+      </section>
+
+      <section className='sr-only' aria-live='polite'>
+        Dữ liệu bảng điều khiển đã cập nhật
       </section>
     </div>
   )

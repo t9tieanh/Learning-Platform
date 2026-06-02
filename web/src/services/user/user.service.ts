@@ -1,7 +1,7 @@
 import axiosClient from '../../lib/axiosClient.lib'
 import { ApiResponse } from '@/types/response.type'
 import { Profile, VipStatusResult } from '@/types/profile'
-import { DataAdminHome } from '@/types/user'
+import { DataAdminHome, TopCourseAdminItem, TopInstructorAdminItem } from '@/types/user'
 
 class UserService {
   async signUp(newUser: {
@@ -142,6 +142,20 @@ class UserService {
 
   async getAdminHome(): Promise<ApiResponse<DataAdminHome>> {
     const response = await axiosClient.axiosInstance.get('user/home-admin')
+    return response.data
+  }
+
+  async getAdminTopCourses(limit = 5): Promise<ApiResponse<TopCourseAdminItem[]>> {
+    const response = await axiosClient.axiosInstance.get('user/admin/top-courses', {
+      params: { limit }
+    })
+    return response.data
+  }
+
+  async getAdminTopInstructors(limit = 5): Promise<ApiResponse<TopInstructorAdminItem[]>> {
+    const response = await axiosClient.axiosInstance.get('user/admin/top-instructors', {
+      params: { limit }
+    })
     return response.data
   }
 }

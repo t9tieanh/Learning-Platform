@@ -7,6 +7,7 @@ import com.example.grpc.course.GetCourseAndStudentResponse;
 import com.example.grpc.course.GetCourseRequest;
 import com.example.grpc.course.GetCourseTagsRequest;
 import com.example.grpc.course.GetCourseTagsResponse;
+import com.example.grpc.course.GetActiveAdminCoursesResponse;
 import com.example.grpc.user.*;
 import com.google.protobuf.Empty;
 import net.devh.boot.grpc.client.inject.GrpcClient;
@@ -21,6 +22,10 @@ public class CourseGrpcClient {
 
     public GetCourseAdminDataResponse getCourseAdminData() {
         return courseStub.getCourseAdminData(Empty.getDefaultInstance());
+    }
+
+    public GetActiveAdminCoursesResponse getActiveAdminCourses() {
+        return courseStub.getActiveAdminCourses(Empty.getDefaultInstance());
     }
 
     public GetCourseAndStudentResponse getTotalCoursesAndStudent(String userId) {

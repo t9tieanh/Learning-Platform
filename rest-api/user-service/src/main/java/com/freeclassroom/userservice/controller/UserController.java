@@ -9,6 +9,8 @@ import com.freeclassroom.userservice.dto.request.user.CreationUserRequest;
 import com.freeclassroom.userservice.dto.request.user.UpdateUserRequest;
 import com.freeclassroom.userservice.dto.response.ApiResponse;
 import com.freeclassroom.userservice.dto.response.admin.DataAdminHome;
+import com.freeclassroom.userservice.dto.response.admin.TopCourseAdminItem;
+import com.freeclassroom.userservice.dto.response.admin.TopInstructorAdminItem;
 import com.freeclassroom.userservice.dto.response.certificate.CertificateResponse;
 import com.freeclassroom.userservice.dto.response.course.CourseUserResponse;
 import com.freeclassroom.userservice.dto.response.personal.PersonalizationResponse;
@@ -93,6 +95,20 @@ public class UserController {
     @GetMapping("/home-admin")
     ApiResponse<DataAdminHome> getAdminData() {
         return userService.getAdminData();
+    }
+
+    @GetMapping("/admin/top-courses")
+    ApiResponse<List<TopCourseAdminItem>> getAdminTopCourses(
+            @RequestParam(name = "limit", defaultValue = "5") int limit
+    ) {
+        return userService.getAdminTopCourses(limit);
+    }
+
+    @GetMapping("/admin/top-instructors")
+    ApiResponse<List<TopInstructorAdminItem>> getAdminTopInstructors(
+            @RequestParam(name = "limit", defaultValue = "5") int limit
+    ) {
+        return userService.getAdminTopInstructors(limit);
     }
 
     @GetMapping("/certificates")

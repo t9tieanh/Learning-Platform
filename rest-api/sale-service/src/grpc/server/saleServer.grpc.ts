@@ -141,6 +141,38 @@ const saleServiceImpl = {
             callback(err, null);
         }
     }
+    ,
+    getCoursesRevenue: async (call: any, callback: any) => {
+        try {
+            const { coursesId } = call.request;
+            if (!Array.isArray(coursesId)) throw new Error('coursesId must be array');
+
+            if (coursesId.length === 0) {
+                callback(null, { items: [] });
+                return;
+            }
+
+            const rows: Array<{ courseId: string; revenue: number }> = await prismaService.$queryRaw(
+                Prisma.sql`SELECT oi.course_id AS courseId,
+                                  COALESCE(SUM(oi.price), 0) AS revenue
+                           FROM \`order_items\` oi
+                           INNER JOIN \`orders\` o ON oi.order_id = o.id
+                           WHERE oi.course_id IN (${Prisma.join(coursesId)})
+                             AND o.status = 'Completed'
+                           GROUP BY oi.course_id`
+            ) as any;
+
+            callback(null, {
+                items: rows.map((r) => ({
+                    courseId: r.courseId,
+                    revenue: Number(Number(r.revenue ?? 0).toFixed(2))
+                }))
+            });
+        } catch (err) {
+            Logger.error(`getCoursesRevenue error: ${err}`);
+            callback(err, null);
+        }
+    }
 };
 
 

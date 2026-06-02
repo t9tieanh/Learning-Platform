@@ -2,6 +2,7 @@ package com.freeclassroom.courseservice.repository.entity;
 
 import com.freeclassroom.courseservice.entity.course.CourseEntity;
 import com.freeclassroom.courseservice.dto.response.course.instructor.CourseLessonCountProjection;
+import com.freeclassroom.courseservice.dto.response.admin.AdminActiveCourseProjection;
 import com.freeclassroom.courseservice.dto.response.course.instructor.InstructorCourseRowProjection;
 import com.freeclassroom.courseservice.dto.response.course.instructor.InstructorCourseStatsProjection;
 import com.freeclassroom.courseservice.enums.entity.EnumCourseProgressStep;
@@ -17,6 +18,41 @@ import java.util.List;
 import java.util.Optional;
 
 public interface CourseRepository extends JpaRepository<CourseEntity, String> {
+    @Query("""
+        SELECT COUNT(c)
+        FROM CourseEntity c
+        WHERE c.status = com.freeclassroom.courseservice.enums.entity.EnumCourseStatus.PUBLISHED
+          AND c.progressStep = com.freeclassroom.courseservice.enums.entity.EnumCourseProgressStep.COMPLETED
+          AND c.deleted = false
+    """)
+    Long countActiveCoursesForAdmin();
+
+    @Query("""
+        SELECT COUNT(DISTINCT c.instructorId)
+        FROM CourseEntity c
+        WHERE c.status = com.freeclassroom.courseservice.enums.entity.EnumCourseStatus.PUBLISHED
+          AND c.progressStep = com.freeclassroom.courseservice.enums.entity.EnumCourseProgressStep.COMPLETED
+          AND c.deleted = false
+    """)
+    Long countActiveInstructorsForAdmin();
+
+    @Query("""
+        SELECT
+            c.id AS courseId,
+            c.instructorId AS instructorId,
+            c.title AS title,
+            c.thumbnailUrl AS thumbnailUrl,
+            COALESCE(c.rating, 0) AS rating,
+            COUNT(e.id) AS studentCount
+        FROM CourseEntity c
+        LEFT JOIN c.enrollments e
+        WHERE c.status = com.freeclassroom.courseservice.enums.entity.EnumCourseStatus.PUBLISHED
+          AND c.progressStep = com.freeclassroom.courseservice.enums.entity.EnumCourseProgressStep.COMPLETED
+          AND c.deleted = false
+        GROUP BY c.id, c.instructorId, c.title, c.thumbnailUrl, c.rating
+    """)
+    List<AdminActiveCourseProjection> findActiveAdminCourseStats();
+
     Optional<CourseEntity> findByIdAndInstructorId(String id, String instructorId);
     boolean existsByIdAndInstructorId(String id, String instructorId);
     List<CourseEntity> findAllByInstructorId(String instructorId);

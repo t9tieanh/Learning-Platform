@@ -41,3 +41,11 @@ message TopCourseRevenueItem {
 message GetTopCoursesRevenueResponse {
   repeated TopCourseRevenueItem items = 1;
 }
+
+message GetCoursesRevenueRequest {
+  repeated string coursesId = 1;
+}
+
+message GetCoursesRevenueResponse {
+  repeated TopCourseRevenueItem items = 1;
+}
