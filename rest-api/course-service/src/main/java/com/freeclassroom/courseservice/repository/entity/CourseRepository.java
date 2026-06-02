@@ -216,6 +216,19 @@ public interface CourseRepository extends JpaRepository<CourseEntity, String> {
     Page<CourseEntity> findAllWithTags(Pageable pageable);
 
     @Query("""
+        SELECT c
+        FROM CourseEntity c
+        WHERE c.deleted = false
+          AND (:search IS NULL OR LOWER(c.title) LIKE LOWER(CONCAT('%', :search, '%')))
+          AND (:status IS NULL OR c.status = :status)
+    """)
+    Page<CourseEntity> findAllForAdmin(
+            @Param("search") String search,
+            @Param("status") EnumCourseStatus status,
+            Pageable pageable
+    );
+
+    @Query("""
         SELECT
             c.id AS id,
             c.title AS title,

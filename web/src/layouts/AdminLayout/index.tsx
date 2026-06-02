@@ -19,15 +19,15 @@ const AdminLayout: React.FC = () => {
       <div className='flex h-[100dvh] min-h-[100dvh] w-full overflow-hidden bg-gradient-to-br from-background via-muted/20 to-background'>
         <AdminSidebar />
         <div className='flex-1 flex flex-col min-h-0'>
-          <header className='h-16 border-b bg-background/80 backdrop-blur-sm flex items-center px-6 shadow-sm'>
+          <header className='flex h-16 items-center border-b bg-background/80 px-4 shadow-sm backdrop-blur-sm sm:px-6'>
             <SidebarTrigger />
-            <div className='ml-4 flex items-center justify-between flex-1'>
-              <h1 className='text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent'>
+            <div className='ml-3 flex flex-1 items-center justify-between sm:ml-4'>
+              <h1 className='bg-gradient-to-r from-primary to-accent bg-clip-text text-lg font-bold text-transparent sm:text-2xl'>
                 Quản trị hệ thống
               </h1>
             </div>
           </header>
-          <main className='flex-1 min-h-0 overflow-y-auto overscroll-contain bg-slate-50/60 p-6'>
+          <main className='flex-1 min-h-0 overflow-x-hidden overflow-y-auto overscroll-contain bg-slate-50/60 p-3 sm:p-4 lg:p-6'>
             <Outlet />
           </main>
         </div>
