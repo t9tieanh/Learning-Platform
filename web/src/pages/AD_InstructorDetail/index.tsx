@@ -34,6 +34,13 @@ const courseStatusBadgeClass: Record<string, string> = {
   REJECTED: 'border-rose-200 bg-rose-50 text-rose-700'
 }
 
+const courseStatusText: Record<string, string> = {
+  PUBLISHED: 'Đã xuất bản',
+  DRAFT: 'Bản nháp',
+  PENDING_REVIEW: 'Chờ duyệt',
+  REJECTED: 'Bị từ chối'
+}
+
 const monthLabel = (month: number) => `T${month}`
 
 export default function AD_InstructorDetail() {
@@ -59,7 +66,7 @@ export default function AD_InstructorDetail() {
         setSummary(res.result ?? null)
       } catch (e: any) {
         if (!active) return
-        setSummaryError(e?.response?.data?.message || e?.message || 'Khong the tai tong quan giang vien')
+        setSummaryError(e?.response?.data?.message || e?.message || 'Không thể tải tổng quan giảng viên')
         setSummary(null)
       } finally {
         if (active) setSummaryLoading(false)
@@ -87,7 +94,7 @@ export default function AD_InstructorDetail() {
         setCourses(res.result ?? null)
       } catch (e: any) {
         if (!active) return
-        setCoursesError(e?.response?.data?.message || e?.message || 'Khong the tai danh sach khoa hoc')
+        setCoursesError(e?.response?.data?.message || e?.message || 'Không thể tải danh sách khóa học')
         setCourses(null)
       } finally {
         if (active) setCoursesLoading(false)
@@ -121,12 +128,12 @@ export default function AD_InstructorDetail() {
             onClick={() => navigate('/admin/instructors')}
           >
             <ArrowLeft className='mr-2 h-4 w-4' />
-            Quay lai danh sach
+            Quay lại danh sách
           </Button>
 
           {summaryLoading && !summary ? (
             <div className='rounded-2xl border border-white/10 bg-white/5 px-5 py-8 text-sm text-slate-200'>
-              Dang tai tong quan giang vien...
+              Đang tải tổng quan giảng viên...
             </div>
           ) : summaryError && !summary ? (
             <div className='rounded-2xl border border-rose-300/30 bg-rose-500/10 px-5 py-8 text-sm text-rose-100'>
@@ -142,14 +149,14 @@ export default function AD_InstructorDetail() {
                 <div className='max-w-3xl'>
                   <div className='flex flex-wrap items-center gap-3'>
                     <p className='text-xs font-semibold uppercase tracking-[0.28em] text-cyan-200/80'>
-                      Instructor profile
+                      Hồ sơ giảng viên
                     </p>
                     <Badge className='rounded-full border-white/10 bg-white/10 px-3 py-1 text-white'>
                       {summary.metrics.courseCount >= 5
-                        ? 'Top mentor'
+                        ? 'Giảng viên hàng đầu'
                         : summary.metrics.courseCount >= 3
-                          ? 'Dang hoat dong'
-                          : 'Dang tang truong'}
+                          ? 'Đang hoạt động'
+                          : 'Đang tăng trưởng'}
                     </Badge>
                   </div>
                   <h1 className='mt-3 text-3xl font-semibold tracking-tight'>{summary.profile.name}</h1>
@@ -161,7 +168,7 @@ export default function AD_InstructorDetail() {
                     </span>
                   </div>
                   <p className='mt-4 max-w-2xl text-sm leading-6 text-slate-300'>
-                    {summary.profile.description || 'Chua cap nhat mo ta.'}
+                    {summary.profile.description || 'Chưa cập nhật mô tả.'}
                   </p>
                   <div className='mt-4 flex flex-wrap gap-2'>
                     {summary.profile.expertise.map((item) => (
@@ -184,7 +191,7 @@ export default function AD_InstructorDetail() {
               <BookOpen className='h-5 w-5' />
             </div>
             <div>
-              <p className='text-sm font-medium text-slate-500'>Khoa hoc</p>
+              <p className='text-sm font-medium text-slate-500'>Khóa học</p>
               <p className='mt-1 text-2xl font-semibold text-slate-950'>{summary?.metrics.courseCount ?? 0}</p>
             </div>
           </div>
@@ -195,7 +202,7 @@ export default function AD_InstructorDetail() {
               <DollarSign className='h-5 w-5' />
             </div>
             <div>
-              <p className='text-sm font-medium text-slate-500'>Tong doanh thu</p>
+              <p className='text-sm font-medium text-slate-500'>Tổng doanh thu</p>
               <p className='mt-1 text-2xl font-semibold text-slate-950'>
                 {formatCurrency(summary?.metrics.totalRevenue ?? 0)}
               </p>
@@ -208,7 +215,7 @@ export default function AD_InstructorDetail() {
               <Users className='h-5 w-5' />
             </div>
             <div>
-              <p className='text-sm font-medium text-slate-500'>Hoc vien</p>
+              <p className='text-sm font-medium text-slate-500'>Học viên</p>
               <p className='mt-1 text-2xl font-semibold text-slate-950'>
                 {formatNumber(summary?.metrics.studentsCount ?? 0)}
               </p>
@@ -221,7 +228,7 @@ export default function AD_InstructorDetail() {
               <Award className='h-5 w-5' />
             </div>
             <div>
-              <p className='text-sm font-medium text-slate-500'>Chung chi ca nhan</p>
+              <p className='text-sm font-medium text-slate-500'>Chứng chỉ cá nhân</p>
               <p className='mt-1 text-2xl font-semibold text-slate-950'>
                 {formatNumber(summary?.personalCertificates.totalCertificates ?? 0)}
               </p>
@@ -233,9 +240,9 @@ export default function AD_InstructorDetail() {
       <section className='grid gap-4 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]'>
         <Card className='rounded-[30px] border border-slate-200/80 bg-white/95 shadow-[0_22px_55px_-36px_rgba(15,23,42,0.24)]'>
           <div className='border-b border-slate-200/80 px-6 py-5'>
-            <h2 className='text-lg font-semibold tracking-tight text-slate-950'>Khoa hoc phu trach</h2>
+            <h2 className='text-lg font-semibold tracking-tight text-slate-950'>Khóa học phụ trách</h2>
             <p className='mt-1 text-sm text-slate-500'>
-              Danh sach khoa hoc da tach rieng thanh API phan trang server-side.
+              Danh sách khóa học đã tách riêng thành API phân trang phía máy chủ.
             </p>
           </div>
           <div className='overflow-x-auto'>
@@ -243,19 +250,19 @@ export default function AD_InstructorDetail() {
               <TableHeader>
                 <TableRow className='border-b border-slate-200 bg-slate-50/70 hover:bg-slate-50/70'>
                   <TableHead className='px-6 py-4 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500'>
-                    Khoa hoc
+                    Khóa học
                   </TableHead>
                   <TableHead className='px-6 py-4 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500'>
-                    Hoc vien
+                    Học viên
                   </TableHead>
                   <TableHead className='px-6 py-4 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500'>
                     Doanh thu
                   </TableHead>
                   <TableHead className='px-6 py-4 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500'>
-                    Danh gia
+                    Đánh giá
                   </TableHead>
                   <TableHead className='px-6 py-4 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500'>
-                    Trang thai
+                    Trạng thái
                   </TableHead>
                 </TableRow>
               </TableHeader>
@@ -263,7 +270,7 @@ export default function AD_InstructorDetail() {
                 {coursesLoading ? (
                   <TableRow>
                     <TableCell colSpan={5} className='px-6 py-12 text-center text-sm text-slate-500'>
-                      Dang tai danh sach khoa hoc...
+                      Đang tải danh sách khóa học...
                     </TableCell>
                   </TableRow>
                 ) : coursesError ? (
@@ -275,7 +282,7 @@ export default function AD_InstructorDetail() {
                 ) : (courses?.items.length ?? 0) === 0 ? (
                   <TableRow>
                     <TableCell colSpan={5} className='px-6 py-12 text-center text-sm text-slate-500'>
-                      Chua co khoa hoc nao de hien thi.
+                      Chưa có khóa học nào để hiển thị.
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -283,8 +290,14 @@ export default function AD_InstructorDetail() {
                     <TableRow key={course.id} className='border-b border-slate-100 hover:bg-sky-50/40'>
                       <TableCell className='px-6 py-4'>
                         <div>
-                          <p className='font-medium text-slate-950'>{course.title}</p>
-                          <p className='mt-1 text-sm text-slate-500'>{course.category || 'Khong co danh muc'}</p>
+                          <button
+                            type='button'
+                            onClick={() => navigate(`/admin/course/${course.id}`)}
+                            className='font-medium text-slate-950 hover:text-sky-600 transition-colors text-left'
+                          >
+                            {course.title}
+                          </button>
+                          <p className='mt-1 text-sm text-slate-500'>{course.category || 'Không có danh mục'}</p>
                         </div>
                       </TableCell>
                       <TableCell className='px-6 py-4 text-slate-700'>{formatNumber(course.studentsCount)}</TableCell>
@@ -303,7 +316,7 @@ export default function AD_InstructorDetail() {
                           className={`rounded-full px-3 py-1 ${courseStatusBadgeClass[course.status] ?? courseStatusBadgeClass.DRAFT
                             }`}
                         >
-                          {course.status}
+                          {courseStatusText[course.status] ?? course.status}
                         </Badge>
                       </TableCell>
                     </TableRow>
@@ -314,7 +327,7 @@ export default function AD_InstructorDetail() {
           </div>
           <div className='flex flex-col gap-3 border-t border-slate-200/80 bg-slate-50/60 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6'>
             <p className='text-sm text-slate-500'>
-              Dang xem trang <span className='font-medium text-slate-700'>{courses?.page ?? 1}</span> tren tong{' '}
+              Đang xem trang <span className='font-medium text-slate-700'>{courses?.page ?? 1}</span> trên tổng{' '}
               <span className='font-medium text-slate-700'>{courses?.totalPages ?? 1}</span> trang.
             </p>
             <div className='flex items-center gap-2'>
@@ -325,7 +338,7 @@ export default function AD_InstructorDetail() {
                 onClick={() => setCoursePage((value) => Math.max(1, value - 1))}
               >
                 <ChevronLeft className='mr-1 h-4 w-4' />
-                Truoc
+                Trước
               </Button>
               <Button
                 variant='outline'
@@ -342,28 +355,37 @@ export default function AD_InstructorDetail() {
 
         <div className='space-y-4'>
           <Card className='rounded-[30px] border border-slate-200/80 bg-white/95 p-6 shadow-[0_22px_55px_-36px_rgba(15,23,42,0.24)]'>
-            <h2 className='text-lg font-semibold tracking-tight text-slate-950'>Chung chi ca nhan cua giang vien</h2>
-            <div className='mt-5 grid gap-4 md:grid-cols-2'>
-              {(summary?.personalCertificates.items ?? []).map((certificate) => (
-                <div key={certificate.id} className='rounded-2xl border border-slate-200 bg-slate-50/70 p-4'>
-                  <div className='inline-flex rounded-full bg-amber-50 p-2 text-amber-700'>
-                    <Award className='h-4 w-4' />
-                  </div>
-                  <p className='mt-4 font-medium text-slate-950'>{certificate.title}</p>
-                  <p className='mt-1 text-sm text-slate-500'>{certificate.organization}</p>
-                  <p className='mt-3 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400'>
-                    {certificate.issueDate || 'Khong ro ngay cap'}
-                  </p>
+            <h2 className='text-lg font-semibold tracking-tight text-slate-950'>Chứng chỉ cá nhân của giảng viên</h2>
+            {(summary?.personalCertificates.items.length ?? 0) === 0 && !summaryLoading ? (
+              <div className='mt-5 rounded-3xl border border-dashed border-slate-200/80 bg-slate-50 px-5 py-6 text-slate-600'>
+                <div className='flex items-center gap-3'>
+                  <Award className='h-5 w-5 text-amber-500' />
+                  <p className='text-sm font-semibold text-slate-900'>Chưa có chứng chỉ cá nhân đã xác nhận.</p>
                 </div>
-              ))}
-            </div>
-            {(summary?.personalCertificates.items.length ?? 0) === 0 && !summaryLoading && (
-              <p className='mt-5 text-sm text-slate-500'>Giang vien nay chua co chung chi ca nhan da xac nhan.</p>
+                <p className='mt-2 text-sm text-slate-500'>
+                  Giảng viên này chưa cập nhật chứng chỉ, vui lòng kiểm tra lại hồ sơ hoặc chờ xác nhận.
+                </p>
+              </div>
+            ) : (
+              <div className='mt-5 grid gap-6 md:grid-cols-2'>
+                {(summary?.personalCertificates.items ?? []).map((certificate) => (
+                  <div key={certificate.id} className='rounded-2xl border border-slate-200 bg-slate-50/70 p-4'>
+                    <div className='inline-flex rounded-full bg-amber-50 p-2 text-amber-700'>
+                      <Award className='h-4 w-4' />
+                    </div>
+                    <p className='mt-4 font-medium text-slate-950'>{certificate.title}</p>
+                    <p className='mt-1 text-sm text-slate-500'>{certificate.organization}</p>
+                    <p className='mt-3 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400'>
+                      {certificate.issueDate || 'Không rõ ngày cấp'}
+                    </p>
+                  </div>
+                ))}
+              </div>
             )}
           </Card>
 
           <Card className='rounded-[30px] border border-slate-200/80 bg-white/95 p-6 shadow-[0_22px_55px_-36px_rgba(15,23,42,0.24)]'>
-            <h2 className='text-lg font-semibold tracking-tight text-slate-950'>Doanh thu theo thang</h2>
+            <h2 className='text-lg font-semibold tracking-tight text-slate-950'>Doanh thu theo tháng</h2>
             <div className='mt-5 space-y-3'>
               {(summary?.revenueSnapshot.monthlyRevenue ?? []).map((item) => (
                 <div key={item.month} className='rounded-2xl border border-slate-200 bg-slate-50/70 p-4'>

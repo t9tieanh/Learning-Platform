@@ -39,7 +39,7 @@ export default function Instructors() {
         setData(res.result ?? null)
       } catch (e: any) {
         if (!active) return
-        setError(e?.response?.data?.message || e?.message || 'Khong the tai danh sach giang vien')
+        setError(e?.response?.data?.message || e?.message || 'Không thể tải danh sách giảng viên')
         setData(null)
       } finally {
         if (active) setLoading(false)
@@ -63,11 +63,10 @@ export default function Instructors() {
         <div className='absolute bottom-0 left-12 h-28 w-28 rounded-full bg-sky-300/10 blur-3xl' />
         <div className='relative flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between'>
           <div className='max-w-2xl'>
-            <p className='text-xs font-semibold uppercase tracking-[0.28em] text-blue-200/80'>Instructor management</p>
-            <h1 className='mt-3 text-3xl font-semibold tracking-tight'>Quan ly giang vien</h1>
+            <p className='text-xs font-semibold uppercase tracking-[0.28em] text-blue-200/80'>TỔNG QUAN GIẢNG VIÊN</p>
+            <h1 className='mt-2 text-3xl font-semibold tracking-tight'>Quản lý giảng viên</h1>
             <p className='mt-2 text-sm leading-6 text-slate-300'>
-              Danh sach giang vien da duoc toi uu lai theo huong phan trang server-side va enrich profile theo tung
-              page, giam manh luong tai so voi cach cu.
+              Theo dõi danh sách giảng viên, khóa học đang giảng dạy và các chỉ số hoạt động trên hệ thống.
             </p>
           </div>
         </div>
@@ -77,10 +76,7 @@ export default function Instructors() {
         <div className='border-b border-slate-200/80 bg-slate-50/80 px-4 py-4 sm:px-6 sm:py-5'>
           <div className='flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between'>
             <div>
-              <h2 className='text-lg font-semibold tracking-tight text-slate-950'>Danh sach giang vien</h2>
-              <p className='mt-1 text-sm text-slate-500'>
-                Search, sort va filter deu chay qua server-side pagination de giu payload gon.
-              </p>
+              <h2 className='text-lg font-semibold tracking-tight text-slate-950'>Danh sách giảng viên</h2>
             </div>
 
             <div className='flex w-full flex-col gap-3 xl:max-w-4xl xl:flex-row xl:items-center'>
@@ -89,20 +85,20 @@ export default function Instructors() {
                 <Input
                   value={search}
                   onChange={(event) => setSearch(event.target.value)}
-                  placeholder='Tim theo ten hoac email giang vien'
+                  placeholder='Tìm theo tên hoặc email giảng viên'
                   className='h-11 rounded-xl border-slate-200 bg-white pl-9 pr-3 text-sm'
                 />
               </div>
 
               <Select value={sortBy} onValueChange={(value) => setSortBy(value as typeof sortBy)}>
                 <SelectTrigger className='h-11 w-full rounded-xl border-slate-200 bg-white text-sm xl:w-[210px]'>
-                  <SelectValue placeholder='Sap xep' />
+                  <SelectValue placeholder='Sắp xếp' />
                 </SelectTrigger>
                 <SelectContent className='rounded-xl border-slate-200 bg-white'>
-                  <SelectItem value='name_asc'>Ten A-Z</SelectItem>
-                  <SelectItem value='name_desc'>Ten Z-A</SelectItem>
-                  <SelectItem value='courses_desc'>Nhieu khoa hoc nhat</SelectItem>
-                  <SelectItem value='courses_asc'>It khoa hoc nhat</SelectItem>
+                  <SelectItem value='name_asc'>Tên A-Z</SelectItem>
+                  <SelectItem value='name_desc'>Tên Z-A</SelectItem>
+                  <SelectItem value='courses_desc'>Nhiều khóa học nhất</SelectItem>
+                  <SelectItem value='courses_asc'>Ít khóa học nhất</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -114,16 +110,16 @@ export default function Instructors() {
             <TableHeader>
               <TableRow className='border-b border-slate-200 bg-slate-50/70 hover:bg-slate-50/70'>
                 <TableHead className='px-6 py-4 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500'>
-                  Giang vien
+                  Giảng viên
                 </TableHead>
                 <TableHead className='px-6 py-4 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500'>
                   Email
                 </TableHead>
                 <TableHead className='px-6 py-4 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500'>
-                  So khoa hoc
+                  Số khóa học
                 </TableHead>
                 <TableHead className='px-6 py-4 text-right text-xs font-semibold uppercase tracking-[0.2em] text-slate-500'>
-                  Hanh dong
+                  Hành động
                 </TableHead>
               </TableRow>
             </TableHeader>
@@ -131,7 +127,7 @@ export default function Instructors() {
               {loading ? (
                 <TableRow>
                   <TableCell colSpan={4} className='px-6 py-16 text-center text-sm text-slate-500'>
-                    Dang tai danh sach giang vien...
+                    Đang tải danh sách giảng viên...
                   </TableCell>
                 </TableRow>
               ) : error ? (
@@ -143,12 +139,15 @@ export default function Instructors() {
               ) : (data?.items.length ?? 0) === 0 ? (
                 <TableRow>
                   <TableCell colSpan={4} className='px-6 py-16 text-center text-sm text-slate-500'>
-                    Khong tim thay giang vien phu hop voi bo loc hien tai.
+                    Không tìm thấy giảng viên phù hợp với bộ lọc hiện tại.
                   </TableCell>
                 </TableRow>
               ) : (
                 data?.items.map((instructor: AdminInstructorListItem) => (
-                  <TableRow key={instructor.id} className='border-b border-slate-100 transition-colors hover:bg-sky-50/40'>
+                  <TableRow
+                    key={instructor.id}
+                    className='border-b border-slate-100 transition-colors hover:bg-sky-50/40'
+                  >
                     <TableCell className='px-6 py-4'>
                       <div className='flex items-center gap-4'>
                         <Avatar className='h-12 w-12 ring-2 ring-slate-100'>
@@ -159,7 +158,9 @@ export default function Instructors() {
                       </div>
                     </TableCell>
                     <TableCell className='px-6 py-4 text-sm text-slate-500'>{instructor.email}</TableCell>
-                    <TableCell className='px-6 py-4 text-sm font-medium text-slate-700'>{instructor.courseCount} khoa</TableCell>
+                    <TableCell className='px-6 py-4 text-sm font-medium text-slate-700'>
+                      {instructor.courseCount} khóa
+                    </TableCell>
                     <TableCell className='px-6 py-4 text-right'>
                       <Button
                         variant='outline'
@@ -167,7 +168,7 @@ export default function Instructors() {
                         onClick={() => navigate(`/admin/instructors/${instructor.id}`)}
                       >
                         <Eye className='mr-2 h-4 w-4' />
-                        Xem chi tiet
+                        Xem chi tiết
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -186,7 +187,7 @@ export default function Instructors() {
               onClick={() => setPage((value) => Math.max(1, value - 1))}
             >
               <ChevronLeft className='mr-1 h-4 w-4' />
-              Truoc
+              Trước
             </Button>
             <Button
               variant='outline'

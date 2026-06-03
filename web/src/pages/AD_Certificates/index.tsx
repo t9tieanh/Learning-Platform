@@ -175,7 +175,7 @@ export default function CertificatesPage() {
         <div className='absolute bottom-0 left-12 h-28 w-28 rounded-full bg-sky-300/10 blur-3xl' />
         <div className='relative flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between'>
           <div className='max-w-2xl'>
-            <p className='text-xs font-semibold uppercase tracking-[0.28em] text-emerald-200/80'>Verification center</p>
+            <p className='text-xs font-semibold uppercase tracking-[0.28em] text-emerald-200/80'>HỆ THỐNG CHỨNG CHỈ</p>
             <h1 className='mt-3 text-3xl font-semibold tracking-tight'>Xác nhận chứng chỉ</h1>
             <p className='mt-2 text-sm leading-6 text-slate-300'>
               Kiểm tra, duyệt và theo dõi trạng thái chứng chỉ trong một giao diện gọn gàng, dễ ra quyết định hơn.

@@ -112,8 +112,10 @@ export default function CoursesAdmin() {
         <div className='absolute bottom-0 left-8 h-24 w-24 rounded-full bg-cyan-300/10 blur-3xl' />
         <div className='relative flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between'>
           <div className='max-w-2xl'>
-            <p className='text-xs font-semibold uppercase tracking-[0.28em] text-sky-200/80'>Course operations</p>
-            <h1 className='mt-3 text-3xl font-semibold tracking-tight'>Quản lý khóa học</h1>
+            <p className='text-xs font-semibold uppercase tracking-[0.28em] text-sky-200/80'>
+              THÔNG TIN KHÓA HỌC HỆ THỐNG
+            </p>
+            <h1 className='mt-2 text-3xl font-semibold tracking-tight'>Quản lý khóa học</h1>
             <p className='mt-2 text-sm leading-6 text-slate-300'>
               Theo dõi tiến độ xuất bản và kiểm tra nhanh các khóa học trên hệ thống trong bố cục rõ ràng, dễ quét.
             </p>
@@ -169,7 +171,10 @@ export default function CoursesAdmin() {
                 />
               </div>
 
-              <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as 'ALL' | AdminCourseStatusFilter)}>
+              <Select
+                value={statusFilter}
+                onValueChange={(value) => setStatusFilter(value as 'ALL' | AdminCourseStatusFilter)}
+              >
                 <SelectTrigger className='h-11 w-full rounded-xl border-slate-200 bg-white text-sm lg:w-[220px]'>
                   <span className='inline-flex items-center gap-2'>
                     <ListFilter className='h-4 w-4 text-slate-400' />
@@ -331,7 +336,9 @@ export default function CoursesAdmin() {
                   </div>
                 </div>
 
-                <p className='mt-3 line-clamp-2 text-sm text-slate-500'>{course.shortDescription || 'Chưa có mô tả ngắn.'}</p>
+                <p className='mt-3 line-clamp-2 text-sm text-slate-500'>
+                  {course.shortDescription || 'Chưa có mô tả ngắn.'}
+                </p>
 
                 <div className='mt-4 grid gap-3 sm:grid-cols-2'>
                   <div className='rounded-2xl bg-slate-50 px-3 py-2'>

@@ -144,7 +144,7 @@ export default function DiscountsAdmin() {
         <div className='absolute bottom-0 left-10 h-28 w-28 rounded-full bg-cyan-300/10 blur-3xl' />
         <div className='relative flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between'>
           <div className='max-w-2xl'>
-            <p className='text-xs font-semibold uppercase tracking-[0.28em] text-indigo-200/80'>Promotion center</p>
+            <p className='text-xs font-semibold uppercase tracking-[0.28em] text-indigo-200/80'>MÃ GIẢM HỆ THỐNG</p>
             <h1 className='mt-3 text-3xl font-semibold tracking-tight'>Quản lý mã giảm giá</h1>
             <p className='mt-2 text-sm leading-6 text-slate-300'>
               Quản lý ưu đãi theo từng trạng thái với bố cục sáng rõ, dễ so sánh và sẵn sàng cho môi trường production.
