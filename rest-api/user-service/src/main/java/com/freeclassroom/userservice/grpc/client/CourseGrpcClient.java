@@ -3,10 +3,14 @@ package com.freeclassroom.userservice.grpc.client;
 import com.example.grpc.course.GetChartDataRequest;
 import com.example.grpc.course.GetChartDataResponse;
 import com.example.grpc.course.GetCourseAdminDataResponse;
+import com.example.grpc.course.GetAdminCourseModerationCountsResponse;
+import com.example.grpc.course.GetAdminTopInstructorsRequest;
 import com.example.grpc.course.GetCourseAndStudentResponse;
+import com.example.grpc.course.GetAdminInstructorLeaderboardResponse;
 import com.example.grpc.course.GetCourseRequest;
 import com.example.grpc.course.GetCourseTagsRequest;
 import com.example.grpc.course.GetCourseTagsResponse;
+import com.example.grpc.course.GetActiveAdminCoursesResponse;
 import com.example.grpc.user.*;
 import com.google.protobuf.Empty;
 import net.devh.boot.grpc.client.inject.GrpcClient;
@@ -21,6 +25,21 @@ public class CourseGrpcClient {
 
     public GetCourseAdminDataResponse getCourseAdminData() {
         return courseStub.getCourseAdminData(Empty.getDefaultInstance());
+    }
+
+    public GetActiveAdminCoursesResponse getActiveAdminCourses() {
+        return courseStub.getActiveAdminCourses(Empty.getDefaultInstance());
+    }
+
+    public GetAdminCourseModerationCountsResponse getAdminCourseModerationCounts() {
+        return courseStub.getAdminCourseModerationCounts(Empty.getDefaultInstance());
+    }
+
+    public GetAdminInstructorLeaderboardResponse getAdminTopInstructorsLeaderboard(int limit) {
+        GetAdminTopInstructorsRequest request = GetAdminTopInstructorsRequest.newBuilder()
+                .setLimit(limit)
+                .build();
+        return courseStub.getAdminTopInstructorsLeaderboard(request);
     }
 
     public GetCourseAndStudentResponse getTotalCoursesAndStudent(String userId) {

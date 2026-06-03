@@ -1,6 +1,7 @@
 package com.freeclassroom.courseservice.repository.entity;
 
 import com.freeclassroom.courseservice.entity.member.EnrollmentsEntity;
+import com.freeclassroom.courseservice.dto.response.admin.AdminEnrollmentBucketProjection;
 import com.freeclassroom.courseservice.enums.entity.EnumCompletionStatus;
 import com.freeclassroom.courseservice.enums.entity.EnumCourseStatus;
 import org.springframework.data.domain.Page;
@@ -11,6 +12,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -73,6 +75,42 @@ public interface EnrollmentRepository extends JpaRepository<EnrollmentsEntity, S
             @Param("publishedStatus") EnumCourseStatus publishedStatus,
             @Param("completedStatus") EnumCompletionStatus completedStatus,
             Pageable pageable
+    );
+
+    @Query("""
+            SELECT FUNCTION('DATE_FORMAT', e.enrollmentDate, '%Y-%m-%d') AS bucketKey,
+                   COUNT(e.id) AS studentCount
+            FROM EnrollmentsEntity e
+            JOIN e.course c
+            WHERE c.status = com.freeclassroom.courseservice.enums.entity.EnumCourseStatus.PUBLISHED
+              AND c.progressStep = com.freeclassroom.courseservice.enums.entity.EnumCourseProgressStep.COMPLETED
+              AND c.deleted = false
+              AND e.enrollmentDate >= :startAt
+              AND e.enrollmentDate < :endAt
+            GROUP BY FUNCTION('DATE_FORMAT', e.enrollmentDate, '%Y-%m-%d')
+            ORDER BY bucketKey ASC
+            """)
+    List<AdminEnrollmentBucketProjection> countAdminEnrollmentsByDay(
+            @Param("startAt") LocalDateTime startAt,
+            @Param("endAt") LocalDateTime endAt
+    );
+
+    @Query("""
+            SELECT FUNCTION('DATE_FORMAT', e.enrollmentDate, '%Y-%m') AS bucketKey,
+                   COUNT(e.id) AS studentCount
+            FROM EnrollmentsEntity e
+            JOIN e.course c
+            WHERE c.status = com.freeclassroom.courseservice.enums.entity.EnumCourseStatus.PUBLISHED
+              AND c.progressStep = com.freeclassroom.courseservice.enums.entity.EnumCourseProgressStep.COMPLETED
+              AND c.deleted = false
+              AND e.enrollmentDate >= :startAt
+              AND e.enrollmentDate < :endAt
+            GROUP BY FUNCTION('DATE_FORMAT', e.enrollmentDate, '%Y-%m')
+            ORDER BY bucketKey ASC
+            """)
+    List<AdminEnrollmentBucketProjection> countAdminEnrollmentsByMonth(
+            @Param("startAt") LocalDateTime startAt,
+            @Param("endAt") LocalDateTime endAt
     );
 
 }

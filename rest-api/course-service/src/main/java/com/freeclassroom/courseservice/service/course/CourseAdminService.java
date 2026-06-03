@@ -32,6 +32,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 
@@ -50,9 +51,10 @@ public class CourseAdminService implements ICourseAdminService {
     private final RabbitTemplate rabbitTemplate;
 
     @Override
-    public ApiResponse<PageResponse<CourseListResponse>> getCourses(int page, int size) {
+    public ApiResponse<PageResponse<CourseListResponse>> getCourses(int page, int size, String search, EnumCourseStatus status) {
         Pageable pageable = PageRequest.of(Math.max(0, page - 1), size, Sort.by("createdAt").descending());
-        Page<CourseEntity> coursePage = courseRepo.findAll(pageable);
+        String normalizedSearch = StringUtils.hasText(search) ? search.trim() : null;
+        Page<CourseEntity> coursePage = courseRepo.findAllForAdmin(normalizedSearch, status, pageable);
         List<CourseListResponse> items = courseMapper.toListResponse(coursePage.getContent());
         // get info of instructor
         items.stream().forEach(item -> {

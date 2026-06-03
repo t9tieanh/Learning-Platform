@@ -49,6 +49,19 @@ message GetTeachersResponse {
   repeated Teacher teachers = 1;
 }
 
+message SearchTeachersByIdsRequest {
+  repeated string teacher_ids = 1;
+  string search = 2;
+  int32 page = 3;
+  int32 limit = 4;
+  string sort = 5;
+}
+
+message SearchTeachersByIdsResponse {
+  repeated Teacher teachers = 1;
+  bool has_next = 2;
+}
+
 message TeacherDetail {
   string id = 1;
   string name = 2;
@@ -70,6 +83,25 @@ message Certificate {
   string organization = 3;
   string imageUrl = 4;
   string credentialUrl = 5;
+}
+
+message InstructorCertificatePreview {
+  string id = 1;
+  string title = 2;
+  string organization = 3;
+  string issueDate = 4;
+  string imageUrl = 5;
+}
+
+message AdminInstructorSummaryProfile {
+  string id = 1;
+  string name = 2;
+  string email = 3;
+  string image = 4;
+  string description = 5;
+  repeated Expertise expertises = 6;
+  repeated InstructorCertificatePreview certificates = 7;
+  int64 totalCertificates = 8;
 }
 
 // CheckIsVip request/response for quiz generation authorization

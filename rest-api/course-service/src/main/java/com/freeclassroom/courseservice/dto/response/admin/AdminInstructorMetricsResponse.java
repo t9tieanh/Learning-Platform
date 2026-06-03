@@ -1,0 +1,17 @@
+package com.freeclassroom.courseservice.dto.response.admin;
+
+import lombok.*;
+import lombok.experimental.FieldDefaults;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public class AdminInstructorMetricsResponse {
+    Long courseCount;
+    Long studentsCount;
+    Double totalRevenue;
+    Double completionRate;
+    Double averageRating;
+}

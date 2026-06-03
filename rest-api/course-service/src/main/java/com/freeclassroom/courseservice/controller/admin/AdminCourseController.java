@@ -6,6 +6,7 @@ import com.freeclassroom.courseservice.dto.response.common.CreationResponse;
 import com.freeclassroom.courseservice.dto.response.course.CourseListResponse;
 import com.freeclassroom.courseservice.dto.response.course.CourseResponse;
 import com.freeclassroom.courseservice.dto.response.course.PageResponse;
+import com.freeclassroom.courseservice.enums.entity.EnumCourseStatus;
 import com.freeclassroom.courseservice.service.course.ICourseAdminService;
 import com.freeclassroom.courseservice.service.course.ICourseService;
 import lombok.AccessLevel;
@@ -29,9 +30,11 @@ public class AdminCourseController {
     @GetMapping
     public ApiResponse<PageResponse<CourseListResponse>> getCourses(
             @RequestParam(defaultValue = "1") Integer page,
-            @RequestParam(defaultValue = "10") Integer limit
+            @RequestParam(defaultValue = "10") Integer limit,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) EnumCourseStatus status
     ) {
-        return courseAdminService.getCourses(page, limit);
+        return courseAdminService.getCourses(page, limit, search, status);
     }
 
     @PostMapping("/{id}/approve")

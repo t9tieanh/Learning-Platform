@@ -36,6 +36,7 @@ import AD_HomePage from './pages/AD_HomePage'
 import AD_Courses from './pages/AD_Courses'
 import AD_CourseDetails from './pages/AD_CourseDetails'
 import AD_Instructor from './pages/AD_Instructor'
+import AD_InstructorDetail from './pages/AD_InstructorDetail'
 import AD_Certificates from './pages/AD_Certificates'
 import CertificateVerify from './pages/CertificateVerify'
 import AD_Blogs from './pages/AD_Blogs'
@@ -115,6 +116,7 @@ const router = createBrowserRouter([
           { path: 'courses', element: <AD_Courses /> },
           { path: 'course/:id', element: <AD_CourseDetails /> },
           { path: 'instructors', element: <AD_Instructor /> },
+          { path: 'instructors/:instructorId', element: <AD_InstructorDetail /> },
           { path: 'certificates', element: <AD_Certificates /> },
           { path: 'discounts', element: <DiscountsAdmin /> },
           { path: 'blogs', element: <AD_Blogs /> },
