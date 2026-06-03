@@ -132,3 +132,17 @@ message GetCourseTagsResponse {
   string category = 2;
 }
 
+message TryIssueCourseCompletionCertificateRequest {
+  string user_id = 1;
+  string lesson_id = 2;
+}
+
+message TryIssueCourseCompletionCertificateResponse {
+  bool issued = 1;
+  bool is_newly_completed_course = 2;
+  string certificate_id = 3;
+  string certificate_code = 4;
+  bool lessons_complete = 5;
+  bool tests_complete = 6;
+}
+

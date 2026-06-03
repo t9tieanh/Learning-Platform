@@ -31,7 +31,7 @@ const PDFViewer = ({ lesson, markDoneVideo }: { lesson: Lesson; markDoneVideo: (
 
       setIsLoading(true)
       try {
-        const urlResponse = await lessonStudentService.getPresignedUrl(lesson.id)
+        const urlResponse = await lessonStudentService.getLessonVideoUrl(lesson.id)
         if (urlResponse.code === 200) {
           setPdfSrc(urlResponse.result || '')
         }

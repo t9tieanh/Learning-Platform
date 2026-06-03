@@ -129,7 +129,7 @@ def export_lesson_data(lesson_id):
 
 if __name__ == "__main__":
     # Default ID for testing
-    target_id = "5d5d9206-4a7f-49c3-8272-7e04b2f01c8c"
+    target_id = "db4f689e-aaa9-4fca-b18e-1687652b4c81"
     if len(sys.argv) > 1:
         target_id = sys.argv[1]
     

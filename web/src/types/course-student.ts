@@ -19,12 +19,35 @@ export interface CertificateSummary {
   status: string
 }
 
+export type CertificateJourneyPendingTestStatus = 'NOT_ATTEMPTED' | 'NOT_PASSED'
+
+export interface CertificateJourneyPendingTest {
+  lessonId: string
+  lessonTitle: string | null
+  chapterId: string | null
+  chapterTitle: string | null
+  chapterPosition: number | null
+  lessonPosition: number | null
+  bestPercent: number
+  attempted: boolean
+  status: CertificateJourneyPendingTestStatus
+}
+
 export interface CertificateJourney {
   completedLessons: number
   totalLessons: number
   progressPercent: number
   certificateIssued: boolean
   certificate: CertificateSummary | null
+  lessonsWithTest?: number
+  passedTests?: number
+  testProgressPercent?: number
+  minPassPercent?: number
+  lessonsComplete?: boolean
+  testsComplete?: boolean
+  eligibleForCertificate?: boolean
+  blockers?: string[]
+  pendingLessonTests?: CertificateJourneyPendingTest[]
 }
 
 export interface Chapter {

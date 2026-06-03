@@ -61,6 +61,28 @@ public class CourseCompletionCertificateService implements ICourseCompletionCert
             return Optional.empty();
         }
 
+        return Optional.of(createAndSaveCertificate(enrollment, course));
+    }
+
+    /**
+     * Creates a certificate without re-checking lesson/test eligibility.
+     * Callers must validate eligibility via {@link CertificateEligibilityService} first.
+     */
+    @Transactional
+    public Optional<CourseCompletionCertificateEntity> issueCertificate(EnrollmentsEntity enrollment) {
+        if (certificateRepository.existsByEnrollmentId(enrollment.getId())) {
+            return certificateRepository.findByEnrollmentId(enrollment.getId());
+        }
+
+        CourseEntity course = enrollment.getCourse();
+        if (course == null || !EnumCourseStatus.PUBLISHED.equals(course.getStatus())) {
+            return Optional.empty();
+        }
+
+        return Optional.of(createAndSaveCertificate(enrollment, course));
+    }
+
+    private CourseCompletionCertificateEntity createAndSaveCertificate(EnrollmentsEntity enrollment, CourseEntity course) {
         GetUserResponse student = userGrpcClient.getUser(enrollment.getUserId());
         GetUserResponse instructor = userGrpcClient.getUser(course.getInstructorId());
 
@@ -88,7 +110,7 @@ public class CourseCompletionCertificateService implements ICourseCompletionCert
 
         certificateRepository.save(cert);
         log.info("Issued course completion certificate {} for enrollment {}", cert.getCertificateCode(), enrollment.getId());
-        return Optional.of(cert);
+        return cert;
     }
 
     @Override

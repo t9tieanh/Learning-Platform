@@ -6,7 +6,9 @@ import { VerifyEmail } from '~/dto/request/notification.dto'
 import { CourseApprovalEvent } from '~/dto/event/course-approval-event.dto'
 import { handleCourseApprovalEvent } from '~/services/course.service'
 import { handleStudyReminderEvent } from '~/services/studyReminder.service'
+import { handleCertificateIssuedEvent } from '~/services/certificateIssued.service'
 import type { StudyReminderEvent } from '~/dto/event/study-reminder-event.dto'
+import type { CertificateIssuedEvent } from '~/dto/event/certificate-issued-event.dto'
 import Logger from '~/utils/logger'
 
 const USER_NOTIFICATION_EXCHANGE = 'user-notification-exchange'
@@ -168,6 +170,10 @@ class RabbitClient {
     // STUDY_REMINDER (daily learning nudge from course-service)
     await RabbitClient.channel.assertQueue(QueueNameEnum.STUDY_REMINDER, { durable: true })
     this.consumeQueue<StudyReminderEvent>(QueueNameEnum.STUDY_REMINDER, handleStudyReminderEvent)
+
+    // CERTIFICATE_ISSUED (course completion certificate email from course-service)
+    await RabbitClient.channel.assertQueue(QueueNameEnum.CERTIFICATE_ISSUED, { durable: true })
+    this.consumeQueue<CertificateIssuedEvent>(QueueNameEnum.CERTIFICATE_ISSUED, handleCertificateIssuedEvent)
   }
 
   private static async setupDynamicConsumer(consumer: ConsumerDef) {
