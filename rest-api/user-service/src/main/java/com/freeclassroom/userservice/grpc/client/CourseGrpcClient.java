@@ -4,7 +4,9 @@ import com.example.grpc.course.GetChartDataRequest;
 import com.example.grpc.course.GetChartDataResponse;
 import com.example.grpc.course.GetCourseAdminDataResponse;
 import com.example.grpc.course.GetAdminCourseModerationCountsResponse;
+import com.example.grpc.course.GetAdminTopInstructorsRequest;
 import com.example.grpc.course.GetCourseAndStudentResponse;
+import com.example.grpc.course.GetAdminInstructorLeaderboardResponse;
 import com.example.grpc.course.GetCourseRequest;
 import com.example.grpc.course.GetCourseTagsRequest;
 import com.example.grpc.course.GetCourseTagsResponse;
@@ -31,6 +33,13 @@ public class CourseGrpcClient {
 
     public GetAdminCourseModerationCountsResponse getAdminCourseModerationCounts() {
         return courseStub.getAdminCourseModerationCounts(Empty.getDefaultInstance());
+    }
+
+    public GetAdminInstructorLeaderboardResponse getAdminTopInstructorsLeaderboard(int limit) {
+        GetAdminTopInstructorsRequest request = GetAdminTopInstructorsRequest.newBuilder()
+                .setLimit(limit)
+                .build();
+        return courseStub.getAdminTopInstructorsLeaderboard(request);
     }
 
     public GetCourseAndStudentResponse getTotalCoursesAndStudent(String userId) {

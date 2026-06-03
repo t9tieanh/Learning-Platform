@@ -7,6 +7,7 @@ import com.freeclassroom.courseservice.entity.course.CourseEntity;
 import com.freeclassroom.courseservice.entity.member.EnrollmentsEntity;
 import com.freeclassroom.courseservice.entity.category.TagEntity;
 import com.freeclassroom.courseservice.dto.response.admin.AdminActiveCourseProjection;
+import com.freeclassroom.courseservice.dto.response.admin.AdminInstructorLeaderboardProjection;
 import com.freeclassroom.courseservice.enums.entity.EnumCourseStatus;
 import com.freeclassroom.courseservice.exception.CustomExeption;
 import com.freeclassroom.courseservice.exception.ErrorCode;
@@ -21,6 +22,8 @@ import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import net.devh.boot.grpc.server.service.GrpcService;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -228,6 +231,34 @@ public class CourseGrpcService extends CourseServiceImplBase {
             responseObserver.onError(
                     Status.INTERNAL
                             .withDescription("Failed to load active admin courses: " + e.getMessage())
+                            .asRuntimeException()
+            );
+        }
+    }
+
+    @Override
+    public void getAdminTopInstructorsLeaderboard(
+            GetAdminTopInstructorsRequest request,
+            StreamObserver<GetAdminInstructorLeaderboardResponse> responseObserver
+    ) {
+        try {
+            int normalizedLimit = Math.max(1, request.getLimit());
+            Pageable pageable = PageRequest.of(0, normalizedLimit);
+
+            List<AdminInstructorLeaderboardItem> items = courseRepo.findAdminTopInstructorLeaderboard(pageable).stream()
+                    .map(stat -> AdminInstructorLeaderboardItem.newBuilder()
+                            .setInstructorId(stat.getInstructorId() == null ? "" : stat.getInstructorId())
+                            .setStudentCount(stat.getStudentCount() == null ? 0L : stat.getStudentCount())
+                            .setCourseCount(stat.getCourseCount() == null ? 0L : stat.getCourseCount())
+                            .build())
+                    .toList();
+
+            responseObserver.onNext(GetAdminInstructorLeaderboardResponse.newBuilder().addAllItems(items).build());
+            responseObserver.onCompleted();
+        } catch (Exception e) {
+            responseObserver.onError(
+                    Status.INTERNAL
+                            .withDescription("Failed to load admin instructor leaderboard: " + e.getMessage())
                             .asRuntimeException()
             );
         }

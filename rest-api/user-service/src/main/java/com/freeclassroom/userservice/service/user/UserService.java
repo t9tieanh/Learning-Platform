@@ -2,8 +2,10 @@ package com.freeclassroom.userservice.service.user;
 
 import com.example.grpc.course.GetCourseAdminDataResponse;
 import com.example.grpc.course.ActiveAdminCourseStat;
+import com.example.grpc.course.AdminInstructorLeaderboardItem;
 import com.example.grpc.course.GetActiveAdminCoursesResponse;
 import com.example.grpc.course.GetAdminCourseModerationCountsResponse;
+import com.example.grpc.course.GetAdminInstructorLeaderboardResponse;
 import com.example.grpc.course.TotalBlogResponse;
 import com.example.grpc.user.GetCoursesRevenueResponse;
 import com.example.grpc.user.TopCourseRevenueItem;
@@ -72,7 +74,9 @@ import java.util.Set;
 import java.util.HashSet;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static com.freeclassroom.userservice.enums.RedisStreamEnum.EVENT_USER;
 
@@ -84,6 +88,7 @@ public class UserService implements IUserService {
     private static final int DEFAULT_TOP_LIMIT = 5;
     private static final int MAX_TOP_LIMIT = 50;
     private static final long CACHE_TTL_MILLIS = 45_000L;
+    private static final long ADMIN_HOME_CACHE_TTL_MILLIS = 30_000L;
 
     PendingUserRepository pendingUserRepo;
     OTPForgetPasswordRepository otpForgetPasswordRepo;
@@ -117,8 +122,11 @@ public class UserService implements IUserService {
 
     private final Map<Integer, CacheEntry<List<TopCourseAdminItem>>> topCourseCache = new ConcurrentHashMap<>();
     private final Map<Integer, CacheEntry<List<TopInstructorAdminItem>>> topInstructorCache = new ConcurrentHashMap<>();
+    @NonFinal
+    private volatile CacheEntry<DataAdminHome> adminHomeCache;
 
     private record CacheEntry<T>(T value, long expiresAt) {}
+    private record AdminCourseHomeStats(long courseCount, long instructorCount) {}
 
     private static class InstructorAggregate {
         long studentCount;
@@ -141,6 +149,51 @@ public class UserService implements IUserService {
 
     private <T> void putCache(Map<Integer, CacheEntry<T>> cache, int limit, T value) {
         cache.put(limit, new CacheEntry<>(value, System.currentTimeMillis() + CACHE_TTL_MILLIS));
+    }
+
+    private DataAdminHome getValidAdminHomeCache() {
+        CacheEntry<DataAdminHome> cacheEntry = adminHomeCache;
+        if (cacheEntry == null || cacheEntry.expiresAt() < System.currentTimeMillis()) {
+            return null;
+        }
+        return cacheEntry.value();
+    }
+
+    private void putAdminHomeCache(DataAdminHome data) {
+        adminHomeCache = new CacheEntry<>(data, System.currentTimeMillis() + ADMIN_HOME_CACHE_TTL_MILLIS);
+    }
+
+    private AdminCourseHomeStats loadAdminCourseHomeStats() {
+        try {
+            GetCourseAdminDataResponse courseResponse = courseGrpcClient.getCourseAdminData();
+            if (courseResponse == null) {
+                return new AdminCourseHomeStats(0L, 0L);
+            }
+            return new AdminCourseHomeStats(courseResponse.getTotalCourse(), courseResponse.getTotalInstructor());
+        } catch (Exception courseEx) {
+            log.warn("Failed to load admin course stats via gRPC", courseEx);
+            return new AdminCourseHomeStats(0L, 0L);
+        }
+    }
+
+    private long loadAdminBlogCount() {
+        try {
+            TotalBlogResponse blogResponse = blogGrpcClient.getTotalBlog();
+            return blogResponse == null ? 0L : blogResponse.getTotal();
+        } catch (Exception blogEx) {
+            log.warn("Failed to load admin blog stats via gRPC", blogEx);
+            return 0L;
+        }
+    }
+
+    private long loadPendingCertificateCount() {
+        try {
+            Long certificateCnt = certificateRepository.countByStatus(CertificateStatus.PENDING);
+            return certificateCnt != null ? certificateCnt : 0L;
+        } catch (Exception certificateEx) {
+            log.warn("Failed to load admin certificate stats", certificateEx);
+            return 0L;
+        }
     }
 
     public ApiResponse<UserResponse> registerUser(CreationUserRequest request) {
@@ -345,39 +398,37 @@ public class UserService implements IUserService {
 
     @Override
     public ApiResponse<DataAdminHome> getAdminData() {
-        DataAdminHome data = new DataAdminHome();
+        DataAdminHome cached = getValidAdminHomeCache();
+        if (cached != null) {
+            return ApiResponse.<DataAdminHome>builder()
+                    .code(HttpStatus.OK.value())
+                    .message("Lấy data thành công!")
+                    .result(cached)
+                    .build();
+        }
 
         try {
-            data.setCourseCnt(0);
-            data.setInstructorCnt(0);
-            data.setBlogCnt(0);
-            data.setCertificateCnt(0);
+            CompletableFuture<AdminCourseHomeStats> courseFuture =
+                    CompletableFuture.supplyAsync(this::loadAdminCourseHomeStats);
+            CompletableFuture<Long> blogFuture =
+                    CompletableFuture.supplyAsync(this::loadAdminBlogCount);
+            CompletableFuture<Long> certificateFuture =
+                    CompletableFuture.supplyAsync(this::loadPendingCertificateCount);
 
-            try {
-                GetCourseAdminDataResponse courseResponse = courseGrpcClient.getCourseAdminData();
-                if (courseResponse != null) {
-                    data.setCourseCnt(courseResponse.getTotalCourse());
-                    data.setInstructorCnt(courseResponse.getTotalInstructor());
-                }
-            } catch (Exception courseEx) {
-                log.warn("Failed to load admin course stats via gRPC", courseEx);
-            }
+            CompletableFuture.allOf(courseFuture, blogFuture, certificateFuture).join();
 
-            try {
-                TotalBlogResponse blogResponse = blogGrpcClient.getTotalBlog();
-                if (blogResponse != null) {
-                    data.setBlogCnt(blogResponse.getTotal());
-                }
-            } catch (Exception blogEx) {
-                log.warn("Failed to load admin blog stats via gRPC", blogEx);
-            }
+            AdminCourseHomeStats courseStats = courseFuture.join();
+            Long blogCount = blogFuture.join();
+            Long certificateCount = certificateFuture.join();
 
-            try {
-                Long certificateCnt = certificateRepository.countByStatus(CertificateStatus.PENDING);
-                data.setCertificateCnt(certificateCnt != null ? certificateCnt : 0);
-            } catch (Exception certificateEx) {
-                log.warn("Failed to load admin certificate stats", certificateEx);
-            }
+            DataAdminHome data = DataAdminHome.builder()
+                    .courseCnt(courseStats.courseCount())
+                    .instructorCnt(courseStats.instructorCount())
+                    .blogCnt(blogCount == null ? 0L : blogCount)
+                    .certificateCnt(certificateCount == null ? 0L : certificateCount)
+                    .build();
+
+            putAdminHomeCache(data);
 
             return ApiResponse.<DataAdminHome>builder()
                     .code(HttpStatus.OK.value())
@@ -390,7 +441,12 @@ public class UserService implements IUserService {
             return ApiResponse.<DataAdminHome>builder()
                     .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
                     .message("Lấy data thất bại: " + e.getMessage())
-                    .result(data)
+                    .result(DataAdminHome.builder()
+                            .courseCnt(0L)
+                            .instructorCnt(0L)
+                            .certificateCnt(0L)
+                            .blogCnt(0L)
+                            .build())
                     .build();
         }
     }
@@ -522,12 +578,13 @@ public class UserService implements IUserService {
         }
 
         try {
-            GetActiveAdminCoursesResponse activeCoursesResponse = courseGrpcClient.getActiveAdminCourses();
-            List<ActiveAdminCourseStat> activeCourses = activeCoursesResponse == null
+            GetAdminInstructorLeaderboardResponse leaderboardResponse =
+                    courseGrpcClient.getAdminTopInstructorsLeaderboard(normalizedLimit);
+            List<AdminInstructorLeaderboardItem> leaderboardItems = leaderboardResponse == null
                     ? List.of()
-                    : activeCoursesResponse.getItemsList();
+                    : leaderboardResponse.getItemsList();
 
-            if (activeCourses.isEmpty()) {
+            if (leaderboardItems.isEmpty()) {
                 List<TopInstructorAdminItem> empty = List.of();
                 putCache(topInstructorCache, normalizedLimit, empty);
                 return ApiResponse.<List<TopInstructorAdminItem>>builder()
@@ -537,36 +594,10 @@ public class UserService implements IUserService {
                         .build();
             }
 
-            List<String> courseIds = activeCourses.stream()
-                    .map(ActiveAdminCourseStat::getCourseId)
+            Set<String> instructorIds = leaderboardItems.stream()
+                    .map(AdminInstructorLeaderboardItem::getInstructorId)
                     .filter(id -> id != null && !id.isBlank())
-                    .toList();
-
-            Map<String, Double> revenueMap = new HashMap<>();
-            try {
-                GetCoursesRevenueResponse revenueResponse = saleGrpcClient.getCoursesRevenue(courseIds);
-                if (revenueResponse != null) {
-                    for (TopCourseRevenueItem item : revenueResponse.getItemsList()) {
-                        revenueMap.put(item.getCourseId(), item.getRevenue());
-                    }
-                }
-            } catch (Exception saleEx) {
-                log.warn("Failed to load course revenues for top instructors", saleEx);
-            }
-
-            Map<String, InstructorAggregate> aggregates = new HashMap<>();
-            Set<String> instructorIds = new HashSet<>();
-
-            for (ActiveAdminCourseStat course : activeCourses) {
-                String instructorId = course.getInstructorId();
-                if (instructorId == null || instructorId.isBlank()) continue;
-                instructorIds.add(instructorId);
-
-                InstructorAggregate agg = aggregates.computeIfAbsent(instructorId, id -> new InstructorAggregate());
-                agg.courseCount += 1;
-                agg.studentCount += course.getStudentCount();
-                agg.revenue += revenueMap.getOrDefault(course.getCourseId(), 0D);
-            }
+                    .collect(Collectors.toSet());
 
             Map<String, UserEntity> instructorProfileMap = new HashMap<>();
             if (!instructorIds.isEmpty()) {
@@ -576,32 +607,26 @@ public class UserService implements IUserService {
                 }
             }
 
-            List<TopInstructorAdminItem> sorted = new ArrayList<>(aggregates.entrySet().stream()
-                    .map(entry -> {
-                        String instructorId = entry.getKey();
-                        InstructorAggregate agg = entry.getValue();
-                        UserEntity profile = instructorProfileMap.get(instructorId);
+            List<TopInstructorAdminItem> mapped = new ArrayList<>(leaderboardItems.stream()
+                    .filter(item -> item.getInstructorId() != null && !item.getInstructorId().isBlank())
+                    .map(item -> {
+                        UserEntity profile = instructorProfileMap.get(item.getInstructorId());
                         return TopInstructorAdminItem.builder()
-                                .instructorId(instructorId)
+                                .instructorId(item.getInstructorId())
                                 .instructorName(profile != null ? profile.getName() : "Giảng viên")
                                 .instructorAvatar(profile != null ? profile.getImage() : "")
-                                .studentCount(agg.studentCount)
-                                .courseCount(agg.courseCount)
-                                .revenue(agg.revenue)
+                                .studentCount(item.getStudentCount())
+                                .courseCount(item.getCourseCount())
+                                .revenue(0D)
                                 .build();
                     })
-                    .sorted(Comparator
-                            .comparingDouble(TopInstructorAdminItem::getRevenue).reversed()
-                            .thenComparing(Comparator.comparingLong(TopInstructorAdminItem::getStudentCount).reversed())
-                            .thenComparing(Comparator.comparingLong(TopInstructorAdminItem::getCourseCount).reversed()))
-                    .limit(normalizedLimit)
                     .toList());
 
-            for (int i = 0; i < sorted.size(); i++) {
-                sorted.get(i).setRank(i + 1);
+            for (int i = 0; i < mapped.size(); i++) {
+                mapped.get(i).setRank(i + 1);
             }
 
-            List<TopInstructorAdminItem> result = List.copyOf(sorted);
+            List<TopInstructorAdminItem> result = List.copyOf(mapped);
             putCache(topInstructorCache, normalizedLimit, result);
 
             return ApiResponse.<List<TopInstructorAdminItem>>builder()

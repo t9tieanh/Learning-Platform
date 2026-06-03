@@ -3,6 +3,7 @@ package com.freeclassroom.courseservice.repository.entity;
 import com.freeclassroom.courseservice.entity.course.CourseEntity;
 import com.freeclassroom.courseservice.dto.response.course.instructor.CourseLessonCountProjection;
 import com.freeclassroom.courseservice.dto.response.admin.AdminActiveCourseProjection;
+import com.freeclassroom.courseservice.dto.response.admin.AdminInstructorLeaderboardProjection;
 import com.freeclassroom.courseservice.dto.response.course.instructor.InstructorCourseRowProjection;
 import com.freeclassroom.courseservice.dto.response.course.instructor.InstructorCourseStatsProjection;
 import com.freeclassroom.courseservice.enums.entity.EnumCourseProgressStep;
@@ -60,6 +61,23 @@ public interface CourseRepository extends JpaRepository<CourseEntity, String> {
         GROUP BY c.id, c.instructorId, c.title, c.thumbnailUrl, c.rating
     """)
     List<AdminActiveCourseProjection> findActiveAdminCourseStats();
+
+    @Query("""
+        SELECT
+            c.instructorId AS instructorId,
+            COUNT(DISTINCT c.id) AS courseCount,
+            COUNT(e.id) AS studentCount
+        FROM CourseEntity c
+        LEFT JOIN c.enrollments e
+        WHERE c.status = com.freeclassroom.courseservice.enums.entity.EnumCourseStatus.PUBLISHED
+          AND c.progressStep = com.freeclassroom.courseservice.enums.entity.EnumCourseProgressStep.COMPLETED
+          AND c.deleted = false
+          AND c.instructorId IS NOT NULL
+          AND c.instructorId <> ''
+        GROUP BY c.instructorId
+        ORDER BY COUNT(e.id) DESC, COUNT(DISTINCT c.id) DESC
+    """)
+    List<AdminInstructorLeaderboardProjection> findAdminTopInstructorLeaderboard(Pageable pageable);
 
     @Query("""
         SELECT c.id

@@ -3,17 +3,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { Area, AreaChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
-import {
-  AlertTriangle,
-  BookOpen,
-  CheckCircle2,
-  Clock,
-  FileText,
-  ShieldAlert,
-  Sparkles,
-  Star,
-  Users
-} from 'lucide-react'
+import { AlertTriangle, BookOpen, Clock, FileText, ShieldAlert, Sparkles, Star, Users } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import userService from '@/services/user/user.service'
 import {
@@ -27,10 +17,6 @@ import {
 import { toast } from 'sonner'
 import courseImage from '@/assets/images/course.jpg'
 import user1 from '@/assets/images/user1.jpg'
-import user2 from '@/assets/images/user2.jpg'
-import user3 from '@/assets/images/user3.jpg'
-import user4 from '@/assets/images/user4.jpg'
-import user5 from '@/assets/images/user5.jpeg'
 
 type RangeKey = AdminBusinessPerformanceRange
 
@@ -42,52 +28,6 @@ type PerformancePoint = {
 
 const baseCardClass =
   'rounded-2xl border border-slate-200/70 bg-gradient-to-br from-white via-slate-50/80 to-slate-100/70 shadow-sm transition-all duration-300 hover:shadow-md'
-
-const mockRecentActivity = [
-  {
-    id: 'a1',
-    avatar: user1,
-    fallback: 'NA',
-    content: 'Nguyễn Văn A tạo khóa học ReactJS Mastery',
-    time: '5 phút trước'
-  },
-  {
-    id: 'a2',
-    avatar: user2,
-    fallback: 'TH',
-    content: 'Trần Hải Nam đăng ký khóa học UI/UX Fundamentals',
-    time: '12 phút trước'
-  },
-  {
-    id: 'a3',
-    avatar: user3,
-    fallback: 'QT',
-    content: 'Khóa học Node.js API được duyệt',
-    time: '27 phút trước'
-  },
-  {
-    id: 'a4',
-    avatar: user4,
-    fallback: 'LM',
-    content: 'Chứng chỉ Frontend Pro được xác minh',
-    time: '48 phút trước'
-  },
-  {
-    id: 'a5',
-    avatar: user5,
-    fallback: 'PL',
-    content: 'Blog “AI for Education 2026” được xuất bản',
-    time: '1 giờ trước'
-  }
-]
-
-const mockPlatformHealth = [
-  { label: 'Người dùng đang hoạt động', value: 12480, unit: '', progress: 78 },
-  { label: 'Khóa học đang mở bán', value: 328, unit: '', progress: 72 },
-  { label: 'Tỷ lệ hoàn thành khóa học', value: 68, unit: '%', progress: 68 },
-  { label: 'Tỷ lệ đánh giá tích cực', value: 94, unit: '%', progress: 94 },
-  { label: 'Tỷ lệ uptime', value: 99.97, unit: '%', progress: 100 }
-]
 
 const formatNumber = (value: number) => new Intl.NumberFormat('vi-VN').format(value)
 const formatCurrency = (value: number) =>
@@ -110,7 +50,10 @@ export default function Dashboard() {
   const [topCourses, setTopCourses] = useState<TopCourseAdminItem[]>([])
   const [topInstructors, setTopInstructors] = useState<TopInstructorAdminItem[]>([])
   const [pendingActions, setPendingActions] = useState<AdminPendingActions | null>(null)
-  const [loading, setLoading] = useState(false)
+  const [metricsLoading, setMetricsLoading] = useState(false)
+  const [pendingLoading, setPendingLoading] = useState(false)
+  const [topCoursesLoading, setTopCoursesLoading] = useState(false)
+  const [topInstructorsLoading, setTopInstructorsLoading] = useState(false)
   const [performanceLoading, setPerformanceLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [range, setRange] = useState<RangeKey>('12m')
@@ -118,31 +61,83 @@ export default function Dashboard() {
 
   useEffect(() => {
     let active = true
-    const fetchData = async () => {
+    const fetchMetrics = async () => {
       try {
-        setLoading(true)
+        setMetricsLoading(true)
         setError(null)
-        const [homeRes, pendingActionsRes, topCourseRes, topInstructorRes] = await Promise.all([
-          userService.getAdminHome(),
-          userService.getAdminPendingActions(),
-          userService.getAdminTopCourses(5),
-          userService.getAdminTopInstructors(5)
-        ])
+        const homeRes = await userService.getAdminHome()
         if (!active) return
         setData(homeRes.result ?? null)
-        setPendingActions(pendingActionsRes.result ?? null)
-        setTopCourses(topCourseRes.result ?? [])
-        setTopInstructors(topInstructorRes.result ?? [])
       } catch (e: any) {
         if (!active) return
-        const msg = e?.response?.data?.message || e?.message || 'Không thể tải dữ liệu admin'
+        const msg = e?.response?.data?.message || e?.message || 'Không thể tải dữ liệu tổng quan admin'
         setError(msg)
         toast.error(msg)
       } finally {
-        if (active) setLoading(false)
+        if (active) setMetricsLoading(false)
       }
     }
-    fetchData()
+    fetchMetrics()
+    return () => {
+      active = false
+    }
+  }, [])
+
+  useEffect(() => {
+    let active = true
+
+    const fetchPendingActions = async () => {
+      try {
+        setPendingLoading(true)
+        const response = await userService.getAdminPendingActions()
+        if (!active) return
+        setPendingActions(response.result ?? null)
+      } catch (e: any) {
+        if (!active) return
+        const msg = e?.response?.data?.message || e?.message || 'Không thể tải danh sách cần xử lý'
+        toast.error(msg)
+        setPendingActions(null)
+      } finally {
+        if (active) setPendingLoading(false)
+      }
+    }
+
+    const fetchTopCourses = async () => {
+      try {
+        setTopCoursesLoading(true)
+        const response = await userService.getAdminTopCourses(5)
+        if (!active) return
+        setTopCourses(response.result ?? [])
+      } catch (e: any) {
+        if (!active) return
+        const msg = e?.response?.data?.message || e?.message || 'Không thể tải danh sách khóa học nổi bật'
+        toast.error(msg)
+        setTopCourses([])
+      } finally {
+        if (active) setTopCoursesLoading(false)
+      }
+    }
+
+    const fetchTopInstructors = async () => {
+      try {
+        setTopInstructorsLoading(true)
+        const response = await userService.getAdminTopInstructors(5)
+        if (!active) return
+        setTopInstructors(response.result ?? [])
+      } catch (e: any) {
+        if (!active) return
+        const msg = e?.response?.data?.message || e?.message || 'Không thể tải danh sách giảng viên nổi bật'
+        toast.error(msg)
+        setTopInstructors([])
+      } finally {
+        if (active) setTopInstructorsLoading(false)
+      }
+    }
+
+    void fetchPendingActions()
+    void fetchTopCourses()
+    void fetchTopInstructors()
+
     return () => {
       active = false
     }
@@ -185,25 +180,25 @@ export default function Dashboard() {
   const metricCards = [
     {
       title: 'Tổng khóa học',
-      value: data?.courseCnt ?? (loading ? '…' : 0),
+      value: data?.courseCnt ?? (metricsLoading ? '…' : 0),
       icon: BookOpen,
       iconClass: 'bg-sky-50 text-sky-600'
     },
     {
       title: 'Giảng viên',
-      value: data?.instructorCnt ?? (loading ? '…' : 0),
+      value: data?.instructorCnt ?? (metricsLoading ? '…' : 0),
       icon: Users,
       iconClass: 'bg-cyan-50 text-cyan-600'
     },
     {
       title: 'Chứng chỉ chờ duyệt',
-      value: data?.certificateCnt ?? (loading ? '…' : 0),
+      value: data?.certificateCnt ?? (metricsLoading ? '…' : 0),
       icon: Clock,
       iconClass: 'bg-amber-50 text-amber-600'
     },
     {
       title: 'Bài viết',
-      value: data?.blogCnt ?? (loading ? '…' : 0),
+      value: data?.blogCnt ?? (metricsLoading ? '…' : 0),
       icon: FileText,
       iconClass: 'bg-emerald-50 text-emerald-600'
     }
@@ -230,7 +225,7 @@ export default function Dashboard() {
     }
   ]
 
-  const hasPendingActions = loading || actionItems.some((item) => item.value > 0)
+  const hasPendingActions = pendingLoading || actionItems.some((item) => item.value > 0)
 
   return (
     <div className='space-y-5'>
@@ -404,7 +399,7 @@ export default function Dashboard() {
         <Card className={cn(baseCardClass, 'bg-gradient-to-br from-white via-violet-50/60 to-indigo-100/40')}>
           <CardHeader className='px-5 py-4'>
             <CardTitle className='text-lg font-semibold text-slate-900'>Giảng viên hàng đầu</CardTitle>
-            <CardDescription>Leaderboard giảng viên có hiệu suất cao nhất</CardDescription>
+            <CardDescription>Leaderboard giảng viên theo số học viên và số khóa học</CardDescription>
           </CardHeader>
           <CardContent className='px-5 pb-4 pt-1'>
             <div className='space-y-2.5'>
@@ -424,12 +419,16 @@ export default function Dashboard() {
                       <span>{ins.courseCount} khóa học</span>
                     </div>
                   </div>
-                  <p className='text-sm font-semibold text-emerald-700'>{formatCurrency(ins.revenue)}</p>
                 </div>
               ))}
-              {topInstructors.length === 0 ? (
+              {!topInstructorsLoading && topInstructors.length === 0 ? (
                 <p className='rounded-xl border border-dashed border-slate-200 px-3 py-4 text-center text-sm text-slate-500'>
                   Chưa có dữ liệu giảng viên nổi bật
+                </p>
+              ) : null}
+              {topInstructorsLoading ? (
+                <p className='rounded-xl border border-dashed border-slate-200 px-3 py-4 text-center text-sm text-slate-500'>
+                  Đang tải dữ liệu giảng viên nổi bật...
                 </p>
               ) : null}
             </div>
@@ -464,9 +463,14 @@ export default function Dashboard() {
                   </div>
                 </div>
               ))}
-              {topCourses.length === 0 ? (
+              {!topCoursesLoading && topCourses.length === 0 ? (
                 <p className='rounded-xl border border-dashed border-slate-200 px-3 py-4 text-center text-sm text-slate-500'>
                   Chưa có dữ liệu khóa học nổi bật
+                </p>
+              ) : null}
+              {topCoursesLoading ? (
+                <p className='rounded-xl border border-dashed border-slate-200 px-3 py-4 text-center text-sm text-slate-500'>
+                  Đang tải dữ liệu khóa học nổi bật...
                 </p>
               ) : null}
             </div>
