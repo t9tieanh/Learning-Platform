@@ -4,6 +4,7 @@ import com.freeclassroom.userservice.entity.certificate.Certificate;
 import com.freeclassroom.userservice.enums.CertificateStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
@@ -19,4 +20,21 @@ public interface CertificateRepository extends JpaRepository<Certificate, String
 
     @Query("SELECT c FROM Certificate c WHERE c.userId = :userId AND c.status = com.freeclassroom.userservice.enums.CertificateStatus.CONFIRMED")
     List<Certificate> findConfirmedCertificatesByUserId(@Param("userId") String userId);
+
+    @Query("""
+        SELECT c
+        FROM Certificate c
+        WHERE c.userId = :userId
+          AND c.status = com.freeclassroom.userservice.enums.CertificateStatus.CONFIRMED
+        ORDER BY c.issueDate DESC, c.id DESC
+    """)
+    List<Certificate> findConfirmedCertificatePreviewByUserId(@Param("userId") String userId, Pageable pageable);
+
+    @Query("""
+        SELECT COUNT(c)
+        FROM Certificate c
+        WHERE c.userId = :userId
+          AND c.status = com.freeclassroom.userservice.enums.CertificateStatus.CONFIRMED
+    """)
+    long countConfirmedCertificatesByUserId(@Param("userId") String userId);
 }

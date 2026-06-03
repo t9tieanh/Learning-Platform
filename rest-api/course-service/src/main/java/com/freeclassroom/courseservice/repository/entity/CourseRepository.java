@@ -3,7 +3,10 @@ package com.freeclassroom.courseservice.repository.entity;
 import com.freeclassroom.courseservice.entity.course.CourseEntity;
 import com.freeclassroom.courseservice.dto.response.course.instructor.CourseLessonCountProjection;
 import com.freeclassroom.courseservice.dto.response.admin.AdminActiveCourseProjection;
+import com.freeclassroom.courseservice.dto.response.admin.AdminInstructorCourseProjection;
 import com.freeclassroom.courseservice.dto.response.admin.AdminInstructorLeaderboardProjection;
+import com.freeclassroom.courseservice.dto.response.admin.AdminInstructorListProjection;
+import com.freeclassroom.courseservice.dto.response.admin.AdminInstructorMetricsProjection;
 import com.freeclassroom.courseservice.dto.response.course.instructor.InstructorCourseRowProjection;
 import com.freeclassroom.courseservice.dto.response.course.instructor.InstructorCourseStatsProjection;
 import com.freeclassroom.courseservice.enums.entity.EnumCourseProgressStep;
@@ -78,6 +81,72 @@ public interface CourseRepository extends JpaRepository<CourseEntity, String> {
         ORDER BY COUNT(e.id) DESC, COUNT(DISTINCT c.id) DESC
     """)
     List<AdminInstructorLeaderboardProjection> findAdminTopInstructorLeaderboard(Pageable pageable);
+
+    @Query("""
+        SELECT
+            c.instructorId AS instructorId,
+            COUNT(DISTINCT c.id) AS courseCount
+        FROM CourseEntity c
+        WHERE c.deleted = false
+          AND c.instructorId IS NOT NULL
+          AND c.instructorId <> ''
+        GROUP BY c.instructorId
+    """)
+    List<AdminInstructorListProjection> findAdminInstructorRows();
+
+    @Query("""
+        SELECT DISTINCT c.instructorId
+        FROM CourseEntity c
+        WHERE c.deleted = false
+          AND c.instructorId IS NOT NULL
+          AND c.instructorId <> ''
+    """)
+    List<String> findDistinctInstructorIds();
+
+    @Query("""
+        SELECT
+            c.instructorId AS instructorId,
+            COUNT(DISTINCT c.id) AS courseCount
+        FROM CourseEntity c
+        WHERE c.deleted = false
+          AND c.instructorId IS NOT NULL
+          AND c.instructorId <> ''
+        GROUP BY c.instructorId
+        HAVING (:minCourseCount IS NULL OR COUNT(DISTINCT c.id) >= :minCourseCount)
+           AND (:maxCourseCount IS NULL OR COUNT(DISTINCT c.id) <= :maxCourseCount)
+        ORDER BY COUNT(DISTINCT c.id) DESC, c.instructorId ASC
+    """)
+    List<AdminInstructorListProjection> findAdminInstructorRowsOrderByCourseCountDesc(@Param("minCourseCount") Long minCourseCount,
+                                                                                       @Param("maxCourseCount") Long maxCourseCount,
+                                                                                       Pageable pageable);
+
+    @Query("""
+        SELECT
+            c.instructorId AS instructorId,
+            COUNT(DISTINCT c.id) AS courseCount
+        FROM CourseEntity c
+        WHERE c.deleted = false
+          AND c.instructorId IS NOT NULL
+          AND c.instructorId <> ''
+        GROUP BY c.instructorId
+        HAVING (:minCourseCount IS NULL OR COUNT(DISTINCT c.id) >= :minCourseCount)
+           AND (:maxCourseCount IS NULL OR COUNT(DISTINCT c.id) <= :maxCourseCount)
+        ORDER BY COUNT(DISTINCT c.id) ASC, c.instructorId ASC
+    """)
+    List<AdminInstructorListProjection> findAdminInstructorRowsOrderByCourseCountAsc(@Param("minCourseCount") Long minCourseCount,
+                                                                                     @Param("maxCourseCount") Long maxCourseCount,
+                                                                                     Pageable pageable);
+
+    @Query("""
+        SELECT
+            c.instructorId AS instructorId,
+            COUNT(DISTINCT c.id) AS courseCount
+        FROM CourseEntity c
+        WHERE c.deleted = false
+          AND c.instructorId IN :instructorIds
+        GROUP BY c.instructorId
+    """)
+    List<AdminInstructorListProjection> findInstructorCourseCountsByInstructorIds(@Param("instructorIds") List<String> instructorIds);
 
     @Query("""
         SELECT c.id
@@ -213,8 +282,41 @@ public interface CourseRepository extends JpaRepository<CourseEntity, String> {
         SELECT c.id 
         FROM CourseEntity c
         WHERE c.instructorId = :userId
+          AND c.deleted = false
     """)
     List<String> findAllIdsByInstructorId(@Param("userId") String userId);
+
+    @Query("""
+        SELECT
+            COUNT(DISTINCT c.id) AS courseCount,
+            COUNT(e.id) AS studentsCount,
+            COALESCE(AVG(c.rating), 0) AS averageRating,
+            COALESCE(AVG(e.progress), 0) AS completionRate
+        FROM CourseEntity c
+        LEFT JOIN c.enrollments e
+        WHERE c.deleted = false
+          AND c.instructorId = :instructorId
+    """)
+    AdminInstructorMetricsProjection getAdminInstructorMetrics(@Param("instructorId") String instructorId);
+
+    @Query("""
+        SELECT
+            c.id AS id,
+            c.title AS title,
+            c.category.name AS category,
+            c.status AS status,
+            COALESCE(c.rating, 0) AS rating,
+            COUNT(e.id) AS studentsCount
+        FROM CourseEntity c
+        LEFT JOIN c.enrollments e
+        WHERE c.deleted = false
+          AND c.instructorId = :instructorId
+        GROUP BY c.id, c.title, c.category.name, c.status, c.rating, c.createdAt
+    """)
+    Page<AdminInstructorCourseProjection> findAdminInstructorCourses(
+            @Param("instructorId") String instructorId,
+            Pageable pageable
+    );
 
     Page<CourseEntity> findByInstructorIdAndStatusAndProgressStep(
             String instructorId,
