@@ -30,7 +30,7 @@ export async function initSagas(): Promise<void> {
       }
 
       Logger.info(
-        `[ASSISTANT_COURSE_EMBEDDING_QUEUE] received approval event for course ${event.id} (${event.action})`
+        `[ASSISTANT_COURSE_EMBEDDING_QUEUE] received course approval event ${event.id} (${event.action})`
       )
       await courseApprovalService.handleCourseApprovalEvent(event)
     }

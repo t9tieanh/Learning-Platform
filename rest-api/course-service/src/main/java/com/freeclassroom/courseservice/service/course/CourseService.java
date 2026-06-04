@@ -363,16 +363,22 @@ public class CourseService implements ICourseService {
                 .orElseThrow(() -> new CustomExeption(ErrorCode.COURSE_NOT_FOUND));
 
         // check avatar, title
-        if (course.getTitle().equals(null) || course.getTitle().equals("") || course.getThumbnailUrl().equals(null) || course.getThumbnailUrl().equals("")
-            || course.getRequirements().stream().count() == 0 || course.getOutcomes().stream().count() == 0
-        )
+        if (course.getTitle() == null || course.getTitle().isBlank()
+                || course.getThumbnailUrl() == null || course.getThumbnailUrl().isBlank()
+                || course.getRequirements() == null || course.getRequirements().isEmpty()
+                || course.getOutcomes() == null || course.getOutcomes().isEmpty()) {
             throw new CustomExeption(ErrorCode.INFO_COURSE_NOT_OKE);
+        }
 
-        if (courseRepo.countLessonsByCourseId(id) == 0)
+        if (courseRepo.countLessonsByCourseId(id) == 0) {
             throw new CustomExeption(ErrorCode.COURSE_WITHOUT_VIDEO);
+        }
 
-        if (course.getFinalPrice() == 0 || course.getOriginalPrice() == 0 )
+        Double finalPrice = course.getFinalPrice();
+        Double originalPrice = course.getOriginalPrice();
+        if (finalPrice == null || originalPrice == null || finalPrice <= 0 || originalPrice <= 0) {
             throw new CustomExeption(ErrorCode.COURSE_WITHOUT_PRICE);
+        }
 
         // -> maybe approval
         course.setProgressStep(EnumCourseProgressStep.COMPLETED);
