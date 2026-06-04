@@ -30,7 +30,8 @@ public enum ErrorCode {
     // dùng cho xác thực otp
     NOT_VERIFY_OTP(1011, "Mã OTP không hợp lệ, vui lòng thử lại", HttpStatus.OK),
 
-    FILE_TOO_LARGE(1012, "Ảnh đại diện tối đa 5MB", HttpStatus.BAD_REQUEST);
+    FILE_TOO_LARGE(1012, "Ảnh đại diện tối đa 5MB", HttpStatus.BAD_REQUEST),
+    FILE_UPLOAD_FAILED(1013, "Không thể tải ảnh lên, vui lòng thử lại", HttpStatus.OK);
 
     private final int code;
     private final HttpStatusCode statusCode;

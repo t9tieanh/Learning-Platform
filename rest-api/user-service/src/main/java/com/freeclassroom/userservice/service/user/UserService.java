@@ -348,52 +348,42 @@ public class UserService implements IUserService {
 
     @Override
     public ApiResponse<GetUserResponse> updateUser(String id, UpdateUserRequest request) {
-        try {
-            UserEntity user = userRepository.findById(id)
-                    .orElseThrow(() -> new CustomExeption(ErrorCode.USER_NOT_FOUND));
+        UserEntity user = userRepository.findById(id)
+                .orElseThrow(() -> new CustomExeption(ErrorCode.USER_NOT_FOUND));
 
-            if (request.getDescription() != null && !request.getDescription().equals(user.getDescription())) {
-                user.setDescription(request.getDescription());
-            }
-            if (request.getEmail() != null && !request.getEmail().equals(user.getEmail())) {
-                user.setEmail(request.getEmail());
-            }
-            if (request.getName() != null && !request.getName().equals(user.getName())) {
-                user.setName(request.getName());
-            }
-            if (request.getPhone() != null && !request.getPhone().equals(user.getPhone())) {
-                user.setPhone(request.getPhone());
-            }
-            if (request.getPosition() != null && !request.getPosition().equals(user.getPosition())) {
-                user.setPosition(request.getPosition());
-            }
-            if (request.getStatus() != null && !request.getStatus().equals(user.getStatus())) {
-                user.setStatus(request.getStatus());
-            }
-
-            if (request.getImage() != null && !request.getImage().isEmpty()) {
-                String uploadedUrl = uploadFileService.uploadFile(request.getImage());
-                user.setImage(uploadedUrl);
-            }
-
-            userRepository.save(user);
-
-            GetUserResponse response = userMapper.toDto(user);
-
-            return ApiResponse.<GetUserResponse>builder()
-                    .code(HttpStatus.OK.value())
-                    .message("Chỉnh sửa thông tin profile thành công !")
-                    .result(response)
-                    .build();
-        } catch (CustomExeption e) {
-            return ApiResponse.<GetUserResponse>builder()
-                    .code(HttpStatus.OK.value())
-                    .message("Chỉnh sửa thông tin profile thất bại !")
-                    .result(null)
-                    .build();
-        } catch (Exception e) {
-            throw new CustomExeption(ErrorCode.UNCATEGORIZED_EXEPTION);
+        if (request.getDescription() != null && !request.getDescription().equals(user.getDescription())) {
+            user.setDescription(request.getDescription());
         }
+        if (request.getEmail() != null && !request.getEmail().equals(user.getEmail())) {
+            user.setEmail(request.getEmail());
+        }
+        if (request.getName() != null && !request.getName().equals(user.getName())) {
+            user.setName(request.getName());
+        }
+        if (request.getPhone() != null && !request.getPhone().equals(user.getPhone())) {
+            user.setPhone(request.getPhone());
+        }
+        if (request.getPosition() != null && !request.getPosition().equals(user.getPosition())) {
+            user.setPosition(request.getPosition());
+        }
+        if (request.getStatus() != null && !request.getStatus().equals(user.getStatus())) {
+            user.setStatus(request.getStatus());
+        }
+
+        if (request.getImage() != null && !request.getImage().isEmpty()) {
+            String uploadedUrl = uploadFileService.uploadFile(request.getImage());
+            user.setImage(uploadedUrl);
+        }
+
+        userRepository.save(user);
+
+        GetUserResponse response = userMapper.toDto(user);
+
+        return ApiResponse.<GetUserResponse>builder()
+                .code(HttpStatus.OK.value())
+                .message("Chỉnh sửa thông tin profile thành công !")
+                .result(response)
+                .build();
     }
 
     @Override
