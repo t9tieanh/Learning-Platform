@@ -125,7 +125,7 @@ const Step1MediaUpload: React.FC<Step1MediaUploadProps> = ({
                 <div className='relative w-12 h-12'>
                   <img src={learnovaLogo} alt='Loading' className='w-full h-full object-contain animate-bounce' />
                 </div>
-                <LoadingDots text='Đang tải lên video' className='text-black-600 text-sm font-medium' />
+                <LoadingDots text='Đang xử lý tệp, vui lòng chờ...' className='text-black-600 text-sm font-medium' />
               </div>
             </div>
           )}
