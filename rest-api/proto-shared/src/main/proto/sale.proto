@@ -41,3 +41,27 @@ message TopCourseRevenueItem {
 message GetTopCoursesRevenueResponse {
   repeated TopCourseRevenueItem items = 1;
 }
+
+message GetCoursesRevenueRequest {
+  repeated string coursesId = 1;
+}
+
+message GetCoursesRevenueResponse {
+  repeated TopCourseRevenueItem items = 1;
+}
+
+message GetAdminBusinessRevenueRequest {
+  repeated string coursesId = 1;
+  string startDate = 2;
+  string endDate = 3;
+  string bucketType = 4;
+}
+
+message AdminBusinessRevenuePoint {
+  string bucketKey = 1;
+  double revenue = 2;
+}
+
+message GetAdminBusinessRevenueResponse {
+  repeated AdminBusinessRevenuePoint items = 1;
+}

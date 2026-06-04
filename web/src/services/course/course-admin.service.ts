@@ -34,6 +34,15 @@ export interface CoursesAdminResult {
   totalPages: number
 }
 
+export type AdminCourseStatusFilter = 'PENDING_REVIEW' | 'PUBLISHED' | 'REJECTED'
+
+export interface GetCoursesAdminParams {
+  page?: number
+  limit?: number
+  search?: string
+  status?: AdminCourseStatusFilter
+}
+
 class CourseAdminService {
   async getCourseDetailAdmin(courseId: string): Promise<ApiResponse<any>> {
     const response = await axiosClient.axiosInstance.get(`learning/admin/courses/${courseId}`)
@@ -45,9 +54,15 @@ class CourseAdminService {
     return response.data
   }
 
-  async getCoursesAdmin(page = 0, limit = 10): Promise<ApiResponse<CoursesAdminResult>> {
+  async getCoursesAdmin(params: GetCoursesAdminParams = {}): Promise<ApiResponse<CoursesAdminResult>> {
+    const { page = 0, limit = 10, search, status } = params
     const response = await axiosClient.axiosInstance.get(`learning/admin/courses`, {
-      params: { page, limit }
+      params: {
+        page: page + 1,
+        limit,
+        search: search?.trim() || undefined,
+        status
+      }
     })
 
     return response.data

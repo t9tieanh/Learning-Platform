@@ -175,7 +175,7 @@ export default function CertificatesPage() {
         <div className='absolute bottom-0 left-12 h-28 w-28 rounded-full bg-sky-300/10 blur-3xl' />
         <div className='relative flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between'>
           <div className='max-w-2xl'>
-            <p className='text-xs font-semibold uppercase tracking-[0.28em] text-emerald-200/80'>Verification center</p>
+            <p className='text-xs font-semibold uppercase tracking-[0.28em] text-emerald-200/80'>HỆ THỐNG CHỨNG CHỈ</p>
             <h1 className='mt-3 text-3xl font-semibold tracking-tight'>Xác nhận chứng chỉ</h1>
             <p className='mt-2 text-sm leading-6 text-slate-300'>
               Kiểm tra, duyệt và theo dõi trạng thái chứng chỉ trong một giao diện gọn gàng, dễ ra quyết định hơn.
@@ -377,17 +377,19 @@ export default function CertificatesPage() {
           </DialogHeader>
 
           {selectedCert && (
-            <div className='grid gap-6 px-6 py-6 lg:grid-cols-[1.15fr_0.85fr]'>
+            <div className='grid gap-6 px-6 py-6 lg:grid-cols-[1fr_350px]'>
               <div className='space-y-5'>
                 <div className='grid gap-3 sm:grid-cols-2'>
                   <div className='rounded-2xl border border-slate-200 bg-slate-50/80 p-4'>
                     <p className='text-xs font-semibold uppercase tracking-[0.18em] text-slate-500'>Người dùng</p>
-                    <p className='mt-2 font-medium text-slate-950'>{selectedCert.userName}</p>
-                    <p className='mt-1 text-sm text-slate-500'>{selectedCert.userEmail}</p>
+                    <p className='mt-2 line-clamp-2 font-medium text-slate-950 break-words'>{selectedCert.userName}</p>
+                    <p className='mt-1 line-clamp-2 text-sm text-slate-500 break-all'>{selectedCert.userEmail}</p>
                   </div>
                   <div className='rounded-2xl border border-slate-200 bg-slate-50/80 p-4'>
                     <p className='text-xs font-semibold uppercase tracking-[0.18em] text-slate-500'>Khóa học</p>
-                    <p className='mt-2 font-medium text-slate-950'>{selectedCert.courseName}</p>
+                    <p className='mt-2 line-clamp-2 font-medium text-slate-950 break-words'>
+                      {selectedCert.courseName}
+                    </p>
                     <p className='mt-1 text-sm text-slate-500'>
                       {new Date(selectedCert.submittedAt).toLocaleDateString('vi-VN')}
                     </p>
@@ -395,7 +397,7 @@ export default function CertificatesPage() {
                 </div>
 
                 <div className='rounded-2xl border border-slate-200 bg-white p-4'>
-                  <div className='flex flex-wrap items-center gap-3'>
+                  <div className='space-y-3'>
                     <div>
                       <p className='text-xs font-semibold uppercase tracking-[0.18em] text-slate-500'>
                         Trạng thái hiện tại
@@ -405,7 +407,9 @@ export default function CertificatesPage() {
                     {selectedCert.organization && (
                       <div>
                         <p className='text-xs font-semibold uppercase tracking-[0.18em] text-slate-500'>Nơi cấp</p>
-                        <p className='mt-2 text-sm font-medium text-slate-700'>{selectedCert.organization}</p>
+                        <p className='mt-2 line-clamp-2 text-sm font-medium text-slate-700 break-words'>
+                          {selectedCert.organization}
+                        </p>
                       </div>
                     )}
                   </div>
@@ -456,18 +460,20 @@ export default function CertificatesPage() {
                 )}
               </div>
 
-              <div className='rounded-[24px] border border-slate-200 bg-slate-50/70 p-4'>
-                {selectedCert.imageUrl ? (
-                  <img
-                    src={selectedCert.imageUrl}
-                    alt='Chứng chỉ'
-                    className='h-full w-full rounded-[20px] border border-slate-200 object-cover shadow-sm'
-                  />
-                ) : (
-                  <div className='flex h-full min-h-[320px] items-center justify-center rounded-[20px] border border-dashed border-slate-200 bg-white text-sm text-slate-400'>
-                    Không có ảnh chứng chỉ
-                  </div>
-                )}
+              <div className='flex items-center justify-center'>
+                <div className='h-[320px] w-[320px] rounded-[24px] border border-slate-200 bg-slate-50/70 p-4'>
+                  {selectedCert.imageUrl ? (
+                    <img
+                      src={selectedCert.imageUrl}
+                      alt='Chứng chỉ'
+                      className='h-full w-full rounded-[20px] border border-slate-200 object-cover shadow-sm'
+                    />
+                  ) : (
+                    <div className='flex h-full items-center justify-center rounded-[20px] border border-dashed border-slate-200 bg-white text-sm text-slate-400'>
+                      Không có ảnh
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           )}

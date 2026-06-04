@@ -1,6 +1,14 @@
 package com.freeclassroom.courseservice.repository.entity;
 
 import com.freeclassroom.courseservice.entity.course.CourseEntity;
+import com.freeclassroom.courseservice.dto.response.course.instructor.CourseLessonCountProjection;
+import com.freeclassroom.courseservice.dto.response.admin.AdminActiveCourseProjection;
+import com.freeclassroom.courseservice.dto.response.admin.AdminInstructorCourseProjection;
+import com.freeclassroom.courseservice.dto.response.admin.AdminInstructorLeaderboardProjection;
+import com.freeclassroom.courseservice.dto.response.admin.AdminInstructorListProjection;
+import com.freeclassroom.courseservice.dto.response.admin.AdminInstructorMetricsProjection;
+import com.freeclassroom.courseservice.dto.response.course.instructor.InstructorCourseRowProjection;
+import com.freeclassroom.courseservice.dto.response.course.instructor.InstructorCourseStatsProjection;
 import com.freeclassroom.courseservice.enums.entity.EnumCourseProgressStep;
 import com.freeclassroom.courseservice.enums.entity.EnumCourseStatus;
 import feign.Param;
@@ -14,6 +22,141 @@ import java.util.List;
 import java.util.Optional;
 
 public interface CourseRepository extends JpaRepository<CourseEntity, String> {
+    @Query("""
+        SELECT COUNT(c)
+        FROM CourseEntity c
+        WHERE c.status = com.freeclassroom.courseservice.enums.entity.EnumCourseStatus.PUBLISHED
+          AND c.progressStep = com.freeclassroom.courseservice.enums.entity.EnumCourseProgressStep.COMPLETED
+          AND c.deleted = false
+    """)
+    Long countActiveCoursesForAdmin();
+
+    @Query("""
+        SELECT COUNT(DISTINCT c.instructorId)
+        FROM CourseEntity c
+        WHERE c.status = com.freeclassroom.courseservice.enums.entity.EnumCourseStatus.PUBLISHED
+          AND c.progressStep = com.freeclassroom.courseservice.enums.entity.EnumCourseProgressStep.COMPLETED
+          AND c.deleted = false
+    """)
+    Long countActiveInstructorsForAdmin();
+
+    @Query("""
+        SELECT COUNT(c)
+        FROM CourseEntity c
+        WHERE c.status = :status
+          AND c.deleted = false
+    """)
+    Long countByStatusForAdmin(@Param("status") EnumCourseStatus status);
+
+    @Query("""
+        SELECT
+            c.id AS courseId,
+            c.instructorId AS instructorId,
+            c.title AS title,
+            c.thumbnailUrl AS thumbnailUrl,
+            COALESCE(c.rating, 0) AS rating,
+            COUNT(e.id) AS studentCount
+        FROM CourseEntity c
+        LEFT JOIN c.enrollments e
+        WHERE c.status = com.freeclassroom.courseservice.enums.entity.EnumCourseStatus.PUBLISHED
+          AND c.progressStep = com.freeclassroom.courseservice.enums.entity.EnumCourseProgressStep.COMPLETED
+          AND c.deleted = false
+        GROUP BY c.id, c.instructorId, c.title, c.thumbnailUrl, c.rating
+    """)
+    List<AdminActiveCourseProjection> findActiveAdminCourseStats();
+
+    @Query("""
+        SELECT
+            c.instructorId AS instructorId,
+            COUNT(DISTINCT c.id) AS courseCount,
+            COUNT(e.id) AS studentCount
+        FROM CourseEntity c
+        LEFT JOIN c.enrollments e
+        WHERE c.status = com.freeclassroom.courseservice.enums.entity.EnumCourseStatus.PUBLISHED
+          AND c.progressStep = com.freeclassroom.courseservice.enums.entity.EnumCourseProgressStep.COMPLETED
+          AND c.deleted = false
+          AND c.instructorId IS NOT NULL
+          AND c.instructorId <> ''
+        GROUP BY c.instructorId
+        ORDER BY COUNT(e.id) DESC, COUNT(DISTINCT c.id) DESC
+    """)
+    List<AdminInstructorLeaderboardProjection> findAdminTopInstructorLeaderboard(Pageable pageable);
+
+    @Query("""
+        SELECT
+            c.instructorId AS instructorId,
+            COUNT(DISTINCT c.id) AS courseCount
+        FROM CourseEntity c
+        WHERE c.deleted = false
+          AND c.instructorId IS NOT NULL
+          AND c.instructorId <> ''
+        GROUP BY c.instructorId
+    """)
+    List<AdminInstructorListProjection> findAdminInstructorRows();
+
+    @Query("""
+        SELECT DISTINCT c.instructorId
+        FROM CourseEntity c
+        WHERE c.deleted = false
+          AND c.instructorId IS NOT NULL
+          AND c.instructorId <> ''
+    """)
+    List<String> findDistinctInstructorIds();
+
+    @Query("""
+        SELECT
+            c.instructorId AS instructorId,
+            COUNT(DISTINCT c.id) AS courseCount
+        FROM CourseEntity c
+        WHERE c.deleted = false
+          AND c.instructorId IS NOT NULL
+          AND c.instructorId <> ''
+        GROUP BY c.instructorId
+        HAVING (:minCourseCount IS NULL OR COUNT(DISTINCT c.id) >= :minCourseCount)
+           AND (:maxCourseCount IS NULL OR COUNT(DISTINCT c.id) <= :maxCourseCount)
+        ORDER BY COUNT(DISTINCT c.id) DESC, c.instructorId ASC
+    """)
+    List<AdminInstructorListProjection> findAdminInstructorRowsOrderByCourseCountDesc(@Param("minCourseCount") Long minCourseCount,
+                                                                                       @Param("maxCourseCount") Long maxCourseCount,
+                                                                                       Pageable pageable);
+
+    @Query("""
+        SELECT
+            c.instructorId AS instructorId,
+            COUNT(DISTINCT c.id) AS courseCount
+        FROM CourseEntity c
+        WHERE c.deleted = false
+          AND c.instructorId IS NOT NULL
+          AND c.instructorId <> ''
+        GROUP BY c.instructorId
+        HAVING (:minCourseCount IS NULL OR COUNT(DISTINCT c.id) >= :minCourseCount)
+           AND (:maxCourseCount IS NULL OR COUNT(DISTINCT c.id) <= :maxCourseCount)
+        ORDER BY COUNT(DISTINCT c.id) ASC, c.instructorId ASC
+    """)
+    List<AdminInstructorListProjection> findAdminInstructorRowsOrderByCourseCountAsc(@Param("minCourseCount") Long minCourseCount,
+                                                                                     @Param("maxCourseCount") Long maxCourseCount,
+                                                                                     Pageable pageable);
+
+    @Query("""
+        SELECT
+            c.instructorId AS instructorId,
+            COUNT(DISTINCT c.id) AS courseCount
+        FROM CourseEntity c
+        WHERE c.deleted = false
+          AND c.instructorId IN :instructorIds
+        GROUP BY c.instructorId
+    """)
+    List<AdminInstructorListProjection> findInstructorCourseCountsByInstructorIds(@Param("instructorIds") List<String> instructorIds);
+
+    @Query("""
+        SELECT c.id
+        FROM CourseEntity c
+        WHERE c.status = com.freeclassroom.courseservice.enums.entity.EnumCourseStatus.PUBLISHED
+          AND c.progressStep = com.freeclassroom.courseservice.enums.entity.EnumCourseProgressStep.COMPLETED
+          AND c.deleted = false
+    """)
+    List<String> findActiveCourseIdsForAdmin();
+
     Optional<CourseEntity> findByIdAndInstructorId(String id, String instructorId);
     boolean existsByIdAndInstructorId(String id, String instructorId);
     List<CourseEntity> findAllByInstructorId(String instructorId);
@@ -139,8 +282,41 @@ public interface CourseRepository extends JpaRepository<CourseEntity, String> {
         SELECT c.id 
         FROM CourseEntity c
         WHERE c.instructorId = :userId
+          AND c.deleted = false
     """)
     List<String> findAllIdsByInstructorId(@Param("userId") String userId);
+
+    @Query("""
+        SELECT
+            COUNT(DISTINCT c.id) AS courseCount,
+            COUNT(e.id) AS studentsCount,
+            COALESCE(AVG(c.rating), 0) AS averageRating,
+            COALESCE(AVG(e.progress), 0) AS completionRate
+        FROM CourseEntity c
+        LEFT JOIN c.enrollments e
+        WHERE c.deleted = false
+          AND c.instructorId = :instructorId
+    """)
+    AdminInstructorMetricsProjection getAdminInstructorMetrics(@Param("instructorId") String instructorId);
+
+    @Query("""
+        SELECT
+            c.id AS id,
+            c.title AS title,
+            c.category.name AS category,
+            c.status AS status,
+            COALESCE(c.rating, 0) AS rating,
+            COUNT(e.id) AS studentsCount
+        FROM CourseEntity c
+        LEFT JOIN c.enrollments e
+        WHERE c.deleted = false
+          AND c.instructorId = :instructorId
+        GROUP BY c.id, c.title, c.category.name, c.status, c.rating, c.createdAt
+    """)
+    Page<AdminInstructorCourseProjection> findAdminInstructorCourses(
+            @Param("instructorId") String instructorId,
+            Pageable pageable
+    );
 
     Page<CourseEntity> findByInstructorIdAndStatusAndProgressStep(
             String instructorId,
@@ -158,4 +334,118 @@ public interface CourseRepository extends JpaRepository<CourseEntity, String> {
     @EntityGraph(attributePaths = {"tags", "category"})
     @Query("select c from CourseEntity c")
     Page<CourseEntity> findAllWithTags(Pageable pageable);
+
+    @Query("""
+        SELECT c
+        FROM CourseEntity c
+        WHERE c.deleted = false
+          AND (:search IS NULL OR LOWER(c.title) LIKE LOWER(CONCAT('%', :search, '%')))
+          AND (:status IS NULL OR c.status = :status)
+    """)
+    Page<CourseEntity> findAllForAdmin(
+            @Param("search") String search,
+            @Param("status") EnumCourseStatus status,
+            Pageable pageable
+    );
+
+    @Query("""
+        SELECT
+            c.id AS id,
+            c.title AS title,
+            c.shortDescription AS shortDescription,
+            c.thumbnailUrl AS thumbnailUrl,
+            c.originalPrice AS originalPrice,
+            c.finalPrice AS finalPrice,
+            c.rating AS rating,
+            c.createdAt AS createdAt,
+            COUNT(e.id) AS studentsCount
+        FROM CourseEntity c
+        LEFT JOIN c.enrollments e
+        WHERE c.instructorId = :instructorId
+          AND c.status = com.freeclassroom.courseservice.enums.entity.EnumCourseStatus.PUBLISHED
+          AND c.progressStep = com.freeclassroom.courseservice.enums.entity.EnumCourseProgressStep.COMPLETED
+          AND (:search IS NULL OR LOWER(c.title) LIKE LOWER(CONCAT('%', :search, '%')))
+        GROUP BY c.id, c.title, c.shortDescription, c.thumbnailUrl, c.originalPrice, c.finalPrice, c.rating, c.createdAt
+    """)
+    Page<InstructorCourseRowProjection> findPublicInstructorCourses(
+            @Param("instructorId") String instructorId,
+            @Param("search") String search,
+            Pageable pageable
+    );
+
+    @Query("""
+        SELECT
+            c.id AS id,
+            c.title AS title,
+            c.shortDescription AS shortDescription,
+            c.thumbnailUrl AS thumbnailUrl,
+            c.originalPrice AS originalPrice,
+            c.finalPrice AS finalPrice,
+            c.rating AS rating,
+            c.createdAt AS createdAt,
+            COUNT(e.id) AS studentsCount
+        FROM CourseEntity c
+        LEFT JOIN c.enrollments e
+        WHERE c.instructorId = :instructorId
+          AND c.status = com.freeclassroom.courseservice.enums.entity.EnumCourseStatus.PUBLISHED
+          AND c.progressStep = com.freeclassroom.courseservice.enums.entity.EnumCourseProgressStep.COMPLETED
+          AND (:search IS NULL OR LOWER(c.title) LIKE LOWER(CONCAT('%', :search, '%')))
+        GROUP BY c.id, c.title, c.shortDescription, c.thumbnailUrl, c.originalPrice, c.finalPrice, c.rating, c.createdAt
+        ORDER BY COUNT(e.id) DESC, c.createdAt DESC
+    """)
+    Page<InstructorCourseRowProjection> findPublicInstructorCoursesOrderByStudentsDesc(
+            @Param("instructorId") String instructorId,
+            @Param("search") String search,
+            Pageable pageable
+    );
+
+    @Query("""
+        SELECT
+            c.id AS id,
+            c.title AS title,
+            c.shortDescription AS shortDescription,
+            c.thumbnailUrl AS thumbnailUrl,
+            c.originalPrice AS originalPrice,
+            c.finalPrice AS finalPrice,
+            c.rating AS rating,
+            c.createdAt AS createdAt,
+            COUNT(e.id) AS studentsCount
+        FROM CourseEntity c
+        LEFT JOIN c.enrollments e
+        WHERE c.instructorId = :instructorId
+          AND c.status = com.freeclassroom.courseservice.enums.entity.EnumCourseStatus.PUBLISHED
+          AND c.progressStep = com.freeclassroom.courseservice.enums.entity.EnumCourseProgressStep.COMPLETED
+          AND (:search IS NULL OR LOWER(c.title) LIKE LOWER(CONCAT('%', :search, '%')))
+        GROUP BY c.id, c.title, c.shortDescription, c.thumbnailUrl, c.originalPrice, c.finalPrice, c.rating, c.createdAt
+        ORDER BY COUNT(e.id) ASC, c.createdAt ASC
+    """)
+    Page<InstructorCourseRowProjection> findPublicInstructorCoursesOrderByStudentsAsc(
+            @Param("instructorId") String instructorId,
+            @Param("search") String search,
+            Pageable pageable
+    );
+
+    @Query("""
+        SELECT
+            COUNT(c.id) AS totalCourses,
+            AVG(c.rating) AS averageRating
+        FROM CourseEntity c
+        WHERE c.instructorId = :instructorId
+          AND c.status = com.freeclassroom.courseservice.enums.entity.EnumCourseStatus.PUBLISHED
+          AND c.progressStep = com.freeclassroom.courseservice.enums.entity.EnumCourseProgressStep.COMPLETED
+    """)
+    InstructorCourseStatsProjection getPublicInstructorCourseStats(@Param("instructorId") String instructorId);
+
+    @Query("""
+        SELECT
+            c.id AS courseId,
+            COUNT(l.id) AS lessonsCount
+        FROM CourseEntity c
+        LEFT JOIN c.chapters ch
+        LEFT JOIN ch.lessons l
+        WHERE c.id IN :courseIds
+          AND (l.id IS NULL OR l.deleted = false)
+        GROUP BY c.id
+    """)
+    List<CourseLessonCountProjection> countLessonsByCourseIds(@Param("courseIds") List<String> courseIds);
 }

@@ -9,6 +9,8 @@ option java_outer_classname = "UserServiceProto";
 service UserService {
   rpc GetUser (GetUserRequest) returns (GetUserResponse);
   rpc GetBulkTeachers (GetTeachersRequest) returns (GetTeachersResponse);
+  rpc SearchTeachersByIds (SearchTeachersByIdsRequest) returns (SearchTeachersByIdsResponse);
   rpc GetTeacherDetail (GetUserRequest) returns (TeacherDetail);
+  rpc GetAdminInstructorSummaryProfile (GetUserRequest) returns (AdminInstructorSummaryProfile);
   rpc CheckIsVip (CheckIsVipRequest) returns (CheckIsVipResponse);
 }
