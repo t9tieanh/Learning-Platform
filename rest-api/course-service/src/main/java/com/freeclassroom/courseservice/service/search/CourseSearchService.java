@@ -25,7 +25,7 @@ public class CourseSearchService {
 
     private final ElasticsearchClient elasticsearchClient;
 
-    @Value("${app.elasticsearch.course-index:courses-dev}")
+    @Value("${app.elasticsearch.course-index:courses}")
     private String courseIndex;
 
     public EsPage<CourseEsDocument> searchCourses(

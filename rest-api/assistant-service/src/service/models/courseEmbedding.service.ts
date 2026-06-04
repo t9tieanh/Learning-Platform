@@ -89,7 +89,7 @@ class CourseEmbeddingService {
         link,
         content,
         metadata,
-        check,
+        "check",
         embedding,
         created_at
       )
