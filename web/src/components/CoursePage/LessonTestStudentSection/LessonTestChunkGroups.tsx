@@ -13,6 +13,7 @@ export interface LessonTestChunkGroupsProps {
   setChoice: (quizId: string, choiceId: string) => void
   result: LessonTestSubmissionResult | null
   resultByQuizId: Map<string, LessonTestSubmissionItem>
+  showAnswerKey?: boolean
   flaggedIds: Record<string, boolean>
   toggleFlag: (quizId: string) => void
   onSeek?: (timestamp: string) => void
@@ -27,6 +28,7 @@ export const LessonTestChunkGroups: React.FC<LessonTestChunkGroupsProps> = ({
   setChoice,
   result,
   resultByQuizId,
+  showAnswerKey = true,
   flaggedIds,
   toggleFlag,
   onSeek,
@@ -62,6 +64,7 @@ export const LessonTestChunkGroups: React.FC<LessonTestChunkGroupsProps> = ({
               setChoice={setChoice}
               locked={Boolean(result)}
               row={resultByQuizId.get(quiz.id)}
+              showAnswerKey={showAnswerKey}
               flaggedIds={flaggedIds}
               toggleFlag={toggleFlag}
               onSeek={onSeek}

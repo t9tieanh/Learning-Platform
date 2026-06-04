@@ -12,6 +12,7 @@ import { StatusCodes } from 'http-status-codes';
 import ApiError from '~/middleware/ApiError';
 import prismaService from '~/service/utils/prisma.service';
 import lessonTestService from '~/service/lessonTest/lessonTest.service';
+import lessonTestEligibilityService from '~/service/lessonTest/lessonTestEligibility.service';
 import { shuffleArray, stringSetsEqual } from '~/utils/array.util';
 import courseClient from '~/grpc/courseClient.grpc';
 import Logger from '~/utils/logger';
@@ -20,6 +21,17 @@ const MIN_PASS_PERCENT_FOR_CERTIFICATE = 50;
 
 /** MCQ + true/false only; short answer is out of scope for auto-grading v1. */
 const GRADABLE_TYPES: QuestionType[] = [QuestionType.MULTIPLE_CHOICE, QuestionType.TRUE_FALSE];
+
+type GradedSubmissionItem = {
+  quizId: string;
+  isCorrect: boolean;
+  pointsEarned: number;
+  maxPoints: number;
+  selectedChoiceIds: string[];
+  correctChoiceIds: string[];
+  explanation: string;
+  chunkId: string | null;
+};
 
 type QuizWithChoicesAndGroup = Prisma.QuizGetPayload<{
   include: {
@@ -235,16 +247,7 @@ export class LessonTestStudentService {
       answerByQuiz.set(row.quizId, uniq);
     }
 
-    const items: {
-      quizId: string;
-      isCorrect: boolean;
-      pointsEarned: number;
-      maxPoints: number;
-      selectedChoiceIds: string[];
-      correctChoiceIds: string[];
-      explanation: string;
-      chunkId: string | null;
-    }[] = [];
+    const items: GradedSubmissionItem[] = [];
 
     let earnedPoints = 0;
     const maxPoints = orderedQuizzes.length;
@@ -319,16 +322,21 @@ export class LessonTestStudentService {
 
     if (percent >= MIN_PASS_PERCENT_FOR_CERTIFICATE) {
       try {
-        const issueResult = await courseClient.tryIssueCourseCompletionCertificate(userId, lessonId);
-        certificatePayload = {
-          isCompletedCourse: issueResult.isNewlyCompletedCourse,
-          certificateId: issueResult.certificateId,
-          certificateCode: issueResult.certificateCode,
-        };
+        const allCourseTestsPassed = await this.areAllCourseLessonTestsPassed(userId, lessonId);
+        if (allCourseTestsPassed) {
+          const issueResult = await courseClient.tryIssueCourseCompletionCertificate(userId, lessonId);
+          certificatePayload = {
+            isCompletedCourse: issueResult.isNewlyCompletedCourse,
+            certificateId: issueResult.certificateId,
+            certificateCode: issueResult.certificateCode,
+          };
+        }
       } catch (error) {
         Logger.error(`Failed to try issue certificate after lesson test submit: ${error}`);
       }
     }
+
+    const answersRevealed = this.shouldRevealAnswers(percent);
 
     return {
       submissionId: submission.id,
@@ -338,7 +346,8 @@ export class LessonTestStudentService {
         maxPoints,
         percent,
       },
-      items,
+      answersRevealed,
+      items: this.toStudentResponseItems(items, answersRevealed),
       chunks: lesson.chunks,
       subtitles: lesson.subtitles,
       ...certificatePayload,
@@ -372,12 +381,44 @@ export class LessonTestStudentService {
         maxPoints: r.maxPoints,
         percent: r.percent,
       },
+      answersRevealed: this.shouldRevealAnswers(r.percent),
     }));
   }
 
   private parseStoredChoiceIds(value: unknown): string[] {
     if (!Array.isArray(value)) return [];
     return value.filter((x): x is string => typeof x === 'string');
+  }
+
+  private shouldRevealAnswers(percent: number): boolean {
+    return percent >= MIN_PASS_PERCENT_FOR_CERTIFICATE;
+  }
+
+  /**
+   * True when every lesson in the course that has a published gradable test
+   * has a best submission at or above the pass threshold (50%).
+   */
+  private async areAllCourseLessonTestsPassed(userId: string, lessonId: string): Promise<boolean> {
+    const courseLessonIds = await courseClient.getCourseLessonIdsByLessonId(lessonId);
+    if (courseLessonIds.length === 0) {
+      return false;
+    }
+
+    const rows = await lessonTestEligibilityService.batchGetEligibility(
+      userId,
+      courseLessonIds,
+      MIN_PASS_PERCENT_FOR_CERTIFICATE
+    );
+
+    return rows.every((row) => !row.hasPublishedTest || row.passed);
+  }
+
+  private toStudentResponseItems<T extends { correctChoiceIds?: string[]; explanation?: string }>(
+    items: T[],
+    answersRevealed: boolean
+  ): T[] {
+    if (answersRevealed) return items;
+    return items.map(({ correctChoiceIds: _c, explanation: _e, ...rest }) => rest as T);
   }
 
   /**
@@ -484,6 +525,8 @@ export class LessonTestStudentService {
       if (row) items.push(row);
     }
 
+    const answersRevealed = this.shouldRevealAnswers(submission.percent);
+
     return {
       submissionId: submission.id,
       lessonId,
@@ -493,7 +536,8 @@ export class LessonTestStudentService {
         maxPoints: submission.maxPoints,
         percent: submission.percent,
       },
-      items,
+      answersRevealed,
+      items: this.toStudentResponseItems(items, answersRevealed),
       chunks: lesson.chunks,
       subtitles: lesson.subtitles,
     };
