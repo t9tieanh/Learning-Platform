@@ -16,9 +16,11 @@ import tagsService from '@/services/course/tags.service'
 
 const LandingPageForm = ({
   id,
-  courseInfo
+  courseInfo,
+  onIntroVideoUpdated
 }: {
   id: string
+  onIntroVideoUpdated?: (url: string) => void
   courseInfo: {
     courseTitle: string
     subtitle: string
@@ -155,9 +157,11 @@ const LandingPageForm = ({
                   errors,
                   setValue,
                   getValues,
-                  handleSubmit
+                  handleSubmit,
+                  watch
                 }}
                 id={id}
+                onIntroVideoUpdated={onIntroVideoUpdated}
               />
             </TabsContent>
 

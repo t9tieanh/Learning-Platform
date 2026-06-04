@@ -5,8 +5,14 @@ import { toast } from 'sonner'
 import CustomButton from '@/components/common/Button'
 import { FaPaperPlane } from 'react-icons/fa'
 import courseService from '@/services/course/course.service'
-import { PriceFormValues } from '@/utils/create-course/price'
+import {
+  MAX_PRICE_THOUSANDS,
+  MIN_FINAL_PRICE_THOUSANDS,
+  MIN_ORIGINAL_PRICE_THOUSANDS,
+  PriceFormValues
+} from '@/utils/create-course/price'
 import useLoading from '@/hooks/useLoading.hook'
+import type { FieldErrors, UseFormRegister, UseFormSetValue, UseFormTrigger } from 'react-hook-form'
 
 const PriceInput = ({
   currency,
@@ -15,48 +21,58 @@ const PriceInput = ({
   subLabel,
   name,
   register,
-  errors,
+  errorMessage,
+  min,
   setCoursePrice
 }: {
   currency: string
   setCurrency: (value: string) => void
   label: string
   subLabel: string
-  name: string
-  register?: any
-  errors?: any
+  name: keyof PriceFormValues
+  register: UseFormRegister<PriceFormValues>
+  errorMessage?: string
+  min: number
   setCoursePrice: (value: number) => void
 }) => {
+  const { onChange, onBlur, ref, name: fieldName } = register(name)
+
   return (
-    <>
+    <div className='space-y-1.5'>
       <div className='flex flex-col gap-1.5'>
-        <Label htmlFor='currency' className='text-[11px] font-bold text-gray-400 uppercase tracking-wider'>
+        <Label htmlFor={fieldName} className='text-[11px] font-bold text-gray-400 uppercase tracking-wider'>
           {label}
         </Label>
         <p className='text-[10px] font-medium text-gray-300'>{subLabel}</p>
       </div>
       <div className='relative'>
         <CustomInput
-          id='price'
+          id={fieldName}
+          name={fieldName}
+          ref={ref}
           type='number'
           step={1}
-          min={1}
-          max={10000}
+          min={min}
+          max={MAX_PRICE_THOUSANDS}
           placeholder='Ví dụ: 200'
-          {...(register && name ? register(name) : {})}
+          onBlur={onBlur}
           onChange={(e) => {
+            onChange(e)
             const raw = e.target.value
             if (raw === '') return
             const value = Number(raw)
-            if (isNaN(value)) return
+            if (Number.isNaN(value)) return
             setCoursePrice(value)
           }}
-          className='pl-8 pr-24 h-11 text-[13.5px] font-bold border-gray-100 bg-gray-50/20 focus:bg-white transition-all rounded-2xl placeholder:text-gray-300'
+          className={`pl-8 pr-24 h-11 text-[13.5px] font-bold bg-gray-50/20 focus:bg-white transition-all rounded-2xl placeholder:text-gray-300 ${
+            errorMessage ? 'border-red-300 focus-visible:ring-red-200' : 'border-gray-100'
+          }`}
         />
         <span className='absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 font-bold'>₫</span>
         <span className='absolute right-3.5 px-2 py-1 bg-gray-100/50 rounded-lg text-[10px] top-1/2 -translate-y-1/2 text-gray-400 font-black uppercase tracking-tighter'>.000 VND</span>
       </div>
-    </>
+      {errorMessage ? <p className='text-[11px] font-medium text-red-500'>{errorMessage}</p> : null}
+    </div>
   )
 }
 
@@ -66,17 +82,24 @@ const PriceForm = ({
   register,
   errors,
   setValue,
+  trigger,
   courseId,
-  handleSubmit
+  handleSubmit,
+  onPriceUpdated
 }: {
   currency: string
   setCurrency: (value: string) => void
-  register?: any
-  errors?: any
-  setValue: any
+  register: UseFormRegister<PriceFormValues>
+  errors: FieldErrors<PriceFormValues>
+  setValue: UseFormSetValue<PriceFormValues>
+  trigger: UseFormTrigger<PriceFormValues>
   courseId: string
-  handleSubmit: any
+  handleSubmit: ReturnType<typeof import('react-hook-form').useForm<PriceFormValues>>['handleSubmit']
+  onPriceUpdated?: () => void | Promise<void>
 }) => {
+  const revalidatePrices = () => {
+    void trigger(['originalPrice', 'finalPrice'])
+  }
   const { loading, startLoading, stopLoading } = useLoading()
 
   // handle update price
@@ -89,6 +112,7 @@ const PriceForm = ({
       const result = await courseService.updatePrice(courseId, originalPrice, finalPrice)
       if (result && result.code === 200) {
         toast.success(result.message || 'Cập nhật giá khóa học thành công!')
+        await onPriceUpdated?.()
       } else toast.error(result.message || 'Cập nhật giá khóa học thất bại. Vui lòng thử lại.')
     } catch (error) {
       toast.error('Cập nhật giá khóa học thất bại. Vui lòng thử lại.')
@@ -111,10 +135,12 @@ const PriceForm = ({
             label='Giá gốc của khóa học'
             subLabel='Giá hiển thị gạch ngang để thu hút học viên'
             name='originalPrice'
+            min={MIN_ORIGINAL_PRICE_THOUSANDS}
             register={register}
-            errors={errors}
+            errorMessage={errors.originalPrice?.message}
             setCoursePrice={(price: number) => {
-              setValue('originalPrice', price)
+              setValue('originalPrice', price, { shouldValidate: true, shouldDirty: true })
+              revalidatePrices()
             }}
           />
           <PriceInput
@@ -123,15 +149,18 @@ const PriceForm = ({
             label='Giá thực tế bán ra'
             subLabel='Mức giá cuối cùng học viên sẽ thanh toán'
             name='finalPrice'
+            min={MIN_FINAL_PRICE_THOUSANDS}
             register={register}
-            errors={errors}
+            errorMessage={errors.finalPrice?.message}
             setCoursePrice={(price: number) => {
-              setValue('finalPrice', price)
+              setValue('finalPrice', price, { shouldValidate: true, shouldDirty: true })
+              revalidatePrices()
             }}
           />
 
           <div className='p-4 bg-blue-50/30 rounded-2xl border border-blue-50/80 text-[11px] font-medium text-blue-600 leading-relaxed'>
-            * Hệ thống nhận đơn vị nghìn đồng. Phạm vi cho phép: 50 - 20,000 (tương đương 50.000đ - 20.000.000đ)
+            * Hệ thống nhận đơn vị nghìn đồng. Giá bán ra: 5 - 20,000 (5.000đ - 20.000.000đ). Giá gốc tối thiểu
+            50.000đ và phải lớn hơn giá bán ra.
           </div>
           <div className='flex justify-end pt-2'>
             <CustomButton

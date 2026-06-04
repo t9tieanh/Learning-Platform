@@ -68,7 +68,8 @@ public class CourseService implements ICourseService {
     IUploadFileService fileService;
 
     @NonFinal
-    private Double PLATFORM_FEES = 0.1d;
+    @org.springframework.beans.factory.annotation.Value("${app.course.platform-fee-rate:0.2}")
+    private Double platformFeeRate = 0.2d;
 
     @Override
     public ApiResponse<CreationResponse> createCourse(CreationCourseRequest request, String userId) {
@@ -272,9 +273,13 @@ public class CourseService implements ICourseService {
                     course.setIntroductoryVideo(fileUrl);
                     courseRepo.save(course);
 
+                    String completedPayload = String.format(
+                            "{\"introductoryVideo\":\"%s\",\"message\":\"Video giới thiệu đã được tải lên thành công !\"}",
+                            fileUrl.replace("\\", "\\\\").replace("\"", "\\\"")
+                    );
                     ServerSentEvent<String> completedEvent = ServerSentEvent.<String>builder()
                             .event("completed")
-                            .data("{\"lessonId\": \"" + course.getId() + "\", \"message\": \"Video giới thiệu đã được tải lên thành công !\"}")
+                            .data(completedPayload)
                             .build();
 
                     return Flux.just(savingEvent, completedEvent);
@@ -330,9 +335,8 @@ public class CourseService implements ICourseService {
                                 .id(course.getId())
                                 .originalPrice(originalPrice)
                                 .finalPrice(finalPrice)
-                                .platformFee(PLATFORM_FEES)
-                                // ammount instructor receive
-                                .yourIncome(finalPrice * (1 - PLATFORM_FEES))
+                                .platformFee(platformFeeRate)
+                                .yourIncome(finalPrice * (1 - platformFeeRate))
                                 .build()
                 )
                 .build();
@@ -363,16 +367,22 @@ public class CourseService implements ICourseService {
                 .orElseThrow(() -> new CustomExeption(ErrorCode.COURSE_NOT_FOUND));
 
         // check avatar, title
-        if (course.getTitle().equals(null) || course.getTitle().equals("") || course.getThumbnailUrl().equals(null) || course.getThumbnailUrl().equals("")
-            || course.getRequirements().stream().count() == 0 || course.getOutcomes().stream().count() == 0
-        )
+        if (course.getTitle() == null || course.getTitle().isBlank()
+                || course.getThumbnailUrl() == null || course.getThumbnailUrl().isBlank()
+                || course.getRequirements() == null || course.getRequirements().isEmpty()
+                || course.getOutcomes() == null || course.getOutcomes().isEmpty()) {
             throw new CustomExeption(ErrorCode.INFO_COURSE_NOT_OKE);
+        }
 
-        if (courseRepo.countLessonsByCourseId(id) == 0)
+        if (courseRepo.countLessonsByCourseId(id) == 0) {
             throw new CustomExeption(ErrorCode.COURSE_WITHOUT_VIDEO);
+        }
 
-        if (course.getFinalPrice() == 0 || course.getOriginalPrice() == 0 )
+        Double finalPrice = course.getFinalPrice();
+        Double originalPrice = course.getOriginalPrice();
+        if (finalPrice == null || originalPrice == null || finalPrice <= 0 || originalPrice <= 0) {
             throw new CustomExeption(ErrorCode.COURSE_WITHOUT_PRICE);
+        }
 
         // -> maybe approval
         course.setProgressStep(EnumCourseProgressStep.COMPLETED);

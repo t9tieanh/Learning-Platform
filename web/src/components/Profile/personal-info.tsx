@@ -77,9 +77,16 @@ const PersonalInfo = () => {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const descriptionEditorRef = useRef<Quill | null>(null)
   const hasShownDescriptionLimitToastRef = useRef(false)
+  const AVATAR_MAX_BYTES = 5 * 1024 * 1024
+
   const handleAvatarChange = (e?: React.ChangeEvent<HTMLInputElement>) => {
     const file = e?.target?.files?.[0]
     if (!file) return
+    if (file.size > AVATAR_MAX_BYTES) {
+      toast.error('Ảnh đại diện tối đa 5MB')
+      if (e?.target) e.target.value = ''
+      return
+    }
     setForm((prev) => ({ ...prev, imageFile: file }))
   }
 

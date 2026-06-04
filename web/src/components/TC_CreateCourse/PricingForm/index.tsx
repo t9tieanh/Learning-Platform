@@ -1,9 +1,6 @@
-import { useEffect, useState } from 'react'
-import { Button } from '@/components/ui/button'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import TitleComponent from '@/components/TC_CreateCourse/common/Title'
 import PriceForm from '@/components/TC_CreateCourse/PricingForm/PriceForm'
-import SuggestedPrice from '@/components/TC_CreateCourse/PricingForm/SuggestedPrice'
-import Orientation from '@/components/TC_CreateCourse/PricingForm/Orientation'
 import PreviewPrice from '@/components/TC_CreateCourse/PricingForm/PreviewPrice'
 import { PriceFormSchema, PriceFormValues } from '@/utils/create-course/price'
 import { useForm } from 'react-hook-form'
@@ -12,54 +9,63 @@ import courseService from '@/services/course/course.service'
 import PricingFormSkeleton from './Skeleton/PricingFormSkeleton'
 import { Layout } from 'lucide-react'
 
+const DEFAULT_PLATFORM_FEE_RATE = 0.2
+
 const PricingForm = ({ id }: { id: string }) => {
   const {
     register,
     handleSubmit,
     watch,
     setValue,
-    getValues,
+    trigger,
     formState: { errors }
   } = useForm<PriceFormValues>({
     resolver: yupResolver(PriceFormSchema),
+    mode: 'onChange',
+    reValidateMode: 'onChange',
     defaultValues: {
-      originalPrice: 50000,
-      finalPrice: 50000
+      originalPrice: 100,
+      finalPrice: 50
     }
   })
   const [currency, setCurrency] = useState('VND')
-  const [yourIncome, setYourIncome] = useState(0)
-  const [platformFee, setPlatformFee] = useState(0)
+  const [platformFeeRate, setPlatformFeeRate] = useState(DEFAULT_PLATFORM_FEE_RATE)
   const [loading, setLoading] = useState(true)
 
-  const suggestedPrices = [
-    { price: 480000, tier: 'Cơ bản', description: 'Phù hợp cho khóa học ngắn' },
-    { price: 1_200_000, tier: 'Tiêu chuẩn', description: 'Mức giá phổ biến nhất' },
-    { price: 2_400_000, tier: 'Nâng cao', description: 'Dành cho khóa học toàn diện' },
-    { price: 4_800_000, tier: 'Chuyên nghiệp', description: 'Cho nội dung cấp chuyên gia' }
-  ]
+  const finalPriceThousands = watch('finalPrice')
 
-  const getPrice = async () => {
+  const getPrice = useCallback(async () => {
     setLoading(true)
     try {
       const response = await courseService.getPrice(id)
-      if (response && response.code === 200 && response.result) {
-        const { originalPrice, finalPrice, yourIncome, platformFee } = response.result
+      if (response?.code === 200 && response.result) {
+        const { originalPrice, finalPrice, platformFee } = response.result
         setValue('originalPrice', originalPrice / 1000)
         setValue('finalPrice', finalPrice / 1000)
-        setYourIncome(yourIncome / 1000)
-        setPlatformFee(platformFee / 1000)
+        if (typeof platformFee === 'number' && platformFee > 0 && platformFee < 1) {
+          setPlatformFeeRate(platformFee)
+        }
       }
     } catch (error) {
-      console.log('Error fetching price:', error)
+      console.error('Error fetching price:', error)
     } finally {
       setLoading(false)
     }
-  }
+  }, [id, setValue])
 
   useEffect(() => {
     getPrice()
-  }, [id])
+  }, [getPrice])
+
+  const finalPriceVnd = useMemo(() => {
+    const value = Number(finalPriceThousands)
+    if (!Number.isFinite(value) || value <= 0) return 0
+    return value * 1000
+  }, [finalPriceThousands])
+
+  const yourIncomeVnd = useMemo(() => {
+    return Math.round(finalPriceVnd * (1 - platformFeeRate))
+  }, [finalPriceVnd, platformFeeRate])
 
   if (loading) {
     return <PricingFormSkeleton />
@@ -81,13 +87,19 @@ const PricingForm = ({ id }: { id: string }) => {
             register={register}
             errors={errors}
             setValue={setValue}
+            trigger={trigger}
             courseId={id}
             handleSubmit={handleSubmit}
+            onPriceUpdated={getPrice}
           />
         </div>
 
         <div className='space-y-6'>
-          <PreviewPrice coursePrice={getValues('finalPrice')} yourIncome={yourIncome} platformFee={platformFee} />
+          <PreviewPrice
+            coursePriceVnd={finalPriceVnd}
+            yourIncomeVnd={yourIncomeVnd}
+            platformFeeRate={platformFeeRate}
+          />
         </div>
       </div>
     </div>

@@ -1,4 +1,6 @@
-export type CourseApprovalAction = 'APPROVED' | 'REJECTED'
+import { CourseApprovalAction } from '~/enums/courseApprovalAction.enum'
+
+export { CourseApprovalAction }
 
 export interface CourseApprovalTagDto {
   id: string

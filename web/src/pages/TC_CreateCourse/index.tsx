@@ -90,7 +90,13 @@ const TC_CreateCourse = () => {
       case CourseProgressStep.SETTINGS:
         return <SetupForm id={id as string} />
       default:
-        return <LandingPageForm id={id as string} courseInfo={courseInfo} />
+        return (
+          <LandingPageForm
+            id={id as string}
+            courseInfo={courseInfo}
+            onIntroVideoUpdated={(url) => setCourseInfo((prev) => ({ ...prev, introductoryVideo: url }))}
+          />
+        )
     }
   }
 

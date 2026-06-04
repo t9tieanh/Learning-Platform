@@ -14,11 +14,15 @@ import { useUpload } from '@/hooks/useUpload.hook'
 import { useAuthStore } from '@/stores/useAuth.stores'
 
 interface MediaInfomationProps {
-  formProps: CommonProps
+  formProps: CommonProps & {
+    watch: (name: 'introductoryVideo') => string | undefined
+  }
   id: string
+  onIntroVideoUpdated?: (url: string) => void
 }
 
-const MediaInfomation = ({ formProps, id }: MediaInfomationProps) => {
+const MediaInfomation = ({ formProps, id, onIntroVideoUpdated }: MediaInfomationProps) => {
+  const savedIntroVideo = formProps.watch('introductoryVideo')
   const { loading, startLoading, stopLoading } = useLoading()
   const imageInputRef = useRef<HTMLInputElement>(null)
   const videoInputRef = useRef<HTMLInputElement>(null)
@@ -123,9 +127,25 @@ const MediaInfomation = ({ formProps, id }: MediaInfomationProps) => {
 
     try {
       console.log('Uploading intro video file:', formData)
-      await upload(formData, async () => {
-        toast.success('Tải video giới thiệu lên thành công')
+      await upload(formData, async (payload) => {
+        let videoUrl = payload?.introductoryVideo
+
+        if (!videoUrl) {
+          try {
+            const response = await courseService.getCourseInfo(id)
+            videoUrl = response?.result?.introductoryVideo
+          } catch (error) {
+            console.error('Failed to refresh intro video url:', error)
+          }
+        }
+
+        if (videoUrl) {
+          formProps.setValue('introductoryVideo', videoUrl, { shouldDirty: true, shouldValidate: true })
+          onIntroVideoUpdated?.(videoUrl)
+        }
+
         handleCancelVideo()
+        toast.success('Tải video giới thiệu lên thành công')
       })
     } catch (error) {
       console.error('Error uploading intro video:', error)
@@ -208,36 +228,50 @@ const MediaInfomation = ({ formProps, id }: MediaInfomationProps) => {
                    hover:border-blue-200 hover:bg-blue-50/10 transition-all duration-300 cursor-pointer group bg-gray-50/20'
             onClick={triggerVideoUpload}
           >
-            {videoSrc ? (
+            {videoSrc || savedIntroVideo ? (
               <div className='flex flex-col items-center'>
                 <video
                   ref={videoPreviewRef}
-                  src={videoSrc}
+                  src={videoSrc ?? savedIntroVideo ?? undefined}
                   controls
                   className='w-full max-h-48 mb-3 rounded-md bg-black'
                 />
                 <div className='flex justify-center items-center gap-3 w-full'>
-                  <CustomButton
-                    className='bg-blue-600 hover:bg-blue-700 text-white rounded-xl h-7.5 px-6 text-[10.5px] font-bold shadow-lg shadow-blue-100'
-                    label={'Xác nhận lưu'}
-                    onClick={handleConfirmVideo}
-                    icon={<Send className='h-3.5 w-3.5 mr-2' />}
-                  />
-                  <div className='flex items-center gap-2'>
+                  {videoSrc ? (
+                    <>
+                      <CustomButton
+                        className='bg-blue-600 hover:bg-blue-700 text-white rounded-xl h-7.5 px-6 text-[10.5px] font-bold shadow-lg shadow-blue-100'
+                        label={'Xác nhận lưu'}
+                        onClick={handleConfirmVideo}
+                        icon={<Send className='h-3.5 w-3.5 mr-2' />}
+                      />
+                      <div className='flex items-center gap-2'>
+                        <CustomButton
+                          className='bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-100 rounded-xl h-7.5 w-7.5 p-0 flex items-center justify-center'
+                          icon={<MousePointer className='h-3.5 w-3.5' />}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            triggerVideoUpload()
+                          }}
+                        />
+                        <CustomButton
+                          className='bg-red-50 hover:bg-red-100 text-red-600 border border-red-100 rounded-xl h-7.5 w-7.5 p-0 flex items-center justify-center'
+                          onClick={handleCancelVideo}
+                          icon={<CircleX className='h-3.5 w-3.5' />}
+                        />
+                      </div>
+                    </>
+                  ) : (
                     <CustomButton
-                      className='bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-100 rounded-xl h-7.5 w-7.5 p-0 flex items-center justify-center'
-                      icon={<MousePointer className='h-3.5 w-3.5' />}
+                      className='bg-blue-600 hover:bg-blue-700 text-white rounded-xl px-8 h-7.5 text-[10.5px] font-bold shadow-lg shadow-blue-100'
                       onClick={(e) => {
                         e.stopPropagation()
                         triggerVideoUpload()
                       }}
+                      label='Thay video giới thiệu'
+                      icon={<Upload className='h-3.5 w-3.5 mr-2' />}
                     />
-                    <CustomButton
-                      className='bg-red-50 hover:bg-red-100 text-red-600 border border-red-100 rounded-xl h-7.5 w-7.5 p-0 flex items-center justify-center'
-                      onClick={handleCancelVideo}
-                      icon={<CircleX className='h-3.5 w-3.5' />}
-                    />
-                  </div>
+                  )}
                 </div>
                 {isUploading && <IntroVideoPreviewProgress progress={progress} />}
               </div>
