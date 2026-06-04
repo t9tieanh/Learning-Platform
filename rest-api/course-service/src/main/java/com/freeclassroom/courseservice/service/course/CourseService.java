@@ -273,9 +273,13 @@ public class CourseService implements ICourseService {
                     course.setIntroductoryVideo(fileUrl);
                     courseRepo.save(course);
 
+                    String completedPayload = String.format(
+                            "{\"introductoryVideo\":\"%s\",\"message\":\"Video giới thiệu đã được tải lên thành công !\"}",
+                            fileUrl.replace("\\", "\\\\").replace("\"", "\\\"")
+                    );
                     ServerSentEvent<String> completedEvent = ServerSentEvent.<String>builder()
                             .event("completed")
-                            .data("{\"lessonId\": \"" + course.getId() + "\", \"message\": \"Video giới thiệu đã được tải lên thành công !\"}")
+                            .data(completedPayload)
                             .build();
 
                     return Flux.just(savingEvent, completedEvent);
