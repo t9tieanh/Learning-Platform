@@ -13,6 +13,7 @@ import com.freeclassroom.courseservice.grpc.client.SaleGrpcClient;
 import com.freeclassroom.courseservice.grpc.client.UserGrpcClient;
 import com.freeclassroom.courseservice.repository.entity.CourseRepository;
 import com.freeclassroom.courseservice.repository.entity.EnrollmentRepository;
+import com.freeclassroom.courseservice.repository.entity.LessonRepository;
 import com.freeclassroom.courseservice.service.lesson.ILessonService;
 import com.freeclassroom.courseservice.service.lesson.ILessonStudentService;
 import com.freeclassroom.courseservice.service.certificate.CertificateEligibilityService;
@@ -40,6 +41,7 @@ public class CourseGrpcService extends CourseServiceImplBase {
     private final ILessonService lessonService;
     private final ILessonStudentService lessonStudentService;
     private final CertificateEligibilityService certificateEligibilityService;
+    private final LessonRepository lessonRepository;
 
     @Override
     public void getCourse(GetCourseRequest request, StreamObserver<CourseResponse> responseObserver) {
@@ -439,6 +441,33 @@ public class CourseGrpcService extends CourseServiceImplBase {
 
         resObs.onNext(response);
         resObs.onCompleted();
+    }
+
+    @Override
+    public void getCourseLessonIdsByLesson(
+            GetCourseLessonIdsByLessonRequest request,
+            StreamObserver<GetCourseLessonIdsByLessonResponse> responseObserver
+    ) {
+        try {
+            String courseId = lessonRepository.findCourseIdByLessonId(request.getLessonId())
+                    .orElseThrow(() -> new CustomExeption(ErrorCode.LESSON_NOT_FOUND));
+
+            GetCourseLessonIdsByLessonResponse response = GetCourseLessonIdsByLessonResponse.newBuilder()
+                    .addAllLessonIds(lessonRepository.findIdsByCourseId(courseId))
+                    .build();
+
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+        } catch (CustomExeption e) {
+            responseObserver.onError(
+                    Status.NOT_FOUND.withDescription(e.getMessage()).asRuntimeException()
+            );
+        } catch (Exception e) {
+            responseObserver.onError(
+                    Status.INTERNAL.withDescription("Failed to get course lesson ids: " + e.getMessage())
+                            .asRuntimeException()
+            );
+        }
     }
 
     @Override

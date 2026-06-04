@@ -23,4 +23,6 @@ service CourseService {
   rpc getCourseTags(GetCourseTagsRequest) returns (GetCourseTagsResponse);
   rpc tryIssueCourseCompletionCertificate(TryIssueCourseCompletionCertificateRequest)
       returns (TryIssueCourseCompletionCertificateResponse);
+  rpc getCourseLessonIdsByLesson(GetCourseLessonIdsByLessonRequest)
+      returns (GetCourseLessonIdsByLessonResponse);
 }

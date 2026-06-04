@@ -15,6 +15,7 @@ export interface LessonTestQuestionCardProps {
   setChoice: (quizId: string, choiceId: string) => void
   locked: boolean
   row: LessonTestSubmissionItem | undefined
+  showAnswerKey?: boolean
   flaggedIds: Record<string, boolean>
   toggleFlag: (quizId: string) => void
   chunks?: LessonChunk[]
@@ -31,6 +32,7 @@ export const LessonTestQuestionCard: React.FC<LessonTestQuestionCardProps> = ({
   setChoice,
   locked,
   row,
+  showAnswerKey = true,
   flaggedIds,
   toggleFlag,
   chunks = [],
@@ -99,8 +101,9 @@ export const LessonTestQuestionCard: React.FC<LessonTestQuestionCardProps> = ({
           const choiceId = `${quiz.id}-${c.id}`
           const letter = String.fromCharCode(65 + optIdx)
           const picked = (answers[quiz.id]?.[0] ?? '') === c.id
-          const isCorrectChoice = Boolean(row && row.correctChoiceIds.includes(c.id))
-          const isWrongPick = locked && row && !row.isCorrect && picked && !isCorrectChoice
+          const isCorrectChoice = showAnswerKey && Boolean(row?.correctChoiceIds?.includes(c.id))
+          const isWrongPick =
+            locked && row && !row.isCorrect && picked && (showAnswerKey ? !isCorrectChoice : true)
 
           return (
             <div
@@ -150,7 +153,7 @@ export const LessonTestQuestionCard: React.FC<LessonTestQuestionCardProps> = ({
         })}
       </RadioGroup>
 
-      {locked && row?.explanation ? (
+      {locked && showAnswerKey && row?.explanation ? (
         <div className='relative rounded-2xl border border-blue-100/50 bg-white/40 backdrop-blur-md px-3 md:px-4 py-3 md:py-3.5 mt-2 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden group/expl'>
           <div className='absolute top-0 left-0 w-1 h-full bg-blue-500/50' />
           <span className='font-bold text-[#0C356A] text-[11px] tracking-widest mb-2 block opacity-70'>Phân tích đáp án</span>
