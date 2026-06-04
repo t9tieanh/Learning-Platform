@@ -73,6 +73,8 @@ export interface LessonTestStudentSectionProps {
   onPrefetchRefresh?: (view: StudentLessonTestView) => void
   onSeek?: (timestamp: string) => void
   chunks?: import('@/types/ai').LessonChunk[]
+  onCourseCompleted?: (certificate?: { id: string; certificateCode: string }) => void
+  onCourseDataRefresh?: () => void
 }
 
 const LessonTestStudentSection: React.FC<LessonTestStudentSectionProps> = ({
@@ -81,6 +83,8 @@ const LessonTestStudentSection: React.FC<LessonTestStudentSectionProps> = ({
   onPrefetchRefresh,
   onSeek,
   chunks,
+  onCourseCompleted,
+  onCourseDataRefresh,
 }) => {
   const setLessonDraft = useLessonTestDraftStore((s) => s.setLessonDraft)
   const clearLessonDraft = useLessonTestDraftStore((s) => s.clearLessonDraft)
@@ -186,6 +190,12 @@ const LessonTestStudentSection: React.FC<LessonTestStudentSectionProps> = ({
         setResult(res.result)
         clearLessonDraft(lessonId)
         toast.success(`Đã nộp bài: ${res.result.summary.earnedPoints}/${res.result.summary.maxPoints} điểm`)
+        onCourseDataRefresh?.()
+        if (res.result.isCompletedCourse && res.result.certificateId && res.result.certificateCode) {
+          onCourseCompleted?.({ id: res.result.certificateId, certificateCode: res.result.certificateCode })
+        } else if (res.result.isCompletedCourse) {
+          onCourseCompleted?.()
+        }
       } else {
         toast.error(res.message || 'Nộp bài thất bại.')
       }

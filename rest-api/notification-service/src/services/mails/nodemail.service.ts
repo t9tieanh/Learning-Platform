@@ -195,6 +195,40 @@ class NodeMailService {
         })
         break
       }
+      case QueueNameEnum.CERTIFICATE_ISSUED: {
+        const issued = notification as {
+          email?: string
+          userName?: string
+          courseTitle?: string
+          courseThumbnailUrl?: string | null
+          certificateCode?: string
+          profileUrl?: string
+          courseUrl?: string
+        }
+
+        subject = 'Chúc mừng! Bạn đã nhận chứng chỉ hoàn thành khóa học 🎓'
+        to = issued.email || notification.email
+        templateName = 'certificate-issued.html'
+        templateData = withEmailLayout({
+          pageTitle: 'Chứng chỉ hoàn thành khóa học · Learnova',
+          badge: 'Chứng chỉ',
+          headerGradient: EMAIL_GRADIENTS.success,
+          buttonGradient: EMAIL_GRADIENTS.brand,
+          headerTitle: `Chúc mừng ${issued.userName || 'bạn'}!`,
+          headerSubtitle: 'Bạn đã hoàn thành khóa học và nhận chứng chỉ từ Learnova.',
+          ctaUrl: issued.profileUrl,
+          ctaLabel: 'Xem chứng chỉ của tôi',
+          footerNote: 'Thông báo chứng chỉ khóa học · Learnova',
+          userName: issued.userName || 'bạn',
+          courseTitle: issued.courseTitle || 'Khóa học',
+          courseThumbnailUrl: issued.courseThumbnailUrl,
+          hasThumbnail: Boolean(issued.courseThumbnailUrl),
+          certificateCode: issued.certificateCode,
+          profileUrl: issued.profileUrl,
+          courseUrl: issued.courseUrl
+        })
+        break
+      }
       case QueueNameEnum.COURSE_APPROVAL: {
         const event = notification as unknown as CourseApprovalEvent
         // Lấy email instructor qua userGrpc

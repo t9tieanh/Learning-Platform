@@ -17,6 +17,10 @@ import com.freeclassroom.courseservice.repository.entity.CourseRepository;
 import com.freeclassroom.courseservice.repository.entity.EnrollmentRepository;
 import com.freeclassroom.courseservice.service.lesson.ILessonService;
 import com.freeclassroom.courseservice.service.lesson.ILessonStudentService;
+import com.freeclassroom.courseservice.service.certificate.CertificateEligibilityService;
+import com.freeclassroom.courseservice.dto.certificate.CertificateEligibilityResult;
+import com.freeclassroom.courseservice.dto.certificate.CertificateEligibilityTryResult;
+import com.freeclassroom.courseservice.entity.certificate.CourseCompletionCertificateEntity;
 import com.google.protobuf.Empty;
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
@@ -39,6 +43,7 @@ public class CourseGrpcService extends CourseServiceImplBase {
     private final SaleGrpcClient saleGrpcClient;
     private final ILessonService lessonService;
     private final ILessonStudentService lessonStudentService;
+    private final CertificateEligibilityService certificateEligibilityService;
 
     @Override
     public void getCourse(GetCourseRequest request, StreamObserver<CourseResponse> responseObserver) {
@@ -514,5 +519,42 @@ public class CourseGrpcService extends CourseServiceImplBase {
 
         resObs.onNext(response);
         resObs.onCompleted();
+    }
+
+    @Override
+    public void tryIssueCourseCompletionCertificate(
+            TryIssueCourseCompletionCertificateRequest request,
+            StreamObserver<TryIssueCourseCompletionCertificateResponse> responseObserver
+    ) {
+        try {
+            EnrollmentsEntity enrollment = enrollmentRepo
+                    .findByUserIdAndLessonIdWithCourse(request.getUserId(), request.getLessonId())
+                    .orElseThrow(() -> new CustomExeption(ErrorCode.UNAUTHORIZED));
+
+            CertificateEligibilityTryResult tryResult = certificateEligibilityService.tryIssue(enrollment);
+            CertificateEligibilityResult eligibility = tryResult.getEligibility();
+
+            TryIssueCourseCompletionCertificateResponse.Builder builder =
+                    TryIssueCourseCompletionCertificateResponse.newBuilder()
+                            .setIssued(tryResult.getCertificate().isPresent())
+                            .setIsNewlyCompletedCourse(tryResult.isNewlyIssued())
+                            .setLessonsComplete(eligibility.isLessonsComplete())
+                            .setTestsComplete(eligibility.isTestsComplete());
+
+            tryResult.getCertificate().ifPresent(cert -> builder
+                    .setCertificateId(cert.getId() != null ? cert.getId() : "")
+                    .setCertificateCode(cert.getCertificateCode() != null ? cert.getCertificateCode() : ""));
+
+            responseObserver.onNext(builder.build());
+            responseObserver.onCompleted();
+        } catch (CustomExeption e) {
+            responseObserver.onError(
+                    Status.NOT_FOUND.withDescription(e.getMessage()).asRuntimeException()
+            );
+        } catch (Exception e) {
+            responseObserver.onError(
+                    Status.INTERNAL.withDescription("Failed to issue certificate: " + e.getMessage()).asRuntimeException()
+            );
+        }
     }
 }

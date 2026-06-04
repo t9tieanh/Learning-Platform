@@ -26,3 +26,5 @@ n8n/workflows
 
 Semantic-Chunking-Typescript
 .codex
+
+docker-compose.local.yml

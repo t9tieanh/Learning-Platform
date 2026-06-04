@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AdminCourseController {
     ICourseService courseService;
-    ICourseAdminService courseAdminService;
+    ICourseAdminService courseAdminService; 
 
     @GetMapping("/{id}")
     public ApiResponse<CourseResponse> getCourse(@PathVariable String id) {

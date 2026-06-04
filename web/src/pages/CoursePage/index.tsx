@@ -193,6 +193,30 @@ const CoursePage = () => {
     setWatchedPercent(0) // Reset for new lecture
   }
 
+  const handleNavigateToLessonTest = useCallback(
+    (lessonId: string) => {
+      if (!courseData) return
+      for (const chapter of courseData.chapters ?? []) {
+        const found = chapter.lessons?.find((lesson) => lesson.id === lessonId)
+        if (!found) continue
+        setCurrentLecture({
+          id: found.id,
+          title: found.title,
+          content: found.content,
+          duration: found.duration ?? null,
+          position: found.position ?? null,
+          type: found.type === 'article' ? 'article' : 'video',
+          completionStatus: found.completionStatus ?? 'NOT_STARTED',
+        })
+        setWatchedPercent(found.completionStatus === 'COMPLETED' ? 100 : 0)
+        setActiveTab('Bài kiểm tra')
+        setActiveMobileTab(null)
+        return
+      }
+    },
+    [courseData]
+  )
+
   // Initialize the first lecture as current
   useEffect(() => {
     if (!currentLecture && uiSections.length && uiSections[0].lectures.length) {
@@ -288,6 +312,8 @@ const CoursePage = () => {
                   onTabChange={setActiveTab}
                   selectedChunkId={selectedChunkId}
                   watchedPercent={watchedPercent}
+                  onCourseCompleted={handleCourseCompleted}
+                  onCourseDataRefresh={() => fetchCourseInfo(currentLectureIdRef.current, { silent: true })}
                 />
               </div>
             </>
@@ -302,7 +328,10 @@ const CoursePage = () => {
             <>
               {courseData?.certificateJourney && (
                 <div className='p-3 border-b border-border'>
-                  <CertificateJourneyProgress journey={courseData.certificateJourney} />
+                  <CertificateJourneyProgress
+                    journey={courseData.certificateJourney}
+                    onNavigateToLessonTest={handleNavigateToLessonTest}
+                  />
                 </div>
               )}
               <CourseSidebar
@@ -326,6 +355,8 @@ const CoursePage = () => {
           onSeek={handleSeek}
           isLoading={isLoading}
           subtitlesRaw={analysisData?.subtitles}
+          certificateJourney={courseData?.certificateJourney}
+          onNavigateToLessonTest={handleNavigateToLessonTest}
         />
       </div>
 

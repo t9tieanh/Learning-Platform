@@ -45,4 +45,13 @@ public interface LessonRepository extends JpaRepository<LessonEntity,String> {
             @Param("chapterId") String chapterId,
             @Param("enrollmentId") String enrollmentId
     );
+
+    @Query("""
+            SELECT l.id
+            FROM LessonEntity l
+            JOIN l.chapter ch
+            WHERE ch.course.id = :courseId
+            ORDER BY ch.position ASC, l.position ASC
+            """)
+    List<String> findIdsByCourseId(@Param("courseId") String courseId);
 }

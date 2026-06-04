@@ -24,4 +24,6 @@ service CourseService {
   rpc canEditLesson(CanEditLessonRequest) returns (CanEditLessonResponse);
   rpc canViewLesson(CanViewLessonRequest) returns (CanViewLessonResponse);
   rpc getCourseTags(GetCourseTagsRequest) returns (GetCourseTagsResponse);
+  rpc tryIssueCourseCompletionCertificate(TryIssueCourseCompletionCertificateRequest)
+      returns (TryIssueCourseCompletionCertificateResponse);
 }

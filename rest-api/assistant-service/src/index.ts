@@ -9,6 +9,7 @@ import { env } from './config/env';
 import indexRoute from '~/routes';
 import cookieParser from 'cookie-parser';
 import Logger from './utils/logger';
+import { startAssistantGrpcServer } from '~/grpc/assistantServer.grpc';
 
 const app = express();
 
@@ -41,4 +42,11 @@ initializeBullProcessors().catch((error) => {
     process.exit(1);
 });
 
-app.listen(PORT, () => Logger.info(`Learnova:assistant_service running at http://localhost:${PORT}`));
+app.listen(PORT, () => {
+  Logger.info(`Learnova:assistant_service running at http://localhost:${PORT}`);
+  try {
+    startAssistantGrpcServer();
+  } catch (error) {
+    Logger.error(`Failed to start Assistant gRPC server: ${error}`);
+  }
+});

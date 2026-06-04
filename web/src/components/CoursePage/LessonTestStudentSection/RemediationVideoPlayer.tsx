@@ -31,7 +31,7 @@ const RemediationVideoPlayer: React.FC<RemediationVideoPlayerProps> = ({
     const fetchUrl = async () => {
       setLoading(true)
       try {
-        const res = await lessonStudentService.getPresignedUrl(lessonId)
+        const res = await lessonStudentService.getLessonVideoUrl(lessonId)
         if (!cancelled && res.code === 200) {
           setVideoUrl(res.result || null)
         }

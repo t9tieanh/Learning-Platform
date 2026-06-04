@@ -28,7 +28,9 @@ export const TabNavigation = ({
   activeTab: externalActiveTab,
   onTabChange,
   selectedChunkId,
-  watchedPercent
+  watchedPercent,
+  onCourseCompleted,
+  onCourseDataRefresh,
 }: {
   currentLecture: Lesson
   thumbnailUri: string
@@ -40,6 +42,8 @@ export const TabNavigation = ({
   onTabChange: (tab: string) => void
   selectedChunkId?: string | null
   watchedPercent: number
+  onCourseCompleted?: (certificate?: { id: string; certificateCode: string }) => void
+  onCourseDataRefresh?: () => void
 }) => {
   const activeTab = externalActiveTab
   const setActiveTab = onTabChange
@@ -208,6 +212,8 @@ export const TabNavigation = ({
               onPrefetchRefresh={setLessonTestPrefetch}
               onSeek={onSeek}
               chunks={analysisData?.chunks ?? []}
+              onCourseCompleted={onCourseCompleted}
+              onCourseDataRefresh={onCourseDataRefresh}
             />
           </div>
         )}

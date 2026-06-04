@@ -71,6 +71,9 @@ export interface LessonTestSubmissionResult {
   items: LessonTestSubmissionItem[]
   chunks?: import('./ai').LessonChunk[]
   subtitles?: string | null
+  isCompletedCourse?: boolean
+  certificateId?: string | null
+  certificateCode?: string | null
 }
 
 /** One row in `GET …/student/submissions` (list attempts). */
