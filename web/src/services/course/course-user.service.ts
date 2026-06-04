@@ -1,6 +1,7 @@
 import { ApiResponse } from '@/types/response.type'
 import axiosClient from '@/lib/axiosClient.lib'
 import { Course } from '@/components/TC_Courses/CourseTypes'
+import { InstructorCoursesApiPayload } from '@/types/instructor-courses.type'
 
 export interface CourseResponse {
   id: string
@@ -150,6 +151,26 @@ class CourseUserService {
   async countInstructorCourseValid(params: { instructorId: string }) {
     const response = await axiosClient.axiosInstance.get('learning/courses/count', {
       params
+    })
+    return response.data
+  }
+
+  async getInstructorPublicCourses(params: {
+    instructorId: string
+    page?: number
+    limit?: number
+    search?: string
+    sortBy?: 'latest' | 'rating' | 'students' | 'bestSeller'
+    sortDirection?: 'asc' | 'desc'
+  }): Promise<ApiResponse<InstructorCoursesApiPayload>> {
+    const response = await axiosClient.axiosInstance.get(`learning/courses/instructors/${params.instructorId}`, {
+      params: {
+        page: params.page ?? 1,
+        limit: params.limit ?? 9,
+        search: params.search,
+        sortBy: params.sortBy ?? 'latest',
+        sortDirection: params.sortDirection ?? 'desc'
+      }
     })
     return response.data
   }

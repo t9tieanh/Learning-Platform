@@ -45,7 +45,7 @@ const AD_Blogs = () => {
         <div className='absolute bottom-0 left-8 h-28 w-28 rounded-full bg-cyan-300/10 blur-3xl' />
         <div className='relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between'>
           <div className='max-w-2xl'>
-            <p className='text-xs font-semibold uppercase tracking-[0.28em] text-sky-200/80'>Content dashboard</p>
+            <p className='text-xs font-semibold uppercase tracking-[0.28em] text-sky-200/80'>Bài viết HỆ THỐNG</p>
             <h1 className='mt-3 text-3xl font-semibold tracking-tight'>Quản lý bài viết</h1>
             <p className='mt-2 text-sm leading-6 text-slate-300'>
               Theo dõi nội dung, kiểm tra bài đăng mới và giữ trải nghiệm quản trị nội dung nhất quán, dễ quét hơn.

@@ -43,6 +43,38 @@ message GetCourseAdminDataResponse {
   int64 totalInstructor = 2;
 }
 
+message ActiveAdminCourseStat {
+  string courseId = 1;
+  string instructorId = 2;
+  string title = 3;
+  string thumbnailUrl = 4;
+  double rating = 5;
+  int64 studentCount = 6;
+}
+
+message GetActiveAdminCoursesResponse {
+  repeated ActiveAdminCourseStat items = 1;
+}
+
+message AdminInstructorLeaderboardItem {
+  string instructorId = 1;
+  int64 studentCount = 2;
+  int64 courseCount = 3;
+}
+
+message GetAdminTopInstructorsRequest {
+  int32 limit = 1;
+}
+
+message GetAdminInstructorLeaderboardResponse {
+  repeated AdminInstructorLeaderboardItem items = 1;
+}
+
+message GetAdminCourseModerationCountsResponse {
+  int64 pendingReviewCount = 1;
+  int64 rejectedCount = 2;
+}
+
 message GetCourseAndStudentResponse {
   int64 totalCourse = 1;
   int64 totalStudent = 2;

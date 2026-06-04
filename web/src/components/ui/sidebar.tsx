@@ -20,13 +20,25 @@ const SidebarContext = React.createContext<{
 })
 
 export function SidebarProvider({ children }: { children: React.ReactNode }) {
-  const [open, setOpen] = React.useState(true)
+  const [open, setOpen] = React.useState(() => {
+    if (typeof window === "undefined") return true
+    return window.innerWidth >= 1024
+  })
+
+  React.useEffect(() => {
+    const mediaQuery = window.matchMedia("(min-width: 1024px)")
+    const handleChange = (event: MediaQueryListEvent) => {
+      setOpen(event.matches)
+    }
+
+    mediaQuery.addEventListener("change", handleChange)
+    return () => mediaQuery.removeEventListener("change", handleChange)
+  }, [])
 
   return (
     <SidebarContext.Provider value={{ open, setOpen }}>
-      <div className="flex min-h-screen">
-        <Sidebar />
-        <main className="flex-1 transition-all duration-300">
+      <div className="flex min-h-screen w-full">
+        <main className="flex-1 min-w-0 transition-all duration-300">
           {children}
         </main>
       </div>
@@ -43,16 +55,26 @@ export function Sidebar({
   className?: string
   collapsible?: "icon" | "none"
 }) {
-  const { open } = useSidebar()
+  const { open, setOpen } = useSidebar()
   return (
-    <aside
-      className={cn(
-        "flex h-screen flex-col border-r bg-white transition-all duration-300 ease-in-out",
-        className
-      )}
-    >
-      {children}
-    </aside>
+    <>
+      <div
+        onClick={() => setOpen(false)}
+        className={cn(
+          "fixed inset-0 z-40 bg-slate-950/45 backdrop-blur-[1px] transition-opacity duration-300 lg:hidden",
+          open ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
+        )}
+      />
+      <aside
+        className={cn(
+          "fixed inset-y-0 left-0 z-50 flex h-screen flex-col border-r bg-white transition-all duration-300 ease-in-out lg:static lg:z-auto",
+          open ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
+          className
+        )}
+      >
+        {children}
+      </aside>
+    </>
   )
 }
 
@@ -61,7 +83,8 @@ export function SidebarTrigger() {
   return (
     <button
       onClick={() => setOpen(!open)}
-      className="m-2 rounded-lg border p-2 hover:bg-gray-100"
+      className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:bg-slate-50 lg:h-11 lg:w-11"
+      aria-label={open ? "Thu gọn thanh điều hướng" : "Mở thanh điều hướng"}
     >
       ☰
     </button>
