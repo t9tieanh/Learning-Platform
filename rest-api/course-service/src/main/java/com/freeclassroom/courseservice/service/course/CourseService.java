@@ -68,7 +68,8 @@ public class CourseService implements ICourseService {
     IUploadFileService fileService;
 
     @NonFinal
-    private Double PLATFORM_FEES = 0.1d;
+    @org.springframework.beans.factory.annotation.Value("${app.course.platform-fee-rate:0.2}")
+    private Double platformFeeRate = 0.2d;
 
     @Override
     public ApiResponse<CreationResponse> createCourse(CreationCourseRequest request, String userId) {
@@ -330,9 +331,8 @@ public class CourseService implements ICourseService {
                                 .id(course.getId())
                                 .originalPrice(originalPrice)
                                 .finalPrice(finalPrice)
-                                .platformFee(PLATFORM_FEES)
-                                // ammount instructor receive
-                                .yourIncome(finalPrice * (1 - PLATFORM_FEES))
+                                .platformFee(platformFeeRate)
+                                .yourIncome(finalPrice * (1 - platformFeeRate))
                                 .build()
                 )
                 .build();
