@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { CheckSquare, CheckCircle } from 'lucide-react'
 import TitleComponent from '@/components/TC_CreateCourse/common/Title'
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import courseService from '@/services/course/course.service'
 import { toast } from 'sonner'
 import showConfirmToast from '@/components/common/ShowConfirmToast'
@@ -14,6 +15,7 @@ import formatDuration from '@/utils/time/formatDuration.utils'
 import SetupFormSkeleton from './Skeleton/SetupFormSkeleton'
 
 const SetupForm = ({ id }: { id: string }) => {
+  const navigate = useNavigate()
   const [overviewCourse, setOverviewCourse] = useState<{
     lessonNum: number
     videoDuration: number
@@ -55,6 +57,7 @@ const SetupForm = ({ id }: { id: string }) => {
       const response = await courseService.requestApproval(id)
       if (response && response.code === 200) {
         toast.success(response.message || 'Yêu cầu kiểm duyệt khóa học đã được gửi thành công!')
+        navigate('/teacher/course')
       } else {
         toast.error(response.message || 'Gửi yêu cầu kiểm duyệt thất bại. Vui lòng thử lại.')
       }
