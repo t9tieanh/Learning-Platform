@@ -3,6 +3,7 @@ package com.freeclassroom.courseservice.service.search;
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch._types.SortOrder;
 import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
+import co.elastic.clients.elasticsearch._types.query_dsl.Operator;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch._types.query_dsl.TextQueryType;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
@@ -51,7 +52,7 @@ public class CourseSearchService {
                             .query(query);
 
                     // Sorting
-                    return applySort(req, sort);
+                    return applySort(req, sort, search);
                 },
                 CourseEsDocument.class
         );
@@ -79,12 +80,38 @@ public class CourseSearchService {
         // not deleted - best effort
         bool.filter(f -> f.term(t -> t.field("deleted").value(false)));
 
-        if (search != null && !search.isBlank()) {
-            bool.must(m -> m.multiMatch(mm -> mm
-                    .query(search)
-                    .fields("title^3", "shortDescription", "longDescription")
-                    .type(TextQueryType.BoolPrefix)
+        if (hasText(search)) {
+            String normalizedSearch = search.trim();
+
+            bool.should(s -> s.term(t -> t
+                    .field("title.keyword")
+                    .value(normalizedSearch)
+                    .boost(30.0f)
             ));
+            bool.should(s -> s.matchPhrase(mp -> mp
+                    .field("title")
+                    .query(normalizedSearch)
+                    .boost(18.0f)
+            ));
+            bool.should(s -> s.match(m -> m
+                    .field("title")
+                    .query(normalizedSearch)
+                    .operator(Operator.And)
+                    .boost(12.0f)
+            ));
+            bool.should(s -> s.multiMatch(mm -> mm
+                    .query(normalizedSearch)
+                    .fields("title^8", "shortDescription^2", "longDescription")
+                    .type(TextQueryType.BestFields)
+                    .boost(6.0f)
+            ));
+            bool.should(s -> s.multiMatch(mm -> mm
+                    .query(normalizedSearch)
+                    .fields("title^5", "shortDescription^1.5", "longDescription")
+                    .type(TextQueryType.BoolPrefix)
+                    .boost(3.0f)
+            ));
+            bool.minimumShouldMatch("1");
         }
 
         if (category != null && !category.isBlank()) {
@@ -104,13 +131,24 @@ public class CourseSearchService {
 
     private co.elastic.clients.elasticsearch.core.SearchRequest.Builder applySort(
             co.elastic.clients.elasticsearch.core.SearchRequest.Builder builder,
-            String sort
+            String sort,
+            String search
     ) {
-        return switch (sort) {
+        String normalizedSort = sort == null ? "" : sort.trim();
+
+        return switch (normalizedSort) {
             case "price-low" -> builder.sort(s -> s.field(f -> f.field("finalPrice").order(SortOrder.Asc)));
             case "price-high" -> builder.sort(s -> s.field(f -> f.field("finalPrice").order(SortOrder.Desc)));
-            default -> builder.sort(s -> s.field(f -> f.field("createdAt").order(SortOrder.Desc)));
+            default -> hasText(search)
+                    ? builder
+                    .sort(s -> s.score(sc -> sc.order(SortOrder.Desc)))
+                    .sort(s -> s.field(f -> f.field("createdAt").order(SortOrder.Desc)))
+                    : builder.sort(s -> s.field(f -> f.field("createdAt").order(SortOrder.Desc)));
         };
+    }
+
+    private boolean hasText(String value) {
+        return value != null && !value.isBlank();
     }
 
     public record EsPage<T>(List<T> items, int page, int size, long totalItems, int totalPages) {}

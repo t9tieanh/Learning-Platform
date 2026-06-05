@@ -277,15 +277,22 @@ public class CourseUserService implements ICourseUserService{
     private ApiResponse<PageResponse<CourseUserResponse>> getAllCoursesFromDb(int page, int limit, String search, String category,
                                                                               Double minPrice, Double minRating, String sort) {
         try {
-            Sort sortOption = switch (sort) {
+            String normalizedSearch = search != null && !search.trim().isEmpty() ? search.trim() : null;
+            String normalizedSort = sort == null ? "" : sort.trim();
+            boolean useSearchRelevanceSort = normalizedSearch != null && normalizedSort.isEmpty();
+            Sort sortOption = switch (normalizedSort) {
                 case "price-low" -> Sort.by(Sort.Direction.ASC, "finalPrice");
                 case "price-high" -> Sort.by(Sort.Direction.DESC, "finalPrice");
                 default -> Sort.by(Sort.Direction.DESC, "createdAt");
             };
 
-            Pageable pageable = PageRequest.of(Math.max(page - 1, 0), limit, sortOption);
+            Pageable pageable = useSearchRelevanceSort
+                    ? PageRequest.of(Math.max(page - 1, 0), limit)
+                    : PageRequest.of(Math.max(page - 1, 0), limit, sortOption);
 
-            Page<CourseEntity> result = courseRepo.findAllWithFilters(search, category, minPrice, minRating, pageable);
+            Page<CourseEntity> result = useSearchRelevanceSort
+                    ? courseRepo.findAllWithFiltersOrderBySearchRelevance(normalizedSearch, category, minPrice, minRating, pageable)
+                    : courseRepo.findAllWithFilters(normalizedSearch, category, minPrice, minRating, pageable);
 
             List<CourseUserResponse> content = getInstructorGrpc(result.getContent());
 
