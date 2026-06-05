@@ -155,6 +155,21 @@ class CourseGrpcClient {
             })
         })
     }
+
+    async getCourseLessonIdsByLessonId(lessonId: string): Promise<string[]> {
+        return new Promise((resolve, reject) => {
+            const req = { lesson_id: lessonId }
+            this.courseClient.getCourseLessonIdsByLesson(req, (err: any, response: any) => {
+                if (err) {
+                    Logger.error(`grpc getCourseLessonIdsByLesson error: ${err}`)
+                    return reject(err)
+                }
+
+                const ids: string[] = response?.lesson_ids ?? response?.lessonIds ?? []
+                resolve(Array.isArray(ids) ? ids.filter((id) => typeof id === 'string' && id.trim()) : [])
+            })
+        })
+    }
 }
 
 export interface TryIssueCourseCompletionCertificateResult {

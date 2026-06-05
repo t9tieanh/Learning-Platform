@@ -4,6 +4,7 @@ import com.freeclassroom.userservice.dto.response.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -11,6 +12,15 @@ import java.util.Map;
 
 @ControllerAdvice
 public class ExceptionsHandler {
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    ResponseEntity<ApiResponse> maxUploadSizeExceededHandler(MaxUploadSizeExceededException e) {
+        ApiResponse apiResponse = new ApiResponse();
+        apiResponse.setCode(ErrorCode.FILE_TOO_LARGE.getCode());
+        apiResponse.setMessage(ErrorCode.FILE_TOO_LARGE.getMessage());
+        return ResponseEntity.status(ErrorCode.FILE_TOO_LARGE.getStatusCode()).body(apiResponse);
+    }
+
     @ExceptionHandler(value = Exception.class)
     ResponseEntity<ApiResponse> exceptionHandler(Exception e) {
         ApiResponse apiResponse = new ApiResponse();

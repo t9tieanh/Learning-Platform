@@ -6,8 +6,13 @@ interface UploadOptions {
   uri: string
 }
 
+export type UploadCompletedPayload = {
+  introductoryVideo?: string
+  message?: string
+}
+
 interface UploadResult {
-  upload: (formData: FormData, callback?: () => Promise<void>) => Promise<void>
+  upload: (formData: FormData, callback?: (payload?: UploadCompletedPayload) => Promise<void>) => Promise<void>
   progress: number
   message: string
   isUploading: boolean
@@ -19,7 +24,7 @@ export function useUpload({ accessToken, uri }: UploadOptions): UploadResult {
   const [isUploading, setIsUploading] = useState(false)
 
   const upload = useCallback(
-    async (formData: FormData, callback?: () => Promise<void>) => {
+    async (formData: FormData, callback?: (payload?: UploadCompletedPayload) => Promise<void>) => {
       if (!formData.get('file')) {
         throw new Error('Vui lòng chọn file trước khi lưu bài giảng')
       }
@@ -46,6 +51,7 @@ export function useUpload({ accessToken, uri }: UploadOptions): UploadResult {
 
         const reader = response.body.pipeThrough(new TextDecoderStream()).getReader()
         let buffer = ''
+        let completedPayload: UploadCompletedPayload | undefined
 
         while (true) {
           const { value, done } = await reader.read()
@@ -76,6 +82,10 @@ export function useUpload({ accessToken, uri }: UploadOptions): UploadResult {
                 } else if (event === 'completed') {
                   setMessage(parsed.message)
                   setProgress(100)
+                  completedPayload = {
+                    introductoryVideo: parsed.introductoryVideo,
+                    message: parsed.message
+                  }
                 }
               } catch {
                 console.warn('Không parse được:', jsonStr)
@@ -85,8 +95,7 @@ export function useUpload({ accessToken, uri }: UploadOptions): UploadResult {
 
           buffer = events[events.length - 1]
         }
-        // finish upload -> call callback
-        if (callback) await callback()
+        if (callback) await callback(completedPayload)
       } catch (err) {
         console.error(err)
         setMessage('Lỗi khi upload')

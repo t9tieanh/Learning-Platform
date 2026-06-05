@@ -8,6 +8,7 @@ import type { LessonTestSubmissionResult, StudentLessonTestView } from '@/types/
 import { LessonTestChunkGroups } from './LessonTestChunkGroups'
 import { LessonTestHistoryPanel } from './LessonTestHistoryPanel'
 import { LessonTestHero } from './LessonTestHero'
+import { LessonTestPassHintBanner } from './LessonTestPassHintBanner'
 import { LessonTestQuestionNavDesktop, LessonTestQuestionNavMobile } from './LessonTestQuestionMap'
 import {
   buildQuestionNavItems,
@@ -225,6 +226,8 @@ const LessonTestStudentSection: React.FC<LessonTestStudentSectionProps> = ({
     setFlaggedIds((prev) => ({ ...prev, [quizId]: !prev[quizId] }))
   }, [result])
 
+  const showAnswerKey = result?.answersRevealed ?? true
+
   const mapState = useMemo(
     () => ({
       questionNavItems,
@@ -327,7 +330,9 @@ const LessonTestStudentSection: React.FC<LessonTestStudentSectionProps> = ({
                 <LessonTestQuestionNavMobile {...mapState} />
 
                 {result ? (
-                  <div className='rounded-xl border border-gray-100 bg-gradient-to-br from-slate-50 to-blue-50/40 px-4 py-3.5 shadow-sm shadow-gray-900/[0.03]'>
+                  <>
+                    {!result.answersRevealed ? <LessonTestPassHintBanner /> : null}
+                    <div className='rounded-xl border border-gray-100 bg-gradient-to-br from-slate-50 to-blue-50/40 px-4 py-3.5 shadow-sm shadow-gray-900/[0.03]'>
                     <p className='text-[10px] font-bold tracking-wider text-gray-500'>
                       Thống kê lần nộp này
                     </p>
@@ -359,7 +364,8 @@ const LessonTestStudentSection: React.FC<LessonTestStudentSectionProps> = ({
                         <p className='text-[10.5px] font-semibold text-gray-500 mt-1.5'>Câu đúng</p>
                       </div>
                     </div>
-                  </div>
+                    </div>
+                  </>
                 ) : null}
 
                 <div className='border-b border-gray-100 pb-4'>
@@ -379,6 +385,7 @@ const LessonTestStudentSection: React.FC<LessonTestStudentSectionProps> = ({
                   setChoice={setChoice}
                   result={result}
                   resultByQuizId={resultByQuizId}
+                  showAnswerKey={showAnswerKey}
                   flaggedIds={flaggedIds}
                   toggleFlag={toggleFlag}
                   onSeek={onSeek}

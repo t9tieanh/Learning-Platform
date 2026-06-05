@@ -60,14 +60,16 @@ export interface LessonTestSubmissionItem {
   pointsEarned: number
   maxPoints: number
   selectedChoiceIds: string[]
-  correctChoiceIds: string[]
-  explanation: string
+  correctChoiceIds?: string[]
+  explanation?: string
+  chunkId?: string | null
 }
 
 export interface LessonTestSubmissionResult {
   submissionId: string
   lessonId: string
   summary: LessonTestSubmissionSummary
+  answersRevealed: boolean
   items: LessonTestSubmissionItem[]
   chunks?: import('./ai').LessonChunk[]
   subtitles?: string | null
@@ -81,6 +83,7 @@ export interface LessonTestSubmissionHistoryEntry {
   submissionId: string
   submittedAt: string
   summary: LessonTestSubmissionSummary
+  answersRevealed: boolean
 }
 
 /** `GET …/student/submissions/:submissionId` — same scoring fields as submit, plus question snapshot for review. */
@@ -99,6 +102,7 @@ export interface LessonTestSubmissionDetailResult {
   lessonId: string
   submittedAt: string
   summary: LessonTestSubmissionSummary
+  answersRevealed: boolean
   items: LessonTestSubmissionDetailItem[]
   chunks?: LessonChunk[]
   subtitles?: string | null

@@ -178,3 +178,11 @@ message TryIssueCourseCompletionCertificateResponse {
   bool tests_complete = 6;
 }
 
+message GetCourseLessonIdsByLessonRequest {
+  string lesson_id = 1;
+}
+
+message GetCourseLessonIdsByLessonResponse {
+  repeated string lesson_ids = 1;
+}
+

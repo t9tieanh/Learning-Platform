@@ -5,9 +5,10 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
- * Represents a course document stored in Elasticsearch index (default: courses-dev).
+ * Represents a course document stored in Elasticsearch index (default: courses).
  * Only includes fields needed to build CourseUserResponse.
  */
 @Getter
@@ -35,6 +36,8 @@ public class CourseEsDocument {
     String category;
 
     LocalDateTime createdAt;
+
+    List<String> tags;
 
     // Optional fields if present in index mapping
     String status;

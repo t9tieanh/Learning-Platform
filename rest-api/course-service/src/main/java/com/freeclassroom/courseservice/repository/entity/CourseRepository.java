@@ -166,6 +166,10 @@ public interface CourseRepository extends JpaRepository<CourseEntity, String> {
     @Query("select c from CourseEntity c where c.id = :id")
     Optional<CourseEntity> findByIdWithTags(@Param("id") String id);
 
+    @EntityGraph(attributePaths = {"tags", "category"})
+    @Query("select c from CourseEntity c where c.id = :id")
+    Optional<CourseEntity> findByIdWithTagsAndCategory(@Param("id") String id);
+
     @EntityGraph(attributePaths = {"chapters"})
     @Query("select c from CourseEntity c where c.id = :id")
     Optional<CourseEntity> findByIdWithChapters(@Param("id") String id);

@@ -1,5 +1,4 @@
 import { FC, useState, useEffect, useRef } from 'react'
-import { NavigationMenu, NavigationMenuItem, NavigationMenuList } from '@/components/ui/navigation-menu'
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
 import CustomButton from '../common/Button'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -16,9 +15,9 @@ import {
   Menu as MenuIcon,
   Crown,
   ChevronRight,
+  ChevronDown,
   House,
   BookOpen,
-  GraduationCap,
   StickyNote,
   Building2
 } from 'lucide-react'
@@ -26,6 +25,26 @@ import Menu from './menu'
 import logo from '@/assets/images/logo1.png'
 import { useVipUpgrade } from '@/contexts/VipUpgradeContext'
 import { AnimatePresence, motion } from 'framer-motion'
+
+const VIP_EXPLORE_LABEL = 'Khám phá VIP'
+
+const VipExploreButton: FC<{ onClick: () => void; className?: string }> = ({ onClick, className = '' }) => (
+  <motion.button
+    type='button'
+    onClick={onClick}
+    title={VIP_EXPLORE_LABEL}
+    aria-label={VIP_EXPLORE_LABEL}
+    whileHover={{ y: -1 }}
+    whileTap={{ scale: 0.98 }}
+    transition={{ duration: 0.2 }}
+    className={`group/vip hidden h-10 w-10 shrink-0 flex-none items-center justify-center overflow-visible rounded-full border border-amber-200 bg-gradient-to-r from-amber-200 via-yellow-200 to-orange-200 text-sm font-semibold text-amber-800 shadow-sm transition-[width,padding,box-shadow] duration-200 hover:z-20 hover:w-auto hover:justify-start hover:px-2.5 hover:shadow-md md:flex ${className}`}
+  >
+    <Crown className='h-4 w-4 shrink-0' aria-hidden />
+    <span className='inline-block max-w-0 overflow-hidden whitespace-nowrap opacity-0 transition-[max-width,opacity,margin] duration-200 ease-out group-hover/vip:ml-1.5 group-hover/vip:max-w-[6.5rem] group-hover/vip:opacity-100 group-focus-visible/vip:ml-1.5 group-focus-visible/vip:max-w-[6.5rem] group-focus-visible/vip:opacity-100'>
+      {VIP_EXPLORE_LABEL}
+    </span>
+  </motion.button>
+)
 
 const Header: FC = () => {
   const navigate = useNavigate()
@@ -79,63 +98,68 @@ const Header: FC = () => {
   return (
     <div
       ref={rootRef}
-      className={`sticky top-0 z-50 w-full border-b border-slate-200/60 bg-white/80 px-4 py-3 backdrop-blur-md transition-all duration-300 ${
-        isScrolled ? 'shadow-[0_14px_35px_rgba(15,23,42,0.1)]' : 'shadow-none'
+      className={`sticky top-0 z-50 w-full border-b px-4 py-2 transition-[border-color,box-shadow,background-color,backdrop-filter] duration-300 ${
+        isScrolled
+          ? 'border-slate-200/60 bg-white/70 shadow-[0_14px_35px_rgba(15,23,42,0.1)] backdrop-blur-md backdrop-saturate-150'
+          : 'border-transparent bg-white shadow-none backdrop-blur-none'
       }`}
     >
-      <NavigationMenu className='min-w-full mx-0'>
-        <div className='mx-auto flex w-full max-w-7xl items-center justify-between rounded-2xl border border-slate-200 bg-white/90 px-4 py-2'>
-          {/* Logo */}
-          <NavigationMenuList className='text-left'>
-            <button
-              onClick={() => navigate('/')}
-              className='group flex cursor-pointer items-center gap-2 rounded-xl border-none bg-transparent px-1 py-1.5'
-            >
-              <img src={logo} alt='LEARNOVA logo' className='h-9 w-auto select-none object-contain md:h-10' />
-            </button>
-          </NavigationMenuList>
+      <div className='mx-auto grid h-14 w-full max-w-7xl grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-2 px-2 md:gap-x-4 md:px-4'>
+        {/* Logo */}
+        <div className='flex shrink-0 items-center justify-start'>
+          <button
+            type='button'
+            onClick={() => navigate('/')}
+            className='shrink-0 rounded-xl border-none bg-transparent p-1'
+          >
+            <img src={logo} alt='LEARNOVA logo' className='h-9 w-auto select-none object-contain md:h-10' />
+          </button>
+        </div>
 
-          {/* Desktop Navigation */}
-          <NavigationMenuList className='mx-auto hidden bg-transparent text-blue-500 md:block'>
-            <NavigationMenuItem>
-              <Tabs value={activeMenu} className='w-full'>
-                <TabsList className='rounded-2xl border border-transparent bg-transparent p-1'>
-                  {menuItems.map((item) => (
-                    <motion.div
-                      key={item.value}
-                      whileHover={{ y: -1 }}
-                      transition={{ duration: 0.25, ease: 'easeOut' }}
+        {/* Desktop Navigation — căn giữa vùng giữa logo và actions */}
+        <nav
+          className='hidden min-w-0 justify-self-stretch md:flex md:items-center md:justify-center md:translate-x-14 lg:translate-x-16'
+          aria-label='Điều hướng chính'
+        >
+          <Tabs value={activeMenu}>
+            <TabsList className='h-auto w-auto flex-nowrap gap-0.5 rounded-2xl border border-transparent bg-transparent p-0.5 [&_[data-slot=tabs-trigger]]:flex-none'>
+              {menuItems.map((item) => {
+                const isActive = activeMenu === item.value
+                return (
+                  <TabsTrigger
+                    key={item.value}
+                    value={item.value}
+                    onClick={() => navigate(item.path)}
+                    className='tab-page relative flex h-10 shrink-0 flex-none items-center gap-1.5 whitespace-nowrap rounded-xl px-3 py-2 text-sm font-semibold text-slate-600 transition-colors duration-200 hover:bg-slate-50 hover:text-blue-600 data-[state=active]:bg-blue-50/80 data-[state=active]:text-blue-700 data-[state=active]:shadow-none'
+                  >
+                    <span
+                      className={`flex shrink-0 items-center justify-center transition-colors duration-200 ${
+                        isActive ? 'text-blue-600' : 'text-slate-400'
+                      }`}
+                      aria-hidden
                     >
-                      <TabsTrigger
-                        value={item.value}
-                        onClick={() => navigate(item.path)}
-                        className='tab-page relative flex items-center gap-2 rounded-xl px-5 py-2.5 text-base font-semibold text-blue-500 transition-all duration-300 hover:text-blue-600 data-[state=active]:bg-transparent data-[state=active]:text-blue-700 data-[state=active]:shadow-none'
-                      >
-                        {item.label}
-                        {activeMenu === item.value && (
-                          <motion.span
-                            layoutId='header-active-pill'
-                            className='absolute inset-x-2 -bottom-[1px] h-0.5 rounded-full bg-blue-500'
-                            transition={{ type: 'spring', stiffness: 260, damping: 26 }}
-                          />
-                        )}
-                      </TabsTrigger>
-                    </motion.div>
-                  ))}
-                </TabsList>
-              </Tabs>
-            </NavigationMenuItem>
-          </NavigationMenuList>
+                      {item.icon}
+                    </span>
+                    <span>{item.label}</span>
+                    {isActive && (
+                      <span className='absolute inset-x-2 -bottom-px h-0.5 rounded-full bg-blue-500' />
+                    )}
+                  </TabsTrigger>
+                )
+              })}
+            </TabsList>
+          </Tabs>
+        </nav>
 
-          {/* Right Section */}
-          <NavigationMenuList className='flex items-center gap-2 md:gap-3'>
+        {/* Right Section */}
+        <div className='flex shrink-0 flex-nowrap items-center justify-end gap-2 md:gap-2.5'>
             {/* Cart Icon */}
             <motion.button
               onClick={() => navigate('/my-cart')}
               whileHover={{ y: -1 }}
               whileTap={{ scale: 0.98 }}
               transition={{ duration: 0.2 }}
-              className='relative rounded-xl border border-slate-200 bg-white p-2.5 text-slate-700 transition-all duration-300 hover:border-cyan-200 hover:bg-cyan-50 hover:text-cyan-700'
+              className='relative shrink-0 rounded-xl border border-slate-200 bg-white p-2.5 text-slate-700 transition-all duration-300 hover:border-cyan-200 hover:bg-cyan-50 hover:text-cyan-700'
               aria-label='Giỏ hàng'
             >
               <ShoppingCart className='h-5 w-5' />
@@ -148,42 +172,38 @@ const Header: FC = () => {
 
             {/* User Menu / Auth Buttons */}
             {data ? (
-              <div className='flex items-center gap-3 md:gap-5'>
+              <div className='flex shrink-0 flex-nowrap items-center gap-2 md:gap-2.5'>
                 {/* Explore VIP Button — desktop only */}
-                {!data.isVip && (
-                  <motion.button
-                    onClick={openVipDialog}
-                    whileHover={{ y: -1 }}
-                    whileTap={{ scale: 0.98 }}
-                    transition={{ duration: 0.2 }}
-                    className='hidden items-center gap-1.5 rounded-full border border-amber-200 bg-gradient-to-r from-amber-200 via-yellow-200 to-orange-200 px-4 py-2 text-sm font-semibold text-amber-800 shadow-sm transition-all duration-300 hover:shadow-md md:flex'
-                  >
-                    <Crown className='h-4 w-4' />
-                    <span>Khám phá VIP</span>
-                  </motion.button>
-                )}
+                {!data.isVip && <VipExploreButton onClick={openVipDialog} />}
 
-                <div className='profile flex gap-2 text-sm font-bold items-center'>
+                <div className='profile shrink-0'>
                   <Popover open={isProfileOpen} onOpenChange={setIsProfileOpen}>
-                    <PopoverTrigger className='flex items-center gap-2 rounded-2xl border border-cyan-200/80 bg-gradient-to-r from-cyan-50 via-white to-blue-50 px-2.5 py-1.5 outline-none shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-cyan-300 hover:shadow-md'>
-                      <p className='mt-0.5 hidden text-sm font-medium text-slate-800 md:block'>
-                        <span className='font-semibold text-cyan-700'>Xin chào,</span> {data.name}
-                      </p>
-                      <div className='relative'>
+                    <PopoverTrigger className='group flex h-10 max-h-10 shrink-0 flex-nowrap items-center gap-2 rounded-full border border-slate-200/90 bg-white py-1 pl-1 pr-1.5 outline-none shadow-[0_1px_3px_rgba(15,23,42,0.06)] transition-all duration-300 hover:border-slate-300 hover:shadow-[0_4px_14px_rgba(15,23,42,0.08)] xl:gap-2.5 xl:pl-3 xl:pr-1.5'>
+                      <span className='hidden max-w-[11rem] truncate whitespace-nowrap text-sm xl:inline'>
+                        <span className='font-medium text-slate-500'>Xin chào, </span>
+                        <span className='font-semibold text-slate-900'>{data.name}</span>
+                      </span>
+                      <div className='relative shrink-0'>
                         <Avatar
-                          className={`h-9 w-9 rounded-3xl border border-white transition-transform duration-300 hover:scale-105 md:h-10 md:w-10 ${
-                            data.isVip ? 'ring-2 ring-yellow-400 ring-offset-2' : ''
+                          className={`h-9 w-9 rounded-full border-2 border-slate-100 transition-transform duration-300 group-hover:scale-[1.02] md:h-9 md:w-9 ${
+                            data.isVip ? 'ring-2 ring-amber-400/90 ring-offset-2 ring-offset-white' : ''
                           }`}
                         >
                           <AvatarImage src={data.avatarUrl} alt='avatar' />
-                          <AvatarFallback>{data.name?.charAt(0)}</AvatarFallback>
+                          <AvatarFallback className='bg-slate-100 text-slate-600 text-sm font-semibold'>
+                            {data.name?.charAt(0)}
+                          </AvatarFallback>
                         </Avatar>
                         {data.isVip && (
-                          <div className='absolute -bottom-1 -right-1 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-full p-0.5 shadow-sm border-2 border-white z-10'>
-                            <Crown className='w-3 h-3 text-white' strokeWidth={3} />
+                          <div className='absolute -bottom-0.5 -right-0.5 z-10 rounded-full border-2 border-white bg-gradient-to-r from-amber-400 to-amber-600 p-0.5 shadow-sm'>
+                            <Crown className='w-2.5 h-2.5 text-white' strokeWidth={3} />
                           </div>
                         )}
                       </div>
+                      <ChevronDown
+                        className='hidden h-4 w-4 shrink-0 text-slate-400 transition-transform duration-300 group-data-[state=open]:rotate-180 md:block xl:ml-0'
+                        aria-hidden
+                      />
                     </PopoverTrigger>
                     <PopoverContent className='w-88 rounded-2xl border border-slate-200 bg-white p-3 shadow-xl'>
                       <Menu
@@ -198,17 +218,7 @@ const Header: FC = () => {
               </div>
             ) : (
               <div className='flex items-center gap-2'>
-                <motion.button
-                  type='button'
-                  onClick={openVipDialog}
-                  whileHover={{ y: -1 }}
-                  whileTap={{ scale: 0.98 }}
-                  transition={{ duration: 0.2 }}
-                  className='hidden items-center gap-1.5 rounded-full border border-amber-200 bg-gradient-to-r from-amber-200 via-yellow-200 to-orange-200 px-4 py-2 text-sm font-semibold text-amber-800 shadow-sm transition-all duration-300 hover:shadow-md md:flex'
-                >
-                  <Crown className='w-4 h-4 shrink-0' aria-hidden />
-                  <span>Khám phá VIP</span>
-                </motion.button>
+                <VipExploreButton onClick={openVipDialog} />
                 <CustomButton
                   label='Đăng ký'
                   icon={<UserPlus className='w-4 h-4' />}
@@ -333,9 +343,21 @@ const Header: FC = () => {
                           navigate(item.path)
                           setIsOpen(false)
                         }}
-                        className='flex items-center gap-3 px-4 py-3 hover:bg-cyan-50 rounded-xl transition-all duration-300 text-sm font-medium hover:text-cyan-700 text-left w-full text-slate-700'
+                        className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 text-sm font-medium text-left w-full ${
+                          location.pathname === item.path || location.pathname.startsWith(`${item.path}/`)
+                            ? 'bg-blue-50 text-blue-700'
+                            : 'text-slate-700 hover:bg-slate-50 hover:text-blue-600'
+                        }`}
                       >
-                        <span className='w-5 h-5 flex items-center justify-center text-slate-500'>{item.icon}</span>
+                        <span
+                          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
+                            location.pathname === item.path || location.pathname.startsWith(`${item.path}/`)
+                              ? 'bg-white text-blue-600 shadow-sm'
+                              : 'bg-slate-100 text-slate-500'
+                          }`}
+                        >
+                          {item.icon}
+                        </span>
                         <span>{item.label}</span>
                         <AnimatePresence>
                           {(location.pathname === item.path || location.pathname.startsWith(`${item.path}/`)) && (
@@ -353,9 +375,8 @@ const Header: FC = () => {
                 </div>
               </SheetContent>
             </Sheet>
-          </NavigationMenuList>
         </div>
-      </NavigationMenu>
+      </div>
     </div>
   )
 }

@@ -9,9 +9,6 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import reactor.core.publisher.Flux;
-
-import java.io.IOException;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -22,20 +19,10 @@ public class UploadFileService implements IUploadFileService {
 
     @Override
     public String uploadFile(MultipartFile file) {
-        try {
-            String contentType = file.getContentType();
-            if (contentType == null) {
-                throw new CustomExeption(ErrorCode.UNCATEGORIZED_EXEPTION);
-            }
-
-            //check if is
-            if (contentType.startsWith("image/")) {
-                return cloudinaryClient.uploadFile(file);
-            }
-            return cloudinaryClient.uploadFile(file);
-        } catch (Exception e) {
-            log.error("Upload failed", e);
-            throw new CustomExeption(ErrorCode.UNCATEGORIZED_EXEPTION);
+        String contentType = file.getContentType();
+        if (contentType == null || !contentType.startsWith("image/")) {
+            throw new CustomExeption(ErrorCode.INVALID_KEY);
         }
+        return cloudinaryClient.uploadFile(file);
     }
 }

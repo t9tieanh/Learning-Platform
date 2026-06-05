@@ -6,6 +6,7 @@ import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
+import org.aopalliance.aop.Advice;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -34,6 +35,12 @@ public class RabbitMQConfig {
     public static final String COURSE_APPROVAL_EXCHANGE = "course.approval.exchange";
     public static final String COURSE_APPROVAL_ROUTING_KEY = "course.approval.#";
     public static final String ASSISTANT_COURSE_EMBEDDING_QUEUE = "assistant.course.embedding.queue";
+
+    // --- course approval -> elasticsearch index ---
+    public static final String COURSE_SEARCH_INDEX_QUEUE = "course.search.index.queue";
+    public static final String COURSE_SEARCH_INDEX_DLX = "course.search.index.dlx";
+    public static final String COURSE_SEARCH_INDEX_DLQ = "course.search.index.dlq";
+    public static final String COURSE_SEARCH_INDEX_DLQ_ROUTING_KEY = "course.search.index.dead";
 
     @Bean
     public Queue registerCourseQueue () {
@@ -116,6 +123,43 @@ public class RabbitMQConfig {
                 .with(COURSE_APPROVAL_ROUTING_KEY);
     }
 
+    @Bean
+    public DirectExchange courseSearchIndexDlqExchange() {
+        return new DirectExchange(COURSE_SEARCH_INDEX_DLX, true, false);
+    }
+
+    @Bean
+    public Queue courseSearchIndexDlq() {
+        return new Queue(COURSE_SEARCH_INDEX_DLQ, true);
+    }
+
+    @Bean
+    public Binding bindingCourseSearchIndexDlq(
+            Queue courseSearchIndexDlq,
+            DirectExchange courseSearchIndexDlqExchange
+    ) {
+        return BindingBuilder
+                .bind(courseSearchIndexDlq)
+                .to(courseSearchIndexDlqExchange)
+                .with(COURSE_SEARCH_INDEX_DLQ_ROUTING_KEY);
+    }
+
+    @Bean
+    public Queue courseSearchIndexQueue() {
+        return QueueBuilder.durable(COURSE_SEARCH_INDEX_QUEUE)
+                .withArgument("x-dead-letter-exchange", COURSE_SEARCH_INDEX_DLX)
+                .withArgument("x-dead-letter-routing-key", COURSE_SEARCH_INDEX_DLQ_ROUTING_KEY)
+                .build();
+    }
+
+    @Bean
+    public Binding bindingCourseSearchIndex(Queue courseSearchIndexQueue, TopicExchange courseApprovalExchange) {
+        return BindingBuilder
+                .bind(courseSearchIndexQueue)
+                .to(courseApprovalExchange)
+                .with(COURSE_APPROVAL_ROUTING_KEY);
+    }
+
     // --- config lesson analysis ---
     public static final String LESSON_ANALYSIS_QUEUE = "lesson.analysis.queue";
     public static final String LESSON_ANALYSIS_EXCHANGE = "lesson.analysis.exchange";
@@ -167,6 +211,21 @@ public class RabbitMQConfig {
         factory.setMessageConverter(messageConverter);
         factory.setAcknowledgeMode(AcknowledgeMode.AUTO);
         factory.setDefaultRequeueRejected(true);
+        return factory;
+    }
+
+    @Bean
+    public SimpleRabbitListenerContainerFactory courseSearchIndexListenerContainerFactory(
+            ConnectionFactory connectionFactory,
+            Jackson2JsonMessageConverter messageConverter,
+            Advice courseSearchIndexRetryAdvice) {
+
+        SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
+        factory.setConnectionFactory(connectionFactory);
+        factory.setMessageConverter(messageConverter);
+        factory.setAcknowledgeMode(AcknowledgeMode.AUTO);
+        factory.setDefaultRequeueRejected(false);
+        factory.setAdviceChain(courseSearchIndexRetryAdvice);
         return factory;
     }
 }

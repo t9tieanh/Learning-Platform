@@ -23,11 +23,25 @@ type CourseEmbeddingPersistInput = {
 class CourseEmbeddingService {
   private readonly embeddingService = new EmbeddingE5Service()
 
-  async indexFromApprovalEvent(event: CourseApprovalEvent): Promise<void> {
-    if (event.action !== 'APPROVED') {
+  async deleteFromApprovalEvent(event: CourseApprovalEvent): Promise<void> {
+    if (!event.id) {
+      Logger.warn('[CourseEmbedding] Skip delete: missing course id')
       return
     }
 
+    const deleted = await prismaService.courseEmbedding.deleteMany({
+      where: { id: event.id }
+    })
+
+    if (deleted.count === 0) {
+      Logger.info(`[CourseEmbedding] No embedding found for rejected course ${event.id}`)
+      return
+    }
+
+    Logger.info(`[CourseEmbedding] Deleted embedding for rejected course ${event.id}`)
+  }
+
+  async indexFromApprovalEvent(event: CourseApprovalEvent): Promise<void> {
     const name = event.title?.trim()
     const description = (event.shortDescription ?? event.longDescription ?? '').trim()
 
@@ -89,7 +103,7 @@ class CourseEmbeddingService {
         link,
         content,
         metadata,
-        check,
+        "check",
         embedding,
         created_at
       )
