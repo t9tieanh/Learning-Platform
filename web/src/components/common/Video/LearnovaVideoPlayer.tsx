@@ -248,7 +248,7 @@ const LearnovaVideoPlayer = forwardRef<HTMLVideoElement | null, LearnovaVideoPla
                                     alt='Loading'
                                     className='w-16 h-16 object-contain'
                                 />
-                                <LoadingDots text='Chờ learnova một tí nhé...' className='text-blue-400 font-bold text-sm' />
+                                <LoadingDots text='Đang xử lý...' className='text-blue-400 font-bold text-sm' />
                             </div>
                         </div>
                     )}
