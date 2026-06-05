@@ -217,6 +217,37 @@ public interface CourseRepository extends JpaRepository<CourseEntity, String> {
     );
 
     @Query("""
+        SELECT c FROM CourseEntity c
+        WHERE c.status = 'PUBLISHED'
+        AND (
+            :search IS NULL
+            OR LOWER(c.title) LIKE LOWER(CONCAT('%', :search, '%'))
+            OR LOWER(c.shortDescription) LIKE LOWER(CONCAT('%', :search, '%'))
+            OR LOWER(c.longDescription) LIKE LOWER(CONCAT('%', :search, '%'))
+        )
+        AND (:category IS NULL OR c.category.name = :category)
+        AND (:minPrice IS NULL OR c.finalPrice >= :minPrice)
+        AND (:minRating IS NULL OR c.rating >= :minRating)
+        ORDER BY
+            CASE
+                WHEN LOWER(c.title) = LOWER(:search) THEN 0
+                WHEN LOWER(c.title) LIKE LOWER(CONCAT(:search, '%')) THEN 1
+                WHEN LOWER(c.title) LIKE LOWER(CONCAT('%', :search, '%')) THEN 2
+                WHEN LOWER(c.shortDescription) LIKE LOWER(CONCAT('%', :search, '%')) THEN 3
+                WHEN LOWER(c.longDescription) LIKE LOWER(CONCAT('%', :search, '%')) THEN 4
+                ELSE 5
+            END,
+            c.createdAt DESC
+    """)
+    Page<CourseEntity> findAllWithFiltersOrderBySearchRelevance(
+            @Param("search") String search,
+            @Param("category") String category,
+            @Param("minPrice") Double minPrice,
+            @Param("minRating") Double minRating,
+            Pageable pageable
+    );
+
+    @Query("""
         SELECT COALESCE(SUM(l.duration), 0)
         FROM CourseEntity c
         JOIN c.chapters ch
