@@ -28,6 +28,10 @@ public class EnrollmentsEntity extends AbstractEntity {
     @Column(name = "user_id", nullable = false)
     String userId;
 
+    @Builder.Default
+    @Column(name = "is_owner_enrollment", nullable = false)
+    Boolean ownerEnrollment = false;
+
     LocalDateTime enrollmentDate;
 
     @Enumerated(EnumType.STRING)

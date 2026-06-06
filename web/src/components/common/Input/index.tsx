@@ -10,13 +10,13 @@ type CustomInputProps = React.InputHTMLAttributes<HTMLInputElement> & {
 // eslint-disable-next-line
 const CustomInput = React.forwardRef<HTMLInputElement, CustomInputProps>(({ label, className, ...rest }, ref) => {
   return (
-    <div className='input-container'>
+    <div className='input-container space-y-2'>
       {label && (
-        <Label className='mb-2' htmlFor={rest.id || rest.name}>
+        <Label className='mb-2 inline-block' htmlFor={rest.id || rest.name}>
           {label}
         </Label>
       )}
-      <Input ref={ref} className={`input-field ${className ?? ''}`} {...rest} />
+      <Input ref={ref} className={`input-field h-12 rounded-2xl px-4 ${className ?? ''}`} {...rest} />
     </div>
   )
 })

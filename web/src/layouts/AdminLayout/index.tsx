@@ -22,7 +22,8 @@ const AdminLayout: React.FC = () => {
           <header className='flex h-16 items-center border-b bg-background/80 px-4 shadow-sm backdrop-blur-sm sm:px-6'>
             <SidebarTrigger />
             <div className='ml-3 flex flex-1 items-center justify-between sm:ml-4'>
-              <h1 className='bg-gradient-to-r from-primary to-accent bg-clip-text text-lg font-bold text-transparent sm:text-2xl'>
+              <h1 className='bg-gradient-to-r from-cyan-400 via-sky-400 to-blue-500 bg-clip-text text-lg font-bold text-transparent sm:text-2xl'>
+                {' '}
                 Quản trị hệ thống
               </h1>
             </div>
