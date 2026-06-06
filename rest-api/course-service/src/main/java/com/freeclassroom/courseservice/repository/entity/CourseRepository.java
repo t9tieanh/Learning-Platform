@@ -288,27 +288,27 @@ public interface CourseRepository extends JpaRepository<CourseEntity, String> {
     List<CourseEntity> findAllByInstructorIdWithEnrollments(@Param("instructorId") String instructorId);
 
     @Query("""
-       SELECT MONTH(e.createdAt) AS month,
+       SELECT MONTH(e.updatedAt) AS month,
               COUNT(e.id) AS totalEnrollment
        FROM EnrollmentsEntity e
        WHERE e.course.instructorId = :userId
          AND (e.ownerEnrollment IS NULL OR e.ownerEnrollment = false)
-         AND YEAR(e.createdAt) = :year
-       GROUP BY MONTH(e.createdAt)
-       ORDER BY MONTH(e.createdAt)
+         AND YEAR(e.updatedAt) = :year
+       GROUP BY MONTH(e.updatedAt)
+       ORDER BY MONTH(e.updatedAt)
        """)
     List<Object[]> countEnrollmentsByMonth(@Param("userId") String userId,
                                            @Param("year") long year);
 
     @Query("""
-       SELECT MONTH(e.createdAt) AS month,
+       SELECT MONTH(e.updatedAt) AS month,
               COUNT(e.id) AS totalEnrollment
        FROM EnrollmentsEntity e
        WHERE e.course.instructorId = :instructorId
          AND (e.ownerEnrollment IS NULL OR e.ownerEnrollment = false)
-         AND YEAR(e.createdAt) = :year
-       GROUP BY MONTH(e.createdAt)
-       ORDER BY MONTH(e.createdAt)
+         AND YEAR(e.updatedAt) = :year
+       GROUP BY MONTH(e.updatedAt)
+       ORDER BY MONTH(e.updatedAt)
        """)
     List<Object[]> countEnrollmentsByMonthForInstructor(@Param("instructorId") String instructorId,
                                                          @Param("year") int year);

@@ -79,7 +79,7 @@ public interface EnrollmentRepository extends JpaRepository<EnrollmentsEntity, S
     );
 
     @Query("""
-            SELECT FUNCTION('DATE_FORMAT', e.enrollmentDate, '%Y-%m-%d') AS bucketKey,
+            SELECT FUNCTION('DATE_FORMAT', e.updatedAt, '%Y-%m-%d') AS bucketKey,
                    COUNT(e.id) AS studentCount
             FROM EnrollmentsEntity e
             JOIN e.course c
@@ -87,9 +87,9 @@ public interface EnrollmentRepository extends JpaRepository<EnrollmentsEntity, S
               AND c.progressStep = com.freeclassroom.courseservice.enums.entity.EnumCourseProgressStep.COMPLETED
               AND c.deleted = false
               AND (e.ownerEnrollment IS NULL OR e.ownerEnrollment = false)
-              AND e.enrollmentDate >= :startAt
-              AND e.enrollmentDate < :endAt
-            GROUP BY FUNCTION('DATE_FORMAT', e.enrollmentDate, '%Y-%m-%d')
+              AND e.updatedAt >= :startAt
+              AND e.updatedAt < :endAt
+            GROUP BY FUNCTION('DATE_FORMAT', e.updatedAt, '%Y-%m-%d')
             ORDER BY bucketKey ASC
             """)
     List<AdminEnrollmentBucketProjection> countAdminEnrollmentsByDay(
@@ -98,7 +98,7 @@ public interface EnrollmentRepository extends JpaRepository<EnrollmentsEntity, S
     );
 
     @Query("""
-            SELECT FUNCTION('DATE_FORMAT', e.enrollmentDate, '%Y-%m') AS bucketKey,
+            SELECT FUNCTION('DATE_FORMAT', e.updatedAt, '%Y-%m') AS bucketKey,
                    COUNT(e.id) AS studentCount
             FROM EnrollmentsEntity e
             JOIN e.course c
@@ -106,9 +106,9 @@ public interface EnrollmentRepository extends JpaRepository<EnrollmentsEntity, S
               AND c.progressStep = com.freeclassroom.courseservice.enums.entity.EnumCourseProgressStep.COMPLETED
               AND c.deleted = false
               AND (e.ownerEnrollment IS NULL OR e.ownerEnrollment = false)
-              AND e.enrollmentDate >= :startAt
-              AND e.enrollmentDate < :endAt
-            GROUP BY FUNCTION('DATE_FORMAT', e.enrollmentDate, '%Y-%m')
+              AND e.updatedAt >= :startAt
+              AND e.updatedAt < :endAt
+            GROUP BY FUNCTION('DATE_FORMAT', e.updatedAt, '%Y-%m')
             ORDER BY bucketKey ASC
             """)
     List<AdminEnrollmentBucketProjection> countAdminEnrollmentsByMonth(
