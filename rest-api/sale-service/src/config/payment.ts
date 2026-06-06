@@ -23,4 +23,6 @@ export const payosConfig = {
     process.env.PAYOS_RETURN_URL || 'http://localhost:3005/orders/verify-order/payos',
   cancelUrl:
     process.env.PAYOS_CANCEL_URL || 'http://localhost:3005/orders/cancel-order/payos',
+  webhookUrl:
+    process.env.PAYOS_WEBHOOK_URL || 'http://localhost:4000/orders/payment/payos/webhook',
 }
