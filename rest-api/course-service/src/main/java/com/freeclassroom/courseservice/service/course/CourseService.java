@@ -22,6 +22,7 @@ import com.freeclassroom.courseservice.exception.CustomExeption;
 import com.freeclassroom.courseservice.exception.ErrorCode;
 import com.freeclassroom.courseservice.grpc.client.UserGrpcClient;
 import com.freeclassroom.courseservice.mapper.CourseMapper;
+import com.freeclassroom.courseservice.mapper.EnrollmentMapper;
 import com.freeclassroom.courseservice.mapper.LessonMapper;
 import com.freeclassroom.courseservice.repository.entity.CategoryRepository;
 import com.freeclassroom.courseservice.repository.entity.ChapterRepository;
@@ -50,6 +51,7 @@ import reactor.core.publisher.Mono;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -64,6 +66,7 @@ public class CourseService implements ICourseService {
     ChapterRepository chapterRepo;
 
     CourseMapper courseMapper;
+    EnrollmentMapper enrollmentMapper;
     LessonMapper lessonMapper;
     UserGrpcClient userGrpcClient;
 
@@ -222,6 +225,15 @@ public class CourseService implements ICourseService {
                     .ifPresent(e -> entity.setEnrollments(e.getEnrollments()));
 
             CourseResponse response = courseMapper.toDto(entity);
+            if (entity.getEnrollments() != null) {
+                response.setEnrollments(
+                        entity.getEnrollments().stream()
+                                .filter(enrollment -> !Boolean.TRUE.equals(enrollment.getOwnerEnrollment()))
+                                .map(enrollmentMapper::toDto)
+                                .filter(Objects::nonNull)
+                                .toList()
+                );
+            }
 
             response.getChapters().forEach(chapterDTO -> {
                 var chapter = chapterRepo.findByIdWithLessons(chapterDTO.getId())

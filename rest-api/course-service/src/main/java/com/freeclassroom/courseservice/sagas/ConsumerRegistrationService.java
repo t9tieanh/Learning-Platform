@@ -52,6 +52,7 @@ public class ConsumerRegistrationService {
             EnrollmentsEntity enrollment = EnrollmentsEntity.builder()
                     .progress(0d)
                     .userId(message.getPayload().getUserId())
+                    .ownerEnrollment(false)
                     .course(course)
                     .build();
             course.getEnrollments().add(enrollment);
@@ -108,4 +109,3 @@ public class ConsumerRegistrationService {
         );
     }
 }
-

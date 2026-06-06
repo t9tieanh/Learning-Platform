@@ -118,7 +118,7 @@ const SignInForm = ({
                   isLoader={loading}
                   type='submit'
                   icon={<LogIn size={16} />}
-                  className='w-full rounded-md shadow-lg border border-gray-300 bg-blue-500 py-3 text-white hover:bg-blue-600'
+                  className='h-12 w-full rounded-[1.6rem] border border-gray-300 bg-blue-500 px-5 py-3 text-white shadow-lg hover:bg-blue-600'
                 />
               </div>
             </form>
@@ -137,7 +137,7 @@ const SignInForm = ({
                 onClick={handleLoginWithGoogle}
                 icon={<FcGoogle />}
                 label='Đăng nhập với Google'
-                className='bg-inherit w-full rounded-md border-2 border-gray-300 shadow-lg hover:bg-blue-100 text-blue-600'
+                className='h-12 w-full rounded-[1.6rem] border-2 border-gray-300 bg-inherit px-5 text-blue-600 shadow-lg hover:bg-blue-100'
               />
             </div>
 
@@ -146,7 +146,7 @@ const SignInForm = ({
               onClick={() => navigate('/')}
               label='Về trang chủ'
               icon={<ArrowLeft size={16} />}
-              className='w-full rounded-md shadow-lg border border-gray-300 bg-blue-500 py-3 text-white hover:bg-blue-600'
+              className='h-12 w-full rounded-[1.6rem] border border-gray-300 bg-blue-500 px-5 py-3 text-white shadow-lg hover:bg-blue-600'
             />
           </CardContent>
         </CardHeader>

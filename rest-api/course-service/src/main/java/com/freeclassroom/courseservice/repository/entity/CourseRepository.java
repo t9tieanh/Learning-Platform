@@ -57,7 +57,7 @@ public interface CourseRepository extends JpaRepository<CourseEntity, String> {
             COALESCE(c.rating, 0) AS rating,
             COUNT(e.id) AS studentCount
         FROM CourseEntity c
-        LEFT JOIN c.enrollments e
+        LEFT JOIN c.enrollments e ON (e.ownerEnrollment IS NULL OR e.ownerEnrollment = false)
         WHERE c.status = com.freeclassroom.courseservice.enums.entity.EnumCourseStatus.PUBLISHED
           AND c.progressStep = com.freeclassroom.courseservice.enums.entity.EnumCourseProgressStep.COMPLETED
           AND c.deleted = false
@@ -71,7 +71,7 @@ public interface CourseRepository extends JpaRepository<CourseEntity, String> {
             COUNT(DISTINCT c.id) AS courseCount,
             COUNT(e.id) AS studentCount
         FROM CourseEntity c
-        LEFT JOIN c.enrollments e
+        LEFT JOIN c.enrollments e ON (e.ownerEnrollment IS NULL OR e.ownerEnrollment = false)
         WHERE c.status = com.freeclassroom.courseservice.enums.entity.EnumCourseStatus.PUBLISHED
           AND c.progressStep = com.freeclassroom.courseservice.enums.entity.EnumCourseProgressStep.COMPLETED
           AND c.deleted = false
@@ -181,7 +181,7 @@ public interface CourseRepository extends JpaRepository<CourseEntity, String> {
     @Query("""
         SELECT c 
         FROM CourseEntity c 
-        LEFT JOIN c.enrollments e
+        LEFT JOIN c.enrollments e ON (e.ownerEnrollment IS NULL OR e.ownerEnrollment = false)
         WHERE c.status = 'PUBLISHED'
         GROUP BY c 
         ORDER BY COUNT(e) DESC
@@ -191,7 +191,7 @@ public interface CourseRepository extends JpaRepository<CourseEntity, String> {
     @Query("""
         SELECT c
         FROM CourseEntity c
-        LEFT JOIN c.enrollments e
+        LEFT JOIN c.enrollments e ON (e.ownerEnrollment IS NULL OR e.ownerEnrollment = false)
         WHERE c.status = 'PUBLISHED'
           AND FUNCTION('MONTH', e.enrollmentDate) = :month
           AND FUNCTION('YEAR', e.enrollmentDate) = :year
@@ -278,6 +278,7 @@ public interface CourseRepository extends JpaRepository<CourseEntity, String> {
     SELECT c FROM CourseEntity c
     JOIN c.enrollments e
     WHERE e.userId = :userId
+      AND (e.ownerEnrollment IS NULL OR e.ownerEnrollment = false)
       AND c.deleted = false
       AND c.status = com.freeclassroom.courseservice.enums.entity.EnumCourseStatus.PUBLISHED
 """)
@@ -287,25 +288,27 @@ public interface CourseRepository extends JpaRepository<CourseEntity, String> {
     List<CourseEntity> findAllByInstructorIdWithEnrollments(@Param("instructorId") String instructorId);
 
     @Query("""
-       SELECT MONTH(e.createdAt) AS month,
+       SELECT MONTH(e.updatedAt) AS month,
               COUNT(e.id) AS totalEnrollment
        FROM EnrollmentsEntity e
        WHERE e.course.instructorId = :userId
-         AND YEAR(e.createdAt) = :year
-       GROUP BY MONTH(e.createdAt)
-       ORDER BY MONTH(e.createdAt)
+         AND (e.ownerEnrollment IS NULL OR e.ownerEnrollment = false)
+         AND YEAR(e.updatedAt) = :year
+       GROUP BY MONTH(e.updatedAt)
+       ORDER BY MONTH(e.updatedAt)
        """)
     List<Object[]> countEnrollmentsByMonth(@Param("userId") String userId,
                                            @Param("year") long year);
 
     @Query("""
-       SELECT MONTH(e.createdAt) AS month,
+       SELECT MONTH(e.updatedAt) AS month,
               COUNT(e.id) AS totalEnrollment
        FROM EnrollmentsEntity e
        WHERE e.course.instructorId = :instructorId
-         AND YEAR(e.createdAt) = :year
-       GROUP BY MONTH(e.createdAt)
-       ORDER BY MONTH(e.createdAt)
+         AND (e.ownerEnrollment IS NULL OR e.ownerEnrollment = false)
+         AND YEAR(e.updatedAt) = :year
+       GROUP BY MONTH(e.updatedAt)
+       ORDER BY MONTH(e.updatedAt)
        """)
     List<Object[]> countEnrollmentsByMonthForInstructor(@Param("instructorId") String instructorId,
                                                          @Param("year") int year);
@@ -328,7 +331,7 @@ public interface CourseRepository extends JpaRepository<CourseEntity, String> {
             COALESCE(AVG(c.rating), 0) AS averageRating,
             COALESCE(AVG(e.progress), 0) AS completionRate
         FROM CourseEntity c
-        LEFT JOIN c.enrollments e
+        LEFT JOIN c.enrollments e ON (e.ownerEnrollment IS NULL OR e.ownerEnrollment = false)
         WHERE c.deleted = false
           AND c.instructorId = :instructorId
     """)
@@ -343,7 +346,7 @@ public interface CourseRepository extends JpaRepository<CourseEntity, String> {
             COALESCE(c.rating, 0) AS rating,
             COUNT(e.id) AS studentsCount
         FROM CourseEntity c
-        LEFT JOIN c.enrollments e
+        LEFT JOIN c.enrollments e ON (e.ownerEnrollment IS NULL OR e.ownerEnrollment = false)
         WHERE c.deleted = false
           AND c.instructorId = :instructorId
         GROUP BY c.id, c.title, c.category.name, c.status, c.rating, c.createdAt
@@ -395,7 +398,7 @@ public interface CourseRepository extends JpaRepository<CourseEntity, String> {
             c.createdAt AS createdAt,
             COUNT(e.id) AS studentsCount
         FROM CourseEntity c
-        LEFT JOIN c.enrollments e
+        LEFT JOIN c.enrollments e ON (e.ownerEnrollment IS NULL OR e.ownerEnrollment = false)
         WHERE c.instructorId = :instructorId
           AND c.status = com.freeclassroom.courseservice.enums.entity.EnumCourseStatus.PUBLISHED
           AND c.progressStep = com.freeclassroom.courseservice.enums.entity.EnumCourseProgressStep.COMPLETED
@@ -420,7 +423,7 @@ public interface CourseRepository extends JpaRepository<CourseEntity, String> {
             c.createdAt AS createdAt,
             COUNT(e.id) AS studentsCount
         FROM CourseEntity c
-        LEFT JOIN c.enrollments e
+        LEFT JOIN c.enrollments e ON (e.ownerEnrollment IS NULL OR e.ownerEnrollment = false)
         WHERE c.instructorId = :instructorId
           AND c.status = com.freeclassroom.courseservice.enums.entity.EnumCourseStatus.PUBLISHED
           AND c.progressStep = com.freeclassroom.courseservice.enums.entity.EnumCourseProgressStep.COMPLETED
@@ -446,7 +449,7 @@ public interface CourseRepository extends JpaRepository<CourseEntity, String> {
             c.createdAt AS createdAt,
             COUNT(e.id) AS studentsCount
         FROM CourseEntity c
-        LEFT JOIN c.enrollments e
+        LEFT JOIN c.enrollments e ON (e.ownerEnrollment IS NULL OR e.ownerEnrollment = false)
         WHERE c.instructorId = :instructorId
           AND c.status = com.freeclassroom.courseservice.enums.entity.EnumCourseStatus.PUBLISHED
           AND c.progressStep = com.freeclassroom.courseservice.enums.entity.EnumCourseProgressStep.COMPLETED

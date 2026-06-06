@@ -119,7 +119,7 @@ const SignUpForm: FC<{ setIsSignUpMode: (value: boolean) => void; handleLoginWit
                   isLoader={loading}
                   label='Tạo tài khoản'
                   type='submit'
-                  className='w-full shadow-lg rounded-md border border-gray-300 bg-blue-500 py-3 text-white hover:bg-blue-600'
+                  className='h-12 w-full rounded-[1.35rem] border border-gray-300 bg-blue-500 px-5 py-3 text-white shadow-lg hover:bg-blue-600'
                   icon={<Send size={16} />}
                 />
               </div>
@@ -136,7 +136,8 @@ const SignUpForm: FC<{ setIsSignUpMode: (value: boolean) => void; handleLoginWit
               <div className='mt-5 flex items-center justify-center gap-3 w-full mb-2'>
                 <CustomButton
                   icon={<FcGoogle />}
-                  className='bg-inherit w-full border-2 border-solid hover:bg-red-600'
+                  label='Đăng nhập với Google'
+                  className='h-12 w-full rounded-[1.6rem] border-2 border-gray-300 bg-inherit px-5 text-blue-600 shadow-lg hover:bg-blue-100'
                   onClick={handleLoginWithGoogle}
                 />
               </div>
@@ -145,7 +146,7 @@ const SignUpForm: FC<{ setIsSignUpMode: (value: boolean) => void; handleLoginWit
                 onClick={() => navigate('/')}
                 label='Về trang chủ'
                 icon={<ArrowLeft size={16} />}
-                className='w-full rounded-md shadow-lg border border-gray-300 bg-blue-500 py-3 text-white hover:bg-blue-600'
+                className='h-12 w-full rounded-[1.35rem] border border-gray-300 bg-blue-500 px-5 py-3 text-white shadow-lg hover:bg-blue-600'
               />
             </form>
           </CardContent>
