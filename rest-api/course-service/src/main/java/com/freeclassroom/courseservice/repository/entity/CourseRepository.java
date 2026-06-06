@@ -280,6 +280,7 @@ public interface CourseRepository extends JpaRepository<CourseEntity, String> {
     WHERE e.userId = :userId
       AND c.deleted = false
       AND c.status = com.freeclassroom.courseservice.enums.entity.EnumCourseStatus.PUBLISHED
+      AND (c.instructorId IS NULL OR c.instructorId <> :userId)
 """)
     Page<CourseEntity> findAllByUserId(@Param("userId") String userId, Pageable pageable);
 
