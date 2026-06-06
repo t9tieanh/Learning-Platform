@@ -8,7 +8,7 @@ import { Info, Video, Tag } from 'lucide-react'
 import { landingPageSchema, LandingPageFormValues } from '@/utils/create-course/landingPage'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
-import { useEffect } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
@@ -17,10 +17,12 @@ import tagsService from '@/services/course/tags.service'
 const LandingPageForm = ({
   id,
   courseInfo,
-  onIntroVideoUpdated
+  onIntroVideoUpdated,
+  onThumbnailUpdated
 }: {
   id: string
   onIntroVideoUpdated?: (url: string) => void
+  onThumbnailUpdated?: (url: string) => void
   courseInfo: {
     courseTitle: string
     subtitle: string
@@ -71,9 +73,17 @@ const LandingPageForm = ({
     fetchCourseData()
   }, [id, setValue, navigator])
 
-  // khi courseInfo từ parent thay đổi -> reset form
+  const initializedForIdRef = useRef<string | null>(null)
+  const [mediaPreview, setMediaPreview] = useState({
+    thumbnailUrl: '',
+    introductoryVideo: ''
+  })
+
+  // Chỉ reset form một lần khi load khóa học — không reset lại sau upload media.
   useEffect(() => {
-    if (!courseInfo) return
+    if (!courseInfo || !id) return
+    if (initializedForIdRef.current === id) return
+
     reset({
       courseTitle: courseInfo.courseTitle,
       subtitle: courseInfo.subtitle,
@@ -85,7 +95,22 @@ const LandingPageForm = ({
       thumbnailUrl: courseInfo.thumbnailUrl,
       introductoryVideo: courseInfo.introductoryVideo
     })
-  }, [courseInfo, reset])
+    setMediaPreview({
+      thumbnailUrl: courseInfo.thumbnailUrl,
+      introductoryVideo: courseInfo.introductoryVideo
+    })
+    initializedForIdRef.current = id
+  }, [id, courseInfo, reset])
+
+  const handleThumbnailUpdated = (url: string) => {
+    setMediaPreview((prev) => ({ ...prev, thumbnailUrl: url }))
+    onThumbnailUpdated?.(url)
+  }
+
+  const handleIntroVideoUpdated = (url: string) => {
+    setMediaPreview((prev) => ({ ...prev, introductoryVideo: url }))
+    onIntroVideoUpdated?.(url)
+  }
 
   // Watch form values
   const formValues = watch()
@@ -161,7 +186,8 @@ const LandingPageForm = ({
                   watch
                 }}
                 id={id}
-                onIntroVideoUpdated={onIntroVideoUpdated}
+                onIntroVideoUpdated={handleIntroVideoUpdated}
+                onThumbnailUpdated={handleThumbnailUpdated}
               />
             </TabsContent>
 
@@ -183,7 +209,11 @@ const LandingPageForm = ({
 
         {/* Preview Section */}
         <div className='space-y-8'>
-          <PreviewComponent {...formValues} />
+          <PreviewComponent
+            {...formValues}
+            thumbnailUrl={mediaPreview.thumbnailUrl || formValues.thumbnailUrl}
+            introductoryVideo={mediaPreview.introductoryVideo || formValues.introductoryVideo}
+          />
         </div>
       </div>
     </div>

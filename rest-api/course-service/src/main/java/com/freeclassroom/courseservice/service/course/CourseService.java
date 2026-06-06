@@ -28,6 +28,8 @@ import com.freeclassroom.courseservice.repository.entity.ChapterRepository;
 import com.freeclassroom.courseservice.repository.entity.CourseRepository;
 import com.freeclassroom.courseservice.repository.entity.TagRepository;
 import com.freeclassroom.courseservice.service.utils.file.IUploadFileService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -66,6 +68,7 @@ public class CourseService implements ICourseService {
     UserGrpcClient userGrpcClient;
 
     IUploadFileService fileService;
+    ObjectMapper objectMapper;
 
     @NonFinal
     @org.springframework.beans.factory.annotation.Value("${app.course.platform-fee-rate:0.2}")
@@ -269,14 +272,22 @@ public class CourseService implements ICourseService {
                             .data("{\"message\": \"Upload file thành công, đang lưu những dữ liệu còn lại !...\"}")
                             .build();
 
-                    // save to db
                     course.setIntroductoryVideo(fileUrl);
                     courseRepo.save(course);
 
-                    String completedPayload = String.format(
-                            "{\"introductoryVideo\":\"%s\",\"message\":\"Video giới thiệu đã được tải lên thành công !\"}",
-                            fileUrl.replace("\\", "\\\\").replace("\"", "\\\"")
-                    );
+                    String completedPayload;
+                    try {
+                        completedPayload = objectMapper.writeValueAsString(
+                                IntroVideoUploadCompletedResponse.builder()
+                                        .introductoryVideo(fileUrl)
+                                        .message("Video giới thiệu đã được tải lên thành công !")
+                                        .build()
+                        );
+                    } catch (JsonProcessingException exception) {
+                        log.error("Failed to serialize intro video upload completed payload", exception);
+                        throw new CustomExeption(ErrorCode.UPLOAD_NOT_COMPLETED);
+                    }
+
                     ServerSentEvent<String> completedEvent = ServerSentEvent.<String>builder()
                             .event("completed")
                             .data(completedPayload)
