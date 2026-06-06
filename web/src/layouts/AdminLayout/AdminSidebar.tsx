@@ -15,6 +15,8 @@ import userService from '@/services/user/user.service'
 import { useAuthStore } from '@/stores/useAuth.stores'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
+import learnovaLogo from '@/assets/images/logo1.png'
+import learnovaLogoCompact from '@/assets/images/LEARNOVA_sm.png'
 
 const menuItems = [
   { title: 'Trang chủ', url: '/admin', icon: LayoutDashboard },
@@ -65,20 +67,14 @@ export function AdminSidebar() {
           } bg-white/[0.02] backdrop-blur-xl`}
         >
           {open ? (
-            <div className='rounded-3xl border border-white/10 bg-white/[0.04] p-4 shadow-[0_18px_40px_-28px_rgba(15,23,42,0.75)]'>
-              <div className='flex items-center gap-3'>
-                <div className='flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-400 via-cyan-400 to-blue-500 text-sm font-extrabold text-white shadow-[0_18px_30px_-18px_rgba(56,189,248,0.8)]'>
-                  N
-                </div>
-                <div className='min-w-0'>
-                  <p className='text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400'>Admin panel</p>
-                  <h2 className='mt-1 text-lg font-semibold tracking-tight text-white'>NovaAdmin</h2>
-                </div>
+            <div className='rounded-2xl border border-white/10 bg-white/[0.04] p-3 shadow-[0_18px_40px_-28px_rgba(15,23,42,0.75)]'>
+              <div className='flex justify-center overflow-hidden rounded-xl px-3 py-2'>
+                <img src={learnovaLogo} alt='Learnova logo' className='h-10 w-full max-w-[160px] object-contain' />
               </div>
             </div>
           ) : (
-            <div className='flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-400 via-cyan-400 to-blue-500 text-sm font-extrabold text-white shadow-[0_18px_30px_-18px_rgba(56,189,248,0.8)]'>
-              N
+            <div className='flex h-11 w-11 items-center justify-center overflow-hidden rounded-2xl bg-white p-1 shadow-[0_18px_30px_-18px_rgba(56,189,248,0.8)]'>
+              <img src={learnovaLogoCompact} alt='Learnova compact logo' className='h-full w-full object-contain' />
             </div>
           )}
         </div>
