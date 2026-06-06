@@ -163,8 +163,6 @@ const InstructorCoursesPage = () => {
                       }}
                       rating={Number(course.rating || 0)}
                       reviewCount={0}
-                      duration={course.duration || '—'}
-                      lectures={Number(course.lessonsCount || 0)}
                       category={undefined}
                       level={course.level || 'Mọi cấp độ'}
                       isBestseller={Boolean(course.isBestseller)}

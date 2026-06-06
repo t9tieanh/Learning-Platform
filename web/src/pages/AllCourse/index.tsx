@@ -1,9 +1,9 @@
 import { useMemo, useState } from 'react'
 import { CourseCard } from '@/components/AllCourse/CourseCard'
-import { CourseFetchingOverlay } from '@/components/AllCourse/CourseFetchingOverlay'
 import CourseCardListSkeleton from '@/components/AllCourse/CourseCardListSkeleton'
 import { FilterSidebar } from '@/components/AllCourse/FilterSidebar'
 import { SortBar } from '@/components/AllCourse/SortBar'
+import SortBarSkeleton from '@/components/AllCourse/SortBarSkeleton'
 import CustomPagination from '@/components/common/Pagination/CustomPagination'
 import instructorAvatar from '@/assets/images/course.jpg'
 import heroCourses from '@/assets/images/hero-courses.png'
@@ -164,7 +164,8 @@ const Index = () => {
   const totalPages = activeQuery.data?.totalPages ?? 1
   const totalElements = activeQuery.data?.totalElements ?? 0
   const loading = activeQuery.isLoading
-  const busy = activeQuery.isFetching
+  const refreshing = activeQuery.isFetching && !activeQuery.isLoading
+  const showSkeleton = loading || (activeQuery.isFetching && items.length === 0)
   const hasError = activeQuery.isError
 
   const filteredItems = useMemo(() => {
@@ -189,8 +190,6 @@ const Index = () => {
         },
         rating: c.rating ?? 0,
         reviewCount: c.reviewsCount ?? c.reviewCount ?? 0,
-        duration: c.duration ?? '—',
-        lectures: c.lectures ?? c.lessonsCount ?? 0,
         category: getCourseCategoryName(c) ?? 'Lập trình',
         level: c.level ?? 'Mọi cấp độ',
         isBestseller: Boolean(c.isBestseller),
@@ -209,7 +208,6 @@ const Index = () => {
 
   return (
     <div className='min-h-[100dvh] bg-[#f4f9fc]'>
-      <CourseFetchingOverlay visible={busy} />
       <section
         className='relative isolate overflow-hidden border-b border-slate-200/70 bg-cover bg-center'
         style={{
@@ -256,17 +254,21 @@ const Index = () => {
           />
 
           <div className='min-w-0'>
-            <SortBar
-              totalCourses={totalElements}
-              sortValue={sortValue}
-              onSortChange={(v) => {
-                setSortValue(v)
-                setCurrentPage(1)
-              }}
-              viewMode={viewMode}
-              onViewModeChange={setViewMode}
-              busy={busy}
-            />
+            {showSkeleton ? (
+              <SortBarSkeleton />
+            ) : (
+              <SortBar
+                totalCourses={totalElements}
+                sortValue={sortValue}
+                onSortChange={(v) => {
+                  setSortValue(v)
+                  setCurrentPage(1)
+                }}
+                viewMode={viewMode}
+                onViewModeChange={setViewMode}
+                busy={refreshing}
+              />
+            )}
 
             {hasError ? (
               <div className='mb-8 rounded-2xl border border-red-100 bg-white/80 p-6 text-slate-700 shadow-sm'>
@@ -286,8 +288,8 @@ const Index = () => {
                   viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6' : 'flex flex-col gap-4'
                 }`}
               >
-                {loading
-                  ? [...Array(viewMode === 'grid' ? 9 : 10)].map((_, idx) => (
+                {showSkeleton
+                  ? [...Array(pageSize)].map((_, idx) => (
                       <CourseCardListSkeleton key={idx} layout={viewMode} />
                     ))
                   : mappedCourses.map((course) => (
@@ -305,7 +307,7 @@ const Index = () => {
               </div>
             )}
 
-            {!loading && !hasError && mappedCourses.length === 0 && (
+            {!showSkeleton && !hasError && mappedCourses.length === 0 && (
               <div className='rounded-2xl border border-blue-100/70 bg-white/80 p-8 text-center shadow-sm'>
                 <p className='text-lg font-semibold text-slate-900'>Không có khóa học phù hợp.</p>
                 <p className='mt-2 text-sm text-slate-500'>Hãy thử thay đổi bộ lọc hoặc từ khóa để xem thêm kết quả.</p>
@@ -317,7 +319,7 @@ const Index = () => {
                 currentPage={currentPage}
                 totalPages={totalPages}
                 onPageChange={setCurrentPage}
-                loading={loading}
+                loading={showSkeleton || refreshing}
               />
             </div>
           </div>
