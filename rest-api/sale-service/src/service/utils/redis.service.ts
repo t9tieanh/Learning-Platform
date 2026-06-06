@@ -162,6 +162,11 @@ class RedisService {
     return await this.redis.srem(key, member)
   }
 
+  async sremMany(key: string, members: string[]): Promise<number> {
+    if (members.length === 0) return 0
+    return await this.redis.srem(key, ...members)
+  }
+
   async sismember(key: string, member: string): Promise<number> {
     return await this.redis.sismember(key, member)
   }

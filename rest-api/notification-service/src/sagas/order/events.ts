@@ -4,7 +4,8 @@ export const MessageType = {
   REGISTER_UPDATE_FAILED: 'register.update.failed.v1',
   ORDER_COMPLETED: 'order.completed.v1',
   ORDER_COMPLETION_FAILED: 'order.completion.failed.v1',
-  NOTIFICATION_SEND: 'notification.send.v1'
+  NOTIFICATION_SEND: 'notification.send.v1',
+  PAYMENT_REFUND_NOTIFY: 'notification.refund.v1'
 } as const
 
 export type MessageTypeKey = keyof typeof MessageType

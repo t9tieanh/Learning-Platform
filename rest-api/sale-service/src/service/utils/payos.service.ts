@@ -1,4 +1,4 @@
-import { PayOS } from '@payos/node'
+import { PayOS, Webhook } from '@payos/node'
 import { OrderType } from '@prisma/client'
 import { payosConfig } from '~/config/payment'
 import ApiError from '~/middleware/ApiError'
@@ -142,6 +142,62 @@ export class PayosService {
       amount: paymentLink.amount,
       orderCode,
     }
+  }
+
+  async verifyWebhook(body: Webhook): Promise<{ orderCode: number; amount: number }> {
+    const payos = this.getPayosClient()
+    let webhookData
+    try {
+      webhookData = await payos.webhooks.verify(body)
+    } catch (err) {
+      Logger.warn(`PayOS webhook verify failed: ${err}`)
+      throw new ApiError(StatusCodes.BAD_REQUEST, 'Chữ ký webhook không hợp lệ')
+    }
+
+    if (!webhookData || webhookData.code !== '00') {
+      throw new ApiError(StatusCodes.PAYMENT_REQUIRED, 'Thanh toán chưa thành công')
+    }
+
+    return {
+      orderCode: webhookData.orderCode,
+      amount: webhookData.amount,
+    }
+  }
+
+  async resolveOrderFromWebhook(data: { orderCode: number; amount: number }) {
+    const order = await prismaService.order.findFirst({
+      where: { payos_order_code: BigInt(data.orderCode) },
+      select: {
+        id: true,
+        total: true,
+        type: true,
+        status: true,
+        user_id: true,
+        customer_email: true,
+        customer_name: true,
+        items: { select: { course_id: true, price: true } },
+      },
+    })
+
+    if (!order) {
+      throw new ApiError(StatusCodes.NOT_FOUND, 'Không tìm thấy đơn hàng cho mã PayOS')
+    }
+
+    if (Math.round(order.total) !== data.amount) {
+      throw new ApiError(StatusCodes.BAD_REQUEST, 'Số tiền không khớp với đơn hàng')
+    }
+
+    return { orderId: order.id, amount: data.amount, order }
+  }
+
+  async confirmWebhook(): Promise<void> {
+    if (!payosConfig.webhookUrl) {
+      throw new ApiError(StatusCodes.BAD_REQUEST, 'PAYOS_WEBHOOK_URL chưa được cấu hình')
+    }
+
+    const payos = this.getPayosClient()
+    await payos.webhooks.confirm(payosConfig.webhookUrl)
+    Logger.info(`PayOS webhook registered: ${payosConfig.webhookUrl}`)
   }
 }
 

@@ -13,8 +13,11 @@ import { VipRegisterCreatedPayload } from '~/sagas/buy_vip/vip.dtos';
 import { CourseMessageType } from '~/sagas/order_course/course.events';
 import { VipMessageType } from '~/sagas/buy_vip/vip.events';
 import Logger from '~/utils/logger';
+import { Webhook } from '@payos/node';
 
 const SAGA_TIMEOUT_MS = 30_000
+/** Webhook often arrives before return URL — wait long enough for redirect + saga to finish */
+const WEBHOOK_RETURN_URL_WAIT_MS = 60_000
 
 class OrderPaymentService {
     async verifyOrderForMomo(query: any) {
@@ -39,6 +42,92 @@ class OrderPaymentService {
 
     async verifyVipOrderForPayos(query: any) {
         return this.handleVerifyVip(query, 'payos');
+    }
+
+    async handlePayosWebhook(body: Webhook): Promise<{ alreadyCompleted: boolean; refundNotified: boolean }> {
+        const webhookData = await payosService.verifyWebhook(body);
+
+        let order: Awaited<ReturnType<typeof payosService.resolveOrderFromWebhook>>['order'];
+        let orderId: string;
+        try {
+            const resolved = await payosService.resolveOrderFromWebhook(webhookData);
+            order = resolved.order;
+            orderId = resolved.orderId;
+        } catch (err) {
+            if (err instanceof ApiError && err.status === StatusCodes.NOT_FOUND) {
+                Logger.info('PayOS webhook validation ping acknowledged');
+                return { alreadyCompleted: false, refundNotified: false };
+            }
+            throw err;
+        }
+
+        if (order.status === OrderStatus.Completed) {
+            return { alreadyCompleted: true, refundNotified: false };
+        }
+
+        // Webhook often beats return URL while order is still Pending — wait for return URL saga
+        if (order.status === OrderStatus.Pending || order.status === OrderStatus.Processing) {
+            Logger.info(`PayOS webhook: order ${order.status}, waiting for return URL (${orderId})`);
+            const sagaSuccess = await this.waitForReturnUrlSaga(orderId);
+            if (sagaSuccess) {
+                return { alreadyCompleted: false, refundNotified: false };
+            }
+
+            const latestStatus = await this.getOrderStatus(orderId);
+            if (latestStatus === OrderStatus.Completed) {
+                return { alreadyCompleted: true, refundNotified: false };
+            }
+        }
+
+        await this.sendRefundNotification(orderId, order);
+        return { alreadyCompleted: false, refundNotified: true };
+    }
+
+    private async waitForReturnUrlSaga(orderId: string): Promise<boolean> {
+        try {
+            const sagaResult = await redisService.waitForMessage<SagaResult>(
+                `saga:result:${orderId}`,
+                WEBHOOK_RETURN_URL_WAIT_MS
+            );
+            return sagaResult.success;
+        } catch (err) {
+            Logger.error(`PayOS webhook saga wait failed for ${orderId}: ${err}`);
+            return false;
+        }
+    }
+
+    private async getOrderStatus(orderId: string): Promise<OrderStatus | null> {
+        const order = await prismaService.order.findUnique({
+            where: { id: orderId },
+            select: { status: true },
+        });
+        return order?.status ?? null;
+    }
+
+    private async sendRefundNotification(
+        orderId: string,
+        order: { user_id: string; customer_email: string; customer_name: string; total: number }
+    ): Promise<void> {
+        try {
+            const payload = {
+                orderId,
+                user_id: order.user_id,
+                customer_name: order.customer_name,
+                customer_email: order.customer_email,
+                total: order.total,
+            };
+            const envelope = createEnvelope({
+                type: CourseMessageType.PAYMENT_REFUND_NOTIFY,
+                payload,
+                correlationId: `refund-${orderId}`,
+            });
+            await rabbitMQService.sendMessageTopic(
+                envelope, 'app_events', CourseMessageType.PAYMENT_REFUND_NOTIFY, 'topic', true
+            );
+            Logger.info(`PayOS refund notification sent for order ${orderId}`);
+        } catch (err) {
+            Logger.error(`Failed to send refund notification for order ${orderId}: ${err}`);
+        }
     }
 
     /** 

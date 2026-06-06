@@ -79,7 +79,7 @@ class CartService {
 
     async removeFromCart(cartId: string, courseId: string, isGuest = false): Promise<void> {
         // remove from redis first
-        await redisService.srem(`cart:${cartId}`, courseId);
+        await redisService.srem(`cart:${cartId}`, courseId).catch((err) => Logger.warn(`Failed to remove course ${courseId} from cart: ${err}`));
 
         if (isGuest) {
             return;
@@ -116,6 +116,40 @@ class CartService {
             await redisService.srem(`cart:${cartId}`, courseId);
         } catch (e) {
             Logger.warn(`redis srem failed after removeFromCart: ${e}`);
+        }
+    }
+
+    async removeManyFromCart(cartId: string, courseIds: string[], isGuest = false): Promise<void> {
+        if (courseIds.length === 0) return;
+
+        const uniqueCourseIds = [...new Set(courseIds.map(String))];
+
+        await redisService.sremMany(`cart:${cartId}`, uniqueCourseIds)
+            .catch((err) => Logger.warn(`Failed to remove courses from cart redis: ${err}`));
+
+        if (isGuest) return;
+
+        await prismaService.$transaction(async (tx) => {
+            const cart = await tx.cart.findUnique({
+                where: { id: cartId }
+            });
+
+            if (!cart) {
+                throw new ApiError(404, 'Giỏ hàng không tồn tại !');
+            }
+
+            await tx.cart_Item.deleteMany({
+                where: {
+                    cart_id: cart.id,
+                    course_id: { in: uniqueCourseIds }
+                }
+            });
+        });
+
+        try {
+            await redisService.sremMany(`cart:${cartId}`, uniqueCourseIds);
+        } catch (e) {
+            Logger.warn(`redis sremMany failed after removeManyFromCart: ${e}`);
         }
     }
 

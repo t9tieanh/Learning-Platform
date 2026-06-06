@@ -12,9 +12,7 @@ import Logger from '~/utils/logger';
 class CourseHandler {
     private async sendMessage(type: string, payload: any, correlationId: string) {
         const envelope = createEnvelope({ type, payload, correlationId });
-        await rabbitMQService.sendMessageTopic(envelope, CourseExchangeNames.APP_EVENTS, type, 'topic', true).catch(err => {
-            Logger.error(`Failed to send message [${type}]: ${err}`);
-        });
+        await rabbitMQService.sendMessageTopic(envelope, CourseExchangeNames.APP_EVENTS, type, 'topic', true);
     }
 
     async handleOrderCreated(message: RegisterUpdatedPayload) {
@@ -35,12 +33,14 @@ class CourseHandler {
             orderService.getOrderInfo(order.user_id, message.orderId)
                 .then(async (orderData) => {
                     const correlationId = `order-${order.id}`;
+                    const errorMessages: string[] = [];
+
                     await Promise.all([
                         this.sendMessage(
                             CourseMessageType.NOTIFICATION_SEND,
                             { ...orderData, orderType: 'COURSE' },
                             correlationId
-                        ),
+                        ).catch((err) => errorMessages.push(`Failed to send NOTIFICATION_SEND: ${err}`)),
                         this.sendMessage(
                             CourseMessageType.COURSE_PURCHASED_SYNC,
                             {
@@ -51,19 +51,21 @@ class CourseHandler {
                                 }))
                             },
                             correlationId
-                        )
+                        ).catch((err) => errorMessages.push(`Failed to send COURSE_PURCHASED_SYNC: ${err}`)),
+                        (async () => {
+                            const cartId = await cartService.getCartId(orderData.user_id);
+                            const courseIds = orderData.items.map((item) => item.course_id.toString());
+                            await cartService.removeManyFromCart(cartId, courseIds);
+                        })().catch((err) => errorMessages.push(`Failed to process cart cleanup: ${err}`))
                     ]);
-                    try {
-                        const cartId = await cartService.getCartId(orderData.user_id);
-                        orderData.items.forEach((item) => {
-                            cartService.removeFromCart(cartId, item.course_id.toString())
-                                .catch(err => Logger.error(`Failed to remove order items from cart: ${err}`));
-                        });
-                    } catch (err) {
-                        Logger.error(`Failed to process cart cleanup: ${err}`);
+
+                    if (errorMessages.length > 0) {
+                        console.log(`Fire-and-forget tasks failed for order ${message.orderId}:`, errorMessages);
                     }
                 })
-                .catch(err => Logger.error(`Failed to send course notification for order ${message.orderId}: ${err}`));
+                .catch((err) => {
+                    console.log(`Failed to load order info for fire-and-forget tasks (order ${message.orderId}):`, err);
+                });
 
         } catch (error) {
             Logger.error(`Error completing order, rolling back: ${error}`);
@@ -85,7 +87,7 @@ class CourseHandler {
                     items: order?.items.map(item => ({ course_id: item.course_id, price: item.price }))
                 },
                 `order-${order?.id}`
-            );
+            ).catch((err) => Logger.error(`Failed to send ORDER_COMPLETION_FAILED: ${err}`));
         }
     }
 

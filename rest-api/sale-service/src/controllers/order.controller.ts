@@ -5,6 +5,8 @@ import { env } from '~/config/env'
 import ApiError from '~/middleware/ApiError';
 import orderPaymentService from '~/service/models/order-payment.service';
 import orderHistoryService from '~/service/models/order-history.service';
+import Logger from '~/utils/logger';
+import { Webhook } from '@payos/node';
 
 class OrderController {
     async createOrder(req: Request, res: Response, next: NextFunction) {
@@ -190,8 +192,24 @@ class OrderController {
     }
 
     async payosWebhook(req: Request, res: Response) {
-        console.log('[PayOS webhook]', JSON.stringify(req.body));
-        return res.status(200).json({ error: 0, message: 'Ok' });
+        try {
+            const result = await orderPaymentService.handlePayosWebhook(req.body as Webhook);
+            Logger.info(
+                `PayOS webhook OK order processed (alreadyCompleted=${result.alreadyCompleted}, refundNotified=${result.refundNotified})`
+            );
+            return res.status(200).json({ error: 0, message: 'Ok' });
+        } catch (err) {
+            Logger.error(`PayOS webhook failed: ${err}`);
+            const status = err instanceof ApiError ? err.status : 500;
+            const isClientError = status >= 400 && status < 500;
+            if (isClientError) {
+                return res.status(400).json({
+                    error: -1,
+                    message: err instanceof Error ? err.message : 'Invalid webhook',
+                });
+            }
+            return res.status(200).json({ error: 0, message: 'Ok' });
+        }
     }
 
     async getOrderInfo(req: Request, res: Response, next: NextFunction) {

@@ -9,6 +9,7 @@ import indexRoute from '~/routes';
 import { initSagas } from './sagas/init/initSaga';
 import Logger from './utils/logger';
 import { checkAndSeedData } from './utils/bootstrap';
+import payosService from './service/utils/payos.service';
 
 const { startGrpcServer } = require('./grpc/server/saleServer.grpc')
 
@@ -49,8 +50,21 @@ async function bootstrap() {
     // 2. Check and Seed Data (VIP Packages & Discounts)
     await checkAndSeedData();
 
-    // 3. Start Express server
-    app.listen(PORT, () => Logger.info(`Learnova:sale_service running at http://localhost:${PORT}`));
+    // 3. Start Express server (must listen before PayOS confirm — PayOS pings webhook URL)
+    await new Promise<void>((resolve) => {
+      app.listen(PORT, () => {
+        Logger.info(`Learnova:sale_service running at http://localhost:${PORT}`);
+        resolve();
+      });
+    });
+
+    if (process.env.PAYOS_CONFIRM_WEBHOOK === 'true') {
+      try {
+        await payosService.confirmWebhook();
+      } catch (err) {
+        Logger.warn(`PayOS webhook confirm skipped: ${err}`);
+      }
+    }
 
   } catch (error) {
     Logger.error(`Bootstrap failed: ${error}`);
