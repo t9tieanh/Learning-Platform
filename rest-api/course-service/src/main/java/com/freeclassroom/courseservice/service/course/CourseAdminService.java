@@ -34,6 +34,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.util.HashSet;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -88,9 +89,13 @@ public class CourseAdminService implements ICourseAdminService {
         // add instructor to course
 
         if (!enrollmentRepository.existsByUserIdAndCourse_Id(course.getInstructorId(), courseId)) {
+            if (course.getEnrollments() == null) {
+                course.setEnrollments(new HashSet<>());
+            }
             EnrollmentsEntity enrollment = EnrollmentsEntity.builder()
                     .progress(0d)
                     .userId(course.getInstructorId())
+                    .ownerEnrollment(true)
                     .course(course)
                     .build();
             course.getEnrollments().add(enrollment);

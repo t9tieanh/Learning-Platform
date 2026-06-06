@@ -67,6 +67,7 @@ public interface EnrollmentRepository extends JpaRepository<EnrollmentsEntity, S
             JOIN FETCH e.course c
             WHERE c.status = :publishedStatus
             AND e.userId <> c.instructorId
+            AND (e.ownerEnrollment IS NULL OR e.ownerEnrollment = false)
             AND (e.status IS NULL OR e.status <> :completedStatus)
             AND (e.progress IS NULL OR e.progress < 100.0)
             ORDER BY e.userId ASC, c.title ASC
@@ -85,6 +86,7 @@ public interface EnrollmentRepository extends JpaRepository<EnrollmentsEntity, S
             WHERE c.status = com.freeclassroom.courseservice.enums.entity.EnumCourseStatus.PUBLISHED
               AND c.progressStep = com.freeclassroom.courseservice.enums.entity.EnumCourseProgressStep.COMPLETED
               AND c.deleted = false
+              AND (e.ownerEnrollment IS NULL OR e.ownerEnrollment = false)
               AND e.enrollmentDate >= :startAt
               AND e.enrollmentDate < :endAt
             GROUP BY FUNCTION('DATE_FORMAT', e.enrollmentDate, '%Y-%m-%d')
@@ -103,6 +105,7 @@ public interface EnrollmentRepository extends JpaRepository<EnrollmentsEntity, S
             WHERE c.status = com.freeclassroom.courseservice.enums.entity.EnumCourseStatus.PUBLISHED
               AND c.progressStep = com.freeclassroom.courseservice.enums.entity.EnumCourseProgressStep.COMPLETED
               AND c.deleted = false
+              AND (e.ownerEnrollment IS NULL OR e.ownerEnrollment = false)
               AND e.enrollmentDate >= :startAt
               AND e.enrollmentDate < :endAt
             GROUP BY FUNCTION('DATE_FORMAT', e.enrollmentDate, '%Y-%m')

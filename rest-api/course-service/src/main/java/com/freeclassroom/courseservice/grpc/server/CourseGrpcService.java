@@ -319,7 +319,11 @@ public class CourseGrpcService extends CourseServiceImplBase {
                     continue;
                 }
                 if (course.getEnrollments() != null) {
-                    enrollmentsEntities.addAll(course.getEnrollments());
+                    enrollmentsEntities.addAll(
+                            course.getEnrollments().stream()
+                                    .filter(enrollment -> !Boolean.TRUE.equals(enrollment.getOwnerEnrollment()))
+                                    .collect(Collectors.toSet())
+                    );
                 }
             }
 
@@ -340,7 +344,6 @@ public class CourseGrpcService extends CourseServiceImplBase {
         try {
             long year = request.getYear();
             String userId = request.getUserId();
-            System.out.println("1 ne");
             List<Object[]> raw = courseRepo.countEnrollmentsByMonth(userId, year);
             Map<Integer, Long> monthToEnrollmentCount = raw.stream()
                     .collect(Collectors.toMap(
@@ -352,13 +355,11 @@ public class CourseGrpcService extends CourseServiceImplBase {
 
             GetChartDataResponse.Builder response = GetChartDataResponse.newBuilder();
             response.setYear(String.valueOf(year));
-            System.out.println("2 ne");
 
             // Gọi gRPC qua Sale (coursesId, year)
 
             // Response List(month, revenue, profit)
             GetRevenueAndProfitResponse saleServiceRes = saleGrpcClient.getRevenueAndProfit(coursesId , year);
-            System.out.println("3 ne");
 
             // Tạo map tháng → revenue/profit
             Map<Integer, GetRevenueAndProfitList> monthToRevenueProfit = new HashMap<>();

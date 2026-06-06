@@ -31,6 +31,7 @@ public class TestController {
         EnrollmentsEntity enrollmentsEntity =  EnrollmentsEntity.builder()
                 .progress(8d)
                 .userId(userId)
+                .ownerEnrollment(false)
                 .course(courseEntity)
                 .build();
 
