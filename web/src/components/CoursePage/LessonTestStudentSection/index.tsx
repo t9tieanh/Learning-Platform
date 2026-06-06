@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { ClipboardList, History, Loader2, PencilLine, RefreshCw, SendHorizontal } from 'lucide-react'
+import { ClipboardList, History, PencilLine, RefreshCw, SendHorizontal } from 'lucide-react'
 import { toast } from 'sonner'
 import CustomButton from '@/components/common/Button'
 import lessonTestStudentService from '@/services/assistant/lesson-test-student.service'
@@ -16,6 +16,10 @@ import {
   lessonTestViewFingerprint,
 } from './utils'
 import { cn } from '@/lib/utils'
+import {
+  LessonTestSectionTabsSkeleton,
+  LessonTestStudentSectionSkeleton,
+} from './LessonTestStudentSectionSkeleton'
 
 type StudentSectionTab = 'take' | 'history'
 
@@ -241,9 +245,10 @@ const LessonTestStudentSection: React.FC<LessonTestStudentSectionProps> = ({
 
   if (loading) {
     return (
-      <div className='py-8 flex flex-col items-center justify-center min-h-[280px] gap-3 animate-in fade-in duration-500'>
-        <Loader2 className='w-8 h-8 animate-spin text-blue-600' />
-        <p className='text-[12.5px] font-medium text-gray-500'>Đang tải bài kiểm tra…</p>
+      <div className='py-4 space-y-3 animate-in fade-in duration-300'>
+        <LessonTestHero />
+        <LessonTestSectionTabsSkeleton />
+        <LessonTestStudentSectionSkeleton />
       </div>
     )
   }
@@ -402,6 +407,7 @@ const LessonTestStudentSection: React.FC<LessonTestStudentSectionProps> = ({
                       label='Làm lại (đề mới)'
                       icon={<RefreshCw className='w-3.5 h-3.5' />}
                       className='h-9 text-[11px] font-bold tracking-[0.1em] rounded-lg border-gray-200'
+                      disabled={loading}
                       onClick={() => void load({ fresh: true })}
                     />
                   ) : (

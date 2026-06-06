@@ -42,7 +42,7 @@ const PreviewComponent = ({
             <TabsContent value='avatar'>
               <div className='aspect-video bg-gray-50 rounded-2xl flex items-center justify-center overflow-hidden border border-gray-100 group'>
                 {thumbnailUrl ? (
-                  <img src={thumbnailUrl} alt='Thumbnail' className='object-cover w-full h-full transition-transform duration-500 group-hover:scale-105' />
+                  <img key={thumbnailUrl} src={thumbnailUrl} alt='Thumbnail' className='object-cover w-full h-full transition-transform duration-500 group-hover:scale-105' />
                 ) : (
                   <ImageIcon className='h-10 w-10 text-gray-200' />
                 )}
@@ -51,7 +51,7 @@ const PreviewComponent = ({
             <TabsContent value='intro'>
               <div className='aspect-video bg-gray-50 rounded-2xl flex items-center justify-center overflow-hidden border border-gray-100'>
                 {introductoryVideo ? (
-                  <video src={`${introductoryVideo}`} controls className='object-contain w-full h-full'>
+                  <video key={introductoryVideo} src={introductoryVideo} controls className='object-contain w-full h-full'>
                     <track kind='captions' />
                   </video>
                 ) : (

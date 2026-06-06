@@ -95,6 +95,7 @@ const TC_CreateCourse = () => {
             id={id as string}
             courseInfo={courseInfo}
             onIntroVideoUpdated={(url) => setCourseInfo((prev) => ({ ...prev, introductoryVideo: url }))}
+            onThumbnailUpdated={(url) => setCourseInfo((prev) => ({ ...prev, thumbnailUrl: url }))}
           />
         )
     }

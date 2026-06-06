@@ -15,13 +15,14 @@ import { useAuthStore } from '@/stores/useAuth.stores'
 
 interface MediaInfomationProps {
   formProps: CommonProps & {
-    watch: (name: 'introductoryVideo') => string | undefined
+    watch: (name: 'introductoryVideo' | 'thumbnailUrl') => string | undefined
   }
   id: string
   onIntroVideoUpdated?: (url: string) => void
+  onThumbnailUpdated?: (url: string) => void
 }
 
-const MediaInfomation = ({ formProps, id, onIntroVideoUpdated }: MediaInfomationProps) => {
+const MediaInfomation = ({ formProps, id, onIntroVideoUpdated, onThumbnailUpdated }: MediaInfomationProps) => {
   const savedIntroVideo = formProps.watch('introductoryVideo')
   const { loading, startLoading, stopLoading } = useLoading()
   const imageInputRef = useRef<HTMLInputElement>(null)
@@ -57,8 +58,8 @@ const MediaInfomation = ({ formProps, id, onIntroVideoUpdated }: MediaInfomation
           const response = await courseService.updateAvatar(id, file)
 
           if (response.code === 200 && response.result) {
-            // Set the image URL to form value
-            formProps.setValue('thumbnailUrl', response.result.imageUrl)
+            formProps.setValue('thumbnailUrl', response.result.imageUrl, { shouldDirty: true, shouldValidate: true })
+            onThumbnailUpdated?.(response.result.imageUrl)
             toast.success('Tải ảnh lên thành công')
           }
         } catch (error) {
@@ -142,9 +143,10 @@ const MediaInfomation = ({ formProps, id, onIntroVideoUpdated }: MediaInfomation
         if (videoUrl) {
           formProps.setValue('introductoryVideo', videoUrl, { shouldDirty: true, shouldValidate: true })
           onIntroVideoUpdated?.(videoUrl)
+          handleCancelVideo()
+        } else {
+          handleCancelVideo()
         }
-
-        handleCancelVideo()
         toast.success('Tải video giới thiệu lên thành công')
       })
     } catch (error) {
@@ -229,14 +231,16 @@ const MediaInfomation = ({ formProps, id, onIntroVideoUpdated }: MediaInfomation
             onClick={triggerVideoUpload}
           >
             {videoSrc || savedIntroVideo ? (
-              <div className='flex flex-col items-center'>
+              <div className='flex flex-col items-center w-full gap-3'>
                 <video
+                  key={videoSrc ?? savedIntroVideo ?? 'empty'}
                   ref={videoPreviewRef}
                   src={videoSrc ?? savedIntroVideo ?? undefined}
                   controls
-                  className='w-full max-h-48 mb-3 rounded-md bg-black'
+                  className='w-full max-h-48 rounded-md bg-black'
                 />
-                <div className='flex justify-center items-center gap-3 w-full'>
+                {isUploading && <IntroVideoPreviewProgress progress={progress} className='px-1' />}
+                <div className='flex flex-wrap justify-center items-center gap-2 w-full'>
                   {videoSrc ? (
                     <>
                       <CustomButton
@@ -244,22 +248,23 @@ const MediaInfomation = ({ formProps, id, onIntroVideoUpdated }: MediaInfomation
                         label={'Xác nhận lưu'}
                         onClick={handleConfirmVideo}
                         icon={<Send className='h-3.5 w-3.5 mr-2' />}
+                        disabled={isUploading}
                       />
-                      <div className='flex items-center gap-2'>
-                        <CustomButton
-                          className='bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-100 rounded-xl h-7.5 w-7.5 p-0 flex items-center justify-center'
-                          icon={<MousePointer className='h-3.5 w-3.5' />}
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            triggerVideoUpload()
-                          }}
-                        />
-                        <CustomButton
-                          className='bg-red-50 hover:bg-red-100 text-red-600 border border-red-100 rounded-xl h-7.5 w-7.5 p-0 flex items-center justify-center'
-                          onClick={handleCancelVideo}
-                          icon={<CircleX className='h-3.5 w-3.5' />}
-                        />
-                      </div>
+                      <CustomButton
+                        className='bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-100 rounded-xl h-7.5 w-7.5 p-0 flex items-center justify-center shrink-0'
+                        icon={<MousePointer className='h-3.5 w-3.5' />}
+                        disabled={isUploading}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          triggerVideoUpload()
+                        }}
+                      />
+                      <CustomButton
+                        className='bg-red-50 hover:bg-red-100 text-red-600 border border-red-100 rounded-xl h-7.5 w-7.5 p-0 flex items-center justify-center shrink-0'
+                        onClick={handleCancelVideo}
+                        icon={<CircleX className='h-3.5 w-3.5' />}
+                        disabled={isUploading}
+                      />
                     </>
                   ) : (
                     <CustomButton
@@ -273,7 +278,6 @@ const MediaInfomation = ({ formProps, id, onIntroVideoUpdated }: MediaInfomation
                     />
                   )}
                 </div>
-                {isUploading && <IntroVideoPreviewProgress progress={progress} />}
               </div>
             ) : (
               <>
