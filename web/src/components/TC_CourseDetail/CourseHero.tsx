@@ -97,6 +97,7 @@ export function CourseHero({
       if (res && res.code === 200) {
         toast.success('Phê duyệt khoá học thành công')
         setOpenApproveModal(false)
+        navigate('/admin/courses')
       } else {
         toast.error(res.message || 'Không thể phê duyệt khoá học')
       }

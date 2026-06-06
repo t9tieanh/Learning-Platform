@@ -103,7 +103,7 @@ const PreviewPublicLesson = ({
                           <img src={logo} alt='Loading' className='w-full h-full object-contain relative z-10 animate-bounce' />
                         </div>
                         <div className='text-center space-y-2'>
-                          <LoadingDots text='Chờ Learnova một tí nhé !' className='text-blue-200 text-xs md:text-sm font-bold tracking-tight' />
+                          <LoadingDots text='Đang xử lý' className='text-blue-200 text-xs md:text-sm font-bold tracking-tight' />
                           <p className='text-white/30 text-[10px] uppercase font-bold tracking-[0.2em]'>Sẵn sàng kiến thức</p>
                         </div>
                       </div>

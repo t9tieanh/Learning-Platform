@@ -1,14 +1,15 @@
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { CirclePlus } from 'lucide-react';
+import { CirclePlus, Search } from 'lucide-react'
 import { Props as CommonProps } from '@/utils/common/reactHookFormProps'
 import CustomTag from '@/components/common/CustomTag'
 import useTags from '@/hooks/useTags.hook'
 import CustomButton from '@/components/common/Button'
 import tagsService from '@/services/course/tags.service'
 import useLoading from '@/hooks/useLoading.hook'
-import { toast } from 'sonner';
+import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
+import { Input } from '@/components/ui/input'
 
 import SeoTagInfomationSkeleton from './Skeleton/SeoTagInfomationSkeleton'
 
@@ -18,12 +19,20 @@ interface SeoTagInfomationProps {
 }
 
 const SeoTagInfomation = ({ formProps, id }: SeoTagInfomationProps) => {
-  const { register, control, errors, setValue, getValues } = formProps
+  const { setValue, getValues } = formProps
   const tags = getValues('tags') || []
   const { tags: availableTags, loading: tagsLoading } = useTags()
   const { loading, startLoading, stopLoading } = useLoading()
+  const [search, setSearch] = useState('')
   const [displayLimit, setDisplayLimit] = useState(10)
-  const hasMoreTags = (availableTags?.length || 0) > displayLimit
+  const normalizedSearch = search.trim().toLowerCase()
+  const filteredTags = useMemo(() => {
+    if (!normalizedSearch) return availableTags || []
+
+    return (availableTags || []).filter((tag) => tag.name.toLowerCase().includes(normalizedSearch))
+  }, [availableTags, normalizedSearch])
+  const visibleTags = filteredTags.slice(0, displayLimit)
+  const hasMoreTags = filteredTags.length > displayLimit
 
   const removeTag = (tagToRemove: { id: string; name: string }) => {
     setValue(
@@ -60,50 +69,81 @@ const SeoTagInfomation = ({ formProps, id }: SeoTagInfomationProps) => {
       <Card className='border-2 border-white ring-1 ring-gray-100 shadow-sm bg-white rounded-[32px] overflow-hidden'>
         <CardHeader className='pb-4'>
           <CardTitle className='text-[15px] font-bold text-gray-900'>Thẻ khóa học</CardTitle>
-          <p className='text-[11.5px] font-medium text-gray-400'>Chọn tối đa 10 thẻ kỹ năng liên quan nhất đến nội dung giảng dạy.</p>
+          <p className='text-[11.5px] font-medium text-gray-400'>
+            Chọn tối đa 10 thẻ kỹ năng liên quan nhất đến nội dung giảng dạy.
+          </p>
         </CardHeader>
 
         <CardContent className='space-y-6'>
-          <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3'>
-            {
-              availableTags?.slice(0, displayLimit).map((tag) => (
-                <CustomTag
-                  key={tag.id}
-                  label={tag.name}
-                  imageUri={tag.imageUrl}
-                  checked={tags.some((t: any) => (typeof t === 'object' ? t.id === tag.id : t === tag.id))}
-                  onChange={(checked: boolean) => {
-                    if (checked) {
-                      if (!tags.some((t: any) => (typeof t === 'object' ? t.id === tag.id : t === tag.id)) && tags.length < 10) {
-                        setValue('tags', [...tags, tag])
-                      }
-                    } else {
-                      removeTag(tag)
-                    }
-                  }}
-                />
-              ))
-            }
+          <div className='space-y-2'>
+            <div className='relative'>
+              <Search className='pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400' />
+              <Input
+                value={search}
+                onChange={(e) => {
+                  setSearch(e.target.value)
+                  setDisplayLimit(10)
+                }}
+                placeholder='Tìm thẻ theo tên kỹ năng...'
+                className='h-11 rounded-2xl border-gray-200 bg-gray-50 pl-10 text-sm shadow-none focus-visible:ring-2'
+              />
+            </div>
+            <p className='text-[11px] font-medium text-gray-400'>
+              {normalizedSearch
+                ? `Tìm thấy ${filteredTags.length} thẻ phù hợp`
+                : 'Nhập từ khóa để lọc nhanh danh sách thẻ'}
+            </p>
           </div>
+
+          <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3'>
+            {visibleTags.map((tag) => (
+              <CustomTag
+                key={tag.id}
+                label={tag.name}
+                imageUri={tag.imageUrl}
+                checked={tags.some((t: any) => (typeof t === 'object' ? t.id === tag.id : t === tag.id))}
+                onChange={(checked: boolean) => {
+                  if (checked) {
+                    if (
+                      !tags.some((t: any) => (typeof t === 'object' ? t.id === tag.id : t === tag.id)) &&
+                      tags.length < 10
+                    ) {
+                      setValue('tags', [...tags, tag])
+                    }
+                  } else {
+                    removeTag(tag)
+                  }
+                }}
+              />
+            ))}
+          </div>
+
+          {normalizedSearch && filteredTags.length === 0 && (
+            <div className='rounded-2xl border border-dashed border-gray-200 bg-gray-50/80 px-4 py-6 text-center text-sm font-medium text-gray-500'>
+              Không tìm thấy thẻ nào khớp với từ khóa &quot;{search.trim()}&quot;.
+            </div>
+          )}
 
           {(hasMoreTags || displayLimit > 10) && (
             <div className='flex justify-center pt-2'>
               <button
                 type='button'
-                onClick={() => setDisplayLimit((prev: number) => hasMoreTags ? prev + 10 : 10)}
+                onClick={() => setDisplayLimit((prev: number) => (hasMoreTags ? prev + 10 : 10))}
                 className='text-[10px] font-bold text-gray-400 hover:text-blue-600 transition-colors uppercase tracking-widest'
               >
-                {hasMoreTags ? `Xem thêm (${(availableTags?.length || 0) - displayLimit} thẻ)` : 'Thu gọn'}
+                {hasMoreTags ? `Xem thêm (${filteredTags.length - displayLimit} thẻ)` : 'Thu gọn'}
               </button>
             </div>
           )}
 
           <div className='flex items-center justify-between pt-4 border-t border-gray-50'>
             <div className='flex items-center gap-2'>
-              <div className={cn(
-                'w-2 h-2 rounded-full transition-colors',
-                tags.length >= 10 ? 'bg-amber-400' : 'bg-blue-500'
-              )} />
+              <div
+                className={cn(
+                  'w-2 h-2 rounded-full transition-colors',
+                  tags.length >= 10 ? 'bg-amber-400' : 'bg-blue-500'
+                )}
+              />
               <span className='text-[11px] font-bold text-gray-400'>{tags.length}/10 thẻ đã chọn</span>
             </div>
             <CustomButton

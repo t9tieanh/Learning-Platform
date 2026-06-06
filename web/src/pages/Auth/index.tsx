@@ -143,7 +143,7 @@ const AuthPage: React.FC<SlidingLoginSignupProps> = ({ isSignUpMode, setIsSignUp
                 Đang xác thực thông tin...
               </p>
               <p className='text-[10px] font-black text-blue-500/50 uppercase tracking-[0.2em]'>
-                Chờ Learnova một tí nhé
+               Đang xử lý
               </p>
             </div>
           </div>

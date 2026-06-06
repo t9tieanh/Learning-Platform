@@ -19,6 +19,11 @@ const BlogSearchBar: FC<BlogSearchBarProps> = ({ onSearch, hideCreateButton }) =
   const [loading, setLoading] = useState<boolean>(false)
   const [searchValue, setSearchValue] = useState('')
   const isFirstSearchRender = useRef(true)
+  const onSearchRef = useRef(onSearch)
+
+  useEffect(() => {
+    onSearchRef.current = onSearch
+  }, [onSearch])
 
   useEffect(() => {
     let mounted = true
@@ -48,11 +53,11 @@ const BlogSearchBar: FC<BlogSearchBarProps> = ({ onSearch, hideCreateButton }) =
     }
 
     const timer = setTimeout(() => {
-      onSearch?.(searchValue.trim())
+      onSearchRef.current?.(searchValue.trim())
     }, 500)
 
     return () => clearTimeout(timer)
-  }, [searchValue, onSearch])
+  }, [searchValue])
 
   const canCreate = (courseCount ?? 0) >= 5
   const tooltipMsg = !canCreate ? 'Bạn phải tạo ít nhất 5 khóa học mới được đăng bài viết' : undefined
