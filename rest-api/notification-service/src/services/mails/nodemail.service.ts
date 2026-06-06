@@ -1,6 +1,6 @@
 import nodemailer from 'nodemailer'
 import { env } from '~/config/env'
-import { NotificationDto, VerifyEmail } from '~/dto/request/notification.dto'
+import { NotificationDto, PaymentRefundNotification, VerifyEmail } from '~/dto/request/notification.dto'
 import { CourseApprovalEvent } from '~/dto/event/course-approval-event.dto'
 import { QueueNameEnum } from '~/enums/rabbitQueue.enum'
 import { getUser } from '~/grpc/userClient'
@@ -226,6 +226,50 @@ class NodeMailService {
           certificateCode: issued.certificateCode,
           profileUrl: issued.profileUrl,
           courseUrl: issued.courseUrl
+        })
+        break
+      }
+      case QueueNameEnum.PAYMENT_REFUND: {
+        const refundNotification = notification as PaymentRefundNotification
+        const refundPayload = refundNotification.payload
+        const formattedTotal = Number(refundPayload.total).toLocaleString('vi-VN')
+
+        subject = 'Thông báo hoàn tiền đơn hàng Learnova'
+        to = refundPayload.customer_email
+        templateName = 'payment-refund.html'
+        templateData = withEmailLayout({
+          pageTitle: 'Thông báo hoàn tiền · Learnova',
+          badge: 'Hoàn tiền',
+          headerGradient: EMAIL_GRADIENTS.danger,
+          headerTitle: `Xin chào ${refundPayload.customer_name || 'bạn'}!`,
+          headerSubtitle: 'Chúng tôi đã nhận thanh toán của bạn nhưng chưa thể kích hoạt đơn hàng.',
+          footerNote: 'Thông báo hoàn tiền · Learnova',
+          customerName: refundPayload.customer_name,
+          orderId: refundPayload.orderId,
+          formattedTotal,
+        })
+        break
+      }
+      case QueueNameEnum.PAYMENT_FAIL_ADMIN: {
+        const adminNotification = notification as PaymentRefundNotification
+        const adminPayload = adminNotification.payload
+        const formattedTotal = Number(adminPayload.total).toLocaleString('vi-VN')
+
+        subject = `[Learnova] Thanh toán thất bại — cần hoàn tiền #${adminPayload.orderId}`
+        to = env.ADMIN_EMAIL
+        templateName = 'payment-fail-admin.html'
+        templateData = withEmailLayout({
+          pageTitle: 'Cảnh báo thanh toán · Learnova',
+          badge: 'Cảnh báo',
+          headerGradient: EMAIL_GRADIENTS.danger,
+          headerTitle: 'Thanh toán thất bại — cần xử lý hoàn tiền',
+          headerSubtitle: 'Khách đã thanh toán qua PayOS nhưng hệ thống không kích hoạt được đơn hàng.',
+          footerNote: 'Thông báo admin · Learnova',
+          orderId: adminPayload.orderId,
+          customerName: adminPayload.customer_name,
+          customerEmail: adminPayload.customer_email,
+          userId: adminPayload.user_id || '—',
+          formattedTotal,
         })
         break
       }

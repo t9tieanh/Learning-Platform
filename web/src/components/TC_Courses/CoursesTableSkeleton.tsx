@@ -19,10 +19,9 @@ const CoursesTableSkeleton = () => {
             <TableHead className='p-5'>
               <Skeleton className='h-3.5 w-16 bg-slate-200' />
             </TableHead>
-            <TableHead className='p-5'>
-              <Skeleton className='h-3.5 w-16 bg-slate-200' />
+            <TableHead className='p-5 text-right'>
+              <Skeleton className='ml-auto h-3.5 w-14 bg-slate-200' />
             </TableHead>
-            <TableHead className='p-5' />
           </TableRow>
         </TableHeader>
 
@@ -34,6 +33,8 @@ const CoursesTableSkeleton = () => {
                   <Skeleton className='h-16 w-24 rounded-xl bg-slate-200' />
                   <div className='space-y-2'>
                     <Skeleton className='h-4 w-48 bg-slate-200' />
+                    <Skeleton className='h-3 w-full max-w-sm bg-slate-200' />
+                    <Skeleton className='h-3 w-2/3 max-w-xs bg-slate-200' />
                     <div className='flex gap-2'>
                       <Skeleton className='h-4 w-16 rounded-md bg-slate-200' />
                       <Skeleton className='h-4 w-16 rounded-md bg-slate-200' />
@@ -43,9 +44,6 @@ const CoursesTableSkeleton = () => {
               </TableCell>
               <TableCell className='p-5'>
                 <Skeleton className='h-6 w-24 rounded-full bg-slate-200' />
-              </TableCell>
-              <TableCell className='p-5'>
-                <Skeleton className='h-4 w-16 bg-slate-200' />
               </TableCell>
               <TableCell className='p-5'>
                 <Skeleton className='h-4 w-24 bg-slate-200' />

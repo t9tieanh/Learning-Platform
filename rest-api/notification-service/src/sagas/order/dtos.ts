@@ -24,3 +24,11 @@ export interface NotificationPayload {
   discount?: Discount
   items: Item[]
 }
+
+export interface PaymentRefundPayload {
+  orderId: string
+  user_id: string
+  customer_name: string
+  customer_email: string
+  total: number
+}

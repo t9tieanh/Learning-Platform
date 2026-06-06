@@ -2,7 +2,7 @@ import { FC } from 'react'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { MoreHorizontal, Filter, Check, BookOpen, Clock, Calendar, Plus } from 'lucide-react'
+import { MoreHorizontal, Filter, Check, BookOpen, Calendar, Plus } from 'lucide-react'
 import { Course, CourseStatus } from './CourseTypes'
 import { useNavigate } from 'react-router-dom'
 import courseService from '@/services/course/course.service'
@@ -114,11 +114,10 @@ const CoursesTable: FC<CoursesTableProps> = ({
       <div className='h-full overflow-auto'>
         <Table className='min-w-[860px] table-fixed'>
           <colgroup>
-            <col className='w-[42%]' />
+            <col className='w-[48%]' />
+            <col className='w-[20%]' />
             <col className='w-[18%]' />
             <col className='w-[14%]' />
-            <col className='w-[16%]' />
-            <col className='w-[10%]' />
           </colgroup>
           <TableHeader>
             <TableRow className='border-b border-blue-100/80 bg-gradient-to-r from-cyan-50 via-blue-50/80 to-indigo-50/85 hover:from-cyan-50 hover:via-blue-50/80 hover:to-indigo-50/85'>
@@ -155,16 +154,17 @@ const CoursesTable: FC<CoursesTableProps> = ({
                   </DropdownMenu>
                 </div>
               </TableHead>
-              <TableHead className='px-6 py-5 text-[11px] font-semibold uppercase tracking-[0.12em] text-blue-700'>Thời lượng</TableHead>
               <TableHead className='px-6 py-5 text-[11px] font-semibold uppercase tracking-[0.12em] text-blue-700'>Ngày tạo</TableHead>
-              <TableHead className='px-7 py-5' />
+              <TableHead className='px-7 py-5 text-right text-[11px] font-semibold uppercase tracking-[0.12em] text-blue-700'>
+                Thao tác
+              </TableHead>
             </TableRow>
           </TableHeader>
 
           <TableBody>
             {courses.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className='px-6 py-16 text-center'>
+                <TableCell colSpan={4} className='px-6 py-16 text-center'>
                   <h3 className='text-xl font-semibold tracking-tight text-slate-900'>Chưa có khóa học nào</h3>
                   <p className='mt-2 text-sm leading-relaxed text-slate-500'>
                     Hãy bắt đầu hành trình giảng dạy bằng cách tạo khóa học đầu tiên của bạn trên hệ thống.
@@ -192,6 +192,11 @@ const CoursesTable: FC<CoursesTableProps> = ({
                         <h4 className='truncate text-sm font-semibold text-slate-900 transition-colors group-hover:text-blue-700'>
                           {course.title}
                         </h4>
+                        {course.shortDescription && (
+                          <p className='mt-1 line-clamp-2 text-xs leading-relaxed text-slate-500'>
+                            {course.shortDescription}
+                          </p>
+                        )}
                         <div className='mt-1.5 flex flex-wrap gap-1.5'>
                           {(course.tagNames || course.tags || []).slice(0, 2).map((tag, idx) => (
                             <span
@@ -207,13 +212,6 @@ const CoursesTable: FC<CoursesTableProps> = ({
                   </TableCell>
 
                   <TableCell className='px-6 py-4'>{getStatusBadge(course.status)}</TableCell>
-
-                  <TableCell className='px-6 py-4'>
-                    <div className='flex items-center gap-2 text-slate-500 transition-colors group-hover:text-blue-700'>
-                      <Clock className='h-3.5 w-3.5' />
-                      <span className='text-xs font-medium'>{course.duration || '0 phút'}</span>
-                    </div>
-                  </TableCell>
 
                   <TableCell className='px-6 py-4'>
                     <div className='flex items-center gap-2 text-slate-500'>

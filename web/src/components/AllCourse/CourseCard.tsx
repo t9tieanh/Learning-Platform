@@ -1,4 +1,4 @@
-import { ClockIcon, ReaderIcon, StarIcon } from '@radix-ui/react-icons'
+import { StarIcon } from '@radix-ui/react-icons'
 import { Send } from 'lucide-react'
 import CustomButton from '@/components/common/Button'
 import { Card } from '@/components/ui/card'
@@ -16,8 +16,6 @@ interface CourseCardProps {
   }
   rating: number
   reviewCount: number
-  duration: string
-  lectures: number
   category?: string
   level: string
   isBestseller?: boolean
@@ -35,8 +33,6 @@ export const CourseCard = ({
   instructor,
   rating,
   reviewCount,
-  duration,
-  lectures,
   category,
   level,
   isBestseller,
@@ -106,14 +102,6 @@ export const CourseCard = ({
               {category && (
                 <span className='rounded-full bg-blue-100 px-2.5 py-1 font-semibold text-blue-600'>{category}</span>
               )}
-              <div className='flex items-center gap-1'>
-                <ClockIcon className='h-3.5 w-3.5 text-slate-400' />
-                <span>{duration}</span>
-              </div>
-              <div className='flex items-center gap-1'>
-                <ReaderIcon className='h-3.5 w-3.5 text-slate-400' />
-                <span>{lectures} bài</span>
-              </div>
             </div>
           </div>
 

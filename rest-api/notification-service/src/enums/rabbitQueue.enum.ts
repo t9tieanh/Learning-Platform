@@ -5,5 +5,7 @@ export enum QueueNameEnum {
   ORDERCONFIRM = 'order-confirm',
   COURSE_APPROVAL = 'course.approval.queue',
   STUDY_REMINDER = 'study-reminder.queue',
-  CERTIFICATE_ISSUED = 'certificate-issued.queue'
+  CERTIFICATE_ISSUED = 'certificate-issued.queue',
+  PAYMENT_REFUND = 'payment-refund',
+  PAYMENT_FAIL_ADMIN = 'payment-fail-admin'
 }

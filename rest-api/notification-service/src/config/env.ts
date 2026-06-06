@@ -23,6 +23,7 @@ export const env = {
   REDIS_PASSWORD: process.env.REDIS_PASSWORD,
   GMAIL_USER: process.env.GMAIL_USER || 'phama9162@gmail.com',
   GMAIL_PASS: process.env.GMAIL_PASS || 'doi la the thoi - phu le',
+  ADMIN_EMAIL: process.env.ADMIN_EMAIL || 'learnova.hello@gmail.com',
   RABBIT_MQ_HOST: process.env.RABBIT_MQ_HOST,
   RABBIT_MQ_PORT: process.env.RABBIT_MQ_PORT,
   RABBIT_MQ_USER_NAME: process.env.RABBIT_MQ_USER_NAME,

@@ -1,0 +1,28 @@
+{{> wrapper-start}}
+{{> header}}
+{{> body-start}}
+
+<p style="margin: 0 0 16px; font-size: 15px; line-height: 1.6; color: #334155;">
+  Chúng tôi xin lỗi vì sự bất tiện này. Hệ thống đã ghi nhận thanh toán của bạn nhưng gặp sự cố khi xử lý đơn hàng.
+</p>
+
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0"
+  style="margin: 20px 0; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden;">
+  <tr>
+    <td style="padding: 16px 20px; background: #f8fafc; font-size: 13px; color: #64748b;">Mã đơn hàng</td>
+    <td style="padding: 16px 20px; font-size: 14px; font-weight: 600; color: #0f172a;">{{orderId}}</td>
+  </tr>
+  <tr>
+    <td style="padding: 16px 20px; background: #f8fafc; font-size: 13px; color: #64748b;">Số tiền</td>
+    <td style="padding: 16px 20px; font-size: 14px; font-weight: 600; color: #0f172a;">{{formattedTotal}} VND</td>
+  </tr>
+</table>
+
+<p style="margin: 0 0 16px; font-size: 15px; line-height: 1.6; color: #334155;">
+  Đội ngũ Learnova sẽ <strong>hoàn tiền</strong> cho bạn trong vòng <strong>3–5 ngày làm việc</strong>.
+  Nếu cần hỗ trợ, vui lòng phản hồi email này.
+</p>
+
+{{> body-end}}
+{{> footer}}
+{{> wrapper-end}}
