@@ -34,7 +34,7 @@ import TC_UpdateBlog from './pages/TC_UpdateBlog'
 import TC_Statistics from './pages/TC_Statistics'
 import AD_HomePage from './pages/AD_HomePage'
 import AD_Courses from './pages/AD_Courses'
-import AD_CourseDetails from './pages/AD_CourseDetails'
+import AD_CourseDetail from './pages/AD_CourseDetail'
 import AD_Instructor from './pages/AD_Instructor'
 import AD_InstructorDetail from './pages/AD_InstructorDetail'
 import AD_Certificates from './pages/AD_Certificates'
@@ -45,6 +45,7 @@ import Home2 from './pages/Home2'
 import { SocketProvider } from '@/api/socket/socket.context'
 import DiscountsAdmin from './pages/AD_Discounts'
 import AuthenticationGate from '@/components/auth-gate/AuthenticationGate'
+import AdminAuthGate from '@/components/auth-gate/AdminAuthGate'
 import VipSuccess from './pages/VipSuccess'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
@@ -110,11 +111,15 @@ const router = createBrowserRouter([
       },
       {
         path: 'admin',
-        element: <AdminLayout />,
+        element: (
+          <AdminAuthGate>
+            <AdminLayout />
+          </AdminAuthGate>
+        ),
         children: [
           { index: true, element: <AD_HomePage /> },
           { path: 'courses', element: <AD_Courses /> },
-          { path: 'course/:id', element: <AD_CourseDetails /> },
+          { path: 'course/:id', element: <AD_CourseDetail /> },
           { path: 'instructors', element: <AD_Instructor /> },
           { path: 'instructors/:instructorId', element: <AD_InstructorDetail /> },
           { path: 'certificates', element: <AD_Certificates /> },

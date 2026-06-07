@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { AUTH_STORAGE_KEY } from '@/utils/auth/crossTabAuth.utils'
 
 type authState = {
   data: {
@@ -33,7 +34,7 @@ export const useAuthStore = create(
       logout: () => set(() => ({ data: null }))
     }),
     {
-      name: 'user-storage'
+      name: AUTH_STORAGE_KEY
     }
   )
 )

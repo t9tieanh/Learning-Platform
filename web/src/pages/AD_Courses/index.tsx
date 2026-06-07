@@ -13,14 +13,22 @@ import courseAdminService, {
   CoursesAdminResult
 } from '@/services/course/course-admin.service'
 import useDebounce from '@/hooks/useDebounce.hook'
+import {
+  CourseStatus,
+  COURSE_STATUS_VALUES,
+  courseStatusBadgeClass,
+  courseStatusLabel,
+} from '@/utils/courseStatus.utils'
 
 const summaryCardClass =
   'rounded-[28px] border border-slate-200/80 bg-white/95 p-5 shadow-[0_18px_40px_-30px_rgba(15,23,42,0.22)]'
 
-const statusLabelMap: Record<AdminCourseStatusFilter, string> = {
-  PENDING_REVIEW: 'Chờ duyệt',
-  PUBLISHED: 'Đã xuất bản',
-  REJECTED: 'Bị từ chối'
+const statusFilterLabelMap: Record<CourseStatus, string> = {
+  [CourseStatus.DRAFT]: 'Bản nháp',
+  [CourseStatus.PENDING_REVIEW]: 'Chờ duyệt',
+  [CourseStatus.PUBLISHED]: 'Đã xuất bản',
+  [CourseStatus.REJECTED]: 'Bị từ chối',
+  [CourseStatus.ARCHIVED]: 'Đã lưu trữ',
 }
 
 export default function CoursesAdmin() {
@@ -67,26 +75,15 @@ export default function CoursesAdmin() {
     const items = data?.items ?? []
     return {
       total: data?.totalElements ?? 0,
-      pending: items.filter((c) => c.status === 'PENDING_REVIEW').length ?? 0
+      pending: items.filter((c) => c.status === CourseStatus.PENDING_REVIEW).length ?? 0
     }
   }, [data])
 
-  const statusBadge = (status?: string | null) => {
-    switch (status) {
-      case 'PENDING_REVIEW':
-        return <Badge className='rounded-full border-amber-200 bg-amber-50 px-3 py-1 text-amber-700'>Chờ duyệt</Badge>
-      case 'PUBLISHED':
-        return (
-          <Badge className='rounded-full border-emerald-200 bg-emerald-50 px-3 py-1 text-emerald-700'>
-            Đã xuất bản
-          </Badge>
-        )
-      case 'REJECTED':
-        return <Badge className='rounded-full border-rose-200 bg-rose-50 px-3 py-1 text-rose-700'>Bị từ chối</Badge>
-      default:
-        return <Badge className='rounded-full border-slate-200 bg-slate-100 px-3 py-1 text-slate-700'>Không rõ</Badge>
-    }
-  }
+  const statusBadge = (status?: string | null) => (
+    <Badge className={`rounded-full px-3 py-1 ${courseStatusBadgeClass(status)}`}>
+      {courseStatusLabel(status)}
+    </Badge>
+  )
 
   const progressLabel = (step?: string | null) => {
     switch (step) {
@@ -183,9 +180,11 @@ export default function CoursesAdmin() {
                 </SelectTrigger>
                 <SelectContent className='rounded-xl border-slate-200 bg-white'>
                   <SelectItem value='ALL'>Tất cả trạng thái</SelectItem>
-                  <SelectItem value='PENDING_REVIEW'>Chờ duyệt</SelectItem>
-                  <SelectItem value='PUBLISHED'>Đã xuất bản</SelectItem>
-                  <SelectItem value='REJECTED'>Bị từ chối</SelectItem>
+                  {COURSE_STATUS_VALUES.map((status) => (
+                    <SelectItem key={status} value={status}>
+                      {statusFilterLabelMap[status]}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -196,7 +195,7 @@ export default function CoursesAdmin() {
           <span className='font-medium text-slate-700'>Tổng kết quả:</span> {data?.totalElements ?? 0}
           {statusFilter !== 'ALL' && (
             <span className='ml-2 inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600'>
-              {statusLabelMap[statusFilter]}
+              {statusFilterLabelMap[statusFilter]}
             </span>
           )}
         </div>

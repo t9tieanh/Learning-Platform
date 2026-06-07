@@ -1,4 +1,5 @@
 import { useAuthStore } from '@/stores/useAuth.stores'
+import { AUTH_STORAGE_KEY } from '@/utils/auth/crossTabAuth.utils'
 
 class AxiosAuthUtils {
   public isRefreshing = false
@@ -13,7 +14,7 @@ class AxiosAuthUtils {
       // ignore
     }
     try {
-      const persisted = localStorage.getItem('user-storage')
+      const persisted = localStorage.getItem(AUTH_STORAGE_KEY)
       if (persisted) {
         const parsed = JSON.parse(persisted)
         const token = parsed?.state?.data?.accessToken as string | undefined
@@ -34,7 +35,7 @@ class AxiosAuthUtils {
       // ignore
     }
     try {
-      const persisted = localStorage.getItem('user-storage')
+      const persisted = localStorage.getItem(AUTH_STORAGE_KEY)
       if (persisted) {
         const parsed = JSON.parse(persisted)
         const token = parsed?.state?.data?.refreshToken as string | undefined

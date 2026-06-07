@@ -1,5 +1,6 @@
 import axiosClient from '@/lib/axiosClient.lib'
 import { ApiResponse } from '@/types/response.type'
+import type { CourseStatus } from '@/utils/courseStatus.utils'
 
 // Types for admin course list response
 export interface InstructorInfo {
@@ -34,7 +35,7 @@ export interface CoursesAdminResult {
   totalPages: number
 }
 
-export type AdminCourseStatusFilter = 'PENDING_REVIEW' | 'PUBLISHED' | 'REJECTED'
+export type AdminCourseStatusFilter = CourseStatus
 
 export interface GetCoursesAdminParams {
   page?: number

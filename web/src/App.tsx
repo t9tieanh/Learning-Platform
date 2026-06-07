@@ -5,10 +5,12 @@ import { Outlet } from 'react-router-dom'
 import { Toaster } from '@/components/ui/sonner'
 import GlobalChatNotifier from '@/components/Chat/GlobalChatNotifier'
 import { VipUpgradeProvider } from '@/contexts/VipUpgradeContext'
+import AuthCrossTabSync from '@/components/auth-gate/AuthCrossTabSync'
 
 const App: FC = () => {
   return (
     <VipUpgradeProvider>
+      <AuthCrossTabSync />
       <div>
         {/* Global chat notifier must be inside Router context */}
         <GlobalChatNotifier />

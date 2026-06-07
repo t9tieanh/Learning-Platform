@@ -21,7 +21,6 @@ import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.List;
 
 @Component
@@ -43,10 +42,21 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
             new PublicEndpoint("/learning/chapters-user.*", "ALL"),
             new PublicEndpoint("/learning/lesson-student.*", "ALL"),
             new PublicEndpoint("/learning/course-certificates/verify.*", "GET"),
-            new PublicEndpoint("/notify/blog.*", "GET"), // chỉ GET blog là public
+            new PublicEndpoint("/notify/blog.*", "GET"),
             new PublicEndpoint("/sale.*", "ALL"),
             new PublicEndpoint("/notify/ai.*", "ALL"),
             new PublicEndpoint("/socket.io.*", "ALL")
+    );
+
+    /** Admin paths stay protected even when a broader public pattern would match. */
+    @NonFinal
+    private List<PublicEndpoint> protectedAdminEndpoints = List.of(
+            new PublicEndpoint("/user/admin/.*", "ALL"),
+            new PublicEndpoint("/user/home-admin", "ALL"),
+            new PublicEndpoint("/user/ad-certificates", "ALL"),
+            new PublicEndpoint("/user/update-certificate", "POST"),
+            new PublicEndpoint("/learning/admin/.*", "ALL"),
+            new PublicEndpoint("/assistant/admin/.*", "ALL")
     );
 
     ObjectMapper objectMapper;
@@ -55,40 +65,47 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
     @NonFinal
     private String apiPrefix;
 
-    private boolean isPublicEndpoint(ServerHttpRequest request) {
+    private boolean matchesEndpoint(ServerHttpRequest request, PublicEndpoint endpoint) {
         String path = request.getURI().getPath();
-        String method = String.valueOf(request.getMethod()); // GET, POST, etc.
+        String method = String.valueOf(request.getMethod());
 
-        return publicEndpoints.stream().anyMatch(e ->
-                path.matches(apiPrefix + e.pattern()) &&
-                        (e.method().equalsIgnoreCase("ALL") || e.method().equalsIgnoreCase(method))
-        );
+        return path.matches(apiPrefix + endpoint.pattern()) &&
+                (endpoint.method().equalsIgnoreCase("ALL") || endpoint.method().equalsIgnoreCase(method));
+    }
+
+    private boolean isProtectedAdminEndpoint(ServerHttpRequest request) {
+        return protectedAdminEndpoints.stream().anyMatch(e -> matchesEndpoint(request, e));
+    }
+
+    private boolean isPublicEndpoint(ServerHttpRequest request) {
+        if (isProtectedAdminEndpoint(request)) {
+            return false;
+        }
+
+        return publicEndpoints.stream().anyMatch(e -> matchesEndpoint(request, e));
+    }
+
+    private boolean hasBearerToken(ServerHttpRequest request) {
+        List<String> authHeader = request.getHeaders().get(HttpHeaders.AUTHORIZATION);
+        if (CollectionUtils.isEmpty(authHeader)) {
+            return false;
+        }
+
+        String token = authHeader.getFirst().replace("Bearer ", "");
+        return !token.isEmpty();
     }
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-
-        if (isPublicEndpoint(exchange.getRequest()))
+        if (isPublicEndpoint(exchange.getRequest())) {
             return chain.filter(exchange);
+        }
 
-        // Get token from authorization header
-        List<String> authHeader = exchange.getRequest().getHeaders().get(HttpHeaders.AUTHORIZATION);
-        if (CollectionUtils.isEmpty(authHeader))
+        if (!hasBearerToken(exchange.getRequest())) {
             return unauthenticated(exchange.getResponse());
-
-        String token = authHeader.getFirst().replace("Bearer ", "");
-
-        if (token.isEmpty())
-            return unauthenticated(exchange.getResponse());
+        }
 
         return chain.filter(exchange);
-
-//        return identityService.introspect(token).flatMap(introspectResponse -> {
-//            if (introspectResponse.getResult().isValid())
-//                return chain.filter(exchange);
-//            else
-//                return unauthenticated(exchange.getResponse());
-//        }).onErrorResume(throwable -> unauthenticated(exchange.getResponse()));
     }
 
     Mono<Void> unauthenticated(ServerHttpResponse response){
@@ -108,8 +125,9 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
         response.getHeaders().add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
 
         return response.writeWith(
-                Mono.just(response.bufferFactory().wrap(body.getBytes())));
+                Mono.just(response.bufferFactory().wrap(body.getBytes(StandardCharsets.UTF_8))));
     }
+
     @Override
     public int getOrder() {
         return -1;
