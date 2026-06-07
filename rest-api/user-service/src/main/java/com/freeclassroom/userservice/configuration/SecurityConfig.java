@@ -7,23 +7,23 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
-import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.filter.CorsFilter;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 @Configuration
 @EnableWebSecurity
@@ -42,31 +42,33 @@ public class SecurityConfig {
     private final CustomJwtDecoder jwtDecoder;
     private final IdentityFilter identityFilter;
 
-    private final String[] PUBLIC_ENDPOINTS = {"/auth/**", "/user/**", "test/**", "expertises/**", "/actuator/health"};
-
-    @Bean
-    public JwtAuthenticationConverter jwtAuthenticationConverter() {
-        JwtGrantedAuthoritiesConverter customConverter = new JwtGrantedAuthoritiesConverter();
-        customConverter.setAuthorityPrefix("ROLE_");
-        customConverter.setAuthoritiesClaimName("roles");
-
-        JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
-        converter.setJwtGrantedAuthoritiesConverter(customConverter);
-        return converter;
-    }
+    private final String[] PUBLIC_ENDPOINTS = {"/auth/**", "test/**", "expertises/**", "/actuator/health"};
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
-                .csrf(csrf -> csrf.disable()) // Tắt CSRF để cho phép API hoạt động
+                .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html"
                         ).permitAll()
+                        .requestMatchers("/user/admin/**", "/user/home-admin", "/user/ad-certificates")
+                        .hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/user/update-certificate")
+                        .hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS).permitAll()
                         .requestMatchers(HttpMethod.GET, PUBLIC_ENDPOINTS).permitAll()
+                        .requestMatchers(HttpMethod.GET, "/user").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/user", "/user/verify").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/user/certificates").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/user/recommendations/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/user/track-event").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/user/personalization").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/user/personalization/*").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/user/*").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/user/certificates").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
@@ -74,7 +76,10 @@ public class SecurityConfig {
                 );
 
         httpSecurity.oauth2ResourceServer(oauth2 ->
-                oauth2.jwt(jwt -> jwt.decoder(jwtDecoder).jwtAuthenticationConverter(jwtAuthenticationConverter()))
+                oauth2.jwt(jwt -> jwt
+                        .decoder(jwtDecoder)
+                        .jwtAuthenticationConverter(this::jwtAuthenticationConverter)
+                )
         );
 
         httpSecurity.addFilterAfter(
@@ -83,5 +88,23 @@ public class SecurityConfig {
         );
 
         return httpSecurity.build();
+    }
+
+    private AbstractAuthenticationToken jwtAuthenticationConverter(Jwt jwt) {
+        Collection<GrantedAuthority> authorities = new ArrayList<>();
+
+        Object scopeClaim = jwt.getClaims().get("scope");
+        if (scopeClaim instanceof List<?> list) {
+            for (Object item : list) {
+                if (item instanceof Map<?, ?> map) {
+                    Object name = map.get("name");
+                    if (name != null) {
+                        authorities.add(new SimpleGrantedAuthority("ROLE_" + name.toString().toUpperCase()));
+                    }
+                }
+            }
+        }
+
+        return new JwtAuthenticationToken(jwt, authorities);
     }
 }

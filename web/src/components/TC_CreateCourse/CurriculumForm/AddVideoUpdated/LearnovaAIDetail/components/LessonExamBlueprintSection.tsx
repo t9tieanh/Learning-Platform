@@ -81,6 +81,8 @@ interface LessonExamBlueprintSectionProps {
   handleSeek?: (startTime: string | null) => void
   lessonType?: LessonType
   lessonTitle?: string
+  /** When true, suppresses all edit/generate controls (admin uses LessonTestPreview instead). */
+  readOnly?: boolean
 }
 
 /** Section: map chunks to config groups, target total, then batch-generate quizzes per group (VIP). */
@@ -93,7 +95,8 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
   onBackToStructure,
   handleSeek,
   lessonType,
-  lessonTitle
+  lessonTitle,
+  readOnly = false
 }) => {
   const { openVipDialog } = useVipUpgrade()
   const { data: authData } = useAuthStore()
@@ -862,6 +865,10 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
     } catch (err) {
       toast.error('Lỗi khi xóa câu hỏi.')
     }
+  }
+
+  if (readOnly) {
+    return null
   }
 
   return (

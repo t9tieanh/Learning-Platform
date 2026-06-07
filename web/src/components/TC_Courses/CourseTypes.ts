@@ -1,4 +1,4 @@
-export type CourseStatus = 'active' | 'pending' | 'closed' | 'PUBLISHED' | 'DRAFT' | 'PENDING_REVIEW'
+export type CourseStatus = 'active' | 'pending' | 'closed' | 'PUBLISHED' | 'DRAFT' | 'PENDING_REVIEW' | 'REJECTED'
 
 export interface Course {
   id: string

@@ -28,6 +28,13 @@ const getStatusBadge = (status: CourseStatus) => {
           <span className='text-[10px] font-semibold tracking-wide text-amber-700'>Chờ duyệt</span>
         </div>
       )
+    case 'REJECTED':
+      return (
+        <div className='inline-flex items-center gap-1.5 rounded-full border border-rose-200 bg-rose-50 px-2.5 py-1'>
+          <div className='h-1.5 w-1.5 rounded-full bg-rose-500' />
+          <span className='text-[10px] font-semibold tracking-wide text-rose-700'>Bị từ chối</span>
+        </div>
+      )
     default:
       return (
         <div className='inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-100 px-2.5 py-1'>

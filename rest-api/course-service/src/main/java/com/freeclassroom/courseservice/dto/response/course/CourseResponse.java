@@ -33,6 +33,7 @@ public class CourseResponse {
     Double rating;
 
     EnumCourseStatus status;
+    String reason;
     InstructorResponse instructor;
 
     List<ChapterResponse> chapters;

@@ -21,6 +21,7 @@ interface CourseHeroProps {
   onEdit: () => void
   courseId?: string
   introductoryVideo: string
+  rejectionReason?: string | null
 }
 
 enum EnumCourseStatus {
@@ -74,8 +75,10 @@ export function CourseHero({
   publishedAt,
   price,
   onPlayIntro,
-  onEdit
+  onEdit,
+  rejectionReason,
 }: CourseHeroProps) {
+  const isRejected = courseStatus.toString().toLowerCase() === 'rejected'
   const [openPreview, setOpenPreview] = useState(false)
   const [openApproveModal, setOpenApproveModal] = useState(false)
   const [rejectReason, setRejectReason] = useState('')

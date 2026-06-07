@@ -1,5 +1,6 @@
 package com.freeclassroom.courseservice.dto.response.course;
 
+import com.freeclassroom.courseservice.enums.entity.EnumLessonType;
 import com.freeclassroom.courseservice.service.utils.cloudfront.SignedUrl;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -20,4 +21,5 @@ public class LessonCourseAdminTeacherResponse {
     String url;
     Long position;
     Boolean isPublic;
+    EnumLessonType type;
 }

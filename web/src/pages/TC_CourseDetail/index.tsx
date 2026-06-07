@@ -25,6 +25,7 @@ interface CourseResponseDTO {
   shortDescription?: string
   description?: string
   status: string
+  reason?: string
   price?: number
   introductoryVideo?: string
   createdAt?: string
@@ -114,6 +115,7 @@ export default function CourseDetailPage() {
           shortDescription: data.shortDescription || data.description,
           description: data.longDescription || data.description || '',
           status: (data.status || 'DRAFT').toLowerCase(),
+          reason: data.reason || undefined,
           price: data.finalPrice,
           createdAt: data.createdAt,
           tagNames: data.tagNames || data.tags || [],
@@ -208,6 +210,7 @@ export default function CourseDetailPage() {
                 onPlayIntro={handlePlayIntro}
                 onEdit={handleEdit}
                 courseStatus={course.status.toLowerCase()}
+                rejectionReason={course.reason}
               />
 
               <CourseSummary
@@ -253,12 +256,14 @@ export default function CourseDetailPage() {
 
             {!isAdminPage && (
               <aside className='hidden lg:block'>
+                <div className='sticky top-6 self-start'>
                 <StatsSidebar
                   revenue={(course.price || 0) * (course.students || 0)}
                   studentsCount={course.students || 0}
                   rating={course.rating || 0}
                   status={course.status === 'published' ? 'published' : 'draft'}
                 />
+                </div>
               </aside>
             )}
           </div>

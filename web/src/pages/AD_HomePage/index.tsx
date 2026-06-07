@@ -216,12 +216,6 @@ export default function Dashboard() {
       value: pendingActions?.certificatePendingCount ?? 0,
       icon: ShieldAlert,
       tone: 'text-orange-700 bg-orange-50 border-orange-200'
-    },
-    {
-      label: 'Báo cáo vi phạm',
-      value: pendingActions?.rejectedCourseCount ?? 0,
-      icon: AlertTriangle,
-      tone: 'text-rose-700 bg-rose-50 border-rose-200'
     }
   ]
 

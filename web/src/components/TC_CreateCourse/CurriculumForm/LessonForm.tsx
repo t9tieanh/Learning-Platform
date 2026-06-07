@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { FileText, GripVertical, HelpCircle, Play, Trash2, Send, X, Eye, Video, BookOpen } from 'lucide-react'
+import { FileText, GripVertical, HelpCircle, Pencil, Trash2, Send, X, Video, BookOpen, SquarePen } from 'lucide-react'
 import { Chapter, Lesson, CreationLessonFormValues } from '@/utils/create-course/curriculum'
 import { useCallback, useState } from 'react'
 import lessonService from '@/services/course/lesson.service'
@@ -14,8 +14,6 @@ import CustomButton from '@/components/common/Button'
 import CustomDialog from '@/components/common/Dialog'
 import AddVideoForm from './AddVideoUpdated'
 import { useChunkedUpload } from '@/hooks/useChunkedUpload.hook'
-import { MdModeEditOutline } from 'react-icons/md'
-
 const UpdateLessonSchema = yup.object({
   title: yup.string().required('Tiêu đề không được để trống').min(3, 'Tiêu đề phải có ít nhất 3 ký tự')
 })
@@ -105,9 +103,15 @@ const LessonForm = ({
     <>
       <div key={key} className='flex items-center space-x-4 p-4 rounded-2xl border border-gray-200 bg-white shadow-sm transition-all hover:border-blue-100 group'>
         <GripVertical className='h-3.5 w-3.5 text-gray-300' />
-        <span className='flex items-center justify-center w-8 h-8 rounded-xl bg-gray-50 text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-all border border-gray-100/50 cursor-pointer shadow-sm group-hover:scale-105'>
-          <MdModeEditOutline className='h-4 w-4' onClick={() => setPreview({ openPreview: true, lesson })} />
-        </span>
+        <button
+          type='button'
+          title='Chỉnh sửa nội dung bài giảng'
+          aria-label='Chỉnh sửa nội dung bài giảng'
+          onClick={() => setPreview({ openPreview: true, lesson })}
+          className='flex h-8 w-8 items-center justify-center rounded-xl border border-gray-100/50 bg-gray-50 text-gray-400 shadow-sm transition-all hover:bg-blue-50 hover:text-blue-600 group-hover:scale-105'
+        >
+          <SquarePen className='h-4 w-4' />
+        </button>
         <div className='flex-1'>
           {updateTitle ? (
             <form className='space-y-2' onSubmit={handleSubmit(updateLesson)}>
@@ -136,7 +140,8 @@ const LessonForm = ({
               <span className='text-[13px] font-medium text-gray-700'>{lesson.title || 'Bài giảng chưa có tiêu đề'}</span>
               <CustomButton
                 className='opacity-0 transition-all duration-300 group-hover:opacity-100 bg-gray-100 text-gray-500 p-1.5 rounded-lg shadow-sm hover:bg-white hover:text-blue-600 flex items-center justify-center'
-                icon={<MdModeEditOutline className='w-3.5 h-3.5' />}
+                title='Đổi tên bài giảng'
+                icon={<Pencil className='w-3.5 h-3.5' />}
                 onClick={() => {
                   setUpdateTitle(true)
                 }}

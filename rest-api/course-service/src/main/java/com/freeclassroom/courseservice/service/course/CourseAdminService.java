@@ -37,6 +37,9 @@ import org.springframework.util.StringUtils;
 import java.util.HashSet;
 import java.util.List;
 
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
+
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Service
@@ -58,8 +61,18 @@ public class CourseAdminService implements ICourseAdminService {
         Page<CourseEntity> coursePage = courseRepo.findAllForAdmin(normalizedSearch, status, pageable);
         List<CourseListResponse> items = courseMapper.toListResponse(coursePage.getContent());
         // get info of instructor
-        items.stream().forEach(item -> {
-            item.setInstructor(instructorMapper.toResponse(userClient.getUser(item.getInstructorId())));
+        items.forEach(item -> {
+            try {
+                var user = userClient.getUser(item.getInstructorId());
+                item.setInstructor(instructorMapper.toResponse(user));
+            } catch (StatusRuntimeException e) {
+                if (e.getStatus().getCode() == Status.Code.NOT_FOUND) {
+                    log.warn("Instructor not found for course {}: {}", item.getId(), item.getInstructorId());
+                    item.setInstructor(null);
+                } else {
+                    throw e;
+                }
+            }
         });
         PageResponse<CourseListResponse> pageResponse = PageResponse.<CourseListResponse>builder()
                 .items(items)

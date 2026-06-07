@@ -30,6 +30,7 @@ import HighGlossBackground from '@/components/common/HighGlossBackground'
 import quizService from '@/services/assistant/quiz.service'
 import { QuizDifficulty, BloomLevel, QuizBatchDistributionItem } from '@/types/quiz'
 import { toast } from 'sonner'
+import { ReadOnlyQuizList } from './ReadOnlyQuizList'
 
 interface ChunkItemProps {
     chunk: LessonChunk
@@ -43,6 +44,8 @@ interface ChunkItemProps {
     handleCancelEdit: () => void
     handleSave: (chunkId: string) => void
     lessonTitle?: string
+    /** When true, hides edit/generate actions and shows embedded quizzes read-only (admin preview). */
+    readOnly?: boolean
 }
 
 const ChunkItem: React.FC<ChunkItemProps> = ({
@@ -56,10 +59,11 @@ const ChunkItem: React.FC<ChunkItemProps> = ({
     handleStartEdit,
     handleCancelEdit,
     handleSave,
-    lessonTitle
+    lessonTitle,
+    readOnly = false
 }) => {
     const [chunkQuizzes, setChunkQuizzes] = useState<Quiz[]>(chunk.quizzes || [])
-    const [isQuizVisible, setIsQuizVisible] = useState(false)
+    const [isQuizVisible, setIsQuizVisible] = useState(readOnly)
     const [isBulkGenerating, setIsBulkGenerating] = useState(false)
     const [isLoadingQuizzes, setIsLoadingQuizzes] = useState(false)
     const [isPickerOpen, setIsPickerOpen] = useState(false)
@@ -107,10 +111,14 @@ const ChunkItem: React.FC<ChunkItemProps> = ({
     }, [chunk.id, mapQuizzes])
 
     useEffect(() => {
+        if (readOnly) {
+            setChunkQuizzes(chunk.quizzes || [])
+            return
+        }
         if (isQuizVisible) {
             fetchQuizzes()
         }
-    }, [isQuizVisible, fetchQuizzes])
+    }, [isQuizVisible, fetchQuizzes, readOnly, chunk.quizzes])
 
     const handleGenerateBatch = async (distribution: QuizBatchDistributionItem[], userPrompt?: string) => {
         if (isBulkGenerating) return
@@ -209,7 +217,7 @@ const ChunkItem: React.FC<ChunkItemProps> = ({
                                     Tóm tắt kiến thức
                                 </label>
                             </div>
-                            {editingSummaryId !== chunk.id && (
+                            {!readOnly && editingSummaryId !== chunk.id && (
                                 <CustomButton
                                     onClick={(e) => {
                                         e.stopPropagation()
@@ -244,9 +252,10 @@ const ChunkItem: React.FC<ChunkItemProps> = ({
                         )}
                     </div>
 
-                    {/* Quiz Header & Actions */}
+                    {/* Quiz section — read-only for admin preview, editable for instructors */}
                     <div className='pt-2'>
                         <div className='flex items-center justify-between gap-4 flex-wrap'>
+                            {!readOnly && (
                             <CustomButton
                                 type='button'
                                 onClick={() => setIsQuizVisible(!isQuizVisible)}
@@ -279,7 +288,18 @@ const ChunkItem: React.FC<ChunkItemProps> = ({
                                     isQuizVisible ? 'rotate-90 text-blue-400' : 'text-gray-300'
                                 )} />
                             </CustomButton>
+                            )}
 
+                            {readOnly && (
+                              <div className='flex items-center gap-2 px-1'>
+                                <BookOpen className='w-4 h-4 text-blue-600' />
+                                <p className='text-[11.5px] font-bold text-gray-700'>
+                                  Câu hỏi ôn tập ({chunkQuizzes.length})
+                                </p>
+                              </div>
+                            )}
+
+                            {!readOnly && (
                             <div className='flex items-center gap-2'>
                                 <Popover open={isPickerOpen} onOpenChange={setIsPickerOpen}>
                                     <PopoverTrigger asChild>
@@ -330,23 +350,28 @@ const ChunkItem: React.FC<ChunkItemProps> = ({
                                     )}
                                 </Popover>
                             </div>
+                            )}
                         </div>
 
                         <AnimatePresence>
-                            {isQuizVisible && (
+                            {(readOnly || isQuizVisible) && (
                                 <motion.div
                                     initial={{ opacity: 0, height: 0 }}
                                     animate={{ opacity: 1, height: 'auto' }}
                                     exit={{ opacity: 0, height: 0 }}
                                     className='mt-6 overflow-hidden'
                                 >
-                                    <LearnovaQuizBuilder
-                                        chunkId={chunk.id}
-                                        initialQuizzes={chunkQuizzes}
-                                        onSave={handleSaveQuizzes}
-                                        onGenerateAI={handleGenerateBatch}
-                                        lessonTitle={lessonTitle}
-                                    />
+                                    {readOnly ? (
+                                        <ReadOnlyQuizList quizzes={chunkQuizzes} />
+                                    ) : (
+                                        <LearnovaQuizBuilder
+                                            chunkId={chunk.id}
+                                            initialQuizzes={chunkQuizzes}
+                                            onSave={handleSaveQuizzes}
+                                            onGenerateAI={handleGenerateBatch}
+                                            lessonTitle={lessonTitle}
+                                        />
+                                    )}
                                 </motion.div>
                             )}
                         </AnimatePresence>

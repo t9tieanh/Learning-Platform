@@ -10,6 +10,7 @@ import quizRouter from '~/routes/quiz.route'
 import lessonTestRouter from '~/routes/lesson_test.route'
 import lessonTestChunkGroupRouter from '~/routes/lesson_test_chunk_group.route'
 import lessonTestStudentRouter from '~/routes/lesson_test_student.route'
+import adminAnalysisRouter from '~/routes/adminAnalysis.route'
 
 const IndexRouter: Router = express.Router()
 
@@ -22,6 +23,7 @@ IndexRouter.use('/analysis', lessonTestRouter)
 IndexRouter.use('/analysis', lessonTestChunkGroupRouter)
 IndexRouter.use('/analysis', lessonTestStudentRouter)
 IndexRouter.use('/quizzes', quizRouter)
+IndexRouter.use('/admin/analysis', adminAnalysisRouter)
 
 IndexRouter.route('/status').get(async (req: Request, res: Response) => {
   res.status(StatusCodes.OK).json({
