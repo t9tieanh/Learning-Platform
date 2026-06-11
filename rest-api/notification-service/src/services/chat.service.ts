@@ -2,6 +2,7 @@ import { Types } from 'mongoose'
 import Conversation, { IConversation } from '~/models/message/conversation.model'
 import Message, { IMessage } from '~/models/message/message.model'
 import { Feedback } from '~/models/review/feedback.model'
+import courseClient from '~/grpc/courseClient'
 import socketClient from '~/socket'
 import Logger from '~/utils/logger'
 interface DirectConversationResult {
@@ -111,16 +112,33 @@ const getMessages = async (conversationId: string, cursor?: string, limit = 20) 
   }
 }
 
+const getConversationParticipantContext = async (conversationId: string, currentUserId: string) => {
+  const conversation = await Conversation.findById(conversationId)
+
+  if (!conversation) {
+    throw new Error('Không tìm thấy cuộc trò chuyện')
+  }
+
+  const sender = conversation.participants.find((p) => p.userId === currentUserId)
+  const peer = conversation.participants.find((p) => p.userId !== currentUserId)
+
+  if (!sender || !peer) {
+    throw new Error('Bạn không thuộc cuộc trò chuyện này')
+  }
+
+  return {
+    conversation,
+    senderRole: sender.role,
+    peerId: peer.userId
+  }
+}
+
 // Gửi tin nhắn trong hội thoại
-const sendMessage = async (
-  conversationId: string,
-  senderId: string,
-  senderRole: 'student' | 'instructor',
-  content: string,
-  peerId: string
-): Promise<IMessage> => {
+const sendMessage = async (conversationId: string, senderId: string, content: string): Promise<IMessage> => {
   try {
-    Logger.info(JSON.stringify({ conversationId, senderId, senderRole, content }))
+    const { senderRole, peerId } = await getConversationParticipantContext(conversationId, senderId)
+
+    Logger.info(JSON.stringify({ conversationId, senderId, senderRole, peerId, content }))
 
     const message = await Message.create({
       conversationId: conversationId,
@@ -311,9 +329,63 @@ const deleteMessage = async (conversationId: string, messageId: string, requeste
   }
 }
 
-const sendFirstMessage = async (courseName: string, instructorId: string, studentId: string) => {
+interface SendFirstMessageParams {
+  courseId: string
+  courseName: string
+  studentId: string
+  instructorIdHint?: string
+}
+
+const resolveInstructorId = async (courseId: string, instructorIdHint?: string) => {
+  const course = await courseClient.getCourse(courseId)
+  const instructorId = course.instructor?.id?.trim()
+  const normalizedInstructorIdHint = instructorIdHint?.trim()
+
+  if (!instructorId) {
+    throw new Error(`Không tìm thấy instructor cho course ${courseId}`)
+  }
+
+  if (normalizedInstructorIdHint && normalizedInstructorIdHint !== instructorId) {
+    Logger.warn(
+      `[sendFirstMessage] instructor_id payload mismatch for course ${courseId}: payload=${normalizedInstructorIdHint}, courseService=${instructorId}`
+    )
+  }
+
+  return instructorId
+}
+
+const sendFirstMessage = async ({ courseId, courseName, studentId, instructorIdHint }: SendFirstMessageParams) => {
   try {
-    const { conversation } = await createOrGetDirect(studentId, instructorId, 'student')
+    const normalizedCourseId = courseId?.trim()
+    const normalizedStudentId = studentId?.trim()
+
+    if (!normalizedCourseId) {
+      throw new Error('Thiếu courseId khi gửi tin nhắn chào mừng')
+    }
+
+    if (!normalizedStudentId) {
+      throw new Error(`Thiếu studentId khi gửi tin nhắn chào mừng cho course ${normalizedCourseId}`)
+    }
+
+    const instructorId = await resolveInstructorId(normalizedCourseId, instructorIdHint)
+
+    if (instructorId === normalizedStudentId) {
+      throw new Error(`InstructorId trùng StudentId (${normalizedStudentId}) cho course ${normalizedCourseId}`)
+    }
+
+    const { conversation } = await createOrGetDirect(normalizedStudentId, instructorId, 'student')
+    const hasStudentParticipant = conversation.participants.some(
+      (p) => p.userId === normalizedStudentId && p.role === 'student'
+    )
+    const hasInstructorParticipant = conversation.participants.some(
+      (p) => p.userId === instructorId && p.role === 'instructor'
+    )
+
+    if (!hasStudentParticipant || !hasInstructorParticipant) {
+      throw new Error(
+        `Conversation ${conversation._id} sai participants cho welcome message: student=${normalizedStudentId}, instructor=${instructorId}`
+      )
+    }
 
     const welcomeMessage = `Xin chào! 👋 Chào mừng bạn đến với khóa học "${courseName}" 🎓 — chúc bạn có một hành trình học tập thật tuyệt vời! 🚀 Nếu có bất kỳ thắc mắc nào, đừng ngần ngại đặt câu hỏi nhé 💬`
 
@@ -336,7 +408,7 @@ const sendFirstMessage = async (courseName: string, instructorId: string, studen
       messageId: message._id,
       content: welcomeMessage,
       senderId: instructorId,
-      peerId: studentId,
+      peerId: normalizedStudentId,
       senderRole: 'instructor'
     })
   } catch (error) {

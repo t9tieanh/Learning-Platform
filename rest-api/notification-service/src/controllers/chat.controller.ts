@@ -150,15 +150,12 @@ const sendMessage = async (req: Request, res: Response) => {
     if (!currentUserId) throw new Error('Thiếu thông tin người dùng (token)')
 
     Logger.info(`[REQ DATA] ${JSON.stringify(req.data)}`)
-    const { conversationId, content, senderRole, peerId, senderId } = req.data as {
+    const { conversationId, content } = req.data as {
       conversationId: string
       content: string
-      senderRole: 'student' | 'instructor'
-      peerId: string
-      senderId: string
     }
 
-    const message = await ChatService.sendMessage(conversationId, currentUserId, senderRole, content, peerId)
+    const message = await ChatService.sendMessage(conversationId, currentUserId, content)
 
     sendResponse(res, {
       code: StatusCodes.CREATED,
