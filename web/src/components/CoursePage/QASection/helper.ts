@@ -10,6 +10,7 @@ export interface ReplyUI {
   avatar: string
   content: string
   timestamp: string
+  isInstructor: boolean
   likes: number
 }
 
@@ -20,6 +21,7 @@ export interface CommentUI {
   avatar: string
   content: string
   timestamp: string
+  isInstructor: boolean
   likes: number
   replies: ReplyUI[]
 }
@@ -46,6 +48,7 @@ export function mapLessonCommentToUIReply(c: LessonComment): ReplyUI {
     avatar: c.userAvt,
     content: c.content,
     timestamp: formatTime(c.createdAt),
+    isInstructor: Boolean(c.isInstructor),
     likes: 0
   }
 }
@@ -58,6 +61,7 @@ export function mapLessonCommentToUI(c: LessonComment): CommentUI {
     avatar: c.userAvt,
     content: c.content,
     timestamp: formatTime(c.createdAt),
+    isInstructor: Boolean(c.isInstructor),
     likes: 0,
     replies: c.children.map(mapLessonCommentToUIReply)
   }
@@ -160,14 +164,20 @@ export function useQASection(lessonId: string): QASectionHook {
       avatar: userAvatar,
       content: newComment,
       timestamp: 'Just now',
+      isInstructor: false,
       likes: 0,
       replies: []
     }
     setComments((prev) => [optimistic, ...prev])
-    const payload: CreateLessonCommentDto = { lessonId, parentId: null, userId, content: newComment }
+    const payload: CreateLessonCommentDto = { lessonId, parentId: null, content: newComment }
     try {
-      await commentService.createLessonComment(payload)
-      loadComments()
+      const res = await commentService.createLessonComment(payload)
+      if (res.code === 200 && res.result) {
+        const createdComment = mapLessonCommentToUI(res.result)
+        setComments((prev) => prev.map((comment) => (comment.id === optimistic.id ? createdComment : comment)))
+      } else {
+        throw new Error(res.message || 'Create comment failed')
+      }
     } catch {
       setError('Không thể gửi bình luận. Vui lòng thử lại.')
       setComments((prev) => prev.filter((c) => c !== optimistic))
@@ -188,13 +198,28 @@ export function useQASection(lessonId: string): QASectionHook {
       avatar: userAvatar,
       content: replyContent,
       timestamp: 'Just now',
+      isInstructor: false,
       likes: 0
     }
     setComments((prev) => prev.map((c) => (c.id === commentId ? { ...c, replies: [...c.replies, reply] } : c)))
-    const payload: CreateLessonCommentDto = { lessonId, parentId: commentId, userId, content: replyContent }
+    const payload: CreateLessonCommentDto = { lessonId, parentId: commentId, content: replyContent }
     try {
-      await commentService.createLessonComment(payload)
-      loadComments()
+      const res = await commentService.createLessonComment(payload)
+      if (res.code === 200 && res.result) {
+        const createdReply = mapLessonCommentToUIReply(res.result)
+        setComments((prev) =>
+          prev.map((c) =>
+            c.id === commentId
+              ? {
+                  ...c,
+                  replies: c.replies.map((currentReply) => (currentReply.id === reply.id ? createdReply : currentReply))
+                }
+              : c
+          )
+        )
+      } else {
+        throw new Error(res.message || 'Create reply failed')
+      }
     } catch {
       setError('Không thể gửi trả lời. Vui lòng thử lại.')
       setComments((prev) =>

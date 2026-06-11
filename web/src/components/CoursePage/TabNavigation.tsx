@@ -22,7 +22,6 @@ export const TabNavigation = ({
   currentLecture,
   thumbnailUri,
   currentLectureId,
-  instructorId,
   analysisData,
   onSeek,
   activeTab: externalActiveTab,
@@ -30,12 +29,11 @@ export const TabNavigation = ({
   selectedChunkId,
   watchedPercent,
   onCourseCompleted,
-  onCourseDataRefresh,
+  onCourseDataRefresh
 }: {
   currentLecture: Lesson
   thumbnailUri: string
   currentLectureId: string
-  instructorId: string
   analysisData?: AnalysisResult | null
   onSeek?: (timestamp: string) => void
   activeTab: string
@@ -52,42 +50,39 @@ export const TabNavigation = ({
   /** Cached GET student lesson-test (same payload as tab probe — avoids a second fetch when opening the tab). */
   const [lessonTestPrefetch, setLessonTestPrefetch] = useState<StudentLessonTestView | null>(null)
 
-  const tabs: { label: string; icon: React.ReactNode; onClick?: () => void }[] = useMemo(
-    () => {
-      const baseTabs = [
-        {
-          label: 'Tổng quan',
-          icon: <Info className='w-3.5 h-3.5' />
-        },
-        {
-          label: 'AI Phân tích',
-          icon: <Brain className='w-3.5 h-3.5 text-blue-500' />
-        },
-        {
-          label: 'Hỏi đáp',
-          icon: <MessageCircleQuestionMark className='w-3.5 h-3.5' />
-        },
-        {
-          label: 'Ghi chú',
-          icon: <NotebookPen className='w-3.5 h-3.5' />
-        },
-        ...(lessonTestTabVisible && (watchedPercent >= 70 || currentLecture.completionStatus === 'COMPLETED')
-          ? [
+  const tabs: { label: string; icon: React.ReactNode; onClick?: () => void }[] = useMemo(() => {
+    const baseTabs = [
+      {
+        label: 'Tổng quan',
+        icon: <Info className='w-3.5 h-3.5' />
+      },
+      {
+        label: 'AI Phân tích',
+        icon: <Brain className='w-3.5 h-3.5 text-blue-500' />
+      },
+      {
+        label: 'Hỏi đáp',
+        icon: <MessageCircleQuestionMark className='w-3.5 h-3.5' />
+      },
+      {
+        label: 'Ghi chú',
+        icon: <NotebookPen className='w-3.5 h-3.5' />
+      },
+      ...(lessonTestTabVisible && (watchedPercent >= 70 || currentLecture.completionStatus === 'COMPLETED')
+        ? [
             {
               label: 'Bài kiểm tra',
               icon: <ClipboardList className='w-3.5 h-3.5' />
             }
           ]
-          : [])
-      ]
+        : [])
+    ]
 
-      if (!analysisData) {
-        return baseTabs.filter((t) => t.label !== 'AI Phân tích')
-      }
-      return baseTabs
-    },
-    [analysisData, lessonTestTabVisible, watchedPercent, currentLecture.completionStatus]
-  )
+    if (!analysisData) {
+      return baseTabs.filter((t) => t.label !== 'AI Phân tích')
+    }
+    return baseTabs
+  }, [analysisData, lessonTestTabVisible, watchedPercent, currentLecture.completionStatus])
 
   useEffect(() => {
     const fetchNoteContent = async () => {
@@ -119,8 +114,7 @@ export const TabNavigation = ({
       try {
         const res = await lessonTestStudentService.getStudentLessonTest(lessonId)
         if (cancelled) return
-        const visible =
-          res.code === 200 && res.result != null && studentLessonTestHasQuestions(res.result)
+        const visible = res.code === 200 && res.result != null && studentLessonTestHasQuestions(res.result)
         setLessonTestTabVisible(visible)
         setLessonTestPrefetch(visible && res.result ? res.result : null)
       } catch {
@@ -159,12 +153,15 @@ export const TabNavigation = ({
           <CustomButton
             key={tab.label}
             onClick={() => (tab.onClick ? tab.onClick() : setActiveTab(tab.label))}
-            className={`py-3 md:py-4 px-3 md:px-5 text-[11px] font-bold tracking-[0.1em] bg-white transition-all relative whitespace-nowrap flex-shrink-0 ${activeTab === tab.label ? 'text-blue-600' : 'text-muted-foreground hover:text-foreground'
-              }`}
+            className={`py-3 md:py-4 px-3 md:px-5 text-[11px] font-bold tracking-[0.1em] bg-white transition-all relative whitespace-nowrap flex-shrink-0 ${
+              activeTab === tab.label ? 'text-blue-600' : 'text-muted-foreground hover:text-foreground'
+            }`}
             label={
               <div className='flex items-center'>
                 {tab.label}
-                {activeTab === tab.label && <div className='absolute bottom-0 left-0 right-0 h-[3px] bg-blue-600 rounded-full mx-2' />}
+                {activeTab === tab.label && (
+                  <div className='absolute bottom-0 left-0 right-0 h-[3px] bg-blue-600 rounded-full mx-2' />
+                )}
                 {tab.label === 'Notes' && noteContent && noteContent?.trim() !== '' && (
                   <span className='ml-1 inline-block w-1.5 h-1.5 bg-red-500 rounded-full'></span>
                 )}
@@ -176,7 +173,7 @@ export const TabNavigation = ({
       </div>
 
       <div className='px-0 min-h-[600px] overflow-visible'>
-        {activeTab === 'Hỏi đáp' && <QASection lessonId={String(currentLectureId)} instructorId={instructorId} />}
+        {activeTab === 'Hỏi đáp' && <QASection lessonId={String(currentLectureId)} />}
         {activeTab === 'Tổng quan' && (
           <div className='mt-6 mx-auto w-full space-y-8'>
             <LectureInfo lesson={currentLecture} thumbnailUri={thumbnailUri} />
@@ -196,11 +193,7 @@ export const TabNavigation = ({
         )}
         {activeTab === 'Ghi chú' && (
           <div className='mt-2 mx-auto w-full'>
-            <NoteSection
-              lessonId={currentLecture.id}
-              note={noteContent}
-              setNote={setNoteContent}
-            />
+            <NoteSection lessonId={currentLecture.id} note={noteContent} setNote={setNoteContent} />
           </div>
         )}
         {activeTab === 'Bài kiểm tra' && lessonTestTabVisible && (

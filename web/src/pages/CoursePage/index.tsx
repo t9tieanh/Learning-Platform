@@ -12,8 +12,7 @@ import Button from '@/components/common/Button'
 import { CourseSkeleton } from '@/components/CoursePage/CourseSkeleton'
 import { TabNavigationSkeleton } from '@/components/CoursePage/TabNavigationSkeleton'
 import { CourseSidebarSkeleton } from '@/components/CoursePage/CourseSidebarSkeleton'
-import { AnalysisResult } from '@/services/assistant/analysis.service'
-import assistantAnalysisService from '@/services/assistant/analysis.service'
+import assistantAnalysisService, { AnalysisResult } from '@/services/assistant/analysis.service'
 import HighGlossBackground from '@/components/common/HighGlossBackground'
 import CoursePageHeaderUser from '@/components/CoursePage/CoursePageHeaderUser'
 import { CertificateJourneyProgress } from '@/components/CoursePage/CertificateJourneyProgress'
@@ -42,7 +41,6 @@ const CoursePage = () => {
   const viewerRef = useRef<import('@/components/CoursePage/VideoPlayer').VideoPlayerRef>(null)
 
   const [analysisData, setAnalysisData] = useState<AnalysisResult | null>(null)
-  const [isLoadingAnalysis, setIsLoadingAnalysis] = useState(false)
   const [showCourseCompletionModal, setShowCourseCompletionModal] = useState(false)
   const [completedCertificate, setCompletedCertificate] = useState<{ id: string; certificateCode: string } | null>(null)
 
@@ -72,53 +70,56 @@ const CoursePage = () => {
   const currentLectureIdRef = useRef(currentLecture?.id)
   currentLectureIdRef.current = currentLecture?.id
 
-  const fetchCourseInfo = useCallback(async (preserveLectureId?: string, options?: { silent?: boolean }) => {
-    if (!courseId) return
-    if (!options?.silent) setIsLoading(true)
-    try {
-      const response = await courseService.getCourseDetails(courseId)
-      if (response && response.code === 200 && response.result) {
-        setCourseData(response.result)
+  const fetchCourseInfo = useCallback(
+    async (preserveLectureId?: string, options?: { silent?: boolean }) => {
+      if (!courseId) return
+      if (!options?.silent) setIsLoading(true)
+      try {
+        const response = await courseService.getCourseDetails(courseId)
+        if (response && response.code === 200 && response.result) {
+          setCourseData(response.result)
 
-        const lectureIdToKeep = preserveLectureId ?? currentLectureIdRef.current
-        if (lectureIdToKeep && lectureIdToKeep !== 'introduction') {
-          for (const ch of response.result.chapters ?? []) {
-            const found = ch.lessons?.find((l) => l.id === lectureIdToKeep)
-            if (found) {
-              setCurrentLecture({
-                id: found.id,
-                title: found.title,
-                content: found.content,
-                duration: found.duration ?? null,
-                position: found.position ?? null,
-                type: found.type === 'article' ? 'article' : 'video',
-                completionStatus: found.completionStatus ?? 'NOT_STARTED'
-              })
-              return
+          const lectureIdToKeep = preserveLectureId ?? currentLectureIdRef.current
+          if (lectureIdToKeep && lectureIdToKeep !== 'introduction') {
+            for (const ch of response.result.chapters ?? []) {
+              const found = ch.lessons?.find((l) => l.id === lectureIdToKeep)
+              if (found) {
+                setCurrentLecture({
+                  id: found.id,
+                  title: found.title,
+                  content: found.content,
+                  duration: found.duration ?? null,
+                  position: found.position ?? null,
+                  type: found.type === 'article' ? 'article' : 'video',
+                  completionStatus: found.completionStatus ?? 'NOT_STARTED'
+                })
+                return
+              }
             }
           }
-        }
 
-        if (!options?.silent) {
-          setCurrentLecture({
-            id: 'introduction',
-            title: 'Giới thiệu khóa học',
-            content: response.result.longDescription || '',
-            duration: null,
-            introductionVideo: response.result.introductoryVideo as string,
-            position: null,
-            type: 'video',
-            completionStatus: 'COMPLETED',
-            thumbnailUrl: response.result.thumbnailUrl as string
-          })
+          if (!options?.silent) {
+            setCurrentLecture({
+              id: 'introduction',
+              title: 'Giới thiệu khóa học',
+              content: response.result.longDescription || '',
+              duration: null,
+              introductionVideo: response.result.introductoryVideo as string,
+              position: null,
+              type: 'video',
+              completionStatus: 'COMPLETED',
+              thumbnailUrl: response.result.thumbnailUrl as string
+            })
+          }
         }
+      } catch (error) {
+        console.error('Failed to fetch course details', error)
+      } finally {
+        if (!options?.silent) setIsLoading(false)
       }
-    } catch (error) {
-      console.error('Failed to fetch course details', error)
-    } finally {
-      if (!options?.silent) setIsLoading(false)
-    }
-  }, [courseId])
+    },
+    [courseId]
+  )
 
   useEffect(() => {
     fetchCourseInfo()
@@ -140,7 +141,6 @@ const CoursePage = () => {
         return
       }
 
-      setIsLoadingAnalysis(true)
       try {
         const response = await assistantAnalysisService.getAnalysisDetail(currentLecture.id)
         if (response && response.code === 200 && response.result) {
@@ -150,8 +150,6 @@ const CoursePage = () => {
         }
       } catch (error) {
         setAnalysisData(null)
-      } finally {
-        setIsLoadingAnalysis(false)
       }
     }
 
@@ -206,7 +204,7 @@ const CoursePage = () => {
           duration: found.duration ?? null,
           position: found.position ?? null,
           type: found.type === 'article' ? 'article' : 'video',
-          completionStatus: found.completionStatus ?? 'NOT_STARTED',
+          completionStatus: found.completionStatus ?? 'NOT_STARTED'
         })
         setWatchedPercent(found.completionStatus === 'COMPLETED' ? 100 : 0)
         setActiveTab('Bài kiểm tra')
@@ -305,7 +303,6 @@ const CoursePage = () => {
                   currentLecture={currentLecture!}
                   thumbnailUri={courseData?.thumbnailUrl as string}
                   currentLectureId={currentLecture!.id}
-                  instructorId={(courseData?.instructor as any)?.id || ''}
                   analysisData={analysisData}
                   onSeek={handleSeek}
                   activeTab={activeTab}

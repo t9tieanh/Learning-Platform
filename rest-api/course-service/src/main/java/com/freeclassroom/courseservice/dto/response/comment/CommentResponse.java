@@ -21,5 +21,6 @@ public class CommentResponse {
     String parentId;
     String content;
     Date createdAt;
+    Boolean isInstructor;
     List<CommentResponse> children = new ArrayList<>();
 }
