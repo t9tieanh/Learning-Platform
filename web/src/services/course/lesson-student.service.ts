@@ -86,9 +86,13 @@ class LessonStudentService {
     switch (lessonVideoUrlMode) {
       case LessonVideoUrlMode.BasicAuth:
         return this.getDevPresignedUrl(lessonId)
-      case LessonVideoUrlMode.CookieNginx:
-        await this.setAccessCookie(lessonId)
-        return this.getMediaUrl(lessonId)
+      case LessonVideoUrlMode.CookieNginx: {
+        const [, mediaUrlResponse] = await Promise.all([
+          this.setAccessCookie(lessonId),
+          this.getMediaUrl(lessonId)
+        ])
+        return mediaUrlResponse
+      }
       case LessonVideoUrlMode.Ip:
       default:
         return this.getPresignedUrl(lessonId)
