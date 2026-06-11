@@ -4,6 +4,7 @@ import BlogSearchBar from '@/components/TC_Blog/BlogSearchBar'
 import BlogTable from '@/components/TC_Blog/BlogTable'
 import BlogPagination from '@/components/TC_Blog/BlogPagination'
 import blogService, { type BlogItem } from '@/services/blog/blog.service'
+import BlogTableSkeleton from '@/components/TC_Blog/BlogTableSkeleton'
 
 const PAGE_SIZE = 6
 
@@ -91,9 +92,7 @@ const AD_Blogs = () => {
 
         <div className='mt-5 rounded-[26px] border border-slate-200/70 bg-white p-4 shadow-[0_14px_36px_-28px_rgba(15,23,42,0.18)]'>
           {loading ? (
-            <div className='flex min-h-[320px] items-center justify-center rounded-[22px] border border-dashed border-slate-200 bg-slate-50/80 px-6 text-sm font-medium text-slate-500'>
-              Đang tải danh sách bài viết...
-            </div>
+            <BlogTableSkeleton rows={PAGE_SIZE} />
           ) : error ? (
             <div className='flex min-h-[320px] items-center justify-center rounded-[22px] border border-rose-200 bg-rose-50/80 px-6 text-sm font-medium text-rose-600'>
               {error}

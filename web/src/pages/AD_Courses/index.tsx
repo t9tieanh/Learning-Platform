@@ -13,6 +13,7 @@ import courseAdminService, {
   CoursesAdminResult
 } from '@/services/course/course-admin.service'
 import useDebounce from '@/hooks/useDebounce.hook'
+import { AdminCoursesTableSkeleton, AdminStatCardsSkeleton } from '@/components/Admin/Skeleton'
 import {
   CourseStatus,
   COURSE_STATUS_VALUES,
@@ -30,6 +31,8 @@ const statusFilterLabelMap: Record<CourseStatus, string> = {
   [CourseStatus.REJECTED]: 'Bị từ chối',
   [CourseStatus.ARCHIVED]: 'Đã lưu trữ',
 }
+
+const adminCourseStatusFilterValues = COURSE_STATUS_VALUES.filter((status) => status !== CourseStatus.DRAFT)
 
 export default function CoursesAdmin() {
   const [data, setData] = useState<CoursesAdminResult | null>(null)
@@ -125,28 +128,34 @@ export default function CoursesAdmin() {
       </section>
 
       <section className='grid gap-4 md:grid-cols-2'>
-        <Card className={summaryCardClass}>
-          <div className='flex items-center gap-4'>
-            <div className='flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-50 text-sky-600'>
-              <BookOpen className='h-5 w-5' />
-            </div>
-            <div>
-              <p className='text-sm font-medium text-slate-500'>Tổng khóa học</p>
-              <p className='mt-1 text-2xl font-semibold text-slate-950'>{stats.total}</p>
-            </div>
-          </div>
-        </Card>
-        <Card className={summaryCardClass}>
-          <div className='flex items-center gap-4'>
-            <div className='flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 text-amber-600'>
-              <Clock3 className='h-5 w-5' />
-            </div>
-            <div>
-              <p className='text-sm font-medium text-slate-500'>Chờ duyệt</p>
-              <p className='mt-1 text-2xl font-semibold text-slate-950'>{stats.pending}</p>
-            </div>
-          </div>
-        </Card>
+        {loading && !data ? (
+          <AdminStatCardsSkeleton count={2} />
+        ) : (
+          <>
+            <Card className={summaryCardClass}>
+              <div className='flex items-center gap-4'>
+                <div className='flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-50 text-sky-600'>
+                  <BookOpen className='h-5 w-5' />
+                </div>
+                <div>
+                  <p className='text-sm font-medium text-slate-500'>Tổng khóa học</p>
+                  <p className='mt-1 text-2xl font-semibold text-slate-950'>{stats.total}</p>
+                </div>
+              </div>
+            </Card>
+            <Card className={summaryCardClass}>
+              <div className='flex items-center gap-4'>
+                <div className='flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 text-amber-600'>
+                  <Clock3 className='h-5 w-5' />
+                </div>
+                <div>
+                  <p className='text-sm font-medium text-slate-500'>Chờ duyệt</p>
+                  <p className='mt-1 text-2xl font-semibold text-slate-950'>{stats.pending}</p>
+                </div>
+              </div>
+            </Card>
+          </>
+        )}
       </section>
 
       <Card className='overflow-hidden rounded-[24px] border border-slate-200/80 bg-white/95 shadow-[0_22px_55px_-36px_rgba(15,23,42,0.24)] sm:rounded-[30px]'>
@@ -180,7 +189,7 @@ export default function CoursesAdmin() {
                 </SelectTrigger>
                 <SelectContent className='rounded-xl border-slate-200 bg-white'>
                   <SelectItem value='ALL'>Tất cả trạng thái</SelectItem>
-                  {COURSE_STATUS_VALUES.map((status) => (
+                  {adminCourseStatusFilterValues.map((status) => (
                     <SelectItem key={status} value={status}>
                       {statusFilterLabelMap[status]}
                     </SelectItem>
@@ -200,39 +209,34 @@ export default function CoursesAdmin() {
           )}
         </div>
 
-        <div className='hidden overflow-x-auto lg:block'>
-          <Table className='min-w-[980px]'>
-            <TableHeader>
-              <TableRow className='border-b border-slate-200 bg-slate-50/70 hover:bg-slate-50/70'>
-                <TableHead className='px-6 py-4 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500'>
-                  Tên khóa học
-                </TableHead>
-                <TableHead className='px-6 py-4 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500'>
-                  Người đăng
-                </TableHead>
-                <TableHead className='px-6 py-4 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500'>
-                  Tiến độ
-                </TableHead>
-                <TableHead className='px-6 py-4 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500'>
-                  Trạng thái
-                </TableHead>
-                <TableHead className='px-6 py-4 text-right text-xs font-semibold uppercase tracking-[0.2em] text-slate-500'>
-                  Hành động
-                </TableHead>
-              </TableRow>
-            </TableHeader>
+        {loading ? (
+          <AdminCoursesTableSkeleton rows={pageSize} />
+        ) : (
+          <>
+            <div className='hidden overflow-x-auto lg:block'>
+              <Table className='min-w-[980px]'>
+                <TableHeader>
+                  <TableRow className='border-b border-slate-200 bg-slate-50/70 hover:bg-slate-50/70'>
+                    <TableHead className='px-6 py-4 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500'>
+                      Tên khóa học
+                    </TableHead>
+                    <TableHead className='px-6 py-4 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500'>
+                      Người đăng
+                    </TableHead>
+                    <TableHead className='px-6 py-4 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500'>
+                      Tiến độ
+                    </TableHead>
+                    <TableHead className='px-6 py-4 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500'>
+                      Trạng thái
+                    </TableHead>
+                    <TableHead className='px-6 py-4 text-right text-xs font-semibold uppercase tracking-[0.2em] text-slate-500'>
+                      Hành động
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
 
-            <TableBody>
-              {loading && (
-                <TableRow>
-                  <TableCell colSpan={5} className='px-6 py-16 text-center text-sm font-medium text-slate-500'>
-                    Đang tải...
-                  </TableCell>
-                </TableRow>
-              )}
-
-              {!loading &&
-                data?.items.map((course: CourseAdminItem) => (
+                <TableBody>
+                  {data?.items.map((course: CourseAdminItem) => (
                   <TableRow
                     key={course.id}
                     className='group border-b border-slate-100 transition-colors hover:bg-sky-50/40'
@@ -295,26 +299,19 @@ export default function CoursesAdmin() {
                   </TableRow>
                 ))}
 
-              {!loading && !data?.items?.length && (
-                <TableRow>
-                  <TableCell colSpan={5} className='px-6 py-16 text-center text-sm text-slate-500'>
-                    Không có khóa học nào phù hợp với bộ lọc hiện tại.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </div>
-
-        <div className='space-y-4 p-4 lg:hidden'>
-          {loading && (
-            <div className='rounded-2xl border border-slate-200 bg-slate-50 px-4 py-10 text-center text-sm font-medium text-slate-500'>
-              Đang tải...
+                  {!data?.items?.length && (
+                    <TableRow>
+                      <TableCell colSpan={5} className='px-6 py-16 text-center text-sm text-slate-500'>
+                        Không có khóa học nào phù hợp với bộ lọc hiện tại.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
             </div>
-          )}
 
-          {!loading &&
-            data?.items.map((course: CourseAdminItem) => (
+            <div className='space-y-4 p-4 lg:hidden'>
+              {data?.items.map((course: CourseAdminItem) => (
               <article key={course.id} className='rounded-3xl border border-slate-200 bg-white p-4 shadow-sm'>
                 <div className='flex items-start gap-3'>
                   {course.thumbnailUrl ? (
@@ -360,14 +357,16 @@ export default function CoursesAdmin() {
                   Xem chi tiết
                 </Button>
               </article>
-            ))}
+              ))}
 
-          {!loading && !data?.items?.length && (
-            <div className='rounded-2xl border border-slate-200 bg-slate-50 px-4 py-10 text-center text-sm text-slate-500'>
-              Không có khóa học nào phù hợp với bộ lọc hiện tại.
+              {!data?.items?.length && (
+                <div className='rounded-2xl border border-slate-200 bg-slate-50 px-4 py-10 text-center text-sm text-slate-500'>
+                  Không có khóa học nào phù hợp với bộ lọc hiện tại.
+                </div>
+              )}
             </div>
-          )}
-        </div>
+          </>
+        )}
 
         <div className='flex flex-col gap-4 border-t border-slate-200/80 bg-slate-50/70 px-4 py-4 sm:px-6 sm:flex-row sm:items-center sm:justify-between'>
           <div className='text-sm text-slate-500'>Tổng {data?.totalElements ?? 0} khóa học</div>

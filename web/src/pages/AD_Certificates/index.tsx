@@ -16,6 +16,7 @@ import certificateService from '@/services/certificate/certificate.service'
 import { Award, Check, Clock3, ExternalLink, ShieldCheck, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { AdminCertificatesTableSkeleton, AdminStatCardsSkeleton } from '@/components/Admin/Skeleton'
 
 const statCardClass =
   'rounded-[26px] border border-slate-200/80 bg-white/95 p-5 shadow-[0_18px_40px_-30px_rgba(15,23,42,0.2)]'
@@ -204,6 +205,10 @@ export default function CertificatesPage() {
       </section>
 
       <section className='grid gap-4 md:grid-cols-3 xl:grid-cols-4'>
+        {loading ? (
+          <AdminStatCardsSkeleton count={4} columnsClassName='grid gap-4 md:grid-cols-3 xl:grid-cols-4' />
+        ) : (
+          <>
         <div className={statCardClass}>
           <div className='flex items-center gap-3'>
             <div className='flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-50 text-sky-600'>
@@ -248,6 +253,8 @@ export default function CertificatesPage() {
             </div>
           </div>
         </div>
+          </>
+        )}
       </section>
 
       <section className='overflow-hidden rounded-[30px] border border-slate-200/80 bg-white/95 shadow-[0_22px_55px_-36px_rgba(15,23,42,0.24)]'>
@@ -257,9 +264,7 @@ export default function CertificatesPage() {
         </div>
 
         {loading ? (
-          <div className='flex min-h-[320px] items-center justify-center px-6 text-sm font-medium text-slate-500'>
-            Đang tải danh sách chứng chỉ...
-          </div>
+          <AdminCertificatesTableSkeleton rows={8} />
         ) : error ? (
           <div className='flex min-h-[320px] items-center justify-center px-6 text-sm font-medium text-rose-600'>
             {error}

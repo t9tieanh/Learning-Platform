@@ -377,6 +377,7 @@ public interface CourseRepository extends JpaRepository<CourseEntity, String> {
         SELECT c
         FROM CourseEntity c
         WHERE c.deleted = false
+          AND c.status <> com.freeclassroom.courseservice.enums.entity.EnumCourseStatus.DRAFT
           AND (:search IS NULL OR LOWER(c.title) LIKE LOWER(CONCAT('%', :search, '%')))
           AND (:status IS NULL OR c.status = :status)
     """)
