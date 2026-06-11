@@ -5,6 +5,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom'
 import useLoading from '@/hooks/useLoading.hook'
 import userService from '@/services/user/user.service'
 import { useAuthStore } from '@/stores/useAuth.stores'
+import { getHomePathForRole } from '@/utils/auth/adminRole.utils'
 import { toast } from 'sonner'
 
 import learnovaLogo from '@/assets/images/logo1.png'
@@ -29,9 +30,7 @@ const AuthPage: React.FC<SlidingLoginSignupProps> = ({ isSignUpMode, setIsSignUp
   useEffect(() => {
     const current = useAuthStore.getState().data
     if (current) {
-      const role = current?.role
-      const path = role === 'admin' ? '/admin' : '/'
-      navigator(path, { replace: true })
+      navigator(getHomePathForRole(current.role), { replace: true })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -57,9 +56,7 @@ const AuthPage: React.FC<SlidingLoginSignupProps> = ({ isSignUpMode, setIsSignUp
           isVip: r.isVip ?? false
         } as any)
         toast.success('Đăng nhập thành công!')
-        const role = r.role
-        const path = role === 'admin' ? '/admin' : '/'
-        navigator(path)
+        navigator(getHomePathForRole(r.role))
       } else {
         toast.error(response.message)
       }

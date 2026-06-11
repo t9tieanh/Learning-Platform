@@ -13,6 +13,7 @@ import userService from '@/services/user/user.service'
 import { toast } from 'sonner'
 import useLoading from '@/hooks/useLoading.hook'
 import { useAuthStore } from '@/stores/useAuth.stores'
+import { getHomePathForRole } from '@/utils/auth/adminRole.utils'
 import { useNavigate } from 'react-router-dom'
 import logo from '@/assets/images/logo1.png'
 import { LogIn, ArrowLeft } from 'lucide-react'
@@ -58,9 +59,7 @@ const SignInForm = ({
           isVip: r.isVip ?? false
         })
         toast.success('Đăng nhập thành công!')
-        const role = response.result.role
-        const path = role === 'admin' ? '/admin' : '/'
-        navigate(path)
+        navigate(getHomePathForRole(response.result.role))
       } else toast.error(response.message)
     } catch (error: any) {
       toast.error('Đã có lỗi trong quá trình xử lý !')

@@ -16,6 +16,7 @@ import userService from '@/services/user/user.service'
 import { useAuthStore } from '@/stores/useAuth.stores'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
+import { showConfirmToast } from '@/components/common/ShowConfirmToast'
 import learnovaLogo from '@/assets/images/logo1.png'
 import learnovaLogoCompact from '@/assets/images/LEARNOVA_sm.png'
 
@@ -47,6 +48,14 @@ export function AdminSidebar() {
   }
 
   const handleLogout = async () => {
+    const confirmed = await showConfirmToast({
+      title: 'Đăng xuất',
+      description: 'Bạn có chắc chắn muốn đăng xuất?',
+      confirmLabel: 'Đăng xuất',
+      cancelLabel: 'Hủy'
+    })
+    if (!confirmed) return
+
     try {
       const token = useAuthStore.getState().data?.accessToken
       if (token) {
