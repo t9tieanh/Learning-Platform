@@ -1,10 +1,11 @@
 import { ApiResponse } from '@/types/response.type'
+import { LessonVideoUrlMode } from '@/types/lesson-video.type'
 import axios from 'axios'
 import axiosClient from '@/lib/axiosClient.lib'
 import {
   lessonVideoDevBasicPassword,
   lessonVideoDevBasicUsername,
-  useDevLessonVideoPresignedApi
+  lessonVideoUrlMode
 } from '@/config/lesson-video.config'
 
 export interface MarkDoneLessonResult {
@@ -50,6 +51,7 @@ class LessonStudentService {
     const response = await axiosClient.axiosInstance.get(`/learning/lesson-student/${lessonId}/info`)
     return response.data
   }
+
   async getPresignedUrl(lessonId: string): Promise<ApiResponse<string>> {
     const response = await axiosClient.axiosInstance.get(`/learning/lesson-student/${lessonId}/presigned-url`)
     return response.data
@@ -70,11 +72,27 @@ class LessonStudentService {
     return response.data
   }
 
+  async setAccessCookie(lessonId: string): Promise<ApiResponse<void>> {
+    const response = await axiosClient.axiosInstance.post(`/learning/lesson-student/${lessonId}/access-cookie`)
+    return response.data
+  }
+
+  async getMediaUrl(lessonId: string): Promise<ApiResponse<string>> {
+    const response = await axiosClient.axiosInstance.get(`/learning/lesson-student/${lessonId}/media-url`)
+    return response.data
+  }
+
   async getLessonVideoUrl(lessonId: string): Promise<ApiResponse<string>> {
-    if (useDevLessonVideoPresignedApi) {
-      return this.getDevPresignedUrl(lessonId)
+    switch (lessonVideoUrlMode) {
+      case LessonVideoUrlMode.BasicAuth:
+        return this.getDevPresignedUrl(lessonId)
+      case LessonVideoUrlMode.CookieNginx:
+        await this.setAccessCookie(lessonId)
+        return this.getMediaUrl(lessonId)
+      case LessonVideoUrlMode.Ip:
+      default:
+        return this.getPresignedUrl(lessonId)
     }
-    return this.getPresignedUrl(lessonId)
   }
 
   async getPresignedCookies(lessonId: string): Promise<ApiResponse<{
