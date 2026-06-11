@@ -1,7 +1,7 @@
 import { ReactNode } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
 import { useAuthStore } from '@/stores/useAuth.stores'
-import { hasAdminRole } from '@/utils/auth/adminRole.utils'
+import { getHomePathForRole, hasAdminRole } from '@/utils/auth/adminRole.utils'
 import { hasActiveAuthSession } from '@/utils/auth/crossTabAuth.utils'
 
 const AdminAuthGate = ({ children }: { children: ReactNode }) => {
@@ -13,7 +13,7 @@ const AdminAuthGate = ({ children }: { children: ReactNode }) => {
   }
 
   if (!hasAdminRole(data?.role)) {
-    return <Navigate to='/' replace />
+    return <Navigate to={getHomePathForRole(data?.role)} replace />
   }
 
   return <>{children}</>
