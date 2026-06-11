@@ -1,5 +1,6 @@
 package com.freeclassroom.courseservice.controller.user;
 
+import com.freeclassroom.courseservice.configuration.LessonMediaProperties;
 import com.freeclassroom.courseservice.dto.request.lesson.MakeNoteForLessonRequest;
 import com.freeclassroom.courseservice.dto.response.ApiResponse;
 import com.freeclassroom.courseservice.dto.response.common.CreationResponse;
@@ -13,10 +14,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.Duration;
 
 @RestController
 @RequestMapping("/lesson-student")
@@ -24,6 +29,7 @@ import org.springframework.web.bind.annotation.*;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class LessonStudentController {
     ILessonStudentService lessonStudentService;
+    LessonMediaProperties lessonMediaProperties;
 
     /**
      * Local/dev: CloudFront signed URL without IP binding (same policy as {@code @SignedUrl} on course intro).
@@ -69,6 +75,36 @@ public class LessonStudentController {
         }
 
         return lessonStudentService.getPresignedCookies(id, clientIp);
+    }
+
+    @GetMapping("/{id}/media-url")
+    @PreAuthorize("@lessonStudentService.canViewLesson(#id, authentication.name)")
+    public ApiResponse<String> getMediaUrl(@PathVariable String id) {
+        return lessonStudentService.getMediaUrl(id);
+    }
+
+    @PostMapping("/{id}/access-cookie")
+    @PreAuthorize("@lessonStudentService.canViewLesson(#id, authentication.name)")
+    public ResponseEntity<ApiResponse<Void>> issueAccessCookie(@PathVariable String id) {
+        String userId = SecurityContextHolder.getContext().getAuthentication().getName();
+        String cookieValue = lessonStudentService.createLessonAccessCookie(id, userId);
+
+        ResponseCookie cookie = ResponseCookie.from(lessonMediaProperties.getCookieName(), cookieValue)
+                .httpOnly(true)
+                .secure(lessonMediaProperties.isCookieSecure())
+                .path(lessonMediaProperties.getCookiePath())
+                .maxAge(Duration.ofSeconds(lessonMediaProperties.getCookieMaxAgeSeconds()))
+                .sameSite("Lax")
+                .build();
+
+        ApiResponse<Void> body = ApiResponse.<Void>builder()
+                .code(200)
+                .message("Cấp cookie truy cập bài học thành công !")
+                .build();
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .body(body);
     }
 
     @GetMapping("/{id}")
