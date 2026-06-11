@@ -7,6 +7,7 @@ import com.freeclassroom.courseservice.service.comment.ICommentService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,10 +21,11 @@ public class CommentController {
     ICommentService commentService;
 
     @PostMapping
-    ApiResponse<Boolean> createComment(
+    ApiResponse<CommentResponse> createComment(
             @RequestBody CommentRequest request
     ) {
-        return commentService.createComment(request);
+        String userId = SecurityContextHolder.getContext().getAuthentication().getName();
+        return commentService.createComment(request, userId);
     }
 
     @DeleteMapping("/{id}")

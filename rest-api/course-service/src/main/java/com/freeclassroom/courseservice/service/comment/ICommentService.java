@@ -7,7 +7,7 @@ import com.freeclassroom.courseservice.dto.response.comment.CommentResponse;
 import java.util.List;
 
 public interface ICommentService {
-    ApiResponse<Boolean> createComment(CommentRequest request);
+    ApiResponse<CommentResponse> createComment(CommentRequest request, String userId);
     ApiResponse<Boolean> deleteComment(String id);
     ApiResponse<List<CommentResponse>> getComments(String lessonId);
     ApiResponse<Boolean> updateComment(String id, CommentRequest request);

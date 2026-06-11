@@ -3,7 +3,6 @@ import { ApiResponse } from '@/types/response.type'
 export interface CreateLessonCommentDto {
   lessonId: string
   parentId?: string | null
-  userId: string
   content: string
 }
 
@@ -16,10 +15,11 @@ export interface LessonComment {
   parentId: string | null
   content: string
   createdAt: string
+  isInstructor?: boolean
   children: LessonComment[]
 }
 
-export type CreateLessonCommentResponse = ApiResponse<boolean>
+export type CreateLessonCommentResponse = ApiResponse<LessonComment>
 export type LoadLessonCommentsResponse = ApiResponse<LessonComment[]>
 export type DeleteLessonCommentResponse = ApiResponse<boolean>
 export interface UpdateLessonCommentDto {
