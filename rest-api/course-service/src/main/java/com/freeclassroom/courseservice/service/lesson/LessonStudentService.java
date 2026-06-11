@@ -25,7 +25,6 @@ import com.freeclassroom.courseservice.service.certificate.CertificateEligibilit
 import com.freeclassroom.courseservice.dto.certificate.CertificateEligibilityTryResult;
 import com.freeclassroom.courseservice.service.utils.jwt.JwtLessonAccessTokenProvider;
 import com.freeclassroom.courseservice.service.utils.other.FileUtils;
-import com.nimbusds.jwt.JWTClaimsSet;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -352,7 +351,15 @@ public class LessonStudentService implements ILessonStudentService {
     @Override
     public String createLessonAccessCookie(String lessonId, String userId) {
         canViewLesson(lessonId, userId);
-        return jwtLessonAccessTokenProvider.generate(userId, lessonId);
+
+        LessonEntity lesson = lessonRepo.findById(lessonId)
+                .orElseThrow(() -> new CustomExeption(ErrorCode.LESSON_NOT_FOUND));
+        String objectKey = fileUtils.extractObjectKey(lesson.getUrl());
+        if (objectKey == null) {
+            throw new CustomExeption(ErrorCode.LESSON_NOT_FOUND);
+        }
+
+        return jwtLessonAccessTokenProvider.generate(userId, lessonId, objectKey);
     }
 
     @Override
@@ -371,32 +378,11 @@ public class LessonStudentService implements ILessonStudentService {
             throw new LessonMediaAccessException(HttpStatus.UNAUTHORIZED);
         }
 
-        JWTClaimsSet claims;
         try {
-            claims = jwtLessonAccessTokenProvider.verify(cookieToken);
+            return jwtLessonAccessTokenProvider.verifyMediaAccess(cookieToken, lessonIdFromUri);
         } catch (CustomExeption exception) {
             throw new LessonMediaAccessException(HttpStatus.UNAUTHORIZED);
         }
-
-        String userId = claims.getSubject();
-        String lessonIdFromToken = (String) claims.getClaim(JwtLessonAccessTokenProvider.CLAIM_LESSON_ID);
-        if (lessonIdFromToken == null || !lessonIdFromToken.equals(lessonIdFromUri)) {
-            throw new LessonMediaAccessException(HttpStatus.FORBIDDEN);
-        }
-
-        if (!enrollmentRepo.existsByUserIdAndCourse_Chapters_Lessons_Id(userId, lessonIdFromUri)) {
-            throw new LessonMediaAccessException(HttpStatus.FORBIDDEN);
-        }
-
-        LessonEntity lesson = lessonRepo.findById(lessonIdFromUri)
-                .orElseThrow(() -> new LessonMediaAccessException(HttpStatus.FORBIDDEN));
-
-        String objectKey = fileUtils.extractObjectKey(lesson.getUrl());
-        if (objectKey == null) {
-            throw new LessonMediaAccessException(HttpStatus.FORBIDDEN);
-        }
-
-        return objectKey;
     }
 
     private String rewriteSignedUrlToMediaGateway(String signedUrl, String lessonId) throws Exception {

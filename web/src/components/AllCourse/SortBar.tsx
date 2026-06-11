@@ -14,22 +14,15 @@ interface SortBarProps {
   onSortChange: (value: string) => void
   viewMode: 'list' | 'grid'
   onViewModeChange: (value: 'list' | 'grid') => void
-  busy?: boolean
 }
 
-export const SortBar = ({ totalCourses, sortValue, onSortChange, viewMode, onViewModeChange, busy }: SortBarProps) => {
+export const SortBar = ({ totalCourses, sortValue, onSortChange, viewMode, onViewModeChange }: SortBarProps) => {
   return (
     <div className='mb-5 flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-[0_12px_30px_rgba(15,23,42,0.05)] lg:flex-row lg:items-center lg:justify-between'>
       <div className='flex items-center gap-3'>
         <p className='text-sm text-slate-700'>
           Hiển thị <span className='font-semibold text-blue-600'>{totalCourses}</span> khóa học
         </p>
-        {busy && (
-          <span className='inline-flex items-center gap-2 rounded-full bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-600'>
-            <span className='h-1.5 w-1.5 rounded-full bg-blue-500 animate-pulse' />
-            Đang cập nhật
-          </span>
-        )}
       </div>
 
       <div className='flex flex-wrap items-center gap-3'>

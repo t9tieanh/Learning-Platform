@@ -28,11 +28,12 @@ interface LearnovaVideoPlayerProps {
     clipStartTime?: number
     clipEndTime?: number
     defaultShowSubtitles?: boolean
+    overlay?: React.ReactNode
 }
 
 
 const LearnovaVideoPlayer = forwardRef<HTMLVideoElement | null, LearnovaVideoPlayerProps>(
-    ({ src, subtitles = [], chunks = [], isPiPEnabled = false, isSeekingAllowed = true, className = '', containerClassName = '', onSeeking, onTimeUpdate, onShowChunkDetails, clipStartTime, clipEndTime, defaultShowSubtitles }, ref) => {
+    ({ src, subtitles = [], chunks = [], isPiPEnabled = false, isSeekingAllowed = true, className = '', containerClassName = '', onSeeking, onTimeUpdate, onShowChunkDetails, clipStartTime, clipEndTime, defaultShowSubtitles, overlay }, ref) => {
         const [isVideoLoading, setIsVideoLoading] = useState(true)
         const [isPlaying, setIsPlaying] = useState(false)
         const [duration, setDuration] = useState(0)
@@ -211,6 +212,12 @@ const LearnovaVideoPlayer = forwardRef<HTMLVideoElement | null, LearnovaVideoPla
                         onPause={() => setIsPlaying(false)}
                         onClick={togglePlay}
                     />
+
+                    {overlay && (
+                        <div className='absolute inset-0 z-[35] pointer-events-none overflow-hidden'>
+                            {overlay}
+                        </div>
+                    )}
 
                     {/* Subtitles Overlay */}
                     <AnimatePresence>
