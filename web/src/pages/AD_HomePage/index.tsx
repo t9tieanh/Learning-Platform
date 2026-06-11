@@ -17,6 +17,12 @@ import {
 import { toast } from 'sonner'
 import courseImage from '@/assets/images/course.jpg'
 import user1 from '@/assets/images/user1.jpg'
+import {
+  AdminChartSkeleton,
+  AdminLeaderboardSkeleton,
+  AdminStatCardsSkeleton
+} from '@/components/Admin/Skeleton'
+import { Skeleton } from '@/components/ui/skeleton'
 
 type RangeKey = AdminBusinessPerformanceRange
 
@@ -242,7 +248,10 @@ export default function Dashboard() {
       ) : null}
 
       <section className='grid gap-4 md:grid-cols-2 xl:grid-cols-4'>
-        {metricCards.map((item) => {
+        {metricsLoading && !data ? (
+          <AdminStatCardsSkeleton count={4} columnsClassName='grid gap-4 md:grid-cols-2 xl:grid-cols-4' />
+        ) : (
+          metricCards.map((item) => {
           const Icon = item.icon
           return (
             <Card
@@ -262,7 +271,8 @@ export default function Dashboard() {
               </CardContent>
             </Card>
           )
-        })}
+        })
+        )}
       </section>
 
       <section className='grid gap-4 lg:grid-cols-10'>
@@ -273,7 +283,6 @@ export default function Dashboard() {
                 <CardTitle className='text-lg font-semibold text-slate-900'>Hiệu suất kinh doanh</CardTitle>
                 <CardDescription>
                   Doanh thu và tăng trưởng học viên theo thời gian
-                  {performanceLoading ? <span className='ml-2 text-cyan-600'>Đang cập nhật...</span> : null}
                 </CardDescription>
               </div>
               <div className='flex flex-wrap items-center gap-2'>
@@ -295,6 +304,12 @@ export default function Dashboard() {
             </div>
           </CardHeader>
           <CardContent className='px-5 pb-4 pt-1'>
+            {performanceLoading ? (
+              <div className='grid gap-4 lg:grid-cols-2'>
+                <AdminChartSkeleton />
+                <AdminChartSkeleton />
+              </div>
+            ) : (
             <div className='grid gap-4 lg:grid-cols-2'>
               <div className='relative h-[220px] rounded-xl border border-slate-100 bg-gradient-to-br from-white via-sky-50/60 to-cyan-100/40 p-3'>
                 <p className='mb-2 text-xs font-medium text-slate-500'>Doanh thu (triệu VND)</p>
@@ -349,6 +364,7 @@ export default function Dashboard() {
                 ) : null}
               </div>
             </div>
+            )}
           </CardContent>
         </Card>
 
@@ -360,7 +376,12 @@ export default function Dashboard() {
             <CardDescription>Các mục cần admin xử lý ưu tiên</CardDescription>
           </CardHeader>
           <CardContent className='px-5 pb-4 pt-1'>
-            {hasPendingActions ? (
+            {pendingLoading ? (
+              <div className='space-y-2'>
+                <Skeleton className='h-14 w-full rounded-xl' />
+                <Skeleton className='h-14 w-full rounded-xl' />
+              </div>
+            ) : hasPendingActions ? (
               <div className='space-y-2'>
                 {actionItems.map((item) => {
                   const Icon = item.icon
@@ -397,6 +418,10 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent className='px-5 pb-4 pt-1'>
             <div className='space-y-2.5'>
+              {topInstructorsLoading ? (
+                <AdminLeaderboardSkeleton count={5} />
+              ) : (
+                <>
               {topInstructors.map((ins, index) => (
                 <div key={ins.instructorId} className='flex items-center gap-3 rounded-xl border border-slate-100 p-3'>
                   <div className='flex h-8 w-8 items-center justify-center rounded-full bg-slate-900 text-xs font-bold text-white'>
@@ -420,11 +445,8 @@ export default function Dashboard() {
                   Chưa có dữ liệu giảng viên nổi bật
                 </p>
               ) : null}
-              {topInstructorsLoading ? (
-                <p className='rounded-xl border border-dashed border-slate-200 px-3 py-4 text-center text-sm text-slate-500'>
-                  Đang tải dữ liệu giảng viên nổi bật...
-                </p>
-              ) : null}
+                </>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -436,6 +458,10 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent className='px-5 pb-4 pt-1'>
             <div className='space-y-3'>
+              {topCoursesLoading ? (
+                <AdminLeaderboardSkeleton count={5} />
+              ) : (
+                <>
               {topCourses.map((course) => (
                 <div key={course.courseId} className='flex gap-3 rounded-xl border border-slate-100 p-3'>
                   <img
@@ -462,11 +488,8 @@ export default function Dashboard() {
                   Chưa có dữ liệu khóa học nổi bật
                 </p>
               ) : null}
-              {topCoursesLoading ? (
-                <p className='rounded-xl border border-dashed border-slate-200 px-3 py-4 text-center text-sm text-slate-500'>
-                  Đang tải dữ liệu khóa học nổi bật...
-                </p>
-              ) : null}
+                </>
+              )}
             </div>
           </CardContent>
         </Card>
