@@ -17,10 +17,9 @@ import { QASectionSkeleton } from './QASectionSkeleton'
 
 interface QASectionProps {
   lessonId: string
-  instructorId: string
 }
 
-export const QASection = ({ lessonId, instructorId }: QASectionProps) => {
+export const QASection = ({ lessonId }: QASectionProps) => {
   const {
     comments,
     newComment,
@@ -36,7 +35,6 @@ export const QASection = ({ lessonId, instructorId }: QASectionProps) => {
     handleAddReply,
     visibleCount,
     handleLoadMore,
-    handleLike,
     askDelete,
     confirmOpen,
     setConfirmOpen,
@@ -123,7 +121,10 @@ export const QASection = ({ lessonId, instructorId }: QASectionProps) => {
           </div>
         )}
         {comments.slice(0, visibleCount).map((comment: CommentUI) => (
-          <div key={comment.id} className='group bg-white rounded-xl border border-gray-100 p-4 md:p-5 shadow-sm hover:shadow transition-all duration-200 space-y-4'>
+          <div
+            key={comment.id}
+            className='group bg-white rounded-xl border border-gray-100 p-4 md:p-5 shadow-sm hover:shadow transition-all duration-200 space-y-4'
+          >
             <div className='flex gap-3'>
               <div className='relative shrink-0'>
                 <Avatar className='h-9 w-9 rounded-xl border border-gray-100 shadow-sm'>
@@ -138,13 +139,17 @@ export const QASection = ({ lessonId, instructorId }: QASectionProps) => {
               <div className='flex-1 space-y-2 min-w-0'>
                 <div className='flex items-center justify-between gap-2'>
                   <div className='flex flex-wrap items-center gap-x-2 gap-y-0.5 min-w-0'>
-                    <span className='font-semibold text-gray-800 text-[13px] tracking-tight truncate'>{comment.author}</span>
-                    {comment.userId === instructorId && (
+                    <span className='font-semibold text-gray-800 text-[13px] tracking-tight truncate'>
+                      {comment.author}
+                    </span>
+                    {comment.isInstructor && (
                       <span className='text-[10px] px-1.5 py-0.5 rounded bg-amber-500 text-white font-bold uppercase tracking-wider shrink-0'>
                         GV
                       </span>
                     )}
-                    <span className='text-[10px] text-gray-400 font-bold uppercase tracking-wider shrink-0'>{comment.timestamp}</span>
+                    <span className='text-[10px] text-gray-400 font-bold uppercase tracking-wider shrink-0'>
+                      {comment.timestamp}
+                    </span>
                   </div>
 
                   {userId && userId === comment.userId && (
@@ -155,7 +160,10 @@ export const QASection = ({ lessonId, instructorId }: QASectionProps) => {
                             <MoreHorizontal className='w-4 h-4' />
                           </button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align='end' className='rounded-xl border-gray-100 shadow-lg p-1.5 min-w-[128px]'>
+                        <DropdownMenuContent
+                          align='end'
+                          className='rounded-xl border-gray-100 shadow-lg p-1.5 min-w-[128px]'
+                        >
                           <DropdownMenuItem
                             className='rounded-lg text-[12.5px] font-semibold text-gray-600 focus:bg-blue-50 focus:text-blue-600 gap-2 cursor-pointer'
                             onClick={() => startEdit(comment.id, false, comment.content)}
@@ -231,13 +239,17 @@ export const QASection = ({ lessonId, instructorId }: QASectionProps) => {
                     <div className='flex-1 space-y-1.5 min-w-0'>
                       <div className='flex items-center justify-between gap-2'>
                         <div className='flex flex-wrap items-center gap-x-2 gap-y-0.5 min-w-0'>
-                          <span className='font-semibold text-gray-800 text-[12.5px] tracking-tight truncate'>{reply.author}</span>
-                          {reply.userId === instructorId && (
+                          <span className='font-semibold text-gray-800 text-[12.5px] tracking-tight truncate'>
+                            {reply.author}
+                          </span>
+                          {reply.isInstructor && (
                             <span className='text-[10px] px-1.5 py-0.5 rounded bg-amber-500 text-white font-bold uppercase tracking-wider shrink-0'>
                               GV
                             </span>
                           )}
-                          <span className='text-[10px] text-gray-400 font-bold uppercase tracking-wider shrink-0'>{reply.timestamp}</span>
+                          <span className='text-[10px] text-gray-400 font-bold uppercase tracking-wider shrink-0'>
+                            {reply.timestamp}
+                          </span>
                         </div>
                         {userId && userId === reply.userId && (
                           <div className='opacity-0 group-hover/reply:opacity-100 transition-opacity'>
@@ -247,7 +259,10 @@ export const QASection = ({ lessonId, instructorId }: QASectionProps) => {
                                   <MoreHorizontal className='w-3.5 h-3.5' />
                                 </button>
                               </DropdownMenuTrigger>
-                              <DropdownMenuContent align='end' className='rounded-xl border-gray-100 shadow-lg p-1.5 min-w-[128px]'>
+                              <DropdownMenuContent
+                                align='end'
+                                className='rounded-xl border-gray-100 shadow-lg p-1.5 min-w-[128px]'
+                              >
                                 <DropdownMenuItem
                                   className='rounded-lg text-[12.5px] font-semibold text-gray-600 focus:bg-blue-50 focus:text-blue-600 gap-2 cursor-pointer'
                                   onClick={() => startEdit(reply.id, true, reply.content, comment.id)}
@@ -331,7 +346,9 @@ export const QASection = ({ lessonId, instructorId }: QASectionProps) => {
             <div className='w-14 h-14 bg-red-50 rounded-2xl flex items-center justify-center text-red-500 mx-auto'>
               <Trash2 className='w-7 h-7' />
             </div>
-            <DialogTitle className='text-center text-[15px] font-black tracking-tight text-[#0C356A]'>Xóa bình luận?</DialogTitle>
+            <DialogTitle className='text-center text-[15px] font-black tracking-tight text-[#0C356A]'>
+              Xóa bình luận?
+            </DialogTitle>
             <DialogDescription className='text-center text-[12.5px] font-medium text-gray-500 leading-relaxed'>
               Bạn có chắc chắn muốn xóa bình luận này? <br /> Hành động này không thể hoàn tác.
             </DialogDescription>

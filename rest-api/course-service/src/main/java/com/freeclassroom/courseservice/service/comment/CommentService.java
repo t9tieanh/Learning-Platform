@@ -8,12 +8,14 @@ import com.freeclassroom.courseservice.entity.comment.CommentEntity;
 import com.freeclassroom.courseservice.grpc.client.UserGrpcClient;
 import com.freeclassroom.courseservice.mapper.CommentMapper;
 import com.freeclassroom.courseservice.repository.entity.CommentRepository;
+import com.freeclassroom.courseservice.repository.entity.LessonRepository;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.*;
 
@@ -21,30 +23,45 @@ import java.util.*;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class CommentService implements ICommentService{
+    static final String ANONYMOUS_USER = "anonymousUser";
+    static final String UNKNOWN_AUTHOR_NAME = "Người dùng";
+    static final String UNKNOWN_AUTHOR_AVATAR = "";
+
     CommentRepository commentRepository;
+    LessonRepository lessonRepository;
     CommentMapper commentMapper;
     UserGrpcClient userGrpcClient;
     @Override
-    public ApiResponse<Boolean> createComment(CommentRequest request) {
+    public ApiResponse<CommentResponse> createComment(CommentRequest request, String userId) {
         try {
+            if (!StringUtils.hasText(userId) || ANONYMOUS_USER.equals(userId)) {
+                return ApiResponse.<CommentResponse>builder()
+                        .code(HttpStatus.UNAUTHORIZED.value())
+                        .message("Authentication required")
+                        .result(null)
+                        .build();
+            }
+
             CommentEntity comment = new CommentEntity();
             comment.setLessonId(request.getLessonId());
-            comment.setUserId(request.getUserId());
+            comment.setUserId(userId);
             comment.setParentId(request.getParentId());
             comment.setContent(request.getContent());
 
-            commentRepository.save(comment);
-            return ApiResponse.<Boolean>builder()
+            CommentEntity savedComment = commentRepository.save(comment);
+            CommentResponse response = enrichComment(commentMapper.toDto(savedComment));
+
+            return ApiResponse.<CommentResponse>builder()
                     .code(HttpStatus.OK.value())
                     .message("Create message success")
-                    .result(true)
+                    .result(response)
                     .build();
         } catch (Exception e) {
             e.printStackTrace();
-            return ApiResponse.<Boolean>builder()
+            return ApiResponse.<CommentResponse>builder()
                     .code(HttpStatus.BAD_REQUEST.value())
                     .message("Create message failed")
-                    .result(false)
+                    .result(null)
                     .build();
         }
     }
@@ -145,13 +162,8 @@ public class CommentService implements ICommentService{
         List<CommentResponse> roots = new ArrayList<>();
 
         for(CommentResponse c : comments) {
-            GetUserResponse user = userGrpcClient.getUser(c.getUserId());
-            c.setUserName(user.getName());
-            c.setUserAvt(user.getImage());
+            enrichComment(c);
             map.put(c.getId(), c);
-            if (c.getChildren() == null) {
-                c.setChildren(new ArrayList<>());
-            }
         }
 
         for (CommentResponse c : comments) {
@@ -166,15 +178,65 @@ public class CommentService implements ICommentService{
             }
         }
 
-        roots.sort((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()));
+        roots.sort((a, b) -> compareCreatedAtDesc(a.getCreatedAt(), b.getCreatedAt()));
 
         for (CommentResponse r : roots) {
             if (r.getChildren() != null) {
-                r.getChildren().sort((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()));
+                r.getChildren().sort((a, b) -> compareCreatedAtDesc(a.getCreatedAt(), b.getCreatedAt()));
             }
         }
 
         return roots;
+    }
+
+    private CommentResponse enrichComment(CommentResponse comment) {
+        if (!StringUtils.hasText(comment.getUserId())) {
+            comment.setUserName(UNKNOWN_AUTHOR_NAME);
+            comment.setUserAvt(UNKNOWN_AUTHOR_AVATAR);
+            comment.setIsInstructor(false);
+            ensureChildren(comment);
+            return comment;
+        }
+
+        try {
+            GetUserResponse user = userGrpcClient.getUser(comment.getUserId());
+            comment.setUserName(StringUtils.hasText(user.getName()) ? user.getName() : UNKNOWN_AUTHOR_NAME);
+            comment.setUserAvt(user.getImage());
+        } catch (RuntimeException e) {
+            comment.setUserName(UNKNOWN_AUTHOR_NAME);
+            comment.setUserAvt(UNKNOWN_AUTHOR_AVATAR);
+        }
+        comment.setIsInstructor(isLessonInstructor(comment.getLessonId(), comment.getUserId()));
+        ensureChildren(comment);
+        return comment;
+    }
+
+    private void ensureChildren(CommentResponse comment) {
+        if (comment.getChildren() == null) {
+            comment.setChildren(new ArrayList<>());
+        }
+    }
+
+    private int compareCreatedAtDesc(Date left, Date right) {
+        if (left == null && right == null) {
+            return 0;
+        }
+        if (left == null) {
+            return 1;
+        }
+        if (right == null) {
+            return -1;
+        }
+        return right.compareTo(left);
+    }
+
+    private boolean isLessonInstructor(String lessonId, String userId) {
+        if (!StringUtils.hasText(lessonId) || !StringUtils.hasText(userId)) {
+            return false;
+        }
+        return lessonRepository.findInstructorIdByLessonId(lessonId)
+                .map(userId::equals)
+                .orElse(false);
     }
 
     private void deleteCommentTree(String id) {
