@@ -6,7 +6,6 @@ import com.freeclassroom.courseservice.dto.response.common.CreationResponse;
 import com.freeclassroom.courseservice.dto.response.lesson.MarkDoneLessonResponse;
 import com.freeclassroom.courseservice.dto.response.course.CloudFrontCookieResponse;
 import com.freeclassroom.courseservice.dto.response.course.LessonInfoResponse;
-import com.freeclassroom.courseservice.dto.response.course.student.LessonOverviewResponse;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 
@@ -20,4 +19,7 @@ public interface ILessonStudentService {
     ApiResponse<String> getPresignedUrl(String lessonId, String ipAddress);
     ApiResponse<String> getPresignedUrlNoIp(String lessonId);
     ApiResponse<CloudFrontCookieResponse> getPresignedCookies(String lessonId, String ipAddress);
+    ApiResponse<String> getMediaUrl(String lessonId);
+    String createLessonAccessCookie(String lessonId, String userId);
+    String verifyLessonMediaAccess(String cookieToken, String originalUri);
 }
