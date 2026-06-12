@@ -1,6 +1,6 @@
 import { X, TableOfContents, Sparkles, Brain } from 'lucide-react'
 import { SectionList } from './SectionList'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { AIChatSection } from './AIChatSection'
 
@@ -33,6 +33,14 @@ interface CourseSidebarProps {
 
 export const CourseSidebar = ({ sections, currentLectureId, onSelectLecture, onClose, onSeek, initialTab, hideHeader, subtitlesRaw }: CourseSidebarProps) => {
   const [activeTab, setActiveTab] = useState<'content' | 'ai'>(initialTab || 'content')
+
+  const currentLectureType = useMemo<'video' | 'article'>(() => {
+    for (const section of sections) {
+      const lecture = section.lectures.find((l) => l.id === currentLectureId)
+      if (lecture) return lecture.type
+    }
+    return 'video'
+  }, [sections, currentLectureId])
 
   // Update activeTab if initialTab changes (e.g. from mobile drawer)
   useEffect(() => {
@@ -108,6 +116,7 @@ export const CourseSidebar = ({ sections, currentLectureId, onSelectLecture, onC
         <div className={`h-full min-h-0 flex flex-col bg-[#fcfdfe] items-stretch w-full px-4 ${activeTab !== 'ai' ? 'hidden' : ''}`}>
           <AIChatSection
             lessonId={currentLectureId}
+            lessonType={currentLectureType}
             onSeek={onSeek}
             isTabVisible={activeTab === 'ai'}
             subtitlesRaw={subtitlesRaw}
