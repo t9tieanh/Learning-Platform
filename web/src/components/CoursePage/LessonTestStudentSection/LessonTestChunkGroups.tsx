@@ -19,6 +19,7 @@ export interface LessonTestChunkGroupsProps {
   onSeek?: (timestamp: string) => void
   chunks?: import('@/types/ai').LessonChunk[]
   lessonId: string
+  lessonType?: 'video' | 'article'
   subtitlesRaw?: string | null
 }
 
@@ -34,6 +35,7 @@ export const LessonTestChunkGroups: React.FC<LessonTestChunkGroupsProps> = ({
   onSeek,
   chunks,
   lessonId,
+  lessonType = 'video',
   subtitlesRaw,
 }) => (
   <div className='space-y-8 md:space-y-10'>
@@ -70,6 +72,7 @@ export const LessonTestChunkGroups: React.FC<LessonTestChunkGroupsProps> = ({
               onSeek={onSeek}
               chunks={chunks}
               lessonId={lessonId}
+              lessonType={lessonType}
               subtitlesRaw={subtitlesRaw}
             />
           ))}

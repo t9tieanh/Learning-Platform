@@ -20,6 +20,7 @@ export interface LessonTestQuestionCardProps {
   toggleFlag: (quizId: string) => void
   chunks?: LessonChunk[]
   lessonId?: string
+  lessonType?: 'video' | 'article'
   subtitlesRaw?: string | null
   onSeek?: (timestamp: string) => void
 }
@@ -37,6 +38,7 @@ export const LessonTestQuestionCard: React.FC<LessonTestQuestionCardProps> = ({
   toggleFlag,
   chunks = [],
   lessonId,
+  lessonType = 'video',
   subtitlesRaw,
   onSeek,
 }) => (
@@ -162,6 +164,7 @@ export const LessonTestQuestionCard: React.FC<LessonTestQuestionCardProps> = ({
               explanation={row.explanation}
               chunks={chunks}
               lessonId={lessonId}
+              lessonType={lessonType}
               subtitlesRaw={subtitlesRaw}
               onSeek={onSeek}
             />

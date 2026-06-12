@@ -72,22 +72,24 @@ function LessonTestSectionModeTabs({
   )
 }
 
-export interface LessonTestStudentSectionProps {
+export interface LessonTestStudentSectionPrs {
   lessonId: string
   initialView?: StudentLessonTestView | null
   onPrefetchRefresh?: (view: StudentLessonTestView) => void
   onSeek?: (timestamp: string) => void
   chunks?: import('@/types/ai').LessonChunk[]
+  lessonType?: 'video' | 'article'
   onCourseCompleted?: (certificate?: { id: string; certificateCode: string }) => void
   onCourseDataRefresh?: () => void
 }
 
-const LessonTestStudentSection: React.FC<LessonTestStudentSectionProps> = ({
+const LessonTestStudentSection: React.FC<LessonTestStudentSectionPrs> = ({
   lessonId,
   initialView = null,
   onPrefetchRefresh,
   onSeek,
   chunks,
+  lessonType = 'video',
   onCourseCompleted,
   onCourseDataRefresh,
 }) => {
@@ -264,7 +266,7 @@ const LessonTestStudentSection: React.FC<LessonTestStudentSectionProps> = ({
           <div className='relative group'>
             <div className='absolute -inset-0.5 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-2xl blur opacity-20 group-hover:opacity-30 transition duration-1000' />
             <div className='relative bg-white rounded-2xl border border-gray-100 shadow-sm overflow-visible p-4 md:p-6'>
-              <LessonTestHistoryPanel lessonId={lessonId} />
+              <LessonTestHistoryPanel lessonId={lessonId} lessonType={lessonType} />
             </div>
           </div>
         ) : (
@@ -323,7 +325,7 @@ const LessonTestStudentSection: React.FC<LessonTestStudentSectionProps> = ({
         <div className='relative group'>
           <div className='absolute -inset-0.5 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-2xl blur opacity-20 group-hover:opacity-30 transition duration-1000' />
           <div className='relative bg-white rounded-2xl border border-gray-100 shadow-sm overflow-visible p-4 md:p-6'>
-            <LessonTestHistoryPanel lessonId={lessonId} />
+            <LessonTestHistoryPanel lessonId={lessonId} lessonType={lessonType} />
           </div>
         </div>
       ) : (
@@ -396,6 +398,7 @@ const LessonTestStudentSection: React.FC<LessonTestStudentSectionProps> = ({
                   onSeek={onSeek}
                   chunks={result?.chunks ?? chunks}
                   lessonId={lessonId}
+                  lessonType={lessonType}
                   subtitlesRaw={result?.subtitles}
                 />
 
