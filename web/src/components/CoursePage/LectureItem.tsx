@@ -1,5 +1,6 @@
 import { PlayCircle, FileText, CheckCircle2 } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { htmlToPlainText } from '@/utils/htmlToPlainText.util'
 
 interface LectureItemProps {
   lecture: {
@@ -17,6 +18,9 @@ interface LectureItemProps {
 
 export const LectureItem = ({ lecture, isActive, onSelect }: LectureItemProps) => {
   const isCompleted = lecture.completionStatus === 'COMPLETED'
+  const articlePreview = lecture.type === 'article'
+    ? htmlToPlainText(lecture.content) || 'Bài viết'
+    : 'Bài viết'
 
   return (
     <button
@@ -57,11 +61,11 @@ export const LectureItem = ({ lecture, isActive, onSelect }: LectureItemProps) =
               <Tooltip>
                 <TooltipTrigger asChild>
                   <span className={`text-[10px] font-bold  tracking-wider truncate max-w-[150px] inline-block align-bottom ${isActive ? 'text-blue-100' : 'text-gray-400'}`}>
-                    {lecture.content || 'Bài viết'}
+                    {articlePreview}
                   </span>
                 </TooltipTrigger>
                 <TooltipContent side="bottom" className="max-w-[300px] text-[11px] font-medium p-2">
-                  {lecture.content || 'Bài viết'}
+                  {articlePreview}
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>

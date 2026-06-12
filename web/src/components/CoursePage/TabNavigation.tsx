@@ -212,6 +212,7 @@ export const TabNavigation = ({
               onPrefetchRefresh={setLessonTestPrefetch}
               onSeek={onSeek}
               chunks={analysisData?.chunks ?? []}
+              lessonType={currentLecture.type}
               onCourseCompleted={onCourseCompleted}
               onCourseDataRefresh={onCourseDataRefresh}
             />
