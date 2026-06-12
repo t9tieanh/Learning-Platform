@@ -10,6 +10,7 @@ import courseAdminInstructorService from '@/services/course/course-admin-instruc
 import type { AdminInstructorListItem, AdminInstructorListResult } from '@/types/admin-instructor'
 import { ChevronLeft, ChevronRight, Eye, ListFilter, Search } from 'lucide-react'
 import useDebounce from '@/hooks/useDebounce.hook'
+import { AdminInstructorsTableSkeleton } from '@/components/Admin/Skeleton'
 
 export default function Instructors() {
   const navigate = useNavigate()
@@ -106,6 +107,9 @@ export default function Instructors() {
         </div>
 
         <div className='overflow-x-auto'>
+          {loading ? (
+            <AdminInstructorsTableSkeleton rows={10} />
+          ) : (
           <Table className='min-w-[820px]'>
             <TableHeader>
               <TableRow className='border-b border-slate-200 bg-slate-50/70 hover:bg-slate-50/70'>
@@ -124,13 +128,7 @@ export default function Instructors() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {loading ? (
-                <TableRow>
-                  <TableCell colSpan={4} className='px-6 py-16 text-center text-sm text-slate-500'>
-                    Đang tải danh sách giảng viên...
-                  </TableCell>
-                </TableRow>
-              ) : error ? (
+              {error ? (
                 <TableRow>
                   <TableCell colSpan={4} className='px-6 py-16 text-center text-sm text-rose-600'>
                     {error}
@@ -176,6 +174,7 @@ export default function Instructors() {
               )}
             </TableBody>
           </Table>
+          )}
         </div>
 
         <div className='flex flex-col gap-3 border-t border-slate-200/80 bg-slate-50/60 px-4 py-4 sm:flex-row sm:items-center sm:justify-end sm:px-6'>

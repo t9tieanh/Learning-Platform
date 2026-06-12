@@ -10,7 +10,7 @@ import heroCourses from '@/assets/images/hero-courses.png'
 import courseService from '@/services/course/course-user.service'
 import useDebounce from '@/hooks/useDebounce.hook'
 import eventTracker from '@/services/personalize/eventTracker'
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 
 type PaginationItem = number | 'ellipsis'
 
@@ -154,7 +154,6 @@ const Index = () => {
     },
     staleTime: 10 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
-    placeholderData: keepPreviousData,
     retry: false
   })
 
@@ -163,9 +162,8 @@ const Index = () => {
   const items = useMemo(() => activeQuery.data?.items ?? [], [activeQuery.data?.items])
   const totalPages = activeQuery.data?.totalPages ?? 1
   const totalElements = activeQuery.data?.totalElements ?? 0
-  const loading = activeQuery.isLoading
-  const refreshing = activeQuery.isFetching && !activeQuery.isLoading
-  const showSkeleton = loading || (activeQuery.isFetching && items.length === 0)
+  const loading = activeQuery.isFetching
+  const showSkeleton = loading
   const hasError = activeQuery.isError
 
   const filteredItems = useMemo(() => {
@@ -266,7 +264,6 @@ const Index = () => {
                 }}
                 viewMode={viewMode}
                 onViewModeChange={setViewMode}
-                busy={refreshing}
               />
             )}
 
@@ -319,7 +316,7 @@ const Index = () => {
                 currentPage={currentPage}
                 totalPages={totalPages}
                 onPageChange={setCurrentPage}
-                loading={showSkeleton || refreshing}
+                loading={showSkeleton}
               />
             </div>
           </div>

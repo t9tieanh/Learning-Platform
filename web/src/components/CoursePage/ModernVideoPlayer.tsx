@@ -10,6 +10,7 @@ import { timeToSeconds } from '@/utils/time/time.utils'
 import { AnimatePresence, motion } from 'framer-motion'
 import { CheckCircle2, ChevronLeft, ChevronRight } from 'lucide-react'
 import VideoQuizOverlay from './VideoQuizOverlay'
+import DynamicVideoWatermark from './DynamicVideoWatermark'
 import { useLessonProgressStore } from '@/stores/useLessonProgressStore'
 
 export interface VideoPlayerRef {
@@ -18,6 +19,7 @@ export interface VideoPlayerRef {
 
 const ModernVideoPlayer = forwardRef<VideoPlayerRef, {
     lesson: Lesson
+    courseTitle?: string
     markDoneVideo: () => Promise<void>
     subtitlesRaw?: string
     chunks?: LessonChunk[]
@@ -25,6 +27,7 @@ const ModernVideoPlayer = forwardRef<VideoPlayerRef, {
     onProgress?: (percent: number) => void
 }>(({
     lesson,
+    courseTitle,
     markDoneVideo,
     subtitlesRaw,
     chunks = [],
@@ -224,6 +227,12 @@ const ModernVideoPlayer = forwardRef<VideoPlayerRef, {
                         onTimeUpdate={handleTimeUpdate}
                         onSeeking={handleSeekingSync}
                         onShowChunkDetails={onShowChunkDetails}
+                        overlay={
+                            <DynamicVideoWatermark
+                                active={!!actualVideoUrl && !lesson.introductionVideo}
+                                courseTitle={courseTitle}
+                            />
+                        }
                     />
 
                     <AnimatePresence>

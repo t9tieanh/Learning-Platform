@@ -288,6 +288,7 @@ const CoursePage = () => {
                 <LessonViewer
                   ref={viewerRef}
                   lesson={currentLecture!}
+                  courseTitle={courseData?.title}
                   subtitlesRaw={analysisData?.subtitles ?? undefined}
                   chunks={analysisData?.chunks ?? []}
                   isInvalid={analysisData?.status?.toLowerCase() === 'failed'}

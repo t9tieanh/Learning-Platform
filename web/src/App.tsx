@@ -6,11 +6,13 @@ import { Toaster } from '@/components/ui/sonner'
 import GlobalChatNotifier from '@/components/Chat/GlobalChatNotifier'
 import { VipUpgradeProvider } from '@/contexts/VipUpgradeContext'
 import AuthCrossTabSync from '@/components/auth-gate/AuthCrossTabSync'
+import AdminSiteRestrictionGate from '@/components/auth-gate/AdminSiteRestrictionGate'
 
 const App: FC = () => {
   return (
     <VipUpgradeProvider>
       <AuthCrossTabSync />
+      <AdminSiteRestrictionGate>
       <div>
         {/* Global chat notifier must be inside Router context */}
         <GlobalChatNotifier />
@@ -37,6 +39,7 @@ const App: FC = () => {
           }}
         />
       </div>
+      </AdminSiteRestrictionGate>
     </VipUpgradeProvider>
   )
 }
