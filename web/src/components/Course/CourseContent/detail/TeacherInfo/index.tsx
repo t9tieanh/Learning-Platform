@@ -9,6 +9,15 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 
 const EXPERTISE_VISIBLE_LIMIT = 10
+const EMPTY_DESCRIPTION = 'Giảng viên chưa cập nhật phần giới thiệu.'
+const EMPTY_EXPERTISE = 'Chưa có thông tin chuyên môn.'
+const EMPTY_CERTIFICATES = 'Chưa có chứng chỉ được cập nhật.'
+
+const stripHtml = (value?: string) =>
+  value
+    ?.replace(/<[^>]*>/g, '')
+    .replace(/&nbsp;/g, ' ')
+    .trim() ?? ''
 
 interface Teacher {
   id: string
@@ -37,11 +46,13 @@ const TeacherInfo = ({ teacher }: { teacher: Teacher }) => {
   const navigate = useNavigate()
   const [expertiseExpanded, setExpertiseExpanded] = useState(false)
   const expertiseList = teacher?.expertise ?? []
+  const certificatesList = teacher?.certificates ?? []
+  const hasDescription = Boolean(stripHtml(teacher?.description))
+  const hasExpertise = expertiseList.length > 0
+  const hasCertificates = certificatesList.length > 0
   const hasMoreExpertise = expertiseList.length > EXPERTISE_VISIBLE_LIMIT
   const visibleExpertise =
-    expertiseExpanded || !hasMoreExpertise
-      ? expertiseList
-      : expertiseList.slice(0, EXPERTISE_VISIBLE_LIMIT)
+    expertiseExpanded || !hasMoreExpertise ? expertiseList : expertiseList.slice(0, EXPERTISE_VISIBLE_LIMIT)
 
   return (
     <Card className='ml-0 md:ml-20 border-none'>
@@ -97,31 +108,39 @@ const TeacherInfo = ({ teacher }: { teacher: Teacher }) => {
             <div>
               <h4 className='font-semibold text-foreground mb-3'>Giới thiệu</h4>
               <p className='text-muted-foreground leading-relaxed text-base'>
-                <span dangerouslySetInnerHTML={{ __html: teacher?.description }} />
+                {hasDescription ? (
+                  <span dangerouslySetInnerHTML={{ __html: teacher?.description }} />
+                ) : (
+                  EMPTY_DESCRIPTION
+                )}
               </p>
             </div>
             <div>
               <h4 className='font-semibold text-foreground mb-3'>Chuyên môn</h4>
-              <div className='flex flex-wrap gap-2'>
-                {visibleExpertise.map((skill) => (
-                  <Badge
-                    key={skill.id}
-                    variant='secondary'
-                    className='bg-white shadow-lg text-black p-1 px-2 hover:bg-primary/20'
-                  >
-                    <Avatar className='w-20 h-20 w-6 h-6 mr-2'>
-                      <AvatarImage src={skill?.image} alt={skill?.name} />
-                      <AvatarFallback className='text-2xl font-semibold bg-gradient-primary text-primary-foreground'>
-                        {skill?.name
-                          .split(' ')
-                          .map((n) => n[0])
-                          .join('')}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>{skill.name}</div>
-                  </Badge>
-                ))}
-              </div>
+              {hasExpertise ? (
+                <div className='flex flex-wrap gap-2'>
+                  {visibleExpertise.map((skill) => (
+                    <Badge
+                      key={skill.id}
+                      variant='secondary'
+                      className='bg-white shadow-lg text-black p-1 px-2 hover:bg-primary/20'
+                    >
+                      <Avatar className='w-20 h-20 w-6 h-6 mr-2'>
+                        <AvatarImage src={skill?.image} alt={skill?.name} />
+                        <AvatarFallback className='text-2xl font-semibold bg-gradient-primary text-primary-foreground'>
+                          {skill?.name
+                            .split(' ')
+                            .map((n) => n[0])
+                            .join('')}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>{skill.name}</div>
+                    </Badge>
+                  ))}
+                </div>
+              ) : (
+                <p className='text-muted-foreground leading-relaxed text-base'>{EMPTY_EXPERTISE}</p>
+              )}
               {hasMoreExpertise && (
                 <Button
                   type='button'
@@ -146,24 +165,28 @@ const TeacherInfo = ({ teacher }: { teacher: Teacher }) => {
             </div>
             <div>
               <h4 className='font-semibold text-foreground mb-3'>Chứng chỉ</h4>
-              <div className='flex flex-wrap gap-2'>
-                {teacher?.certificates?.map((certificate, index) => (
-                  <a key={index} href={certificate?.credentialUrl} target='_blank' rel='noopener noreferrer'>
-                    <Badge variant='secondary' className='bg-white shadow-lg text-black p-1 px-2 hover:bg-primary/20'>
-                      <Avatar className='w-20 h-20 w-6 h-6 mr-2'>
-                        <AvatarImage src={certificate?.imageUrl} alt={certificate?.title} />
-                        <AvatarFallback className='text-2xl font-semibold bg-gradient-primary text-primary-foreground'>
-                          {certificate?.title
-                            .split(' ')
-                            .map((n) => n[0])
-                            .join('')}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>{certificate.title}</div>
-                    </Badge>
-                  </a>
-                ))}
-              </div>
+              {hasCertificates ? (
+                <div className='flex flex-wrap gap-2'>
+                  {certificatesList.map((certificate, index) => (
+                    <a key={index} href={certificate?.credentialUrl} target='_blank' rel='noopener noreferrer'>
+                      <Badge variant='secondary' className='bg-white shadow-lg text-black p-1 px-2 hover:bg-primary/20'>
+                        <Avatar className='w-20 h-20 w-6 h-6 mr-2'>
+                          <AvatarImage src={certificate?.imageUrl} alt={certificate?.title} />
+                          <AvatarFallback className='text-2xl font-semibold bg-gradient-primary text-primary-foreground'>
+                            {certificate?.title
+                              .split(' ')
+                              .map((n) => n[0])
+                              .join('')}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>{certificate.title}</div>
+                      </Badge>
+                    </a>
+                  ))}
+                </div>
+              ) : (
+                <p className='text-muted-foreground leading-relaxed text-base'>{EMPTY_CERTIFICATES}</p>
+              )}
             </div>
           </div>
         </div>

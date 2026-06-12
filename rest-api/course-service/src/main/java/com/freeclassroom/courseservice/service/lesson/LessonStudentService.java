@@ -25,6 +25,7 @@ import com.freeclassroom.courseservice.service.certificate.CertificateEligibilit
 import com.freeclassroom.courseservice.dto.certificate.CertificateEligibilityTryResult;
 import com.freeclassroom.courseservice.service.utils.jwt.JwtLessonAccessTokenProvider;
 import com.freeclassroom.courseservice.service.utils.other.FileUtils;
+import com.nimbusds.jwt.JWTClaimsSet;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
