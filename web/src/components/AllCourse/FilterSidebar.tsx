@@ -79,6 +79,7 @@ export const FilterSidebar = ({
           <div className='relative'>
             <MagnifyingGlassIcon className='pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500' />
             <Input
+              data-testid='course-search-input'
               value={search}
               onChange={(e) => onSearchChange(e.target.value)}
               placeholder='Nhập tên khóa học...'

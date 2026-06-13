@@ -150,7 +150,9 @@ const Cover = ({ video, image, title, shortDescription, teacher, tags, showSmall
         <PreviewPublicLesson preview={preview} setPreview={setPreview} />
 
         <div className='title-container text-left text-white w-full md:w-auto relative z-10'>
-          <h1 className='text-xl md:text-4xl font-bold mb-4 max-w-xl text-justify'>Khóa học {title}</h1>
+          <h1 data-testid='course-detail-title' className='text-xl md:text-4xl font-bold mb-4 max-w-xl text-justify'>
+            Khóa học {title}
+          </h1>
           <div className='flex items-center gap-2 mb-4'>
             <Avatar>
               <AvatarImage src={teacher.avatar} />
