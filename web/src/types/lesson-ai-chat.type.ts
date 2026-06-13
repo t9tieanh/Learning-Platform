@@ -10,6 +10,7 @@ export interface LessonAiChatMessage {
 
 export interface AIChatSectionProps {
     lessonId: string
+    lessonType?: 'video' | 'article'
     onSeek?: (timestamp: string) => void
     /** When false (e.g. another sidebar tab visible), skips network refreshes until true */
     isTabVisible?: boolean

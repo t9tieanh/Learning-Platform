@@ -253,6 +253,13 @@ export function CertificateJourneyProgress({ journey, onNavigateToLessonTest }: 
   )
   const isCelebrating = certificateIssued
 
+  const resolvedLessonProgress = useMemo(() => {
+    if (totalLessons > 0) {
+      return Math.round((completedLessons / totalLessons) * 1000) / 10
+    }
+    return progressPercent
+  }, [completedLessons, totalLessons, progressPercent])
+
   const resolvedTestProgress = useMemo(() => {
     if (testProgressPercent > 0) return testProgressPercent
     if (lessonsWithTest > 0) return Math.round((passedTests / lessonsWithTest) * 1000) / 10
@@ -422,7 +429,7 @@ export function CertificateJourneyProgress({ journey, onNavigateToLessonTest }: 
                     {completedLessons}/{totalLessons}
                   </span>
                 </div>
-                <Progress value={progressPercent} className={cn('h-2', progressOnGloss)} />
+                <Progress value={resolvedLessonProgress} className={cn('h-2', progressOnGloss)} />
               </div>
 
               {lessonsWithTest > 0 ? (

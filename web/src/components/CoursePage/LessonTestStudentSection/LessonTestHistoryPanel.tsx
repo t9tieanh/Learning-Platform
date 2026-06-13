@@ -96,9 +96,10 @@ function detailItemToStudentQuiz(item: LessonTestSubmissionDetailItem): StudentQ
 
 export interface LessonTestHistoryPanelProps {
   lessonId: string
+  lessonType?: 'video' | 'article'
 }
 
-export const LessonTestHistoryPanel: React.FC<LessonTestHistoryPanelProps> = ({ lessonId }) => {
+export const LessonTestHistoryPanel: React.FC<LessonTestHistoryPanelProps> = ({ lessonId, lessonType = 'video' }) => {
   const [rows, setRows] = useState<LessonTestSubmissionHistoryEntry[] | null>(null)
   const [listError, setListError] = useState<string | null>(null)
   const [detailOpen, setDetailOpen] = useState(false)
@@ -327,6 +328,7 @@ export const LessonTestHistoryPanel: React.FC<LessonTestHistoryPanelProps> = ({ 
                       toggleFlag={() => {}}
                       chunks={detail.chunks}
                       lessonId={lessonId}
+                      lessonType={lessonType}
                       subtitlesRaw={detail.subtitles}
                     />
                   )
