@@ -1,0 +1,227 @@
+{
+    "root_group": {
+        "name": "",
+        "path": "",
+        "id": "d41d8cd98f00b204e9800998ecf8427e",
+        "groups": {
+            "Guest browse course list": {
+                "name": "Guest browse course list",
+                "path": "::Guest browse course list",
+                "id": "aed9f8367a585b0cfe5e61fe0f9a2bb1",
+                "groups": {},
+                "checks": {
+                        "load course list status is 2xx": {
+                            "name": "load course list status is 2xx",
+                            "path": "::Guest browse course list::load course list status is 2xx",
+                            "id": "f8d3194db24fccc0f61db85767ce2d32",
+                            "passes": 333,
+                            "fails": 10
+                        }
+                    }
+            },
+            "Guest search courses": {
+                "checks": {
+                    "load course search status is 2xx": {
+                        "name": "load course search status is 2xx",
+                        "path": "::Guest search courses::load course search status is 2xx",
+                        "id": "6b329487dcdf60af2f6ee1ee2d98780d",
+                        "passes": 330,
+                        "fails": 13
+                    }
+                },
+                "name": "Guest search courses",
+                "path": "::Guest search courses",
+                "id": "4c785dc460b187ba870d1d3a90bfdbbf",
+                "groups": {}
+            },
+            "Guest view course detail": {
+                "name": "Guest view course detail",
+                "path": "::Guest view course detail",
+                "id": "58a0e96b34de8f50af2306fac243ad39",
+                "groups": {},
+                "checks": {
+                        "load course detail status is 2xx": {
+                            "path": "::Guest view course detail::load course detail status is 2xx",
+                            "id": "838d78c81fddc2e4ee79d8ddbbd4bd24",
+                            "passes": 337,
+                            "fails": 4,
+                            "name": "load course detail status is 2xx"
+                        }
+                    }
+            },
+            "User login and view my learning": {
+                "name": "User login and view my learning",
+                "path": "::User login and view my learning",
+                "id": "02972eb6147b472a1e7bb0f93c88c0d4",
+                "groups": {},
+                "checks": {
+                        "my learning load status is 2xx": {
+                            "id": "ea4e0f78caad8e32a45e93437ae61b13",
+                            "passes": 323,
+                            "fails": 5,
+                            "name": "my learning load status is 2xx",
+                            "path": "::User login and view my learning::my learning load status is 2xx"
+                        }
+                    }
+            }
+        },
+        "checks": {}
+    },
+    "metrics": {
+        "http_req_connecting": {
+            "p(95)": 0,
+            "avg": 17.947783418439723,
+            "min": 0,
+            "med": 0,
+            "max": 3316.355914,
+            "p(90)": 0
+        },
+        "http_req_sending": {
+            "p(95)": 0.14653389999999986,
+            "avg": 0.08765563002364071,
+            "min": 0,
+            "med": 0.0807815,
+            "max": 0.370446,
+            "p(90)": 0.1265444
+        },
+        "data_sent": {
+            "count": 393373,
+            "rate": 1196.386344216611
+        },
+        "http_req_duration{endpoint:course_list_load}": {
+            "p(90)": 10107.905861400002,
+            "p(95)": 12997.877518799982,
+            "avg": 4395.874722408164,
+            "min": 0,
+            "med": 2354.881097,
+            "max": 30001.16339,
+            "thresholds": {
+                "p(95)<1000": true
+            }
+        },
+        "data_received": {
+            "rate": 58015.84325624052,
+            "count": 19075666
+        },
+        "http_req_duration{endpoint:course_detail_load}": {
+            "avg": 4603.606415310849,
+            "min": 411.100943,
+            "med": 2450.49284,
+            "max": 30001.055021,
+            "p(90)": 10363.126195,
+            "p(95)": 12007.959558,
+            "thresholds": {
+                "p(95)<1200": true
+            }
+        },
+        "http_req_receiving": {
+            "p(95)": 3675.455403399996,
+            "avg": 1334.8503663055544,
+            "min": 0,
+            "med": 751.9878265,
+            "max": 29605.254531,
+            "p(90)": 2378.8708382000004
+        },
+        "http_reqs": {
+            "count": 1692,
+            "rate": 5.145970095595035
+        },
+        "iterations": {
+            "count": 336,
+            "rate": 1.021894770756461
+        },
+        "vus_max": {
+            "min": 50,
+            "max": 50,
+            "value": 50
+        },
+        "http_req_duration": {
+            "p(95)": 15125.935125749975,
+            "avg": 5767.113052055558,
+            "min": 0,
+            "med": 3717.8970615,
+            "max": 30001.439611,
+            "p(90)": 11434.221775900003
+        },
+        "http_req_tls_handshaking": {
+            "min": 0,
+            "med": 0,
+            "max": 5677.764769,
+            "p(90)": 0,
+            "p(95)": 0,
+            "avg": 30.223219891843968
+        },
+        "iteration_duration": {
+            "avg": 32689.195310520845,
+            "min": 13780.984768,
+            "med": 29524.9059175,
+            "max": 79363.559102,
+            "p(90)": 50833.128595999995,
+            "p(95)": 60848.63762025
+        },
+        "vus": {
+            "min": 1,
+            "max": 50,
+            "value": 1
+        },
+        "group_duration": {
+            "min": 1405.635779,
+            "med": 6351.035655,
+            "max": 40737.963637,
+            "p(90)": 15845.074167599994,
+            "p(95)": 21565.708333899962,
+            "avg": 8254.890064574462
+        },
+        "checks": {
+            "passes": 1323,
+            "fails": 32,
+            "thresholds": {
+                "rate>0.95": false
+            },
+            "value": 0.9763837638376384
+        },
+        "http_req_duration{endpoint:course_search_load}": {
+            "min": 426.257973,
+            "med": 3397.670113,
+            "max": 30001.439611,
+            "p(90)": 13410.682160400002,
+            "p(95)": 18612.5948799,
+            "avg": 6082.263109448977,
+            "thresholds": {
+                "p(95)<1500": true
+            }
+        },
+        "http_req_duration{expected_response:true}": {
+            "med": 3505.678522,
+            "max": 28775.466405,
+            "p(90)": 10929.151292,
+            "p(95)": 12909.014611,
+            "avg": 5219.822861475477,
+            "min": 321.687339
+        },
+        "http_req_blocked": {
+            "avg": 47.766102204491666,
+            "min": 0,
+            "med": 0.0002365,
+            "max": 5919.632766,
+            "p(90)": 0.000577,
+            "p(95)": 0.0007978999999999996
+        },
+        "http_req_failed": {
+            "passes": 41,
+            "fails": 1651,
+            "thresholds": {
+                "rate<0.01": true
+            },
+            "value": 0.024231678486997636
+        },
+        "http_req_waiting": {
+            "min": 0,
+            "med": 2325.6327414999996,
+            "max": 30001.302836,
+            "p(90)": 10089.049994000003,
+            "p(95)": 11833.062436049988,
+            "avg": 4432.175030119973
+        }
+    }
+}

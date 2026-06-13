@@ -1,0 +1,12 @@
+[
+  {
+    "id": "replace-with-real-course-id",
+    "title": "React for Beginners",
+    "searchKeyword": "react"
+  },
+  {
+    "id": "replace-with-second-course-id",
+    "title": "Spring Boot Fundamentals",
+    "searchKeyword": "spring"
+  }
+]

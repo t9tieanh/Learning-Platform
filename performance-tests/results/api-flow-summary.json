@@ -1,0 +1,245 @@
+{
+    "root_group": {
+        "path": "",
+        "id": "d41d8cd98f00b204e9800998ecf8427e",
+        "groups": {
+            "Guest view course list": {
+                "name": "Guest view course list",
+                "path": "::Guest view course list",
+                "id": "06a479c09a3fa09af75efeb5093fdbe3",
+                "groups": {},
+                "checks": {
+                        "flow list status is 2xx": {
+                            "fails": 0,
+                            "name": "flow list status is 2xx",
+                            "path": "::Guest view course list::flow list status is 2xx",
+                            "id": "d3d011f9863e4cbc45fc4ec09ae7b65a",
+                            "passes": 25
+                        }
+                    }
+            },
+            "Guest search course": {
+                "name": "Guest search course",
+                "path": "::Guest search course",
+                "id": "89246f57d833d8ab982bdf8e4f6297bf",
+                "groups": {},
+                "checks": {
+                        "flow search status is 2xx": {
+                            "name": "flow search status is 2xx",
+                            "path": "::Guest search course::flow search status is 2xx",
+                            "id": "9495bc04869c2b9c89aea4769e465c8a",
+                            "passes": 24,
+                            "fails": 1
+                        }
+                    }
+            },
+            "Guest view course detail": {
+                "id": "58a0e96b34de8f50af2306fac243ad39",
+                "groups": {},
+                "checks": {
+                        "flow detail status is 2xx": {
+                            "name": "flow detail status is 2xx",
+                            "path": "::Guest view course detail::flow detail status is 2xx",
+                            "id": "06b352745818463cb1a635592dd9cd09",
+                            "passes": 25,
+                            "fails": 0
+                        }
+                    },
+                "name": "Guest view course detail",
+                "path": "::Guest view course detail"
+            },
+            "User view my learning": {
+                "name": "User view my learning",
+                "path": "::User view my learning",
+                "id": "0e535dcee18df4b407ed1cf71d2fe27f",
+                "groups": {},
+                "checks": {
+                        "flow my learning status is 2xx": {
+                            "path": "::User view my learning::flow my learning status is 2xx",
+                            "id": "5f8e6beec5d1885f86559a77acb6f475",
+                            "passes": 23,
+                            "fails": 0,
+                            "name": "flow my learning status is 2xx"
+                        }
+                    }
+            },
+            "User cart and order write flow skipped": {
+                "name": "User cart and order write flow skipped",
+                "path": "::User cart and order write flow skipped",
+                "id": "6bb04b55e6411542c2b4e911a6ad9e9e",
+                "groups": {},
+                "checks": {}
+            }
+        },
+        "checks": {},
+        "name": ""
+    },
+    "metrics": {
+        "checks": {
+            "passes": 97,
+            "fails": 1,
+            "thresholds": {
+                "rate>0.95": false
+            },
+            "value": 0.9897959183673469
+        },
+        "iterations": {
+            "count": 23,
+            "rate": 0.15333273487464688
+        },
+        "http_req_tls_handshaking": {
+            "avg": 51.71989696694215,
+            "min": 0,
+            "med": 0,
+            "max": 1990.523421,
+            "p(90)": 0,
+            "p(95)": 0
+        },
+        "data_received": {
+            "count": 1145491,
+            "rate": 7636.576861056267
+        },
+        "http_req_duration{endpoint:user_cart_add_flow}": {
+            "avg": 0,
+            "min": 0,
+            "med": 0,
+            "max": 0,
+            "p(90)": 0,
+            "p(95)": 0,
+            "thresholds": {
+                "p(95)<1500": false
+            }
+        },
+        "http_req_failed": {
+            "passes": 1,
+            "fails": 120,
+            "thresholds": {
+                "rate<0.02": false
+            },
+            "value": 0.008264462809917356
+        },
+        "http_req_duration{endpoint:guest_course_list_flow}": {
+            "max": 22605.724029,
+            "p(90)": 6578.2513218,
+            "p(95)": 8084.150978199996,
+            "avg": 3457.5665244,
+            "min": 417.14573,
+            "med": 2421.059673,
+            "thresholds": {
+                "p(95)<1200": true
+            }
+        },
+        "vus": {
+            "value": 2,
+            "min": 2,
+            "max": 5
+        },
+        "http_req_duration{expected_response:true}": {
+            "p(90)": 8132.812139300001,
+            "p(95)": 9914.808973949997,
+            "avg": 4239.371196433333,
+            "min": 417.14573,
+            "med": 3042.309778,
+            "max": 23852.57236
+        },
+        "http_req_duration{endpoint:guest_course_search_flow}": {
+            "min": 871.083819,
+            "med": 3315.606938,
+            "max": 30000.199367,
+            "p(90)": 7839.311843200003,
+            "p(95)": 9644.506055199996,
+            "avg": 4735.119541399999,
+            "thresholds": {
+                "p(95)<1500": true
+            }
+        },
+        "http_req_connecting": {
+            "min": 0,
+            "med": 0,
+            "max": 242.610118,
+            "p(90)": 0,
+            "p(95)": 0,
+            "avg": 9.714644892561983
+        },
+        "http_req_blocked": {
+            "max": 2266.487346,
+            "p(90)": 0.000658,
+            "p(95)": 0.000961,
+            "avg": 62.81180128099174,
+            "min": 0.000162,
+            "med": 0.00022
+        },
+        "http_req_receiving": {
+            "avg": 1161.4625853553719,
+            "min": 0.065504,
+            "med": 551.912578,
+            "max": 27458.250279,
+            "p(90)": 2225.318212,
+            "p(95)": 2881.764879
+        },
+        "data_sent": {
+            "count": 30177,
+            "rate": 201.17921479618346
+        },
+        "vus_max": {
+            "min": 5,
+            "max": 5,
+            "value": 5
+        },
+        "http_reqs": {
+            "count": 121,
+            "rate": 0.8066635182535772
+        },
+        "group_duration": {
+            "min": 1000.295039,
+            "med": 2905.637709,
+            "max": 31000.969484,
+            "p(90)": 6224.665202,
+            "p(95)": 7862.826199,
+            "avg": 3866.7578220495866
+        },
+        "http_req_waiting": {
+            "avg": 3290.7211069090904,
+            "min": 308.346334,
+            "med": 1850.406709,
+            "max": 23092.959259,
+            "p(90)": 7425.286459,
+            "p(95)": 8241.889453
+        },
+        "http_req_duration{endpoint:user_my_learning_flow}": {
+            "avg": 1839.2817467826092,
+            "min": 668.828273,
+            "med": 1610.210789,
+            "max": 6086.105713,
+            "p(90)": 2909.941737,
+            "p(95)": 3677.118963099999,
+            "thresholds": {
+                "p(95)<1500": true
+            }
+        },
+        "http_req_duration": {
+            "min": 417.14573,
+            "med": 3071.180046,
+            "max": 30000.199367,
+            "p(90)": 8215.335824,
+            "p(95)": 10332.843591,
+            "avg": 4452.270602801654
+        },
+        "http_req_sending": {
+            "min": 0.037689,
+            "med": 0.077808,
+            "max": 0.200234,
+            "p(90)": 0.12655,
+            "p(95)": 0.179165,
+            "avg": 0.08691053719008265
+        },
+        "iteration_duration": {
+            "max": 55098.934248,
+            "p(90)": 42082.4485492,
+            "p(95)": 46142.021184,
+            "avg": 27708.756032695648,
+            "min": 17334.496764,
+            "med": 25487.324726
+        }
+    }
+}
