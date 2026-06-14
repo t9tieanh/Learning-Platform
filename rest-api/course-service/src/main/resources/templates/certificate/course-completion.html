@@ -46,19 +46,11 @@
             padding: 8mm 14mm 10mm 14mm;
         }
 
-        .brand-logo-wrap {
-            width: 40mm;
-            border: 0.4mm solid #bfdbfe;
-            background: #ffffff;
-            padding: 1.5mm 2mm;
-            text-align: center;
-        }
-
         .brand-logo {
-            height: 7mm;
-            width: 36mm;
+            height: 8mm;
+            width: auto;
+            max-width: 40mm;
             display: block;
-            margin: 0 auto;
         }
 
         .brand-title {
@@ -258,16 +250,10 @@
             <table width="100%" cellspacing="0" cellpadding="0">
                 <tr>
                     <td width="44mm" style="width: 44mm; vertical-align: middle;">
-                        <table class="brand-logo-wrap" cellspacing="0" cellpadding="0">
-                            <tr>
-                                <td style="text-align: center;">
-                                    <img class="brand-logo"
-                                         th:if="${cert.logoDataUri != null}"
-                                         th:src="${cert.logoDataUri}"
-                                         alt="Learnova"/>
-                                </td>
-                            </tr>
-                        </table>
+                        <img class="brand-logo"
+                             th:if="${cert.logoDataUri != null}"
+                             th:src="${cert.logoDataUri}"
+                             alt="Learnova"/>
                     </td>
                     <td style="padding-left: 4mm; vertical-align: middle;">
                         <p class="brand-title">Learnova Certificate</p>

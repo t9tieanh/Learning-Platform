@@ -33,11 +33,17 @@
           {{courseTitle}}
         </p>
         {{#if certificateCode}}
-        <p style="margin: 0; font-size: 14px; line-height: 1.6; color: #64748b">
+        <p style="margin: 0 0 6px; font-size: 14px; line-height: 1.6; color: #64748b">
           Mã chứng chỉ:
           <strong style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: #1d4ed8">
             {{certificateCode}}
           </strong>
+        </p>
+        {{/if}}
+        {{#if hasCourseScore}}
+        <p style="margin: 0; font-size: 14px; line-height: 1.6; color: #64748b">
+          Tổng điểm đạt được:
+          <strong style="color: #1d4ed8">{{scoreDisplay}}</strong>
         </p>
         {{/if}}
       </div>
@@ -47,7 +53,10 @@
 
 <p style="margin: 0 0 18px; font-size: 15px; line-height: 1.65; color: #475569">
   Bạn đã hoàn thành toàn bộ bài học và vượt qua các bài kiểm tra bắt buộc. Chứng chỉ đã được lưu trong hồ sơ Learnova
-  của bạn — hãy tải PDF hoặc chia sẻ thành tích này ngay hôm nay.
+  của bạn.
+  {{#if hasPdfAttachment}}
+  File PDF chứng chỉ được đính kèm trong email này — bạn có thể tải và lưu trữ ngay.
+  {{/if}}
 </p>
 
 {{#if profileUrl}}

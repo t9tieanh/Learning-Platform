@@ -19,6 +19,11 @@ import {
   Star,
   Users
 } from 'lucide-react'
+import {
+  AdminCoursesTableSkeleton,
+  AdminInstructorHeroSkeleton,
+  AdminStatCardsSkeleton
+} from '@/components/Admin/Skeleton'
 
 const summaryCardClass =
   'rounded-[28px] border border-slate-200/80 bg-white/95 p-5 shadow-[0_18px_40px_-30px_rgba(15,23,42,0.22)]'
@@ -132,9 +137,7 @@ export default function AD_InstructorDetail() {
           </Button>
 
           {summaryLoading && !summary ? (
-            <div className='rounded-2xl border border-white/10 bg-white/5 px-5 py-8 text-sm text-slate-200'>
-              Đang tải tổng quan giảng viên...
-            </div>
+            <AdminInstructorHeroSkeleton />
           ) : summaryError && !summary ? (
             <div className='rounded-2xl border border-rose-300/30 bg-rose-500/10 px-5 py-8 text-sm text-rose-100'>
               {summaryError}
@@ -185,6 +188,10 @@ export default function AD_InstructorDetail() {
       </section>
 
       <section className='grid gap-4 md:grid-cols-2 xl:grid-cols-4'>
+        {summaryLoading && !summary ? (
+          <AdminStatCardsSkeleton count={4} columnsClassName='grid gap-4 md:grid-cols-2 xl:grid-cols-4' />
+        ) : (
+          <>
         <Card className={summaryCardClass}>
           <div className='flex items-center gap-4'>
             <div className='flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-50 text-sky-600'>
@@ -235,6 +242,8 @@ export default function AD_InstructorDetail() {
             </div>
           </div>
         </Card>
+          </>
+        )}
       </section>
 
       <section className='grid gap-4 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]'>
@@ -246,6 +255,9 @@ export default function AD_InstructorDetail() {
             </p>
           </div>
           <div className='overflow-x-auto'>
+            {coursesLoading ? (
+              <AdminCoursesTableSkeleton rows={5} />
+            ) : (
             <Table className='min-w-[760px]'>
               <TableHeader>
                 <TableRow className='border-b border-slate-200 bg-slate-50/70 hover:bg-slate-50/70'>
@@ -267,13 +279,7 @@ export default function AD_InstructorDetail() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {coursesLoading ? (
-                  <TableRow>
-                    <TableCell colSpan={5} className='px-6 py-12 text-center text-sm text-slate-500'>
-                      Đang tải danh sách khóa học...
-                    </TableCell>
-                  </TableRow>
-                ) : coursesError ? (
+                {coursesError ? (
                   <TableRow>
                     <TableCell colSpan={5} className='px-6 py-12 text-center text-sm text-rose-600'>
                       {coursesError}
@@ -324,6 +330,7 @@ export default function AD_InstructorDetail() {
                 )}
               </TableBody>
             </Table>
+            )}
           </div>
           <div className='flex flex-col gap-3 border-t border-slate-200/80 bg-slate-50/60 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6'>
             <p className='text-sm text-slate-500'>

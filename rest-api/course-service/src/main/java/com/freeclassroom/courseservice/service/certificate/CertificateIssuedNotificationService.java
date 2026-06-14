@@ -17,6 +17,8 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.util.Base64;
+
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -26,6 +28,7 @@ public class CertificateIssuedNotificationService {
     RabbitTemplate rabbitTemplate;
     UserGrpcClient userGrpcClient;
     StudyReminderProperties studyReminderProperties;
+    CertificatePdfService certificatePdfService;
 
     public void publish(CourseCompletionCertificateEntity certificate, EnrollmentsEntity enrollment) {
         try {
@@ -74,6 +77,20 @@ public class CertificateIssuedNotificationService {
         String baseUrl = studyReminderProperties.getFrontendBaseUrl().replaceAll("/+$", "");
         String courseId = course != null ? course.getCourseId() : null;
 
+        String pdfBase64 = null;
+        String pdfFilename = null;
+        try {
+            byte[] pdfBytes = certificatePdfService.generatePdf(certificate);
+            pdfBase64 = Base64.getEncoder().encodeToString(pdfBytes);
+            pdfFilename = certificatePdfService.buildDownloadFilename(certificate.getCertificateCode());
+        } catch (Exception ex) {
+            log.warn(
+                    "[CertificateIssued] Failed to generate PDF for cert {}: {}",
+                    certificate.getCertificateCode(),
+                    ex.getMessage()
+            );
+        }
+
         return CertificateIssuedEvent.builder()
                 .userId(enrollment.getUserId())
                 .userName(userName)
@@ -83,8 +100,12 @@ public class CertificateIssuedNotificationService {
                 .courseThumbnailUrl(course != null ? course.getThumbnailUrl() : null)
                 .certificateId(certificate.getId())
                 .certificateCode(certificate.getCertificateCode())
+                .courseScore(certificate.getCourseScore())
+                .courseScoreTotal(certificate.getCourseScoreTotal())
                 .profileUrl(baseUrl + "/me?mode=cert")
                 .courseUrl(courseId != null ? baseUrl + "/course/" + courseId : baseUrl)
+                .certificatePdfBase64(pdfBase64)
+                .certificatePdfFilename(pdfFilename)
                 .build();
     }
 

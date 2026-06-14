@@ -13,6 +13,7 @@ import userService from '@/services/user/user.service'
 import { toast } from 'sonner'
 import useLoading from '@/hooks/useLoading.hook'
 import { useAuthStore } from '@/stores/useAuth.stores'
+import { getHomePathForRole } from '@/utils/auth/adminRole.utils'
 import { useNavigate } from 'react-router-dom'
 import logo from '@/assets/images/logo1.png'
 import { LogIn, ArrowLeft } from 'lucide-react'
@@ -58,9 +59,7 @@ const SignInForm = ({
           isVip: r.isVip ?? false
         })
         toast.success('Đăng nhập thành công!')
-        const role = response.result.role
-        const path = role === 'admin' ? '/admin' : '/'
-        navigate(path)
+        navigate(getHomePathForRole(response.result.role))
       } else toast.error(response.message)
     } catch (error: any) {
       toast.error('Đã có lỗi trong quá trình xử lý !')
@@ -95,10 +94,19 @@ const SignInForm = ({
           <CardContent className='mt-5'>
             <form onSubmit={handleSubmit(onSubmit)}>
               <div className='login-form flex flex-col gap-3'>
-                <CustomInput placeholder='Tên đăng nhập hoặc email' {...register('username')} />
+                <CustomInput
+                  data-testid='login-email-input'
+                  placeholder='Tên đăng nhập hoặc email'
+                  {...register('username')}
+                />
                 {errors.username && <span className='text-red-500 text-xs text-left'>{errors.username.message}</span>}
 
-                <CustomInput placeholder='Mật khẩu' type='password' {...register('password')} />
+                <CustomInput
+                  data-testid='login-password-input'
+                  placeholder='Mật khẩu'
+                  type='password'
+                  {...register('password')}
+                />
                 {errors.password && <span className='text-red-500 text-xs text-left'>{errors.password.message}</span>}
               </div>
               <div className='remember-me flex justify-between items-center mt-5'>
@@ -114,6 +122,7 @@ const SignInForm = ({
               </div>
               <div className='signin-button w-full mt-5'>
                 <CustomButton
+                  data-testid='login-submit-button'
                   label='Đăng nhập'
                   isLoader={loading}
                   type='submit'

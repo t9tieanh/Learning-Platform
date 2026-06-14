@@ -1,0 +1,153 @@
+{
+    "metrics": {
+        "data_sent": {
+            "count": 2136492,
+            "rate": 2653.3634162008298
+        },
+        "iterations": {
+            "count": 6889,
+            "rate": 8.555623224522963
+        },
+        "data_received": {
+            "count": 275885240,
+            "rate": 342628.85275759787
+        },
+        "vus": {
+            "value": 1,
+            "min": 1,
+            "max": 300
+        },
+        "http_req_connecting": {
+            "avg": 14.097765498006229,
+            "min": 0,
+            "med": 0,
+            "max": 4324.261762,
+            "p(90)": 0,
+            "p(95)": 0
+        },
+        "group_duration": {
+            "p(95)": 36958.1720544,
+            "avg": 16323.999114138629,
+            "min": 1631.563958,
+            "med": 14233.175629,
+            "max": 60003.01523,
+            "p(90)": 28432.37373519999
+        },
+        "http_req_receiving": {
+            "max": 29412.705916,
+            "p(90)": 2881.4204145999997,
+            "p(95)": 4946.769497999997,
+            "avg": 1952.3189097531351,
+            "min": 0,
+            "med": 1285.045459
+        },
+        "http_req_duration{expected_response:true}": {
+            "p(95)": 15268.617627049945,
+            "avg": 7440.657998987723,
+            "min": 507.668583,
+            "med": 6761.2103050000005,
+            "max": 29990.416876,
+            "p(90)": 12227.666778100001
+        },
+        "http_req_tls_handshaking": {
+            "min": 0,
+            "med": 0,
+            "max": 16360.700663,
+            "p(90)": 0,
+            "p(95)": 0,
+            "avg": 25.86898183752628
+        },
+        "vus_max": {
+            "value": 300,
+            "min": 300,
+            "max": 300
+        },
+        "http_req_waiting": {
+            "max": 30001.119991,
+            "p(90)": 10326.209894600004,
+            "p(95)": 13822.435949,
+            "avg": 6169.523194117289,
+            "min": 0,
+            "med": 5372.092944
+        },
+        "http_req_blocked": {
+            "avg": 39.38324724737185,
+            "min": 0,
+            "med": 0.000213,
+            "max": 16602.443007,
+            "p(90)": 0.000496,
+            "p(95)": 0.000642
+        },
+        "checks": {
+            "passes": 13354,
+            "fails": 439,
+            "value": 0.9681722612919597
+        },
+        "http_req_failed": {
+            "passes": 439,
+            "fails": 13354,
+            "thresholds": {
+                "rate<0.05": false
+            },
+            "value": 0.03182773870804031
+        },
+        "http_reqs": {
+            "count": 13793,
+            "rate": 17.129875328181917
+        },
+        "iteration_duration": {
+            "avg": 17324.651985132565,
+            "min": 2631.77014,
+            "med": 15233.563358,
+            "max": 61005.219476,
+            "p(90)": 29433.27826999999,
+            "p(95)": 37959.00284559999
+        },
+        "http_req_duration": {
+            "avg": 8121.90216134872,
+            "min": 0,
+            "med": 6876.978252,
+            "max": 30001.399016,
+            "p(90)": 13462.503850800007,
+            "p(95)": 19465.486892599994
+        },
+        "http_req_sending": {
+            "avg": 0.060057478286087276,
+            "min": 0,
+            "med": 0.05525,
+            "max": 1.197965,
+            "p(90)": 0.0854578,
+            "p(95)": 0.10244659999999998
+        }
+    },
+    "root_group": {
+        "id": "d41d8cd98f00b204e9800998ecf8427e",
+        "groups": {
+            "Stress browse": {
+                "name": "Stress browse",
+                "path": "::Stress browse",
+                "id": "4e168e82ed11fca9df12679a31d4575e",
+                "groups": {},
+                "checks": {
+                        "stress list status is 2xx": {
+                            "passes": 6671,
+                            "fails": 233,
+                            "name": "stress list status is 2xx",
+                            "path": "::Stress browse::stress list status is 2xx",
+                            "id": "ccc0740f57886730dae31e4ad247ae2d"
+                        },
+                        "stress search status is 2xx": {
+                            "name": "stress search status is 2xx",
+                            "path": "::Stress browse::stress search status is 2xx",
+                            "id": "d5ce0c0a5a23ede16a118669934851c3",
+                            "passes": 6683,
+                            "fails": 206
+                        }
+                    }
+            }
+        },
+        "checks": {},
+        "name": "",
+        "path": ""
+    }
+}

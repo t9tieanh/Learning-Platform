@@ -4,6 +4,7 @@ import {
     Bot,
     User,
     Play,
+    FileText,
     Loader2,
     Sparkles,
     MessageSquarePlus,
@@ -36,6 +37,7 @@ import type { AIChatSectionProps, LessonAiChatMessage } from '@/types/lesson-ai-
 import { formatSessionPickLabel, mapLessonChatHistoryToUi } from '@/utils/lessonAiChat.utils'
 import { PremiumLockedState } from './PremiumLockedState'
 import RemediationVideoPlayer from './LessonTestStudentSection/RemediationVideoPlayer'
+import RemediationArticleViewer from './LessonTestStudentSection/RemediationArticleViewer'
 import { LessonChunk } from '@/types/ai'
 import {
     Tooltip,
@@ -47,11 +49,13 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
 export const AIChatSection: React.FC<AIChatSectionProps> = ({
     lessonId,
+    lessonType = 'video',
     onSeek,
     isTabVisible = true,
     subtitlesRaw
 }) => {
     const { data: user } = useAuthStore()
+    const isArticleLesson = lessonType === 'article'
     const [messages, setMessages] = useState<LessonAiChatMessage[]>([])
     const [input, setInput] = useState('')
     const [isLoading, setIsLoading] = useState(false)
@@ -549,12 +553,20 @@ export const AIChatSection: React.FC<AIChatSectionProps> = ({
                                                                                     isPlayerOpen ? "bg-blue-600 text-white border-blue-600" : "bg-blue-50 text-blue-600 border-blue-100 hover:bg-blue-600 hover:text-white"
                                                                                 )}
                                                                             >
-                                                                                <Play className={cn("w-2.5 h-2.5 fill-current shrink-0", isPlayerOpen && "animate-pulse")} />
+                                                                                {isArticleLesson ? (
+                                                                                    <FileText className={cn('w-2.5 h-2.5 shrink-0', isPlayerOpen && 'animate-pulse')} />
+                                                                                ) : (
+                                                                                    <Play className={cn('w-2.5 h-2.5 fill-current shrink-0', isPlayerOpen && 'animate-pulse')} />
+                                                                                )}
                                                                                 <span className="max-w-[120px] truncate">{source.title || 'Nội dung'}</span>
                                                                             </button>
                                                                         </TooltipTrigger>
                                                                         <TooltipContent side="top">
-                                                                            <p className="font-bold">Xem video: {source.startTime}</p>
+                                                                            <p className="font-bold">
+                                                                                {isArticleLesson
+                                                                                    ? `Xem tài liệu: ${source.title || 'Nội dung'}`
+                                                                                    : `Xem video: ${source.startTime}`}
+                                                                            </p>
                                                                         </TooltipContent>
                                                                     </Tooltip>
                                                                 </TooltipProvider>
@@ -571,8 +583,17 @@ export const AIChatSection: React.FC<AIChatSectionProps> = ({
                                             {(() => {
                                                 const chunkId = activePlayerKey.split(':')[1];
                                                 const source = m.sources.find(s => s.chunkId === chunkId);
-                                                if (!source) return null;
-                                                return <RemediationVideoPlayer lessonId={lessonId} chunk={{...source, timestamp: source.startTime, sentenceCount: 0} as any} subtitlesRaw={subtitlesRaw} />;
+                                                if (!source) return null
+                                                if (isArticleLesson) {
+                                                    return <RemediationArticleViewer lessonId={lessonId} />
+                                                }
+                                                return (
+                                                    <RemediationVideoPlayer
+                                                        lessonId={lessonId}
+                                                        chunk={{ ...source, timestamp: source.startTime, sentenceCount: 0 } as LessonChunk}
+                                                        subtitlesRaw={subtitlesRaw}
+                                                    />
+                                                )
                                             })()}
                                         </div>
                                     )}

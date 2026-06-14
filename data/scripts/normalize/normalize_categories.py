@@ -1,9 +1,49 @@
 import csv
 import os
+import sys
 import uuid
 import datetime
+from pathlib import Path
 
-def normalize_categories(input_file, output_courses_file, output_categories_file):
+SCRIPT_ROOT = Path(__file__).resolve().parents[1]
+if str(SCRIPT_ROOT) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_ROOT))
+
+from utils.translator import translate_to_vietnamese
+
+COURSE_LIMIT = 1100
+
+def translate_categories(categories_file):
+    print(f"Translating categories in {categories_file}...")
+
+    rows = []
+    fieldnames = []
+
+    with open(categories_file, 'r', encoding='utf-8') as f:
+        reader = csv.DictReader(f)
+        fieldnames = reader.fieldnames
+        rows = list(reader)
+
+    total = len(rows)
+    for i, row in enumerate(rows):
+        if row.get('name'):
+            row['name'] = translate_to_vietnamese(row['name'])
+        if row.get('description'):
+            row['description'] = translate_to_vietnamese(row['description'])
+
+        if (i + 1) % 5 == 0 or (i + 1) == total:
+            print(f"Progress: {i + 1}/{total} categories translated.")
+
+    temp_file = categories_file + '.tmp'
+    with open(temp_file, 'w', encoding='utf-8', newline='') as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(rows)
+
+    os.replace(temp_file, categories_file)
+    print(f"Translated categories in: {categories_file}")
+
+def normalize_categories(input_file, output_courses_file, output_categories_file, course_limit=COURSE_LIMIT):
     """
     Normalizes the category field by extracting distinct categories into a separate file
     and replacing the category name with its ID in the courses file.
@@ -32,6 +72,8 @@ def normalize_categories(input_file, output_courses_file, output_categories_file
                 if category_name and category_name not in categories_map:
                     # Generate a new UUID
                     categories_map[category_name] = str(uuid.uuid4())
+                if course_limit and len(courses_data) >= course_limit:
+                    break
 
         # Prepare Categories CSV
         # Schema: id, created_at, deleted, updated_at, description, name
@@ -52,6 +94,8 @@ def normalize_categories(input_file, output_courses_file, output_categories_file
                 })
         
         print(f"Extracted {len(categories_map)} categories to: {output_categories_file}")
+        if course_limit:
+            print(f"Limited to {course_limit} courses")
 
         # Prepare Normalized Courses CSV
         # Replace 'category' column with 'category_id'
@@ -83,6 +127,8 @@ def normalize_categories(input_file, output_courses_file, output_categories_file
                 rows_processed += 1
                 
         print(f"Normalized {rows_processed} courses to: {output_courses_file}")
+
+        translate_categories(output_categories_file)
 
 
     except FileNotFoundError:

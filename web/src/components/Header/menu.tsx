@@ -161,14 +161,20 @@ const Menu = ({
           )}
           <CustomButton
             label='Thông tin của tôi'
-            icon={<User className={iconClass} />}
-            className={cn(btnClass, 'border border-slate-200 bg-white text-gray-800 hover:bg-blue-500 hover:text-white')}
+            icon={<User className={cn(iconClass, 'text-white')} />}
+            className={cn(
+              btnClass,
+              'border-0 bg-gradient-to-r from-blue-500 via-blue-600 to-[#0C356A] text-white font-semibold shadow-md shadow-blue-500/30 hover:from-blue-600 hover:via-blue-700 hover:to-[#0a2d58] hover:text-white'
+            )}
             onClick={handleMyCoursesClick}
           />
           <CustomButton
-            className={cn(btnClass, 'border border-slate-200 bg-white text-gray-800 hover:bg-blue-500 hover:text-white')}
             label='Trang giảng viên'
-            icon={<GraduationCap className={iconClass} />}
+            icon={<GraduationCap className={cn(iconClass, 'text-yellow-950')} />}
+            className={cn(
+              btnClass,
+              'border-0 bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-400 text-yellow-950 font-semibold shadow-md shadow-yellow-400/40 hover:from-yellow-400 hover:via-yellow-500 hover:to-amber-500 hover:text-yellow-950'
+            )}
             onClick={handleTeacherClick}
           />
           <CustomButton

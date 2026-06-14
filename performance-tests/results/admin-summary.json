@@ -1,0 +1,192 @@
+{
+    "root_group": {
+        "path": "",
+        "id": "d41d8cd98f00b204e9800998ecf8427e",
+        "groups": {
+            "Admin overview": {
+                "path": "::Admin overview",
+                "id": "e3820b3da6c98ce5ac8e10c092339b57",
+                "groups": {},
+                "checks": {
+                        "admin home status is 2xx": {
+                            "id": "dc9109956608503325fa4f7071958d07",
+                            "passes": 3,
+                            "fails": 0,
+                            "name": "admin home status is 2xx",
+                            "path": "::Admin overview::admin home status is 2xx"
+                        },
+                        "admin business performance status is 2xx": {
+                            "path": "::Admin overview::admin business performance status is 2xx",
+                            "id": "da1a027cd5787c8b3382e614401bb3a4",
+                            "passes": 3,
+                            "fails": 0,
+                            "name": "admin business performance status is 2xx"
+                        }
+                    },
+                "name": "Admin overview"
+            },
+            "Admin supporting widgets": {
+                "checks": {
+                    "admin pending actions status is 2xx": {
+                        "passes": 2,
+                        "fails": 1,
+                        "name": "admin pending actions status is 2xx",
+                        "path": "::Admin supporting widgets::admin pending actions status is 2xx",
+                        "id": "02e0f85c4f4b26c0983f332939b0517d"
+                    },
+                    "admin top courses status is 2xx": {
+                        "name": "admin top courses status is 2xx",
+                        "path": "::Admin supporting widgets::admin top courses status is 2xx",
+                        "id": "e57a5d28c312daaead1b6ff9563390d0",
+                        "passes": 2,
+                        "fails": 1
+                    },
+                    "admin top instructors status is 2xx": {
+                        "fails": 0,
+                        "name": "admin top instructors status is 2xx",
+                        "path": "::Admin supporting widgets::admin top instructors status is 2xx",
+                        "id": "dcb5b7585a796201e8617a764043ae90",
+                        "passes": 3
+                    },
+                    "admin certificates status is 2xx": {
+                        "name": "admin certificates status is 2xx",
+                        "path": "::Admin supporting widgets::admin certificates status is 2xx",
+                        "id": "918ca38b477b5fe2fb8346b130849acc",
+                        "passes": 2,
+                        "fails": 0
+                    }
+                },
+                "name": "Admin supporting widgets",
+                "path": "::Admin supporting widgets",
+                "id": "ef52ab7d4c73efb514344e8f237baf57",
+                "groups": {}
+            }
+        },
+        "checks": {},
+        "name": ""
+    },
+    "metrics": {
+        "http_req_tls_handshaking": {
+            "p(90)": 216.0056988000005,
+            "p(95)": 244.08984335,
+            "avg": 33.22972345454546,
+            "min": 0,
+            "med": 0,
+            "max": 246.742819
+        },
+        "http_reqs": {
+            "count": 22,
+            "rate": 0.24444161091531497
+        },
+        "data_received": {
+            "count": 60879,
+            "rate": 676.4254923142482
+        },
+        "vus_max": {
+            "value": 3,
+            "min": 3,
+            "max": 3
+        },
+        "http_req_connecting": {
+            "avg": 78.04214868181818,
+            "min": 0,
+            "med": 0,
+            "max": 1251.355173,
+            "p(90)": 204.94628730000048,
+            "p(95)": 237.3472058
+        },
+        "iterations": {
+            "count": 4,
+            "rate": 0.04444392925733
+        },
+        "http_req_duration": {
+            "min": 615.586116,
+            "med": 3620.6111995,
+            "max": 30001.215901,
+            "p(90)": 29846.250770800005,
+            "p(95)": 30000.56424215,
+            "avg": 8897.475254863637,
+            "thresholds": {
+                "p(95)<2000": true
+            }
+        },
+        "http_req_receiving": {
+            "p(95)": 20910.900238349997,
+            "avg": 3174.4978095909096,
+            "min": 0,
+            "med": 159.98517950000002,
+            "max": 27119.162427,
+            "p(90)": 14064.419991800029
+        },
+        "group_duration": {
+            "p(95)": 21958.4666476,
+            "avg": 10345.557303200001,
+            "min": 5572.346584,
+            "med": 6197.54441,
+            "max": 25200.991577,
+            "p(90)": 18715.941718200003
+        },
+        "http_req_duration{expected_response:true}": {
+            "med": 2906.157669,
+            "max": 15716.511184,
+            "p(90)": 8054.973584300002,
+            "p(95)": 10136.55828279999,
+            "avg": 4293.380044666667,
+            "min": 615.586116
+        },
+        "http_req_sending": {
+            "max": 0.355445,
+            "p(90)": 0.15063230000000014,
+            "p(95)": 0.19455309999999998,
+            "avg": 0.0880096818181818,
+            "min": 0.032795,
+            "med": 0.06858700000000001
+        },
+        "http_req_waiting": {
+            "p(90)": 8670.647293500004,
+            "p(95)": 28939.605731099982,
+            "avg": 5722.88943559091,
+            "min": 325.994974,
+            "med": 2876.4577325,
+            "max": 30000.521914
+        },
+        "http_req_failed": {
+            "passes": 4,
+            "fails": 18,
+            "thresholds": {
+                "rate<0.01": true
+            },
+            "value": 0.18181818181818182
+        },
+        "vus": {
+            "max": 3,
+            "value": 1,
+            "min": 1
+        },
+        "iteration_duration": {
+            "med": 30000.6895945,
+            "max": 39881.616462,
+            "p(90)": 36917.3711934,
+            "p(95)": 38399.4938277,
+            "avg": 31305.469622750003,
+            "min": 25338.88284
+        },
+        "checks": {
+            "passes": 15,
+            "fails": 2,
+            "value": 0.8823529411764706
+        },
+        "http_req_blocked": {
+            "avg": 116.81139299999997,
+            "min": 0.000195,
+            "med": 0.00027,
+            "max": 1538.701933,
+            "p(90)": 457.5442348000011,
+            "p(95)": 522.04171875
+        },
+        "data_sent": {
+            "count": 8496,
+            "rate": 94.39890574256891
+        }
+    }
+}

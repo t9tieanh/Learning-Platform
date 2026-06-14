@@ -40,7 +40,12 @@ export const TabNavigation = ({
   onTabChange: (tab: string) => void
   selectedChunkId?: string | null
   watchedPercent: number
-  onCourseCompleted?: (certificate?: { id: string; certificateCode: string }) => void
+  onCourseCompleted?: (certificate?: {
+    id: string
+    certificateCode: string
+    courseScore?: number | null
+    courseScoreTotal?: number | null
+  }) => void
   onCourseDataRefresh?: () => void
 }) => {
   const activeTab = externalActiveTab
@@ -205,6 +210,7 @@ export const TabNavigation = ({
               onPrefetchRefresh={setLessonTestPrefetch}
               onSeek={onSeek}
               chunks={analysisData?.chunks ?? []}
+              lessonType={currentLecture.type}
               onCourseCompleted={onCourseCompleted}
               onCourseDataRefresh={onCourseDataRefresh}
             />

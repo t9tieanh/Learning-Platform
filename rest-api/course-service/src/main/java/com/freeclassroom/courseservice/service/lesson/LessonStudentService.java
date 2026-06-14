@@ -1,13 +1,13 @@
 package com.freeclassroom.courseservice.service.lesson;
 
 import com.freeclassroom.courseservice.configuration.CustomJwtDecoder;
+import com.freeclassroom.courseservice.configuration.LessonMediaProperties;
 import com.freeclassroom.courseservice.dto.request.lesson.MakeNoteForLessonRequest;
 import com.freeclassroom.courseservice.dto.response.ApiResponse;
 import com.freeclassroom.courseservice.dto.response.common.CreationResponse;
 import com.freeclassroom.courseservice.dto.response.lesson.MarkDoneLessonResponse;
 import com.freeclassroom.courseservice.dto.response.course.CloudFrontCookieResponse;
 import com.freeclassroom.courseservice.dto.response.course.LessonInfoResponse;
-import com.freeclassroom.courseservice.dto.response.course.student.LessonOverviewResponse;
 import com.freeclassroom.courseservice.entity.certificate.CourseCompletionCertificateEntity;
 import com.freeclassroom.courseservice.entity.course.LessonEntity;
 import com.freeclassroom.courseservice.entity.member.EnrollmentsEntity;
@@ -15,6 +15,7 @@ import com.freeclassroom.courseservice.entity.member.LessonProgressEntity;
 import com.freeclassroom.courseservice.enums.entity.EnumLessonProgress;
 import com.freeclassroom.courseservice.exception.CustomExeption;
 import com.freeclassroom.courseservice.exception.ErrorCode;
+import com.freeclassroom.courseservice.exception.LessonMediaAccessException;
 import com.freeclassroom.courseservice.mapper.LessonStudentMapper;
 import com.freeclassroom.courseservice.repository.entity.EnrollmentRepository;
 import com.freeclassroom.courseservice.repository.entity.LessonProgressRepository;
@@ -22,7 +23,9 @@ import com.freeclassroom.courseservice.repository.entity.LessonRepository;
 import com.freeclassroom.courseservice.service.utils.cloudfront.ICloudFrontService;
 import com.freeclassroom.courseservice.service.certificate.CertificateEligibilityService;
 import com.freeclassroom.courseservice.dto.certificate.CertificateEligibilityTryResult;
+import com.freeclassroom.courseservice.service.utils.jwt.JwtLessonAccessTokenProvider;
 import com.freeclassroom.courseservice.service.utils.other.FileUtils;
+import com.nimbusds.jwt.JWTClaimsSet;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -32,6 +35,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.MediaTypeFactory;
 import org.springframework.http.ResponseEntity;
@@ -39,13 +43,20 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.net.URI;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Service
 @Slf4j
 public class LessonStudentService implements ILessonStudentService {
+
+    private static final Pattern MEDIA_LESSON_URI_PATTERN =
+            Pattern.compile("^/media/lesson/([^/?#]+)");
+
     EnrollmentRepository enrollmentRepo;
     LessonRepository lessonRepo;
     LessonProgressRepository lessonProgressRepo;
@@ -54,6 +65,8 @@ public class LessonStudentService implements ILessonStudentService {
     LessonStudentMapper lessonMapper;
     FileUtils fileUtils;
     CertificateEligibilityService certificateEligibilityService;
+    JwtLessonAccessTokenProvider jwtLessonAccessTokenProvider;
+    LessonMediaProperties lessonMediaProperties;
 
     @Value("${server.backendUri}")
     @NonFinal
@@ -183,6 +196,12 @@ public class LessonStudentService implements ILessonStudentService {
         CertificateEligibilityTryResult tryResult = certificateEligibilityService.tryIssue(enrollment);
         boolean isCompletedCourse = tryResult.isNewlyIssued();
         Optional<CourseCompletionCertificateEntity> issuedCertificate = tryResult.getCertificate();
+        Integer courseScore = issuedCertificate
+                .map(CourseCompletionCertificateEntity::getCourseScore)
+                .orElse(tryResult.getEligibility().getCourseScore());
+        Integer courseScoreTotal = issuedCertificate
+                .map(CourseCompletionCertificateEntity::getCourseScoreTotal)
+                .orElse(tryResult.getEligibility().getCourseScoreTotal());
 
         return ApiResponse.<MarkDoneLessonResponse>builder()
                 .result(
@@ -191,6 +210,8 @@ public class LessonStudentService implements ILessonStudentService {
                                 .completedCourse(isCompletedCourse)
                                 .certificateId(isCompletedCourse ? issuedCertificate.map(CourseCompletionCertificateEntity::getId).orElse(null) : null)
                                 .certificateCode(isCompletedCourse ? issuedCertificate.map(CourseCompletionCertificateEntity::getCertificateCode).orElse(null) : null)
+                                .courseScore(isCompletedCourse ? courseScore : null)
+                                .courseScoreTotal(isCompletedCourse ? courseScoreTotal : null)
                                 .build()
                 )
                 .code(200)
@@ -309,5 +330,92 @@ public class LessonStudentService implements ILessonStudentService {
             log.error("Lỗi khi tạo signed cookies cho lesson {}: {}", lessonId, e.getMessage());
             throw new CustomExeption(ErrorCode.UNAUTHORIZED);
         }
+    }
+
+    @Override
+    public ApiResponse<String> getMediaUrl(String lessonId) {
+        LessonEntity lesson = lessonRepo.findById(lessonId).orElseThrow(
+                () -> new CustomExeption(ErrorCode.LESSON_NOT_FOUND)
+        );
+
+        String objectKey = fileUtils.extractObjectKey(lesson.getUrl());
+        if (objectKey == null) {
+            throw new CustomExeption(ErrorCode.LESSON_NOT_FOUND);
+        }
+
+        try {
+            String signedUrl = cloudFrontService.getSignedUrl(objectKey);
+            String mediaUrl = rewriteSignedUrlToMediaGateway(signedUrl, lessonId);
+            return ApiResponse.<String>builder()
+                    .code(200)
+                    .message("Lấy URL media thành công !")
+                    .result(mediaUrl)
+                    .build();
+        } catch (Exception exception) {
+            log.error("Lỗi khi tạo media URL cho lesson {}: {}", lessonId, exception.getMessage());
+            throw new CustomExeption(ErrorCode.UNAUTHORIZED);
+        }
+    }
+
+    @Override
+    public String createLessonAccessCookie(String lessonId, String userId) {
+        canViewLesson(lessonId, userId);
+
+        LessonEntity lesson = lessonRepo.findById(lessonId)
+                .orElseThrow(() -> new CustomExeption(ErrorCode.LESSON_NOT_FOUND));
+        String objectKey = fileUtils.extractObjectKey(lesson.getUrl());
+        if (objectKey == null) {
+            throw new CustomExeption(ErrorCode.LESSON_NOT_FOUND);
+        }
+
+        return jwtLessonAccessTokenProvider.generate(userId, lessonId, objectKey);
+    }
+
+    @Override
+    public String verifyLessonMediaAccess(String cookieToken, String originalUri) {
+        if (originalUri == null || originalUri.isBlank()) {
+            throw new LessonMediaAccessException(HttpStatus.UNAUTHORIZED);
+        }
+
+        Matcher matcher = MEDIA_LESSON_URI_PATTERN.matcher(originalUri);
+        if (!matcher.find()) {
+            throw new LessonMediaAccessException(HttpStatus.UNAUTHORIZED);
+        }
+
+        String lessonIdFromUri = matcher.group(1);
+        if (cookieToken == null || cookieToken.isBlank()) {
+            throw new LessonMediaAccessException(HttpStatus.UNAUTHORIZED);
+        }
+
+        try {
+            return jwtLessonAccessTokenProvider.verifyMediaAccess(cookieToken, lessonIdFromUri);
+        } catch (CustomExeption exception) {
+            throw new LessonMediaAccessException(HttpStatus.UNAUTHORIZED);
+        }
+    }
+
+    private String rewriteSignedUrlToMediaGateway(String signedUrl, String lessonId) throws Exception {
+        URI uri = URI.create(signedUrl);
+        String query = uri.getRawQuery();
+
+        String base = trimTrailingSlash(lessonMediaProperties.getPublicBaseUrl());
+        String pathPrefix = trimTrailingSlash(lessonMediaProperties.getMediaPathPrefix());
+        StringBuilder rewritten = new StringBuilder(base)
+                .append(pathPrefix)
+                .append('/')
+                .append(lessonId);
+
+        if (query != null && !query.isBlank()) {
+            rewritten.append('?').append(query);
+        }
+
+        return rewritten.toString();
+    }
+
+    private String trimTrailingSlash(String value) {
+        if (value == null || value.isBlank()) {
+            return "";
+        }
+        return value.endsWith("/") ? value.substring(0, value.length() - 1) : value;
     }
 }

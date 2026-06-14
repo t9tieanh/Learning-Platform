@@ -1,0 +1,8 @@
+export { default as AdminStatCardsSkeleton } from './AdminStatCardsSkeleton'
+export { default as AdminChartSkeleton } from './AdminChartSkeleton'
+export { default as AdminLeaderboardSkeleton } from './AdminLeaderboardSkeleton'
+export { default as AdminCoursesTableSkeleton } from './AdminCoursesTableSkeleton'
+export { default as AdminInstructorsTableSkeleton } from './AdminInstructorsTableSkeleton'
+export { default as AdminCertificatesTableSkeleton } from './AdminCertificatesTableSkeleton'
+export { default as AdminDiscountsTableSkeleton } from './AdminDiscountsTableSkeleton'
+export { default as AdminInstructorDetailSkeleton, AdminInstructorHeroSkeleton } from './AdminInstructorDetailSkeleton'

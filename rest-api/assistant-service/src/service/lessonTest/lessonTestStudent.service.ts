@@ -314,10 +314,14 @@ export class LessonTestStudentService {
       isCompletedCourse: boolean;
       certificateId: string | null;
       certificateCode: string | null;
+      courseScore: number | null;
+      courseScoreTotal: number | null;
     } = {
       isCompletedCourse: false,
       certificateId: null,
       certificateCode: null,
+      courseScore: null,
+      courseScoreTotal: null,
     };
 
     if (percent >= MIN_PASS_PERCENT_FOR_CERTIFICATE) {
@@ -329,6 +333,8 @@ export class LessonTestStudentService {
             isCompletedCourse: issueResult.isNewlyCompletedCourse,
             certificateId: issueResult.certificateId,
             certificateCode: issueResult.certificateCode,
+            courseScore: issueResult.courseScore,
+            courseScoreTotal: issueResult.courseScoreTotal,
           };
         }
       } catch (error) {

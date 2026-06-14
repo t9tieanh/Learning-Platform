@@ -1,0 +1,8 @@
+[
+  {
+    "login": "student_demo",
+    "email": "student@example.com",
+    "password": "ChangeMe123!",
+    "role": "USER"
+  }
+]

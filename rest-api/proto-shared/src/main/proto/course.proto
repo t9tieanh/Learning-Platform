@@ -176,6 +176,8 @@ message TryIssueCourseCompletionCertificateResponse {
   string certificate_code = 4;
   bool lessons_complete = 5;
   bool tests_complete = 6;
+  int32 course_score = 7;
+  int32 course_score_total = 8;
 }
 
 message GetCourseLessonIdsByLessonRequest {

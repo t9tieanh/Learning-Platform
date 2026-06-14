@@ -1,8 +1,9 @@
 import React, { useMemo, useState } from 'react'
-import { Play, ChevronUp, ChevronDown, Sparkles } from 'lucide-react'
+import { Play, FileText, Sparkles } from 'lucide-react'
 import { LessonChunk } from '@/types/ai'
 import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible'
 import RemediationVideoPlayer from './RemediationVideoPlayer'
+import RemediationArticleViewer from './RemediationArticleViewer'
 import { cn } from '@/lib/utils'
 import {
   Tooltip,
@@ -16,6 +17,7 @@ interface StudentExplanationRemediationProps {
   explanation: string
   chunks: LessonChunk[]
   lessonId: string
+  lessonType?: 'video' | 'article'
   subtitlesRaw?: string | null
   onSeek?: (timestamp: string) => void
 }
@@ -24,10 +26,12 @@ const StudentExplanationRemediation: React.FC<StudentExplanationRemediationProps
   explanation,
   chunks,
   lessonId,
+  lessonType = 'video',
   subtitlesRaw,
   onSeek,
 }) => {
   const [openChunkId, setOpenChunkId] = useState<string | null>(null)
+  const isArticleLesson = lessonType === 'article'
 
   const parts = useMemo(() => {
     const normalized = chunkCitationUtil.normalizeChunkCitationText(explanation)
@@ -84,16 +88,20 @@ const StudentExplanationRemediation: React.FC<StudentExplanationRemediationProps
                           ? 'bg-blue-600 text-white shadow-lg shadow-blue-200' 
                           : 'bg-white text-blue-600 hover:bg-blue-600 hover:text-white'
                       )}
-                      title={isOpen ? 'Đóng trình phát' : 'Xem đoạn trích'}
+                      title={isOpen ? (isArticleLesson ? 'Đóng tài liệu' : 'Đóng trình phát') : (isArticleLesson ? 'Xem tài liệu' : 'Xem đoạn trích')}
                     >
-                      <Play className={cn('w-2.5 h-2.5 fill-current ml-0.5', isOpen && 'animate-pulse')} />
+                      {isArticleLesson ? (
+                        <FileText className={cn('w-2.5 h-2.5', isOpen && 'animate-pulse')} />
+                      ) : (
+                        <Play className={cn('w-2.5 h-2.5 fill-current ml-0.5', isOpen && 'animate-pulse')} />
+                      )}
                     </button>
                     
                     <span className='text-[11px] font-bold text-blue-700 select-none'>
                       {chunk.title || `Phân đoạn ${chunk.chunkIndex + 1}`}
                     </span>
 
-                    {onSeek && (
+                    {!isArticleLesson && onSeek && (
                       <button
                         type='button'
                         onClick={(e) => {
@@ -109,7 +117,9 @@ const StudentExplanationRemediation: React.FC<StudentExplanationRemediationProps
                   </span>
                 </TooltipTrigger>
                 <TooltipContent side='top' className='bg-slate-900 text-white border-none text-[10px] px-2 py-1'>
-                  <p className='font-bold uppercase tracking-tight'>{chunk.timestamp}</p>
+                  <p className='font-bold uppercase tracking-tight'>
+                    {isArticleLesson ? (chunk.title || `Phân đoạn ${chunk.chunkIndex + 1}`) : chunk.timestamp}
+                  </p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -117,19 +127,27 @@ const StudentExplanationRemediation: React.FC<StudentExplanationRemediationProps
         })}
       </p>
 
-      {chunks.map((chunk) => (
-        <Collapsible key={chunk.id} open={openChunkId === chunk.id}>
-          <CollapsibleContent className='overflow-hidden animate-in slide-in-from-top-2 duration-300'>
-            <div className='mt-2 rounded-2xl overflow-hidden shadow-2xl border border-blue-100/50 bg-white'>
-               <RemediationVideoPlayer 
-                  lessonId={lessonId} 
-                  chunk={chunk} 
-                  subtitlesRaw={subtitlesRaw} 
-               />
-            </div>
-          </CollapsibleContent>
-        </Collapsible>
-      ))}
+      {isArticleLesson ? (
+        openChunkId ? (
+          <div className='mt-2 rounded-2xl overflow-hidden shadow-2xl border border-blue-100/50 bg-white animate-in slide-in-from-top-2 duration-300'>
+            <RemediationArticleViewer lessonId={lessonId} />
+          </div>
+        ) : null
+      ) : (
+        chunks.map((chunk) => (
+          <Collapsible key={chunk.id} open={openChunkId === chunk.id}>
+            <CollapsibleContent className='overflow-hidden animate-in slide-in-from-top-2 duration-300'>
+              <div className='mt-2 rounded-2xl overflow-hidden shadow-2xl border border-blue-100/50 bg-white'>
+                <RemediationVideoPlayer
+                  lessonId={lessonId}
+                  chunk={chunk}
+                  subtitlesRaw={subtitlesRaw}
+                />
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
+        ))
+      )}
     </div>
   )
 }

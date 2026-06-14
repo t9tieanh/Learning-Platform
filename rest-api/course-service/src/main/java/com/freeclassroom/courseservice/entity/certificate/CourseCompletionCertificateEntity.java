@@ -41,6 +41,12 @@ public class CourseCompletionCertificateEntity extends AbstractEntity {
 
     LocalDateTime completedAt;
 
+    @Column(name = "course_score")
+    Integer courseScore;
+
+    @Column(name = "course_score_total")
+    Integer courseScoreTotal;
+
     @Enumerated(EnumType.STRING)
     EnumCertificateStatus status;
 }

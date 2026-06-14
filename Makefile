@@ -1,6 +1,10 @@
-.PHONY: help web api notification socket clean
+.PHONY: help web api notification socket clean nginx-local nginx-local-stop nginx-local-logs nginx-local-reload nginx-local-test nginx-local-status
 
-# Colors for output
+# Local lesson-media nginx (Docker)
+LOCAL_NGINX_DIR = local/nginx
+LOCAL_NGINX_PORT = 8889
+LOCAL_NGINX_CONTAINER = learnova-lesson-media-nginx
+GATEWAY_PORT = 8888
 BLUE = \033[0;34m
 GREEN = \033[0;32m
 YELLOW = \033[0;33m
@@ -26,6 +30,14 @@ help:
 	@echo "$(GREEN)General:$(NC)"
 	@echo "  $(YELLOW)make clean$(NC)            - Clean all build artifacts"
 	@echo "  $(YELLOW)make help$(NC)             - Show this help message"
+	@echo ""
+	@echo "$(GREEN)Local nginx (lesson media gateway):$(NC)"
+	@echo "  $(YELLOW)make nginx-local$(NC)        - Start nginx on http://localhost:$(LOCAL_NGINX_PORT) (proxy API -> :$(GATEWAY_PORT))"
+	@echo "  $(YELLOW)make nginx-local-stop$(NC)   - Stop local nginx container"
+	@echo "  $(YELLOW)make nginx-local-logs$(NC)   - Tail nginx access/error logs"
+	@echo "  $(YELLOW)make nginx-local-reload$(NC) - Reload nginx after config edit"
+	@echo "  $(YELLOW)make nginx-local-test$(NC)   - Smoke test media location (expect 401 without cookie)"
+	@echo "  $(YELLOW)make nginx-local-status$(NC) - Show container status"
 	@echo ""
 
 # ============ WEB (React) ============
@@ -151,3 +163,35 @@ dev-web-socket:
 	cd web && yarn run dev & \
 	cd socket-server && npm run dev & \
 	wait
+
+# ============ Local nginx (lesson media + API proxy) ============
+nginx-local:
+	@echo "$(BLUE)Starting local lesson-media nginx...$(NC)"
+	@echo "$(YELLOW)Prerequisite:$(NC) gateway/API running on localhost:$(GATEWAY_PORT) (make dev-all or docker stack)"
+	@echo "$(YELLOW)URL:$(NC)          http://localhost:$(LOCAL_NGINX_PORT)"
+	@echo "$(YELLOW)web/.env:$(NC)      VITE_API=http://localhost:$(LOCAL_NGINX_PORT)"
+	@echo "$(YELLOW)course-service:$(NC) LESSON_MEDIA_PUBLIC_BASE_URL=http://localhost:$(LOCAL_NGINX_PORT)"
+	@echo "$(YELLOW)web/.env:$(NC)      VITE_LESSON_VIDEO_URL_MODE=cookie-nginx"
+	@cd $(LOCAL_NGINX_DIR) && LOCAL_NGINX_PORT=$(LOCAL_NGINX_PORT) docker compose up -d
+	@echo "$(GREEN)✓ nginx-local running: http://localhost:$(LOCAL_NGINX_PORT)$(NC)"
+	@echo "$(GREEN)  logs: make nginx-local-logs$(NC)"
+
+nginx-local-stop:
+	@echo "$(BLUE)Stopping local lesson-media nginx...$(NC)"
+	@cd $(LOCAL_NGINX_DIR) && docker compose down
+	@echo "$(GREEN)✓ nginx-local stopped$(NC)"
+
+nginx-local-logs:
+	@docker logs -f $(LOCAL_NGINX_CONTAINER)
+
+nginx-local-reload:
+	@docker exec $(LOCAL_NGINX_CONTAINER) nginx -t
+	@docker exec $(LOCAL_NGINX_CONTAINER) nginx -s reload
+	@echo "$(GREEN)✓ nginx config reloaded$(NC)"
+
+nginx-local-test:
+	@echo "$(BLUE)Smoke test GET /media/lesson/test (expect HTTP 401 without cookie)...$(NC)"
+	@curl -s -o /dev/null -w "HTTP %{http_code}\n" "http://localhost:$(LOCAL_NGINX_PORT)/media/lesson/test-lesson-id"
+
+nginx-local-status:
+	@docker ps --filter name=$(LOCAL_NGINX_CONTAINER) --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'

@@ -122,6 +122,7 @@ const CoursePurchaseBox = ({
               />
 
               <CustomButton
+                data-testid='add-to-cart-button'
                 className='w-full h-12 text-base bg-red-500 hover:bg-red-600 text-white'
                 icon={<FaShoppingCart className='w-4 h-4' />}
                 label='Thêm vào giỏ hàng'

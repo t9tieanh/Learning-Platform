@@ -1,0 +1,42 @@
+name: Playwright Production Smoke
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 2 * * *'
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+
+    env:
+      BASE_URL: ${{ secrets.E2E_BASE_URL }}
+      TEST_STUDENT_EMAIL: ${{ secrets.TEST_STUDENT_EMAIL }}
+      TEST_STUDENT_PASSWORD: ${{ secrets.TEST_STUDENT_PASSWORD }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run production smoke tests
+        run: npx playwright test tests/smoke/prod-smoke.spec.ts
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          if-no-files-found: ignore
