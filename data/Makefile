@@ -63,6 +63,9 @@ import-feedback-json:
 sync-supabase:
 	$(PYTHON) scripts/supabase/import-data/sync_assistant_to_supabase.py
 
+normalize-supabase:
+	$(PYTHON) scripts/supabase/normalize_courses_for_supabase.py
+
 import-supabase:
 	$(PYTHON) scripts/supabase/import_to_supabase.py
 
