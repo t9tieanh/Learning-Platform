@@ -1,6 +1,7 @@
 package com.freeclassroom.courseservice.service.certificate;
 
 import com.example.grpc.user.GetUserResponse;
+import com.freeclassroom.courseservice.dto.certificate.CourseScoreSummary;
 import com.freeclassroom.courseservice.dto.response.ApiResponse;
 import com.freeclassroom.courseservice.dto.response.certificate.CertificateVerifyResponse;
 import com.freeclassroom.courseservice.dto.response.certificate.CourseCompletionCertificateResponse;
@@ -61,7 +62,7 @@ public class CourseCompletionCertificateService implements ICourseCompletionCert
             return Optional.empty();
         }
 
-        return Optional.of(createAndSaveCertificate(enrollment, course));
+        return Optional.of(createAndSaveCertificate(enrollment, course, CourseScoreSummary.noTestsDefault()));
     }
 
     /**
@@ -69,7 +70,10 @@ public class CourseCompletionCertificateService implements ICourseCompletionCert
      * Callers must validate eligibility via {@link CertificateEligibilityService} first.
      */
     @Transactional
-    public Optional<CourseCompletionCertificateEntity> issueCertificate(EnrollmentsEntity enrollment) {
+    public Optional<CourseCompletionCertificateEntity> issueCertificate(
+            EnrollmentsEntity enrollment,
+            CourseScoreSummary scoreSummary
+    ) {
         if (certificateRepository.existsByEnrollmentId(enrollment.getId())) {
             return certificateRepository.findByEnrollmentId(enrollment.getId());
         }
@@ -79,10 +83,14 @@ public class CourseCompletionCertificateService implements ICourseCompletionCert
             return Optional.empty();
         }
 
-        return Optional.of(createAndSaveCertificate(enrollment, course));
+        return Optional.of(createAndSaveCertificate(enrollment, course, scoreSummary));
     }
 
-    private CourseCompletionCertificateEntity createAndSaveCertificate(EnrollmentsEntity enrollment, CourseEntity course) {
+    private CourseCompletionCertificateEntity createAndSaveCertificate(
+            EnrollmentsEntity enrollment,
+            CourseEntity course,
+            CourseScoreSummary scoreSummary
+    ) {
         GetUserResponse student = userGrpcClient.getUser(enrollment.getUserId());
         GetUserResponse instructor = userGrpcClient.getUser(course.getInstructorId());
 
@@ -105,6 +113,8 @@ public class CourseCompletionCertificateService implements ICourseCompletionCert
                         .build())
                 .issuedAt(now)
                 .completedAt(now)
+                .courseScore(scoreSummary.getEarned())
+                .courseScoreTotal(scoreSummary.getTotal())
                 .status(EnumCertificateStatus.ISSUED)
                 .build();
 

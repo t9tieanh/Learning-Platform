@@ -79,7 +79,12 @@ export interface LessonTestStudentSectionPrs {
   onSeek?: (timestamp: string) => void
   chunks?: import('@/types/ai').LessonChunk[]
   lessonType?: 'video' | 'article'
-  onCourseCompleted?: (certificate?: { id: string; certificateCode: string }) => void
+  onCourseCompleted?: (certificate?: {
+    id: string
+    certificateCode: string
+    courseScore?: number | null
+    courseScoreTotal?: number | null
+  }) => void
   onCourseDataRefresh?: () => void
 }
 
@@ -199,7 +204,12 @@ const LessonTestStudentSection: React.FC<LessonTestStudentSectionPrs> = ({
         toast.success(`Đã nộp bài: ${res.result.summary.earnedPoints}/${res.result.summary.maxPoints} điểm`)
         onCourseDataRefresh?.()
         if (res.result.isCompletedCourse && res.result.certificateId && res.result.certificateCode) {
-          onCourseCompleted?.({ id: res.result.certificateId, certificateCode: res.result.certificateCode })
+          onCourseCompleted?.({
+            id: res.result.certificateId,
+            certificateCode: res.result.certificateCode,
+            courseScore: res.result.courseScore,
+            courseScoreTotal: res.result.courseScoreTotal
+          })
         } else if (res.result.isCompletedCourse) {
           onCourseCompleted?.()
         }

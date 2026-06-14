@@ -5,6 +5,7 @@ import com.freeclassroom.courseservice.configuration.CertificateProperties;
 import com.freeclassroom.courseservice.dto.certificate.CertificateEligibilityResult;
 import com.freeclassroom.courseservice.dto.certificate.CertificateEligibilityTryResult;
 import com.freeclassroom.courseservice.dto.certificate.CertificatePendingLessonTestRef;
+import com.freeclassroom.courseservice.dto.certificate.CourseScoreSummary;
 import com.freeclassroom.courseservice.entity.certificate.CourseCompletionCertificateEntity;
 import com.freeclassroom.courseservice.entity.course.CourseEntity;
 import com.freeclassroom.courseservice.entity.member.EnrollmentsEntity;
@@ -94,6 +95,11 @@ public class CertificateEligibilityService {
                 ? Math.round((passedTests * 1000.0) / lessonsWithTest) / 10.0
                 : 100.0;
 
+        CourseScoreSummary scoreSummary = computeCourseScoreSummary(testItems);
+
+        int courseScore = scoreSummary.getEarned();
+        int courseScoreTotal = scoreSummary.getTotal();
+
         List<String> blockers = buildBlockers(lessonsComplete, testsComplete, pendingTests, lessonsWithTest, passedTests, minPassPercent, alreadyIssued);
 
         return CertificateEligibilityResult.builder()
@@ -104,6 +110,8 @@ public class CertificateEligibilityService {
                 .passedTests(passedTests)
                 .testProgressPercent(testProgressPercent)
                 .minPassPercent(minPassPercent)
+                .courseScore(courseScore)
+                .courseScoreTotal(courseScoreTotal)
                 .blockers(blockers)
                 .pendingLessonTests(pendingLessonTests)
                 .build();
@@ -135,7 +143,10 @@ public class CertificateEligibilityService {
         }
 
         Optional<CourseCompletionCertificateEntity> issued =
-                courseCompletionCertificateService.issueCertificate(managedEnrollment);
+                courseCompletionCertificateService.issueCertificate(
+                        managedEnrollment,
+                        new CourseScoreSummary(eligibility.getCourseScore(), eligibility.getCourseScoreTotal())
+                );
 
         issued.ifPresent(cert -> TransactionSynchronizationManager.registerSynchronization(
                 new TransactionSynchronization() {
@@ -156,6 +167,22 @@ public class CertificateEligibilityService {
     private boolean isLessonsComplete(EnrollmentsEntity enrollment) {
         Double progress = enrollment.getProgress();
         return progress != null && progress >= 1.0;
+    }
+
+    /** Sum of best earned / max points across published lesson tests; 10/10 when the course has no tests. */
+    static CourseScoreSummary computeCourseScoreSummary(List<LessonTestEligibilityItem> testItems) {
+        int totalEarned = 0;
+        int totalMax = 0;
+        int lessonsWithTest = 0;
+        for (LessonTestEligibilityItem item : testItems) {
+            if (!item.getHasPublishedTest()) {
+                continue;
+            }
+            lessonsWithTest++;
+            totalEarned += (int) Math.round(item.getBestEarnedPoints());
+            totalMax += item.getMaxPoints();
+        }
+        return lessonsWithTest > 0 ? new CourseScoreSummary(totalEarned, totalMax) : CourseScoreSummary.noTestsDefault();
     }
 
     private List<String> buildBlockers(

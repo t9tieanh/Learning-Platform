@@ -195,6 +195,12 @@ public class LessonStudentService implements ILessonStudentService {
         CertificateEligibilityTryResult tryResult = certificateEligibilityService.tryIssue(enrollment);
         boolean isCompletedCourse = tryResult.isNewlyIssued();
         Optional<CourseCompletionCertificateEntity> issuedCertificate = tryResult.getCertificate();
+        Integer courseScore = issuedCertificate
+                .map(CourseCompletionCertificateEntity::getCourseScore)
+                .orElse(tryResult.getEligibility().getCourseScore());
+        Integer courseScoreTotal = issuedCertificate
+                .map(CourseCompletionCertificateEntity::getCourseScoreTotal)
+                .orElse(tryResult.getEligibility().getCourseScoreTotal());
 
         return ApiResponse.<MarkDoneLessonResponse>builder()
                 .result(
@@ -203,6 +209,8 @@ public class LessonStudentService implements ILessonStudentService {
                                 .completedCourse(isCompletedCourse)
                                 .certificateId(isCompletedCourse ? issuedCertificate.map(CourseCompletionCertificateEntity::getId).orElse(null) : null)
                                 .certificateCode(isCompletedCourse ? issuedCertificate.map(CourseCompletionCertificateEntity::getCertificateCode).orElse(null) : null)
+                                .courseScore(isCompletedCourse ? courseScore : null)
+                                .courseScoreTotal(isCompletedCourse ? courseScoreTotal : null)
                                 .build()
                 )
                 .code(200)

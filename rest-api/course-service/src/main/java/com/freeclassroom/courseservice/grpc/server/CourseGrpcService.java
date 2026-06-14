@@ -573,7 +573,13 @@ public class CourseGrpcService extends CourseServiceImplBase {
 
             tryResult.getCertificate().ifPresent(cert -> builder
                     .setCertificateId(cert.getId() != null ? cert.getId() : "")
-                    .setCertificateCode(cert.getCertificateCode() != null ? cert.getCertificateCode() : ""));
+                    .setCertificateCode(cert.getCertificateCode() != null ? cert.getCertificateCode() : "")
+                    .setCourseScore(cert.getCourseScore() != null ? cert.getCourseScore() : eligibility.getCourseScore())
+                    .setCourseScoreTotal(
+                            cert.getCourseScoreTotal() != null
+                                    ? cert.getCourseScoreTotal()
+                                    : eligibility.getCourseScoreTotal()
+                    ));
 
             responseObserver.onNext(builder.build());
             responseObserver.onCompleted();
