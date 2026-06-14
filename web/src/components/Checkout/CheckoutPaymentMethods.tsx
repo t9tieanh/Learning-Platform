@@ -96,10 +96,10 @@ const CheckoutPaymentMethods = ({ receiveEmail }: CheckoutPaymentMethodsProps) =
   }
 
   return (
-    <div className='flex flex-wrap gap-3'>
+    <div className='flex flex-col gap-3 w-full'>
       <CustomButton
         type='submit'
-        className='bg-pink-200 text-black py-2 rounded-md hover:bg-gray-200 shadow-sm'
+        className='w-full sm:w-auto bg-pink-200 text-black py-2 rounded-md hover:bg-gray-200 shadow-sm'
         label='Thanh toán bằng Momo'
         onClick={handlePayWithMomo}
         icon={
@@ -108,16 +108,7 @@ const CheckoutPaymentMethods = ({ receiveEmail }: CheckoutPaymentMethodsProps) =
       />
       <CustomButton
         type='submit'
-        className='bg-blue-300 text-gray py-2 rounded-md hover:bg-gray-200 shadow-sm'
-        label='Thanh toán bằng VnPay'
-        onClick={handlePayWithVnPay}
-        icon={
-          <img src={VnPayLogo} alt='VnPay Logo' className='h-6 w-auto' />
-        }
-      />
-      <CustomButton
-        type='submit'
-        className='bg-emerald-100 text-black py-2 rounded-md hover:bg-gray-200 shadow-sm'
+        className='w-full sm:w-auto bg-emerald-100 text-black py-2 rounded-md hover:bg-gray-200 shadow-sm'
         label='Thanh toán PayOS (VietQR)'
         onClick={handlePayWithPayos}
         icon={

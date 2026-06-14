@@ -60,9 +60,9 @@ async function bootstrap() {
 
     if (process.env.PAYOS_CONFIRM_WEBHOOK === 'true') {
       try {
-        await payosService.confirmWebhook();
+        await payosService.confirmWebhookWithRetry()
       } catch (err) {
-        Logger.warn(`PayOS webhook confirm skipped: ${err}`);
+        Logger.warn(`PayOS webhook confirm skipped after retries: ${err}`)
       }
     }
 
