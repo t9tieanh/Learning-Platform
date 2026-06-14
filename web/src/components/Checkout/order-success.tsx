@@ -7,9 +7,11 @@ import pendingIcon from '@/assets/images/pending-icon.webp'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Order, OrderStatus } from '@/types/order.type'
 import { formatCurrency } from '@/utils/common/formatPrice'
+import { usePostPaymentChatNotification } from '@/components/Chat/usePostPaymentChatNotification'
 
 const OrderSuccess = ({ order, id }: { order: Order; id: string }) => {
   const navigate = useNavigate()
+  usePostPaymentChatNotification(order.status === OrderStatus.Completed)
 
   // cal from price of courses
   const subtotal = order?.items?.reduce((sum, item) => sum + (item.price || 0), 0) || 0

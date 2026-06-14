@@ -6,11 +6,22 @@ function getRoomId(instructorId: string, studentId: string) {
     return ids.join("_");
 }
 
+function getUserInboxRoomId(userId: string) {
+    return `user_${userId}`;
+}
+
 export const registerChatHandlers = (io: Server, socket: Socket) => {
     socket.on("join_room", ({ instructorId, studentId }) => {
         const roomId = getRoomId(instructorId, studentId);
         socket.join(roomId);
         logger.info(`✅ Client ${socket.id} joined room: ${roomId}`);
+    });
+
+    socket.on("join_user_inbox", (userId: string) => {
+        if (!userId) return;
+        const inboxRoomId = getUserInboxRoomId(userId);
+        socket.join(inboxRoomId);
+        logger.info(`✅ Client ${socket.id} joined user inbox: ${inboxRoomId}`);
     });
 
     socket.on("server_message_send", (data) => {
@@ -22,7 +33,7 @@ export const registerChatHandlers = (io: Server, socket: Socket) => {
             roomId = getRoomId(peerId, senderId);
         }
         logger.info(`💬 Message from ${data.senderId} in ${roomId}: ${data.content}`);
-        io.to(roomId).emit("receive_message", {
+        const payload = {
             senderId: senderId,
             message: content,
             createdAt: Date.now(),
@@ -31,7 +42,9 @@ export const registerChatHandlers = (io: Server, socket: Socket) => {
             senderRole: senderRole,
             messageId: messageId,
             conversationId: conversationId
-        });
+        };
+        io.to(roomId).emit("receive_message", payload);
+        io.to(getUserInboxRoomId(peerId)).emit("message_notification", payload);
     });
 
     socket.on("server_message_read", (data) => {
