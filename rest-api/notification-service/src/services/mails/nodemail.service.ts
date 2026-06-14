@@ -3,6 +3,7 @@ import { env } from '~/config/env'
 import { NotificationDto, PaymentRefundNotification, VerifyEmail } from '~/dto/request/notification.dto'
 import { CourseApprovalEvent } from '~/dto/event/course-approval-event.dto'
 import { QueueNameEnum } from '~/enums/rabbitQueue.enum'
+import { NotificationOrderType } from '~/enums/notificationOrderType.enum'
 import { getUser } from '~/grpc/userClient'
 import { EMAIL_GRADIENTS, renderTemplate } from '~/utils/templateUtil'
 import Logger from '~/utils/logger'
@@ -114,7 +115,7 @@ class NodeMailService {
       }
 
       case QueueNameEnum.ORDERCONFIRM: {
-        Logger.info(`[NodeMailService] Handling ORDERCONFIRM. Processing for: ${(notification as any).payload?.customer_email || (notification as any).email}. isVip: ${(notification as any).payload?.orderType === 'VIP'}`);
+        Logger.info(`[NodeMailService] Handling ORDERCONFIRM. Processing for: ${(notification as any).payload?.customer_email || (notification as any).email}. isVip: ${(notification as any).payload?.orderType === NotificationOrderType.VIP}`);
         // Order confirmation notification - payload should contain customer and items
         const orderNotification = notification as {
           email?: string | string[]
@@ -122,7 +123,7 @@ class NodeMailService {
           payload?: any
         }
 
-        const isVipOrder = orderNotification.payload?.orderType === 'VIP'
+        const isVipOrder = orderNotification.payload?.orderType === NotificationOrderType.VIP
 
         subject = isVipOrder ? 'Cảm ơn bạn đã đăng ký VIP!' : 'Xác nhận đơn hàng của bạn'
         to = orderNotification.email || orderNotification.to || []
@@ -273,20 +274,28 @@ class NodeMailService {
         const refundNotification = notification as PaymentRefundNotification
         const refundPayload = refundNotification.payload
         const formattedTotal = Number(refundPayload.total).toLocaleString('vi-VN')
+        const isVip = refundPayload.orderType === NotificationOrderType.VIP
 
-        subject = 'Thông báo hoàn tiền đơn hàng Learnova'
+        subject = isVip
+          ? 'Đăng ký VIP Learnova không thành công'
+          : 'Thông báo hoàn tiền đơn hàng Learnova'
         to = refundPayload.customer_email
-        templateName = 'payment-refund.html'
+        templateName = isVip ? 'vip-payment-fail.html' : 'payment-refund.html'
         templateData = withEmailLayout({
-          pageTitle: 'Thông báo hoàn tiền · Learnova',
-          badge: 'Hoàn tiền',
-          headerGradient: EMAIL_GRADIENTS.danger,
-          headerTitle: `Xin chào ${refundPayload.customer_name || 'bạn'}!`,
-          headerSubtitle: 'Chúng tôi đã nhận thanh toán của bạn nhưng chưa thể kích hoạt đơn hàng.',
-          footerNote: 'Thông báo hoàn tiền · Learnova',
+          pageTitle: isVip ? 'Đăng ký VIP thất bại · Learnova' : 'Thông báo hoàn tiền · Learnova',
+          badge: isVip ? 'VIP' : 'Hoàn tiền',
+          headerGradient: isVip ? EMAIL_GRADIENTS.vip : EMAIL_GRADIENTS.danger,
+          headerTitle: isVip
+            ? `Xin chào ${refundPayload.customer_name || 'bạn'}!`
+            : `Xin chào ${refundPayload.customer_name || 'bạn'}!`,
+          headerSubtitle: isVip
+            ? 'Thanh toán đã ghi nhận nhưng hệ thống chưa thể kích hoạt gói VIP của bạn.'
+            : 'Chúng tôi đã nhận thanh toán của bạn nhưng chưa thể kích hoạt đơn hàng.',
+          footerNote: isVip ? 'Thông báo đăng ký VIP · Learnova' : 'Thông báo hoàn tiền · Learnova',
           customerName: refundPayload.customer_name,
           orderId: refundPayload.orderId,
           formattedTotal,
+          reason: refundPayload.reason || (isVip ? 'Kích hoạt gói VIP thất bại' : undefined),
         })
         break
       }
@@ -294,22 +303,30 @@ class NodeMailService {
         const adminNotification = notification as PaymentRefundNotification
         const adminPayload = adminNotification.payload
         const formattedTotal = Number(adminPayload.total).toLocaleString('vi-VN')
+        const isVip = adminPayload.orderType === NotificationOrderType.VIP
 
-        subject = `[Learnova] Thanh toán thất bại — cần hoàn tiền #${adminPayload.orderId}`
+        subject = isVip
+          ? `[Learnova] Đăng ký VIP thất bại — cần hoàn tiền #${adminPayload.orderId}`
+          : `[Learnova] Thanh toán thất bại — cần hoàn tiền #${adminPayload.orderId}`
         to = env.ADMIN_EMAIL
-        templateName = 'payment-fail-admin.html'
+        templateName = isVip ? 'vip-payment-fail-admin.html' : 'payment-fail-admin.html'
         templateData = withEmailLayout({
-          pageTitle: 'Cảnh báo thanh toán · Learnova',
+          pageTitle: isVip ? 'Cảnh báo VIP · Learnova' : 'Cảnh báo thanh toán · Learnova',
           badge: 'Cảnh báo',
-          headerGradient: EMAIL_GRADIENTS.danger,
-          headerTitle: 'Thanh toán thất bại — cần xử lý hoàn tiền',
-          headerSubtitle: 'Khách đã thanh toán qua PayOS nhưng hệ thống không kích hoạt được đơn hàng.',
-          footerNote: 'Thông báo admin · Learnova',
+          headerGradient: isVip ? EMAIL_GRADIENTS.vip : EMAIL_GRADIENTS.danger,
+          headerTitle: isVip
+            ? 'Đăng ký VIP thất bại — cần xử lý hoàn tiền'
+            : 'Thanh toán thất bại — cần xử lý hoàn tiền',
+          headerSubtitle: isVip
+            ? 'Khách đã thanh toán gói VIP nhưng user-service không kích hoạt được tài khoản VIP.'
+            : 'Khách đã thanh toán qua PayOS nhưng hệ thống không kích hoạt được đơn hàng.',
+          footerNote: isVip ? 'Thông báo admin VIP · Learnova' : 'Thông báo admin · Learnova',
           orderId: adminPayload.orderId,
           customerName: adminPayload.customer_name,
           customerEmail: adminPayload.customer_email,
           userId: adminPayload.user_id || '—',
           formattedTotal,
+          reason: adminPayload.reason || (isVip ? 'Kích hoạt gói VIP thất bại' : undefined),
         })
         break
       }

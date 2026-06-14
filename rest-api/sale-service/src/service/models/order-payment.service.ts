@@ -1,6 +1,6 @@
 import prismaService from '~/service/utils/prisma.service';
 import ApiError from '~/middleware/ApiError';
-import { OrderStatus } from '@prisma/client';
+import { OrderStatus, OrderType } from '@prisma/client';
 import { StatusCodes } from 'http-status-codes';
 import vnpayService from '~/service/utils/vnpay.service';
 import momoService from '../utils/momo.service';
@@ -76,6 +76,10 @@ class OrderPaymentService {
             return { alreadyCompleted: false, refundNotified: false };
         }
 
+        if (order.type === OrderType.VIP_SUBSCRIPTION) {
+            return this.handlePayosVipWebhook(order, orderId);
+        }
+
         const triggerResult = await orderFulfillmentService.triggerOrderFulfillment(orderId, 'webhook');
 
         if (triggerResult.triggered) {
@@ -88,6 +92,67 @@ class OrderPaymentService {
         Logger.error(`PayOS webhook: could not trigger fulfillment for ${orderId}: ${triggerResult.reason}`);
         await orderRefundNotificationService.sendPaymentRefundNotify(orderId);
         return { alreadyCompleted: false, refundNotified: true };
+    }
+
+    private async handlePayosVipWebhook(
+        order: { id: string; user_id: string; total: number; status: string },
+        orderId: string
+    ): Promise<{ alreadyCompleted: boolean; refundNotified: boolean }> {
+        if (await orderFulfillmentService.isSagaTriggered(orderId)) {
+            Logger.info(`PayOS VIP webhook: saga already triggered for ${orderId}`);
+            return { alreadyCompleted: false, refundNotified: false };
+        }
+
+        const lockKey = `payment:lock:${orderId}`;
+        const locked = await redisService.setLock(lockKey, { provider: PaymentProviderEnum.PAYOS, source: 'webhook' }, 120);
+        if (!locked) {
+            if (await orderFulfillmentService.isSagaTriggered(orderId)) {
+                return { alreadyCompleted: false, refundNotified: false };
+            }
+            Logger.warn(`PayOS VIP webhook: could not acquire lock for ${orderId}`);
+            return { alreadyCompleted: false, refundNotified: false };
+        }
+
+        if (await orderFulfillmentService.isSagaTriggered(orderId)) {
+            return { alreadyCompleted: false, refundNotified: false };
+        }
+
+        await prismaService.order.update({
+            where: { id: orderId },
+            data: { status: OrderStatus.Processing },
+        });
+
+        const correlationId = `viporder-${order.id}`;
+        const payload: VipRegisterCreatedPayload = {
+            orderId: order.id,
+            userId: order.user_id,
+            amount: order.total,
+            durationMonths: 1,
+        };
+
+        const envelope = createEnvelope({
+            type: VipMessageType.VIP_REGISTER_CREATED,
+            payload,
+            correlationId,
+        });
+
+        try {
+            await rabbitMQService.sendMessageTopic(
+                envelope,
+                'app_events',
+                VipMessageType.VIP_REGISTER_CREATED,
+                'topic',
+                true
+            );
+        } catch (err) {
+            Logger.error(`PayOS VIP webhook: publish VIP_REGISTER_CREATED failed for ${orderId}: ${err}`);
+            await this.markOrderCancel(orderId);
+            return { alreadyCompleted: false, refundNotified: true };
+        }
+
+        await orderFulfillmentService.markSagaTriggered(orderId, { source: 'webhook', correlationId });
+        Logger.info(`PayOS VIP webhook: VIP_REGISTER_CREATED published for ${orderId}`);
+        return { alreadyCompleted: false, refundNotified: false };
     }
 
     /** 
@@ -181,6 +246,11 @@ class OrderPaymentService {
             const { order, orderId: id } = await this.validatePaymentCallback(query, provider);
             orderId = id;
 
+            if (await orderFulfillmentService.isSagaTriggered(orderId)) {
+                Logger.info(`VIP verify (${provider}): saga already triggered for ${orderId}, treating as success`);
+                return this.buildResponse(true, orderId, order, `Thanh toán VIP ${orderId} thành công`, '00');
+            }
+
             const lockKey = `payment:lock:${orderId}`;
             const locked = await redisService.setLock(lockKey, { provider }, 120);
             if (!locked) {
@@ -230,6 +300,22 @@ class OrderPaymentService {
 
         } catch (err: any) {
             Logger.error(`Error verifying VIP order (${provider}): ${err}`);
+
+            if (err instanceof ApiError && err.status === StatusCodes.OK) {
+                let resolvedOrderId = orderId;
+                if (!resolvedOrderId && provider === PaymentProviderEnum.PAYOS) {
+                    try {
+                        const payosResult = await payosService.verifyReturnQuery(query);
+                        resolvedOrderId = payosResult.orderId;
+                    } catch {
+                        // ignore
+                    }
+                }
+                if (resolvedOrderId) {
+                    return this.buildResponse(true, resolvedOrderId, null, err.message, '00');
+                }
+            }
+
             if (orderId) await this.markOrderCancel(orderId);
 
             if (err instanceof ApiError) {

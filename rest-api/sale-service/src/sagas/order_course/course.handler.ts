@@ -8,6 +8,7 @@ import orderService from '~/service/models/order.service';
 import cartService from '~/service/models/cart.service';
 import redisService from '~/service/utils/redis.service';
 import orderRefundNotificationService from '~/service/utils/order-refund-notification.service';
+import { NotificationOrderType } from '~/enums/notificationOrderType.enum';
 import Logger from '~/utils/logger';
 
 class CourseHandler {
@@ -55,7 +56,7 @@ class CourseHandler {
                     await Promise.all([
                         this.sendMessage(
                             CourseMessageType.NOTIFICATION_SEND,
-                            { ...orderData, orderType: 'COURSE' },
+                            { ...orderData, orderType: NotificationOrderType.COURSE },
                             correlationId
                         ).catch((err) => errorMessages.push(`Failed to send NOTIFICATION_SEND: ${err}`)),
                         this.sendMessage(

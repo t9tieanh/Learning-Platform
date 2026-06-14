@@ -1,5 +1,5 @@
 import { QueueNameEnum } from '~/enums/rabbitQueue.enum'
-import { NotificationPayload } from '~/sagas/order/dtos'
+import { NotificationPayload, PaymentRefundPayload } from '~/sagas/order/dtos'
 
 export interface NotificationDto {
   type: QueueNameEnum
@@ -17,11 +17,5 @@ export interface OrderConfirm extends NotificationDto {
 }
 
 export interface PaymentRefundNotification extends NotificationDto {
-  payload: {
-    customer_name: string
-    customer_email: string
-    total: number
-    orderId: string
-    user_id?: string
-  }
+  payload: PaymentRefundPayload
 }

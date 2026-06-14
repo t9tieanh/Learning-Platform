@@ -6,6 +6,8 @@ import { createEnvelope } from '../events/envelope';
 import { VipMessageType, VipExchangeNames } from './vip.events';
 import orderService from '~/service/models/order.service';
 import redisService from '~/service/utils/redis.service';
+import orderRefundNotificationService from '~/service/utils/order-refund-notification.service';
+import { NotificationOrderType } from '~/enums/notificationOrderType.enum';
 import Logger from '~/utils/logger';
 
 class VipHandler {
@@ -34,7 +36,7 @@ class VipHandler {
             orderService.getOrderInfo(order.user_id, message.orderId)
                 .then(orderData => this.sendMessage(
                     VipMessageType.NOTIFICATION_SEND,
-                    { ...orderData, orderType: 'VIP' },
+                    { ...orderData, orderType: NotificationOrderType.VIP },
                     `viporder-${order.id}`
                 ))
                 .catch(err => Logger.error(`Failed to send VIP notification for order ${message.orderId}: ${err}`));
@@ -59,8 +61,22 @@ class VipHandler {
     }
 
     async handleVipRegisterFailed(message: VipRegisterFailedPayload) {
-        Logger.error(`VIP Register update failed for order ${message.orderId}: ${message.reason || message.status}`);
-        await prismaService.order.update({ where: { id: message.orderId }, data: { status: OrderStatus.Cancel } });
+        const reason = message.reason || message.status || 'Kích hoạt gói VIP thất bại';
+        Logger.error(`VIP Register update failed for order ${message.orderId}: ${reason}`);
+
+        await Promise.all([
+            prismaService.order.update({
+                where: { id: message.orderId },
+                data: { status: OrderStatus.Cancel },
+            }),
+            redisService.publishSagaResult(message.orderId, { success: false, reason }),
+        ]);
+
+        orderRefundNotificationService
+            .sendVipPaymentFailureNotify(message.orderId, reason)
+            .catch((err) =>
+                Logger.error(`Failed to send VIP failure notification for order ${message.orderId}: ${err}`)
+            );
     }
 }
 

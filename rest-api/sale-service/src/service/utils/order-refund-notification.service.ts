@@ -2,6 +2,7 @@ import prismaService from '~/service/utils/prisma.service'
 import rabbitMQService from '~/service/utils/rabbitmq.service'
 import { createEnvelope } from '~/sagas/events/envelope'
 import { CourseMessageType } from '~/sagas/order_course/course.events'
+import { NotificationOrderType } from '~/enums/notificationOrderType.enum'
 import Logger from '~/utils/logger'
 
 export interface PaymentRefundPayload {
@@ -10,6 +11,8 @@ export interface PaymentRefundPayload {
   customer_name: string
   customer_email: string
   total: number
+  orderType?: NotificationOrderType
+  reason?: string
 }
 
 class OrderRefundNotificationService {
@@ -35,6 +38,34 @@ class OrderRefundNotificationService {
       customer_name: order.customer_name,
       customer_email: order.customer_email,
       total: order.total,
+      orderType: NotificationOrderType.COURSE,
+    })
+  }
+
+  async sendVipPaymentFailureNotify(orderId: string, reason?: string): Promise<void> {
+    const order = await prismaService.order.findUnique({
+      where: { id: orderId },
+      select: {
+        user_id: true,
+        customer_name: true,
+        customer_email: true,
+        total: true,
+      },
+    })
+
+    if (!order) {
+      Logger.error(`VIP failure notify: order not found ${orderId}`)
+      return
+    }
+
+    await this.sendRefundPayload({
+      orderId,
+      user_id: order.user_id,
+      customer_name: order.customer_name,
+      customer_email: order.customer_email,
+      total: order.total,
+      orderType: NotificationOrderType.VIP,
+      reason: reason || 'Kích hoạt gói VIP thất bại',
     })
   }
 
