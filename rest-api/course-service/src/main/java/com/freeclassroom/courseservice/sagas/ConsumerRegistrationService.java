@@ -31,7 +31,9 @@ public class ConsumerRegistrationService {
     public void receiveMessage(MessageDTO<RegisterRequestDto> message) {
         try {
             if (message.getType() == EnumMessageType.ORDER_CREATED) {
-                handleRegisterUserToCourse(message);
+                // test thown error
+                // throw new Exception("Your error message here");
+                 handleRegisterUserToCourse(message);
             } else {
                 rollbackRegisterCourse(message);
             }
