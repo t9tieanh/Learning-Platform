@@ -317,10 +317,7 @@ export const ChatArea = ({
       // Gọi API — backend sẽ lưu DB và emit socket
       const res = await chatService.sendMessage({
         conversationId: conversationId ?? '',
-        senderId: myId ?? '',
-        senderRole: myRole,
-        content: text,
-        peerId
+        content: text
       })
 
       const saved = res?.result

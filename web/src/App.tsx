@@ -3,6 +3,7 @@ import './assets/styles/app.css'
 import './assets/styles/app.scss'
 import { Outlet } from 'react-router-dom'
 import { Toaster } from '@/components/ui/sonner'
+import { ChatNotificationToaster } from '@/components/Chat/ChatNotificationToaster'
 import GlobalChatNotifier from '@/components/Chat/GlobalChatNotifier'
 import { VipUpgradeProvider } from '@/contexts/VipUpgradeContext'
 import AuthCrossTabSync from '@/components/auth-gate/AuthCrossTabSync'
@@ -17,6 +18,7 @@ const App: FC = () => {
         {/* Global chat notifier must be inside Router context */}
         <GlobalChatNotifier />
         <Outlet />
+        <ChatNotificationToaster />
         <Toaster
           position='top-center'
           richColors
