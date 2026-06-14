@@ -52,6 +52,7 @@ export const CourseCard = ({
 
   return (
     <Card
+      data-testid='course-card'
       className='group cursor-pointer overflow-hidden rounded-2xl border border-slate-200 bg-white p-0 py-0 shadow-[0_10px_24px_rgba(15,23,42,0.04)] transition-all duration-200 ease-in-out hover:-translate-y-0.5 hover:shadow-[0_16px_36px_rgba(15,23,42,0.08)]'
       onClick={handleClickCourse}
     >

@@ -1,0 +1,193 @@
+{
+    "root_group": {
+        "checks": {
+            "instructor self profile status is 2xx": {
+                "path": "::instructor self profile status is 2xx",
+                "id": "a8c17bd38fa66b54f864bf6489f3627e",
+                "passes": 8,
+                "fails": 0,
+                "name": "instructor self profile status is 2xx"
+            }
+        },
+        "name": "",
+        "path": "",
+        "id": "d41d8cd98f00b204e9800998ecf8427e",
+        "groups": {
+            "Instructor overview": {
+                "name": "Instructor overview",
+                "path": "::Instructor overview",
+                "id": "619f32ebc1a08ba54b16329e554daa1e",
+                "groups": {},
+                "checks": {
+                        "instructor statistic status is 2xx": {
+                            "path": "::Instructor overview::instructor statistic status is 2xx",
+                            "id": "0bce37ef66c17576f97f0d9cbb99760f",
+                            "passes": 8,
+                            "fails": 0,
+                            "name": "instructor statistic status is 2xx"
+                        },
+                        "instructor chart status is 2xx": {
+                            "passes": 8,
+                            "fails": 0,
+                            "name": "instructor chart status is 2xx",
+                            "path": "::Instructor overview::instructor chart status is 2xx",
+                            "id": "6f16ba1c0db14df7235824d69aed728d"
+                        }
+                    }
+            },
+            "Instructor course and analytics": {
+                "groups": {},
+                "checks": {
+                        "instructor course list status is 2xx": {
+                            "path": "::Instructor course and analytics::instructor course list status is 2xx",
+                            "id": "8926b01140e7132a03921265a897abd4",
+                            "passes": 8,
+                            "fails": 0,
+                            "name": "instructor course list status is 2xx"
+                        },
+                        "instructor learners analytics status is 2xx": {
+                            "id": "34290b150e388b7700d1a6fa348f7305",
+                            "passes": 8,
+                            "fails": 0,
+                            "name": "instructor learners analytics status is 2xx",
+                            "path": "::Instructor course and analytics::instructor learners analytics status is 2xx"
+                        },
+                        "instructor revenue analytics status is 2xx": {
+                            "name": "instructor revenue analytics status is 2xx",
+                            "path": "::Instructor course and analytics::instructor revenue analytics status is 2xx",
+                            "id": "7b4c1a95f44542f4628ea3dce3d031f1",
+                            "passes": 8,
+                            "fails": 0
+                        }
+                    },
+                "name": "Instructor course and analytics",
+                "path": "::Instructor course and analytics",
+                "id": "337a703b14a2c28d59faf936068b42e1"
+            }
+        }
+    },
+    "metrics": {
+        "http_req_duration": {
+            "min": 326.092357,
+            "med": 1867.2386235,
+            "max": 20939.594805,
+            "p(90)": 7788.025538,
+            "p(95)": 8514.17786525,
+            "avg": 3218.768436696428,
+            "thresholds": {
+                "p(95)<2000": true
+            }
+        },
+        "vus": {
+            "value": 1,
+            "min": 1,
+            "max": 3
+        },
+        "http_req_tls_handshaking": {
+            "p(90)": 0,
+            "p(95)": 62.2828155,
+            "avg": 63.74635358928572,
+            "min": 0,
+            "med": 0,
+            "max": 3071.503847
+        },
+        "iterations": {
+            "count": 8,
+            "rate": 0.11889645122973323
+        },
+        "iteration_duration": {
+            "avg": 24213.83219825,
+            "min": 15448.711934,
+            "med": 24025.037448,
+            "max": 39062.269667,
+            "p(90)": 31121.9078026,
+            "p(95)": 35092.088734799996
+        },
+        "http_req_sending": {
+            "p(95)": 0.11419725,
+            "avg": 0.07357839285714284,
+            "min": 0.030722,
+            "med": 0.066611,
+            "max": 0.184358,
+            "p(90)": 0.1028695
+        },
+        "data_sent": {
+            "count": 12125,
+            "rate": 180.20243389506444
+        },
+        "http_reqs": {
+            "count": 56,
+            "rate": 0.8322751586081326
+        },
+        "http_req_duration{expected_response:true}": {
+            "min": 326.092357,
+            "med": 1867.2386235,
+            "max": 20939.594805,
+            "p(90)": 7788.025538,
+            "p(95)": 8514.17786525,
+            "avg": 3218.768436696428
+        },
+        "http_req_waiting": {
+            "med": 1557.1332975,
+            "max": 11906.088789,
+            "p(90)": 7196.916131,
+            "p(95)": 7436.99885925,
+            "avg": 2556.5709229107156,
+            "min": 292.579385
+        },
+        "http_req_blocked": {
+            "max": 4375.55542,
+            "p(90)": 0.0005495000000000001,
+            "p(95)": 132.49276275,
+            "avg": 97.06349458928578,
+            "min": 0.000176,
+            "med": 0.00024249999999999999
+        },
+        "checks": {
+            "fails": 0,
+            "passes": 48,
+            "value": 1
+        },
+        "data_received": {
+            "count": 99362,
+            "rate": 1476.7236483860943
+        },
+        "group_duration": {
+            "med": 5155.2768240000005,
+            "max": 24229.140547,
+            "p(90)": 8114.3506560000005,
+            "p(95)": 12939.85940725,
+            "avg": 6470.5471541875,
+            "min": 3019.904989
+        },
+        "http_req_receiving": {
+            "med": 147.46851049999998,
+            "max": 17700.461281,
+            "p(90)": 1109.6630045000002,
+            "p(95)": 1224.46502175,
+            "avg": 662.1239353928573,
+            "min": 0.068714
+        },
+        "http_req_failed": {
+            "passes": 0,
+            "fails": 56,
+            "thresholds": {
+                "rate<0.01": false
+            },
+            "value": 0
+        },
+        "vus_max": {
+            "value": 3,
+            "min": 3,
+            "max": 3
+        },
+        "http_req_connecting": {
+            "avg": 30.97116701785714,
+            "min": 0,
+            "med": 0,
+            "max": 1260.231249,
+            "p(90)": 0,
+            "p(95)": 59.26769975
+        }
+    }
+}

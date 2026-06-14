@@ -94,10 +94,19 @@ const SignInForm = ({
           <CardContent className='mt-5'>
             <form onSubmit={handleSubmit(onSubmit)}>
               <div className='login-form flex flex-col gap-3'>
-                <CustomInput placeholder='Tên đăng nhập hoặc email' {...register('username')} />
+                <CustomInput
+                  data-testid='login-email-input'
+                  placeholder='Tên đăng nhập hoặc email'
+                  {...register('username')}
+                />
                 {errors.username && <span className='text-red-500 text-xs text-left'>{errors.username.message}</span>}
 
-                <CustomInput placeholder='Mật khẩu' type='password' {...register('password')} />
+                <CustomInput
+                  data-testid='login-password-input'
+                  placeholder='Mật khẩu'
+                  type='password'
+                  {...register('password')}
+                />
                 {errors.password && <span className='text-red-500 text-xs text-left'>{errors.password.message}</span>}
               </div>
               <div className='remember-me flex justify-between items-center mt-5'>
@@ -113,6 +122,7 @@ const SignInForm = ({
               </div>
               <div className='signin-button w-full mt-5'>
                 <CustomButton
+                  data-testid='login-submit-button'
                   label='Đăng nhập'
                   isLoader={loading}
                   type='submit'
