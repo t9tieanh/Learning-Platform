@@ -5,6 +5,8 @@ import { env } from '~/config/env'
 import ApiError from '~/middleware/ApiError';
 import orderPaymentService from '~/service/models/order-payment.service';
 import orderHistoryService from '~/service/models/order-history.service';
+import orderVerifyRedirectService from '~/service/utils/order-verify-redirect.service';
+import { PaymentProviderEnum } from '~/enums/paymentProvider.enum';
 import Logger from '~/utils/logger';
 import { Webhook } from '@payos/node';
 
@@ -94,31 +96,21 @@ class OrderController {
     }
 
     async verifyOrderForVnpay(req: Request, res: Response, next: NextFunction) {
-        try {
-            const query = req.query;
-            const verificationResult = await orderPaymentService.verifyOrderForVnPay(query);
-            if (!verificationResult.isSuccess) {
-                sendResponse(res, {
-                    code: 400,
-                    message: 'Xác thực đơn hàng thất bại !',
-                    result: verificationResult
-                });
-                return;
-            }
-            return res.redirect(env.WEB_URL + verificationResult.orderId);
-        } catch (error) {
-            next(error);
-        }
+        return orderVerifyRedirectService.handleVerifyRedirect(
+            res,
+            req.query,
+            PaymentProviderEnum.VNPAY,
+            () => orderPaymentService.verifyOrderForVnPay(req.query)
+        );
     }
 
     async verifyOrderForMomo(req: Request, res: Response, next: NextFunction) {
-        try {
-            const query = req.query;
-            const verificationResult = await orderPaymentService.verifyOrderForMomo(query);
-            return res.redirect(env.WEB_URL + verificationResult.orderId);
-        } catch (error) {
-            next(error);
-        }
+        return orderVerifyRedirectService.handleVerifyRedirect(
+            res,
+            req.query,
+            PaymentProviderEnum.MOMO,
+            () => orderPaymentService.verifyOrderForMomo(req.query)
+        );
     }
 
     async verifyVipOrderForVnpay(req: Request, res: Response, next: NextFunction) {
@@ -153,21 +145,12 @@ class OrderController {
     }
 
     async verifyOrderForPayos(req: Request, res: Response, next: NextFunction) {
-        try {
-            const query = req.query;
-            const verificationResult = await orderPaymentService.verifyOrderForPayos(query);
-            if (!verificationResult.isSuccess) {
-                sendResponse(res, {
-                    code: 400,
-                    message: 'Xác thực đơn hàng thất bại !',
-                    result: verificationResult
-                });
-                return;
-            }
-            return res.redirect(env.WEB_URL + verificationResult.orderId);
-        } catch (error) {
-            next(error);
-        }
+        return orderVerifyRedirectService.handleVerifyRedirect(
+            res,
+            req.query,
+            PaymentProviderEnum.PAYOS,
+            () => orderPaymentService.verifyOrderForPayos(req.query)
+        );
     }
 
     async verifyVipOrderForPayos(req: Request, res: Response, next: NextFunction) {
