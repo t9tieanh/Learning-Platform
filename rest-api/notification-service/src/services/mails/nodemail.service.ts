@@ -22,6 +22,11 @@ export interface SendEmailOptions {
   subject: string
   text?: string
   html?: string
+  attachments?: Array<{
+    filename: string
+    content: Buffer
+    contentType?: string
+  }>
 }
 
 class NodeMailService {
@@ -46,7 +51,8 @@ class NodeMailService {
         to: options.to,
         subject: options.subject,
         text: options.text,
-        html: options.html
+        html: options.html,
+        attachments: options.attachments
       })
 
       Logger.info(`Email sent: ${info.messageId}`)
@@ -202,8 +208,12 @@ class NodeMailService {
           courseTitle?: string
           courseThumbnailUrl?: string | null
           certificateCode?: string
+          courseScore?: number | null
+          courseScoreTotal?: number | null
           profileUrl?: string
           courseUrl?: string
+          certificatePdfBase64?: string | null
+          certificatePdfFilename?: string | null
         }
 
         subject = 'Chúc mừng! Bạn đã nhận chứng chỉ hoàn thành khóa học 🎓'
@@ -224,10 +234,40 @@ class NodeMailService {
           courseThumbnailUrl: issued.courseThumbnailUrl,
           hasThumbnail: Boolean(issued.courseThumbnailUrl),
           certificateCode: issued.certificateCode,
+          courseScore: issued.courseScore,
+          courseScoreTotal: issued.courseScoreTotal,
+          hasCourseScore: issued.courseScore != null && issued.courseScoreTotal != null,
+          scoreDisplay:
+            issued.courseScore != null && issued.courseScoreTotal != null
+              ? `${issued.courseScore}/${issued.courseScoreTotal}`
+              : null,
+          hasPdfAttachment: Boolean(issued.certificatePdfBase64),
           profileUrl: issued.profileUrl,
           courseUrl: issued.courseUrl
         })
-        break
+
+        const html = await renderTemplate(templateName, templateData)
+
+        const mailPayload: SendEmailOptions = {
+          to: (to as string[]) || [notification.email],
+          subject,
+          text: html.replace(/<[^>]+>/g, ''),
+          html
+        }
+
+        if (issued.certificatePdfBase64) {
+          mailPayload.attachments = [
+            {
+              filename: issued.certificatePdfFilename || 'Learnova-Chung-chi.pdf',
+              content: Buffer.from(issued.certificatePdfBase64, 'base64'),
+              contentType: 'application/pdf'
+            }
+          ]
+        }
+
+        await this.send(mailPayload)
+        Logger.info(`Email sent: ${mailPayload.subject}`)
+        return
       }
       case QueueNameEnum.PAYMENT_REFUND: {
         const refundNotification = notification as PaymentRefundNotification

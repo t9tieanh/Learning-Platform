@@ -1,12 +1,9 @@
-import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Award, ArrowRight, Download, Loader2, PartyPopper, Sparkles } from 'lucide-react'
+import { Award, ArrowRight, Mail, PartyPopper, Sparkles } from 'lucide-react'
 import CustomDialog from '@/components/common/Dialog'
 import CustomButton from '@/components/common/Button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import CelebrationFireworks from '@/components/common/CelebrationFireworks'
-import courseCertificateService from '@/services/certificate/course-certificate.service'
-import { toast } from 'sonner'
 import logo from '@/assets/images/logo1.png'
 
 interface CourseCompletionCelebrationProps {
@@ -16,6 +13,8 @@ interface CourseCompletionCelebrationProps {
   courseThumbnailUrl?: string | null
   certificateId?: string
   certificateCode?: string
+  courseScore?: number | null
+  courseScoreTotal?: number | null
 }
 
 export default function CourseCompletionCelebration({
@@ -23,36 +22,15 @@ export default function CourseCompletionCelebration({
   onOpenChange,
   courseTitle,
   courseThumbnailUrl,
-  certificateId,
-  certificateCode
+  certificateCode,
+  courseScore,
+  courseScoreTotal
 }: CourseCompletionCelebrationProps) {
   const navigate = useNavigate()
-  const [downloading, setDownloading] = useState(false)
 
   const handleViewCertificate = () => {
     onOpenChange(false)
     navigate('/me?mode=cert')
-  }
-
-  const handleDownloadPdf = async () => {
-    if (!certificateId) {
-      handleViewCertificate()
-      return
-    }
-
-    try {
-      setDownloading(true)
-      await courseCertificateService.downloadCertificatePdf(
-        certificateId,
-        certificateCode ? `Learnova-Chung-chi-${certificateCode}.pdf` : undefined
-      )
-      toast.success('Đã tải chứng chỉ PDF')
-    } catch (error) {
-      console.error('Failed to download certificate PDF', error)
-      toast.error('Không thể tải file PDF. Vui lòng thử lại.')
-    } finally {
-      setDownloading(false)
-    }
   }
 
   return (
@@ -127,9 +105,17 @@ export default function CourseCompletionCelebration({
                     </span>
                   </h2>
                   <p className='text-gray-500 text-sm md:text-[14px] leading-relaxed font-semibold max-w-sm'>
-                    Chứng chỉ hoàn thành đã được cấp. Tải PDF ngay hoặc xem trong hồ sơ của bạn.
+                    Chứng chỉ hoàn thành đã được cấp. Xem trong hồ sơ của bạn hoặc kiểm tra email để nhận file PDF.
                   </p>
                 </div>
+              </div>
+
+              <div className='flex items-start gap-3 p-4 rounded-2xl bg-amber-50 border border-amber-100'>
+                <Mail className='w-4 h-4 text-amber-600 shrink-0 mt-0.5' />
+                <p className='text-xs text-amber-900/80 font-medium leading-relaxed'>
+                  Chúng tôi đã gửi file chứng chỉ PDF qua email đăng ký của bạn. Vui lòng kiểm tra hộp thư (và mục spam
+                  nếu cần).
+                </p>
               </div>
 
               <div className='flex items-center gap-3 p-4 rounded-2xl bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100'>
@@ -147,34 +133,30 @@ export default function CourseCompletionCelebration({
                       'Chứng chỉ khóa học của bạn'
                     )}
                   </p>
+                  {courseScore != null && courseScoreTotal != null && (
+                    <p className='text-xs text-gray-600 font-medium mt-1'>
+                      Tổng điểm đạt được:{' '}
+                      <span className='font-bold text-blue-700'>
+                        {courseScore}/{courseScoreTotal}
+                      </span>
+                    </p>
+                  )}
                 </div>
                 <Sparkles className='w-5 h-5 text-amber-500 shrink-0 animate-pulse' />
               </div>
 
               <div className='flex flex-wrap gap-2 pt-1'>
                 <CustomButton
-                  onClick={handleDownloadPdf}
-                  label={downloading ? 'Đang tải...' : 'Tải PDF'}
-                  icon={
-                    downloading ? (
-                      <Loader2 className='w-3.5 h-3.5 animate-spin' />
-                    ) : (
-                      <Download className='w-3.5 h-3.5' />
-                    )
-                  }
-                  className='h-10 flex-1 min-w-[calc(50%-0.25rem)] sm:min-w-0 basis-[calc(33.333%-0.375rem)] bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all hover:-translate-y-0.5 active:scale-[0.98] flex items-center justify-center gap-2 px-3 disabled:opacity-70'
-                />
-                <CustomButton
                   onClick={handleViewCertificate}
                   label='Xem hồ sơ'
                   icon={<Award className='w-3.5 h-3.5' />}
-                  className='h-10 flex-1 min-w-[calc(50%-0.25rem)] sm:min-w-0 basis-[calc(33.333%-0.375rem)] bg-white hover:bg-blue-50 text-blue-700 border border-blue-200 rounded-xl text-xs font-bold transition-all active:scale-[0.98] flex items-center justify-center gap-2 px-3'
+                  className='h-10 flex-1 min-w-[calc(50%-0.25rem)] sm:min-w-0 basis-[calc(50%-0.375rem)] bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all hover:-translate-y-0.5 active:scale-[0.98] flex items-center justify-center gap-2 px-3'
                 />
                 <CustomButton
                   onClick={() => onOpenChange(false)}
                   label='Tiếp tục học'
                   icon={<ArrowRight className='w-3.5 h-3.5' />}
-                  className='h-10 flex-1 min-w-full sm:min-w-0 basis-[calc(33.333%-0.375rem)] bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 rounded-xl text-xs font-bold transition-all active:scale-[0.98] flex items-center justify-center gap-2 px-3'
+                  className='h-10 flex-1 min-w-[calc(50%-0.25rem)] sm:min-w-0 basis-[calc(50%-0.375rem)] bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 rounded-xl text-xs font-bold transition-all active:scale-[0.98] flex items-center justify-center gap-2 px-3'
                 />
               </div>
             </div>

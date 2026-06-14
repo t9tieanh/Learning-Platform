@@ -18,4 +18,8 @@ public class MarkDoneLessonResponse {
     String certificateId;
 
     String certificateCode;
+
+    Integer courseScore;
+
+    Integer courseScoreTotal;
 }

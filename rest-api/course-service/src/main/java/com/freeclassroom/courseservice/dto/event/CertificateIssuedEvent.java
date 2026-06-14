@@ -21,6 +21,10 @@ public class CertificateIssuedEvent {
     String courseThumbnailUrl;
     String certificateId;
     String certificateCode;
+    Integer courseScore;
+    Integer courseScoreTotal;
     String profileUrl;
     String courseUrl;
+    String certificatePdfBase64;
+    String certificatePdfFilename;
 }

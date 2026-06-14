@@ -1,6 +1,13 @@
 import csv
 import os
-import uuid
+import random
+from collections import defaultdict
+
+EXPERTISE_TARGET = 5
+EXPERTISE_VARIANCE = 2
+EXPERTISE_MIN = EXPERTISE_TARGET - EXPERTISE_VARIANCE  # 3
+EXPERTISE_MAX = EXPERTISE_TARGET + EXPERTISE_VARIANCE  # 7
+EXPERTISE_RANDOM_SEED = 42
 
 def normalize_expertise(normalized_dir):
     courses_file = os.path.join(normalized_dir, 'courses.csv')
@@ -54,7 +61,23 @@ def normalize_expertise(normalized_dir):
         print(f"Error loading course_tag: {e}")
         return
 
-    # 4. Write expertise.csv
+    # 4. Limit each user to ~5 ± 2 expertise
+    user_tags = defaultdict(set)
+    for user_id, tag_id in user_expertise_set:
+        user_tags[user_id].add(tag_id)
+
+    rng = random.Random(EXPERTISE_RANDOM_SEED)
+    limited_user_expertise = set()
+    for user_id, tag_ids in user_tags.items():
+        tags = list(tag_ids)
+        target = rng.randint(EXPERTISE_MIN, EXPERTISE_MAX)
+        count = min(len(tags), target)
+        for tag_id in rng.sample(tags, count):
+            limited_user_expertise.add((user_id, tag_id))
+
+    print(f"Limited user expertise to {EXPERTISE_MIN}-{EXPERTISE_MAX} per user ({len(limited_user_expertise)} relations)")
+
+    # 5. Write expertise.csv
     # Schema: id, image, name
     expertise_header = ['id', 'image', 'name']
     with open(output_expertise_file, 'w', encoding='utf-8', newline='') as f:
@@ -68,18 +91,18 @@ def normalize_expertise(normalized_dir):
             })
     print(f"Created {len(tags_data)} expertise entries in: {output_expertise_file}")
 
-    # 5. Write user_expertise.csv
+    # 6. Write user_expertise.csv
     # Schema: user_id, expertise_id
     user_expertise_header = ['user_id', 'expertise_id']
     with open(output_user_expertise_file, 'w', encoding='utf-8', newline='') as f:
         writer = csv.DictWriter(f, fieldnames=user_expertise_header)
         writer.writeheader()
-        for user_id, tag_id in user_expertise_set:
+        for user_id, tag_id in limited_user_expertise:
             writer.writerow({
                 'user_id': user_id,
                 'expertise_id': tag_id
             })
-    print(f"Created {len(user_expertise_set)} user-expertise relations in: {output_user_expertise_file}")
+    print(f"Created {len(limited_user_expertise)} user-expertise relations in: {output_user_expertise_file}")
 
 if __name__ == "__main__":
     script_dir = os.path.dirname(os.path.abspath(__file__))

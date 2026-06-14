@@ -30,3 +30,5 @@ Semantic-Chunking-Typescript
 .codex
 
 docker-compose.local.yml
+
+production.v2

@@ -19,7 +19,12 @@ export const LessonViewer = forwardRef<VideoPlayerRef, {
   onShowChunkDetails?: (chunkId: string) => void;
   onProgress?: (percent: number) => void;
   onLessonCompleted?: () => void;
-  onCourseCompleted?: (certificate?: { id: string; certificateCode: string }) => void;
+  onCourseCompleted?: (certificate?: {
+    id: string
+    certificateCode: string
+    courseScore?: number | null
+    courseScoreTotal?: number | null
+  }) => void;
 }>(
   ({ lesson, courseTitle, subtitlesRaw, chunks = [], isInvalid, qualityReason, onShowChunkDetails, onProgress, onLessonCompleted, onCourseCompleted }, ref) => {
     const { id } = lesson
@@ -36,9 +41,9 @@ export const LessonViewer = forwardRef<VideoPlayerRef, {
           toast.success(response.message)
           onLessonCompletedRef.current?.()
           if (response.result?.isCompletedCourse) {
-            const { certificateId, certificateCode } = response.result
+            const { certificateId, certificateCode, courseScore, courseScoreTotal } = response.result
             if (certificateId && certificateCode) {
-              onCourseCompletedRef.current?.({ id: certificateId, certificateCode })
+              onCourseCompletedRef.current?.({ id: certificateId, certificateCode, courseScore, courseScoreTotal })
             } else {
               onCourseCompletedRef.current?.()
             }

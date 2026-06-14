@@ -17,7 +17,11 @@ export const handleCertificateIssuedEvent = async (event: CertificateIssuedEvent
     courseTitle: event.courseTitle,
     courseThumbnailUrl: event.courseThumbnailUrl,
     certificateCode: event.certificateCode,
+    courseScore: event.courseScore,
+    courseScoreTotal: event.courseScoreTotal,
     profileUrl: event.profileUrl,
-    courseUrl: event.courseUrl
+    courseUrl: event.courseUrl,
+    certificatePdfBase64: event.certificatePdfBase64,
+    certificatePdfFilename: event.certificatePdfFilename
   } as any)
 }
