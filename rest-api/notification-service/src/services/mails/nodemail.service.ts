@@ -8,15 +8,6 @@ import { getUser } from '~/grpc/userClient'
 import { EMAIL_GRADIENTS, renderTemplate } from '~/utils/templateUtil'
 import Logger from '~/utils/logger'
 
-function withEmailLayout(data: Record<string, unknown>): Record<string, unknown> {
-  return {
-    year: new Date().getFullYear(),
-    headerGradient: EMAIL_GRADIENTS.brand,
-    buttonGradient: EMAIL_GRADIENTS.brand,
-    ...data
-  }
-}
-
 // Interface cho options gửi mail
 export interface SendEmailOptions {
   to: string | string[]
@@ -33,6 +24,8 @@ export interface SendEmailOptions {
 class NodeMailService {
   static transporter: nodemailer.Transporter | null = null
 
+  private static readonly FAKE_EMAIL_DOMAIN = 'example.com'
+
   constructor() {
     if (NodeMailService.transporter === null) {
       NodeMailService.transporter = nodemailer.createTransport({
@@ -45,11 +38,44 @@ class NodeMailService {
     }
   }
 
-  private async send(options: SendEmailOptions): Promise<nodemailer.SentMessageInfo> {
+  private withEmailLayout(data: Record<string, unknown>): Record<string, unknown> {
+    return {
+      year: new Date().getFullYear(),
+      headerGradient: EMAIL_GRADIENTS.brand,
+      buttonGradient: EMAIL_GRADIENTS.brand,
+      ...data
+    }
+  }
+
+  private isFakeEmail(email: string): boolean {
+    const domain = email.trim().toLowerCase().split('@')[1]
+    return domain === NodeMailService.FAKE_EMAIL_DOMAIN
+  }
+
+  private normalizeRecipients(to: string | string[]): string[] {
+    const list = Array.isArray(to) ? to : [to]
+    return list.flat().filter(Boolean)
+  }
+
+  private async send(options: SendEmailOptions): Promise<nodemailer.SentMessageInfo | void> {
+    const recipients = this.normalizeRecipients(options.to)
+    const fakeRecipients = recipients.filter((email) => this.isFakeEmail(email))
+    const realRecipients = recipients.filter((email) => !this.isFakeEmail(email))
+
+    if (fakeRecipients.length > 0) {
+      Logger.info(
+        `Skipped email to fake address(es): ${fakeRecipients.join(', ')} | subject: ${options.subject}`
+      )
+    }
+
+    if (realRecipients.length === 0) {
+      return
+    }
+
     try {
       const info = await NodeMailService.transporter?.sendMail({
         from: '"Phạm Tiến Anh" <phama9162@gmail.com>',
-        to: options.to,
+        to: realRecipients,
         subject: options.subject,
         text: options.text,
         html: options.html,
@@ -78,7 +104,7 @@ class NodeMailService {
         subject = 'Hãy xác thực tài khoản của bạn'
         to = emailNotification.email
         templateName = 'email-verification.html'
-        templateData = withEmailLayout({
+        templateData = this.withEmailLayout({
           pageTitle: 'Xác thực tài khoản · Learnova',
           badge: 'Xác thực',
           headerTitle: `Xin chào ${emailNotification.name}!`,
@@ -99,7 +125,7 @@ class NodeMailService {
         subject = 'Đặt lại mật khẩu của bạn'
         to = passwordNotification.email
         templateName = 'email-verification.html'
-        templateData = withEmailLayout({
+        templateData = this.withEmailLayout({
           pageTitle: 'Đặt lại mật khẩu · Learnova',
           badge: 'Bảo mật',
           headerTitle: `Xin chào ${passwordNotification.name}!`,
@@ -133,7 +159,7 @@ class NodeMailService {
         const formattedTotal = isNaN(orderTotal) ? orderPayload.total : orderTotal.toLocaleString('vi-VN')
 
         if (isVipOrder) {
-          templateData = withEmailLayout({
+          templateData = this.withEmailLayout({
             ...orderPayload,
             pageTitle: 'Đăng ký VIP · Learnova',
             badge: 'VIP',
@@ -146,7 +172,7 @@ class NodeMailService {
             footerNote: 'Xác nhận gói VIP · Learnova'
           })
         } else {
-          templateData = withEmailLayout({
+          templateData = this.withEmailLayout({
             ...orderPayload,
             pageTitle: 'Xác nhận đơn hàng · Learnova',
             badge: 'Đơn hàng',
@@ -178,7 +204,7 @@ class NodeMailService {
         subject = 'Đừng quên học hôm nay trên Learnova 🎓'
         to = reminder.email || notification.email
         templateName = 'study-reminder.html'
-        templateData = withEmailLayout({
+        templateData = this.withEmailLayout({
           pageTitle: 'Nhắc học hôm nay · Learnova',
           badge: 'Nhắc học',
           headerTitle: `Chào ${reminder.userName || 'bạn'}, tiếp tục hành trình học tập nhé!`,
@@ -220,7 +246,7 @@ class NodeMailService {
         subject = 'Chúc mừng! Bạn đã nhận chứng chỉ hoàn thành khóa học 🎓'
         to = issued.email || notification.email
         templateName = 'certificate-issued.html'
-        templateData = withEmailLayout({
+        templateData = this.withEmailLayout({
           pageTitle: 'Chứng chỉ hoàn thành khóa học · Learnova',
           badge: 'Chứng chỉ',
           headerGradient: EMAIL_GRADIENTS.success,
@@ -281,7 +307,7 @@ class NodeMailService {
           : 'Thông báo hoàn tiền đơn hàng Learnova'
         to = refundPayload.customer_email
         templateName = isVip ? 'vip-payment-fail.html' : 'payment-refund.html'
-        templateData = withEmailLayout({
+        templateData = this.withEmailLayout({
           pageTitle: isVip ? 'Đăng ký VIP thất bại · Learnova' : 'Thông báo hoàn tiền · Learnova',
           badge: isVip ? 'VIP' : 'Hoàn tiền',
           headerGradient: isVip ? EMAIL_GRADIENTS.vip : EMAIL_GRADIENTS.danger,
@@ -310,7 +336,7 @@ class NodeMailService {
           : `[Learnova] Thanh toán thất bại — cần hoàn tiền #${adminPayload.orderId}`
         to = env.ADMIN_EMAIL
         templateName = isVip ? 'vip-payment-fail-admin.html' : 'payment-fail-admin.html'
-        templateData = withEmailLayout({
+        templateData = this.withEmailLayout({
           pageTitle: isVip ? 'Cảnh báo VIP · Learnova' : 'Cảnh báo thanh toán · Learnova',
           badge: 'Cảnh báo',
           headerGradient: isVip ? EMAIL_GRADIENTS.vip : EMAIL_GRADIENTS.danger,
@@ -345,7 +371,7 @@ class NodeMailService {
         if (event.action === 'APPROVED') {
           subject = 'Khóa học của bạn đã được duyệt!'
           templateName = 'course-approved.html'
-          templateData = withEmailLayout({
+          templateData = this.withEmailLayout({
             pageTitle: 'Khóa học đã duyệt · Learnova',
             badge: 'Đã duyệt',
             headerGradient: EMAIL_GRADIENTS.success,
@@ -361,7 +387,7 @@ class NodeMailService {
         } else if (event.action === 'REJECTED') {
           subject = 'Khóa học của bạn bị từ chối'
           templateName = 'course-rejected.html'
-          templateData = withEmailLayout({
+          templateData = this.withEmailLayout({
             pageTitle: 'Khóa học bị từ chối · Learnova',
             badge: 'Từ chối',
             headerGradient: EMAIL_GRADIENTS.danger,
