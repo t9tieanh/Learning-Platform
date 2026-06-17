@@ -166,7 +166,7 @@ const DashboardStats: React.FC = () => {
       y: {
         formatter: (value: number, { seriesIndex }) => {
           if (seriesIndex === 2) return `${Math.round(value)} học viên`
-          return formatCurrency(value * 1_000_000)
+          return formatCurrency(value * 1_000_00)
         }
       }
     }
