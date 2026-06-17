@@ -59,8 +59,8 @@ const TeacherInfo = ({ teacher }: { teacher: Teacher }) => {
       <CardContent className='p-6'>
         <div className='flex flex-col md:flex-row gap-6'>
           {/* Teacher Avatar and Basic Info */}
-          <div className='flex flex-col items-center md:items-start gap-4 md:w-1/3'>
-            <div className='rounded-full bg-gradient-to-br from-[#17EAD9] to-[#1FA2FF] p-[3px] shadow-md shadow-[#1FA2FF]/20'>
+          <div className='flex flex-col items-center md:items-start gap-4 md:w-1/4'>
+            <div className=' rounded-full bg-gradient-to-br from-[#17EAD9] to-[#1FA2FF] p-[3px] shadow-md shadow-[#1FA2FF]/20'>
               <Avatar className='h-20 w-20 border-2 border-white shadow-inner'>
                 <AvatarImage src={teacher?.image} alt={teacher?.name} className='object-cover' />
                 <AvatarFallback className='bg-gradient-to-br from-[#17EAD9] to-[#1FA2FF] text-lg font-semibold text-white'>
@@ -77,22 +77,6 @@ const TeacherInfo = ({ teacher }: { teacher: Teacher }) => {
               <p className='text-primary text-base font-medium'>@{teacher?.username}</p>
             </div>
 
-            <div className='grid grid-cols-2 gap-4 w-full'>
-              <div className='text-center p-3 bg-muted/30 rounded-lg'>
-                <div className='flex items-center justify-center gap-1 text-primary mb-1'>
-                  {React.createElement(Star, { className: 'w-4 h-4 fill-current' })}
-                  <span className='font-semibold'>5</span>
-                </div>
-                <p className='text-xs text-muted-foreground'>Đánh giá</p>
-              </div>
-              <div className='text-center p-3 bg-muted/30 rounded-lg'>
-                <div className='flex items-center justify-center gap-1 text-primary mb-1'>
-                  {React.createElement(BookOpen, { className: 'w-4 h-4' })}
-                  <span className='font-semibold'>{teacher?.numCourse}</span>
-                </div>
-                <p className='text-xs text-muted-foreground'>Khóa học</p>
-              </div>
-            </div>
             <Button
               type='button'
               className='w-full rounded-full bg-blue-600 text-white hover:bg-blue-700'
