@@ -12,6 +12,7 @@ import com.freeclassroom.courseservice.entity.member.EnrollmentsEntity;
 import com.freeclassroom.courseservice.enums.entity.EnumCourseStatus;
 import com.freeclassroom.courseservice.grpc.client.AssistantGrpcClient;
 import com.freeclassroom.courseservice.repository.entity.CourseCompletionCertificateRepository;
+import com.freeclassroom.courseservice.repository.entity.CourseRepository;
 import com.freeclassroom.courseservice.repository.entity.EnrollmentRepository;
 import com.freeclassroom.courseservice.repository.entity.LessonRepository;
 import lombok.AccessLevel;
@@ -37,6 +38,7 @@ public class CertificateEligibilityService {
     CertificateProperties certificateProperties;
     CourseCompletionCertificateService courseCompletionCertificateService;
     CourseCompletionCertificateRepository certificateRepository;
+    CourseRepository courseRepository;
     EnrollmentRepository enrollmentRepository;
     LessonRepository lessonRepository;
     CertificateIssuedNotificationService certificateIssuedNotificationService;
@@ -164,9 +166,24 @@ public class CertificateEligibilityService {
                 .build();
     }
 
+    /**
+     * Counts completed lessons from {@code lesson_progress}, not {@code enrollment.progress}.
+     * The denormalized progress field can stay at 1.0 after manual deletes or curriculum changes.
+     */
     private boolean isLessonsComplete(EnrollmentsEntity enrollment) {
-        Double progress = enrollment.getProgress();
-        return progress != null && progress >= 1.0;
+        CourseEntity course = enrollment.getCourse();
+        if (course == null || course.getId() == null || enrollment.getId() == null) {
+            return false;
+        }
+        long totalLessons = courseRepository.countLessonsByCourseId(course.getId());
+        if (totalLessons <= 0) {
+            return false;
+        }
+        long completedLessons = lessonRepository.countCompletedLessonsForEnrollment(
+                course.getId(),
+                enrollment.getId()
+        );
+        return completedLessons >= totalLessons;
     }
 
     /** Sum of best earned / max points across published lesson tests; 10/10 when the course has no tests. */
