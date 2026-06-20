@@ -6,6 +6,7 @@ interface GetAllParams {
   limit: number
   search?: string
   instructorId?: string
+  tag?: string
 }
 
 interface CreateBlogParams {
@@ -15,6 +16,7 @@ interface CreateBlogParams {
   title: string
   image_url: string
   content: string
+  tags?: string[]
   markdown_file_url?: string[]
 }
 
@@ -22,6 +24,7 @@ interface UpdateBlogParams {
   title?: string
   image_url?: string
   content?: string
+  tags?: string[]
   markdown_file_url?: string[]
 }
 
@@ -33,6 +36,7 @@ interface BlogListItem {
   title: string
   image_url: string
   content: string
+  tags: string[]
   markdown_file_url: string[]
   createdAt: Date
   updatedAt: Date
@@ -40,6 +44,7 @@ interface BlogListItem {
 
 interface BlogListResult {
   items: BlogListItem[]
+  availableTags: string[]
   page: number
   limit: number
   total: number
@@ -54,9 +59,91 @@ interface BlogLeanDocument {
   title: string
   image_url: string
   content: string
+  tags?: string[]
   markdown_file_url?: string[]
   createdAt: Date
   updatedAt: Date
+}
+
+const normalizeTag = (value: string): string => value.trim()
+
+const normalizeTags = (values: unknown): string[] => {
+  if (!Array.isArray(values)) return []
+
+  const normalized: string[] = []
+  const seen = new Set<string>()
+
+  for (let i = 0; i < values.length; i += 1) {
+    const raw = values[i]
+    if (typeof raw !== 'string') continue
+
+    const display = normalizeTag(raw)
+    if (!display) continue
+
+    const key = display.toLowerCase()
+    if (seen.has(key)) continue
+
+    seen.add(key)
+    normalized.push(display)
+  }
+
+  return normalized
+}
+
+const escapeRegex = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+
+const buildListQuery = ({ search = '', instructorId, tag }: Pick<GetAllParams, 'search' | 'instructorId' | 'tag'>) => {
+  const trimmedSearch = search.trim()
+  const normalizedTag = typeof tag === 'string' ? tag.trim().toLowerCase() : ''
+  const query: FilterQuery<IBlog> = {}
+
+  if (trimmedSearch.length > 0) {
+    query.$text = { $search: trimmedSearch }
+  }
+
+  if (typeof instructorId === 'string' && instructorId.trim().length > 0) {
+    query.instructor_id = instructorId.trim()
+  }
+
+  if (normalizedTag.length > 0) {
+    query.tags = {
+      $elemMatch: {
+        $regex: `^${escapeRegex(normalizedTag)}$`,
+        $options: 'i'
+      }
+    }
+  }
+
+  return query
+}
+
+const getAvailableTags = async ({
+  search = '',
+  instructorId
+}: Pick<GetAllParams, 'search' | 'instructorId'>): Promise<string[]> => {
+  const query = buildListQuery({ search, instructorId })
+
+  const rows = await BlogModel.aggregate<{ _id: string; display: string }>([
+    { $match: query },
+    { $unwind: '$tags' },
+    {
+      $group: {
+        _id: { $toLower: '$tags' },
+        display: { $first: '$tags' }
+      }
+    },
+    { $sort: { display: 1 } }
+  ])
+
+  const availableTags: string[] = []
+  for (let i = 0; i < rows.length; i += 1) {
+    const value = typeof rows[i].display === 'string' ? rows[i].display : rows[i]._id
+    if (typeof value === 'string' && value.trim().length > 0) {
+      availableTags.push(value)
+    }
+  }
+
+  return availableTags
 }
 
 const toBlogListItem = (b: BlogLeanDocument): BlogListItem => {
@@ -68,26 +155,18 @@ const toBlogListItem = (b: BlogLeanDocument): BlogListItem => {
     title: b.title,
     image_url: b.image_url,
     content: b.content,
+    tags: normalizeTags(b.tags),
     markdown_file_url: Array.isArray(b.markdown_file_url) ? b.markdown_file_url : [],
     createdAt: b.createdAt,
     updatedAt: b.updatedAt
   }
 }
 
-const getAllBlogs = async ({ page, limit, search = '', instructorId }: GetAllParams): Promise<BlogListResult> => {
+const getAllBlogs = async ({ page, limit, search = '', instructorId, tag }: GetAllParams): Promise<BlogListResult> => {
   const skip = (page - 1) * limit
   const trimmedSearch = search.trim()
   const hasSearch = trimmedSearch.length > 0
-
-  const query: FilterQuery<IBlog> = {}
-
-  if (hasSearch) {
-    query.$text = { $search: trimmedSearch }
-  }
-
-  if (typeof instructorId === 'string' && instructorId.trim().length > 0) {
-    query.instructor_id = instructorId.trim()
-  }
+  const query = buildListQuery({ search, instructorId, tag })
 
   let findQuery = BlogModel.find(query)
 
@@ -100,9 +179,10 @@ const getAllBlogs = async ({ page, limit, search = '', instructorId }: GetAllPar
     findQuery = findQuery.sort({ createdAt: -1 })
   }
 
-  const [itemsRaw, total] = await Promise.all([
+  const [itemsRaw, total, availableTags] = await Promise.all([
     findQuery.skip(skip).limit(limit).lean(),
-    BlogModel.countDocuments(query)
+    BlogModel.countDocuments(query),
+    getAvailableTags({ search, instructorId })
   ])
 
   const items: BlogListItem[] = []
@@ -113,6 +193,7 @@ const getAllBlogs = async ({ page, limit, search = '', instructorId }: GetAllPar
   const totalPages = Math.ceil(total / limit) || 1
   return {
     items,
+    availableTags,
     page,
     limit,
     total,
@@ -152,6 +233,7 @@ const create = async (params: CreateBlogParams) => {
     title: params.title,
     image_url: params.image_url,
     content: params.content,
+    tags: normalizeTags(params.tags),
     markdown_file_url: Array.isArray(params.markdown_file_url) ? params.markdown_file_url : []
   })
 
@@ -165,12 +247,14 @@ const update = async (id: string, params: UpdateBlogParams) => {
     title?: string
     image_url?: string
     content?: string
+    tags?: string[]
     markdown_file_url?: string[]
   } = {}
 
   if (typeof params.title === 'string') updateData.title = params.title
   if (typeof params.image_url === 'string') updateData.image_url = params.image_url
   if (typeof params.content === 'string') updateData.content = params.content
+  if (Array.isArray(params.tags)) updateData.tags = normalizeTags(params.tags)
   if (Array.isArray(params.markdown_file_url)) updateData.markdown_file_url = params.markdown_file_url
 
   const b = await BlogModel.findByIdAndUpdate(id, updateData, { new: true }).lean()

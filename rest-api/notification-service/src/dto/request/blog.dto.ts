@@ -22,6 +22,11 @@ export class CreateBlogDTO {
   @IsOptional()
   @IsArray()
   @Type(() => String)
+  tags?: string[] = []
+
+  @IsOptional()
+  @IsArray()
+  @Type(() => String)
   markdown_file_url?: string[] = []
 }
 
@@ -49,6 +54,11 @@ export class GetBlogsDTO {
 
   @IsOptional()
   @IsString()
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : ''))
+  tag?: string
+
+  @IsOptional()
+  @IsString()
   instructorId?: string
 }
 
@@ -73,6 +83,11 @@ export class UpdateBlogDTO {
   @IsOptional()
   @IsString()
   content?: string
+
+  @IsOptional()
+  @IsArray()
+  @Type(() => String)
+  tags?: string[]
 
   @IsOptional()
   @IsArray()

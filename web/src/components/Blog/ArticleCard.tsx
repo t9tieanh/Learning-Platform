@@ -5,9 +5,12 @@ interface ArticleCardProps {
   category: string
   title: string
   slug: string
+  tags?: string[]
 }
 
-export const ArticleCard = ({ image, category, title, slug }: ArticleCardProps) => {
+export const ArticleCard = ({ image, category, title, slug, tags = [] }: ArticleCardProps) => {
+  const visibleTags = tags.slice(0, 2)
+
   return (
     <Link to={`/blog-details/${slug}`} className='group'>
       <article className='flex gap-4 items-start transition-all mb-2'>
@@ -17,6 +20,18 @@ export const ArticleCard = ({ image, category, title, slug }: ArticleCardProps) 
           <h3 className='text-sm font-semibold text-foreground mt-1 line-clamp-2 group-hover:text-primary transition-colors'>
             {title}
           </h3>
+          {visibleTags.length > 0 && (
+            <div className='mt-2 flex flex-wrap gap-1.5'>
+              {visibleTags.map((tag) => (
+                <span
+                  key={tag}
+                  className='rounded-full border border-blue-200 bg-blue-50 px-2 py-0.5 text-[10px] font-semibold text-blue-700'
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
       </article>
     </Link>

@@ -29,6 +29,9 @@ export interface QuizDto {
     type: string
     difficulty: string
     bloomLevel: string
+    isApproved: boolean
+    quizScope: string
+    aiGenerated: boolean
     choices: QuizChoiceDto[]
 }
 
@@ -132,6 +135,9 @@ export function toChunkDto(chunk: LessonChunk & { quizzes?: (Quiz & { choices: Q
             type: quiz.type,
             difficulty: quiz.difficulty,
             bloomLevel: quiz.bloomLevel,
+            isApproved: quiz.isApproved,
+            quizScope: quiz.quizScope,
+            aiGenerated: quiz.aiGenerated,
             choices: (quiz.choices || []).map((choice: QuizChoice) => ({
                 id: choice.id,
                 text: choice.text,

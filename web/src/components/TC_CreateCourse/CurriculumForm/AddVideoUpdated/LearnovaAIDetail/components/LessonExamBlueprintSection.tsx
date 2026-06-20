@@ -1283,9 +1283,11 @@ const LessonExamBlueprintSection: React.FC<LessonExamBlueprintSectionProps> = ({
                                       <span className='font-bold text-blue-700 shrink-0 tabular-nums'>
                                         {qi + 1}.
                                       </span>
-                                      <span className='flex-1 [overflow-wrap:anywhere] font-medium'>
-                                        {q.question}
-                                      </span>
+                                      <div className='flex-1 [overflow-wrap:anywhere] font-medium prose-sm max-w-none prose-p:my-0' dangerouslySetInnerHTML={{ 
+                                        __html: (q.question || '').includes('&lt;') 
+                                          ? new DOMParser().parseFromString(q.question || '', 'text/html').documentElement.textContent || ''
+                                          : (q.question || '')
+                                      }} />
                                       <CustomButton
                                         type='button'
                                         variant='ghost'

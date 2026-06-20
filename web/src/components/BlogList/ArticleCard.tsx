@@ -9,6 +9,7 @@ export interface Article {
   userName: string
   userAvt: string
   createdAt: string
+  tags?: string[]
 }
 
 interface ArticleCardProps {
@@ -34,6 +35,18 @@ export const ArticleCard = ({ article }: ArticleCardProps) => {
         <h3 className='text-xl font-semibold text-card-foreground mb-4 line-clamp-2 group-hover:text-accent transition-colors duration-300'>
           {article.title}
         </h3>
+        {article.tags && article.tags.length > 0 && (
+          <div className='mb-4 flex flex-wrap gap-2'>
+            {article.tags.slice(0, 2).map((tag) => (
+              <span
+                key={tag}
+                className='rounded-full border border-blue-200 bg-blue-50 px-2.5 py-1 text-[11px] font-semibold text-blue-700'
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
         <div className='flex items-center gap-4 text-sm text-muted-foreground'>
           <div className='flex items-center gap-1.5'>
             <User className='h-4 w-4' />

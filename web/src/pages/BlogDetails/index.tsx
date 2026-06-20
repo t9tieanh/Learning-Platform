@@ -121,17 +121,30 @@ const BlogDetails = () => {
                   {blog.title}
                 </h1>
 
+                {blog.tags.length > 0 && (
+                  <div className='flex flex-wrap gap-2'>
+                    {blog.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className='rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700'
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
                 <div className='flex items-center gap-4 py-3 border-b border-border/50'>
                   <Avatar className='h-12 w-12 border-2 border-blue-300'>
                     <AvatarImage src={blog.userAvt} alt={blog.userName || ''} />
                     <AvatarFallback className='bg-muted text-muted-foreground'>
                       {blog.userName
                         ? blog.userName
-                          .split(' ')
-                          .filter(Boolean)
-                          .slice(0, 2)
-                          .map((word) => word[0].toUpperCase())
-                          .join('')
+                            .split(' ')
+                            .filter(Boolean)
+                            .slice(0, 2)
+                            .map((word) => word[0].toUpperCase())
+                            .join('')
                         : 'U'}
                     </AvatarFallback>
                   </Avatar>

@@ -8,6 +8,7 @@ export interface IBlog extends Document {
   title: string
   image_url: string
   content: string
+  tags: string[]
   markdown_file_url: string[]
   createdAt: Date
   updatedAt: Date
@@ -23,6 +24,7 @@ const BlogSchema: Schema = new Schema(
     title: { type: String, required: true },
     image_url: { type: String, required: true },
     content: { type: String, required: true },
+    tags: { type: [String], default: [] },
     markdown_file_url: { type: [String], default: [] }
   },
   {

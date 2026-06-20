@@ -5,11 +5,17 @@ interface SearchBarProps {
   value: string
   onChange: (value: string) => void
   placeholder?: string
+  className?: string
 }
 
-export const SearchBar = ({ value, onChange, placeholder = 'Tìm kiếm bài viết...' }: SearchBarProps) => {
+export const SearchBar = ({
+  value,
+  onChange,
+  placeholder = 'Tìm kiếm bài viết...',
+  className = ''
+}: SearchBarProps) => {
   return (
-    <div className='relative w-full max-w-2xl mx-auto'>
+    <div className={`relative w-full ${className}`}>
       {/* Icon */}
       <Search className='absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5' />
 

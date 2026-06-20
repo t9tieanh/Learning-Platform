@@ -8,6 +8,7 @@ export interface BlogItem {
   title: string
   image_url: string
   content: string
+  tags: string[]
   markdown_file_url: string[]
   createdAt: string
   updatedAt: string
@@ -17,6 +18,7 @@ export interface BlogItem {
 
 export interface BlogListResponse {
   items: BlogItem[]
+  availableTags: string[]
   page: number
   limit: number
   total: number
@@ -42,6 +44,7 @@ function normalizeBlogItem(item: BlogItemRaw): BlogItem {
     title: item.title || '',
     image_url: item.image_url || '',
     content: item.content || '',
+    tags: Array.isArray(item.tags) ? item.tags.filter((tag): tag is string => typeof tag === 'string') : [],
     markdown_file_url: Array.isArray(item.markdown_file_url) ? item.markdown_file_url : [],
     createdAt: item.createdAt || '',
     updatedAt: item.updatedAt || '',
@@ -56,6 +59,9 @@ function normalizeBlogListResponse(raw: Partial<BlogListResponse>, limitFallback
   const items = rawItems.map((item) => normalizeBlogItem(item as BlogItemRaw))
   return {
     items,
+    availableTags: Array.isArray(raw.availableTags)
+      ? raw.availableTags.filter((tag): tag is string => typeof tag === 'string')
+      : [],
     page: Number(raw.page) || 1,
     limit: Number(raw.limit) || limitFallback,
     total: Number(raw.total) || 0,
@@ -68,6 +74,7 @@ export interface CreateBlogRequest {
   title: string
   image_url: string
   content: string
+  tags?: string[]
   markdown_file_url?: string[]
 }
 
@@ -75,6 +82,7 @@ export interface UpdateBlogRequest {
   title?: string
   image_url?: string
   content?: string
+  tags?: string[]
   markdown_file_url?: string[]
 }
 
@@ -99,12 +107,14 @@ async function getAll(params: {
   page?: number
   limit?: number
   search?: string
+  tag?: string
 }): Promise<BlogListResponse> {
-  const { page = 1, limit = 6, search = '' } = params || {}
+  const { page = 1, limit = 6, search = '', tag = '' } = params || {}
   const qs = new URLSearchParams()
   qs.set('page', String(page))
   qs.set('limit', String(limit))
   if (search) qs.set('search', search)
+  if (tag) qs.set('tag', tag)
   const res = await axiosClient.axiosInstance.get(`/notify/blog/all?${qs.toString()}`)
   return normalizeBlogListResponse((res.data?.result || {}) as Partial<BlogListResponse>, limit)
 }
@@ -114,13 +124,15 @@ async function getAllByInstructorId(params: {
   limit?: number
   search?: string
   instructorId?: string
+  tag?: string
 }): Promise<BlogListResponse> {
-  const { page = 1, limit = 6, search = '', instructorId } = params || {}
+  const { page = 1, limit = 6, search = '', instructorId, tag = '' } = params || {}
   const qs = new URLSearchParams()
   qs.set('page', String(page))
   qs.set('limit', String(limit))
   qs.set('instructorId', String(instructorId))
   if (search) qs.set('search', search)
+  if (tag) qs.set('tag', tag)
   const res = await axiosClient.axiosInstance.get(`/notify/blog/tc-all?${qs.toString()}`)
   return normalizeBlogListResponse((res.data?.result || {}) as Partial<BlogListResponse>, limit)
 }

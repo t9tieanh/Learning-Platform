@@ -4,12 +4,12 @@ import blogBg from '@/assets/images/blog-banner.png'
 interface FeaturedCardProps {
   title: string
   description: string
-  date: string
   slug: string
   image?: string
+  tags?: string[]
 }
 
-export const FeaturedCard = ({ title, description, date, slug, image }: FeaturedCardProps) => {
+export const FeaturedCard = ({ title, description, slug, image, tags = [] }: FeaturedCardProps) => {
   return (
     <Link to={`/blog-details/${slug}`}>
       <article
@@ -42,6 +42,19 @@ export const FeaturedCard = ({ title, description, date, slug, image }: Featured
           <div className='inline-block px-3 py-1 rounded-full bg-white/20 backdrop-blur-sm text-xs font-semibold mb-4'>
             NỔI BẬT
           </div>
+
+          {tags.length > 0 && (
+            <div className='mb-4 flex flex-wrap gap-2'>
+              {tags.slice(0, 2).map((tag) => (
+                <span
+                  key={tag}
+                  className='rounded-full border border-blue-300/60 bg-blue-500/70 px-3 py-1 text-[11px] font-semibold text-white backdrop-blur-sm'
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
 
           <h2 className='text-2xl md:text-3xl font-bold mb-4 leading-tight'>{title}</h2>
 

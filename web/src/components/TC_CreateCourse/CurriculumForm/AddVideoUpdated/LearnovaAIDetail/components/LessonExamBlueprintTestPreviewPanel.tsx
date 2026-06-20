@@ -224,9 +224,11 @@ const LessonExamBlueprintTestPreviewPanel: React.FC<
                     <span className='tabular-nums text-blue-700 shrink-0'>
                       {idx + 1}.
                     </span>
-                    <span className='[overflow-wrap:anywhere]'>
-                      {q.question}
-                    </span>
+                    <div className='[overflow-wrap:anywhere] prose-sm max-w-none prose-p:my-0' dangerouslySetInnerHTML={{ 
+                      __html: (q.question || '').includes('&lt;') 
+                        ? new DOMParser().parseFromString(q.question || '', 'text/html').documentElement.textContent || ''
+                        : (q.question || '')
+                    }} />
                   </p>
 
                   {q.type === QuestionType.SHORT_ANSWER ? (
@@ -282,9 +284,9 @@ const LessonExamBlueprintTestPreviewPanel: React.FC<
                   {answered &&
                   q.type !== QuestionType.SHORT_ANSWER &&
                   q.explanation?.trim() ? (
-                    <p className='mt-2 text-[11px] md:text-[12px] text-slate-600 leading-snug border-t border-slate-200/80 pt-2 [overflow-wrap:anywhere]'>
-                      <span className='font-semibold text-slate-700'>
-                        Giải thích:{' '}
+                    <div className='mt-2 text-[11px] md:text-[12px] text-slate-600 leading-snug border-t border-slate-200/80 pt-2 [overflow-wrap:anywhere] prose-sm max-w-none prose-p:my-0 prose-p:inline'>
+                      <span className='font-semibold text-slate-700 mr-1'>
+                        Giải thích:
                       </span>
                       <ExplanationCitation
                         text={q.explanation.trim()}
@@ -292,7 +294,7 @@ const LessonExamBlueprintTestPreviewPanel: React.FC<
                         handleSeek={handleSeek}
                         lessonType={lessonType}
                       />
-                    </p>
+                    </div>
                   ) : null}
                 </li>
               )
@@ -310,9 +312,11 @@ const LessonExamBlueprintTestPreviewPanel: React.FC<
                     <span className='tabular-nums text-blue-700 shrink-0'>
                       {idx + 1}.
                     </span>
-                    <span className='[overflow-wrap:anywhere]'>
-                      {q.question}
-                    </span>
+                    <div className='[overflow-wrap:anywhere] prose-sm max-w-none prose-p:my-0' dangerouslySetInnerHTML={{ 
+                      __html: (q.question || '').includes('&lt;') 
+                        ? new DOMParser().parseFromString(q.question || '', 'text/html').documentElement.textContent || ''
+                        : (q.question || '')
+                    }} />
                   </p>
                   <CustomButton
                     type='button'
@@ -333,9 +337,9 @@ const LessonExamBlueprintTestPreviewPanel: React.FC<
                       Tự luận ngắn
                     </p>
                     {q.explanation?.trim() ? (
-                      <p className='text-[11px] md:text-[12px] text-blue-900/85 leading-snug [overflow-wrap:anywhere]'>
-                        <span className='font-semibold'>
-                          Gợi ý đáp án / chấm:{' '}
+                      <div className='text-[11px] md:text-[12px] text-blue-900/85 leading-snug [overflow-wrap:anywhere] prose-sm max-w-none prose-p:my-0 prose-p:inline'>
+                        <span className='font-semibold mr-1'>
+                          Gợi ý đáp án / chấm:
                         </span>
                         <ExplanationCitation
                           text={q.explanation.trim()}
@@ -343,7 +347,7 @@ const LessonExamBlueprintTestPreviewPanel: React.FC<
                           handleSeek={handleSeek}
                           lessonType={lessonType}
                         />
-                      </p>
+                      </div>
                     ) : (
                       <p className='text-[10px] text-blue-800/70'>
                         Chưa có gợi ý chấm.
@@ -377,9 +381,9 @@ const LessonExamBlueprintTestPreviewPanel: React.FC<
 
                 {q.type !== QuestionType.SHORT_ANSWER &&
                 q.explanation?.trim() ? (
-                  <p className='text-[11px] md:text-[12px] text-slate-600 leading-snug border-t border-slate-100 pt-2 [overflow-wrap:anywhere]'>
-                    <span className='font-semibold text-slate-700'>
-                      Giải thích:{' '}
+                  <div className='text-[11px] md:text-[12px] text-slate-600 leading-snug border-t border-slate-100 pt-2 [overflow-wrap:anywhere] prose-sm max-w-none prose-p:my-0 prose-p:inline'>
+                    <span className='font-semibold text-slate-700 mr-1'>
+                      Giải thích:
                     </span>
                     <ExplanationCitation
                       text={q.explanation.trim()}
@@ -387,7 +391,7 @@ const LessonExamBlueprintTestPreviewPanel: React.FC<
                       handleSeek={handleSeek}
                       lessonType={lessonType}
                     />
-                  </p>
+                  </div>
                 ) : null}
 
                 {editingQuizId === q.id ? (
