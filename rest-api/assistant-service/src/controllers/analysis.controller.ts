@@ -10,6 +10,7 @@ import { lessonChatQueryService } from '~/service/lesson-chat/lessonChat.query.s
 import { RAGQuestionRequest } from '~/dto/request/ragQuestion.dto'
 import ApiError from '~/middleware/ApiError'
 import Logger from '~/utils/logger'
+import { QuizScope } from '@prisma/client'
 
 class AnalysisController {
     /**
@@ -112,10 +113,23 @@ class AnalysisController {
                 return
             }
 
+            // Filter out unapproved quizzes and lesson-test scoped quizzes
+            // Endpoint /detail is exclusively used by students (CoursePage), so we must hide draft/test data
+            const filteredResult = { ...result }
+            if (filteredResult.chunks) {
+                filteredResult.chunks = filteredResult.chunks.map(chunk => ({
+                    ...chunk,
+                    quizzes: chunk.quizzes?.filter(q => 
+                        q.isApproved === true && 
+                        q.quizScope !== QuizScope.LESSON_TEST
+                    ) || []
+                }))
+            }
+
             sendResponse(res, {
                 code: StatusCodes.OK,
                 message: 'Lấy thông tin AI hoàn tất',
-                result,
+                result: filteredResult,
             })
         } catch (error) {
             sendResponse(res, {
