@@ -60,14 +60,18 @@ const StudentExplanationRemediation: React.FC<StudentExplanationRemediationProps
   }
 
   if (parts.length === 0) {
-    return <span className='text-gray-700'>{explanation}</span>
+    return <div className='text-gray-700 prose-sm max-w-none prose-p:my-0' dangerouslySetInnerHTML={{ 
+      __html: explanation.includes('&lt;') ? new DOMParser().parseFromString(explanation, 'text/html').documentElement.textContent || '' : explanation 
+    }} />
   }
 
   return (
     <div className='space-y-3'>
       <p className='text-[12.5px] font-medium text-gray-700 leading-relaxed'>
         {parts.map((part, i) => {
-          if (typeof part === 'string') return <span key={i}>{part}</span>
+          if (typeof part === 'string') return <span key={i} dangerouslySetInnerHTML={{ 
+            __html: part.includes('&lt;') ? new DOMParser().parseFromString(part, 'text/html').documentElement.textContent || '' : part 
+          }} />
 
           const chunk = chunks.find((c) => c.id === part.chunkId)
           if (!chunk) return <span key={i} className='text-slate-400 opacity-60'>[Nội dung cũ]</span>

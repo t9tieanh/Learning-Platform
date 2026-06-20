@@ -136,9 +136,11 @@ const VideoQuizOverlay: React.FC<VideoQuizOverlayProps> = memo(({
                             exit={{ opacity: 0, x: -10 }}
                             transition={{ duration: 0.2 }}
                         >
-                            <h3 className='text-base md:text-lg font-bold leading-snug mb-2'>
-                                {currentQuiz.question}
-                            </h3>
+                            <h3 className='text-base md:text-lg font-bold leading-snug mb-2 prose-sm max-w-none prose-p:my-0 prose-headings:my-0' dangerouslySetInnerHTML={{
+                                __html: (currentQuiz.question || '').includes('&lt;') 
+                                    ? new DOMParser().parseFromString(currentQuiz.question || '', 'text/html').documentElement.textContent || ''
+                                    : (currentQuiz.question || '')
+                            }} />
                             <div className='flex items-center gap-2'>
                                 <span className='px-2.5 py-0.5 bg-white/20 rounded-lg text-[10px] font-bold border border-white/10 backdrop-blur-sm'>
                                     Chuyên đề: {activeChunk.title}
@@ -192,9 +194,11 @@ const VideoQuizOverlay: React.FC<VideoQuizOverlayProps> = memo(({
                                         <PlayCircle className='w-4 h-4' /> Xem lại đoạn này
                                     </motion.button>
                                 </div>
-                                <p className='text-xs text-slate-600 leading-relaxed font-normal'>
-                                    {currentQuiz.explanation}
-                                </p>
+                                <div className='text-xs text-slate-600 leading-relaxed font-normal prose-sm max-w-none prose-p:my-0' dangerouslySetInnerHTML={{
+                                    __html: (currentQuiz.explanation || '').includes('&lt;') 
+                                        ? new DOMParser().parseFromString(currentQuiz.explanation || '', 'text/html').documentElement.textContent || ''
+                                        : (currentQuiz.explanation || '')
+                                }} />
                             </motion.div>
                         )}
                     </AnimatePresence>

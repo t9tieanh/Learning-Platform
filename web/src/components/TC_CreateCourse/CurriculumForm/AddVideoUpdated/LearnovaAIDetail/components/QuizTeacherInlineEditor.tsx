@@ -3,6 +3,7 @@ import { PencilLine, Plus, X, Trash2, ShieldCheck } from 'lucide-react'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Input } from '@/components/ui/input'
+import MathQuillEditor from '@/components/common/Input/MathQuillEditor'
 import {
   Select,
   SelectContent,
@@ -254,11 +255,10 @@ const QuizTeacherInlineEditor: React.FC<QuizTeacherInlineEditorProps> = ({
         <Label className='text-[12px] md:text-[13px] font-semibold text-gray-600'>
           Câu hỏi
         </Label>
-        <Textarea
-          value={question}
-          onChange={(e) => setQuestion(e.target.value)}
-          rows={3}
-          className='text-[12px] md:text-[13px] resize-y min-h-[72px]'
+        <MathQuillEditor
+          initialHtml={question}
+          onChange={setQuestion}
+          className='min-h-[120px] text-sm'
         />
       </div>
 
@@ -290,55 +290,14 @@ const QuizTeacherInlineEditor: React.FC<QuizTeacherInlineEditorProps> = ({
           Giải thích / gợi ý chấm
         </Label>
         <div className='relative group/exp'>
-          <Textarea
-            ref={textareaRef}
-            value={explanation}
-            onChange={handleExplanationChange}
-            onKeyDown={handleKeyDown}
-            rows={3}
-            className='text-[12px] md:text-[13px] resize-y min-h-[80px]'
-            placeholder='Gõ @ để nhắc đến một phân đoạn bài giảng…'
+          <MathQuillEditor
+            initialHtml={explanation}
+            onChange={(val) => setExplanation(val)}
+            className='text-[12px] md:text-[13px] min-h-[120px]'
           />
-
-          {mentionOpen && (
-            <div className='absolute z-[60] bottom-full left-0 mb-1 w-full max-h-[200px] overflow-y-auto bg-white border border-slate-200 rounded-xl shadow-2xl p-1.5 flex flex-col gap-0.5 animate-in fade-in slide-in-from-bottom-2'>
-              <p className='px-2 py-1 text-[10px] font-bold text-slate-400 tracking-wider'>
-                Chọn phân đoạn bài giảng
-              </p>
-              {filteredChunks.length > 0 ? (
-                filteredChunks.map((c, idx) => (
-                  <button
-                    key={c.id}
-                    type='button'
-                    className={cn(
-                      'flex flex-col items-start px-2.5 py-1.5 rounded-lg text-left transition-colors',
-                      idx === selectedIndex
-                        ? 'bg-blue-600 text-white'
-                        : 'hover:bg-slate-50'
-                    )}
-                    onClick={() => insertMention(c)}
-                    onMouseEnter={() => setSelectedIndex(idx)}
-                  >
-                    <span className='text-[12px] font-bold line-clamp-1'>
-                      {c.title || `Phân đoạn ${c.chunkIndex + 1}`}
-                    </span>
-                    <span
-                      className={cn(
-                        'text-[10px] font-medium opacity-80',
-                        idx === selectedIndex ? 'text-blue-100' : 'text-slate-500'
-                      )}
-                    >
-                      {c.timestamp}
-                    </span>
-                  </button>
-                ))
-              ) : (
-                <div className='px-3 py-4 text-center text-[12px] text-slate-400 italic'>
-                  Không tìm thấy phân đoạn phù hợp
-                </div>
-              )}
-            </div>
-          )}
+          <p className='text-[10px] text-gray-400 mt-1'>
+            Gõ @{'{'}{'{'}Mã phân đoạn{'}'}{'}'}@ để nhắc đến một phân đoạn bài giảng.
+          </p>
         </div>
 
         {explanation.trim() && (

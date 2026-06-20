@@ -60,7 +60,11 @@ export const LessonTestQuestionCard: React.FC<LessonTestQuestionCardProps> = ({
       >
         {gIdx + 1}.{qIdx + 1}
       </span>
-      <p className='text-[12.5px] font-semibold text-gray-800 leading-snug min-w-0 flex-1'>{quiz.question}</p>
+      <div className='text-[12.5px] font-semibold text-gray-800 leading-snug min-w-0 flex-1 prose-sm max-w-none prose-p:my-0' dangerouslySetInnerHTML={{ 
+        __html: (quiz.question || '').includes('&lt;') 
+          ? new DOMParser().parseFromString(quiz.question || '', 'text/html').documentElement.textContent || ''
+          : (quiz.question || '')
+      }} />
       <div className='flex items-start gap-1 shrink-0'>
         {!locked ? (
           <button
@@ -169,9 +173,7 @@ export const LessonTestQuestionCard: React.FC<LessonTestQuestionCardProps> = ({
               onSeek={onSeek}
             />
           ) : (
-            <p className='text-[12.5px] font-medium text-gray-700 leading-relaxed'>
-              {row.explanation}
-            </p>
+            <div className='text-[12.5px] font-medium text-gray-700 leading-relaxed prose-sm max-w-none prose-p:my-0' dangerouslySetInnerHTML={{ __html: row.explanation }} />
           )}
         </div>
       ) : null}
