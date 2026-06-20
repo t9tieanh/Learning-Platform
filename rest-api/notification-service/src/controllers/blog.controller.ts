@@ -12,6 +12,7 @@ interface BlogResponseItem {
   title: string
   image_url: string
   content: string
+  tags: string[]
   markdown_file_url: string[]
   createdAt: Date
   updatedAt: Date
@@ -85,6 +86,22 @@ export const parseSearchParam = (req: Request): string => {
   return ''
 }
 
+export const parseTagParam = (req: Request): string => {
+  const data = req.data
+  if (typeof data === 'object' && data !== null) {
+    const dataRecord = data as Record<string, unknown>
+    if (typeof dataRecord.tag === 'string') {
+      return dataRecord.tag.trim()
+    }
+  }
+
+  if (typeof req.query.tag === 'string') {
+    return req.query.tag.trim()
+  }
+
+  return ''
+}
+
 const enrichMissingInstructorSnapshot = async (items: BlogResponseItem[]): Promise<BlogResponseItem[]> => {
   const uniqueIds: string[] = []
   const seen: Record<string, true> = {}
@@ -128,7 +145,9 @@ const enrichMissingInstructorSnapshot = async (items: BlogResponseItem[]): Promi
     }
 
     const instructorName =
-      typeof item.instructor_name === 'string' && item.instructor_name.trim().length > 0 ? item.instructor_name : user.name
+      typeof item.instructor_name === 'string' && item.instructor_name.trim().length > 0
+        ? item.instructor_name
+        : user.name
     const instructorImage =
       typeof item.instructor_image === 'string' && item.instructor_image.trim().length > 0
         ? item.instructor_image
@@ -148,7 +167,8 @@ const getAll = async (req: Request, res: Response) => {
   try {
     const { page, limit } = parsePaginationParams(req)
     const search = parseSearchParam(req)
-    const blogs = await BlogService.getAll({ page, limit, search })
+    const tag = parseTagParam(req)
+    const blogs = await BlogService.getAll({ page, limit, search, tag })
     const items = await enrichMissingInstructorSnapshot(blogs.items as BlogResponseItem[])
 
     return sendResponse(res, {
@@ -156,6 +176,7 @@ const getAll = async (req: Request, res: Response) => {
       message: 'Lấy danh sách blog thành công',
       result: {
         items,
+        availableTags: blogs.availableTags,
         page: blogs.page,
         limit: blogs.limit,
         total: blogs.total,
@@ -176,10 +197,11 @@ const getAllByInstructorId = async (req: Request, res: Response) => {
   try {
     const { page, limit } = parsePaginationParams(req)
     const search = parseSearchParam(req)
+    const tag = parseTagParam(req)
     const data = req.data
     const dataRecord = typeof data === 'object' && data !== null ? (data as Record<string, unknown>) : {}
     const instructorId = typeof dataRecord.instructorId === 'string' ? dataRecord.instructorId : ''
-    const blogs = await BlogService.getAll({ page, limit, search, instructorId })
+    const blogs = await BlogService.getAll({ page, limit, search, instructorId, tag })
     const items = await enrichMissingInstructorSnapshot(blogs.items as BlogResponseItem[])
 
     sendResponse(res, {
@@ -187,6 +209,7 @@ const getAllByInstructorId = async (req: Request, res: Response) => {
       message: 'Lấy danh sách blog thành công',
       result: {
         items,
+        availableTags: blogs.availableTags,
         page: blogs.page,
         limit: blogs.limit,
         total: blogs.total,
@@ -267,7 +290,10 @@ const getBlogDetails = async (req: Request, res: Response) => {
       }
     } catch (teacherErr) {
       // Keep blog details available even when user-service cannot find the instructor.
-      console.error('[BlogController.getBlogDetails] getTeacherDetail failed, fallback to denormalized fields', teacherErr)
+      console.error(
+        '[BlogController.getBlogDetails] getTeacherDetail failed, fallback to denormalized fields',
+        teacherErr
+      )
     }
 
     sendResponse(res, {
@@ -293,7 +319,7 @@ const getBlogDetails = async (req: Request, res: Response) => {
 
 const createBlog = async (req: Request, res: Response) => {
   try {
-    const { instructor_id, title, image_url, content, markdown_file_url } = (req.data as any) || (req.body as any)
+    const { instructor_id, title, image_url, content, tags, markdown_file_url } = (req.data as any) || (req.body as any)
 
     if (!instructor_id || !title || !image_url || !content) {
       throw new Error('Thiếu dữ liệu bắt buộc (instructor_id, title, image_url, content)')
@@ -310,7 +336,10 @@ const createBlog = async (req: Request, res: Response) => {
         instructorImage = teacher.image
       }
     } catch (userErr) {
-      console.error('[BlogController.createBlog] getTeacherDetail failed, creating with empty instructor snapshot', userErr)
+      console.error(
+        '[BlogController.createBlog] getTeacherDetail failed, creating with empty instructor snapshot',
+        userErr
+      )
     }
 
     const created = await BlogService.create({
@@ -320,6 +349,7 @@ const createBlog = async (req: Request, res: Response) => {
       title,
       image_url,
       content,
+      tags,
       markdown_file_url: markdown_file_url || []
     })
 
@@ -343,12 +373,13 @@ const update = async (req: Request, res: Response) => {
     const id = (req.data as any)?.id || (req.params?.id as string) || ''
     if (!id) throw new Error('Thiếu tham số id')
 
-    const { title, image_url, content, markdown_file_url } = (req.data as any) || (req.body as any)
+    const { title, image_url, content, tags, markdown_file_url } = (req.data as any) || (req.body as any)
 
     const hasAny =
       typeof title === 'string' ||
       typeof image_url === 'string' ||
       typeof content === 'string' ||
+      Array.isArray(tags) ||
       (Array.isArray(markdown_file_url) && markdown_file_url.length >= 0)
 
     if (!hasAny) throw new Error('Thiếu dữ liệu cần cập nhật')
@@ -357,6 +388,7 @@ const update = async (req: Request, res: Response) => {
       title,
       image_url,
       content,
+      tags,
       markdown_file_url
     })
 

@@ -4,9 +4,10 @@ interface ImageCardProps {
   image: string
   title: string
   slug: string
+  tags?: string[]
 }
 
-export const ImageCard = ({ image, title, slug }: ImageCardProps) => {
+export const ImageCard = ({ image, title, slug, tags = [] }: ImageCardProps) => {
   return (
     <Link to={`/blog-details/${slug}`} className='group'>
       <article className='relative rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all mb-8'>
@@ -20,6 +21,18 @@ export const ImageCard = ({ image, title, slug }: ImageCardProps) => {
         </div>
         <div className='absolute bottom-0 left-0 right-0 p-6'>
           <h3 className='text-white font-semibold text-lg line-clamp-2'>{title}</h3>
+          {tags.length > 0 && (
+            <div className='mt-3 flex flex-wrap gap-1.5'>
+              {tags.slice(0, 2).map((tag) => (
+                <span
+                  key={tag}
+                  className='rounded-full border border-blue-300/60 bg-blue-500/75 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-white backdrop-blur-sm'
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
       </article>
     </Link>

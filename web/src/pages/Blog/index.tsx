@@ -19,20 +19,20 @@ const BlogPage = () => {
 
   useEffect(() => {
     let mounted = true
-      ; (async () => {
-        try {
-          setLoading(true)
-          const [tr, nw] = await Promise.all([blogService.getTrending(), blogService.getNew()])
-          if (!mounted) return
-          setTrending(tr)
-          setLatest(nw)
-        } catch (e) {
-          console.error(e)
-          if (mounted) setError('Không thể tải dữ liệu blog')
-        } finally {
-          if (mounted) setLoading(false)
-        }
-      })()
+    ;(async () => {
+      try {
+        setLoading(true)
+        const [tr, nw] = await Promise.all([blogService.getTrending(), blogService.getNew()])
+        if (!mounted) return
+        setTrending(tr)
+        setLatest(nw)
+      } catch (e) {
+        console.error(e)
+        if (mounted) setError('Không thể tải dữ liệu blog')
+      } finally {
+        if (mounted) setLoading(false)
+      }
+    })()
     return () => {
       mounted = false
     }
@@ -70,6 +70,7 @@ const BlogPage = () => {
                       category={'Blog'}
                       title={item.title}
                       slug={item._id}
+                      tags={item.tags}
                     />
                   ))}
               </div>
@@ -96,9 +97,9 @@ const BlogPage = () => {
                           ? trending[featuredIndex].content.replace(/<[^>]*>/g, '').substring(0, 160) + '...'
                           : 'Khám phá kiến thức mới cùng Learnova.'
                       }
-                      date='Học ngay'
                       slug={trending[featuredIndex]?._id}
                       image={trending[featuredIndex]?.image_url}
+                      tags={trending[featuredIndex]?.tags}
                     />
                   </motion.div>
                 </AnimatePresence>
@@ -108,7 +109,9 @@ const BlogPage = () => {
                   {trending.map((_, i) => (
                     <div
                       key={i}
-                      className={`h-1 rounded-full transition-all duration-500 ${i === featuredIndex ? 'w-6 bg-white' : 'w-2 bg-white/30'}`}
+                      className={`h-1 rounded-full transition-all duration-500 ${
+                        i === featuredIndex ? 'w-6 bg-white' : 'w-2 bg-white/30'
+                      }`}
                     />
                   ))}
                 </div>
@@ -137,7 +140,7 @@ const BlogPage = () => {
             {!loading &&
               !error &&
               latest.map((item) => (
-                <ImageCard key={item._id} image={item.image_url} title={item.title} slug={item._id} />
+                <ImageCard key={item._id} image={item.image_url} title={item.title} slug={item._id} tags={item.tags} />
               ))}
           </div>
         </section>
