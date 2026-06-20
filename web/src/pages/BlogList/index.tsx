@@ -5,6 +5,7 @@ import ArticleCardSkeleton from '@/components/BlogList/ArticleCardSkeleton'
 import { PaginationControls } from '@/components/BlogList/PaginationControls'
 import { blogService } from '@/services/blog/blog.service'
 import { formatDate } from '@/utils/common/formattDate'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 const ITEMS_PER_PAGE = 6
 const SEARCH_DEBOUNCE_MS = 500
@@ -12,6 +13,8 @@ const SEARCH_DEBOUNCE_MS = 500
 const BlogPage = () => {
   const [searchQuery, setSearchQuery] = useState('')
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('')
+  const [selectedTag, setSelectedTag] = useState('')
+  const [availableTags, setAvailableTags] = useState<string[]>([])
   const [currentPage, setCurrentPage] = useState(1)
   const [articles, setArticles] = useState<Article[]>([])
   const [totalPages, setTotalPages] = useState(1)
@@ -37,16 +40,19 @@ const BlogPage = () => {
         const res = await blogService.getAll({
           page: currentPage,
           limit: ITEMS_PER_PAGE,
-          search: debouncedSearchQuery
+          search: debouncedSearchQuery,
+          tag: selectedTag
         })
         if (!mounted) return
+        setAvailableTags(res.availableTags || [])
         const mapped: Article[] = (res.items || []).map((b) => ({
           id: b._id,
           title: b.title,
           image: b.image_url,
           userName: b.userName,
           userAvt: b.userAvt,
-          createdAt: formatDate(b.createdAt)
+          createdAt: formatDate(b.createdAt),
+          tags: b.tags
         }))
         setArticles(mapped)
         setTotalPages(res?.totalPages || 1)
@@ -60,7 +66,12 @@ const BlogPage = () => {
     return () => {
       mounted = false
     }
-  }, [currentPage, debouncedSearchQuery])
+  }, [currentPage, debouncedSearchQuery, selectedTag])
+
+  const handleSelectTag = (tag: string) => {
+    setSelectedTag(tag)
+    setCurrentPage(1)
+  }
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page)
@@ -80,7 +91,7 @@ const BlogPage = () => {
             Khám phá các bài viết, mẹo và hướng dẫn giúp bạn học tập hiệu quả hơn.
           </p>
 
-          <div className='mx-auto max-w-2xl'>
+          <div className='mx-auto grid max-w-4xl gap-3 md:grid-cols-[minmax(0,1fr)_minmax(220px,260px)] md:items-center'>
             <SearchBar
               value={searchQuery}
               onChange={(v) => {
@@ -88,7 +99,25 @@ const BlogPage = () => {
                 setCurrentPage(1)
               }}
               placeholder='Tìm kiếm bài viết, tác giả, chủ đề...'
+              className='max-w-none'
             />
+
+            <Select
+              value={selectedTag || 'all'}
+              onValueChange={(value) => handleSelectTag(value === 'all' ? '' : value)}
+            >
+              <SelectTrigger className='w-full rounded-full border border-border bg-white px-5 text-sm shadow-md data-[size=default]:h-14'>
+                <SelectValue placeholder='Lọc theo tag' />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value='all'>Tất cả tag</SelectItem>
+                {availableTags.map((tag) => (
+                  <SelectItem key={tag} value={tag}>
+                    {tag}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
       </header>
@@ -120,7 +149,11 @@ const BlogPage = () => {
           </>
         ) : (
           <div className='text-center py-16'>
-            <p className='text-xl text-muted-foreground'>Không tìm thấy bài viết nào phù hợp với tìm kiếm của bạn.</p>
+            <p className='text-xl text-muted-foreground'>
+              {selectedTag
+                ? `Không tìm thấy bài viết nào với tag "${selectedTag}".`
+                : 'Không tìm thấy bài viết nào phù hợp với tìm kiếm của bạn.'}
+            </p>
           </div>
         )}
       </main>
