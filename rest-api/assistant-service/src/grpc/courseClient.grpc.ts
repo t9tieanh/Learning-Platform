@@ -149,6 +149,18 @@ class CourseGrpcClient {
                     ),
                     certificateId: response?.certificate_id ?? response?.certificateId ?? null,
                     certificateCode: response?.certificate_code ?? response?.certificateCode ?? null,
+                    courseScore:
+                        response?.course_score != null
+                            ? Number(response.course_score)
+                            : response?.courseScore != null
+                              ? Number(response.courseScore)
+                              : null,
+                    courseScoreTotal:
+                        response?.course_score_total != null
+                            ? Number(response.course_score_total)
+                            : response?.courseScoreTotal != null
+                              ? Number(response.courseScoreTotal)
+                              : null,
                     lessonsComplete: Boolean(response?.lessons_complete ?? response?.lessonsComplete),
                     testsComplete: Boolean(response?.tests_complete ?? response?.testsComplete),
                 })
@@ -177,6 +189,8 @@ export interface TryIssueCourseCompletionCertificateResult {
     isNewlyCompletedCourse: boolean
     certificateId: string | null
     certificateCode: string | null
+    courseScore: number | null
+    courseScoreTotal: number | null
     lessonsComplete: boolean
     testsComplete: boolean
 }

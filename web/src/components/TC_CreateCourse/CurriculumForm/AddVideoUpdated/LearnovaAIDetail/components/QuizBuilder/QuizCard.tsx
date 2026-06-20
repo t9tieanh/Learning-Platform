@@ -68,9 +68,14 @@ const QuizCard: React.FC<QuizCardProps> = ({ quiz, index, onEdit, onDelete, isSe
                     className='h-6.5 w-6.5 text-gray-300 hover:text-red-500 hover:bg-red-50 transition-colors'
                 />
             </div>
-            <p className='text-[14px] font-bold text-gray-800 line-clamp-2 min-h-[44px] leading-relaxed group-hover:text-blue-600 transition-colors'>
-                {quiz.question || 'Nội dung câu hỏi đang để trống...'}
-            </p>
+            <div 
+                className='text-[14px] font-bold text-gray-800 line-clamp-2 min-h-[44px] leading-relaxed group-hover:text-blue-600 transition-colors prose-sm max-w-none prose-p:my-0'
+                dangerouslySetInnerHTML={{ 
+                    __html: (quiz.question || '').includes('&lt;') 
+                        ? new DOMParser().parseFromString(quiz.question || '', 'text/html').documentElement.textContent || ''
+                        : (quiz.question || 'Nội dung câu hỏi đang để trống...')
+                }}
+            />
 
             {(quiz.difficulty || quiz.bloomLevel) && (
                 <div className='mt-4 flex flex-wrap gap-2'>

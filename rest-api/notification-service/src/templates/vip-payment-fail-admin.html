@@ -1,0 +1,46 @@
+{{> wrapper-start}}
+{{> header}}
+{{> body-start}}
+
+<p style="margin: 0 0 16px; font-size: 15px; line-height: 1.6; color: #334155;">
+  Một giao dịch <strong>đăng ký VIP</strong> đã được ghi nhận thanh toán thành công nhưng
+  <strong>saga kích hoạt VIP thất bại</strong>. Vui lòng kiểm tra và <strong>hoàn tiền cho khách hàng</strong>.
+</p>
+
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0"
+  style="margin: 20px 0; border: 1px solid #fde68a; border-radius: 12px; overflow: hidden;">
+  <tr>
+    <td style="padding: 16px 20px; background: #fffbeb; font-size: 13px; color: #92400e;">Mã đơn VIP</td>
+    <td style="padding: 16px 20px; font-size: 14px; font-weight: 600; color: #0f172a;">{{orderId}}</td>
+  </tr>
+  <tr>
+    <td style="padding: 16px 20px; background: #fffbeb; font-size: 13px; color: #92400e;">Khách hàng</td>
+    <td style="padding: 16px 20px; font-size: 14px; color: #0f172a;">{{customerName}}</td>
+  </tr>
+  <tr>
+    <td style="padding: 16px 20px; background: #fffbeb; font-size: 13px; color: #92400e;">Email khách</td>
+    <td style="padding: 16px 20px; font-size: 14px; color: #0f172a;">{{customerEmail}}</td>
+  </tr>
+  <tr>
+    <td style="padding: 16px 20px; background: #fffbeb; font-size: 13px; color: #92400e;">User ID</td>
+    <td style="padding: 16px 20px; font-size: 14px; color: #0f172a;">{{userId}}</td>
+  </tr>
+  <tr>
+    <td style="padding: 16px 20px; background: #fffbeb; font-size: 13px; color: #92400e;">Số tiền</td>
+    <td style="padding: 16px 20px; font-size: 14px; font-weight: 600; color: #dc2626;">{{formattedTotal}} VND</td>
+  </tr>
+  {{#if reason}}
+  <tr>
+    <td style="padding: 16px 20px; background: #fffbeb; font-size: 13px; color: #92400e;">Lý do lỗi</td>
+    <td style="padding: 16px 20px; font-size: 14px; color: #0f172a;">{{reason}}</td>
+  </tr>
+  {{/if}}
+</table>
+
+<p style="margin: 0; font-size: 14px; line-height: 1.6; color: #64748b;">
+  Khách hàng đã nhận email thông báo đăng ký VIP thất bại và sẽ được hoàn tiền trong 3–5 ngày làm việc.
+</p>
+
+{{> body-end}}
+{{> footer}}
+{{> wrapper-end}}

@@ -64,6 +64,13 @@ const ModernVideoPlayer = forwardRef<VideoPlayerRef, {
 
     const COMPLETION_THRESHOLD = 0.6
 
+    const processedChunks = useMemo(() => {
+        return chunks.map(chunk => ({
+            ...chunk,
+            quizzes: (chunk.quizzes || []).filter(q => q.isApproved)
+        }))
+    }, [chunks])
+
     useImperativeHandle(ref, () => ({
         seekTo: (time: number) => {
             if (videoRef.current) {
@@ -144,8 +151,8 @@ const ModernVideoPlayer = forwardRef<VideoPlayerRef, {
             }
         }
 
-        if (chunks.length > 0) {
-            const closest = chunks.reduce((prev, curr) => {
+        if (processedChunks.length > 0) {
+            const closest = processedChunks.reduce((prev, curr) => {
                 const prevStart = timeToSeconds(prev.startTime)
                 const currStart = timeToSeconds(curr.startTime)
                 return Math.abs(currStart - currentTime) < Math.abs(prevStart - currentTime) ? curr : prev
@@ -155,7 +162,7 @@ const ModernVideoPlayer = forwardRef<VideoPlayerRef, {
             }
         }
         lastCheckTime.current = currentTime
-    }, [markDoneVideo, chunks, currentChunkTitle, maxTimeWatched, isCompleted, onProgress])
+    }, [markDoneVideo, processedChunks, currentChunkTitle, maxTimeWatched, isCompleted, onProgress])
 
     const handleSeekingSync = useCallback(() => {
         if (!videoRef.current || isCompleted) return
@@ -173,11 +180,11 @@ const ModernVideoPlayer = forwardRef<VideoPlayerRef, {
 
     const startQuiz = useCallback(() => {
         const video = videoRef.current
-        if (!video || chunks.length === 0) return
+        if (!video || processedChunks.length === 0) return
 
         const currentTime = video.currentTime
 
-        const closestChunk = chunks.reduce((prev, curr) => {
+        const closestChunk = processedChunks.reduce((prev, curr) => {
             const prevStart = timeToSeconds(prev.startTime)
             const currStart = timeToSeconds(curr.startTime)
             return Math.abs(currStart - currentTime) < Math.abs(prevStart - currentTime) ? curr : prev
@@ -185,13 +192,13 @@ const ModernVideoPlayer = forwardRef<VideoPlayerRef, {
 
         const chunkWithQuizzes = (closestChunk.quizzes && closestChunk.quizzes.length > 0)
             ? closestChunk
-            : chunks.find(c => c.quizzes && c.quizzes.length > 0)
+            : processedChunks.find(c => c.quizzes && c.quizzes.length > 0)
 
         if (chunkWithQuizzes) {
             video.pause()
             setCurrentQuizChunk(chunkWithQuizzes)
         }
-    }, [chunks])
+    }, [processedChunks])
 
     const finishQuiz = useCallback((chunkId: string) => {
         shownQuizIds.current.add(chunkId)
@@ -219,7 +226,7 @@ const ModernVideoPlayer = forwardRef<VideoPlayerRef, {
                         src={actualVideoUrl}
                         ref={videoRef}
                         subtitles={parsedSubtitles}
-                        chunks={chunks}
+                        chunks={processedChunks}
                         isSeekingAllowed={true}
                         className='w-full h-full shadow-lg'
                         isPiPEnabled={true}
@@ -236,7 +243,7 @@ const ModernVideoPlayer = forwardRef<VideoPlayerRef, {
                     />
 
                     <AnimatePresence>
-                        {chunks.length > 0 && !currentQuizChunk && (
+                        {processedChunks.length > 0 && !currentQuizChunk && (
                             <motion.div
                                 initial={{ opacity: 0, x: 20 }}
                                 animate={{ opacity: 1, x: 0 }}
@@ -293,7 +300,7 @@ const ModernVideoPlayer = forwardRef<VideoPlayerRef, {
                         {currentQuizChunk && (
                             <VideoQuizOverlay
                                 chunk={currentQuizChunk}
-                                allChunks={chunks}
+                                allChunks={processedChunks}
                                 maxTimeWatched={maxTimeWatched}
                                 onSkip={() => finishQuiz(currentQuizChunk.id)}
                                 onContinue={() => finishQuiz(currentQuizChunk.id)}

@@ -1,3 +1,5 @@
+import { NotificationOrderType } from '~/enums/notificationOrderType.enum'
+
 export interface Discount {
   code: string
   type: 'Percent' | 'Fixed' | string
@@ -23,6 +25,7 @@ export interface NotificationPayload {
   status: string
   discount?: Discount
   items: Item[]
+  orderType?: NotificationOrderType
 }
 
 export interface PaymentRefundPayload {
@@ -31,4 +34,6 @@ export interface PaymentRefundPayload {
   customer_name: string
   customer_email: string
   total: number
+  orderType?: NotificationOrderType
+  reason?: string
 }

@@ -7,6 +7,8 @@ import { CourseMessageType, CourseExchangeNames } from './course.events';
 import orderService from '~/service/models/order.service';
 import cartService from '~/service/models/cart.service';
 import redisService from '~/service/utils/redis.service';
+import orderRefundNotificationService from '~/service/utils/order-refund-notification.service';
+import { NotificationOrderType } from '~/enums/notificationOrderType.enum';
 import Logger from '~/utils/logger';
 
 class CourseHandler {
@@ -17,6 +19,24 @@ class CourseHandler {
 
     async handleOrderCreated(message: RegisterUpdatedPayload) {
         try {
+            const existing = await prismaService.order.findFirst({
+                where: { id: message.orderId },
+                select: { id: true, status: true, user_id: true },
+            });
+
+            // test rollback transaction
+            // throw new Error('test');
+
+            if (!existing) {
+                throw new Error('Order not found');
+            }
+
+            if (existing.status === OrderStatus.Completed) {
+                Logger.info(`Order already completed, skipping: ${message.orderId}`);
+                await redisService.publishSagaResult(message.orderId, { success: true });
+                return;
+            }
+
             const order = await prismaService.$transaction(async (tx) => {
                 const order = await tx.order.findFirst({ where: { id: message.orderId } });
                 if (!order) throw new Error('Order not found');
@@ -24,12 +44,10 @@ class CourseHandler {
                 return order;
             });
 
-            // Unblock the payment handler waiting on Redis
             await redisService.publishSagaResult(message.orderId, { success: true });
 
             Logger.info(`Successfully completed order: ${message.orderId}`);
 
-            // Fire-and-forget: notification & cart cleanup failure should NOT trigger rollback
             orderService.getOrderInfo(order.user_id, message.orderId)
                 .then(async (orderData) => {
                     const correlationId = `order-${order.id}`;
@@ -38,7 +56,7 @@ class CourseHandler {
                     await Promise.all([
                         this.sendMessage(
                             CourseMessageType.NOTIFICATION_SEND,
-                            { ...orderData, orderType: 'COURSE' },
+                            { ...orderData, orderType: NotificationOrderType.COURSE },
                             correlationId
                         ).catch((err) => errorMessages.push(`Failed to send NOTIFICATION_SEND: ${err}`)),
                         this.sendMessage(
@@ -93,7 +111,37 @@ class CourseHandler {
 
     async handleRegisterUpdateFailed(message: RegisterUpdatedPayload) {
         Logger.error(`Register update failed for order: ${message.orderId}`);
-        await prismaService.order.update({ where: { id: message.orderId }, data: { status: OrderStatus.Cancel } });
+
+        const order = await prismaService.order.findFirst({
+            where: { id: message.orderId },
+            select: {
+                id: true,
+                status: true,
+            },
+        });
+
+        if (!order) {
+            Logger.error(`Register update failed: order not found ${message.orderId}`);
+            return;
+        }
+
+        if (order.status !== OrderStatus.Cancel) {
+            await prismaService.order.update({
+                where: { id: message.orderId },
+                data: { status: OrderStatus.Cancel },
+            });
+        }
+
+        await redisService.publishSagaResult(message.orderId, {
+            success: false,
+            reason: 'Register update failed',
+        });
+
+        orderRefundNotificationService
+            .sendPaymentRefundNotify(message.orderId)
+            .catch((err) => Logger.error(`Failed to send refund notification for order ${message.orderId}: ${err}`));
+
+        Logger.info(`Register update failed handled for order ${message.orderId}`);
     }
 }
 

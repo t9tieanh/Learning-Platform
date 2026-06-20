@@ -199,6 +199,32 @@ export class PayosService {
     await payos.webhooks.confirm(payosConfig.webhookUrl)
     Logger.info(`PayOS webhook registered: ${payosConfig.webhookUrl}`)
   }
+
+  /** Retry webhook registration with linear backoff: 5s → 10s → 20s between attempts. */
+  async confirmWebhookWithRetry(retryDelaysMs: number[] = [5000, 10000, 20000]): Promise<void> {
+    const maxAttempts = retryDelaysMs.length + 1
+
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        await this.confirmWebhook()
+        if (attempt > 1) {
+          Logger.info(`PayOS webhook registered on attempt ${attempt}/${maxAttempts}`)
+        }
+        return
+      } catch (err) {
+        const isLastAttempt = attempt === maxAttempts
+        if (isLastAttempt) {
+          throw err
+        }
+
+        const delayMs = retryDelaysMs[attempt - 1]
+        Logger.warn(
+          `PayOS webhook confirm failed (attempt ${attempt}/${maxAttempts}): ${err}. Retrying in ${delayMs / 1000}s...`
+        )
+        await new Promise((resolve) => setTimeout(resolve, delayMs))
+      }
+    }
+  }
 }
 
 export default new PayosService()

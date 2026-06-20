@@ -13,6 +13,8 @@ export interface MarkDoneLessonResult {
   isCompletedCourse: boolean
   certificateId?: string | null
   certificateCode?: string | null
+  courseScore?: number | null
+  courseScoreTotal?: number | null
 }
 
 class LessonStudentService {

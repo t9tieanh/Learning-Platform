@@ -21,7 +21,12 @@ class NotificationHandler {
       await Promise.all([
         nodeMailService.sendMail(notification),
         ...(message.items || []).map((item) =>
-          chatService.sendFirstMessage(item.course_name, item.instructor_id, message.user_id)
+          chatService.sendFirstMessage({
+            courseId: item.course_id,
+            courseName: item.course_name,
+            studentId: message.user_id,
+            instructorIdHint: item.instructor_id
+          })
         ),
       ])
     } catch (error) {

@@ -51,7 +51,9 @@ const ExplanationCitation: React.FC<ExplanationCitationProps> = ({
   return (
     <>
       {parts.map((part, i) => {
-        if (typeof part === 'string') return <span key={i}>{part}</span>
+        if (typeof part === 'string') return <span key={i} dangerouslySetInnerHTML={{ 
+          __html: part.includes('&lt;') ? new DOMParser().parseFromString(part, 'text/html').documentElement.textContent || '' : part 
+        }} />
 
         const chunk = chunks.find((c) => c.id === part.chunkId)
         if (!chunk)

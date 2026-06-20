@@ -37,11 +37,12 @@ export class SendMessageDTO {
   @IsNotEmpty()
   content!: string
 
-  // vai trò của người gửi (để FE render đúng)
+  // Deprecated: backend derives senderRole from conversation participants.
+  @IsOptional()
   @IsEnum(['student', 'instructor'] as const, {
     message: 'senderRole must be either student or instructor'
   })
-  senderRole!: 'student' | 'instructor'
+  senderRole?: 'student' | 'instructor'
 }
 
 export class ReadMessageDTO {

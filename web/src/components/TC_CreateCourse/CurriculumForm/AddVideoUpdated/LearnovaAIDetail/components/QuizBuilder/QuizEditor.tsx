@@ -19,8 +19,8 @@ import {
 } from "@/components/ui/popover"
 import { Quiz, QuizChoice } from '@/types/ai'
 import CustomButton from '@/components/common/Button'
-import CustomTextarea from '@/components/common/Textarea'
 import CustomInput from '@/components/common/Input'
+import MathQuillEditor from '@/components/common/Input/MathQuillEditor'
 import DistributionPicker from '../DistributionPicker'
 import { useAuthStore } from '@/stores/useAuth.stores'
 import { useVipUpgrade } from '@/contexts/VipUpgradeContext'
@@ -267,12 +267,10 @@ const QuizEditor: React.FC<QuizEditorProps> = ({
                     {/* Question Content */}
                     <div className='flex flex-col gap-2.5'>
                         <label className='text-[11px] font-medium text-gray-500 px-1'>Nội dung đề bài</label>
-                        <CustomTextarea
-                            value={draft.question}
-                            onChange={(e) => setDraft({ ...draft, question: e.target.value })}
-                            className='text-[14px] font-bold text-gray-800 bg-white border-gray-100 focus:border-blue-200 h-28 rounded-2xl placeholder:text-[14px] placeholder:font-normal placeholder:text-gray-300 shadow-sm leading-relaxed'
-                            placeholder='Nhập câu hỏi tại đây...'
-                            displayLabel=''
+                        <MathQuillEditor
+                            initialHtml={draft.question || ''}
+                            onChange={(html) => setDraft({ ...draft, question: html })}
+                            className='min-h-[120px] bg-white rounded-2xl shadow-sm text-[14px] overflow-hidden'
                         />
                     </div>
 
@@ -352,12 +350,10 @@ const QuizEditor: React.FC<QuizEditorProps> = ({
                             <Brain className='w-3 h-3 text-gray-300' />
                         </div>
                         <div className='relative'>
-                            <CustomTextarea
-                                value={draft.explanation}
-                                onChange={(e) => setDraft({ ...draft, explanation: e.target.value })}
-                                className='bg-white border-gray-100 text-[14px] font-bold text-gray-700/80 rounded-2xl h-24 transition-all italic placeholder:text-[14px] placeholder:font-normal placeholder:text-gray-300 shadow-sm leading-relaxed'
-                                placeholder='Giải thích lý do phương án này là đúng...'
-                                displayLabel=''
+                            <MathQuillEditor
+                                initialHtml={draft.explanation || ''}
+                                onChange={(html) => setDraft({ ...draft, explanation: html })}
+                                className='min-h-[120px] bg-white rounded-2xl shadow-sm text-[14px] overflow-hidden'
                             />
                             {draft.aiGenerated && (
                                 <div className='absolute bottom-3 right-3 flex items-center gap-1.5 px-2 py-1 bg-blue-50 rounded-lg border border-blue-100'>

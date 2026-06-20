@@ -63,7 +63,7 @@ const CheckoutPage = () => {
         <OrderSuccess order={order} id={id as string} />
       ) : (
         <>
-          <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6'>
+          <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 overflow-x-hidden'>
             <Banner />
             {order?.ttl && <TimeToLive ttl={order.ttl} />}
             <div className='py-5 grid grid-cols-1 md:grid-cols-5 items-start min-h-[60vh] gap-6'>

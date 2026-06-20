@@ -7,6 +7,10 @@ export interface CertificateIssuedEvent {
   courseThumbnailUrl?: string | null
   certificateId?: string | null
   certificateCode?: string | null
+  courseScore?: number | null
+  courseScoreTotal?: number | null
   profileUrl?: string | null
   courseUrl?: string | null
+  certificatePdfBase64?: string | null
+  certificatePdfFilename?: string | null
 }

@@ -55,6 +55,33 @@ public interface LessonRepository extends JpaRepository<LessonEntity,String> {
             """)
     List<String> findIdsByCourseId(@Param("courseId") String courseId);
 
+    /** Latest progress per lesson (same rule as lesson overview for students). */
+    @Query("""
+            SELECT COUNT(l)
+            FROM LessonEntity l
+            JOIN l.chapter ch
+            WHERE ch.course.id = :courseId
+            AND COALESCE(
+                (
+                    SELECT lp.progress
+                    FROM LessonProgressEntity lp
+                    WHERE lp.lesson.id = l.id
+                      AND lp.enrollment.id = :enrollmentId
+                      AND lp.updatedAt = (
+                          SELECT MAX(lp2.updatedAt)
+                          FROM LessonProgressEntity lp2
+                          WHERE lp2.lesson.id = l.id
+                            AND lp2.enrollment.id = :enrollmentId
+                      )
+                ),
+                com.freeclassroom.courseservice.enums.entity.EnumLessonProgress.NOT_STARTED
+            ) = com.freeclassroom.courseservice.enums.entity.EnumLessonProgress.COMPLETED
+            """)
+    long countCompletedLessonsForEnrollment(
+            @Param("courseId") String courseId,
+            @Param("enrollmentId") String enrollmentId
+    );
+
     @Query("""
             SELECT ch.course.id
             FROM LessonEntity l

@@ -29,9 +29,10 @@ export function AdminReadOnlyQuizList({
           key={quiz.id}
           className='rounded-xl border border-slate-100 bg-white p-4 shadow-sm ring-1 ring-slate-100/80'
         >
-          <p className='mb-3 text-sm font-medium leading-snug text-slate-800'>
-            {qIdx + 1}. {quiz.question}
-          </p>
+          <div className='mb-3 text-sm font-medium leading-snug text-slate-800 flex items-start gap-1'>
+            <span>{qIdx + 1}.</span>
+            <div dangerouslySetInnerHTML={{ __html: quiz.question || '' }} className='prose-sm max-w-none prose-p:my-0' />
+          </div>
           <ul className='space-y-1.5'>
             {quiz.choices.map((choice) => (
               <li
@@ -53,8 +54,8 @@ export function AdminReadOnlyQuizList({
             ))}
           </ul>
           {quiz.explanation && (
-            <p className='mt-3 rounded-lg bg-slate-50 px-3 py-2 text-xs leading-relaxed text-slate-600'>
-              <span className='font-medium text-slate-700'>Giải thích: </span>
+            <div className='mt-3 rounded-lg bg-slate-50 px-3 py-2 text-xs leading-relaxed text-slate-600 prose-sm max-w-none prose-p:my-0 prose-p:inline'>
+              <span className='font-medium text-slate-700 mr-1'>Giải thích:</span>
               {chunks.length > 0 && onSeek ? (
                 <AdminExplanationCitation
                   text={quiz.explanation}
@@ -63,9 +64,9 @@ export function AdminReadOnlyQuizList({
                   lessonType={lessonType}
                 />
               ) : (
-                quiz.explanation
+                <span dangerouslySetInnerHTML={{ __html: quiz.explanation }} />
               )}
-            </p>
+            </div>
           )}
         </div>
       ))}

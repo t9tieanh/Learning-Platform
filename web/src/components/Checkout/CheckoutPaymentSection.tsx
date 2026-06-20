@@ -13,8 +13,8 @@ const CheckoutPaymentSection = ({ receiveEmail }: CheckoutPaymentSectionProps) =
   const [paymentUnlocked, setPaymentUnlocked] = useState(checkoutPaymentEnabled)
 
   return (
-    <Card className='shadow-sm'>
-      <CardHeader>
+    <Card className='shadow-sm overflow-hidden'>
+      <CardHeader className='px-4 sm:px-6'>
         <CardTitle className='font-semibold text-base flex items-center gap-2'>
           <WalletCards className='w-5 h-5' />
           Chọn phương thức thanh toán
@@ -25,7 +25,7 @@ const CheckoutPaymentSection = ({ receiveEmail }: CheckoutPaymentSectionProps) =
             : 'Thanh toán đang khóa trên môi trường này. Nhập mật khẩu dev để mở cổng test.'}
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className='px-4 sm:px-6'>
         {paymentUnlocked ? (
           <CheckoutPaymentMethods receiveEmail={receiveEmail} />
         ) : (

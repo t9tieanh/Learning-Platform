@@ -3,6 +3,8 @@ export enum SocketEvents {
   DISCONNECT = 'disconnect',
   MESSAGE = 'message',
   JOIN_ROOM = 'join_room',
+  JOIN_USER_INBOX = 'join_user_inbox',
+  MESSAGE_NOTIFICATION = 'message_notification',
   NEW_USER = 'new_user'
 }
 

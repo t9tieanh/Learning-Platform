@@ -40,6 +40,33 @@ export function getInitials(name: string): string {
     .toUpperCase()
 }
 
+function compareCreatedAtAsc(a: string, b: string): number {
+  return new Date(a).getTime() - new Date(b).getTime()
+}
+
+function compareCreatedAtDesc(a: string, b: string): number {
+  return new Date(b).getTime() - new Date(a).getTime()
+}
+
+/** Root comments: newest first. Replies at every level: oldest first. */
+function sortLessonCommentsForUI(comments: LessonComment[]): LessonComment[] {
+  return [...comments]
+    .sort((a, b) => compareCreatedAtDesc(a.createdAt, b.createdAt))
+    .map((comment) => ({
+      ...comment,
+      children: sortRepliesAsc(comment.children ?? [])
+    }))
+}
+
+function sortRepliesAsc(comments: LessonComment[]): LessonComment[] {
+  return [...comments]
+    .sort((a, b) => compareCreatedAtAsc(a.createdAt, b.createdAt))
+    .map((comment) => ({
+      ...comment,
+      children: sortRepliesAsc(comment.children ?? [])
+    }))
+}
+
 export function mapLessonCommentToUIReply(c: LessonComment): ReplyUI {
   return {
     id: c.id,
@@ -63,8 +90,12 @@ export function mapLessonCommentToUI(c: LessonComment): CommentUI {
     timestamp: formatTime(c.createdAt),
     isInstructor: Boolean(c.isInstructor),
     likes: 0,
-    replies: c.children.map(mapLessonCommentToUIReply)
+    replies: (c.children ?? []).map(mapLessonCommentToUIReply)
   }
+}
+
+export function mapLessonCommentsToUI(comments: LessonComment[]): CommentUI[] {
+  return sortLessonCommentsForUI(comments).map(mapLessonCommentToUI)
 }
 
 interface EditingTarget {
@@ -138,7 +169,7 @@ export function useQASection(lessonId: string): QASectionHook {
     try {
       const res = await commentService.getLessonComments(lessonId)
       if (res.code === 200 && res.result) {
-        setComments(res.result.map(mapLessonCommentToUI))
+        setComments(mapLessonCommentsToUI(res.result))
       } else {
         setError(res.message || 'Không thể tải bình luận')
       }

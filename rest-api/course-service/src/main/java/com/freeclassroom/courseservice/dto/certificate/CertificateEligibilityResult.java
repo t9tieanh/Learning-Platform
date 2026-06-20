@@ -18,6 +18,8 @@ public class CertificateEligibilityResult {
     int passedTests;
     double testProgressPercent;
     double minPassPercent;
+    int courseScore;
+    int courseScoreTotal;
     List<String> blockers;
     List<CertificatePendingLessonTestRef> pendingLessonTests;
 }

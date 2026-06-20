@@ -24,5 +24,6 @@ export const env = {
     REDIS_DB_NAME: parseInt(process.env.REDIS_DB_NAME || '0', 10),
     WEB_URL: process.env.WEB_URL || 'http://localhost:3000/check-out/',
     COURSE_GRPC_URL: process.env.COURSE_GRPC_URL || 'course-service:9091',
-    USER_GRPC_URL: process.env.USER_GRPC_URL || 'user-service:9090'
+    USER_GRPC_URL: process.env.USER_GRPC_URL || 'user-service:9090',
+    RETURN_URL_SAGA_TIMEOUT_MS: parseInt(process.env.RETURN_URL_SAGA_TIMEOUT_MS || '5000', 10),
 }

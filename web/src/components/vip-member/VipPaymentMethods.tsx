@@ -110,17 +110,6 @@ const VipPaymentMethods = ({ userEmail }: VipPaymentMethodsProps) => {
       />
       <CustomButton
         type='button'
-        className='w-full h-11 text-sm font-semibold rounded-xl bg-[#005BAA] hover:bg-[#004A8B] text-white shadow-md transition-all hover:-translate-y-0.5'
-        label='Thanh toán bằng VNPay'
-        onClick={handlePayWithVnPay}
-        icon={
-          <div className='bg-white p-0.5 rounded mr-2'>
-            <img src={VnPayLogo} alt='VnPay Logo' className='h-5 w-auto object-contain' />
-          </div>
-        }
-      />
-      <CustomButton
-        type='button'
         className='w-full h-11 text-sm font-semibold rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white shadow-md transition-all hover:-translate-y-0.5'
         label='Thanh toán PayOS (VietQR)'
         onClick={handlePayWithPayos}

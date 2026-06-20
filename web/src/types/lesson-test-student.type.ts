@@ -76,6 +76,8 @@ export interface LessonTestSubmissionResult {
   isCompletedCourse?: boolean
   certificateId?: string | null
   certificateCode?: string | null
+  courseScore?: number | null
+  courseScoreTotal?: number | null
 }
 
 /** One row in `GET …/student/submissions` (list attempts). */

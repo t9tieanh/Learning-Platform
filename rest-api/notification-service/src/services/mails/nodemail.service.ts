@@ -3,18 +3,10 @@ import { env } from '~/config/env'
 import { NotificationDto, PaymentRefundNotification, VerifyEmail } from '~/dto/request/notification.dto'
 import { CourseApprovalEvent } from '~/dto/event/course-approval-event.dto'
 import { QueueNameEnum } from '~/enums/rabbitQueue.enum'
+import { NotificationOrderType } from '~/enums/notificationOrderType.enum'
 import { getUser } from '~/grpc/userClient'
 import { EMAIL_GRADIENTS, renderTemplate } from '~/utils/templateUtil'
 import Logger from '~/utils/logger'
-
-function withEmailLayout(data: Record<string, unknown>): Record<string, unknown> {
-  return {
-    year: new Date().getFullYear(),
-    headerGradient: EMAIL_GRADIENTS.brand,
-    buttonGradient: EMAIL_GRADIENTS.brand,
-    ...data
-  }
-}
 
 // Interface cho options gửi mail
 export interface SendEmailOptions {
@@ -22,10 +14,17 @@ export interface SendEmailOptions {
   subject: string
   text?: string
   html?: string
+  attachments?: Array<{
+    filename: string
+    content: Buffer
+    contentType?: string
+  }>
 }
 
 class NodeMailService {
   static transporter: nodemailer.Transporter | null = null
+
+  private static readonly FAKE_EMAIL_DOMAIN = 'example.com'
 
   constructor() {
     if (NodeMailService.transporter === null) {
@@ -39,14 +38,48 @@ class NodeMailService {
     }
   }
 
-  private async send(options: SendEmailOptions): Promise<nodemailer.SentMessageInfo> {
+  private withEmailLayout(data: Record<string, unknown>): Record<string, unknown> {
+    return {
+      year: new Date().getFullYear(),
+      headerGradient: EMAIL_GRADIENTS.brand,
+      buttonGradient: EMAIL_GRADIENTS.brand,
+      ...data
+    }
+  }
+
+  private isFakeEmail(email: string): boolean {
+    const domain = email.trim().toLowerCase().split('@')[1]
+    return domain === NodeMailService.FAKE_EMAIL_DOMAIN
+  }
+
+  private normalizeRecipients(to: string | string[]): string[] {
+    const list = Array.isArray(to) ? to : [to]
+    return list.flat().filter(Boolean)
+  }
+
+  private async send(options: SendEmailOptions): Promise<nodemailer.SentMessageInfo | void> {
+    const recipients = this.normalizeRecipients(options.to)
+    const fakeRecipients = recipients.filter((email) => this.isFakeEmail(email))
+    const realRecipients = recipients.filter((email) => !this.isFakeEmail(email))
+
+    if (fakeRecipients.length > 0) {
+      Logger.info(
+        `Skipped email to fake address(es): ${fakeRecipients.join(', ')} | subject: ${options.subject}`
+      )
+    }
+
+    if (realRecipients.length === 0) {
+      return
+    }
+
     try {
       const info = await NodeMailService.transporter?.sendMail({
         from: '"Phạm Tiến Anh" <phama9162@gmail.com>',
-        to: options.to,
+        to: realRecipients,
         subject: options.subject,
         text: options.text,
-        html: options.html
+        html: options.html,
+        attachments: options.attachments
       })
 
       Logger.info(`Email sent: ${info.messageId}`)
@@ -71,7 +104,7 @@ class NodeMailService {
         subject = 'Hãy xác thực tài khoản của bạn'
         to = emailNotification.email
         templateName = 'email-verification.html'
-        templateData = withEmailLayout({
+        templateData = this.withEmailLayout({
           pageTitle: 'Xác thực tài khoản · Learnova',
           badge: 'Xác thực',
           headerTitle: `Xin chào ${emailNotification.name}!`,
@@ -92,7 +125,7 @@ class NodeMailService {
         subject = 'Đặt lại mật khẩu của bạn'
         to = passwordNotification.email
         templateName = 'email-verification.html'
-        templateData = withEmailLayout({
+        templateData = this.withEmailLayout({
           pageTitle: 'Đặt lại mật khẩu · Learnova',
           badge: 'Bảo mật',
           headerTitle: `Xin chào ${passwordNotification.name}!`,
@@ -108,7 +141,7 @@ class NodeMailService {
       }
 
       case QueueNameEnum.ORDERCONFIRM: {
-        Logger.info(`[NodeMailService] Handling ORDERCONFIRM. Processing for: ${(notification as any).payload?.customer_email || (notification as any).email}. isVip: ${(notification as any).payload?.orderType === 'VIP'}`);
+        Logger.info(`[NodeMailService] Handling ORDERCONFIRM. Processing for: ${(notification as any).payload?.customer_email || (notification as any).email}. isVip: ${(notification as any).payload?.orderType === NotificationOrderType.VIP}`);
         // Order confirmation notification - payload should contain customer and items
         const orderNotification = notification as {
           email?: string | string[]
@@ -116,7 +149,7 @@ class NodeMailService {
           payload?: any
         }
 
-        const isVipOrder = orderNotification.payload?.orderType === 'VIP'
+        const isVipOrder = orderNotification.payload?.orderType === NotificationOrderType.VIP
 
         subject = isVipOrder ? 'Cảm ơn bạn đã đăng ký VIP!' : 'Xác nhận đơn hàng của bạn'
         to = orderNotification.email || orderNotification.to || []
@@ -126,7 +159,7 @@ class NodeMailService {
         const formattedTotal = isNaN(orderTotal) ? orderPayload.total : orderTotal.toLocaleString('vi-VN')
 
         if (isVipOrder) {
-          templateData = withEmailLayout({
+          templateData = this.withEmailLayout({
             ...orderPayload,
             pageTitle: 'Đăng ký VIP · Learnova',
             badge: 'VIP',
@@ -139,7 +172,7 @@ class NodeMailService {
             footerNote: 'Xác nhận gói VIP · Learnova'
           })
         } else {
-          templateData = withEmailLayout({
+          templateData = this.withEmailLayout({
             ...orderPayload,
             pageTitle: 'Xác nhận đơn hàng · Learnova',
             badge: 'Đơn hàng',
@@ -171,7 +204,7 @@ class NodeMailService {
         subject = 'Đừng quên học hôm nay trên Learnova 🎓'
         to = reminder.email || notification.email
         templateName = 'study-reminder.html'
-        templateData = withEmailLayout({
+        templateData = this.withEmailLayout({
           pageTitle: 'Nhắc học hôm nay · Learnova',
           badge: 'Nhắc học',
           headerTitle: `Chào ${reminder.userName || 'bạn'}, tiếp tục hành trình học tập nhé!`,
@@ -202,14 +235,18 @@ class NodeMailService {
           courseTitle?: string
           courseThumbnailUrl?: string | null
           certificateCode?: string
+          courseScore?: number | null
+          courseScoreTotal?: number | null
           profileUrl?: string
           courseUrl?: string
+          certificatePdfBase64?: string | null
+          certificatePdfFilename?: string | null
         }
 
         subject = 'Chúc mừng! Bạn đã nhận chứng chỉ hoàn thành khóa học 🎓'
         to = issued.email || notification.email
         templateName = 'certificate-issued.html'
-        templateData = withEmailLayout({
+        templateData = this.withEmailLayout({
           pageTitle: 'Chứng chỉ hoàn thành khóa học · Learnova',
           badge: 'Chứng chỉ',
           headerGradient: EMAIL_GRADIENTS.success,
@@ -224,29 +261,67 @@ class NodeMailService {
           courseThumbnailUrl: issued.courseThumbnailUrl,
           hasThumbnail: Boolean(issued.courseThumbnailUrl),
           certificateCode: issued.certificateCode,
+          courseScore: issued.courseScore,
+          courseScoreTotal: issued.courseScoreTotal,
+          hasCourseScore: issued.courseScore != null && issued.courseScoreTotal != null,
+          scoreDisplay:
+            issued.courseScore != null && issued.courseScoreTotal != null
+              ? `${issued.courseScore}/${issued.courseScoreTotal}`
+              : null,
+          hasPdfAttachment: Boolean(issued.certificatePdfBase64),
           profileUrl: issued.profileUrl,
           courseUrl: issued.courseUrl
         })
-        break
+
+        const html = await renderTemplate(templateName, templateData)
+
+        const mailPayload: SendEmailOptions = {
+          to: (to as string[]) || [notification.email],
+          subject,
+          text: html.replace(/<[^>]+>/g, ''),
+          html
+        }
+
+        if (issued.certificatePdfBase64) {
+          mailPayload.attachments = [
+            {
+              filename: issued.certificatePdfFilename || 'Learnova-Chung-chi.pdf',
+              content: Buffer.from(issued.certificatePdfBase64, 'base64'),
+              contentType: 'application/pdf'
+            }
+          ]
+        }
+
+        await this.send(mailPayload)
+        Logger.info(`Email sent: ${mailPayload.subject}`)
+        return
       }
       case QueueNameEnum.PAYMENT_REFUND: {
         const refundNotification = notification as PaymentRefundNotification
         const refundPayload = refundNotification.payload
         const formattedTotal = Number(refundPayload.total).toLocaleString('vi-VN')
+        const isVip = refundPayload.orderType === NotificationOrderType.VIP
 
-        subject = 'Thông báo hoàn tiền đơn hàng Learnova'
+        subject = isVip
+          ? 'Đăng ký VIP Learnova không thành công'
+          : 'Thông báo hoàn tiền đơn hàng Learnova'
         to = refundPayload.customer_email
-        templateName = 'payment-refund.html'
-        templateData = withEmailLayout({
-          pageTitle: 'Thông báo hoàn tiền · Learnova',
-          badge: 'Hoàn tiền',
-          headerGradient: EMAIL_GRADIENTS.danger,
-          headerTitle: `Xin chào ${refundPayload.customer_name || 'bạn'}!`,
-          headerSubtitle: 'Chúng tôi đã nhận thanh toán của bạn nhưng chưa thể kích hoạt đơn hàng.',
-          footerNote: 'Thông báo hoàn tiền · Learnova',
+        templateName = isVip ? 'vip-payment-fail.html' : 'payment-refund.html'
+        templateData = this.withEmailLayout({
+          pageTitle: isVip ? 'Đăng ký VIP thất bại · Learnova' : 'Thông báo hoàn tiền · Learnova',
+          badge: isVip ? 'VIP' : 'Hoàn tiền',
+          headerGradient: isVip ? EMAIL_GRADIENTS.vip : EMAIL_GRADIENTS.danger,
+          headerTitle: isVip
+            ? `Xin chào ${refundPayload.customer_name || 'bạn'}!`
+            : `Xin chào ${refundPayload.customer_name || 'bạn'}!`,
+          headerSubtitle: isVip
+            ? 'Thanh toán đã ghi nhận nhưng hệ thống chưa thể kích hoạt gói VIP của bạn.'
+            : 'Chúng tôi đã nhận thanh toán của bạn nhưng chưa thể kích hoạt đơn hàng.',
+          footerNote: isVip ? 'Thông báo đăng ký VIP · Learnova' : 'Thông báo hoàn tiền · Learnova',
           customerName: refundPayload.customer_name,
           orderId: refundPayload.orderId,
           formattedTotal,
+          reason: refundPayload.reason || (isVip ? 'Kích hoạt gói VIP thất bại' : undefined),
         })
         break
       }
@@ -254,22 +329,30 @@ class NodeMailService {
         const adminNotification = notification as PaymentRefundNotification
         const adminPayload = adminNotification.payload
         const formattedTotal = Number(adminPayload.total).toLocaleString('vi-VN')
+        const isVip = adminPayload.orderType === NotificationOrderType.VIP
 
-        subject = `[Learnova] Thanh toán thất bại — cần hoàn tiền #${adminPayload.orderId}`
+        subject = isVip
+          ? `[Learnova] Đăng ký VIP thất bại — cần hoàn tiền #${adminPayload.orderId}`
+          : `[Learnova] Thanh toán thất bại — cần hoàn tiền #${adminPayload.orderId}`
         to = env.ADMIN_EMAIL
-        templateName = 'payment-fail-admin.html'
-        templateData = withEmailLayout({
-          pageTitle: 'Cảnh báo thanh toán · Learnova',
+        templateName = isVip ? 'vip-payment-fail-admin.html' : 'payment-fail-admin.html'
+        templateData = this.withEmailLayout({
+          pageTitle: isVip ? 'Cảnh báo VIP · Learnova' : 'Cảnh báo thanh toán · Learnova',
           badge: 'Cảnh báo',
-          headerGradient: EMAIL_GRADIENTS.danger,
-          headerTitle: 'Thanh toán thất bại — cần xử lý hoàn tiền',
-          headerSubtitle: 'Khách đã thanh toán qua PayOS nhưng hệ thống không kích hoạt được đơn hàng.',
-          footerNote: 'Thông báo admin · Learnova',
+          headerGradient: isVip ? EMAIL_GRADIENTS.vip : EMAIL_GRADIENTS.danger,
+          headerTitle: isVip
+            ? 'Đăng ký VIP thất bại — cần xử lý hoàn tiền'
+            : 'Thanh toán thất bại — cần xử lý hoàn tiền',
+          headerSubtitle: isVip
+            ? 'Khách đã thanh toán gói VIP nhưng user-service không kích hoạt được tài khoản VIP.'
+            : 'Khách đã thanh toán qua PayOS nhưng hệ thống không kích hoạt được đơn hàng.',
+          footerNote: isVip ? 'Thông báo admin VIP · Learnova' : 'Thông báo admin · Learnova',
           orderId: adminPayload.orderId,
           customerName: adminPayload.customer_name,
           customerEmail: adminPayload.customer_email,
           userId: adminPayload.user_id || '—',
           formattedTotal,
+          reason: adminPayload.reason || (isVip ? 'Kích hoạt gói VIP thất bại' : undefined),
         })
         break
       }
@@ -288,7 +371,7 @@ class NodeMailService {
         if (event.action === 'APPROVED') {
           subject = 'Khóa học của bạn đã được duyệt!'
           templateName = 'course-approved.html'
-          templateData = withEmailLayout({
+          templateData = this.withEmailLayout({
             pageTitle: 'Khóa học đã duyệt · Learnova',
             badge: 'Đã duyệt',
             headerGradient: EMAIL_GRADIENTS.success,
@@ -304,7 +387,7 @@ class NodeMailService {
         } else if (event.action === 'REJECTED') {
           subject = 'Khóa học của bạn bị từ chối'
           templateName = 'course-rejected.html'
-          templateData = withEmailLayout({
+          templateData = this.withEmailLayout({
             pageTitle: 'Khóa học bị từ chối · Learnova',
             badge: 'Từ chối',
             headerGradient: EMAIL_GRADIENTS.danger,

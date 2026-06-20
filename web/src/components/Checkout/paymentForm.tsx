@@ -13,16 +13,16 @@ const PaymentForm = ({ order }: { order: Order | null }) => {
   }, [order])
 
   return (
-    <div className='payment-form space-y-6'>
-      <Card className='shadow-sm'>
-        <CardHeader>
+    <div className='payment-form space-y-6 min-w-0'>
+      <Card className='shadow-sm overflow-hidden'>
+        <CardHeader className='px-4 sm:px-6'>
           <CardTitle className='font-semibold text-base flex items-center gap-2'>
             <User className='w-5 h-5' />
             Thông tin liên hệ
           </CardTitle>
           <CardDescription>Email xác nhận đơn hàng sẽ được gửi về email này.</CardDescription>
         </CardHeader>
-        <CardContent className='space-y-4'>
+        <CardContent className='space-y-4 px-4 sm:px-6'>
           <CustomInput
             disabled
             label='Họ và tên'

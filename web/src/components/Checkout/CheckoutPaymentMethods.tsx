@@ -1,5 +1,4 @@
 import CustomButton from '@/components/common/Button'
-import VnPayLogo from '@/assets/images/Icon-VNPAY-QR.webp'
 import PayOSLogo from '@/assets/images/payos-icon.png'
 import momoLogo from '@/assets/images/momo-logo.webp'
 import { toast } from 'sonner'
@@ -10,35 +9,10 @@ type CheckoutPaymentMethodsProps = {
   receiveEmail: string
 }
 
+const paymentButtonClass =
+  '!w-fit shrink-0 px-3 py-2 rounded-md shadow-sm text-sm whitespace-nowrap'
+
 const CheckoutPaymentMethods = ({ receiveEmail }: CheckoutPaymentMethodsProps) => {
-  const handlePayWithVnPay = async () => {
-    const confirmed = await showConfirmToast({
-      title: (
-        <div className='flex items-center gap-2'>
-          Xác nhận thanh toán
-          <img src={VnPayLogo} alt='VnPay Logo' className='h-5 w-auto' />
-        </div>
-      ),
-      description: 'Bạn sắp thanh toán qua VnPay. Bạn có chắc chắn muốn tiếp tục?',
-      confirmLabel: 'Có, tiếp tục',
-      cancelLabel: 'Hủy'
-    })
-
-    if (!confirmed) return
-
-    try {
-      const response = await orderService.processPayment('VNPAY', receiveEmail)
-      if (response && response.code === 200 && response.result) {
-        toast.success('Đang chuyển đến trang thanh toán VnPay...')
-        window.location.href = response.result.payment.payUrl
-      } else {
-        toast.error(response.message || 'Không thể khởi tạo thanh toán VnPay. Vui lòng thử lại.')
-      }
-    } catch (error: any) {
-      toast.error(error?.response?.data.message || 'Đã có lỗi xảy ra, vui lòng thử lại sau.')
-    }
-  }
-
   const handlePayWithMomo = async () => {
     const confirmed = await showConfirmToast({
       title: (
@@ -96,33 +70,20 @@ const CheckoutPaymentMethods = ({ receiveEmail }: CheckoutPaymentMethodsProps) =
   }
 
   return (
-    <div className='flex flex-wrap gap-3'>
+    <div className='flex flex-row flex-nowrap items-center justify-start gap-2 overflow-x-auto'>
       <CustomButton
-        type='submit'
-        className='bg-pink-200 text-black py-2 rounded-md hover:bg-gray-200 shadow-sm'
+        type='button'
+        className={`${paymentButtonClass} bg-emerald-100 text-black hover:bg-gray-200`}
+        label='Thanh toán bằng PayOS'
+        onClick={handlePayWithPayos}
+        icon={<img src={PayOSLogo} alt='PayOS Logo' className='h-5 w-auto' />}
+      />
+      <CustomButton
+        type='button'
+        className={`${paymentButtonClass} bg-pink-200 text-black hover:bg-gray-200`}
         label='Thanh toán bằng Momo'
         onClick={handlePayWithMomo}
-        icon={
-          <img src={momoLogo} alt='Momo Logo' className='h-6 w-auto' />
-        }
-      />
-      <CustomButton
-        type='submit'
-        className='bg-blue-300 text-gray py-2 rounded-md hover:bg-gray-200 shadow-sm'
-        label='Thanh toán bằng VnPay'
-        onClick={handlePayWithVnPay}
-        icon={
-          <img src={VnPayLogo} alt='VnPay Logo' className='h-6 w-auto' />
-        }
-      />
-      <CustomButton
-        type='submit'
-        className='bg-emerald-100 text-black py-2 rounded-md hover:bg-gray-200 shadow-sm'
-        label='Thanh toán PayOS (VietQR)'
-        onClick={handlePayWithPayos}
-        icon={
-          <img src={PayOSLogo} alt='PayOS Logo' className='h-6 w-auto' />
-        }
+        icon={<img src={momoLogo} alt='Momo Logo' className='h-5 w-auto' />}
       />
     </div>
   )
