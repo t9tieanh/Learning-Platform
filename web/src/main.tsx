@@ -11,6 +11,7 @@ import AuthLayout from './layouts/AuthLayout'
 import TC_Layout from './layouts/TC_Layout'
 import AdminLayout from './layouts/AdminLayout'
 import NotFound from './pages/NotFound'
+import Unauthorized from './pages/Unauthorized'
 import Profile from './pages/Profile'
 import User from '@/pages/User'
 import TCHomePage from './pages/TC_HomePage'
@@ -78,6 +79,7 @@ const router = createBrowserRouter([
           { path: 'certificate/verify/:code', element: <CertificateVerify /> }
         ]
       },
+      { path: 'unauthorized', element: <Unauthorized /> },
       { path: 'auth', element: <AuthLayout /> },
       { path: 'user/verify', element: <User /> },
       { path: '*', element: <NotFound /> },
