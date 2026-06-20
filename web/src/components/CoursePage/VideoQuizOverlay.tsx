@@ -1,11 +1,32 @@
-import React, { useState, memo, useMemo, useEffect } from 'react'
+import React, { useState, memo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { CheckCircle2, XCircle, ArrowRight, SkipForward, PlayCircle } from 'lucide-react'
 import { LessonChunk } from '@/types/ai'
+import { QuizDifficulty } from '@/types/quiz'
 import CustomButton from '@/components/common/Button'
 import { timeToSeconds } from '@/utils/time/time.utils'
 import QuizChoiceItem from './QuizChoiceItem'
 import QuizChunkItem from './QuizChunkItem'
+
+const DIFFICULTY_META: Record<QuizDifficulty, { label: string; className: string }> = {
+  [QuizDifficulty.EASY]: {
+    label: 'Dễ',
+    className: 'bg-emerald-400/20 text-emerald-100 border-emerald-300/30'
+  },
+  [QuizDifficulty.MEDIUM]: {
+    label: 'Trung bình',
+    className: 'bg-amber-400/20 text-amber-100 border-amber-300/30'
+  },
+  [QuizDifficulty.HARD]: {
+    label: 'Khó',
+    className: 'bg-rose-400/20 text-rose-100 border-rose-300/30'
+  }
+}
+
+function getDifficultyMeta(difficulty?: QuizDifficulty) {
+  if (!difficulty) return null
+  return DIFFICULTY_META[difficulty] ?? null
+}
 
 interface VideoQuizOverlayProps {
     chunk: LessonChunk
@@ -54,6 +75,7 @@ const VideoQuizOverlay: React.FC<VideoQuizOverlayProps> = memo(({
     if (!currentQuiz) return null
 
     const isLastQuiz = currentQuizIndex === quizzes.length - 1
+    const difficultyMeta = getDifficultyMeta(currentQuiz.difficulty)
 
     const handleChoiceSelect = (choiceId: string) => {
         if (isAnswered) return
@@ -141,7 +163,14 @@ const VideoQuizOverlay: React.FC<VideoQuizOverlayProps> = memo(({
                                     ? new DOMParser().parseFromString(currentQuiz.question || '', 'text/html').documentElement.textContent || ''
                                     : (currentQuiz.question || '')
                             }} />
-                            <div className='flex items-center gap-2'>
+                            <div className='flex items-center gap-2 flex-wrap'>
+                                {difficultyMeta && (
+                                    <span
+                                        className={`px-2.5 py-0.5 rounded-lg text-[10px] font-bold border backdrop-blur-sm ${difficultyMeta.className}`}
+                                    >
+                                        Độ khó: {difficultyMeta.label}
+                                    </span>
+                                )}
                                 <span className='px-2.5 py-0.5 bg-white/20 rounded-lg text-[10px] font-bold border border-white/10 backdrop-blur-sm'>
                                     Chuyên đề: {activeChunk.title}
                                 </span>
