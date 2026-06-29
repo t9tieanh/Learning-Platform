@@ -20,7 +20,9 @@ import com.freeclassroom.courseservice.exception.CustomExeption;
 import com.freeclassroom.courseservice.exception.ErrorCode;
 import com.freeclassroom.courseservice.mapper.CourseCompletionCertificateMapper;
 import com.freeclassroom.courseservice.mapper.CourseStudentMapper;
+import com.freeclassroom.courseservice.mapper.ChapterStudentMapper;
 import com.freeclassroom.courseservice.repository.entity.CourseCompletionCertificateRepository;
+import com.freeclassroom.courseservice.repository.entity.ChapterRepository;
 import com.freeclassroom.courseservice.repository.entity.CourseRepository;
 import com.freeclassroom.courseservice.repository.entity.EnrollmentRepository;
 import com.freeclassroom.courseservice.repository.entity.LessonRepository;
@@ -43,7 +45,9 @@ import java.util.Map;
 public class CourseStudentService implements ICourseStudentService{
     EnrollmentRepository enrollmentRepo;
     CourseRepository courseRepo;
+    ChapterRepository chapterRepo;
     CourseStudentMapper courseStudentMapper;
+    ChapterStudentMapper chapterStudentMapper;
     LessonRepository lessonRepo;
     CourseCompletionCertificateRepository certificateRepository;
     CourseCompletionCertificateMapper certificateMapper;
@@ -64,14 +68,19 @@ public class CourseStudentService implements ICourseStudentService{
 
         CourseDetailResponse result = courseStudentMapper.toCourseDetailDto(course);
 
+        List<ChapterResponse> chapters = chapterRepo.findByCourseIdOrderByPositionAsc(courseId).stream()
+                .map(chapterStudentMapper::toChapterResponse)
+                .toList();
+        result.setChapters(chapters);
+
         InstructorResponse instructor = new InstructorResponse();
         instructor.setId(userId);
 
         result.setInstructor(instructor);
-        //get data of lesson (include progress)
-        result.getChapters().stream().forEach(chapter -> {
-            chapter.setLessons(lessonRepo.findLessonOverviewWithProgressByChapter(chapter.getId(), enrollment.getId()));
-        });
+        // get data of lesson (include progress) — loaded explicitly, not via lazy chapter.lessons
+        chapters.forEach(chapter -> chapter.setLessons(
+                lessonRepo.findLessonOverviewWithProgressByChapter(chapter.getId(), enrollment.getId())
+        ));
 
         result.setProgress(enrollment.getProgress());
         result.setCertificateJourney(buildCertificateJourney(enrollment, result));
@@ -100,7 +109,7 @@ public class CourseStudentService implements ICourseStudentService{
                 .sum();
 
         long completedLessons = courseDetail.getChapters().stream()
-                .flatMap(ch -> ch.getLessons().stream())
+                .flatMap(ch -> ch.getLessons() != null ? ch.getLessons().stream() : java.util.stream.Stream.empty())
                 .filter(l -> EnumLessonProgress.COMPLETED.equals(l.getCompletionStatus()))
                 .count();
 

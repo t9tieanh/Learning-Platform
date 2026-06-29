@@ -81,6 +81,10 @@ const CoursePage = () => {
       if (!options?.silent) setIsLoading(true)
       try {
         const response = await courseService.getCourseDetails(courseId)
+        if (response?.code === 1006) {
+          navigate('/unauthorized', { replace: true })
+          return
+        }
         if (response && response.code === 200 && response.result) {
           setCourseData(response.result)
 
@@ -123,7 +127,7 @@ const CoursePage = () => {
         if (!options?.silent) setIsLoading(false)
       }
     },
-    [courseId]
+    [courseId, navigate]
   )
 
   useEffect(() => {

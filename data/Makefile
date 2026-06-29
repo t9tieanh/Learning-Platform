@@ -4,7 +4,7 @@ PYTHON_VENV = venv
 PYTHON = $(PYTHON_VENV)/bin/python
 PIP = $(PYTHON_VENV)/bin/pip
 
-.PHONY: bootstrap clean-env pipeline clean-all normalize import sync help clean-supabase clean-courses translate-titles translate-descriptions seed-lesson-test-submissions import-feedback-json
+.PHONY: bootstrap clean-env pipeline clean-all normalize import sync help clean-supabase clean-courses translate-titles translate-descriptions seed-lesson-test-submissions import-feedback-json unenroll-user
 
 help:
 	@echo "Available commands:"
@@ -22,6 +22,7 @@ help:
 	@echo "  import-supabase   - Import normalized courses to Supabase embeddings table"
 	@echo "  clean-supabase    - Clear all course data from Supabase"
 	@echo "  seed-lesson-test-submissions - Seed (N-1) passing lesson test submissions"
+	@echo "  unenroll-user     - Remove hardcoded user enrollment for demo (ARGS: --dry-run | --execute)"
 
 bootstrap:
 	python3 -m venv $(PYTHON_VENV)
@@ -74,6 +75,9 @@ clean-supabase:
 
 seed-lesson-test-submissions:
 	$(PYTHON) scripts/supabase/seed-data/seed_lesson_test_submissions.py $(ARGS)
+
+unenroll-user:
+	$(PYTHON) scripts/clean/unenroll_user_from_course.py $(ARGS)
 
 # --- Full Pipeline ---
 
