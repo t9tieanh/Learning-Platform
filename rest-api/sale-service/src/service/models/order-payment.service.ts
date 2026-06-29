@@ -48,6 +48,11 @@ class OrderPaymentService {
     async handlePayosWebhook(body: Webhook): Promise<{ alreadyCompleted: boolean; refundNotified: boolean }> {
         const webhookData = await payosService.verifyWebhook(body);
 
+        if (this.isPayosConfirmValidationPing(webhookData.orderCode)) {
+            Logger.info('PayOS webhook validation ping acknowledged (test orderCode)');
+            return { alreadyCompleted: false, refundNotified: false };
+        }
+
         let order: Awaited<ReturnType<typeof payosService.resolveOrderFromWebhook>>['order'];
         let orderId: string;
         try {
@@ -92,6 +97,11 @@ class OrderPaymentService {
         Logger.error(`PayOS webhook: could not trigger fulfillment for ${orderId}: ${triggerResult.reason}`);
         await orderRefundNotificationService.sendPaymentRefundNotify(orderId);
         return { alreadyCompleted: false, refundNotified: true };
+    }
+
+    /** PayOS sends this sample orderCode when probing the webhook URL during confirm-webhook. */
+    private isPayosConfirmValidationPing(orderCode: number): boolean {
+        return orderCode === 123;
     }
 
     private async handlePayosVipWebhook(
