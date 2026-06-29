@@ -370,8 +370,11 @@ public interface CourseRepository extends JpaRepository<CourseEntity, String> {
     Optional<CourseEntity> findByIdWithChaptersSorted(@Param("id") String id);
 
     @EntityGraph(attributePaths = {"tags", "category"})
-    @Query("select c from CourseEntity c")
-    Page<CourseEntity> findAllWithTags(Pageable pageable);
+    @Query("""
+        SELECT c FROM CourseEntity c
+        WHERE c.status = com.freeclassroom.courseservice.enums.entity.EnumCourseStatus.PUBLISHED
+    """)
+    Page<CourseEntity> findAllPublishedWithTags(Pageable pageable);
 
     @Query("""
         SELECT c
