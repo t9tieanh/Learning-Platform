@@ -180,7 +180,7 @@ class OrderController {
             Logger.info(
                 `PayOS webhook OK order processed (alreadyCompleted=${result.alreadyCompleted}, refundNotified=${result.refundNotified})`
             );
-            return res.status(200).json({ error: 0, message: 'Ok' });
+            return res.status(200).json({ error: 0, message: 'success', data: null });
         } catch (err) {
             Logger.error(`PayOS webhook failed: ${err}`);
             const status = err instanceof ApiError ? err.status : 500;
@@ -189,9 +189,10 @@ class OrderController {
                 return res.status(400).json({
                     error: -1,
                     message: err instanceof Error ? err.message : 'Invalid webhook',
+                    data: null,
                 });
             }
-            return res.status(200).json({ error: 0, message: 'Ok' });
+            return res.status(200).json({ error: 0, message: 'success', data: null });
         }
     }
 
