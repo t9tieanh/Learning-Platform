@@ -27,7 +27,7 @@ public class CourseSearchMigrationRunner implements ApplicationRunner {
           return;
       }
 
-      log.info("Starting startup migration: courses (full document) -> Elasticsearch");
+      log.info("Starting startup migration: published courses -> Elasticsearch");
       try {
           migrationService.migrateAllCoursesIdAndTags();
       } catch (Exception ex) {

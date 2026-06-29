@@ -58,12 +58,11 @@ async function bootstrap() {
       });
     });
 
+    // Run in background: PayOS pings the public webhook URL (gateway/tunnel may start after sale-service).
     if (process.env.PAYOS_CONFIRM_WEBHOOK === 'true') {
-      try {
-        await payosService.confirmWebhookWithRetry()
-      } catch (err) {
+      void payosService.confirmWebhookWithRetry().catch((err) => {
         Logger.warn(`PayOS webhook confirm skipped after retries: ${err}`)
-      }
+      })
     }
 
   } catch (error) {
