@@ -23,7 +23,7 @@ export type ExplorePreferencesPayload = {
 
 const MAX_SELECTIONS_PER_SECTION = 3
 const MAX_VISIBLE_CATEGORIES = 6
-const CATEGORY_ICONS = ['💻', '📊', '🤖', '🌐', '⚙️', '☁️']
+const CATEGORY_ICONS = ['💻', '⚙️', '🌍', '💼', '🔬', '📊']
 const BENEFIT_HIGHLIGHTS = [
   {
     title: 'Cá nhân hóa lộ trình',
