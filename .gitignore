@@ -32,3 +32,5 @@ Semantic-Chunking-Typescript
 docker-compose.local.yml
 
 production.v2
+
+.claude

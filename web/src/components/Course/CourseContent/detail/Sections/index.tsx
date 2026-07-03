@@ -85,7 +85,6 @@ const CourseSection = ({ section, index }: { section: Section; index: number }) 
             {section.lessonNum} bài
           </Badge>
         </div>
-        <PreviewPublicLesson preview={preview} setPreview={setPreview} />
       </AccordionTrigger>
 
       <AccordionContent className='px-3 md:px-6 pb-6'>
@@ -151,6 +150,7 @@ const CourseSection = ({ section, index }: { section: Section; index: number }) 
           )}
         </div>
       </AccordionContent>
+      <PreviewPublicLesson preview={preview} setPreview={setPreview} />
     </AccordionItem>
   )
 }
