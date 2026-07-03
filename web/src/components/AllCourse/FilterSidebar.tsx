@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { MagnifyingGlassIcon, MixerHorizontalIcon, StarIcon } from '@radix-ui/react-icons'
-import { TagPicker } from 'rsuite'
+import { SelectPicker } from 'rsuite'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -90,17 +90,17 @@ export const FilterSidebar = ({
 
         <div className='mb-7'>
           <Label className='mb-3 text-[11px] font-bold uppercase tracking-wide text-slate-500'>Danh mục</Label>
-          <TagPicker
+          <SelectPicker
             data={categoryOptions}
-            value={selectedCategories}
-            onChange={(value) => onCategoriesChange(value ?? [])}
+            value={selectedCategories[0] ?? null}
+            onChange={(value) => onCategoriesChange(value ? [value] : [])}
             loading={loadingCategories}
             placeholder='Chọn danh mục'
             block
             cleanable
             searchable
-            className='w-full category-tag-picker'
-            popupClassName='category-tag-picker-popup text-sm'
+            className='w-full category-select-picker'
+            popupClassName='category-select-picker-popup text-sm'
           />
         </div>
 
