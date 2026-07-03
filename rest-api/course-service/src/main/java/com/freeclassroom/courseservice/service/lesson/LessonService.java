@@ -39,11 +39,14 @@ public class LessonService implements ILessonService{
     IUploadFileService uploadFileService;
     LessonMapper lessonMapper;
     RabbitTemplate rabbitTemplate;
+    LessonLimitValidator lessonLimitValidator;
 
     @Override
     public Flux<ServerSentEvent<String>> addVideoWithProgress(CreationVideoRequest lesson) throws IOException {
         ChapterEntity chapter = chapterRepo.findById(lesson.getChapterId())
                 .orElseThrow(() -> new CustomExeption(ErrorCode.CHAPTER_NOT_FOUND));
+
+        lessonLimitValidator.assertCanAddLesson(chapter);
 
         return uploadFileService.uploadFileWithProgress(lesson.getFile())
                 .flatMap(event -> {
@@ -94,6 +97,8 @@ public class LessonService implements ILessonService{
     public Flux<ServerSentEvent<String>> addDocumentWithProgress(CreationDocumentRequest lesson) throws IOException {
         ChapterEntity chapter = chapterRepo.findById(lesson.getChapterId())
                 .orElseThrow(() -> new CustomExeption(ErrorCode.CHAPTER_NOT_FOUND));
+
+        lessonLimitValidator.assertCanAddLesson(chapter);
 
         // if have file -> process like addVideo
         if (lesson.getFile() != null && !lesson.getFile().isEmpty()) {

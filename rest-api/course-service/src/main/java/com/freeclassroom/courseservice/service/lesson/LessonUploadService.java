@@ -58,12 +58,14 @@ public class LessonUploadService implements ILessonUploadService {
     RabbitTemplate rabbitTemplate;
     LessonUploadProperties properties;
     AmazonS3Client amazonS3Client;
+    LessonLimitValidator lessonLimitValidator;
 
     @Override
     public ChunkedUploadInitResponse initUpload(ChunkedUploadInitRequest request, String instructorId) {
-        if (!chapterRepository.existsById(request.getChapterId())) {
-            throw new CustomExeption(ErrorCode.CHAPTER_NOT_FOUND);
-        }
+        String courseId = chapterRepository.findCourseIdByChapterId(request.getChapterId())
+                .orElseThrow(() -> new CustomExeption(ErrorCode.CHAPTER_NOT_FOUND));
+        
+        lessonLimitValidator.assertCanAddLesson(request.getChapterId(), courseId);
 
         long chunkSize = resolveChunkSize(request.getChunkSize());
         int totalParts = calculateTotalParts(request.getFileSize(), chunkSize);
@@ -242,10 +244,15 @@ public class LessonUploadService implements ILessonUploadService {
     private LessonDto finalizeUpload(LessonUploadSessionEntity session,
                                      ChunkCompleteRequest request,
                                      List<CompletedPart> completedParts) {
+        ChapterEntity chapter = chapterRepository.findById(session.getChapterId())
+                .orElseThrow(() -> new CustomExeption(ErrorCode.CHAPTER_NOT_FOUND));
+
+        lessonLimitValidator.assertCanAddLesson(chapter);
+
         EnumLessonType lessonType = resolveLessonType(request, session);
         String fileUrl = amazonS3Client.completeMultipartUpload(session.getObjectKey(), session.getUploadId(), completedParts);
 
-        LessonEntity lesson = persistLesson(session, request, fileUrl, lessonType);
+        LessonEntity lesson = persistLesson(chapter, session, request, fileUrl, lessonType);
 
         session.setStatus(EnumLessonUploadStatus.COMPLETED);
         session.setCompletedAt(LocalDateTime.now());
@@ -256,13 +263,11 @@ public class LessonUploadService implements ILessonUploadService {
         return lessonMapper.toDto(lesson);
     }
 
-    private LessonEntity persistLesson(LessonUploadSessionEntity session,
+    private LessonEntity persistLesson(ChapterEntity chapter,
+                                       LessonUploadSessionEntity session,
                                        ChunkCompleteRequest request,
                                        String fileUrl,
                                        EnumLessonType lessonType) {
-        ChapterEntity chapter = chapterRepository.findById(session.getChapterId())
-                .orElseThrow(() -> new CustomExeption(ErrorCode.CHAPTER_NOT_FOUND));
-
         if (lessonType == null) {
             throw new CustomExeption(ErrorCode.FILE_TYPE_INVALID);
         }
