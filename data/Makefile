@@ -4,7 +4,7 @@ PYTHON_VENV = venv
 PYTHON = $(PYTHON_VENV)/bin/python
 PIP = $(PYTHON_VENV)/bin/pip
 
-.PHONY: bootstrap clean-env pipeline clean-all normalize import sync help clean-supabase clean-courses translate-titles translate-descriptions seed-lesson-test-submissions import-feedback-json unenroll-user
+.PHONY: bootstrap clean-env pipeline clean-all normalize import sync help clean-supabase clean-courses translate-titles translate-descriptions seed-lesson-test-submissions import-feedback-json unenroll-user import-courses-from-mysql
 
 help:
 	@echo "Available commands:"
@@ -19,7 +19,8 @@ help:
 	@echo "  import            - Import data to MySQL and MongoDB"
 	@echo "  import-feedback-json - Import feedbacks from JSON seed file via standalone shell script"
 	@echo "  sync-supabase     - Sync lesson analysis to Supabase"
-	@echo "  import-supabase   - Import normalized courses to Supabase embeddings table"
+	@echo "  import-supabase   - Import normalized courses to Supabase embeddings table (from CSV)"
+	@echo "  import-courses-from-mysql - Sync courses directly from MySQL to Supabase (via SSH tunnel)"
 	@echo "  clean-supabase    - Clear all course data from Supabase"
 	@echo "  seed-lesson-test-submissions - Seed (N-1) passing lesson test submissions"
 	@echo "  unenroll-user     - Remove hardcoded user enrollment for demo (ARGS: --dry-run | --execute)"
@@ -69,6 +70,18 @@ normalize-supabase:
 
 import-supabase:
 	$(PYTHON) scripts/supabase/import_to_supabase.py
+
+import-courses-from-mysql:
+	@echo "🔵 Importing courses from MySQL to Supabase..."
+	@echo ""
+	@echo "Prerequisites:"
+	@echo "  1. SSH tunnel: ssh -L 3307:127.0.0.1:3306 learnova.prod"
+	@echo "  2. Dependencies: pip install mysql-connector-python psycopg2-binary"
+	@echo ""
+	@python3 -c "import mysql.connector, psycopg2" 2>/dev/null || { echo "❌ Missing dependencies. Run: pip install mysql-connector-python psycopg2-binary"; exit 1; }
+	@echo "✅ Dependencies OK"
+	@echo ""
+	$(PYTHON) scripts/supabase/import_courses_from_mysql.py
 
 clean-supabase:
 	$(PYTHON) scripts/supabase/clean_supabase_courses.py
