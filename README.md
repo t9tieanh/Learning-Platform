@@ -5,7 +5,7 @@
 <h1 align="center">Learnova – Collaborative E-Learning System</h1>
 
 <p align="center">
-  <img alt="Learning Platform Cover" src="./artifact/forreadme/cover-learnova.jpg" width="100%" style="max-width: 800px; border-radius: 8px; margin: 20px 0;"/>
+  <img alt="Learning Platform Banner" src="./artifact/forreadme/new.v2/learnova-banner.png" width="100%" style="max-width: 900px; border-radius: 8px; margin: 20px 0;"/>
 </p>
 
 <p align="center">
@@ -72,8 +72,31 @@ A comprehensive full-stack e-learning platform designed to empower users to crea
 **Learning Platform** is a modern, scalable web application that bridges the gap between educators and learners. The platform enables instructors to create rich, multimedia-enhanced courses, manage student progress, and facilitate discussions. Learners can enroll in courses, track their learning journey, and engage with peers through integrated social features and real-time communication.
 
 **Project Start**: January 2025  
+**Current Version**: 2.0  
 **Video demo**: https://www.youtube.com/watch?v=N56jemgKceE  
 **Office website**: https://learnova.t9tieanh.io.vn
+
+---
+
+## 🆕 Version 2.0 Updates
+
+**Release Date**: July 2026
+
+### New Features & Improvements
+- ✨ **Optimized Architecture** - Enhanced microservices design with improved scalability
+- 📊 **Enhanced Saga Pattern** - More robust distributed transaction handling
+- 🎯 **Lesson Limits** - Enforced constraints (5 lessons/chapter, 20 lessons/course) for better content quality
+- 📈 **Cost Optimization** - Predictable S3 and CloudFront usage with ~$30/user/year cost model
+- 🔄 **Improved gRPC Communication** - Optimized inter-service communication
+
+### 🤖 New AI & Automation Service
+- **Assistant Service** - New microservice for AI-powered features
+- **Semantic Chunking** - Intelligent document splitting for context preservation
+- **RAG Implementation** - Retrieval-Augmented Generation for accurate, context-aware responses
+- **Assembly AI Integration** - Real-time speech-to-text for voice notes and transcription
+- **OpenAI LLM** - Advanced language model for semantic understanding
+- **Vector Embeddings** - multilingual-e5 model for semantic search across 100+ languages
+- **n8n Workflows** - Automated workflow orchestration for complex processes
 
 ---
 
@@ -83,7 +106,7 @@ The platform follows a **Microservices Architecture** pattern with the following
 
 ### Architecture Overview
 
-![System Architecture Diagram](./artifact/forreadme/system-architecture.png)
+![System Architecture Diagram](./artifact/forreadme/new.v2/Learnova%20Architecture%20Design-Final.jpg)
 
 ### Architecture Components
 
@@ -125,6 +148,23 @@ The platform follows a **Microservices Architecture** pattern with the following
 - Email and push notification sending
 - Notification history tracking
 
+##### **Assistant Service (Node.js + Express.js)**
+- AI-powered course assistant and Q&A
+- Semantic text chunking for course content
+- RAG (Retrieval-Augmented Generation) implementation
+- Real-time voice transcription via Assembly AI
+- Integration with OpenAI LLM for intelligent responses
+- Multilingual support with e5 embedding model
+- Conversation history and context management
+- Supabase (PostgreSQL) for storing embeddings and conversations
+
+##### **AI & Automation Tools (External Integration)**
+- **n8n** - Workflow automation for complex processes
+- **OpenAI LLM** - Advanced language model for semantic understanding
+- **multilingual-e5 Embedding Model** - Vector embeddings for semantic search and RAG
+- **Assembly AI** - High-accuracy speech-to-text conversion
+- **Semantic Chunking** - Intelligent document splitting for context preservation
+
 #### **4. Communication Layer**
 - **gRPC** - High-performance inter-service communication for synchronous calls
 - **HTTP/REST** - Traditional RESTful API communication
@@ -147,11 +187,20 @@ The platform follows a **Microservices Architecture** pattern with the following
 - **Blogs** - Instructor blog posts and articles
 - **Feedbacks** - Course reviews, ratings, and comments
 
+##### **Supabase (PostgreSQL) Database**
+- **Embeddings** - Vector embeddings for semantic search
+- **Assistant Conversations** - AI assistant chat history
+- **Course Context** - Cached course content chunks with metadata
+- **RAG Index** - Knowledge base for retrieval-augmented generation
+
 #### **6. External Services**
 - **Cloudinary** - Image and media storage/optimization
 - **Email Service** - SMTP for transactional emails
 - **Payment Gateway** - Credit card and digital payment processing
 - **OAuth2 Providers** - Google authentication integration
+- **Assembly AI** - Real-time speech-to-text conversion for voice notes
+- **OpenAI API** - GPT models for semantic understanding and response generation
+- **n8n Cloud** - No-code workflow automation for integration
 
 #### **7. Infrastructure**
 - **Docker & Docker Compose** - Containerization and service orchestration
@@ -166,7 +215,7 @@ The platform implements the **Saga Pattern** to handle distributed transactions 
 
 ### Saga Pattern Explanation
 
-![Saga Pattern Flow Diagram](./artifact/forreadme/saga-pattern.png)
+![Saga Pattern Flow Diagram](./artifact/forreadme/new.v2/Learnova%20Architecture%20Design-Saga%20patterrn.jpg)
 
 ### What is a Saga?
 
@@ -310,6 +359,14 @@ If any step fails, compensation transactions are executed in reverse order:
 - Real-time chat messaging
 - Instant updates on course activities
 - Online status indicators
+
+### 🤖 AI & Intelligent Features
+- **AI Course Assistant** - Conversational AI for course Q&A
+- **Semantic Search** - Intelligent search using vector embeddings
+- **RAG (Retrieval-Augmented Generation)** - Context-aware responses from course content
+- **Voice Notes** - Transcribe audio to text using Assembly AI
+- **Smart Chunking** - Semantic text chunking for better content organization
+- **Multilingual Support** - e5 embedding model for 100+ languages
 
 ### 🔐 Security & Authorization
 - JWT-based authentication

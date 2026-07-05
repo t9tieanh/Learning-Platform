@@ -200,9 +200,27 @@ export class PayosService {
     Logger.info(`PayOS webhook registered: ${payosConfig.webhookUrl}`)
   }
 
-  /** Retry webhook registration with linear backoff: 5s → 10s → 20s between attempts. */
-  async confirmWebhookWithRetry(retryDelaysMs: number[] = [5000, 10000, 20000]): Promise<void> {
+  /**
+   * Retry webhook registration after an initial delay so API gateway / tunnel can come up.
+   * Default backoff: 15s → 30s → 45s → 60s → 90s → 120s between attempts.
+   */
+  async confirmWebhookWithRetry(
+    options: {
+      initialDelayMs?: number
+      retryDelaysMs?: number[]
+    } = {}
+  ): Promise<void> {
+    const initialDelayMs = options.initialDelayMs ?? payosConfig.webhookConfirmInitialDelayMs
+    const retryDelaysMs = options.retryDelaysMs ?? payosConfig.webhookConfirmRetryDelaysMs
     const maxAttempts = retryDelaysMs.length + 1
+
+    Logger.info(
+      `PayOS webhook confirm scheduled (url=${payosConfig.webhookUrl}, initialDelay=${initialDelayMs / 1000}s, maxAttempts=${maxAttempts})`
+    )
+
+    if (initialDelayMs > 0) {
+      await new Promise((resolve) => setTimeout(resolve, initialDelayMs))
+    }
 
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       try {

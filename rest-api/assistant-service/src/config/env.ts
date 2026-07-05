@@ -44,4 +44,5 @@ export const env = {
     process.env.LESSON_TEST_GROUP_CONTEXT_MAX_TOKENS || '12000',
     10
   ),
+  DAILY_CHAT_LIMIT: parseInt(process.env.DAILY_CHAT_LIMIT || '20', 10),
 }

@@ -1,5 +1,5 @@
 import CustomDialog from '@/components/common/Dialog'
-import { Play, BookOpenCheck, Sparkles } from 'lucide-react'
+import { Play, BookOpenCheck, Sparkles, X } from 'lucide-react'
 import { useState } from 'react'
 import logo from '@/assets/images/logo1.png'
 import { LoadingDots } from '@/components/common/Loading/LoadingDots'
@@ -33,9 +33,24 @@ const PreviewPublicLesson = ({
         }))
       }}
       size='xl'
+      showCloseButton={false}
     >
       <div className='relative min-h-[400px] max-h-[90vh] flex flex-col rounded-[32px] overflow-hidden'>
         <HighGlossBackground className='absolute inset-0 z-0' />
+
+        <button
+          onClick={(e) => {
+            e.stopPropagation()
+            setPreview((prev: any) => ({
+              ...prev,
+              openPreview: false
+            }))
+          }}
+          className='absolute top-4 right-4 z-50 p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors focus:outline-none focus:ring-2 focus:ring-white'
+          aria-label='Close'
+        >
+          <X className='w-5 h-5 text-white' />
+        </button>
 
         <div className='relative z-10 flex-1 flex flex-col p-4 md:p-6 gap-6 overflow-y-auto'>
           <motion.div

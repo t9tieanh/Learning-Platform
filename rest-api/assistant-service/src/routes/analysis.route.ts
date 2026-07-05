@@ -5,6 +5,7 @@ import Authentication from '~/middleware/auth.midleware'
 import { checkLessonOwnership } from '~/middleware/checkLessonOwnership.middleware'
 import { checkViewLesson } from '~/middleware/checkViewLesson.middleware'
 import validateDto from '~/middleware/validateDto.midleware'
+import chatRateLimit from '~/middleware/chatRateLimit.middleware'
 import { UpdateChunkSummaryDto } from '~/dto/request/update-chunk.dto'
 import { RAGQuestionRequest } from '~/dto/request/ragQuestion.dto'
 
@@ -87,6 +88,7 @@ analysisRouter.post(
     Authentication(true),
     checkViewLesson,
     validateDto(RAGQuestionRequest),
+    chatRateLimit(),
     analysisController.answerQuestion
 )
 

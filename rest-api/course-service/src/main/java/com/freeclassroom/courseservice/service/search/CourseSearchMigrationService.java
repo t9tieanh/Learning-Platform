@@ -9,6 +9,7 @@ import co.elastic.clients.elasticsearch.core.DeleteByQueryResponse;
 import co.elastic.clients.elasticsearch.core.bulk.BulkOperation;
 import com.freeclassroom.courseservice.dto.search.CourseEsDocument;
 import com.freeclassroom.courseservice.entity.course.CourseEntity;
+import com.freeclassroom.courseservice.mapper.CourseEsDocumentMapper;
 import com.freeclassroom.courseservice.repository.entity.CourseRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +31,7 @@ public class CourseSearchMigrationService {
 
   private final ElasticsearchClient elasticsearchClient;
   private final CourseRepository courseRepository;
+  private final CourseEsDocumentMapper courseEsDocumentMapper;
 
   @Value("${app.elasticsearch.course-index:courses}")
   private String indexName;
@@ -59,7 +61,7 @@ public class CourseSearchMigrationService {
 
       while (true) {
           Pageable pageable = PageRequest.of(pageNumber, batchSize);
-          Page<CourseEntity> page = courseRepository.findAllWithTags(pageable);
+          Page<CourseEntity> page = courseRepository.findAllPublishedWithTags(pageable);
           if (page.isEmpty()) {
               break;
           }
@@ -106,6 +108,7 @@ public class CourseSearchMigrationService {
                       .properties("rating", Property.of(p -> p.double_(d -> d)))
                       .properties("instructorId", Property.of(p -> p.keyword(k -> k)))
                       .properties("category", Property.of(p -> p.text(t -> t.fields("keyword", k -> k.keyword(kk -> kk.ignoreAbove(256))))))
+                      .properties("tags", Property.of(p -> p.keyword(k -> k)))
                       .properties("createdAt", Property.of(p -> p.date(d -> d)))
                       .properties("status", Property.of(p -> p.keyword(k -> k)))
                       .properties("deleted", Property.of(p -> p.boolean_(b -> b)))
@@ -136,6 +139,7 @@ public class CourseSearchMigrationService {
                       .properties("rating", Property.of(p -> p.double_(d -> d)))
                       .properties("instructorId", Property.of(p -> p.keyword(k -> k)))
                       .properties("category", Property.of(p -> p.text(t -> t.fields("keyword", k -> k.keyword(kk -> kk.ignoreAbove(256))))))
+                      .properties("tags", Property.of(p -> p.keyword(k -> k)))
                       .properties("createdAt", Property.of(p -> p.date(d -> d)))
                       .properties("status", Property.of(p -> p.keyword(k -> k)))
                       .properties("deleted", Property.of(p -> p.boolean_(b -> b)))
@@ -179,23 +183,10 @@ public class CourseSearchMigrationService {
       List<BulkOperation> operations = new ArrayList<>(courses.size());
 
       for (CourseEntity course : courses) {
-          CourseEsDocument doc = CourseEsDocument.builder()
-                  .id(course.getId())
-                  .title(course.getTitle())
-                  .shortDescription(course.getShortDescription())
-                  .longDescription(course.getLongDescription())
-                  .thumbnailUrl(course.getThumbnailUrl())
-                  .introductoryVideo(course.getIntroductoryVideo())
-                  .language(course.getLanguage())
-                  .originalPrice(course.getOriginalPrice())
-                  .finalPrice(course.getFinalPrice())
-                  .rating(course.getRating())
-                  .instructorId(course.getInstructorId())
-                  .category(course.getCategory() != null ? course.getCategory().getName() : null)
-                  .createdAt(course.getCreatedAt())
-                  .status(course.getStatus() != null ? course.getStatus().name() : null)
-                  .deleted(course.getDeleted())
-                  .build();
+          CourseEsDocument doc = courseEsDocumentMapper.toPublishedDocument(course);
+          if (doc == null || doc.getId() == null) {
+              continue;
+          }
 
           operations.add(BulkOperation.of(o -> o
                   .index(i -> i

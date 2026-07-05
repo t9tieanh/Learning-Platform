@@ -12,6 +12,7 @@ interface CustomDialogProps {
   hideHeader?: boolean
   noPadding?: boolean
   size?: 'sm' | 'md' | 'lg' | 'xl' | 'full'
+  showCloseButton?: boolean
 }
 
 export default function CustomDialog({
@@ -26,7 +27,7 @@ export default function CustomDialog({
   noPadding = false,
   size = 'md',
   showCloseButton = true
-}: CustomDialogProps & { showCloseButton?: boolean }) {
+}: CustomDialogProps) {
   const sizeClassMap: Record<NonNullable<CustomDialogProps['size']>, string> = {
     sm: 'max-w-md sm:max-w-md',
     md: 'max-w-lg sm:max-w-lg',

@@ -50,6 +50,10 @@ public enum ErrorCode {
     LESSON_UPLOAD_INVALID_PART(1403, "Thông tin phần upload không hợp lệ !", HttpStatus.OK),
     LESSON_UPLOAD_TOO_MANY_PARTS(1404, "Số lượng phần upload vượt quá giới hạn !", HttpStatus.OK),
 
+    // Lesson limit validation — keep message numbers (5, 20) in sync with CourseLimitsProperties defaults
+    CHAPTER_LESSON_LIMIT_EXCEEDED(1405, "Mỗi chương chỉ được tối đa 5 bài học !", HttpStatus.OK),
+    COURSE_LESSON_LIMIT_EXCEEDED(1406, "Khóa học chỉ được tối đa 20 bài học !", HttpStatus.OK),
+
     // admin
     COURSE_NOT_DONE(1234561231, "Khóa học chưa được khởi tạo xong !", HttpStatus.OK),
 
