@@ -204,6 +204,23 @@ class RedisService {
       db: env.REDIS_DB_NAME,
     })
   }
+
+  // ---------------------------------------------------------------------------
+  // Rate limiting
+  // ---------------------------------------------------------------------------
+
+  private static readonly INCR_WITH_EXPIRE_SCRIPT = `
+  local current = redis.call('INCR', KEYS[1])
+  if tonumber(current) == 1 then
+    redis.call('EXPIRE', KEYS[1], ARGV[1])
+  end
+  return current
+`
+
+  async incrWithExpire(key: string, ttlInSec: number): Promise<number> {
+    const result = await this.redis.eval(RedisService.INCR_WITH_EXPIRE_SCRIPT, 1, key, ttlInSec)
+    return Number(result)
+  }
 }
 
 export default new RedisService()
