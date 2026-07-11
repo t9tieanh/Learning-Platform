@@ -14,7 +14,6 @@ import com.freeclassroom.courseservice.exception.ErrorCode;
 import com.freeclassroom.courseservice.mapper.ChapterMapper;
 import com.freeclassroom.courseservice.repository.entity.ChapterRepository;
 import com.freeclassroom.courseservice.repository.entity.CourseRepository;
-import com.freeclassroom.courseservice.repository.entity.LessonRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -30,7 +29,6 @@ import java.util.List;
 public class ChapterService implements IChapterService {
     ChapterRepository chapterRepo;
     CourseRepository courseRepo;
-    LessonRepository lessonRepo;
 
     ChapterMapper chapterMapper;
 
@@ -141,14 +139,8 @@ public class ChapterService implements IChapterService {
                 () -> new CustomExeption(ErrorCode.CHAPTER_NOT_FOUND)
         );
 
-        long lessonCount = lessonRepo.countByChapterId(chapterId);
-        if (lessonCount == 0) {
-            chapterRepo.deleteById(chapterId);
-        }
-        else {
-            chapter.setDeleted(true);
-            chapterRepo.save(chapter);
-        }
+        chapter.setDeleted(true);
+        chapterRepo.save(chapter);
         return ApiResponse.<CreationResponse>builder()
                 .code(200)
                 .message("Xóa chương thành công !")

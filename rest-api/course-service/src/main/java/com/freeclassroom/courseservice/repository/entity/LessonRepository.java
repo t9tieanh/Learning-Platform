@@ -89,7 +89,4 @@ public interface LessonRepository extends JpaRepository<LessonEntity,String> {
             WHERE l.id = :lessonId
             """)
     Optional<String> findCourseIdByLessonId(@Param("lessonId") String lessonId);
-
-    @Query("SELECT COUNT(l) FROM LessonEntity l WHERE l.chapter.id = :chapterId")
-    long countByChapterId(@Param("chapterId") String chapterId);
 }
