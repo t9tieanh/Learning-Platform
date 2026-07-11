@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import CustomButton from '@/components/common/Button'
@@ -69,8 +69,10 @@ const AddVideoForm: React.FC<AddVideoFormProps> = ({
   // Find current upload being processed
   const currentUpload = uploadId ? chunkedUpload.uploads.find((u) => u.id === uploadId) : null
 
-  // Effective lesson ID: edit mode uses prop, or fetch from current upload's data
-  const effectiveLessonId = lessonId ?? currentUpload?.data?.lessonId
+  // Memoize lessonId string to avoid re-triggering useAnalysis on object reference changes
+  const effectiveLessonId = useMemo(() => {
+    return lessonId ?? currentUpload?.data?.lessonId
+  }, [lessonId, currentUpload?.data?.lessonId])
 
   // TODO: replace with real auth check
   const isVip = true
@@ -235,6 +237,18 @@ const AddVideoForm: React.FC<AddVideoFormProps> = ({
     }
   }, [currentUpload, step])
 
+  // Debug: Hook form.submit() to find who's calling it
+  const formRef = useRef<HTMLFormElement>(null)
+  useEffect(() => {
+    if (!formRef.current) return
+    const form = formRef.current
+    const originalSubmit = form.submit.bind(form)
+    form.submit = function() {
+      console.error('[FORM.SUBMIT_CALLED] Stack trace:', new Error().stack)
+      return originalSubmit()
+    }
+  }, [])
+
   return (
     <div className='w-full h-full bg-gray-50 flex flex-col'>
       {/* Header */}
@@ -320,13 +334,19 @@ const AddVideoForm: React.FC<AddVideoFormProps> = ({
       <div className='flex-1 overflow-y-auto p-8'>
         <div className='max-w-4xl mx-auto'>
           <form
-            onSubmit={handleSubmit(async (data) => {
-              // For both create and edit modes, if we have an effectiveLessonId, update the lesson metadata
-              if (effectiveLessonId && handleUpdateLesson) {
-                await handleUpdateLesson(data)
-                handleCloseForm(false)
+            ref={formRef}
+            onSubmit={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              console.log('[FORM_SUBMIT] onSubmit triggered - BLOCKED!')
+              // Temporarily blocked for debugging
+              return false
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                console.log('[FORM_KEYDOWN] Enter key pressed on form!', e.target)
               }
-            })}
+            }}
             className='w-full'
           >
             {step === 0 && (

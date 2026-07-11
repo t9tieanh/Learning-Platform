@@ -95,6 +95,20 @@ const LearnovaVideoPlayer = forwardRef<HTMLVideoElement | null, LearnovaVideoPla
             actionTimerRef.current = setTimeout(() => setLastAction(null), 800)
         }, [])
 
+        const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+            // Prevent ALL keyboard events from bubbling to parent form
+            e.stopPropagation()
+
+            if (e.key === ' ') {
+                e.preventDefault()
+                togglePlay()
+            }
+            // Also prevent Enter from triggering form submit
+            else if (e.key === 'Enter') {
+                e.preventDefault()
+            }
+        }, [togglePlay])
+
         const handleMediaLoad = () => {
             setIsVideoLoading(false)
             if (internalVideoRef.current) {
@@ -192,7 +206,12 @@ const LearnovaVideoPlayer = forwardRef<HTMLVideoElement | null, LearnovaVideoPla
                         isPiP ? 'fixed bottom-6 right-6 w-[280px] h-[158px] z-[9999] shadow-[0_20px_60px_rgba(0,0,0,0.8)] border-blue-500/40 cursor-move ring-2 ring-black/50' : 'relative w-full h-full inset-0'
                     )}
                     onMouseMove={resetControlsTimer}
-                    onClick={resetControlsTimer}
+                    onClick={(e) => {
+                        e.stopPropagation()
+                        resetControlsTimer()
+                    }}
+                    onKeyDown={handleKeyDown}
+                    tabIndex={0}
                 >
                     <video
                         src={src || ''}
@@ -210,7 +229,10 @@ const LearnovaVideoPlayer = forwardRef<HTMLVideoElement | null, LearnovaVideoPla
                         onCanPlay={() => setIsBuffering(false)}
                         onPlay={() => setIsPlaying(true)}
                         onPause={() => setIsPlaying(false)}
-                        onClick={togglePlay}
+                        onClick={(e) => {
+                            e.stopPropagation()
+                            togglePlay()
+                        }}
                     />
 
                     {overlay && (
@@ -305,6 +327,7 @@ const LearnovaVideoPlayer = forwardRef<HTMLVideoElement | null, LearnovaVideoPla
                             showControls ? 'opacity-100' : 'opacity-0 pointer-events-none'
                         )}
                         onClick={(e) => {
+                            e.stopPropagation()
                             // Only toggle play if clicking the empty area of the overlay
                             if (e.target === e.currentTarget) {
                                 togglePlay()
@@ -412,7 +435,7 @@ const LearnovaVideoPlayer = forwardRef<HTMLVideoElement | null, LearnovaVideoPla
                         {/* Control Buttons */}
                         <div className='flex items-center justify-between'>
                             <div className='flex items-center gap-3 md:gap-5'>
-                                <button onClick={togglePlay} className='text-white hover:text-blue-400 transition-colors'>
+                                <button onClick={(e) => { e.stopPropagation(); togglePlay() }} className='text-white hover:text-blue-400 transition-colors'>
                                     {isPlaying ? <Pause className='w-6 h-6 fill-current' /> : <Play className='w-6 h-6 fill-current' />}
                                 </button>
 
@@ -431,7 +454,7 @@ const LearnovaVideoPlayer = forwardRef<HTMLVideoElement | null, LearnovaVideoPla
                                 </div>
 
                                 <div className='flex items-center gap-3 group/volume'>
-                                    <button onClick={() => setIsMuted(!isMuted)} className='text-white hover:text-blue-400 transition-colors'>
+                                    <button onClick={(e) => { e.stopPropagation(); setIsMuted(!isMuted) }} className='text-white hover:text-blue-400 transition-colors'>
                                         {isMuted || volume === 0 ? <VolumeX className='w-5 h-5' /> : <Volume2 className='w-5 h-5' />}
                                     </button>
                                     <input
@@ -439,6 +462,7 @@ const LearnovaVideoPlayer = forwardRef<HTMLVideoElement | null, LearnovaVideoPla
                                         min='0' max='1' step='0.1'
                                         value={isMuted ? 0 : volume}
                                         onChange={(e) => {
+                                            e.stopPropagation()
                                             const v = parseFloat(e.target.value)
                                             setVolume(v)
                                             if (internalVideoRef.current) internalVideoRef.current.volume = v
@@ -459,8 +483,8 @@ const LearnovaVideoPlayer = forwardRef<HTMLVideoElement | null, LearnovaVideoPla
                             </div>
 
                             <div className='flex items-center gap-3 md:gap-5'>
-                                <button 
-                                    onClick={() => setShowSubtitles(!showSubtitles)} 
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); setShowSubtitles(!showSubtitles) }}
                                     className={cn(
                                         'transition-colors',
                                         showSubtitles ? 'text-blue-400' : 'text-white/60 hover:text-white'
@@ -469,7 +493,7 @@ const LearnovaVideoPlayer = forwardRef<HTMLVideoElement | null, LearnovaVideoPla
                                 >
                                     <Languages className='w-5 h-5' />
                                 </button>
-                                <button onClick={handleFullscreen} className='text-white hover:text-blue-400 transition-colors'>
+                                <button onClick={(e) => { e.stopPropagation(); handleFullscreen() }} className='text-white hover:text-blue-400 transition-colors'>
                                     {isPiP ? <Bot className='w-5 h-5' /> : <Maximize className='w-5 h-5' />}
                                 </button>
                             </div>
