@@ -1,4 +1,4 @@
-export type LessonType = 'video' | 'quiz' | 'article'
+export type LessonType = 'video' | 'quiz' | 'article' | 'artifact'
 
 export interface Lesson {
   id: string

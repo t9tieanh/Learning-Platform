@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { CourseCard } from '@/components/AllCourse/CourseCard'
 import CourseCardListSkeleton from '@/components/AllCourse/CourseCardListSkeleton'
 import { FilterSidebar } from '@/components/AllCourse/FilterSidebar'
@@ -11,6 +11,7 @@ import courseService from '@/services/course/course-user.service'
 import useDebounce from '@/hooks/useDebounce.hook'
 import eventTracker from '@/services/personalize/eventTracker'
 import { useQuery } from '@tanstack/react-query'
+import { useSearchParams } from 'react-router-dom'
 
 type PaginationItem = number | 'ellipsis'
 
@@ -75,6 +76,7 @@ const getPaginationItems = (
 }
 
 const Index = () => {
+  const [searchParams] = useSearchParams()
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize] = useState(9)
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list')
@@ -85,6 +87,14 @@ const Index = () => {
   const [minPrice, setMinPrice] = useState<number | undefined>(undefined)
   const [minRating, setMinRating] = useState<number | undefined>(undefined)
   const debouncedSearch = useDebounce(search, 400)
+
+  useEffect(() => {
+    const sortParam = searchParams.get('sort')
+    if (sortParam) {
+      setSortValue(sortParam)
+      setCurrentPage(1)
+    }
+  }, [searchParams])
 
   const selectedCategory = useMemo(
     () => (selectedCategories.length === 1 ? selectedCategories[0] : undefined),

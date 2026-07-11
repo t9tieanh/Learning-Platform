@@ -178,27 +178,35 @@ const ModernVideoPlayer = forwardRef<VideoPlayerRef, {
         lastCheckTime.current = videoRef.current.currentTime
     }, [maxTimeWatched, isCompleted])
 
+    const allLessonQuizzes = useMemo(() => {
+        return processedChunks.flatMap(chunk =>
+            (chunk.quizzes || []).map(quiz => ({ ...quiz, chunkId: chunk.id, chunkTitle: chunk.title }))
+        )
+    }, [processedChunks])
+
+    const hasQuizzes = allLessonQuizzes.length > 0
+
     const startQuiz = useCallback(() => {
         const video = videoRef.current
-        if (!video || processedChunks.length === 0) return
+        if (!video || !hasQuizzes || processedChunks.length === 0) return
 
         const currentTime = video.currentTime
-
         const closestChunk = processedChunks.reduce((prev, curr) => {
             const prevStart = timeToSeconds(prev.startTime)
             const currStart = timeToSeconds(curr.startTime)
             return Math.abs(currStart - currentTime) < Math.abs(prevStart - currentTime) ? curr : prev
         })
 
-        const chunkWithQuizzes = (closestChunk.quizzes && closestChunk.quizzes.length > 0)
+        // Try to use closest chunk if it has quizzes, otherwise find first chunk with quizzes
+        const chunkToShow = (closestChunk?.quizzes && closestChunk.quizzes.length > 0)
             ? closestChunk
             : processedChunks.find(c => c.quizzes && c.quizzes.length > 0)
 
-        if (chunkWithQuizzes) {
+        if (chunkToShow) {
             video.pause()
-            setCurrentQuizChunk(chunkWithQuizzes)
+            setCurrentQuizChunk(chunkToShow)
         }
-    }, [processedChunks])
+    }, [processedChunks, hasQuizzes])
 
     const finishQuiz = useCallback((chunkId: string) => {
         shownQuizIds.current.add(chunkId)
@@ -212,113 +220,117 @@ const ModernVideoPlayer = forwardRef<VideoPlayerRef, {
     }, [])
 
     return (
-        <div className='w-full h-full relative group/modern-player overflow-hidden rounded-[2rem] shadow-2xl'>
-            {!showVideo && lesson?.thumbnailUrl && !lesson.introductionVideo ? (
-                <img
-                    src={lesson?.thumbnailUrl}
-                    alt='Video Thumbnail'
-                    className='w-full h-full object-cover shadow-lg mb-4 cursor-pointer'
-                    onClick={() => setShowVideo(true)}
-                />
-            ) : (
-                <>
-                    <LearnovaVideoPlayer
-                        src={actualVideoUrl}
-                        ref={videoRef}
-                        subtitles={parsedSubtitles}
-                        chunks={processedChunks}
-                        isSeekingAllowed={true}
-                        className='w-full h-full shadow-lg'
-                        isPiPEnabled={true}
-                        containerClassName='h-full'
-                        onTimeUpdate={handleTimeUpdate}
-                        onSeeking={handleSeekingSync}
-                        onShowChunkDetails={onShowChunkDetails}
-                        overlay={
-                            <DynamicVideoWatermark
-                                active={!!actualVideoUrl && !lesson.introductionVideo}
-                                courseTitle={courseTitle}
-                            />
-                        }
+        <>
+            <div className='w-full h-full relative group/modern-player overflow-hidden rounded-[2rem] shadow-2xl'>
+                {!showVideo && lesson?.thumbnailUrl && !lesson.introductionVideo ? (
+                    <img
+                        src={lesson?.thumbnailUrl}
+                        alt='Video Thumbnail'
+                        className='w-full h-full object-cover shadow-lg mb-4 cursor-pointer'
+                        onClick={() => setShowVideo(true)}
                     />
+                ) : (
+                    <>
+                        <LearnovaVideoPlayer
+                            src={actualVideoUrl}
+                            ref={videoRef}
+                            subtitles={parsedSubtitles}
+                            chunks={processedChunks}
+                            isSeekingAllowed={true}
+                            className='w-full h-full shadow-lg'
+                            isPiPEnabled={true}
+                            containerClassName='h-full'
+                            onTimeUpdate={handleTimeUpdate}
+                            onSeeking={handleSeekingSync}
+                            onShowChunkDetails={onShowChunkDetails}
+                            overlay={
+                                <DynamicVideoWatermark
+                                    active={!!actualVideoUrl && !lesson.introductionVideo}
+                                    courseTitle={courseTitle}
+                                />
+                            }
+                        />
 
-                    <AnimatePresence>
-                        {processedChunks.length > 0 && !currentQuizChunk && (
-                            <motion.div
-                                initial={{ opacity: 0, x: 20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                exit={{ opacity: 0, x: 20 }}
-                                className='absolute bottom-24 right-0 z-40'
-                            >
-                                <AnimatePresence mode='wait'>
-                                    {!isPromptCollapsed ? (
-                                        <motion.div
-                                            key='expanded-prompt'
-                                            initial={{ opacity: 0, x: 50 }}
-                                            animate={{ opacity: 1, x: 0 }}
-                                            exit={{ opacity: 0, x: 50 }}
-                                            className='flex items-center gap-2 pr-6'
-                                        >
-                                            <button
-                                                onClick={() => setIsPromptCollapsed(true)}
-                                                className='bg-white/90 backdrop-blur-md rounded-full p-2 shadow-lg border border-white/20 text-slate-400 hover:text-blue-600 transition-colors group/collapse'
+                        <AnimatePresence>
+                            {hasQuizzes && !currentQuizChunk && (
+                                <motion.div
+                                    initial={{ opacity: 0, x: 20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: 20 }}
+                                    className='absolute bottom-24 right-0 z-40'
+                                >
+                                    <AnimatePresence mode='wait'>
+                                        {!isPromptCollapsed ? (
+                                            <motion.div
+                                                key='expanded-prompt'
+                                                initial={{ opacity: 0, x: 50 }}
+                                                animate={{ opacity: 1, x: 0 }}
+                                                exit={{ opacity: 0, x: 50 }}
+                                                className='flex items-center gap-2 pr-6'
                                             >
-                                                <ChevronRight className='w-4 h-4' />
-                                            </button>
-                                            <div
-                                                className='bg-white/90 backdrop-blur-xl border border-white/20 p-4 rounded-3xl shadow-2xl flex items-center gap-4 cursor-pointer hover:bg-white transition-all shadow-[0_15px_40px_rgba(0,0,0,0.2)] group/prompt'
-                                                onClick={startQuiz}
+                                                <button
+                                                    onClick={() => setIsPromptCollapsed(true)}
+                                                    className='bg-white/90 backdrop-blur-md rounded-full p-2 shadow-lg border border-white/20 text-slate-400 hover:text-blue-600 transition-colors group/collapse'
+                                                >
+                                                    <ChevronRight className='w-4 h-4' />
+                                                </button>
+                                                <div
+                                                    className='bg-white/90 backdrop-blur-xl border border-white/20 p-4 rounded-3xl shadow-2xl flex items-center gap-4 cursor-pointer hover:bg-white transition-all shadow-[0_15px_40px_rgba(0,0,0,0.2)] group/prompt'
+                                                    onClick={startQuiz}
+                                                >
+                                                    <div className='w-12 h-12 rounded-2xl bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/30 group-hover/prompt:scale-110 transition-transform'>
+                                                        <CheckCircle2 className='w-6 h-6 text-white' />
+                                                    </div>
+                                                    <div className='flex flex-col pr-4'>
+                                                        <span className='text-[10px] font-bold text-blue-600 uppercase tracking-wider mb-0.5'>Ôn tập ngay</span>
+                                                        <span className='text-xs font-semibold text-slate-700 max-w-[180px] truncate'>
+                                                            {currentChunkTitle ? `Hỏi về: ${currentChunkTitle}` : 'Củng cố kiến thức vừa học?'}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </motion.div>
+                                        ) : (
+                                            <motion.button
+                                                key='collapsed-prompt'
+                                                initial={{ opacity: 0, x: 20 }}
+                                                animate={{ opacity: 1, x: 0 }}
+                                                exit={{ opacity: 0, x: 20 }}
+                                                onClick={() => setIsPromptCollapsed(false)}
+                                                className='bg-blue-600 hover:bg-blue-700 text-white rounded-l-2xl p-3 shadow-xl transition-all flex items-center gap-2 pr-5 group'
                                             >
-                                                <div className='w-12 h-12 rounded-2xl bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/30 group-hover/prompt:scale-110 transition-transform'>
-                                                    <CheckCircle2 className='w-6 h-6 text-white' />
-                                                </div>
-                                                <div className='flex flex-col pr-4'>
-                                                    <span className='text-[10px] font-bold text-blue-600 uppercase tracking-wider mb-0.5'>Ôn tập ngay</span>
-                                                    <span className='text-xs font-semibold text-slate-700 max-w-[180px] truncate'>
-                                                        {currentChunkTitle ? `Hỏi về: ${currentChunkTitle}` : 'Củng cố kiến thức vừa học?'}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </motion.div>
-                                    ) : (
-                                        <motion.button
-                                            key='collapsed-prompt'
-                                            initial={{ opacity: 0, x: 20 }}
-                                            animate={{ opacity: 1, x: 0 }}
-                                            exit={{ opacity: 0, x: 20 }}
-                                            onClick={() => setIsPromptCollapsed(false)}
-                                            className='bg-blue-600 hover:bg-blue-700 text-white rounded-l-2xl p-3 shadow-xl transition-all flex items-center gap-2 pr-5 group'
-                                        >
-                                            <ChevronLeft className='w-5 h-5 group-hover:-translate-x-1 transition-transform' />
-                                            <span className='text-[10px] font-bold uppercase tracking-widest'>Ôn tập</span>
-                                        </motion.button>
-                                    )}
-                                </AnimatePresence>
-                            </motion.div>
-                        )}
+                                                <ChevronLeft className='w-5 h-5 group-hover:-translate-x-1 transition-transform' />
+                                                <span className='text-[10px] font-bold uppercase tracking-widest'>Ôn tập</span>
+                                            </motion.button>
+                                        )}
+                                    </AnimatePresence>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </>
+                )}
+            </div>
 
-                        {currentQuizChunk && (
-                            <VideoQuizOverlay
-                                chunk={currentQuizChunk}
-                                allChunks={processedChunks}
-                                maxTimeWatched={maxTimeWatched}
-                                onSkip={() => finishQuiz(currentQuizChunk.id)}
-                                onContinue={() => finishQuiz(currentQuizChunk.id)}
-                                onClose={closeQuiz}
-                                onSeek={(time) => {
-                                    if (videoRef.current) {
-                                        videoRef.current.currentTime = time
-                                        videoRef.current.play().catch(() => { })
-                                        closeQuiz()
-                                    }
-                                }}
-                                isCompleted={isCompleted}
-                            />
-                        )}
-                    </AnimatePresence>
-                </>
-            )}
-        </div>
+            <AnimatePresence>
+                {currentQuizChunk && (
+                    <VideoQuizOverlay
+                        chunk={currentQuizChunk}
+                        allChunks={processedChunks}
+                        maxTimeWatched={maxTimeWatched}
+                        onSkip={() => finishQuiz(currentQuizChunk.id)}
+                        onContinue={() => finishQuiz(currentQuizChunk.id)}
+                        onClose={closeQuiz}
+                        onSeek={(time) => {
+                            if (videoRef.current) {
+                                videoRef.current.currentTime = time
+                                videoRef.current.play().catch(() => { })
+                                closeQuiz()
+                            }
+                        }}
+                        isCompleted={isCompleted}
+                    />
+                )}
+            </AnimatePresence>
+        </>
     )
 })
 
