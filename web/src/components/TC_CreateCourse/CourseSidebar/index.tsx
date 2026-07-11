@@ -1,9 +1,11 @@
 import { cn } from '@/lib/utils'
-import { BookOpen, Image, DollarSign, Settings, CheckCircle, ArrowLeft, Sparkles } from 'lucide-react'
+import { BookOpen, Image, DollarSign, Settings, CheckCircle, LogOut } from 'lucide-react'
 import { FC } from 'react'
 import CourseProgressStep from '@/types/courseProgressStep'
 import { useNavigate } from 'react-router-dom'
 import { showConfirmToast } from '@/components/common/ShowConfirmToast'
+import { useAuthStore } from '@/stores/useAuth.stores'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import logo from '@/assets/images/logo1.png'
 
 interface SidebarItem {
@@ -47,6 +49,15 @@ const sidebarItems: SidebarItem[] = [
 
 const CourseSidebar: FC<CourseSidebarProps> = ({ activeSection = CourseProgressStep.INTRO, onSectionChange }) => {
   const navigate = useNavigate()
+  const { data } = useAuthStore()
+
+  const displayName = data?.name || 'Giảng viên'
+  const initials = (data?.name || 'GV')
+    .split(' ')
+    .map((n) => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2)
 
   const handleOnclick = (item: SidebarItem) => {
     if (item.id === 'BACK') {
@@ -62,6 +73,18 @@ const CourseSidebar: FC<CourseSidebarProps> = ({ activeSection = CourseProgressS
       })
     } else {
       onSectionChange?.(item.id as CourseProgressStep)
+    }
+  }
+
+  const handleExit = async () => {
+    const confirmed = await showConfirmToast({
+      title: 'Bạn có chắc chắn muốn thoát ra?',
+      description: 'Những thay đổi chưa lưu có thể bị mất.',
+      confirmLabel: 'Thoát ra',
+      cancelLabel: 'Hủy'
+    })
+    if (confirmed) {
+      navigate(-1)
     }
   }
 
@@ -130,23 +153,26 @@ const CourseSidebar: FC<CourseSidebarProps> = ({ activeSection = CourseProgressS
         </nav>
       </div>
 
-      {/* Back Button Footer */}
+      {/* User Footer */}
       <div className='p-6 mt-auto border-t border-gray-800 bg-gray-900/20'>
-        <button
-          onClick={() =>
-            handleOnclick({ id: 'BACK', label: 'Quay lại', icon: ArrowLeft })
-          }
-          className='w-full text-left p-4 rounded-[20px] transition-all duration-300 group hover:bg-gray-800 hover:pl-6'
-        >
-          <div className='flex items-center space-x-4'>
-            <div className='flex-shrink-0 p-2.5 bg-red-900/20 text-red-500 rounded-xl group-hover:bg-red-500 group-hover:text-white transition-all'>
-              <ArrowLeft className='h-4 w-4' aria-hidden='true' />
-            </div>
-            <div className='flex-1 min-w-0'>
-              <span className='text-[13px] font-black text-red-500 transition-colors'>Thoát khóa học</span>
-            </div>
+        <div className='flex items-center gap-3'>
+          <Avatar className='h-11 w-11 shrink-0 border border-gray-700'>
+            <AvatarImage className='object-cover' src={data?.avatarUrl} alt='' />
+            <AvatarFallback className='bg-gray-800 text-white text-xs font-bold'>{initials}</AvatarFallback>
+          </Avatar>
+          <div className='flex-1 min-w-0'>
+            <p className='text-[13px] font-black text-white truncate'>{displayName}</p>
+            <p className='text-[10px] font-medium text-gray-500 mt-0.5'>Giảng viên</p>
           </div>
-        </button>
+          <button
+            type='button'
+            onClick={handleExit}
+            className='shrink-0 p-2.5 rounded-xl bg-gray-800 text-gray-400 hover:bg-red-900/30 hover:text-red-400 transition-colors'
+            title='Thoát ra'
+          >
+            <LogOut className='h-4 w-4' aria-hidden />
+          </button>
+        </div>
       </div>
     </aside>
   )
