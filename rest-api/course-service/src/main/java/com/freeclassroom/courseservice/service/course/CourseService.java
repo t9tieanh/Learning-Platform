@@ -218,7 +218,7 @@ public class CourseService implements ICourseService {
             CourseEntity entity = courseRepo.findByIdWithTags(id)
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy khóa học"));
 
-            courseRepo.findByIdWithChapters(id)
+            courseRepo.findByIdWithChaptersSorted(id)
                     .ifPresent(e -> entity.setChapters(e.getChapters()));
 
             courseRepo.findByIdWithEnrollments(id)
