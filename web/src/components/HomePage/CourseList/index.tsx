@@ -9,9 +9,10 @@ interface CourseListProps {
   title: string
   fetcher: () => Promise<any>
   refreshKey?: number
+  filterType?: 'recommend' | 'bestseller'
 }
 
-const CourseList = ({ title, fetcher, refreshKey = 0 }: CourseListProps) => {
+const CourseList = ({ title, fetcher, refreshKey = 0, filterType }: CourseListProps) => {
   const [courses, setCourses] = useState<Course[]>([])
   const [loading, setLoading] = useState(true)
   const [finalTitle, setFinalTitle] = useState(title)
@@ -62,7 +63,7 @@ const CourseList = ({ title, fetcher, refreshKey = 0 }: CourseListProps) => {
           <h4 className='font-bold bg-blue-500 text-white p-2 rounded-r-3xl pl-4 md:pl-12 min-w-80'>{finalTitle}</h4>
         </div>
         <div className='flex-1 flex justify-end'>
-          <a href='/courses' className='text-blue-500 hover:underline text-sm md:mt-2 md:mr-12'>
+          <a href={filterType === 'recommend' ? '/courses?sort=recommend' : '/courses'} className='text-blue-500 hover:underline text-sm md:mt-2 md:mr-12'>
             Xem tất cả
           </a>
         </div>

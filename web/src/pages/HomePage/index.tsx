@@ -50,6 +50,7 @@ const HomePage = () => {
         title='Khóa học gợi ý'
         fetcher={courseService.getPersonalizationCourse}
         refreshKey={recommendationRefreshKey}
+        filterType='recommend'
       />
       <CourseList title='Khóa học bán chạy' fetcher={courseService.getBestSellerCourses} />
       <TrendingCategories />
