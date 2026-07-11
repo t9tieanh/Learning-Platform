@@ -4,6 +4,8 @@ import { Play, Calendar, Edit, Check, BadgeCheck, PlayCircle, CircleDollarSign }
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import CustomDialog from '@/components/common/Dialog'
+import QuillEditor from '@/components/common/Input/QuillEditor'
+import { showConfirmToast } from '@/components/common/ShowConfirmToast'
 import { Badge } from '@/components/ui/badge'
 import courseAdminService from '@/services/course/course-admin.service'
 import { toast } from 'sonner'
@@ -90,6 +92,14 @@ export function CourseHero({
   const navigate = useNavigate()
 
   const handleApproveCourse = async () => {
+    const confirmed = await showConfirmToast({
+      title: 'Phê duyệt khóa học?',
+      description: 'Bạn có chắc chắn muốn phê duyệt khóa học này?',
+      confirmLabel: 'Phê duyệt',
+      cancelLabel: 'Hủy'
+    })
+    if (!confirmed) return
+
     if (!id) {
       toast.error('Missing course id')
       return
@@ -113,6 +123,14 @@ export function CourseHero({
   }
 
   const handleRejectCourse = async () => {
+    const confirmed = await showConfirmToast({
+      title: 'Từ chối khóa học?',
+      description: 'Bạn có chắc chắn muốn từ chối khóa học này? Giảng viên sẽ nhận được ghi chú của bạn.',
+      confirmLabel: 'Từ chối',
+      cancelLabel: 'Hủy'
+    })
+    if (!confirmed) return
+
     if (!id) {
       toast.error('Missing course id')
       return
@@ -167,14 +185,14 @@ export function CourseHero({
           <div className='flex flex-wrap gap-3'>
             {isAdminRoute ? (
               <>
-                {courseStatus === 'pending_review' && (
+                {(courseStatus === 'pending_review' || courseStatus === 'published' || courseStatus === 'rejected') && (
                   <Button
                     onClick={() => setOpenApproveModal(true)}
                     size='lg'
                     className='rounded-xl bg-blue-600 font-semibold text-white hover:bg-blue-700'
                   >
                     <Check className='mr-2 h-4 w-4' />
-                    {courseStatus === 'pending_review' && 'Phê duyệt khóa học'}
+                    {courseStatus === 'published' ? 'Quản lý phê duyệt' : 'Phê duyệt khóa học'}
                   </Button>
                 )}
 
@@ -187,16 +205,14 @@ export function CourseHero({
                       Phê duyệt / Từ chối khoá học
                     </span>
                   }
-                  size='md'
+                  size='lg'
                   description='Bạn có thể phê duyệt khoá học này để nó được xuất bản trên nền tảng hoặc từ chối với lý do cụ thể.'
                 >
                   <div className='space-y-4'>
                     <div className='flex flex-col gap-2'>
-                      <textarea
-                        placeholder='Nếu từ chối, ghi lý do ở đây (tùy chọn)'
-                        value={rejectReason}
-                        onChange={(e) => setRejectReason(e.target.value)}
-                        className='min-h-[96px] w-full rounded-lg border border-slate-200 p-3 text-sm text-slate-700 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100'
+                      <QuillEditor
+                        onChange={setRejectReason}
+                        className='min-h-[160px] text-slate-700'
                       />
                     </div>
                     <div className='flex items-center justify-end gap-2'>

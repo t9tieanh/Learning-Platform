@@ -255,26 +255,6 @@ export default function AD_CourseDetail() {
 
   return (
     <div className="space-y-5 lg:space-y-8">
-      {canReview && (
-        <div className="flex justify-end gap-2">
-          <Button
-            onClick={() => openReviewModal('approve')}
-            className="rounded-full bg-emerald-600 hover:bg-emerald-700"
-          >
-            <Check className="mr-1.5 h-4 w-4" />
-            Phê duyệt
-          </Button>
-          <Button
-            variant="destructive"
-            onClick={() => openReviewModal('reject')}
-            className="rounded-full"
-          >
-            <X className="mr-1.5 h-4 w-4" />
-            Từ chối
-          </Button>
-        </div>
-      )}
-
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-3 lg:gap-6">
         <div className="space-y-5 lg:col-span-2 lg:space-y-6">
           <CourseHero
