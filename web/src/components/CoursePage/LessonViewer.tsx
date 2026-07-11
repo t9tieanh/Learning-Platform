@@ -77,7 +77,7 @@ export const LessonViewer = forwardRef<VideoPlayerRef, {
     }
 
     return (
-      <div className='w-full aspect-video bg-black rounded-[2rem] overflow-hidden relative group shadow-2xl'>
+      <div className='w-full aspect-video bg-black rounded-[2rem] relative group shadow-2xl'>
         {lesson.type === 'video' ? (
           <ModernVideoPlayer ref={ref} lesson={lesson} courseTitle={courseTitle} markDoneVideo={markDoneLesson} subtitlesRaw={subtitlesRaw || undefined} chunks={chunks} onShowChunkDetails={onShowChunkDetails} onProgress={onProgress} />
         ) : lesson.type === 'article' ? (

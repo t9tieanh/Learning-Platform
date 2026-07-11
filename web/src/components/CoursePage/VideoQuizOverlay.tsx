@@ -190,7 +190,7 @@ const VideoQuizOverlay: React.FC<VideoQuizOverlayProps> = memo(({
                             className='grid grid-cols-1 md:grid-cols-2 gap-3 mb-6'
                         >
                             {currentQuiz.choices.map((choice) => (
-                                <QuizChoiceItem 
+                                <QuizChoiceItem
                                     key={choice.id}
                                     choice={choice}
                                     isAnswered={isAnswered}
@@ -224,7 +224,7 @@ const VideoQuizOverlay: React.FC<VideoQuizOverlayProps> = memo(({
                                     </motion.button>
                                 </div>
                                 <div className='text-xs text-slate-600 leading-relaxed font-normal prose-sm max-w-none prose-p:my-0' dangerouslySetInnerHTML={{
-                                    __html: (currentQuiz.explanation || '').includes('&lt;') 
+                                    __html: (currentQuiz.explanation || '').includes('&lt;')
                                         ? new DOMParser().parseFromString(currentQuiz.explanation || '', 'text/html').documentElement.textContent || ''
                                         : (currentQuiz.explanation || '')
                                 }} />
