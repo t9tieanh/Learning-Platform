@@ -178,27 +178,35 @@ const ModernVideoPlayer = forwardRef<VideoPlayerRef, {
         lastCheckTime.current = videoRef.current.currentTime
     }, [maxTimeWatched, isCompleted])
 
+    const allLessonQuizzes = useMemo(() => {
+        return processedChunks.flatMap(chunk =>
+            (chunk.quizzes || []).map(quiz => ({ ...quiz, chunkId: chunk.id, chunkTitle: chunk.title }))
+        )
+    }, [processedChunks])
+
+    const hasQuizzes = allLessonQuizzes.length > 0
+
     const startQuiz = useCallback(() => {
         const video = videoRef.current
-        if (!video || processedChunks.length === 0) return
+        if (!video || !hasQuizzes || processedChunks.length === 0) return
 
         const currentTime = video.currentTime
-
         const closestChunk = processedChunks.reduce((prev, curr) => {
             const prevStart = timeToSeconds(prev.startTime)
             const currStart = timeToSeconds(curr.startTime)
             return Math.abs(currStart - currentTime) < Math.abs(prevStart - currentTime) ? curr : prev
         })
 
-        const chunkWithQuizzes = (closestChunk.quizzes && closestChunk.quizzes.length > 0)
+        // Try to use closest chunk if it has quizzes, otherwise find first chunk with quizzes
+        const chunkToShow = (closestChunk?.quizzes && closestChunk.quizzes.length > 0)
             ? closestChunk
             : processedChunks.find(c => c.quizzes && c.quizzes.length > 0)
 
-        if (chunkWithQuizzes) {
+        if (chunkToShow) {
             video.pause()
-            setCurrentQuizChunk(chunkWithQuizzes)
+            setCurrentQuizChunk(chunkToShow)
         }
-    }, [processedChunks])
+    }, [processedChunks, hasQuizzes])
 
     const finishQuiz = useCallback((chunkId: string) => {
         shownQuizIds.current.add(chunkId)
@@ -244,7 +252,7 @@ const ModernVideoPlayer = forwardRef<VideoPlayerRef, {
                         />
 
                         <AnimatePresence>
-                            {processedChunks.length > 0 && !currentQuizChunk && (
+                            {hasQuizzes && !currentQuizChunk && (
                                 <motion.div
                                     initial={{ opacity: 0, x: 20 }}
                                     animate={{ opacity: 1, x: 0 }}
