@@ -11,6 +11,7 @@ import { useAuthStore } from '@/stores/useAuth.stores'
 import { useNavigate } from 'react-router-dom'
 import formatPrice from '@/utils/common/formatPrice'
 import useLoading from '@/hooks/useLoading.hook'
+import { showConfirmToast } from '@/components/common/ShowConfirmToast'
 
 const CoursePurchaseBox = ({
   originalPrice,
@@ -54,11 +55,19 @@ const CoursePurchaseBox = ({
   // handle payment process
   const handlePayment = async () => {
     try {
-      startProcessing()
       if (!data?.accessToken) {
-        toast.error('Vui lòng đăng nhập để tiếp tục thanh toán.')
+        const confirmed = await showConfirmToast({
+          title: 'Bạn chưa đăng nhập',
+          description: 'Vui lòng đăng nhập để tiếp tục mua khóa học',
+          confirmLabel: 'Đi tới trang đăng nhập',
+          cancelLabel: 'Hủy'
+        })
+        if (confirmed) {
+          navigator('/auth')
+        }
         return
       }
+      startProcessing()
       const response = await orderService.createOrder([courseId])
       if (response && response.code === 200 && response.result) {
         // Redirect to payment page

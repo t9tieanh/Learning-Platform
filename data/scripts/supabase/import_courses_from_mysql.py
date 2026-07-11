@@ -105,7 +105,7 @@ def fetch_courses_from_mysql():
                 rating,
                 thumbnail_url
             FROM courses
-            WHERE deleted = 0 AND status IN ('PUBLISHED', 'PENDING_REVIEW')
+            WHERE deleted = 0 AND status = 'PUBLISHED'
             ORDER BY created_at DESC
             """
 
@@ -113,6 +113,11 @@ def fetch_courses_from_mysql():
             courses = cursor.fetchall()
 
             print(f"✅ Fetched {len(courses)} courses from MySQL")
+
+            # Fetch real tags per course from course_tag -> tags
+            tags_by_course = fetch_tags_by_course(cursor)
+            for course in courses:
+                course['tag_names'] = tags_by_course.get(str(course['id']), [])
 
             cursor.close()
 
@@ -124,6 +129,33 @@ def fetch_courses_from_mysql():
         raise
 
     return courses
+
+def fetch_tags_by_course(cursor):
+    """
+    Fetch real course tags from course_tag -> tags.
+
+    Returns:
+        dict: { course_id (str): [tag_name, ...] }
+    """
+    query = """
+    SELECT ct.course_id AS course_id, t.name AS tag_name
+    FROM course_tag ct
+    INNER JOIN tags t ON t.id = ct.tag_id
+    WHERE (t.deleted = 0 OR t.deleted IS NULL)
+      AND t.name IS NOT NULL
+    ORDER BY t.name ASC
+    """
+
+    cursor.execute(query)
+    rows = cursor.fetchall()
+
+    tags_by_course = {}
+    for row in rows:
+        course_id = str(row['course_id'])
+        tags_by_course.setdefault(course_id, []).append(row['tag_name'])
+
+    print(f"✅ Fetched tags for {len(tags_by_course)} courses")
+    return tags_by_course
 
 def transform_course_data(courses):
     """
@@ -150,16 +182,12 @@ def transform_course_data(courses):
             # Combine description and content for better RAG
             full_content = f"{description}\n\n{content}".strip()
 
-            # Generate tags from status and price
+            # Use real course tags (from course_tag -> tags)
             tags = []
-            if course.get('status') == 'PUBLISHED':
-                tags.append('published')
-            if course.get('rating') and course.get('rating') > 4:
-                tags.append('highly-rated')
-            if course.get('final_price', 0) == 0:
-                tags.append('free')
-            elif course.get('final_price', 0) < 50000:
-                tags.append('affordable')
+            for tag_name in course.get('tag_names', []):
+                normalized = (tag_name or '').strip()
+                if normalized and normalized not in tags:
+                    tags.append(normalized)
 
             # Build metadata
             metadata = {

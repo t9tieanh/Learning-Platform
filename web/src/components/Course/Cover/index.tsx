@@ -69,15 +69,15 @@ const Cover = ({ video, image, title, shortDescription, teacher, tags, showSmall
         style={{ top: 'var(--main-header-height, 100px)' }}
       >
         <div className='max-w-6xl mx-auto px-3 md:px-6 py-2 md:py-3 flex items-center justify-between min-h-[48px] md:min-h-[56px]'>
-          <div className='text-xs md:text-sm flex items-center text-white font-bold text-center text-ellipsis overflow-hidden whitespace-nowrap max-w-[95%] md:max-w-[60%]'>
-            <div className='flex flex-row justify-left items-center gap-1 md:gap-2 rounded-xl md:rounded-2xl bg-white text-black py-1 px-2 md:px-4 shadow-xl'>
-              <span className='truncate'>{title}</span>
-              <span className='flex items-center gap-1 bg-white px-1 md:px-2 py-0.5 text-black'>
-                <Avatar className='w-5 h-5 md:w-6 md:h-6'>
+          <div className='flex items-center gap-2 text-white font-bold w-full overflow-hidden'>
+            <div className='flex flex-row items-center gap-2 rounded-xl md:rounded-2xl bg-white text-black py-1.5 px-3 md:px-4 shadow-xl min-w-0'>
+              <span className='text-xs md:text-sm truncate'>{title}</span>
+              <span className='flex items-center gap-1 flex-shrink-0'>
+                <Avatar className='w-5 h-5 md:w-6 md:h-6 flex-shrink-0'>
                   <AvatarImage src={teacher.avatar || AvatarNotFound} />
                   <AvatarFallback>{teacher.name.charAt(0)}</AvatarFallback>
                 </Avatar>
-                <span className='hidden md:inline text-xs md:text-sm'>{teacher.name}</span>
+                <span className='hidden md:inline text-xs md:text-sm whitespace-nowrap'>{teacher.name}</span>
               </span>
             </div>
           </div>
