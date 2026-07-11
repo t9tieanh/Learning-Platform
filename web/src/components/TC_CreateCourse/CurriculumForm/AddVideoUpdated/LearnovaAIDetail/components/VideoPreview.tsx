@@ -9,7 +9,7 @@ interface VideoPreviewProps {
 
 const VideoPreview: React.FC<VideoPreviewProps> = ({ videoSrc, detailedVideoRef, subtitles }) => {
     return (
-        <div className='relative'>
+        <div className='relative pointer-events-auto'>
             <div className='overflow-hidden rounded-2xl border border-gray-100 shadow-sm'>
                 <LearnovaVideoPlayer
                     src={videoSrc || ''}
