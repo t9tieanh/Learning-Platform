@@ -64,7 +64,7 @@ const StatCard = ({ title, value, subtitle, icon: Icon, trend, trendLabel = 'so 
               }`}
             >
               {trend.positive ? <TrendingUp size={13} /> : <TrendingDown size={13} />}
-              {Math.abs(trend.value)}% {trendLabel}
+              {Math.abs(trend.value).toFixed(2)}% {trendLabel}
             </div>
           )}
         </div>

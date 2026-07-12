@@ -351,10 +351,12 @@ const About = () => {
                     Đăng ký để nhận tư vấn lộ trình học tập miễn phí từ chuyên gia.
                   </p>
                 </div>
-                <Button className='w-full bg-card text-primary hover:bg-card/90 relative z-10 font-semibold'>
-                  Gửi tin nhắn cho chúng tôi
-                  <ArrowRight className='ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform' />
-                </Button>
+                <a href='mailto:hello@learnova.io.vn'>
+                  <Button className='w-full bg-card text-primary hover:bg-card/90 relative z-10 font-semibold'>
+                    Gửi tin nhắn cho chúng tôi
+                    <ArrowRight className='ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform' />
+                  </Button>
+                </a>
                 <div className='absolute -bottom-10 -right-10 w-40 h-40 bg-primary-foreground/10 rounded-full group-hover:scale-110 transition-transform duration-700' />
                 <div className='absolute -top-8 -left-8 w-24 h-24 bg-primary-foreground/5 rounded-full' />
               </Card>
