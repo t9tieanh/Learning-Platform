@@ -13,6 +13,7 @@ import { ConversationMessage } from '@/types/ai'
 import chatboticImage from '@/assets/images/chatbotic.png'
 import ChatBubbleSkeleton from './ChatBubbleSkeleton'
 import useLoading from '@/hooks/useLoading.hook'
+import { chatbotEnabled } from '@/config/chatbot.config'
 
 const bubbleMorphTimes = [0, 0.16, 0.32, 0.5, 0.66, 0.82, 1]
 
@@ -442,4 +443,5 @@ const ChatBubble = () => {
   )
 }
 
-export default ChatBubble
+// Feature flag is a build-time constant, so swapping the export keeps hook order stable.
+export default chatbotEnabled ? ChatBubble : () => null
