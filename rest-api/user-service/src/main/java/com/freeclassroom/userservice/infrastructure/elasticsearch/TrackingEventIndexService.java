@@ -1,15 +1,68 @@
 package com.freeclassroom.userservice.infrastructure.elasticsearch;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
 
 import java.util.Map;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TrackingEventIndexService {
+
+    /** Mapping for the user personalization signals index. Kept in sync with RedisToElasticsearchSyncJob#buildSignalsDocument. */
+    private static final Map<String, Object> INDEX_DEFINITION = Map.of(
+            "mappings", Map.of(
+                    "dynamic", "false",
+                    "properties", Map.of(
+                            "subjectType", Map.of("type", "keyword"),
+                            "subjectId", Map.of("type", "keyword"),
+                            "updatedAt", Map.of("type", "date", "format", "epoch_millis"),
+                            "courseScore", Map.of(
+                                    "type", "nested",
+                                    "properties", Map.of(
+                                            "courseId", Map.of("type", "keyword"),
+                                            "score", Map.of("type", "double")
+                                    )
+                            ),
+                            "tagScore", Map.of(
+                                    "type", "nested",
+                                    "properties", Map.of(
+                                            "tag", Map.of("type", "keyword"),
+                                            "score", Map.of("type", "double")
+                                    )
+                            ),
+                            "categoryScore", Map.of(
+                                    "type", "nested",
+                                    "properties", Map.of(
+                                            "category", Map.of("type", "keyword"),
+                                            "score", Map.of("type", "double")
+                                    )
+                            ),
+                            "keywordScore", Map.of(
+                                    "type", "nested",
+                                    "properties", Map.of(
+                                            "keyword", Map.of("type", "keyword"),
+                                            "score", Map.of("type", "double")
+                                    )
+                            ),
+                            "lastAction", Map.of(
+                                    "properties", Map.of(
+                                            "lastSeenAtMs", Map.of("type", "date", "format", "epoch_millis"),
+                                            "lastEventName", Map.of("type", "keyword"),
+                                            "lastCourseId", Map.of("type", "keyword"),
+                                            "lastTag", Map.of("type", "keyword"),
+                                            "lastCategory", Map.of("type", "keyword"),
+                                            "lastLongDes", Map.of("type", "keyword")
+                                    )
+                            )
+                    )
+            )
+    );
 
     private final RestClient es;
     private final ElasticsearchProperties props;
@@ -24,71 +77,11 @@ public class TrackingEventIndexService {
         RuntimeException last = null;
         for (int attempt = 1; attempt <= 3; attempt++) {
             try {
-                boolean exists = es.head()
-                        .uri("/{index}", index)
-                        .retrieve()
-                        .toBodilessEntity()
-                        .getStatusCode()
-                        .is2xxSuccessful();
+                if (indexExists(index)) return;
 
-                if (exists) return;
-
-                Map<String, Object> body = Map.of(
-                        "mappings", Map.of(
-                                "dynamic", "false",
-                                "properties", Map.of(
-                                        "subjectType", Map.of("type", "keyword"),
-                                        "subjectId", Map.of("type", "keyword"),
-                                        "updatedAt", Map.of("type", "date", "format", "epoch_millis"),
-                                        "courseScore", Map.of(
-                                                "type", "nested",
-                                                "properties", Map.of(
-                                                        "courseId", Map.of("type", "keyword"),
-                                                        "score", Map.of("type", "double")
-                                                )
-                                        ),
-                                        "tagScore", Map.of(
-                                                "type", "nested",
-                                                "properties", Map.of(
-                                                        "tag", Map.of("type", "keyword"),
-                                                        "score", Map.of("type", "double")
-                                                )
-                                        ),
-                                        "categoryScore", Map.of(
-                                            "type", "nested",
-                                            "properties", Map.of(
-                                                "category", Map.of("type", "keyword"),
-                                                "score", Map.of("type", "double")
-                                            )
-                                        ),
-                                        "keywordScore", Map.of(
-                                            "type", "nested",
-                                            "properties", Map.of(
-                                                "keyword", Map.of("type", "keyword"),
-                                                "score", Map.of("type", "double")
-                                            )
-                                        ),
-                                        "lastAction", Map.of(
-                                                "properties", Map.of(
-                                                        "lastSeenAtMs", Map.of("type", "date", "format", "epoch_millis"),
-                                                        "lastEventName", Map.of("type", "keyword"),
-                                                        "lastCourseId", Map.of("type", "keyword"),
-                                                "lastTag", Map.of("type", "keyword"),
-                                                "lastCategory", Map.of("type", "keyword"),
-                                                "lastLongDes", Map.of("type", "keyword")
-                                                )
-                                        )
-                                )
-                        )
-                );
-
-                es.put()
-                        .uri("/{index}", index)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .body(body)
-                        .retrieve()
-                        .toBodilessEntity();
-
+                log.info("Elasticsearch index '{}' not found. Creating...", index);
+                createIndex(index);
+                log.info("Elasticsearch index '{}' created.", index);
                 return; // created successfully
             } catch (RuntimeException e) {
                 last = e;
@@ -102,6 +95,36 @@ public class TrackingEventIndexService {
 
         // stop after 3 attempts
         throw last != null ? last : new RuntimeException("Failed to ensure Elasticsearch index exists");
+    }
+
+    /**
+     * HEAD /{index} returns 404 when the index is absent. Use exchange() so the default
+     * status handlers don't turn that 404 into an exception - a missing index is the
+     * normal path here, not an error.
+     */
+    private boolean indexExists(String index) {
+        return Boolean.TRUE.equals(es.head()
+                .uri("/{index}", index)
+                .exchange((request, response) -> response.getStatusCode().is2xxSuccessful()));
+    }
+
+    /** Idempotent: a concurrent creator winning the race is treated as success. */
+    private void createIndex(String index) {
+        try {
+            es.put()
+                    .uri("/{index}", index)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(INDEX_DEFINITION)
+                    .retrieve()
+                    .toBodilessEntity();
+        } catch (HttpClientErrorException e) {
+            String body = e.getResponseBodyAsString();
+            if (body != null && body.contains("resource_already_exists_exception")) {
+                log.debug("Elasticsearch index '{}' created concurrently by another instance.", index);
+                return;
+            }
+            throw e;
+        }
     }
 
     private static void sleepSilently(long ms) {
