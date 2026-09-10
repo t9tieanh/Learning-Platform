@@ -1,8 +1,8 @@
 # Performance Tests
 
-Bo test nay su dung `k6` va chi goi cac endpoint da xac thuc tu codebase qua API Gateway `http://localhost:8888/api/v1` theo [rest-api/api-gateway/target/classes/application.yaml](/home/ducsang4869/HCMUTE/Learning-Platform/rest-api/api-gateway/target/classes/application.yaml).
+This test suite uses `k6` and only calls endpoints verified from the codebase through the API Gateway at `http://localhost:8888/api/v1`, based on the API Gateway configuration.
 
-## Da xac thuc tu source
+## Verified from the source
 
 - Auth: `POST /auth`, `GET /self`, `POST /auth/refresh`
 - Public learning: `GET /learning/courses`, `GET /learning/courses/{id}`, `GET /learning/categories`, `GET /learning/tags`
@@ -11,15 +11,15 @@ Bo test nay su dung `k6` va chi goi cac endpoint da xac thuc tu codebase qua API
 - Admin: `GET /user/home-admin`, `GET /user/admin/pending-actions`, `GET /user/admin/top-courses`, `GET /user/admin/top-instructors`, `GET /learning/admin/business-performance`
 - Instructor: `GET /instructor/statistic`, `GET /instructor/chart`, `GET /learning/instructor/courses`, `GET /learning/courses-instructor/analytics/learners`, `GET /learning/courses-instructor/analytics/revenue`
 
-## TODO da giu nguyen
+## Known TODOs
 
-- `TODO`: khong thay global health endpoint chung cua gateway, nen smoke test dung `GET /user` va `GET /sale/status`
-- `TODO`: khong dung cac route frontend cu nhu `learning/courses-user...` vi backend hien tai khong xac thuc thay controller tuong ung
-- `TODO`: cart, order, payment la write flow. Script chi chay khi `ENABLE_WRITE_FLOWS=true`
-- `TODO`: order/payment chi chay khi `ENABLE_SANDBOX_ORDER_FLOW=true` va co sandbox/test environment
-- `TODO`: `browser-test.js` chi login khi ban tu xac nhan selector va bat `ENABLE_BROWSER_LOGIN=true`
+- `TODO`: No shared global health endpoint was found for the gateway, so the smoke test uses `GET /user` and `GET /sale/status`
+- `TODO`: Do not use legacy frontend routes such as `learning/courses-user...` because the current backend does not have a verified corresponding controller
+- `TODO`: Cart, order, and payment are write flows. The script runs them only when `ENABLE_WRITE_FLOWS=true`
+- `TODO`: Order/payment flows run only when `ENABLE_SANDBOX_ORDER_FLOW=true` and a sandbox/test environment is available
+- `TODO`: `browser-test.js` performs login only after you confirm the selector and enable `ENABLE_BROWSER_LOGIN=true`
 
-## Cau truc
+## Structure
 
 ```text
 performance-tests/
@@ -30,7 +30,7 @@ performance-tests/
 └── README.md
 ```
 
-## Bien moi truong
+## Environment variables
 
 ```bash
 export BASE_URL=http://localhost:8888/api/v1
@@ -53,20 +53,20 @@ export ENABLE_SANDBOX_ORDER_FLOW=false
 export ENABLE_BROWSER_LOGIN=false
 ```
 
-Luu y:
+Notes:
 
-- Backend `POST /auth` nhan payload `{ "username": "...", "password": "..." }`
-- Vi vay cac bien `USER_EMAIL`, `ADMIN_EMAIL`, `INSTRUCTOR_EMAIL` duoc dung nhu login principal cho truong `username`
-- Neu he thong dang dang nhap bang username thay vi email, ban co the dung `USER_LOGIN`, `ADMIN_LOGIN`, `INSTRUCTOR_LOGIN`
-- Neu da co token san, co the set `USER_TOKEN`, `ADMIN_TOKEN`, `INSTRUCTOR_TOKEN`
+- The backend `POST /auth` accepts the payload `{ "username": "...", "password": "..." }`
+- Therefore, `USER_EMAIL`, `ADMIN_EMAIL`, and `INSTRUCTOR_EMAIL` are used as the login principals for the `username` field
+- If the system uses usernames instead of email addresses for login, you can use `USER_LOGIN`, `ADMIN_LOGIN`, and `INSTRUCTOR_LOGIN`
+- If tokens are already available, you can set `USER_TOKEN`, `ADMIN_TOKEN`, and `INSTRUCTOR_TOKEN`
 
-## Cai dat k6
+## Install k6
 
-1. Cai `k6` tren may local.
-2. Cap nhat file mau trong `performance-tests/data/*.sample.json` hoac set env tu shell/CI.
-3. Dam bao API Gateway va cac service dang chay.
+1. Install `k6` locally.
+2. Update the sample files in `performance-tests/data/*.sample.json` or set the environment variables from your shell/CI.
+3. Make sure the API Gateway and all services are running.
 
-## Lenh chay
+## Run commands
 
 ```bash
 k6 run performance-tests/scripts/smoke-test.js
@@ -80,37 +80,37 @@ k6 run performance-tests/scripts/instructor-dashboard-test.js
 K6_BROWSER_ENABLED=true k6 run performance-tests/scripts/browser-test.js
 ```
 
-Moi script se tu dong sinh:
+Each script automatically generates:
 
-- `performance-tests/results/<ten-script>-report.html`
-- `performance-tests/results/<ten-script>-summary.json`
-- bang tong ket dep tren terminal
+- `performance-tests/results/<script-name>-report.html`
+- `performance-tests/results/<script-name>-summary.json`
+- A formatted summary in the terminal
 
-Vi du:
+Example:
 
 ```bash
 k6 run performance-tests/scripts/smoke-test.js
 xdg-open performance-tests/results/smoke-report.html
 ```
 
-Neu dang o thu muc `k6-performance-test`, dung duong dan lui len:
+If you are in the `k6-performance-test` directory, go up one level in the path:
 
 ```bash
 k6 run ../performance-tests/scripts/smoke-test.js
 xdg-open ../performance-tests/results/smoke-report.html
 ```
 
-## Mo ta script
+## Script descriptions
 
-- `smoke-test.js`: check nhanh endpoint trong 30s, co login/profile neu cung cap credentials
-- `load-test.js`: mo phong tai binh thuong voi browse, search, course detail va my learning
-- `stress-test.js`: tang VU dan de tim gioi han
-- `spike-test.js`: mo phong dot bien traffic
-- `soak-test.js`: chay lau de theo doi leak va queue backlog
-- `api-flow-test.js`: flow guest -> user, chi them cart/order khi bat cờ an toan
-- `admin-dashboard-test.js`: dashboard admin qua `user-service` va `course-service`
-- `instructor-dashboard-test.js`: dashboard instructor, uu tien login bang credentials de lay `userId`
-- `browser-test.js`: smoke browser nhe cho trang home
+- `smoke-test.js`: Quickly checks endpoints for 30 seconds, including login/profile when credentials are provided
+- `load-test.js`: Simulates normal traffic with browsing, search, course details, and my learning
+- `stress-test.js`: Gradually increases VUs to find the system limit
+- `spike-test.js`: Simulates a sudden traffic spike
+- `soak-test.js`: Runs for an extended period to monitor leaks and queue backlogs
+- `api-flow-test.js`: Guest-to-user flow, with cart/order added only when the safety flag is enabled
+- `admin-dashboard-test.js`: Tests the admin dashboard through `user-service` and `course-service`
+- `instructor-dashboard-test.js`: Tests the instructor dashboard, preferring credential-based login to obtain `userId`
+- `browser-test.js`: Lightweight browser smoke test for the home page
 
 ## Thresholds
 
@@ -121,9 +121,9 @@ xdg-open ../performance-tests/results/smoke-report.html
 - Soak: `http_req_duration p95 < 2000ms`, `http_req_failed < 1%`
 - Admin/Instructor: `http_req_duration p95 < 2000ms`, `http_req_failed < 1%`
 
-## Luu y van hanh
+## Operational notes
 
-- Khong chay write flow tren production neu chua xac nhan `testMode`, staging, hoac sandbox.
-- Với soak test, can theo doi them CPU, RAM, DB, Redis, RabbitMQ, Elasticsearch va log server.
-- Payment flow hien chi nen dung voi sandbox. Khong goi thanh toan that.
-- Neu `INSTRUCTOR_TOKEN` khong di kem `userId`, script instructor dashboard se bao `TODO` va bo qua statistic/chart.
+- Do not run write flows in production without confirming `testMode`, staging, or a sandbox.
+- For soak tests, also monitor CPU, RAM, the database, Redis, RabbitMQ, Elasticsearch, and server logs.
+- Payment flows should currently be used only with a sandbox. Do not trigger real payments.
+- If `INSTRUCTOR_TOKEN` is not accompanied by a `userId`, the instructor dashboard script reports `TODO` and skips statistic/chart requests.
