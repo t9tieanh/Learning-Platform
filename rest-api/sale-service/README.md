@@ -1,7 +1,7 @@
 # Sale Service
 - Phạm Tiến Anh
 
-## Công nghệ sử dụng
+## Tech Stack
 
 ![Node.js](https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
@@ -13,30 +13,30 @@
 ![Express.js](https://img.shields.io/badge/Express.js-404D59?style=for-the-badge&logo=express&logoColor=white)
 ![Prisma](https://img.shields.io/badge/Prisma-3982CE?style=for-the-badge&logo=Prisma&logoColor=white)
 
-## Yêu cầu hệ thống
+## Requirements
 
 - Node.js >= 18.x
 - PostgreSQL
 - RabbitMQ
 - Elasticsearch
-- npm (hoặc yarn)
+- npm (or yarn)
 
-## Cài đặt
+## Installation
 
-1. **Cài đặt dependencies:**
+1. **Install dependencies:**
    ```sh
    npm install
    ```
 
-2. **Khởi động các service phụ trợ**  
+2. **Start the supporting services**  
    (PostgreSQL, RabbitMQ, Elasticsearch, Redis)  
    ```sh
    docker compose up -d
    ```
 
-## Khởi tạo database & seed dữ liệu
+## Database setup & data seeding
 
-Chạy các lệnh sau để tạo bảng, seed dữ liệu và đồng bộ dữ liệu async:
+Run the following commands to create the tables, seed data, and sync data asynchronously:
 
 ```sh
 npx prisma generate
@@ -45,22 +45,22 @@ npm run seed
 npm run async-data
 ```
 
-## Chạy server ở môi trường phát triển
+## Running the server in development
 
 ```sh
 npm run dev
 ```
 
-Server sẽ chạy ở cổng mặc định (ví dụ: `http://localhost:4000`).
+The server runs on the default port (e.g. `http://localhost:4000`).
 
-## Các endpoint chính
+## Main endpoints
 
-- `GET /products` — Lấy danh sách sản phẩm (có phân trang)
-- `GET /products/search` — Tìm kiếm sản phẩm theo query
+- `GET /products` — Get the product list (paginated)
+- `GET /products/search` — Search products by query
 
-## Ghi chú
+## Notes
 
-- Đảm bảo các service phụ trợ đã chạy trước khi khởi động server.
-- Nếu gặp lỗi kết nối, kiểm tra lại cấu hình `.env`.
+- Make sure the supporting services are running before starting the server.
+- If you hit connection errors, double-check your `.env` configuration.
 
 ---
