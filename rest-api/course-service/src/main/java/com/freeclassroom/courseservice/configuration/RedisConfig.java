@@ -1,5 +1,7 @@
 package com.freeclassroom.courseservice.configuration;
 
+import io.lettuce.core.ClientOptions;
+import io.lettuce.core.SocketOptions;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -7,8 +9,11 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisPassword;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
+import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
+
+import java.time.Duration;
 
 @Configuration
 public class RedisConfig {
@@ -24,6 +29,10 @@ public class RedisConfig {
     @Value("${redis.password}")
     private String redisPassword;
 
+    // Timeout ngắn để khi Redis treo, cache fallback về DB ngay thay vì chờ mặc định 60s
+    @Value("${redis.timeout:2s}")
+    private Duration redisTimeout;
+
 
     @Bean
     public LettuceConnectionFactory redisConnectionFactory() {
@@ -36,7 +45,14 @@ public class RedisConfig {
             config.setPassword(RedisPassword.of(redisPassword));
         }
 
-        return new LettuceConnectionFactory(config);
+        LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
+                .commandTimeout(redisTimeout)
+                .clientOptions(ClientOptions.builder()
+                        .socketOptions(SocketOptions.builder().connectTimeout(redisTimeout).build())
+                        .build())
+                .build();
+
+        return new LettuceConnectionFactory(config, clientConfig);
     }
 
     @Bean
