@@ -17,7 +17,7 @@ class LoggerService {
             warn: 'yellow',
             info: 'green',
             http: 'magenta',
-            debug: 'white',
+            debug: 'white', 
         };
 
         winston.addColors(colors);
