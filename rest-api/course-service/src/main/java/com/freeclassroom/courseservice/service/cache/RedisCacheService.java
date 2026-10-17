@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -24,7 +25,7 @@ public class RedisCacheService {
     }
 
     public <T> T get(String key, Class<T> clazz) {
-        String json = redis.opsForValue().get(key);
+        String json = readRaw(key);
         if (json == null || json.isBlank()) {
             return null;
         }
@@ -37,7 +38,7 @@ public class RedisCacheService {
     }
 
     public <T> T get(String key, JavaType javaType) {
-        String json = redis.opsForValue().get(key);
+        String json = readRaw(key);
         if (json == null || json.isBlank()) {
             log.debug("Redis cache MISS key='{}'", key);
             return null;
@@ -64,10 +65,26 @@ public class RedisCacheService {
             }
         } catch (JsonProcessingException e) {
             log.warn("Redis cache serialize failed for key='{}': {}", key, e.getMessage());
+        } catch (DataAccessException e) {
+            // Cache is best-effort: callers already have the value, so just skip caching.
+            log.warn("Redis cache unavailable, skip SET key='{}': {}", key, e.getMessage());
         }
     }
 
     public JavaType listOf(Class<?> elementClass) {
         return objectMapper.getTypeFactory().constructCollectionType(java.util.List.class, elementClass);
+    }
+
+    /**
+     * Read the raw cached JSON. Returns null when Redis is unavailable so callers
+     * treat it as a cache MISS and fall back to the source of truth (DB / gRPC).
+     */
+    private String readRaw(String key) {
+        try {
+            return redis.opsForValue().get(key);
+        } catch (DataAccessException e) {
+            log.warn("Redis cache unavailable, treat as MISS key='{}': {}", key, e.getMessage());
+            return null;
+        }
     }
 }
