@@ -33,7 +33,6 @@ const HighlightedArticles = () => {
         setArticles(mapped)
       } catch (e) {
         console.error('Failed to load highlighted blogs', e)
-        if (mounted) setError('Không thể tải bài viết nổi bật')
       } finally {
         if (mounted) setLoading(false)
       }
