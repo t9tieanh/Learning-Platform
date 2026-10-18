@@ -34,3 +34,5 @@ docker-compose.local.yml
 production.v2
 
 .claude
+
+/e5-base
